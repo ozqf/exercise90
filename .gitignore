@@ -1,0 +1,10 @@
+/.vs/
+/.vscode/
+/bin/
+/build/
+/buildgame/
+/debug/
+*.db
+/lib/*/
+!/lib/libraries.md
+/xercise.VC.VC.opendb
