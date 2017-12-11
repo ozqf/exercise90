@@ -10,7 +10,6 @@
 // External
 #include "../../../lib/SDL2-2.0.7/include/SDL.h"
 #include "../../../lib/SDL2-2.0.7/include/SDL_thread.h"
-//#include "SDL2-2.0.7/include/SDL_image.h"
 #include <stdio.h>
 
 //Screen dimension constants
@@ -25,47 +24,10 @@ static SDL_Surface *screenSurface = NULL;
 static bool running = true;
 
 AppInterface app;
-//HMODULE gameModule;
 void* gameModule;
 PlatformInterface platInterface;
 
 SDL_Surface* devSpriteTest = NULL;
-
-/*void LinkToGameWindows()
-{
-    if (app.isvalid != NULL)
-    {
-        app.AppShutdown();
-    }
-
-    HMODULE gameModule = LoadLibraryA("base/gamex86.dll");
-    bool success = false;
-    if (gameModule != NULL)
-    {
-        //gameCode.updateAndRender = (game_update_and_render *)GetProcAddress(library, "UpdateAndRender");
-
-        printf("Located base/gamex86.dll\n");
-        //AppInterface (*LinkFunction)(PlatformInterface) = (void *)GetProcAddress(library, "LinkToApp");
-        Func_LinkToApp* linkToApp = (Func_LinkToApp *)GetProcAddress(gameModule, "LinkToApp");
-        if (linkToApp != NULL)
-        {
-            app = linkToApp(platInterface);
-            success = true;
-        }
-        else
-        {
-            printf("Failed to locate LinkToApp\n");
-        }
-    }
-    else
-    {
-        printf("Failed to load base/gamex86.dll\n");
-    }
-    if (success == false)
-    {
-        app = GetAppInterfaceStub(platInterface);
-    }
-}*/
 
 void LinkToGame()
 {
@@ -200,8 +162,6 @@ inline void RenderBlitBlock(BlitBlock *block)
     fillRect.y = (i32)(block->centre[1] * (f32)metre2pix);
     fillRect.x -= (fillRect.w/2);
     fillRect.y -= (fillRect.h/2);
-    
-    //printf("Render Block. Pos: %d, %d. Size: %d, %d\n", rect.x, rect.y, rect.w, rect.h);
     SDL_FillRect(screenSurface, &fillRect, SDL_MapRGB(screenSurface->format, block->red, block->green, block->blue));
 }
 
@@ -213,7 +173,6 @@ inline void RenderBlitImage(BlitImage* image, SDL_Surface* bitmap)
     imageRect.x = (i32)((image->centre[0] * (f32)metre2pix) - (imageRect.w / 2));
     imageRect.y = (i32)((image->centre[1] * (f32)metre2pix) - (imageRect.h / 2));
     SDL_BlitSurface(devSpriteTest, NULL, screenSurface, &imageRect);
-    //SDL_BlitSurface(devSpriteTest, NULL, screenSurface, NULL);
 }
 
 void PlatformRenderBlitItems(BlitItem* items, i32 numItems)
@@ -238,17 +197,6 @@ void PlatformRenderBlitItems(BlitItem* items, i32 numItems)
         }
         items++;
     }
-}
-
-void RenderInternal()
-{
-    // Clear Screen
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0x00, 0x00, 0x00));
-
-    //SDL_FillRect(screenSurface, &r, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-    //Update the surface
-    SDL_UpdateWindowSurface(window);
 }
 
 void PlatformFillRect(i32 x, i32 y, i32 width, i32 height, uChar red, uChar green, uChar blue)
@@ -361,15 +309,8 @@ int main(int argc, char *args[])
 
             app.AppInit();
 
-            // Run theading tests, if you want to. I mean... no pressure
-            //StartDumbThreadTest();
-
-            // printf("Threads started\n");
-
             while (running)
             {
-                // u32* mouseX = &inputTick.mouse[0];
-                // u32* mouseY = inputTick.mouse[1];
                 u32 mButtonFlags = SDL_GetMouseState(&inputTick.mouse[0], &inputTick.mouse[1]);
                 time.ticks = SDL_GetTicks();
 
@@ -380,23 +321,11 @@ int main(int argc, char *args[])
                 time.deltaTime *= 0.001f;
                 fixedFrameAccumulator += time.deltaTime;
 
-                // printf("Ticks %d, frames: %d, now: %I64d, last: %I64d, diff: %I64d, deltaTime: %f\n",
-                //     time.ticks,
-                //     time.frameNumber,
-                //     now,
-                //     last,
-                //     diff,
-                //     time.deltaTime
-                // );
-
                 if (fixedFrameAccumulator >= time.fixedDeltaTime)
                 {
                     fixedFrameAccumulator = 0;
-
                     // Fixed game tick
                     app.AppFixedUpdate(&time, &inputTick);
-                    //AppFixedFrame(&time, &inputTick);
-                    //GameTick(time.fixedDeltaTime);
                     time.fixedFrameNumber++;
                 }
 
@@ -412,15 +341,8 @@ int main(int argc, char *args[])
                         HandleInput(&e);
                     }
                 }
-
-                // Unlimited framerate game tick - game should render in here
-                //AppFrame(&time, &inputTick);
-                //PlatformClearScreen();
                 app.AppUpdate(&time, &inputTick);
-                //GameTick(time.deltaTime);
                 PlatformFillRect(inputTick.mouse[0] - 4, inputTick.mouse[1] - 4, 8, 8, 0xFF, 0x00, 0x00);
-                //RenderInternal();
-                //SDL_BlitSurface(devSpriteTest, NULL, screenSurface, NULL);
                 SDL_UpdateWindowSurface(window);
 
                 time.frameNumber++;

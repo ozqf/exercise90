@@ -4,27 +4,19 @@ cls
 @echo Build SDL Platform
 
 if not exist bin mkdir bin
-@rem cd bin
-@rem del /s /q /f *.exe
-@rem del /s /q /f *.exp
-@rem cd..
 if not exist build mkdir build
 cd build
 del *.* /Q
-
-@rem @set EnableDelayedExpansion
-
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/cppTest.exe
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
 set compilerInput=../src/Platform/PlatformSDL/sdl_main.cpp 
-@rem ../src/App/app_main.cpp
 
 @rem === LINK SETTINGS ===
 set linkStr=/link /SUBSYSTEM:CONSOLE
-set linkInputA=../src/external/SDL2-2.0.7/lib/x86/SDL2main.lib
-set linkInputB=../src/external/SDL2-2.0.7/lib/x86/SDL2.lib
+set linkInputA=../lib/SDL2-2.0.7/lib/x86/SDL2main.lib
+set linkInputB=../lib/SDL2-2.0.7/lib/x86/SDL2.lib
 @echo on
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB%
 @echo off
@@ -37,9 +29,6 @@ set linkStr=
 set linkInputA=
 set linkInputB=
 
-@rem cl /LD /Fe../bin/gamex86.dll ../src/App/app_main.cpp
-@rem @echo off
-@rem @endlocal
 @cd..
 @echo on
 
@@ -64,6 +53,3 @@ set linkInputB=
 @rem -Fm Create map file (contains addresses of all variables/functions)
 @rem -opt:ref -> make compiler aggressive in removal of unused code
 @rem /LD -> compile to DLL
-
-
-@rem Disable local variable stuff so that directory change commands work again
