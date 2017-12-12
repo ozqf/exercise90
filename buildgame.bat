@@ -1,6 +1,11 @@
 @echo off
 @echo Build Game DLL
 
+if not exist bin mkdir bin
+cd bin
+if not exist base mkdir base
+cd..
+
 if not exist buildGame mkdir buildGame
 cd buildGame
 del *.* /q

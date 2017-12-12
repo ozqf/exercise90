@@ -23,6 +23,8 @@ static SDL_Window *window = NULL;
 static SDL_Surface *screenSurface = NULL;
 static bool running = true;
 
+char* gameModulePath = "base/gamex86.dll";
+
 AppInterface app;
 void* gameModule;
 PlatformInterface platInterface;
@@ -31,11 +33,11 @@ SDL_Surface* devSpriteTest = NULL;
 
 void LinkToGame()
 {
-    gameModule = SDL_LoadObject("base/gamex86.dll");
+    gameModule = SDL_LoadObject(gameModulePath);
     bool success = false;
     if (gameModule != NULL)
     {
-        printf("Located base/gamex86.dll\n");
+        printf("Located %s\n", gameModulePath);
         Func_LinkToApp* linkToApp = (Func_LinkToApp *)SDL_LoadFunction(gameModule, "LinkToApp");
         if (linkToApp != NULL)
         {
@@ -49,7 +51,7 @@ void LinkToGame()
     }
     else
     {
-        printf("Failed to load base/gamex86.dll\n");
+        printf("Failed to load %s\n", gameModulePath);
     }
     if (success == false)
     {
@@ -66,6 +68,7 @@ void UnloadGameDLL()
 
 void PlatformShutdown()
 {
+    printf("*** Shutdown ***\n");
     app.AppShutdown();
     // Free Dev sprite
     SDL_FreeSurface(devSpriteTest);
