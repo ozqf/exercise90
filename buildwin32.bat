@@ -17,8 +17,9 @@ set compilerInput=../src/Platform/PlatformSDL/sdl_main.cpp
 set linkStr=/link /SUBSYSTEM:CONSOLE
 set linkInputA=../lib/SDL2-2.0.7/lib/x86/SDL2main.lib
 set linkInputB=../lib/SDL2-2.0.7/lib/x86/SDL2.lib
+set linkInputC=../lib/glew-2.1.0/lib/Release/Win32/glew32.lib ../lib/OpenGL32.lib
 @echo on
-cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB%
+cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
 set outputExe=
 set compilerFlags=
@@ -28,6 +29,7 @@ set compilerInput=
 set linkStr=
 set linkInputA=
 set linkInputB=
+set linkInputC=
 
 @cd..
 @echo on
