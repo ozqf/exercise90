@@ -45,6 +45,12 @@ MACROS
 /*****************************************************
 SIMPLE TYPES
 *****************************************************/
+struct MemoryBlock
+{
+    void *ptrMemory;
+    i32 size;
+};
+
 struct GameTime
 {
     f32 deltaTime;

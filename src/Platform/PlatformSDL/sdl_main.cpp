@@ -12,7 +12,8 @@
 // External
 #include "../../../lib/SDL2-2.0.7/include/SDL.h"
 #include "../../../lib/SDL2-2.0.7/include/SDL_thread.h"
-#include "../../../lib/glew-2.1.0/include/gl/glew.h"
+#include <windows.h>
+//#include "../../../lib/glew-2.1.0/include/gl/glew.h"
 #include <stdio.h>
 
 //Screen dimension constants

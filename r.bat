@@ -1,5 +1,5 @@
 @echo off
 cd bin
 @echo *** Run Game ***
-cppTest.exe
+exercise90.exe
 cd..

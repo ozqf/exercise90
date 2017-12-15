@@ -11,13 +11,13 @@ del *.* /Q
 set outputExe=/Fe../bin/exercise90.exe
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
-set compilerInput=../src/Platform/win32_main.cpp 
+set compilerInput=../src/Platform/PlatformSDL/sdl_main.cpp 
 
 @rem === LINK SETTINGS ===
 set linkStr=/link /SUBSYSTEM:CONSOLE
-set linkInputA=-opt:ref -subsystem:windows,5.1
-set linkInputB=user32.lib
-set linkInputC=Gdi32.lib
+set linkInputA=../lib/SDL2-2.0.7/lib/x86/SDL2main.lib
+set linkInputB=../lib/SDL2-2.0.7/lib/x86/SDL2.lib
+set linkInputC=../lib/glew-2.1.0/lib/Release/Win32/glew32.lib ../lib/OpenGL32.lib
 @echo on
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
