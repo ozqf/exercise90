@@ -16,7 +16,7 @@ set compilerInput=../src/Platform/win32_main.cpp
 @rem === LINK SETTINGS ===
 set linkStr=/link /SUBSYSTEM:CONSOLE
 set linkInputA=-opt:ref -subsystem:windows,5.1
-set linkInputB=user32.lib
+set linkInputB=user32.lib opengl32.lib
 set linkInputC=Gdi32.lib
 @echo on
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%

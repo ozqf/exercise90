@@ -18,6 +18,8 @@ PRIMITIVE TYPES
 #define u32 uint32_t
 #define u64 uint64_t
 
+#define bool32 uint32_t
+
 /*****************************************************
 MACROS
 *****************************************************/
@@ -37,8 +39,8 @@ MACROS
 #endif
 #define AssertAlways(expression) if(!(expression)) {*(int *)0 = 0; }
 
-#define KiloBytes(bytes) ((value) * 1024LL)
-#define MegaBytes(bytes) (KiloBytes(value) * 1024LL)
+#define KiloBytes(bytes) ((bytes) * 1024LL)
+#define MegaBytes(bytes) (KiloBytes(bytes) * 1024LL)
 
 #define DLL_EXPORT __declspec(dllexport)
 
@@ -78,5 +80,18 @@ struct GameBlock
     f32 halfHeight;
     f32 speed;
 };
+
+
+/****************************************************************
+Global Functions
+****************************************************************/
+
+inline u32 SafeTruncateUInt64(u64 value)
+{
+	// TODO: Defines for max value
+	Assert(value <= 0xFFFFFFFF);
+	u32 result = (u32)value;
+	return result;
+}
 
 #endif

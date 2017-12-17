@@ -13,6 +13,14 @@ struct PlatformInterface
     void (*PlatformRenderBlitItems)(BlitItem* items, i32 numItems);
 };
 
+struct PlatformInterface2
+{
+    bool32 (*PlatformWriteEntireFile)(char *fileName, u32 memorySize, void *memory);
+    void* (*PlatformReadEntireFile)(char *fileName);
+    void (*PlatformAlloc)(MemoryBlock *mem);
+    void (*PlatformFree)(MemoryBlock *mem);
+};
+
 /*****************************************************
 Empty, default Platform interface
 *****************************************************/
