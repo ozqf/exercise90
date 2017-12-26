@@ -9,10 +9,13 @@ PRIMITIVE TYPES
 #define f32 float
 #define f64 double
 
+#define i8 int8_t
 #define i16 int16_t
 #define i32 int32_t
 #define i64 int64_t
 
+
+#define u8 uint8_t
 #define uChar uint8_t
 #define u16 uint16_t
 #define u32 uint32_t
@@ -32,12 +35,15 @@ MACROS
 #define ArrayCount(array) (sizeof(array) / sizeof(array)[0]))
 
 // Quick cross platform assert. Read from address zero if expression is false
+// TODO: Message box assert with a print of __FILE__, __LINE__ and __TIME__ possible?
 #if PARANOID
 #define Assert(expression) if(!(expression)) {*(int *)0 = 0; }
 #else
 #define Assert(expression)
 #endif
-#define AssertAlways(expression) if(!(expression)) {*(int *)0 = 0; }
+#define AssertAlways(expression) if(!(expression)) { *(int *)0 = 0; }
+
+#define IllegalCodePath if (true) { *(int *)0 = 0; }
 
 #define KiloBytes(bytes) ((bytes) * 1024LL)
 #define MegaBytes(bytes) (KiloBytes(bytes) * 1024LL)
@@ -79,6 +85,14 @@ struct GameBlock
     f32 halfWidth;
     f32 halfHeight;
     f32 speed;
+};
+
+struct Transform
+{
+	i32 ID;
+	f32 pos[3];
+	f32 rot[3];
+	f32 scale[3];
 };
 
 

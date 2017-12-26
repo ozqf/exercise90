@@ -1,6 +1,7 @@
 #ifndef WIN32_GL_H
 #define WIN32_GL_H
 
+#include "../Shared/shared.h"
 
 #include <gl/gl.h>
 #include <windows.h>
@@ -109,12 +110,19 @@ void Win32RenderFrame(HWND window)
 	f32 size = 1.0f;
 
 	// lower triangle
+	glColor3f(1, 0, 0);
 	glVertex2f(-size, -size);
+	glColor3f(0, 1, 0);
 	glVertex2f(size, -size);
+	glColor3f(0, 0, 1);
 	glVertex2f(size, size);
+
 	// upper triangle
+	glColor3f(1, 0, 0);
 	glVertex2f(-size, -size);
+	glColor3f(0, 0, 1);
 	glVertex2f(size, size);
+	glColor3f(1, 1, 0);
 	glVertex2f(-size, size);
 
 	/*

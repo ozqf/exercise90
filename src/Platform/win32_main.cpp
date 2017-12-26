@@ -1,5 +1,6 @@
-#ifndef WIN32_MAIN_CPP
-#define WIN32_MAIN_CPP
+#pragma once
+// #ifndef WIN32_MAIN_CPP
+// #define WIN32_MAIN_CPP
 
 #include "../Shared/shared.h"
 #include "win32_main.h"
@@ -22,6 +23,52 @@ global_variable win32_offscreen_buffer globalBackBuffer;
 
 global_variable int xOffset = 0;
 global_variable int yOffset = 0;
+
+/****************************************************************
+Command line
+****************************************************************/
+// Nice array of points to the start of each token in the launch param string
+#define MAX_LAUNCH_PARAMS 50
+global_variable char *launchParams[MAX_LAUNCH_PARAMS];
+i32 numLaunchParams = 0;
+
+void ReadCommandLine(LPSTR lpCmdLine)
+{
+    while (*lpCmdLine && (numLaunchParams < MAX_LAUNCH_PARAMS))
+    {
+        // While not null && If not a valid ascii character (spaces etc) move until a printable character is hit
+        while (*lpCmdLine && ((*lpCmdLine <= 32) && (*lpCmdLine > 126)))
+        {
+            lpCmdLine++;
+        }
+
+        if (*lpCmdLine)
+        {
+            // Mark a new token start
+            launchParams[numLaunchParams] = lpCmdLine;
+            numLaunchParams++;
+
+            // Subdivide the string up by changing the character at the end of a valid section to NULL
+
+            // While null && while it is a valid ascii code (printable character a-z + numbers etc, see ascii table) continue to read until end
+            while (*lpCmdLine && ((*lpCmdLine > 32) && (*lpCmdLine <= 126)))
+            {
+                lpCmdLine++;
+            }
+
+            // If lpCmdLine != NULL, change this character to a null to terminate the string segment here
+            if (*lpCmdLine)
+            {
+                *lpCmdLine = 0;
+                lpCmdLine++;
+            }
+        }
+    }
+
+    // Set final character to NULL
+    launchParams[numLaunchParams] = NULL;
+}
+
 
 /****************************************************************
 ALLOC MAIN MEMORY
@@ -276,6 +323,10 @@ int CALLBACK WinMain(
 {
 	MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
+
+
+    ReadCommandLine(lpCmdLine);
+
     InitDebug();
     printf("Debug init\n");
     printf("File %s, line: %d\n", __FILE__, __LINE__);
@@ -359,4 +410,4 @@ int CALLBACK WinMain(
     }
 }
 
-#endif
+//#endif

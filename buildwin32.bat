@@ -10,14 +10,15 @@ del *.* /Q
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/exercise90.exe
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
-set compilerDefines=/DPARANOID=1
-set compilerInput=../src/Platform/win32_main.cpp 
+set compilerDefines=/DPARANOID=1 /DVERBOSE=1
+@rem set compilerInput=../src/Platform/win32_main.cpp 
+set compilerInput=../src/Platform/win32_consoleApp.cpp 
 
 @rem === LINK SETTINGS ===
-set linkStr=/link /SUBSYSTEM:CONSOLE
-set linkInputA=-opt:ref -subsystem:windows,5.1
-set linkInputB=user32.lib opengl32.lib
-set linkInputC=Gdi32.lib
+@rem set linkStr=/link /SUBSYSTEM:CONSOLE
+@rem set linkInputA=-opt:ref -subsystem:windows,5.1
+@rem set linkInputB=user32.lib opengl32.lib
+@rem set linkInputC=Gdi32.lib
 @echo on
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
