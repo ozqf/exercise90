@@ -43,11 +43,26 @@ void Test_Com_AsciToInt32(char* str)
 
 void Test_Com_AsciToInt32_Series()
 {
-    printf("\n** AsciToInt32 (atoi) tests **\n");
+    printf("\n** ASCI_TO_INT_32 (atoi) TESTS **\n");
     Test_Com_AsciToInt32("50");
     Test_Com_AsciToInt32("-324");
     Test_Com_AsciToInt32("0");
     Test_Com_AsciToInt32("this isn't a number");
     Test_Com_AsciToInt32("0x400"); // 1024
     Test_Com_AsciToInt32("-0x1631"); // -5681
+}
+
+void Test_Com_StringLength()
+{
+    printf("\n** Test String length **\n");
+    printf("Length of '%s': %d\n", "Foo", Com_StrLen("Foo"));
+    printf("Length of '%s': %d\n", "Hello, World!<endL>", Com_StrLen("Hello, World!\n"));
+}
+
+void Test_Com_Run()
+{
+    Test_Com_StringCompareTests();
+    Test_Com_StringCopyTests();
+    Test_Com_AsciToInt32_Series();
+    Test_Com_StringLength();
 }

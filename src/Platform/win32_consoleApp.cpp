@@ -49,9 +49,23 @@ void HeapTest()
     Heap_Allocate(&heap, &ref4, 14, "Test 4");
     u32 *ptr = (u32 *)ref4.ptrMemory;
     u32 val = (u32)(*ptr);
-    printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, val);
+    //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, val);
 
     Heap_DebugPrintAllocations(&heap);
+
+    printf("Test block remove\n");
+    Heap_RemoveBlockById(&heap, 2);
+    Heap_RemoveBlockById(&heap, 1);
+    Heap_DebugPrintAllocations(&heap);
+    HeapRef ref5 = {};
+    Heap_Allocate(&heap, &ref5, 500, "Test 5");
+
+    Heap_DebugPrintAllocations(&heap);
+
+    printf("\nPURGE HEAP\n");
+    Heap_Purge(&heap);
+    Heap_DebugPrintAllocations(&heap);
+
     //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, (u32)(*ptr));
 }
 
@@ -61,11 +75,8 @@ int main(i32 argc, char* argv[])
     printf("Built on %s at %s, line %d\n", __DATE__, __TIME__, __LINE__);
     
     HeapTest();
-
-    Test_Com_StringCompareTests();
-    Test_Com_StringCopyTests();
-    Test_Com_AsciToInt32_Series();;
-
+    //Test_Com_Run();
+    
     printf("End - Success");
     return 0;
 }

@@ -12,7 +12,7 @@ set outputExe=/Fe../bin/exercise90.exe
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1 /DVERBOSE=1
 @rem set compilerInput=../src/Platform/win32_main.cpp 
-set compilerInput=../src/Platform/win32_consoleApp.cpp 
+set compilerInput=../src/Platform/win32_consoleApp.cpp
 
 @rem === LINK SETTINGS ===
 @rem set linkStr=/link /SUBSYSTEM:CONSOLE

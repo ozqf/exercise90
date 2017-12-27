@@ -323,8 +323,6 @@ int CALLBACK WinMain(
 {
 	MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
-
-
     ReadCommandLine(lpCmdLine);
 
     InitDebug();
@@ -348,6 +346,19 @@ int CALLBACK WinMain(
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
 
+    i32 windowWidth = 1280;
+    i32 windowHeight = 720;
+
+    RECT r;
+    r.top = r.left = 0;
+    r.right = 1280;
+    r.bottom = 720;
+    
+    // Adjust desired rect to include area of window including border.
+    // top or left may well now be negative
+    // 
+    AdjustWindowRect(&r, WindowClass.style, false);
+
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
     {
@@ -355,11 +366,11 @@ int CALLBACK WinMain(
             0,
             WindowClass.lpszClassName,
             "Exercise 90",
-            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE, // window style
             CW_USEDEFAULT,
             CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
+            r.right - r.left, // CW_USEDEFAULT,
+            r.bottom - r.top, // CW_USEDEFAULT,
             0,
             0,
             hInstance,

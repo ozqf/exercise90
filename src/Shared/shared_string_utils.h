@@ -9,7 +9,7 @@
  * if a is first alphabetically, return -1
  * if b is first alphabetically, return 1
  */
-i32 Com_CompareStrings(char *a, char *b)
+i32 Com_CompareStrings(const char *a, const char *b)
 {
     while (*a == *b)
     {
@@ -25,7 +25,7 @@ i32 Com_CompareStrings(char *a, char *b)
     return ((*a < *b) ? -1 : 1);
 }
 
-void Com_CopyString(char *source, char *target)
+void Com_CopyStringA(const char *source, char *target)
 {
     while (true)
     {
@@ -34,15 +34,65 @@ void Com_CopyString(char *source, char *target)
         {
             return;
         }
-        target++;
-        source++;
+        ++target;
+        ++source;
     }
+}
+
+void Com_CopyString(const char *source, char *target)
+{
+    while (*source)
+    {
+        *target++ = *source++;
+    }
+    *target = 0;
+}
+
+/**
+ * No checking whether source/target will clash
+ * No checking that target has enough room!
+ */
+void Com_CopyStringLimited(const char *source, char *target, i32 count)
+{
+    if (count <= 0) { return; }
+    while (*source && count)
+    {
+        *target++ = *source++;
+        --count;
+    }
+
+    // Pad remaining space with zeros
+    while (count)
+    {
+        *target++ = 0;
+        --count;
+    }
+
+    *target = 0;
+}
+
+i32 Com_StrLenA(const char* str)
+{
+    i32 result = 0;
+    while (*str)
+    {
+        ++str;
+        ++result;
+    }
+    return result;
+}
+
+i32 Com_StrLen(const char* str)
+{
+    i32 count = 0;
+    while (str[count]) { ++count; }
+    return count;
 }
 
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
-i32 Com_AsciToInt32(char *str)
+i32 Com_AsciToInt32(const char *str)
 {
     i32 sign = 1;
     i32 val = 0;
@@ -50,7 +100,7 @@ i32 Com_AsciToInt32(char *str)
     if (*str == '-')
     {
         sign = -1;
-        str++;
+        ++str;
     }
 
     // hexadecimal
@@ -61,7 +111,7 @@ i32 Com_AsciToInt32(char *str)
         while (1)
         {
             c = *str;
-            str++;
+            ++str;
             if (c >= '0' && c <= '9')
             {
                 val = val * 16 + c - '0';
@@ -85,7 +135,7 @@ i32 Com_AsciToInt32(char *str)
     while (true)
     {
         c = *str;
-        str++;
+        ++str;
         if (c < '0' || c > '9')
         {
             // no numerical character
@@ -100,7 +150,7 @@ i32 Com_AsciToInt32(char *str)
     return val * sign;
 }
 
-f32 Com_AsciToFloat32(char *str)
+f32 Com_AsciToFloat32(const char *str)
 {
     return 0.0f;
 }

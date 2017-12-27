@@ -125,6 +125,15 @@ void Win32RenderFrame(HWND window)
 	glColor3f(1, 1, 0);
 	glVertex2f(-size, size);
 
+	// Foreground
+	size = 0.1f;
+	glColor3f(1, 1, 1);
+	glVertex3f(-size, -size, -1);
+	glColor3f(1, 1, 1);
+	glVertex3f(size, -size, -1);
+	glColor3f(1, 1, 1);
+	glVertex3f(size, size, -1);
+
 	/*
 	gl load identity/identity matrix = matrix that has no effect:
 	1 0 0 0
