@@ -1,5 +1,4 @@
-#ifndef PLATFORM_INTERFACE_H
-#define PLATFORM_INTERFACE_H
+#pragma once
 
 #include "../Shared/shared.h"
 
@@ -41,5 +40,3 @@ void GetPlatformInterfaceStub(PlatformInterface *platInterface)
     platInterface->PlatformClearScreen = PlatformClearScreen_Stub;
     platInterface->PlatformRenderBlitItems = PlatformRenderBlitItems_Stub;
 }
-
-#endif

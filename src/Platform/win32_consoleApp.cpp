@@ -1,3 +1,8 @@
+/*******************************************
+ * Windows Console application main for 
+ * testing purposes
+ ******************************************/
+
 #pragma once
 
 #include <stdio.h>
@@ -7,13 +12,11 @@
 #include "../Shared/Heap.cpp"
 #include "../tests/test_shared_utils.h"
 
-void *ptrSystemMemory;
-Heap heap;
-HeapBlock *block;
-HeapRef file;
-
 void HeapTest()
 {
+    void *ptrSystemMemory;
+    Heap heap;
+
     printf("\n** HEAP TESTS **\n");
     u32 alignedSize = Com_AlignSize(52, 32);
     printf("32 Aligned size of 52 is %d\n", alignedSize);
@@ -35,18 +38,24 @@ void HeapTest()
     Heap_Init(&heap, ptrSystemMemory, systemBytes);
     //printf("Allocated %d bytes\n", systemBytes);
 
-    HeapRef ref = {};
-    Heap_Allocate(&heap, &ref, 52, "Test 1");
+    BlockRef ref = {};
+    Heap_Allocate(&heap, &ref, 52, "B1 52");
 
-    HeapRef ref2 = {};
-    Heap_Allocate(&heap, &ref2, 673, "Test 2");
+    BlockRef ref2 = {};
+    u32 stringBlockId = Heap_Allocate(&heap, &ref2, 128, "B2 128");
+	Com_CopyString("The quick brown fox jumped over the lazy dogs.", (char*)ref2.ptrMemory);
+
+    BlockRef stringRef = {};
+    Heap_InitBlockRef(&heap, &stringRef, stringBlockId);
+    char* stringMem = (char*)Heap_GetBlockMemoryAddress(&heap, &stringRef);
+    printf("\nContents of block %d: %s\n", stringRef.id, stringMem);
 
     // This alloc should fail!
-    //HeapRef ref3 = {};
+    //BlockRef ref3 = {};
     //Heap_Allocate(&heap, &ref3, 2147, "Test 3");
 
-    HeapRef ref4 = {};
-    Heap_Allocate(&heap, &ref4, 14, "Test 4");
+    BlockRef ref4 = {};
+	Heap_Allocate(&heap, &ref4, 14, "B3 14 - This label is far to long and should cause an overflow");
     u32 *ptr = (u32 *)ref4.ptrMemory;
     u32 val = (u32)(*ptr);
     //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, val);
@@ -57,7 +66,7 @@ void HeapTest()
     Heap_RemoveBlockById(&heap, 2);
     Heap_RemoveBlockById(&heap, 1);
     Heap_DebugPrintAllocations(&heap);
-    HeapRef ref5 = {};
+    BlockRef ref5 = {};
     Heap_Allocate(&heap, &ref5, 500, "Test 5");
 
     Heap_DebugPrintAllocations(&heap);
@@ -66,13 +75,19 @@ void HeapTest()
     Heap_Purge(&heap);
     Heap_DebugPrintAllocations(&heap);
 
+    VirtualFree(ptrSystemMemory, 0, MEM_RELEASE);
     //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, (u32)(*ptr));
+}
+
+void HeapTest2()
+{
+    
 }
 
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-    printf("Built on %s at %s, line %d\n", __DATE__, __TIME__, __LINE__);
+    printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
     
     HeapTest();
     //Test_Com_Run();

@@ -5,9 +5,6 @@
 #include "Heap.h"
 #include "shared.h"
 
-#define BLOCK_HEADER_SIZE sizeof(HeapBlock)
-#define HEAP_ALIGNMENT 32
-
 /* Reading Material
 
 https://en.wikipedia.org/wiki/Scratch_space
@@ -22,15 +19,17 @@ https://www.gamasutra.com/blogs/MichaelKissner/20151104/258271/Writing_a_Game_En
 /**
 So here's a first go at some kind of Heap
 Steps to figure out for implementation:
-> Allocate a block
-> Allocate a stack of blocks (create block linked list)
-> Retrieve a block
-> Free a block (resew the linked list)
+DONE > Allocate a block
+DONE > Allocate a stack of blocks (create block linked list)
+DONE > Retrieve a block
+DONE > Free a block (resew the linked list)
+> Defrag the block list
 
 Working plan:
 > The Heap: A block of memory malloc'd externally and assigned to a Heap struct
 > HeapBlock: A block of memory on the heap
-> HeapRef: A Reference to a block on the heap
+> BlockRef: A Reference to a block on the heap. This is what external users should
+use to access memory on the Heap, as it will hold an up to date pointer
 > Blocks are a 32 byte header + the databehind them
 
 0 ------------------------------------------------------------------ Size Of Heap
@@ -66,6 +65,7 @@ void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
     heap->ptrMemory = allocatedMemory;
     heap->ptrEnd = (u8 *)heap->ptrMemory + allocatedSize;
     heap->size = allocatedSize;
+    heap->alignmentBytes = HEAP_DEFAULT_ALIGNMENT;
 
     // ids for tracking
     heap->nextID = 1;
@@ -98,17 +98,30 @@ HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId)
     return NULL;
 }
 
-// Find the data pointer for this heapRef for use. Update if dirty
-void *Heap_GetBlockMemoryAddress(Heap *heap, HeapRef *heapRef)
+HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
+{
+    HeapBlock *block = heap->headBlock;
+    while (block)
+    {
+        if (Com_CompareStrings(block->mem.debugLabel, label) == 0) { return block; }
+        block = block->mem.next;
+    }
+    return NULL;
+}
+
+// Find the data pointer for this BlockRef for use. Update if dirty
+void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 {
     // if defrag indexes match, ref is okay
-    if (heapRef->defragIndex == heap->defragIndex)
+    if (BlockRef->defragIndex == heap->defragIndex)
     {
-        return heapRef->ptrMemory;
+        return BlockRef->ptrMemory;
     }
 
     // Mismatch. Update the Reference address
-    void *newAddress = Heap_FindBlock(heap, heapRef->id);
+    HeapBlock* block = Heap_FindBlock(heap, BlockRef->id);
+    Assert(block != NULL);
+    void* newAddress = block->mem.ptrMemory;
 
     if (newAddress == NULL)
     {
@@ -117,8 +130,8 @@ void *Heap_GetBlockMemoryAddress(Heap *heap, HeapRef *heapRef)
         // Crash
         return NULL;
     }
-    heapRef->ptrMemory = newAddress;
-    heapRef->defragIndex = heap->defragIndex;
+    BlockRef->ptrMemory = newAddress;
+    BlockRef->defragIndex = heap->defragIndex;
     return newAddress;
 }
 
@@ -150,25 +163,48 @@ u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
     return result;
 }
 
-/*****************************
- * LINKED LIST OPERATIONS
- ****************************/
-
 void Heap_DebugPrintAllocations(Heap *heap)
 {
     printf("\n** HEAP PRINT **\n");
+    u32 startAddress = (u32)heap->ptrMemory;
+    u32 fragments[256];
+    u32 fragmentIndex = 0;
     HeapBlock *block = heap->headBlock;
-    u32 usedSpace = 0;
+    if (block == NULL)
+    {
+        printf("Heap is empty. Size: %d\n", heap->size);
+        return;
+    }
+    u32 spaceBeforeHead = (u32)block - (u32)heap->ptrMemory;
+    printf("Space before Block head: %d.\n", spaceBeforeHead);
+    u32 totalSpace = 0;
+    if (totalSpace > 0) { fragments[fragmentIndex++] = totalSpace; }
+
     while (block != NULL)
     {
         u32 space = Heap_CalcSpaceAfterBlock(heap, block);
-        usedSpace += block->mem.volumeSize + BLOCK_HEADER_SIZE;
-        printf("Block %d '%s'. Size: %d. Space after: %d\n",
-               block->mem.id, block->mem.debugLabel, block->mem.volumeSize, space);
+        u32 blockVolume = block->mem.volumeSize + BLOCK_HEADER_SIZE;
+        totalSpace += blockVolume;
+        if (space > 0) { fragments[fragmentIndex++] = space; }
+        u32 address = (u32)block - startAddress;
+        printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
+               address, block->mem.id, block->mem.debugLabel, block->mem.objectSize, blockVolume, space);
+        
         block = block->mem.next;
     }
-    printf("Used: %d\n", usedSpace);
+
+    printf("Fragments: ");
+    for (u32 i = 0; i < fragmentIndex; ++i)
+    {
+        printf("%d, ", fragments[i]);
+    }
+
+    printf("\nUsed: %d of %d\n", totalSpace, heap->size);
 }
+
+/*****************************
+ * LINKED LIST OPERATIONS
+ ****************************/
 
 void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous)
 {
@@ -202,6 +238,13 @@ void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
 {
     HeapBlock *next = block->mem.next;
     HeapBlock *prev = block->mem.prev;
+    #if PARANOID
+    // Zero out space
+    u32 startAddress = (u32)block;
+    u32 numBytes = BLOCK_HEADER_SIZE + block->mem.volumeSize;
+    Com_ZeroMemory((u8*)startAddress, numBytes);
+    #endif
+    // unsew list
     if (prev != NULL)
     {
         prev->mem.next = next;
@@ -244,12 +287,19 @@ void Heap_FreeBlock(Heap *heap, HeapBlock *block)
     Heap_RemoveBlock(heap, block);
 }
 
-void Heap_Allocate(Heap *heap, HeapRef *hRef, uint32_t objectSize, char *label)
+/**
+ * Create a new HeapBlock - returns id of new allocation, and fills out the provided BlockRef
+ * > provided BlockRef can be NULL.
+ * > Label will be clapped to maximum space in a block label
+ * > Will crash if no space of suffient size is available
+ */
+u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
 {
+    Assert(heap != NULL);
 #if VERBOSE
     printf("> HEAP ALLOC %d bytes\n", objectSize);
 #endif
-    u32 volumeSize = Com_AlignSize(objectSize, HEAP_ALIGNMENT);
+    u32 volumeSize = Com_AlignSize(objectSize, heap->alignmentBytes);
     HeapBlock *newBlock = NULL;
     if (heap->headBlock == NULL)
     {
@@ -328,29 +378,60 @@ void Heap_Allocate(Heap *heap, HeapRef *hRef, uint32_t objectSize, char *label)
             }
         }
     }
+
+    // New block has been placed, initialise
     newBlock->mem.id = heap->nextID;
     newBlock->mem.objectSize = objectSize;
     newBlock->mem.volumeSize = volumeSize;
     newBlock->mem.ptrMemory = (void *)((u8 *)newBlock + BLOCK_HEADER_SIZE);
-    Com_CopyString(label, newBlock->mem.debugLabel);
+    Com_CopyStringLimited(label, newBlock->mem.debugLabel, BLOCK_LABEL_SIZE);
+
+    heap->nextID += 1;
+    #if PARANOID
+    Com_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0XCC);
+    #endif
 
 #if VERBOSE
     printf("    NEW BLOCK %d - BLOCK ADDRESS: %d, MEM ADDRESS: %d, OBJECT SIZE: %d VOLUME SIZE: %d\n",
            heap->nextID, (i32)newBlock, (u32)newBlock->mem.ptrMemory, objectSize, newBlock->mem.volumeSize);
 #endif
 
-    hRef->defragIndex = heap->defragIndex;
-    hRef->id = newBlock->mem.id;
-    hRef->ptrMemory = newBlock->mem.ptrMemory;
-    hRef->size = objectSize;
+    if (bRef != NULL)
+    {
+        bRef->defragIndex = heap->defragIndex;
+        bRef->id = newBlock->mem.id;
+        bRef->ptrMemory = newBlock->mem.ptrMemory;
+        bRef->objectSize = objectSize;
+    }
+    
+    return newBlock->mem.id;
+}
 
-    heap->nextID++;
+void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
+{
+    Assert(bRef != NULL);
+    HeapBlock* block = Heap_FindBlock(heap, blockId);
+    Assert(block != NULL);
+    if (block == NULL)
+    {
+        return;
+    }
+    bRef->defragIndex = heap->defragIndex;
+    bRef->id = block->mem.id;
+    bRef->ptrMemory = block->mem.ptrMemory;
+    bRef->objectSize = block->mem.objectSize;
 }
 
 void Heap_Defrag(Heap *heap)
 {
     heap->defragIndex++;
-    // Do defrag
+    /*
+    - Naive Defrag -
+    > Scan for first gap, then count blocks to the next gap
+    > Shift block range to close gap
+    > Repeat until space is only after last block
+    */
+
 }
 
 void Heap_Purge(Heap* heap)
@@ -360,6 +441,7 @@ void Heap_Purge(Heap* heap)
     while (block != NULL)
     {
         next = block->mem.next;
+        
         Heap_RemoveBlock(heap, block);
         block = next;
     }

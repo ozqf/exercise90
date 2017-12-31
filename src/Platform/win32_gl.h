@@ -1,5 +1,4 @@
-#ifndef WIN32_GL_H
-#define WIN32_GL_H
+#pragma once
 
 #include "../Shared/shared.h"
 
@@ -158,5 +157,3 @@ void Win32RenderFrame(HWND window)
 
     ReleaseDC(window, deviceContext);
 }
-
-#endif

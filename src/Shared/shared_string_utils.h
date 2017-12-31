@@ -49,10 +49,25 @@ void Com_CopyString(const char *source, char *target)
 }
 
 /**
+ * Copy a string without exceeding the specified limit
+ * Limit does NOT include NULL terminator
+ */
+void Com_CopyStringLimited(const char *source, char *target, i32 limit)
+{
+    while (*source)
+    {
+        *target++ = *source++;
+        --limit;
+        if (limit == 0) { break; }
+    }
+    *target = 0;
+}
+
+/**
  * No checking whether source/target will clash
  * No checking that target has enough room!
  */
-void Com_CopyStringLimited(const char *source, char *target, i32 count)
+void Com_CopyStringCount(const char *source, char *target, i32 count)
 {
     if (count <= 0) { return; }
     while (*source && count)

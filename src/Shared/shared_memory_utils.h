@@ -18,7 +18,13 @@ void Com_CopyMemory(u8* source, u8* target, u32 numBytes)
 void Com_ZeroMemory(u8 *ptr, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;
-    while ((u32)ptr < endPoint) { *ptr = 0; }
+    while ((u32)ptr < endPoint) { *ptr++ = 0; }
+}
+
+void Com_SetMemory(u8 *ptr, u32 numBytes, u8 val)
+{
+    u32 endPoint = (u32) ptr + numBytes;
+    while ((u32)ptr < endPoint) { *ptr++ = val; }
 }
 
 void Com_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)

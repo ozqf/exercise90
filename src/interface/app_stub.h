@@ -1,5 +1,4 @@
-#ifndef APP_STUB_CPP
-#define APP_STUB_CPP
+#pragma once
 
 #include "../Shared/shared.h"
 #include "app_interface.h"
@@ -120,5 +119,3 @@ AppInterface GetAppInterfaceStub(PlatformInterface platInterface)
     app.AppFixedUpdate = AppFixedUpdate_Stub;
     return app;
 }
-
-#endif

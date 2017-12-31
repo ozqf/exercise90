@@ -1,19 +1,27 @@
+/**********************************************************************
+ * Core implementation of Windows platform layer
+ *********************************************************************/
 #pragma once
-// #ifndef WIN32_MAIN_CPP
-// #define WIN32_MAIN_CPP
 
 #include "../Shared/shared.h"
+#include "../interface/platform_interface.h"
+#include "../interface/app_interface.h"
+#include "../interface/app_stub.h"
+
 #include "win32_main.h"
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
-
-#include <gl/gl.h>
 #include "win32_gl.h"
 
 #include <windows.h>
 #include <stdio.h>
 
-bool globalRunning = true;
+global_variable PlatformInterface platInterface;
+global_variable AppInterface app;
+global_variable void* gameModule;
+global_variable char* appModulePath = "base/gamex86.dll";
+
+global_variable bool globalRunning = true;
 
 global_variable MemoryBlock gameMemory;
 
@@ -24,6 +32,38 @@ global_variable win32_offscreen_buffer globalBackBuffer;
 global_variable int xOffset = 0;
 global_variable int yOffset = 0;
 
+/**********************************************************************
+ * TIMING
+ *********************************************************************/
+global_variable double global_timePassed = 0;
+global_variable double global_secondsPerTick = 0;
+global_variable __int64 global_timeCount = 0;
+global_variable LARGE_INTEGER tick, tock;
+
+f32 Win32_InitFloatTime()
+{
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+    global_secondsPerTick = 1.0 / (double)frequency.QuadPart;
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    global_timeCount = counter.QuadPart;
+    return 0;
+}
+
+f32 Win32_FloatTime()
+{
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+
+    __int64 interval = counter.QuadPart - global_timeCount;
+    global_timeCount = counter.QuadPart;
+
+    double secondsGoneBy = (double)interval * global_secondsPerTick;
+    global_timePassed += secondsGoneBy;
+    return (float)global_timePassed;
+}
+
 /****************************************************************
 Command line
 ****************************************************************/
@@ -32,7 +72,7 @@ Command line
 global_variable char *launchParams[MAX_LAUNCH_PARAMS];
 i32 numLaunchParams = 0;
 
-void ReadCommandLine(LPSTR lpCmdLine)
+void Win32_ReadCommandLine(LPSTR lpCmdLine)
 {
     while (*lpCmdLine && (numLaunchParams < MAX_LAUNCH_PARAMS))
     {
@@ -69,12 +109,35 @@ void ReadCommandLine(LPSTR lpCmdLine)
     launchParams[numLaunchParams] = NULL;
 }
 
+void Win32_Shutdown()
+{
+    globalRunning = false;
+}
+
+/**********************************************************************
+ * Attach to application DLL
+ *********************************************************************/
+
+i32 Win32_GetViewPortMinX() { return 0; }
+i32 Win32_GetViewPortMinY() { return 0; }
+i32 Win32_GetViewPortMaxX() { return 1280; }
+i32 Win32_GetViewPortMaxY() { return 768; }
+
+void Win32_InitPlatformInterface()
+{
+    
+}
+
+void Win32_LinkToApplication()
+{
+    app = GetAppInterfaceStub(platInterface);
+}
 
 /****************************************************************
 ALLOC MAIN MEMORY
 TODO: Return error code if it fails?
 ****************************************************************/
-void PlatformAlloc(MemoryBlock *mem)
+void Win32_Alloc(MemoryBlock *mem)
 {
     i32 size = MegaBytes(2);
     mem->size = size;
@@ -82,7 +145,7 @@ void PlatformAlloc(MemoryBlock *mem)
 
 }
 
-void PlatformFree(MemoryBlock *mem)
+void Win32_Free(MemoryBlock *mem)
 {
     if (mem)
     {
@@ -98,12 +161,15 @@ void PlatformFree(MemoryBlock *mem)
     }
 }
 
-void PlatformFreeFileMemory(void* mem)
+/**********************************************************************
+ * PRIMITIVE FILE I/O
+/*********************************************************************/
+void Win32_FreeFileMemory(void* mem)
 {
     VirtualFree(mem, 0, MEM_RELEASE);
 }
 
-void * PlatformReadEntireFile(char *fileName)
+void * Win32_ReadEntireFile(char *fileName)
 {
 	void *result = 0;
 	HANDLE fileHandle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
@@ -123,7 +189,7 @@ void * PlatformReadEntireFile(char *fileName)
 				}
 				else
 				{
-					PlatformFreeFileMemory(result);
+					Win32_FreeFileMemory(result);
 					result = 0;
 				}
 			}
@@ -138,7 +204,7 @@ void * PlatformReadEntireFile(char *fileName)
 	return result;
 }
 
-bool32 PlatformWriteEntireFile(char *fileName, u32 memorySize, void *memory)
+bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
 {
 	bool32 result = false;
 
@@ -163,6 +229,19 @@ bool32 PlatformWriteEntireFile(char *fileName, u32 memorySize, void *memory)
 	return result;
 }
 
+void Win32_PrintDebug(char* str)
+{
+    OutputDebugStringA(str);
+}
+
+/*********************************************************************
+Windows generic concat string
+*********************************************************************/
+// void Win32_SPrintf_s(char* buffer, u32 charCount, char* format, ...)
+// {
+//     sprintf_s(buffer, charCount, format, ...);
+// }
+
 /*********************************************************************
 Windows misc
 *********************************************************************/
@@ -179,7 +258,7 @@ win32_window_dimension Win32_GetWindowDimension(HWND window)
 /*********************************************************************
 Windows message callback
 *********************************************************************/
-internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM wParam, LPARAM lParam)
+internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT result = 0;
 
@@ -194,7 +273,7 @@ internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM
     {
         //PostQuitMessage(0);
         // TODO: Handle this with a message to the user?
-        globalRunning = false;
+        Win32_Shutdown();
         OutputDebugStringA("WM_CLOSE\n");
     }
     break;
@@ -202,16 +281,14 @@ internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM
     case WM_DESTROY:
     {
         // Handle this as an error - recreate window?
-        globalRunning = false;
+        Win32_Shutdown();
         OutputDebugStringA("WM_DESTROY\n");
-    }
-    break;
+    } break;
 
     case WM_ACTIVATEAPP:
     {
         OutputDebugStringA("WM_ACTIVATEAPP\n");
-    }
-    break;
+    } break;
 
     case WM_SYSKEYUP:
     case WM_SYSKEYDOWN:
@@ -262,8 +339,9 @@ internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM
         }
         else if (VKCode == VK_SPACE)
         {
-            printf("Spacebar superstar\n");
-            MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
+            //printf("Spacebar superstar\n");
+            //global_timePassed = 0;
+            //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
         }
         else if (VKCode == VK_ESCAPE)
         {
@@ -281,8 +359,7 @@ internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM
         {
             globalRunning = false;
         }
-    }
-    break;
+    } break;
 
     case WM_PAINT:
     {
@@ -314,7 +391,7 @@ internal LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT uMsg, WPARAM
 
 /**********************************************************************
  * WIN32 ENTRY POINT
-/*********************************************************************/
+ *********************************************************************/
 int CALLBACK WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -323,13 +400,13 @@ int CALLBACK WinMain(
 {
 	MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
-    ReadCommandLine(lpCmdLine);
+    Win32_ReadCommandLine(lpCmdLine);
 
     InitDebug();
     printf("Debug init\n");
     printf("File %s, line: %d\n", __FILE__, __LINE__);
     gameMemory = {};
-    PlatformAlloc(&gameMemory);
+    Win32_Alloc(&gameMemory);
 
     // Created basic window
     WNDCLASS WindowClass = {}; // {} initialises all variables to 0 (cpp only)
@@ -341,7 +418,7 @@ int CALLBACK WinMain(
 
     //win32LoadXInput();
     
-    WindowClass.lpfnWndProc = Win32MainWindowCallback;
+    WindowClass.lpfnWndProc = Win32_MainWindowCallback;
     WindowClass.hInstance = hInstance;
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
@@ -359,6 +436,9 @@ int CALLBACK WinMain(
     // 
     AdjustWindowRect(&r, WindowClass.style, false);
 
+    Win32_InitPlatformInterface();
+    Win32_LinkToApplication();
+
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
     {
@@ -367,8 +447,8 @@ int CALLBACK WinMain(
             WindowClass.lpszClassName,
             "Exercise 90",
             WS_OVERLAPPEDWINDOW | WS_VISIBLE, // window style
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
+            CW_USEDEFAULT,  // Default position x
+            CW_USEDEFAULT,  // Default position y
             r.right - r.left, // CW_USEDEFAULT,
             r.bottom - r.top, // CW_USEDEFAULT,
             0,
@@ -384,6 +464,8 @@ int CALLBACK WinMain(
                 globalRunning = false;
             }
 
+            float previousTime = Win32_InitFloatTime();
+
             while (globalRunning)
             {
                 MSG message;
@@ -397,6 +479,14 @@ int CALLBACK WinMain(
                     DispatchMessage(&message);
                 }
 
+                float newTime = Win32_FloatTime();
+                float deltaTime = newTime - previousTime;
+                previousTime = newTime;
+                
+                // char buf[64];
+                // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, deltaTime);
+                // OutputDebugString(buf);
+                
                 Win32RenderFrame(appWindow);
 
                 /* Stuff to add:
@@ -420,5 +510,3 @@ int CALLBACK WinMain(
         // Oh dear
     }
 }
-
-//#endif

@@ -1,5 +1,4 @@
-#ifndef APP_INTERFACE_H
-#define APP_INTERFACE_H
+#pragma once
 
 #include "../Shared/shared.h"
 #include "platform_interface.h"
@@ -19,5 +18,3 @@ struct AppInterface
 Platform calls DLL with platform function pointers, DLL should return pointers
 *****************************************************/
 typedef AppInterface (Func_LinkToApp)(PlatformInterface);
-
-#endif
