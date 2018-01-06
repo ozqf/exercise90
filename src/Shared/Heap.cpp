@@ -69,7 +69,7 @@ void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
 
     // ids for tracking
     heap->nextID = 1;
-    heap->defragIndex = 1;
+    heap->iteration = 1;
 
     // Allocated Block Linked list
     heap->headBlock = NULL;
@@ -113,7 +113,7 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
 void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 {
     // if defrag indexes match, ref is okay
-    if (BlockRef->defragIndex == heap->defragIndex)
+    if (BlockRef->iteration == heap->iteration)
     {
         return BlockRef->ptrMemory;
     }
@@ -131,7 +131,7 @@ void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
         return NULL;
     }
     BlockRef->ptrMemory = newAddress;
-    BlockRef->defragIndex = heap->defragIndex;
+    BlockRef->iteration = heap->iteration;
     return newAddress;
 }
 
@@ -167,7 +167,7 @@ void Heap_DebugPrintAllocations(Heap *heap)
 {
     printf("\n** HEAP PRINT **\n");
     u32 startAddress = (u32)heap->ptrMemory;
-    u32 fragments[256];
+    u32 fragments[HEAP_FRAGMENT_TALLY_MAX];
     u32 fragmentIndex = 0;
     HeapBlock *block = heap->headBlock;
     if (block == NULL)
@@ -185,7 +185,10 @@ void Heap_DebugPrintAllocations(Heap *heap)
         u32 space = Heap_CalcSpaceAfterBlock(heap, block);
         u32 blockVolume = block->mem.volumeSize + BLOCK_HEADER_SIZE;
         totalSpace += blockVolume;
-        if (space > 0) { fragments[fragmentIndex++] = space; }
+        if (space > 0 && fragmentIndex < HEAP_FRAGMENT_TALLY_MAX)
+        {
+            fragments[fragmentIndex++] = space;
+        }
         u32 address = (u32)block - startAddress;
         printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
                address, block->mem.id, block->mem.debugLabel, block->mem.objectSize, blockVolume, space);
@@ -314,8 +317,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
         newBlock = (HeapBlock *)heap->ptrMemory;
         *newBlock = {};
         Heap_InsertBlock(heap, newBlock, NULL);
-// heap->headBlock = newBlock;
-// heap->tailBlock = newBlock;
+
 #if VERBOSE
         printf("  Allocating first block, no jump\n");
 #endif
@@ -398,7 +400,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
 
     if (bRef != NULL)
     {
-        bRef->defragIndex = heap->defragIndex;
+        bRef->iteration = heap->iteration;
         bRef->id = newBlock->mem.id;
         bRef->ptrMemory = newBlock->mem.ptrMemory;
         bRef->objectSize = objectSize;
@@ -416,22 +418,10 @@ void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
     {
         return;
     }
-    bRef->defragIndex = heap->defragIndex;
+    bRef->iteration = heap->iteration;
     bRef->id = block->mem.id;
     bRef->ptrMemory = block->mem.ptrMemory;
     bRef->objectSize = block->mem.objectSize;
-}
-
-void Heap_Defrag(Heap *heap)
-{
-    heap->defragIndex++;
-    /*
-    - Naive Defrag -
-    > Scan for first gap, then count blocks to the next gap
-    > Shift block range to close gap
-    > Repeat until space is only after last block
-    */
-
 }
 
 void Heap_Purge(Heap* heap)
@@ -445,4 +435,74 @@ void Heap_Purge(Heap* heap)
         Heap_RemoveBlock(heap, block);
         block = next;
     }
+}
+
+/*
+            0 ------------------------------------------------------------------ Size Of Heap
+Fragmented: ------------|Header->Data|------------|Header->Data-----------------
+Copy 0      <-----------
+Copy 1                  <-------------------------
+Result:     Header->Data|Header->Data|------------------------------------------
+
+example:    < Distance > < numBytes >
+            <-----------|Header->Data|
+            ^           ^ originOffset
+            | destinationOffset
+
+
+*/
+
+/**
+ * fill the given array with fragments
+ * Returns the number of fragments found
+ */
+i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment fragments[], i32 arraySize)
+{
+    i32 fragIndex = 0;
+    // space before headblock, different between block address and heap memory address
+    HeapBlock* block = heap->headBlock;
+    u32 space = (u32)block - (u32)heap->ptrMemory;
+    
+    //i32 numBytes;
+    if (space > 0)
+    {
+        
+        ++fragIndex;
+    }
+
+    // while (block != NULL && fragIndex < arraySize)
+    // {
+    //     // Space after last block is not a fragment!
+    //     if (block->mem.next == NULL)
+    //     {
+    //         break;
+    //     }
+
+    //     space = Heap_CalcSpaceAfterBlock(heap, block);
+    //     if (space > 0)
+    //     {
+    //         fragments[fragIndex].originOffset = (u32)block - (u32)heap->ptrMemory;
+    //         fragments[fragIndex].distance = 0;
+            
+    //     }
+
+    //     block = block->mem.next;
+    // }
+
+    return fragIndex;
+}
+
+void Heap_Defrag(Heap *heap)
+{
+    heap->iteration++;
+    /*
+    - Naive Defrag -
+    > Scan for first gap, then count blocks to the next gap
+    > Shift block range to close gap
+    > Repeat until space is only after last block
+    */
+
+
+    Heap_Fragment fragments[HEAP_FRAGMENT_TALLY_MAX];
+    i32 numFragments = Heap_ScanForFragments(heap, fragments, HEAP_FRAGMENT_TALLY_MAX);
 }

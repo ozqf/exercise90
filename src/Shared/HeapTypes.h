@@ -6,6 +6,9 @@
 #define HEAP_DEFAULT_ALIGNMENT 16
 #define BLOCK_LABEL_SIZE 20
 
+// Size of array used to track fragments during defragging
+#define HEAP_FRAGMENT_TALLY_MAX 256
+
 /*****************************
  * A reference to specific block on the Heap
  * do NOT use ptrMemory directly. Grab it via
@@ -15,7 +18,7 @@
 struct BlockRef
 {
     uint32_t id;            // identify this allocation, for searching
-    uint32_t defragIndex;   // if this fails to match the current heap defragIndex, the pointer is invalid
+    uint32_t iteration;   // if this fails to match the current heap iteration, the pointer is invalid
     void* ptrMemory;
     uint32_t objectSize;
 };
@@ -46,6 +49,24 @@ union HeapBlock
 };
 
 /*****************************
+ * Describes a gap in the heap between either
+ * HeapOrigin <gap> First Block
+ * or
+ * Block <gap> Block
+ ****************************/
+struct Heap_Fragment
+{
+    // Distance into heap the gap starts at
+    u32 originOffset;
+    u32 space;
+    
+    // u32 destinationOffset;
+    // // Distance to copy
+    // u32 distance;
+    // u32 numBytes;
+};
+
+/*****************************
  * A specific Heap, in case you want multiple heaps
  ****************************/
 struct Heap
@@ -57,7 +78,7 @@ struct Heap
 	uint32_t size;
 	// Increment for every defragmentation run.
     // Allows references to know if their pointer is out of date.
-	uint32_t defragIndex;
+	uint32_t iteration;
 
     HeapBlock *headBlock;
     HeapBlock *tailBlock;
