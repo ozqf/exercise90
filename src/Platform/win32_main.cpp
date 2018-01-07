@@ -18,8 +18,8 @@
 
 global_variable PlatformInterface platInterface;
 global_variable AppInterface app;
-global_variable void* gameModule;
-global_variable char* appModulePath = "base/gamex86.dll";
+global_variable void *gameModule;
+global_variable char *appModulePath = "base/gamex86.dll";
 
 global_variable bool globalRunning = true;
 
@@ -125,7 +125,6 @@ i32 Win32_GetViewPortMaxY() { return 768; }
 
 void Win32_InitPlatformInterface()
 {
-    
 }
 
 void Win32_LinkToApplication()
@@ -142,7 +141,6 @@ void Win32_Alloc(MemoryBlock *mem)
     i32 size = MegaBytes(2);
     mem->size = size;
     mem->ptrMemory = VirtualAlloc(0, mem->size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-
 }
 
 void Win32_Free(MemoryBlock *mem)
@@ -150,7 +148,7 @@ void Win32_Free(MemoryBlock *mem)
     if (mem)
     {
         // Reset to 0
-        char* cursor = (char*)mem->ptrMemory;
+        char *cursor = (char *)mem->ptrMemory;
         for (int i = 0; i < mem->size; ++i)
         {
             *cursor = 0;
@@ -164,72 +162,72 @@ void Win32_Free(MemoryBlock *mem)
 /**********************************************************************
  * PRIMITIVE FILE I/O
 /*********************************************************************/
-void Win32_FreeFileMemory(void* mem)
+void Win32_FreeFileMemory(void *mem)
 {
     VirtualFree(mem, 0, MEM_RELEASE);
 }
 
-void * Win32_ReadEntireFile(char *fileName)
+void *Win32_ReadEntireFile(char *fileName)
 {
-	void *result = 0;
-	HANDLE fileHandle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-	if (fileHandle != INVALID_HANDLE_VALUE)
-	{
-		LARGE_INTEGER fileSize;
-		if (GetFileSizeEx(fileHandle, &fileSize))
-		{
-			LPDWORD bytesRead = 0;
-			u32 fileSize32 = SafeTruncateUInt64(fileSize.QuadPart);
-			result = VirtualAlloc(0, fileSize32, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-			if (result)
-			{
-				if (ReadFile(fileHandle, result, fileSize32, bytesRead, 0) && fileSize32 == (u32)bytesRead)
-				{
-					// File read successfully
-				}
-				else
-				{
-					Win32_FreeFileMemory(result);
-					result = 0;
-				}
-			}
-			else
-			{
-				// TODO: Logging
-			}
-		}
-		
-		CloseHandle(fileHandle);
-	}
-	return result;
+    void *result = 0;
+    HANDLE fileHandle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    if (fileHandle != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER fileSize;
+        if (GetFileSizeEx(fileHandle, &fileSize))
+        {
+            LPDWORD bytesRead = 0;
+            u32 fileSize32 = SafeTruncateUInt64(fileSize.QuadPart);
+            result = VirtualAlloc(0, fileSize32, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+            if (result)
+            {
+                if (ReadFile(fileHandle, result, fileSize32, bytesRead, 0) && fileSize32 == (u32)bytesRead)
+                {
+                    // File read successfully
+                }
+                else
+                {
+                    Win32_FreeFileMemory(result);
+                    result = 0;
+                }
+            }
+            else
+            {
+                // TODO: Logging
+            }
+        }
+
+        CloseHandle(fileHandle);
+    }
+    return result;
 }
 
 bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
 {
-	bool32 result = false;
+    bool32 result = false;
 
-	HANDLE fileHandle = CreateFileA(fileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
-	if (fileHandle != INVALID_HANDLE_VALUE)
-	{
-		DWORD bytesWritten;
-		if (WriteFile(fileHandle, memory, memorySize, &bytesWritten, 0))
-		{
-			// Make sure entire file was written
-			result = (bytesWritten == memorySize);
-		}
-		else
-		{
-			// TODO logging
-		}
-	}
-	else
-	{
-		// TODO logging
-	}
-	return result;
+    HANDLE fileHandle = CreateFileA(fileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    if (fileHandle != INVALID_HANDLE_VALUE)
+    {
+        DWORD bytesWritten;
+        if (WriteFile(fileHandle, memory, memorySize, &bytesWritten, 0))
+        {
+            // Make sure entire file was written
+            result = (bytesWritten == memorySize);
+        }
+        else
+        {
+            // TODO logging
+        }
+    }
+    else
+    {
+        // TODO logging
+    }
+    return result;
 }
 
-void Win32_PrintDebug(char* str)
+void Win32_PrintDebug(char *str)
 {
     OutputDebugStringA(str);
 }
@@ -283,12 +281,14 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         // Handle this as an error - recreate window?
         Win32_Shutdown();
         OutputDebugStringA("WM_DESTROY\n");
-    } break;
+    }
+    break;
 
     case WM_ACTIVATEAPP:
     {
         OutputDebugStringA("WM_ACTIVATEAPP\n");
-    } break;
+    }
+    break;
 
     case WM_SYSKEYUP:
     case WM_SYSKEYDOWN:
@@ -342,6 +342,21 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             //printf("Spacebar superstar\n");
             //global_timePassed = 0;
             //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
+            if (wasDown && !isDown)
+            {
+                //printf("Spacebar superstar\n");
+                //global_timePassed = 0;
+                //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
+				
+                ++g_gl_primitive_mode;
+                if (g_gl_primitive_mode >= NUM_GL_PRIMITIVE_MODES)
+                {
+                    g_gl_primitive_mode = 0;
+                }
+				char output[256];
+				sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
+				OutputDebugStringA(output);
+            }
         }
         else if (VKCode == VK_ESCAPE)
         {
@@ -359,7 +374,8 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         {
             globalRunning = false;
         }
-    } break;
+    }
+    break;
 
     case WM_PAINT:
     {
@@ -398,7 +414,7 @@ int CALLBACK WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-	MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
+    MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
     Win32_ReadCommandLine(lpCmdLine);
 
@@ -417,7 +433,7 @@ int CALLBACK WinMain(
     Win32ResizeDIBSection(&globalBackBuffer, 1280, 720);
 
     //win32LoadXInput();
-    
+
     WindowClass.lpfnWndProc = Win32_MainWindowCallback;
     WindowClass.hInstance = hInstance;
     //	WindowClass.hIcon
@@ -430,10 +446,10 @@ int CALLBACK WinMain(
     r.top = r.left = 0;
     r.right = 1280;
     r.bottom = 720;
-    
+
     // Adjust desired rect to include area of window including border.
     // top or left may well now be negative
-    // 
+    //
     AdjustWindowRect(&r, WindowClass.style, false);
 
     Win32_InitPlatformInterface();
@@ -447,18 +463,18 @@ int CALLBACK WinMain(
             WindowClass.lpszClassName,
             "Exercise 90",
             WS_OVERLAPPEDWINDOW | WS_VISIBLE, // window style
-            CW_USEDEFAULT,  // Default position x
-            CW_USEDEFAULT,  // Default position y
-            r.right - r.left, // CW_USEDEFAULT,
-            r.bottom - r.top, // CW_USEDEFAULT,
+            CW_USEDEFAULT,                    // Default position x
+            CW_USEDEFAULT,                    // Default position y
+            r.right - r.left,                 // CW_USEDEFAULT,
+            r.bottom - r.top,                 // CW_USEDEFAULT,
             0,
             0,
             hInstance,
             0);
-        
+
         if (appWindow)
         {
-            if (InitOpenGL(appWindow) == false)
+            if (Win32_InitOpenGL(appWindow) == false)
             {
                 MessageBox(0, "InitOpenGL failed", "Error", MB_OK | MB_ICONINFORMATION);
                 globalRunning = false;
@@ -482,12 +498,12 @@ int CALLBACK WinMain(
                 float newTime = Win32_FloatTime();
                 float deltaTime = newTime - previousTime;
                 previousTime = newTime;
-                
+
                 // char buf[64];
                 // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, deltaTime);
                 // OutputDebugString(buf);
-                
-                Win32RenderFrame(appWindow);
+
+                Win32_RenderFrame(appWindow);
 
                 /* Stuff to add:
                 > PlatformReadNetworkPackets();
