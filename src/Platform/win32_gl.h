@@ -14,7 +14,6 @@ Reading material
 http://www.songho.ca/opengl/
 http://www.opengl-tutorial.org/beginners-tutorials/tutorial-4-a-colored-cube/
 https://www.wikihow.com/Make-a-Cube-in-OpenGL
-http://www.songho.ca/opengl/
 
 // API Reference
 https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glFrustum.xml

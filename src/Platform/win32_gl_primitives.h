@@ -13,28 +13,6 @@
 #define NUM_GL_PRIMITIVE_MODES 3
 global_variable i32 g_gl_primitive_mode = 0;
 
-// Matrix use
-#define TRANSFORM_MATRIX_SIZE 16
-#define X0 0
-#define X1 1
-#define X2 2
-#define X3 3
-
-#define Y0 4
-#define Y1 5
-#define Y2 6
-#define Y3 7
-
-#define Z0 8
-#define Z1 9
-#define Z2 10
-#define Z3 11
-
-#define W0 12
-#define W1 13
-#define W2 14
-#define W3 15
-
 
 win32_offscreen_buffer testBuffer;
 i32 testBufferPixels[TEST_BUFFER_PIXEL_COUNT];

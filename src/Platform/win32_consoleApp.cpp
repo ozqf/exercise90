@@ -89,8 +89,8 @@ int main(i32 argc, char* argv[])
 {
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
     
-    HeapTest();
-    //Test_Com_Run();
+    //HeapTest();
+    Test_Com_Run();
     
     printf("End - Success");
     return 0;

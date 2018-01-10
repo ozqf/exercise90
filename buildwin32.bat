@@ -14,16 +14,16 @@ set compilerDefines=/DPARANOID=1
 @rem /DVERBOSE=1
 
 @rem === Compile Win32 Window application
-set compilerInput=../src/Platform/win32_main.cpp
+@rem set compilerInput=../src/Platform/win32_main.cpp
 
 @rem === Compile Testing Win32 Console application
-@rem set compilerInput=../src/Platform/win32_consoleApp.cpp
+set compilerInput=../src/Platform/win32_consoleApp.cpp
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 set linkStr=/link /SUBSYSTEM:CONSOLE
-set linkInputA=-opt:ref -subsystem:windows,5.1
-set linkInputB=user32.lib opengl32.lib
-set linkInputC=Gdi32.lib
+@rem set linkInputA=-opt:ref -subsystem:windows,5.1
+@rem set linkInputB=user32.lib opengl32.lib
+@rem set linkInputC=Gdi32.lib
 @echo on
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off

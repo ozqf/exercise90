@@ -59,10 +59,67 @@ void Test_Com_StringLength()
     printf("Length of '%s': %d\n", "Hello, World!<endL>", Com_StrLen("Hello, World!\n"));
 }
 
+void Test_COM_PrintMatrix(f32* m)
+{
+    printf("%.2f, %.2f, %.2f, %.2f\n", m[X0], m[X1], m[X2], m[X3]);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m[Y0], m[Y1], m[Y2], m[Y3]);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m[Z0], m[Z1], m[Z2], m[Z3]);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m[W0], m[W1], m[W2], m[W3]);
+}
+
+void Test_COM_PrintVector4(f32* v)
+{
+    printf("%.2f, %.2f, %.2f, %.2f\n", v[VEC_X], v[VEC_Y], v[VEC_Z], v[VEC_W]);
+}
+
+void Test_COM_MatrixMaths()
+{
+    printf("**************************\n");
+    printf("TEST MATRIX MATHS\n");
+    
+    printf("\nSet to Identity Matrix:\n");
+    f32 matrix[16];
+    COM_SetToIdentityMatrix(matrix);
+    Test_COM_PrintMatrix(matrix);
+
+    printf("\nSet to scale by 2:\n");
+    COM_SetAsScaleMatrix(matrix, 2, 2, 2);
+    Test_COM_PrintMatrix(matrix);
+
+    f32 v0[4];
+    v0[VEC_X] = 3;
+    v0[VEC_Y] = 2;
+    v0[VEC_Z] = -4;
+    v0[VEC_W] = 1;
+    printf("Print vector v:\n");
+    Test_COM_PrintVector4(v0);
+
+    printf("\nMultiply v by m\n");
+    COM_MultiplyVectorByMatrix(matrix, v0);
+    Test_COM_PrintVector4(v0);
+
+    printf("\nCreate Translation Matrix\n");
+    COM_SetToIdentityMatrix(matrix);
+    COM_SetMoveMatrix(matrix, 9, -3, 2);
+    Test_COM_PrintMatrix(matrix);
+
+    printf("Multiply v by m\n");
+    COM_MultiplyVectorByMatrix(matrix, v0);
+    Test_COM_PrintVector4(v0);
+
+    printf("\n");
+}
+
+void Test_COM_Maths()
+{
+    Test_COM_MatrixMaths();
+}
+
 void Test_Com_Run()
 {
-    Test_Com_StringCompareTests();
-    Test_Com_StringCopyTests();
-    Test_Com_AsciToInt32_Series();
-    Test_Com_StringLength();
+    // Test_Com_StringCompareTests();
+    // Test_Com_StringCopyTests();
+    // Test_Com_AsciToInt32_Series();
+    // Test_Com_StringLength();
+    Test_COM_Maths();
 }
