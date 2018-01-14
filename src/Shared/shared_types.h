@@ -51,6 +51,47 @@ MACROS
 #define DLL_EXPORT __declspec(dllexport)
 
 /*****************************************************
+MATHS TYPES
+*****************************************************/
+
+struct v2
+{
+    union
+    {
+        struct
+        {
+            f32 X, Y;
+        };
+        f32 E[2];
+    };
+};
+
+struct Vec3
+{
+    f32 x, y, z, w;
+    // overload array operator to return a pointer to x + index
+    f32 &operator[](int index) { return ((&x)[index]); }
+    // union
+    // {
+    //     f32 x, y, z, w;
+    //     //f32 axes[4];
+    // };
+};
+
+struct M4x4
+{
+    union
+    {
+        f32
+        x0, y0, z0, w0,
+        x1, y1, z1, w1,
+        x2, y2, z2, w2,
+        x3, y3, z3, w3;
+        f32 cells[16];
+    };
+};
+
+/*****************************************************
 SIMPLE TYPES
 *****************************************************/
 struct MemoryBlock

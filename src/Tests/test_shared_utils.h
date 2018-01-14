@@ -72,19 +72,54 @@ void Test_COM_PrintVector4(f32* v)
     printf("%.2f, %.2f, %.2f, %.2f\n", v[VEC_X], v[VEC_Y], v[VEC_Z], v[VEC_W]);
 }
 
+void Test_COM_PrintVector4(Vec3 v)
+{
+
+    printf("%.2f, %.2f, %.2f, %.2f\n", v.x, v.y, v.z, v.w);
+    printf("%.2f, %.2f, %.2f, %.2f\n", v[0], v[1], v[2], v[3]);
+}
+
+void Test_COM_PrintVector2(v2 v)
+{
+    printf("%.2f, %.2f\n", v.X, v.Y);
+    printf("%.2f, %.2f\n", v.E[0], v.E[1]);
+}
+
 void Test_COM_MatrixMaths()
 {
     printf("**************************\n");
     printf("TEST MATRIX MATHS\n");
     
+    Vec3 v;     v.x = 3;    v.y = 5;    v.z = 2;    v.w = 1;
+    printf("Vector v:\n");
+
+    Test_COM_PrintVector4(v);
+
+    v2 v2a;
+    // v2a.X = 3;
+    // v2a.Y = 7;
+    v2a = { 3, 7 };
+
+    printf("V2: 3, 7:\n%0.f2, %0.2f\n", v2a.X, v2a.Y);
+    printf("V2 via array union:\n%0.2f, %0.2f\n", v2a.E[0], v2a.E[1]);
+
+
+
+}
+
+void Test_COM_MatrixMaths_ArrayTypes()
+{
+    printf("**************************\n");
+    printf("TEST MATRIX MATHS - Array types\n");
+    
     printf("\nSet to Identity Matrix:\n");
-    f32 matrix[16];
-    COM_SetToIdentityMatrix(matrix);
-    Test_COM_PrintMatrix(matrix);
+    f32 m0[16];
+    COM_SetToIdentityMatrix(m0);
+    Test_COM_PrintMatrix(m0);
 
     printf("\nSet to scale by 2:\n");
-    COM_SetAsScaleMatrix(matrix, 2, 2, 2);
-    Test_COM_PrintMatrix(matrix);
+    COM_SetAsScaleMatrix(m0, 2, 2, 2);
+    Test_COM_PrintMatrix(m0);
 
     f32 v0[4];
     v0[VEC_X] = 3;
@@ -95,17 +130,33 @@ void Test_COM_MatrixMaths()
     Test_COM_PrintVector4(v0);
 
     printf("\nMultiply v by m\n");
-    COM_MultiplyVectorByMatrix(matrix, v0);
+    COM_MultiplyVectorByMatrix(m0, v0);
     Test_COM_PrintVector4(v0);
 
     printf("\nCreate Translation Matrix\n");
-    COM_SetToIdentityMatrix(matrix);
-    COM_SetMoveMatrix(matrix, 9, -3, 2);
-    Test_COM_PrintMatrix(matrix);
+    COM_SetToIdentityMatrix(m0);
+    COM_SetMoveMatrix(m0, 9, -3, 2);
+    Test_COM_PrintMatrix(m0);
 
     printf("Multiply v by m\n");
-    COM_MultiplyVectorByMatrix(matrix, v0);
+    COM_MultiplyVectorByMatrix(m0, v0);
     Test_COM_PrintVector4(v0);
+
+    f32 m1[16];
+    COM_SetToIdentityMatrix(m1);
+    printf("\nCopy\n");
+    COM_CopyMatrix(m0, m1);
+    Test_COM_PrintMatrix(m1);
+
+    printf("\nMultiply matrices\n");
+    printf("M0:\n");
+    COM_SetAsScaleMatrix(m0, 3, 2, 4);
+    Test_COM_PrintMatrix(m0);
+    printf("M1:\n");
+    Test_COM_PrintMatrix(m1);
+    COM_MultiplyMatrices(m0, m1, m1);
+    printf("Result:\n");
+    Test_COM_PrintMatrix(m1);
 
     printf("\n");
 }

@@ -9,7 +9,7 @@
 #include <windows.h>
 
 #include "../Shared/shared.h"
-#include "../Shared/Heap.cpp"
+#include "../Shared/Memory/Heap.cpp"
 #include "../tests/test_shared_utils.h"
 
 void HeapTest()

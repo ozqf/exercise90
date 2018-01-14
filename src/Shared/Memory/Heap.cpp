@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "Heap.h"
-#include "shared.h"
+#include "../shared.h"
 
 /* Reading Material
 
@@ -19,7 +19,7 @@ https://www.gamasutra.com/blogs/MichaelKissner/20151104/258271/Writing_a_Game_En
 /**
 So here's a first go at some kind of Heap
 Steps to figure out for implementation:
-DONE > Allocate a block
+DONE > Allocate a block;
 DONE > Allocate a stack of blocks (create block linked list)
 DONE > Retrieve a block
 DONE > Free a block (resew the linked list)
