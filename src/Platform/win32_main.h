@@ -1,5 +1,4 @@
-#ifndef WIN32_MAIN_H
-#define WIN32_MAIN_H
+#pragma once
 
 #include <windows.h>
 
@@ -23,6 +22,3 @@ struct win32_window_dimension
 	int width;
 	int height;
 };
-
-
-#endif

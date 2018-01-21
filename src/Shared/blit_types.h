@@ -1,5 +1,4 @@
-#ifndef BLIT_TYPES_H
-#define BLIT_TYPES_H
+#pragma once
 
 #include "shared_types.h"
 
@@ -38,6 +37,3 @@ struct BlitItem
     i32 type;
     BlitItemUnion content;
 };
-
-
-#endif

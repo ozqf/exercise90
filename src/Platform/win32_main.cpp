@@ -3,6 +3,9 @@
  *********************************************************************/
 #pragma once
 
+#include <stdio.h>
+#include <windows.h>
+
 #include "../Shared/shared.h"
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
@@ -12,9 +15,6 @@
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
 #include "win32_gl.h"
-
-#include <windows.h>
-#include <stdio.h>
 
 global_variable PlatformInterface platInterface;
 global_variable AppInterface app;

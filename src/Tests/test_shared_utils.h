@@ -67,22 +67,30 @@ void Test_COM_PrintMatrix(f32* m)
     printf("%.2f, %.2f, %.2f, %.2f\n", m[W0], m[W1], m[W2], m[W3]);
 }
 
+void Test_COM_PrintMatrix(M4x4* m)
+{
+    printf("%.2f, %.2f, %.2f, %.2f\n", m->x0, m->x1, m->x2, m->x3);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m->y0, m->y1, m->y2, m->y3);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m->z0, m->z1, m->z2, m->z3);
+    printf("%.2f, %.2f, %.2f, %.2f\n", m->w0, m->w1, m->w2, m->w3);
+}
+
 void Test_COM_PrintVector4(f32* v)
 {
     printf("%.2f, %.2f, %.2f, %.2f\n", v[VEC_X], v[VEC_Y], v[VEC_Z], v[VEC_W]);
 }
 
-void Test_COM_PrintVector4(Vec3 v)
+void Test_COM_PrintVector3(Vec3 v)
 {
 
-    printf("%.2f, %.2f, %.2f, %.2f\n", v.x, v.y, v.z, v.w);
-    printf("%.2f, %.2f, %.2f, %.2f\n", v[0], v[1], v[2], v[3]);
+    printf("x/y/z: %.2f, %.2f, %.2f\n", v.x, v.y, v.z);
+    printf("array:%.2f, %.2f, %.2f\n", v.e[0], v.e[1], v.e[2]);
 }
 
-void Test_COM_PrintVector2(v2 v)
+void Test_COM_PrintVector2(Vec2 v)
 {
-    printf("%.2f, %.2f\n", v.X, v.Y);
-    printf("%.2f, %.2f\n", v.E[0], v.E[1]);
+    printf("%.2f, %.2f\n", v.x, v.y);
+    printf("%.2f, %.2f\n", v.e[0], v.e[1]);
 }
 
 void Test_COM_MatrixMaths()
@@ -90,18 +98,24 @@ void Test_COM_MatrixMaths()
     printf("**************************\n");
     printf("TEST MATRIX MATHS\n");
     
-    Vec3 v;     v.x = 3;    v.y = 5;    v.z = 2;    v.w = 1;
-    printf("Vector v:\n");
-
-    Test_COM_PrintVector4(v);
-
-    v2 v2a;
+    Vec3 a;     a.x = 3;    a.y = 5;    a.z = 2;
+    Vec3 b;     b.x = 2;    b.y = 2;    b.z = 2;
+    Vec3 c;
+    printf("Vector a:\n");
+    Test_COM_PrintVector3(a);
+    printf("Vector b:\n");
+    Test_COM_PrintVector3(b);
+    printf("c = a * b:\n");
+    c = a * b;
+    Test_COM_PrintVector3(c);
+    
+    Vec2 v2a;
     // v2a.X = 3;
     // v2a.Y = 7;
     v2a = { 3, 7 };
 
-    printf("V2: 3, 7:\n%0.f2, %0.2f\n", v2a.X, v2a.Y);
-    printf("V2 via array union:\n%0.2f, %0.2f\n", v2a.E[0], v2a.E[1]);
+    printf("V2: 3, 7:\n%0.f2, %0.2f\n", v2a.x, v2a.y);
+    printf("V2 via array union:\n%0.2f, %0.2f\n", v2a.e[0], v2a.e[1]);
 
 
 

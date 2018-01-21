@@ -1,5 +1,4 @@
-#ifndef WIN32_DRAW_CPP
-#define WIN32_DRAW_CPP
+#pragma once
 
 #include "../Shared/shared.h"
 #include <windows.h>
@@ -55,6 +54,3 @@ internal void Win32CopyBufferToWindow(HDC deviceContext, int windowWidth, int wi
 		&buffer->info,
 		DIB_RGB_COLORS, SRCCOPY);
 }
-
-
-#endif

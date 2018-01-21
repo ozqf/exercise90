@@ -25,6 +25,82 @@ i32 testBufferPixels3[TEST_BUFFER_PIXEL_COUNT];
 
 f32 mat[TRANSFORM_MATRIX_SIZE];
 
+/*
+6 sides, 2 triangles per side = 12 tris
+12 * 3 points, each with pos (vec3), normal (vec3), colour (vec3) and uv (vec2)
+
+	v6	v7
+
+	v4	v5
+  ________
+ /		/ |
+/______/  |
+|v2	v3 |  |
+|	   | /
+|______|/
+v0		v1
+*/
+Vec3 primitive_cubeVerts[8];
+Vec3 primitive_triangleVerts[12 * 3];
+Vec3 primitive_cubeNormals[12 * 3];
+Vec2 primitive_cubeUvs[12];
+
+void ZSetTriangle(Vec3* vectors, Vec3 a, Vec3 b, Vec3 c)
+{
+	vectors[VEC_X] = a;
+	vectors[VEC_Y] = b;
+	vectors[VEC_Z] = c;
+}
+
+void win32_glBuildPrimitives()
+{
+	primitive_cubeVerts[0] = { -1, -1, -1 };
+	primitive_cubeVerts[1] = {  1, -1, -1 };
+	primitive_cubeVerts[2] = { -1,  1, -1 };
+	primitive_cubeVerts[3] = {  1,  1, -1 };
+
+	primitive_cubeVerts[4] = { -1, -1,  1 };
+	primitive_cubeVerts[5] = {  1, -1,  1 };
+	primitive_cubeVerts[6] = { -1,  1,  1 };
+	primitive_cubeVerts[3] = {  1,  1,  1 };
+	
+	/*		Tri0	Tri1	Face Normal		UVs
+	front	0 1 3 - 0 3 2	 0  0 -1		(0, 0), (1, 0), (1, 1) - (0, 0), (1, 1), (0, 1)
+	right   1 5 7 - 1 7 3	 1  0  0		(0  ), (), ()
+	back	5 4 6 - 5 6 7	 0  0  1
+	left	4 0 2 - 4 2 6    -1 0  0
+	top		2 3 6 - 2 7 6    0  1  0
+	bottom	4 5 1 - 4 1 0	 0 -1  0
+	*/
+	
+	// front
+	ZSetTriangle(primitive_triangleVerts + 0, primitive_cubeVerts[0], primitive_cubeVerts[1], primitive_cubeVerts[3]);
+	ZSetTriangle(primitive_triangleVerts + 3, primitive_cubeVerts[0], primitive_cubeVerts[3], primitive_cubeVerts[2]);
+	// right
+	ZSetTriangle(primitive_triangleVerts + 6, primitive_cubeVerts[1], primitive_cubeVerts[5], primitive_cubeVerts[7]);
+	ZSetTriangle(primitive_triangleVerts + 9, primitive_cubeVerts[1], primitive_cubeVerts[7], primitive_cubeVerts[3]);
+	// back
+	ZSetTriangle(primitive_triangleVerts + 12, primitive_cubeVerts[5], primitive_cubeVerts[4], primitive_cubeVerts[6]);
+	ZSetTriangle(primitive_triangleVerts + 15, primitive_cubeVerts[5], primitive_cubeVerts[6], primitive_cubeVerts[7]);
+	// left
+	ZSetTriangle(primitive_triangleVerts + 18, primitive_cubeVerts[4], primitive_cubeVerts[0], primitive_cubeVerts[2]);
+	ZSetTriangle(primitive_triangleVerts + 21, primitive_cubeVerts[4], primitive_cubeVerts[2], primitive_cubeVerts[6]);
+	// top
+	ZSetTriangle(primitive_triangleVerts + 24, primitive_cubeVerts[2], primitive_cubeVerts[3], primitive_cubeVerts[6]);
+	ZSetTriangle(primitive_triangleVerts + 27, primitive_cubeVerts[2], primitive_cubeVerts[7], primitive_cubeVerts[6]);
+	// bottom
+	ZSetTriangle(primitive_triangleVerts + 30, primitive_cubeVerts[4], primitive_cubeVerts[5], primitive_cubeVerts[1]);
+	ZSetTriangle(primitive_triangleVerts + 33, primitive_cubeVerts[4], primitive_cubeVerts[1], primitive_cubeVerts[0]);
+}
+
+// Mesh CreateCube()
+// {
+	
+
+// 	Vec2 v;
+	
+// }
+
 static const GLfloat g_testTriangleVerts[] = {
     -1.0f, -1.0f, 0.0f,
     1.0f, -1.0f, 0.0f,
@@ -68,7 +144,7 @@ void Win32_InitOpenGLTestAssets()
 
 	// 
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity()
+	glLoadIdentity();
 
 	/**
 	--- setup textures ---
@@ -339,7 +415,7 @@ void Win32_DrawToggleTriangle()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	glLoadMatrixf();
+	//glLoadMatrixf();
     
 	f32 size = 0.8f;
 

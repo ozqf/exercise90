@@ -1,5 +1,4 @@
-#ifndef SHARED_TYPES_H
-#define SHARED_TYPES_H
+#pragma once
 
 #include <stdint.h>
 
@@ -54,41 +53,61 @@ MACROS
 MATHS TYPES
 *****************************************************/
 
-struct v2
+struct Vec2
 {
     union
     {
         struct
         {
-            f32 X, Y;
+            f32 x, y;
         };
-        f32 E[2];
+        f32 e[2];
     };
 };
 
 struct Vec3
 {
-    f32 x, y, z, w;
-    // overload array operator to return a pointer to x + index
-    f32 &operator[](int index) { return ((&x)[index]); }
-    // union
-    // {
-    //     f32 x, y, z, w;
-    //     //f32 axes[4];
-    // };
+    union 
+    {
+        struct
+        {
+            f32 x, y, z;
+        };    
+        f32 e[3];
+    };
+    // f32 x, y, z, w;
+    // // overload array operator to return a pointer to x + index
+    // f32 &operator[](int index) { return ((&x)[index]); }
 };
 
 struct M4x4
 {
     union
     {
-        f32
-        x0, y0, z0, w0,
-        x1, y1, z1, w1,
-        x2, y2, z2, w2,
-        x3, y3, z3, w3;
+        struct
+        {
+            f32
+            x0, y0, z0, w0,
+            x1, y1, z1, w1,
+            x2, y2, z2, w2,
+            x3, y3, z3, w3;
+        };
         f32 cells[16];
     };
+};
+
+/****************************************************************
+Graphcs
+****************************************************************/
+struct Mesh
+{
+	u32 id;
+
+	u32 numVerts;
+
+	Vec3* verts;
+	Vec3* normals;
+	Vec3* uvs;
 };
 
 /*****************************************************
@@ -136,7 +155,6 @@ struct Transform
 	f32 scale[3];
 };
 
-
 /****************************************************************
 Global Functions
 ****************************************************************/
@@ -148,5 +166,3 @@ inline u32 SafeTruncateUInt64(u64 value)
 	u32 result = (u32)value;
 	return result;
 }
-
-#endif
