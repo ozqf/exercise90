@@ -301,23 +301,23 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         if (VKCode == 'W')
         {
             OutputDebugStringA("W\n");
-            printf("Up");
+            //printf("Up\n");
             //toneHz += 10;
         }
         else if (VKCode == 'A' && isDown)
         {
             xOffset++;
-            printf("Left");
+            //printf("Left\n");
         }
         else if (VKCode == 'S')
         {
             //toneHz -= 10;
-            printf("Down");
+            //printf("Down\n");
         }
         else if (VKCode == 'D')
         {
             xOffset--;
-            printf("Right");
+            //printf("Right\n");
         }
         else if (VKCode == 'Q')
         {
@@ -327,15 +327,37 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
         else if (VKCode == VK_UP)
         {
+            g_gl_primitive_degrees_X -= 5;
+            if (g_gl_primitive_degrees_X < 0) { g_gl_primitive_degrees_X += 360; }
         }
         else if (VKCode == VK_DOWN)
         {
+            g_gl_primitive_degrees_X += 5;
+            if (g_gl_primitive_degrees_X >= 360) { g_gl_primitive_degrees_X -= 360; }
         }
         else if (VKCode == VK_LEFT)
         {
+            if (isDown)
+            {
+                g_gl_primitive_degrees_Y -= 5;
+                if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y += 360; }
+                //if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y = 0; }
+                // char output[256];
+				// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+				// OutputDebugStringA(output);
+            }
         }
         else if (VKCode == VK_RIGHT)
         {
+            if (isDown)
+            {
+                g_gl_primitive_degrees_Y += 5;
+                //if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y = 360; }
+                if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y -= 360; }
+                // char output[256];
+				// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+				// OutputDebugStringA(output);
+            }
         }
         else if (VKCode == VK_SPACE)
         {

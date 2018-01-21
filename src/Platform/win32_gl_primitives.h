@@ -12,6 +12,8 @@
 
 #define NUM_GL_PRIMITIVE_MODES 3
 global_variable i32 g_gl_primitive_mode = 0;
+global_variable f32 g_gl_primitive_degrees_X = 0;
+global_variable f32 g_gl_primitive_degrees_Y = 0;
 
 
 win32_offscreen_buffer testBuffer;
@@ -407,28 +409,70 @@ void Win32_DrawToggleTriangle()
 	GLuint texToBind = textureHandles[g_gl_primitive_mode];
     glBindTexture(GL_TEXTURE_2D, texToBind);
 
-    glBegin(GL_TRIANGLES);
-
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glRotatef(g_gl_primitive_degrees_X, 1.0f, 0.0f, 0.0f);
+	glRotatef(g_gl_primitive_degrees_Y, 0.0f, 1.0f, 0.0f);
+	glTranslatef(0, 0, -5);
+
+	glMatrixMode(GL_PROJECTION);
+
+	f32 prj[16];
+	// Set as identity
+	prj[0] = 1;		prj[4] = 0;		prj[8] = 0;			prj[12] = 0;
+	prj[1] = 0;		prj[5] = 1;		prj[9] = 0;			prj[13] = 0;
+	prj[2] = 0;		prj[6] = 0;		prj[10] = 1;		prj[14] = 0;
+	prj[3] = 0;		prj[7] = 0;		prj[11] = 0;		prj[15] = 1;
+
+	/*
+	Calculate projection matrix
+	*/
+
+	f32 prjNear = 1;
+	f32 prjFar = 10;
+	f32 left = -0.5f;
+	f32 right = 0.5f;
+	f32 top = 0.5f;
+	f32 bottom = -0.5f;
+
+	prj[0] = (2 * prjNear) / (right - left);	prj[4] = 0;									prj[8] = (right + left) / (left - right);				prj[12] = 0;
+	prj[1] = 0;									prj[5] = (2 * prjNear) / (top - bottom);	prj[9] = (top + bottom) / (top - bottom);				prj[13] = 0;
+	prj[2] = 0;									prj[6] = 0;									prj[10] = -(prjFar + prjNear) / (prjFar - prjNear);		prj[14] = (-2 * prjFar * prjNear) / (prjFar - prjNear);
+	prj[3] = 0;									prj[7] = 0;									prj[11] = -1;											prj[15] = 0;
+
+	char output[256];
+	sprintf_s(output, "PRJ:\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n",
+		prj[0], prj[4], prj[8], prj[12],
+		prj[1], prj[5], prj[9], prj[13],
+		prj[2], prj[6], prj[10], prj[14],
+		prj[3], prj[7], prj[11], prj[15]
+		);
+	OutputDebugStringA(output);
+
+	glLoadMatrixf(prj);
 	
 	//glLoadMatrixf();
-    
+
+    glBegin(GL_TRIANGLES);
+
+	// Set vertex Array
+	// glVertexPointer(3, GL_FLOAT, 0, pointer);
+
 	f32 size = 0.8f;
 
 	// lower triangle. Bottom left -> Bottom Right -> Top Right
-	//glColor3f(1, 0, 0);
+	glColor3f(1, 0, 0);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
 
-	//glColor3f(0, 1, 0);
+	glColor3f(0, 1, 0);
 	glTexCoord2f(1.0f, 0.0f);
 	glVertex2f(size, -size);
 
-	//glColor3f(0, 0, 1);
+	glColor3f(0, 0, 1);
 	glTexCoord2f(1.0f, 1.0f);
 	glVertex2f(size, size);
 
