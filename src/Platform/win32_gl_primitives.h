@@ -15,6 +15,13 @@ global_variable i32 g_gl_primitive_mode = 0;
 global_variable f32 g_gl_primitive_degrees_X = 0;
 global_variable f32 g_gl_primitive_degrees_Y = 0;
 
+global_variable f32 win32_aspectRatio = 0;
+global_variable GL_Test_Input testInput;
+global_variable Transform cameraTransform;
+global_variable Transform entityTransform;
+
+global_variable int xOffset = 0;
+global_variable int yOffset = 0;
 
 win32_offscreen_buffer testBuffer;
 i32 testBufferPixels[TEST_BUFFER_PIXEL_COUNT];
@@ -70,7 +77,7 @@ void win32_glBuildPrimitives()
 	front	0 1 3 - 0 3 2	 0  0 -1		(0, 0), (1, 0), (1, 1) - (0, 0), (1, 1), (0, 1)
 	right   1 5 7 - 1 7 3	 1  0  0		(0  ), (), ()
 	back	5 4 6 - 5 6 7	 0  0  1
-	left	4 0 2 - 4 2 6    -1 0  0
+	prjLeft	4 0 2 - 4 2 6    -1 0  0
 	top		2 3 6 - 2 7 6    0  1  0
 	bottom	4 5 1 - 4 1 0	 0 -1  0
 	*/
@@ -84,7 +91,7 @@ void win32_glBuildPrimitives()
 	// back
 	ZSetTriangle(primitive_triangleVerts + 12, primitive_cubeVerts[5], primitive_cubeVerts[4], primitive_cubeVerts[6]);
 	ZSetTriangle(primitive_triangleVerts + 15, primitive_cubeVerts[5], primitive_cubeVerts[6], primitive_cubeVerts[7]);
-	// left
+	// prjLeft
 	ZSetTriangle(primitive_triangleVerts + 18, primitive_cubeVerts[4], primitive_cubeVerts[0], primitive_cubeVerts[2]);
 	ZSetTriangle(primitive_triangleVerts + 21, primitive_cubeVerts[4], primitive_cubeVerts[2], primitive_cubeVerts[6]);
 	// top
@@ -288,7 +295,7 @@ void Win32_DrawScreenSpaceTest1()
 
 	f32 size = 0.8f;
 
-	// lower triangle. Bottom left -> Bottom Right -> Top Right
+	// lower triangle. Bottom prjLeft -> Bottom Right -> Top Right
 	//glColor3f(1, 0, 0);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
@@ -354,7 +361,7 @@ void Win32_DrawMinimumTriangle()
     
 	f32 size = 0.8f;
 
-	// lower triangle. Bottom left -> Bottom Right -> Top Right
+	// lower triangle. Bottom prjLeft -> Bottom Right -> Top Right
 	//glColor3f(1, 0, 0);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
@@ -373,7 +380,7 @@ void Win32_DrawMinimumTriangle()
 /**
  * Minimum required to draw a textured triangle via fixed pipeline
  */
-void Win32_DrawToggleTriangle()
+void Win32_DrawToggleTriangle(GL_Test_Input input)
 {
     //glEnable(GL_TEXTURE_2D);
     // Horrible texture loading api stuff
@@ -383,7 +390,7 @@ void Win32_DrawToggleTriangle()
 	// 	GL_RGBA,                // iternalFormat: How opengl should handle it on it's side. (a suggestion at least)
 	// 	32,		                // width
 	// 	32,		                // height
-	// 	0,		                // border
+	
 	// 	GL_BGRA_EXT,		    // format: how pixels are stored
 	// 	GL_UNSIGNED_BYTE,       // data type of pixels?
 	// 	testBuffer.ptrMemory
@@ -414,47 +421,33 @@ void Win32_DrawToggleTriangle()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef(g_gl_primitive_degrees_X, 1.0f, 0.0f, 0.0f);
-	glRotatef(g_gl_primitive_degrees_Y, 0.0f, 1.0f, 0.0f);
-	glTranslatef(0, 0, -5);
+	glTranslatef(entityTransform.pos.x, entityTransform.pos.y, entityTransform.pos.z);
+	
+	// Apply rotations around axis
+	glRotatef(entityTransform.rot.x, 1.0f, 0.0f, 0.0f);
+	glRotatef(entityTransform.rot.y, 0.0f, 1.0f, 0.0f);
+	glRotatef(entityTransform.rot.z, 0.0f, 0.0f, 1.0f);
+	//glTranslatef(0, 0, -5);
+
+	/*
+	Calculate projection matrix
+	TODO: crudely applying aspect ratio. What is the correct way to do this?
+	*/
 
 	glMatrixMode(GL_PROJECTION);
 
 	f32 prj[16];
-	// Set as identity
-	prj[0] = 1;		prj[4] = 0;		prj[8] = 0;			prj[12] = 0;
-	prj[1] = 0;		prj[5] = 1;		prj[9] = 0;			prj[13] = 0;
-	prj[2] = 0;		prj[6] = 0;		prj[10] = 1;		prj[14] = 0;
-	prj[3] = 0;		prj[7] = 0;		prj[11] = 0;		prj[15] = 1;
-
-	/*
-	Calculate projection matrix
-	*/
-
+	Matrix_SetToIdentity(prj);
 	f32 prjNear = 1;
-	f32 prjFar = 10;
-	f32 left = -0.5f;
-	f32 right = 0.5f;
-	f32 top = 0.5f;
-	f32 bottom = -0.5f;
+	f32 prjFar = 1000;
+	f32 prjLeft = -0.5f * win32_aspectRatio;
+	f32 prjRight = 0.5f * win32_aspectRatio;
+	f32 prjTop = 0.5f;
+	f32 prjBottom = -0.5f;
 
-	prj[0] = (2 * prjNear) / (right - left);	prj[4] = 0;									prj[8] = (right + left) / (left - right);				prj[12] = 0;
-	prj[1] = 0;									prj[5] = (2 * prjNear) / (top - bottom);	prj[9] = (top + bottom) / (top - bottom);				prj[13] = 0;
-	prj[2] = 0;									prj[6] = 0;									prj[10] = -(prjFar + prjNear) / (prjFar - prjNear);		prj[14] = (-2 * prjFar * prjNear) / (prjFar - prjNear);
-	prj[3] = 0;									prj[7] = 0;									prj[11] = -1;											prj[15] = 0;
-
-	char output[256];
-	sprintf_s(output, "PRJ:\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n%.2f, %.2f, %.2f, %.2f\n",
-		prj[0], prj[4], prj[8], prj[12],
-		prj[1], prj[5], prj[9], prj[13],
-		prj[2], prj[6], prj[10], prj[14],
-		prj[3], prj[7], prj[11], prj[15]
-		);
-	OutputDebugStringA(output);
+	Matrix_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
 
 	glLoadMatrixf(prj);
-	
-	//glLoadMatrixf();
 
     glBegin(GL_TRIANGLES);
 
@@ -479,7 +472,155 @@ void Win32_DrawToggleTriangle()
     glEnd();
 }
 
-void Win32_DrawGLTest()
+void Win32_DrawCameraTriangle()
 {
-    Win32_DrawToggleTriangle();
+	GLuint texToBind = textureHandles[g_gl_primitive_mode];
+    glBindTexture(GL_TEXTURE_2D, texToBind);
+
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+
+	////////////////////////////////////////////////////////////////////
+	// ModelView
+	////////////////////////////////////////////////////////////////////
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// http://www.songho.ca/opengl/gl_transform.html
+	// First, transform the camera (viewing matrix) from world space to eye space
+	// Notice all values are negated, because we move the whole scene with the
+	// inverse of camera transform
+	glRotatef(-cameraTransform.rot.z, 0, 0, 1);
+	glRotatef(-cameraTransform.rot.y, 0, 1, 0);
+	glRotatef(-cameraTransform.rot.x, 1, 0, 0);
+	glTranslatef(-cameraTransform.pos.x, -cameraTransform.pos.y, -cameraTransform.pos.z);
+	
+	// transform the object (model matrix)
+	// The result of GL_MODELVIEW matrix will be:
+	// ModelView_M = View_M * Model_M
+	glTranslatef(entityTransform.pos.x, entityTransform.pos.y, entityTransform.pos.z);
+	glRotatef(entityTransform.rot.x, 1, 0, 0);
+	glRotatef(entityTransform.rot.y, 0, 1, 0);
+	glRotatef(entityTransform.rot.z, 0, 0, 1);
+
+	////////////////////////////////////////////////////////////////////
+	// Projection
+	////////////////////////////////////////////////////////////////////
+	glMatrixMode(GL_PROJECTION);
+
+	f32 prj[16];
+	Matrix_SetToIdentity(prj);
+	f32 prjNear = 1;
+	f32 prjFar = 1000;
+	f32 prjLeft = -0.5f * win32_aspectRatio;
+	f32 prjRight = 0.5f * win32_aspectRatio;
+	f32 prjTop = 0.5f;
+	f32 prjBottom = -0.5f;
+
+	Matrix_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+
+	glLoadMatrixf(prj);
+
+
+	////////////////////////////////////////////////////////////////////
+	// Geometry
+	////////////////////////////////////////////////////////////////////
+    glBegin(GL_TRIANGLES);
+
+	// Set vertex Array
+	// glVertexPointer(3, GL_FLOAT, 0, pointer);
+
+	f32 size = 0.8f;
+
+	// lower triangle. Bottom left -> Bottom Right -> Top Right
+	glColor3f(1, 0, 0);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(-size, -size);
+
+	glColor3f(0, 1, 0);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(size, -size);
+
+	glColor3f(0, 0, 1);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(size, size);
+
+    glEnd();
+}
+
+void Win32_ApplyInputToTransform(InputTick input, Transform* transform)
+{
+	testInput.movement = { 0, 0, 0 };
+	testInput.rotation = { 0, 0, 0 };
+
+	if (input.reset)
+	{
+		transform->pos = { 0, 0, 0 };
+		transform->rot = { 0, 0, 0 };
+		transform->scale = { 1, 1, 1 };
+		return;
+	}
+
+	if (input.moveLeft) { testInput.movement.x += -1; }
+	if (input.moveRight) { testInput.movement.x += 1; }
+
+	if (input.moveForward) { testInput.movement.z += -1; }
+	if (input.moveBackward) { testInput.movement.z += 1; }
+	
+	if (input.moveDown) { testInput.movement.y += -1; }
+	if (input.moveUp) { testInput.movement.y += 1; }
+	
+	
+	if (input.yawLeft) { testInput.rotation.y += -1; }
+	if (input.yawRight) { testInput.rotation.y += 1; }
+
+	if (input.pitchUp) { testInput.rotation.x += -1; }
+	if (input.pitchDown) { testInput.rotation.x += 1; }
+
+	if (input.rollLeft) { testInput.rotation.z += -1; }
+	if (input.rollRight) { testInput.rotation.z += 1; }
+
+	transform->pos.x += testInput.movement.x * testInput.speed;
+	transform->pos.y += testInput.movement.y * testInput.speed;
+	transform->pos.z += testInput.movement.z * testInput.speed;
+
+	transform->rot.x += testInput.rotation.x * testInput.rotSpeed;
+	transform->rot.x = COM_CapAngleDegrees(transform->rot.x);
+	transform->rot.y += testInput.rotation.y * testInput.rotSpeed;
+	transform->rot.y = COM_CapAngleDegrees(transform->rot.y);
+	transform->rot.z += testInput.rotation.z * testInput.rotSpeed;
+	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
+}
+
+void Win32_DrawGLTest(InputTick inputTick)
+{
+	Win32_ApplyInputToTransform(inputTick, &cameraTransform);
+
+	char output[256];
+	sprintf_s(output, "InputTick\nLeft: %d, Right: %d, Foward: %d, Backward: %d, Up: %d, Down: %d\n",
+		inputTick.moveLeft, inputTick.moveRight,
+		inputTick.moveForward, inputTick.moveBackward,
+		inputTick.moveUp, inputTick.moveDown
+		);
+	OutputDebugStringA(output);
+
+	sprintf_s(output, "Input\nMove: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\nSpeed: %.2f\n",
+		testInput.movement.x, testInput.movement.y, testInput.movement.z,
+		testInput.rotation.x, testInput.rotation.y, testInput.rotation.z,
+		testInput.speed
+		);
+	OutputDebugStringA(output);
+
+	sprintf_s(output, "Camera\nPos: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\n",
+		cameraTransform.pos.x,cameraTransform.pos.y, cameraTransform.pos.z,
+		cameraTransform.rot.x,cameraTransform.rot.y, cameraTransform.rot.z
+		);
+	OutputDebugStringA(output);
+
+	sprintf_s(output, "Aspect Ratio: %.2f\n", win32_aspectRatio);
+	OutputDebugStringA(output);
+
+    //Win32_DrawToggleTriangle(testInput);
+
+	Win32_DrawCameraTriangle();
 }

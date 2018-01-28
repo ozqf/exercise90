@@ -24,6 +24,11 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 
 i32 Win32_InitOpenGL(HWND window)
 {
+    entityTransform = {};
+    testInput = {};
+	testInput.speed = 0.2f;
+    testInput.rotSpeed = 5;
+
 	HDC windowContext = GetDC(window);
     /** 
      * "Negotiate" with opengl for a supported Pixel Format Descriptor
@@ -80,7 +85,7 @@ i32 Win32_InitOpenGL(HWND window)
 }
 
 //bool renderedOnce = false;
-void Win32_RenderFrame(HWND window)
+void Win32_RenderFrame(HWND window, InputTick inputTick)
 {
     /*if (renderedOnce == false)
     {
@@ -104,7 +109,7 @@ void Win32_RenderFrame(HWND window)
 	i32 height = r.bottom - r.top;
 	*/
 	GetClientRect(window, &r);
-	//f32 aspectRatio = 
+	win32_aspectRatio = (f32)r.right / (f32)r.bottom;
 
 	/**
 	 * - Fixed function pipeline -
@@ -117,11 +122,13 @@ void Win32_RenderFrame(HWND window)
     //glViewport(x, y, width, height);
 	glViewport(0, 0, r.right, r.bottom);
 
-    //glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
-	glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+    // Magenta (debugging)
+	//glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
     glClear(GL_COLOR_BUFFER_BIT);
 
-	Win32_DrawGLTest();
+	Win32_DrawGLTest(inputTick);
 
 	// Finished, display
     SwapBuffers(deviceContext);

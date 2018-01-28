@@ -39,27 +39,27 @@ OpenGL uses column major, y/x matrices
 
 #define abs(value) { if (value < ) return -value; }
 
-void COM_SetMatrix_X(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
+void Matrix_SetX(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
 {
     m[X0] = x0; m[X1] = x1; m[X2] = x2; m[X3] = x3;
 }
 
-void COM_SetMatrix_Y(f32* m, f32 y0, f32 y1, f32 y2, f32 y3)
+void Matrix_SetY(f32* m, f32 y0, f32 y1, f32 y2, f32 y3)
 {
     m[Y0] = y0; m[Y1] = y1; m[Y2] = y2; m[Y3] = y3;
 }
 
-void COM_SetMatrix_Z(f32* m, f32 z0, f32 z1, f32 z2, f32 z3)
+void Matrix_SetZ(f32* m, f32 z0, f32 z1, f32 z2, f32 z3)
 {
     m[Z0] = z0; m[Z1] = z1; m[Z2] = z2; m[Z3] = z3;
 }
 
-void COM_SetMatrix_W(f32* m, f32 w0, f32 w1, f32 w2, f32 w3)
+void Matrix_SetW(f32* m, f32 w0, f32 w1, f32 w2, f32 w3)
 {
     m[W0] = w0; m[W1] = w1; m[W2] = w2; m[W3] = w3;
 }
 
-void COM_MultiplyMatrices(f32* m0, f32* m1, f32* result)
+void Matrix_Multiply(f32* m0, f32* m1, f32* result)
 {
     result[X0] = m0[X0] * m1[X0];   result[X1] = m0[X1] * m1[X1];   result[X2] = m0[X2] * m1[X2];   result[X3] = m0[X3] * m1[X3];
     result[Y0] = m0[Y0] * m1[Y0];   result[Y1] = m0[Y1] * m1[Y1];   result[Y2] = m0[Y2] * m1[Y2];   result[Y3] = m0[Y3] * m1[Y3];
@@ -67,7 +67,7 @@ void COM_MultiplyMatrices(f32* m0, f32* m1, f32* result)
     result[W0] = m0[W0] * m1[W0];   result[W1] = m0[W1] * m1[W1];   result[W2] = m0[W2] * m1[W2];   result[W3] = m0[W3] * m1[W3];
 }
 
-void COM_CopyMatrix(f32* src, f32* tar)
+void Matrix_Copy(f32* src, f32* tar)
 {
     tar[X0] = src[X0];  tar[X1] = src[X1];  tar[X2] = src[X2];  tar[X3] = src[X3];
     tar[Y0] = src[Y0];  tar[Y1] = src[Y1];  tar[Y2] = src[Y2];  tar[Y3] = src[Y3];
@@ -76,7 +76,7 @@ void COM_CopyMatrix(f32* src, f32* tar)
 
 }
 
-void COM_SetToIdentityMatrix(f32* matrix)
+void Matrix_SetToIdentity(f32* matrix)
 {
     matrix[X0] = 1; matrix[X1] = 0; matrix[X2] = 0; matrix[X3] = 0;
     matrix[Y0] = 0; matrix[Y1] = 1; matrix[Y2] = 0; matrix[Y3] = 0;
@@ -84,18 +84,41 @@ void COM_SetToIdentityMatrix(f32* matrix)
     matrix[W0] = 0; matrix[W1] = 0; matrix[W2] = 0; matrix[W3] = 1;
 }
 
-void COM_SetAsScaleMatrix(f32* matrix, f32 scaleX, f32 scaleY, f32 scaleZ)
+void Matrix_SetAsScale(f32* matrix, f32 scaleX, f32 scaleY, f32 scaleZ)
 {
     matrix[X0] = scaleX;
     matrix[Y1] = scaleY;
     matrix[Z2] = scaleZ;
 }
 
-void COM_SetMoveMatrix(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
+void Matrix_SetAsMove(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
 {
     matrix[X3] = deltaX;
     matrix[Y3] = deltaY;
     matrix[Z3] = deltaZ;
+}
+
+void Matrix_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)
+{
+    m[0] = (2 * prjNear) / (prjRight - prjLeft);
+	m[4] = 0;
+	m[8] = (prjRight + prjLeft) / (prjLeft - prjRight);
+	m[12] = 0;
+	
+	m[1] = 0;
+	m[5] = (2 * prjNear) / (prjTop - prjBottom);
+	m[9] = (prjTop + prjBottom) / (prjTop - prjBottom);
+	m[13] = 0;
+	
+	m[2] = 0;
+	m[6] = 0;
+	m[10] = -(prjFar + prjNear) / (prjFar - prjNear);
+	m[14] = (-2 * prjFar * prjNear) / (prjFar - prjNear);
+	
+	m[3] = 0;
+	m[7] = 0;
+	m[11] = -1;
+	m[15] = 0;
 }
 
 void COM_MultiplyVectorByMatrix(f32* m, f32* v)
@@ -104,4 +127,23 @@ void COM_MultiplyVectorByMatrix(f32* m, f32* v)
     v[VEC_Y] =   (m[Y0] * v[VEC_X]) + (m[Y1] * v[VEC_Y]) + (m[Y2] * v[VEC_Z]) + (m[Y3] * v[VEC_W]);
     v[VEC_Z] =   (m[Z0] * v[VEC_X]) + (m[Z1] * v[VEC_Y]) + (m[Z2] * v[VEC_Z]) + (m[Z3] * v[VEC_W]);
     v[VEC_W] =   (m[W0] * v[VEC_X]) + (m[W1] * v[VEC_Y]) + (m[W2] * v[VEC_Z]) + (m[W3] * v[VEC_W]);
+}
+
+f32 COM_CapAngleDegrees(f32 angle)
+{
+    u32 loopCount = 0;
+    while (angle > 360)
+    {
+        angle -= 360;
+        loopCount++;
+        Assert(loopCount < 99999);
+    }
+    loopCount = 0;
+    while (angle < 0)
+    {
+        angle += 360;
+        loopCount++;
+        Assert(loopCount < 99999);
+    }
+    return angle;
 }

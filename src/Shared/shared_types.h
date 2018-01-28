@@ -131,10 +131,10 @@ struct GameTime
 struct InputTick
 {
     i32 mouse[2];
-    char left;
-    char right;
-    char up;
-    char down;
+    char moveLeft, moveRight, moveUp, moveDown, moveForward, moveBackward;
+    char yawLeft, yawRight, pitchUp, pitchDown;
+    char rollLeft, rollRight;
+    char reset;
 };
 
 struct GameBlock
@@ -147,12 +147,21 @@ struct GameBlock
     f32 speed;
 };
 
+struct GL_Test_Input
+{
+	// +z = forward, +y = up, +x = left
+	Vec3 movement;
+	Vec3 rotation;
+	f32 speed;
+    f32 rotSpeed;
+};
+
 struct Transform
 {
 	i32 ID;
-	f32 pos[3];
-	f32 rot[3];
-	f32 scale[3];
+	Vec3 pos;
+	Vec3 rot;
+	Vec3 scale;
 };
 
 /****************************************************************

@@ -25,12 +25,11 @@ global_variable bool globalRunning = true;
 
 global_variable MemoryBlock gameMemory;
 
+global_variable InputTick inputTick;
+
 global_variable HWND appWindow;
 
 global_variable win32_offscreen_buffer globalBackBuffer;
-
-global_variable int xOffset = 0;
-global_variable int yOffset = 0;
 
 /**********************************************************************
  * TIMING
@@ -298,68 +297,11 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         u32 VKCode = wParam;
         bool wasDown = ((lParam & (1 << 30)) != 0);
         bool isDown = ((lParam & (1 << 31)) == 0);
-        if (VKCode == 'W')
+        if (VKCode == 'R')
         {
-            OutputDebugStringA("W\n");
-            //printf("Up\n");
-            //toneHz += 10;
+            inputTick.reset = isDown;
         }
-        else if (VKCode == 'A' && isDown)
-        {
-            xOffset++;
-            //printf("Left\n");
-        }
-        else if (VKCode == 'S')
-        {
-            //toneHz -= 10;
-            //printf("Down\n");
-        }
-        else if (VKCode == 'D')
-        {
-            xOffset--;
-            //printf("Right\n");
-        }
-        else if (VKCode == 'Q')
-        {
-        }
-        else if (VKCode == 'E')
-        {
-        }
-        else if (VKCode == VK_UP)
-        {
-            g_gl_primitive_degrees_X -= 5;
-            if (g_gl_primitive_degrees_X < 0) { g_gl_primitive_degrees_X += 360; }
-        }
-        else if (VKCode == VK_DOWN)
-        {
-            g_gl_primitive_degrees_X += 5;
-            if (g_gl_primitive_degrees_X >= 360) { g_gl_primitive_degrees_X -= 360; }
-        }
-        else if (VKCode == VK_LEFT)
-        {
-            if (isDown)
-            {
-                g_gl_primitive_degrees_Y -= 5;
-                if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y += 360; }
-                //if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y = 0; }
-                // char output[256];
-				// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-				// OutputDebugStringA(output);
-            }
-        }
-        else if (VKCode == VK_RIGHT)
-        {
-            if (isDown)
-            {
-                g_gl_primitive_degrees_Y += 5;
-                //if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y = 360; }
-                if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y -= 360; }
-                // char output[256];
-				// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-				// OutputDebugStringA(output);
-            }
-        }
-        else if (VKCode == VK_SPACE)
+        else if (VKCode == 'T')
         {
             //printf("Spacebar superstar\n");
             //global_timePassed = 0;
@@ -379,6 +321,101 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
 				sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
 				OutputDebugStringA(output);
             }
+        }
+        else if (VKCode == 'W')
+        {
+            inputTick.moveForward = isDown;
+            // if (isDown)
+            // {
+            //     testInput.movement.z  = 1;
+            // }
+            //OutputDebugStringA("W\n");
+            //printf("Up\n");
+            //toneHz += 10;
+        }
+        else if (VKCode == 'A')
+        {
+            inputTick.moveLeft = isDown;
+            //xOffset++;
+            //printf("Left\n");
+        }
+        else if (VKCode == 'S')
+        {
+            inputTick.moveBackward = isDown;
+            // if (isDown)
+            // {
+            //     testInput.movement.z  = -1;
+            // }
+            //toneHz -= 10;
+            //printf("Down\n");
+        }
+        else if (VKCode == 'D')
+        {
+            inputTick.moveRight = isDown;
+            //xOffset--;
+            //printf("Right\n");
+        }
+        else if (VKCode == 'Q')
+        {
+            inputTick.rollLeft = isDown;
+        }
+        else if (VKCode == 'E')
+        {
+            inputTick.rollRight = isDown;
+        }
+        else if (VKCode == VK_UP)
+        {
+            inputTick.pitchUp = isDown;
+            // if (isDown)
+            // {
+            //     g_gl_primitive_degrees_X -= 5;
+            //     if (g_gl_primitive_degrees_X < 0) { g_gl_primitive_degrees_X += 360; }
+            // }
+            
+        }
+        else if (VKCode == VK_DOWN)
+        {
+            inputTick.pitchDown = isDown;
+            // if (isDown)
+            // {
+            //     g_gl_primitive_degrees_X += 5;
+            //     if (g_gl_primitive_degrees_X >= 360) { g_gl_primitive_degrees_X -= 360; }
+            // }
+            
+        }
+        else if (VKCode == VK_LEFT)
+        {
+            inputTick.yawLeft = isDown;
+            // if (isDown)
+            // {
+            //     g_gl_primitive_degrees_Y -= 5;
+            //     if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y += 360; }
+            //     //if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y = 0; }
+            //     // char output[256];
+			// 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+			// 	// OutputDebugStringA(output);
+            // }
+        }
+        else if (VKCode == VK_RIGHT)
+        {
+            inputTick.yawRight = isDown;
+            // if (isDown)
+            // {
+            //     g_gl_primitive_degrees_Y += 5;
+            //     //if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y = 360; }
+            //     if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y -= 360; }
+            //     // char output[256];
+			// 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+			// 	// OutputDebugStringA(output);
+            // }
+        }
+        else if (VKCode == VK_SPACE)
+        {
+            inputTick.moveUp = isDown;
+        }
+        else if (VKCode == VK_CONTROL)
+        {
+            inputTick.moveDown = isDown;
         }
         else if (VKCode == VK_ESCAPE)
         {
@@ -525,7 +562,7 @@ int CALLBACK WinMain(
                 // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, deltaTime);
                 // OutputDebugString(buf);
 
-                Win32_RenderFrame(appWindow);
+                Win32_RenderFrame(appWindow, inputTick);
 
                 /* Stuff to add:
                 > PlatformReadNetworkPackets();
