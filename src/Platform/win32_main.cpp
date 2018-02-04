@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <windows.h>
 
+
+
 #include "../Shared/shared.h"
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
@@ -18,7 +20,7 @@
 
 global_variable PlatformInterface platInterface;
 global_variable AppInterface app;
-global_variable void *gameModule;
+global_variable HMODULE gameModule;
 global_variable char *appModulePath = "base/gamex86.dll";
 
 global_variable bool globalRunning = true;
@@ -117,18 +119,55 @@ void Win32_Shutdown()
  * Attach to application DLL
  *********************************************************************/
 
-i32 Win32_GetViewPortMinX() { return 0; }
-i32 Win32_GetViewPortMinY() { return 0; }
-i32 Win32_GetViewPortMaxX() { return 1280; }
-i32 Win32_GetViewPortMaxY() { return 768; }
+f32 Win32_GetViewPortMinX() { return 0; }
+f32 Win32_GetViewPortMinY() { return 0; }
+f32 Win32_GetViewPortMaxX() { return 1280; }
+f32 Win32_GetViewPortMaxY() { return 768; }
+void Win32_ClearScreen(void) { }
+void Win32_DrawBlitItems(BlitItem* items, i32 numItems) { }
 
 void Win32_InitPlatformInterface()
 {
+    platInterface.PlatformGetViewPortMinX = Win32_GetViewPortMinX;
+    platInterface.PlatformGetViewPortMinY = Win32_GetViewPortMinY;
+    platInterface.PlatformGetViewPortMaxX = Win32_GetViewPortMaxX;
+    platInterface.PlatformGetViewPortMaxY = Win32_GetViewPortMaxY;
+    platInterface.PlatformClearScreen = Win32_ClearScreen;
+    platInterface.PlatformRenderBlitItems = Win32_DrawBlitItems;
 }
 
-void Win32_LinkToApplication()
+u8 Win32_LinkToApplication()
 {
-    app = GetAppInterfaceStub(platInterface);
+    gameModule = LoadLibraryA(appModulePath);
+    if (gameModule != NULL)
+    {
+        Func_LinkToApp* linkToApp = (Func_LinkToApp*)GetProcAddress(gameModule, "LinkToApp");
+        if (linkToApp != NULL)
+        {
+            app = linkToApp(platInterface);
+            return 1;
+            // if (app != NULL)
+            // {
+            //     return 1;
+            // }
+            // else
+            // {
+            //     MessageBox(0, "No app returned from dll link", "Error", MB_OK | MB_ICONINFORMATION);
+            //     return 0;
+            // }
+        }
+        else
+        {
+            MessageBox(0, "Failed to find dll link function", "Error", MB_OK | MB_ICONINFORMATION);
+            return 0;
+        }
+    }
+    else
+    {
+        MessageBox(0, "Failed to find game dll", "Error", MB_OK | MB_ICONINFORMATION);
+        return 0;
+    }
+    //app = GetAppInterfaceStub(platInterface);
 }
 
 /****************************************************************
@@ -464,6 +503,11 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     return result;
 }
 
+void Win32_ErrorBox(char* msg, char* title)
+{
+    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
+}
+
 /**********************************************************************
  * WIN32 ENTRY POINT
  *********************************************************************/
@@ -512,7 +556,10 @@ int CALLBACK WinMain(
     AdjustWindowRect(&r, WindowClass.style, false);
 
     Win32_InitPlatformInterface();
-    Win32_LinkToApplication();
+    if (!Win32_LinkToApplication())
+    {
+        return 1;
+    }
 
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
@@ -578,10 +625,13 @@ int CALLBACK WinMain(
         else
         {
             // Oh dear
+            return 1;
         }
     }
     else
     {
         // Oh dear
+        return 1;
     }
+    return 0;
 }

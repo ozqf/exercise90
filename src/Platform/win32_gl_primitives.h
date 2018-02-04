@@ -1,9 +1,11 @@
 #pragma once
 
 #include <gl/gl.h>
+#include <math.h>
 
 #include "../Shared/shared.h"
 #include "win32_main.h"
+
 
 #define TEST_BUFFER_WIDTH 32
 #define TEST_BUFFER_HEIGHT 32
@@ -437,7 +439,7 @@ void Win32_DrawToggleTriangle(GL_Test_Input input)
 	glMatrixMode(GL_PROJECTION);
 
 	f32 prj[16];
-	Matrix_SetToIdentity(prj);
+	M4x4_SetToIdentity(prj);
 	f32 prjNear = 1;
 	f32 prjFar = 1000;
 	f32 prjLeft = -0.5f * win32_aspectRatio;
@@ -445,7 +447,7 @@ void Win32_DrawToggleTriangle(GL_Test_Input input)
 	f32 prjTop = 0.5f;
 	f32 prjBottom = -0.5f;
 
-	Matrix_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
 
 	glLoadMatrixf(prj);
 
@@ -509,7 +511,7 @@ void Win32_DrawCameraTriangle()
 	glMatrixMode(GL_PROJECTION);
 
 	f32 prj[16];
-	Matrix_SetToIdentity(prj);
+	M4x4_SetToIdentity(prj);
 	f32 prjNear = 1;
 	f32 prjFar = 1000;
 	f32 prjLeft = -0.5f * win32_aspectRatio;
@@ -517,7 +519,7 @@ void Win32_DrawCameraTriangle()
 	f32 prjTop = 0.5f;
 	f32 prjBottom = -0.5f;
 
-	Matrix_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
 
 	glLoadMatrixf(prj);
 
@@ -549,6 +551,100 @@ void Win32_DrawCameraTriangle()
 }
 
 void Win32_ApplyInputToTransform(InputTick input, Transform* transform)
+{
+	testInput.movement = { 0, 0, 0 };
+	testInput.rotation = { 0, 0, 0 };
+
+	if (input.reset)
+	{
+		transform->pos = { 0, 0, 0 };
+		transform->rot = { 0, 0, 0 };
+		transform->scale = { 1, 1, 1 };
+		return;
+	}
+
+	/////////////////////////////////////////////////
+	// READ ROTATION
+	/////////////////////////////////////////////////
+	if (input.yawLeft) { testInput.rotation.y += 1; }
+	if (input.yawRight) { testInput.rotation.y += -1; }
+
+	//if (input.pitchUp) { testInput.rotation.x += -1; }
+	//if (input.pitchDown) { testInput.rotation.x += 1; }
+
+	//if (input.rollLeft) { testInput.rotation.z += -1; }
+	//if (input.rollRight) { testInput.rotation.z += 1; }
+
+
+	transform->rot.x += testInput.rotation.x * testInput.rotSpeed;
+	transform->rot.x = COM_CapAngleDegrees(transform->rot.x);
+	transform->rot.y += testInput.rotation.y * testInput.rotSpeed;
+	transform->rot.y = COM_CapAngleDegrees(transform->rot.y);
+	transform->rot.z += testInput.rotation.z * testInput.rotSpeed;
+	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
+
+	//if (input.moveLeft) { testInput.movement.x += -1; }
+	//if (input.moveRight) { testInput.movement.x += 1; }
+
+	if (input.moveForward) { testInput.movement.z += -1; }
+	if (input.moveBackward) { testInput.movement.z += 1; }
+
+/*
+Movement forward requires creating a vector in the direction of
+the object's "forward". Object in this case has rotation, so must convert
+rotation to a forward vector, and then scale this vector by desired speed
+to create a velocity change in the desired direction
+
+> Read rotation input and rotate angles
+> Calculate forward vector
+> Scale forward to desired speed and add to position
+
+Rotation Matrix to rotate on Z axis
+cos(theta),	-sin(theta),		0,			0,
+sin(theta),	cos(theta),			0,			0,
+0,			0,					1,			0,
+0,			0,					0,			1
+*/
+	//f32 matrix[16];
+	//M4x4_SetToIdentity(matrix);
+	//M4x4_SetRotation_Z(matrix, );
+
+	if (Vec3_Magnitude(&testInput.movement) == 0)
+	{
+		return;
+	}
+
+	Vec3 forward = {};
+	Vec3 left = {};
+	Vec3 up = {};
+
+	AngleToAxes(&transform->rot, &left, &up, &forward);
+
+	Vec3_SetMagnitude(&forward, (testInput.speed * testInput.movement.z));
+	
+	char output[256];
+	sprintf_s(output, "Forward\nPos: %.2f, %.2f, %.2f\n",
+		forward.x, forward.y, forward.z
+		);
+	OutputDebugStringA(output);
+
+	transform->pos.x += forward.x;
+	transform->pos.y += forward.y;
+	transform->pos.z += forward.z;
+
+	//Vec3_MultiplyByMatrix(&matrix, &forward);
+	
+
+	//if (input.moveDown) { testInput.movement.y += -1; }
+	//if (input.moveUp) { testInput.movement.y += 1; }
+	
+	// naive input with no rotation
+	// transform->pos.x += testInput.movement.x * testInput.speed;
+	// transform->pos.y += testInput.movement.y * testInput.speed;
+	// transform->pos.z += testInput.movement.z * testInput.speed;
+}
+
+void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform)
 {
 	testInput.movement = { 0, 0, 0 };
 	testInput.rotation = { 0, 0, 0 };

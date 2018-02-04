@@ -1,82 +1,13 @@
 #pragma once
 
+#include <math.h>
 #include "shared.h"
 
-#define VEC_X 0
-#define VEC_Y 1
-#define VEC_Z 2
-#define VEC_W 3
+/////////////////////////////////////////////////////////////////////////////
+// 4x4 MATRIX OPERATIONS
+/////////////////////////////////////////////////////////////////////////////
 
-/* Matrix use
-OpenGL uses column major, y/x matrices
-/   0   4   8   12  \
-|   1   5   9   13  |
-|   2   6   10  14  |
-\   3   7   11  15  /
-
-*/
-
-#define TRANSFORM_MATRIX_SIZE 16
-#define X0 0
-#define Y0 1
-#define Z0 2
-#define W0 3
-
-#define X1 4
-#define Y1 5
-#define Z1 6
-#define W1 7
-
-#define X2 8
-#define Y2 9
-#define Z2 10
-#define W2 11
-
-#define X3 12
-#define Y3 13
-#define Z3 14
-#define W3 15
-
-#define abs(value) { if (value < ) return -value; }
-
-void Matrix_SetX(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
-{
-    m[X0] = x0; m[X1] = x1; m[X2] = x2; m[X3] = x3;
-}
-
-void Matrix_SetY(f32* m, f32 y0, f32 y1, f32 y2, f32 y3)
-{
-    m[Y0] = y0; m[Y1] = y1; m[Y2] = y2; m[Y3] = y3;
-}
-
-void Matrix_SetZ(f32* m, f32 z0, f32 z1, f32 z2, f32 z3)
-{
-    m[Z0] = z0; m[Z1] = z1; m[Z2] = z2; m[Z3] = z3;
-}
-
-void Matrix_SetW(f32* m, f32 w0, f32 w1, f32 w2, f32 w3)
-{
-    m[W0] = w0; m[W1] = w1; m[W2] = w2; m[W3] = w3;
-}
-
-void Matrix_Multiply(f32* m0, f32* m1, f32* result)
-{
-    result[X0] = m0[X0] * m1[X0];   result[X1] = m0[X1] * m1[X1];   result[X2] = m0[X2] * m1[X2];   result[X3] = m0[X3] * m1[X3];
-    result[Y0] = m0[Y0] * m1[Y0];   result[Y1] = m0[Y1] * m1[Y1];   result[Y2] = m0[Y2] * m1[Y2];   result[Y3] = m0[Y3] * m1[Y3];
-    result[Z0] = m0[Z0] * m1[Z0];   result[Z1] = m0[Z1] * m1[Z1];   result[Z2] = m0[Z2] * m1[Z2];   result[Z3] = m0[Z3] * m1[Z3];
-    result[W0] = m0[W0] * m1[W0];   result[W1] = m0[W1] * m1[W1];   result[W2] = m0[W2] * m1[W2];   result[W3] = m0[W3] * m1[W3];
-}
-
-void Matrix_Copy(f32* src, f32* tar)
-{
-    tar[X0] = src[X0];  tar[X1] = src[X1];  tar[X2] = src[X2];  tar[X3] = src[X3];
-    tar[Y0] = src[Y0];  tar[Y1] = src[Y1];  tar[Y2] = src[Y2];  tar[Y3] = src[Y3];
-    tar[Z0] = src[Z0];  tar[Z1] = src[Z1];  tar[Z2] = src[Z2];  tar[Z3] = src[Z3];
-    tar[W0] = src[W0];  tar[W1] = src[W1];  tar[W2] = src[W2];  tar[W3] = src[W3];
-
-}
-
-void Matrix_SetToIdentity(f32* matrix)
+void M4x4_SetToIdentity(f32* matrix)
 {
     matrix[X0] = 1; matrix[X1] = 0; matrix[X2] = 0; matrix[X3] = 0;
     matrix[Y0] = 0; matrix[Y1] = 1; matrix[Y2] = 0; matrix[Y3] = 0;
@@ -84,21 +15,29 @@ void Matrix_SetToIdentity(f32* matrix)
     matrix[W0] = 0; matrix[W1] = 0; matrix[W2] = 0; matrix[W3] = 1;
 }
 
-void Matrix_SetAsScale(f32* matrix, f32 scaleX, f32 scaleY, f32 scaleZ)
+void M4x4_SetAsScale(f32* matrix, f32 scaleX, f32 scaleY, f32 scaleZ)
 {
     matrix[X0] = scaleX;
     matrix[Y1] = scaleY;
     matrix[Z2] = scaleZ;
 }
 
-void Matrix_SetAsMove(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
+void M4x4_SetAsMove(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
 {
     matrix[X3] = deltaX;
     matrix[Y3] = deltaY;
     matrix[Z3] = deltaZ;
 }
 
-void Matrix_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)
+void M4x4_SetRotation_Z(f32* matrix, f32 theta)
+{
+    matrix[X0] = (f32)cos(theta);
+    matrix[X1] = (f32)-sin(theta);
+    matrix[Y0] = (f32)sin(theta);
+    matrix[Y1] = (f32)cos(theta);
+}
+
+void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)
 {
     m[0] = (2 * prjNear) / (prjRight - prjLeft);
 	m[4] = 0;
@@ -121,7 +60,7 @@ void Matrix_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjR
 	m[15] = 0;
 }
 
-void COM_MultiplyVectorByMatrix(f32* m, f32* v)
+void Vec3_MultiplyByMatrix(f32* m, f32* v)
 {
     v[VEC_X] =   (m[X0] * v[VEC_X]) + (m[X1] * v[VEC_Y]) + (m[X2] * v[VEC_Z]) + (m[X3] * v[VEC_W]);
     v[VEC_Y] =   (m[Y0] * v[VEC_X]) + (m[Y1] * v[VEC_Y]) + (m[Y2] * v[VEC_Z]) + (m[Y3] * v[VEC_W]);
@@ -146,4 +85,83 @@ f32 COM_CapAngleDegrees(f32 angle)
         Assert(loopCount < 99999);
     }
     return angle;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Rotations
+/////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// convert Euler angles(x,y,z) to axes(left, up, forward)
+// Each column of the rotation matrix represents left, up and forward axis.
+// The order of rotation is Roll->Yaw->Pitch (Rx*Ry*Rz)
+// Rx: rotation about X-axis, pitch
+// Ry: rotation about Y-axis, yaw(heading)
+// Rz: rotation about Z-axis, roll
+//    Rx           Ry          Rz
+// |1  0   0| | Cy  0 Sy| |Cz -Sz 0|   | CyCz        -CySz         Sy  |
+// |0 Cx -Sx|*|  0  1  0|*|Sz  Cz 0| = | SxSyCz+CxSz -SxSySz+CxCz -SxCy|
+// |0 Sx  Cx| |-Sy  0 Cy| | 0   0 1|   |-CxSyCz+SxSz  CxSySz+SxCz  CxCy|
+///////////////////////////////////////////////////////////////////////////////
+// http://www.songho.ca/opengl/gl_anglestoaxes.html
+void AngleToAxes(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
+{
+	//f32 DEG2RAD = 3.141593 / 180;
+    f32 sx, sy, sz, cx, cy, cz, theta;
+
+    // rotation angle about X-axis (pitch)
+    theta = angles->x * DEG2RAD;
+    sx = (f32)sin(theta);
+    cx = (f32)cos(theta);
+
+    // rotation angle about Y-axis (yaw)
+    theta = angles->y * DEG2RAD;
+    sy = (f32)sin(theta);
+    cy = (f32)cos(theta);
+
+    // rotation angle about Z-axis (roll)
+    theta = angles->z * DEG2RAD;
+    sz = (f32)sin(theta);
+    cz = (f32)cos(theta);
+
+    // determine left axis
+    left->x = cy*cz;
+    left->y = sx*sy*cz + cx*sz;
+    left->z = -cx*sy*cz + sx*sz;
+
+    // determine up axis
+    up->x = -cy*sz;
+    up->y = -sx*sy*sz + cx*cz;
+    up->z = cx*sy*sz + sx*cz;
+
+    // determine forward axis
+    forward->x = sy;
+    forward->y = -sx*cy;
+    forward->z = cx*cy;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// compute transform axis from object position, target and up direction
+///////////////////////////////////////////////////////////////////////////////
+// http://www.songho.ca/opengl/gl_lookattoaxes.html
+void LookAtToAxes(Vec3* pos, Vec3* target, Vec3* upDir, Vec3* left, Vec3* up, Vec3* forward)
+{
+    // compute the forward vector
+    forward->x = target->x - pos->x;
+    forward->y = target->y - pos->y;
+    forward->z = target->z - pos->z;
+	Vec3_Normalise(forward);
+    //forward.normalize();
+
+    // compute the left vector
+	Vec3_CrossProduct(upDir, forward, left);
+	Vec3_Normalise(left);
+    //left = upDir.cross(forward);  // cross product
+    //left.normalize();
+
+    // compute the orthonormal up vector
+	Vec3_CrossProduct(forward, left, up);
+	Vec3_Normalise(up);
+    //up = forward.cross(left);     // cross product
+    //up.normalize();
 }

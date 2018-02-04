@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #include "../shared_types.h"
 
 inline Vec3 CreateVec3(f32 x, f32 y)
@@ -67,3 +68,4 @@ inline Vec3 operator*(Vec3 a, M4x4 m)
     //result.w = (a.x * m.w0) + (a.y * m.w1) + (a.z * m.w2) + (1 * m.w3);
     return result;
 }
+#endif
