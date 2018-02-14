@@ -520,6 +520,7 @@ int CALLBACK WinMain(
     MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
     Win32_ReadCommandLine(lpCmdLine);
+    //Assert(false);
 
     InitDebug();
     printf("Debug init\n");
@@ -587,6 +588,7 @@ int CALLBACK WinMain(
             }
 
             float previousTime = Win32_InitFloatTime();
+            GameTime time = {};
 
             while (globalRunning)
             {
@@ -602,14 +604,14 @@ int CALLBACK WinMain(
                 }
 
                 float newTime = Win32_FloatTime();
-                float deltaTime = newTime - previousTime;
+                time.deltaTime = newTime - previousTime;
                 previousTime = newTime;
 
-                // char buf[64];
-                // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, deltaTime);
-                // OutputDebugString(buf);
+                char buf[64];
+                sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
+                OutputDebugString(buf);
 
-                Win32_RenderFrame(appWindow, inputTick);
+                Win32_RenderFrame(appWindow, inputTick, time);
 
                 /* Stuff to add:
                 > PlatformReadNetworkPackets();

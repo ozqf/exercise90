@@ -6,6 +6,8 @@
 #include "../Shared/shared.h"
 #include "win32_main.h"
 
+#include "../Shared/linmath.h"
+
 
 #define TEST_BUFFER_WIDTH 32
 #define TEST_BUFFER_HEIGHT 32
@@ -379,6 +381,37 @@ void Win32_DrawMinimumTriangle()
     glEnd();
 }
 
+void Win32_DebugPrintMatrix(char* label, f32* matrix)
+{
+	char output[256];
+	sprintf_s(output, "%s\n/ %.2f, %.2f, %.2f, %.2f \\\n| %.2f, %.2f, %.2f, %.2f |\n| %.2f, %.2f, %.2f, %.2f |\n\\ %.2f, %.2f, %.2f, %.2f /\n",
+		label,
+		matrix[0], matrix[4], matrix[8], matrix[12],
+		matrix[1], matrix[5], matrix[9], matrix[13],
+		matrix[2], matrix[6], matrix[10], matrix[14],
+		matrix[3], matrix[7], matrix[11], matrix[15]
+		);
+	OutputDebugStringA(output);
+}
+
+void Win32_DebugPrintTransform(char* label, Transform* t)
+{
+	char output[256];
+	sprintf_s(output, "%s\nPos: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\n",
+		label,
+		t->pos.x, t->pos.y, t->pos.z,
+		t->rot.x, t->rot.y, t->rot.z
+		);
+	OutputDebugStringA(output);
+
+	sprintf_s(output, "\nForward: %.2f, %.2f, %.2f\nUp %.2f, %.2f, %.2f\nLeft %.2f, %.2f, %.2f\n",
+		t->forward.x, t->forward.y, t->forward.z,
+		t->up.x, t->up.y, t->up.z,
+		t->left.x, t->left.y, t->left.z
+		);
+	OutputDebugStringA(output);
+}
+
 /**
  * Minimum required to draw a textured triangle via fixed pipeline
  */
@@ -426,11 +459,18 @@ void Win32_DrawToggleTriangle(GL_Test_Input input)
 	glTranslatef(entityTransform.pos.x, entityTransform.pos.y, entityTransform.pos.z);
 	
 	// Apply rotations around axis
-	glRotatef(entityTransform.rot.x, 1.0f, 0.0f, 0.0f);
-	glRotatef(entityTransform.rot.y, 0.0f, 1.0f, 0.0f);
-	glRotatef(entityTransform.rot.z, 0.0f, 0.0f, 1.0f);
-	//glTranslatef(0, 0, -5);
+	// glRotatef(entityTransform.rot.x, 1.0f, 0.0f, 0.0f);
+	// glRotatef(entityTransform.rot.y, 0.0f, 1.0f, 0.0f);
+	// glRotatef(entityTransform.rot.z, 0.0f, 0.0f, 1.0f);
 
+	// glRotatef(entityTransform.rot.z, 0.0f, 0.0f, 1.0f);
+	// glRotatef(entityTransform.rot.y, 0.0f, 1.0f, 0.0f);
+	// glRotatef(entityTransform.rot.x, 1.0f, 0.0f, 0.0f);
+
+	glRotatef(entityTransform.rot.y, 0.0f, 1.0f, 0.0f);
+	glRotatef(entityTransform.rot.x, 1.0f, 0.0f, 0.0f);
+	glRotatef(entityTransform.rot.z, 0.0f, 0.0f, 1.0f);
+	
 	/*
 	Calculate projection matrix
 	TODO: crudely applying aspect ratio. What is the correct way to do this?
@@ -474,6 +514,11 @@ void Win32_DrawToggleTriangle(GL_Test_Input input)
     glEnd();
 }
 
+void Win32_DrawTriangleAGeometry()
+{
+	
+}
+
 void Win32_DrawCameraTriangle()
 {
 	GLuint texToBind = textureHandles[g_gl_primitive_mode];
@@ -485,25 +530,118 @@ void Win32_DrawCameraTriangle()
 	////////////////////////////////////////////////////////////////////
 	// ModelView
 	////////////////////////////////////////////////////////////////////
+
 	glMatrixMode(GL_MODELVIEW);
+
+#define USE_CUSTOM_VIEWMODEL 1
+
+#ifdef USE_OPENGL_VIEWMODEL
+
+	//glPushMatrix();
 	glLoadIdentity();
 
 	// http://www.songho.ca/opengl/gl_transform.html
 	// First, transform the camera (viewing matrix) from world space to eye space
 	// Notice all values are negated, because we move the whole scene with the
 	// inverse of camera transform
-	glRotatef(-cameraTransform.rot.z, 0, 0, 1);
 	glRotatef(-cameraTransform.rot.y, 0, 1, 0);
+	glRotatef(-cameraTransform.rot.z, 0, 0, 1);
 	glRotatef(-cameraTransform.rot.x, 1, 0, 0);
+	
+	// glRotatef(-cameraTransform.rot.x, 1, 0, 0);
+	// glRotatef(-cameraTransform.rot.z, 0, 0, 1);
+	// glRotatef(-cameraTransform.rot.y, 0, 1, 0);
+
+	//Vec3 axis;
+	// axis = cameraTransform.up;
+	// glRotatef(-cameraTransform.rot.y, axis.x, axis.y, axis.z);
+	// axis = cameraTransform.left;
+	// glRotatef(-cameraTransform.rot.x, axis.x, axis.y, axis.z);
+	// axis = cameraTransform.forward;
+	// glRotatef(-cameraTransform.rot.z, axis.x, axis.y, axis.z);
+	
 	glTranslatef(-cameraTransform.pos.x, -cameraTransform.pos.y, -cameraTransform.pos.z);
 	
 	// transform the object (model matrix)
 	// The result of GL_MODELVIEW matrix will be:
 	// ModelView_M = View_M * Model_M
 	glTranslatef(entityTransform.pos.x, entityTransform.pos.y, entityTransform.pos.z);
+
+	// axis = entityTransform.up;
+	// glRotatef(entityTransform.rot.y, axis.x, axis.y, axis.z);
+	// axis = entityTransform.left;
+	// glRotatef(entityTransform.rot.x, axis.x, axis.y, axis.z);
+	// axis = entityTransform.forward;
+	// glRotatef(entityTransform.rot.z, axis.x, axis.y, axis.z);
+
 	glRotatef(entityTransform.rot.x, 1, 0, 0);
 	glRotatef(entityTransform.rot.y, 0, 1, 0);
 	glRotatef(entityTransform.rot.z, 0, 0, 1);
+
+#endif
+
+#ifdef USE_CUSTOM_VIEWMODEL
+
+	f32 mv[16];
+	M4x4_SetToIdentity(mv);
+
+	f32 pitch = entityTransform.rot.x * DEG2RAD;
+	f32 yaw = entityTransform.rot.y * DEG2RAD;
+
+	f32 rotX = pitch * (f32)sin(yaw);
+	f32 rotY = yaw;// (f32)sin(pitch);
+	f32 rotZ = pitch * (f32)cos(yaw);
+
+	
+	M4x4_SetRotation(
+		mv,
+		rotX,
+		rotY,
+		rotZ
+	);
+
+
+	// M4x4_SetRotation(
+	// 	mv,
+	// 	entityTransform.rot.x * DEG2RAD,
+	// 	entityTransform.rot.y * DEG2RAD,
+	// 	entityTransform.rot.z * DEG2RAD
+	// );
+
+	Vec3 mvTranslation = {};
+	mvTranslation.x += -cameraTransform.pos.x + entityTransform.pos.x;
+	mvTranslation.y += -cameraTransform.pos.y + entityTransform.pos.y;
+	mvTranslation.z += -cameraTransform.pos.z + entityTransform.pos.z;
+
+	M4x4_SetMove(mv, mvTranslation.x, mvTranslation.y, mvTranslation.z);
+
+	glLoadMatrixf(mv);
+
+	f32 test[16];
+	M4x4_SetCameraMatrix(test, entityTransform.left, entityTransform.up, entityTransform.forward, entityTransform.pos);
+	Win32_DebugPrintTransform("Camera Transform", &entityTransform);
+	Win32_DebugPrintTransform("Entity Transform", &entityTransform);
+	Win32_DebugPrintMatrix("Test Rot matrix", test);
+
+#endif
+
+	
+
+
+	GLfloat modelView[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelView);
+
+	Win32_DebugPrintMatrix("View Model Matrix", (f32*)&modelView);
+	// char output[256];
+	// sprintf_s(output, "ModelView\n/ %.2f, %.2f, %.2f, %.2f \\\n| %.2f, %.2f, %.2f, %.2f |\n| %.2f, %.2f, %.2f, %.2f |\n\\ %.2f, %.2f, %.2f, %.2f /\n",
+	// 	modelView[0], modelView[4], modelView[8], modelView[12],
+	// 	modelView[1], modelView[5], modelView[9], modelView[13],
+	// 	modelView[2], modelView[6], modelView[10], modelView[14],
+	// 	modelView[3], modelView[7], modelView[11], modelView[15]
+	// 	);
+	// OutputDebugStringA(output);
+
+	//glPopMatrix();
 
 	////////////////////////////////////////////////////////////////////
 	// Projection
@@ -550,18 +688,10 @@ void Win32_DrawCameraTriangle()
     glEnd();
 }
 
-void Win32_ApplyInputToTransform(InputTick input, Transform* transform)
+void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)
 {
 	testInput.movement = { 0, 0, 0 };
 	testInput.rotation = { 0, 0, 0 };
-
-	if (input.reset)
-	{
-		transform->pos = { 0, 0, 0 };
-		transform->rot = { 0, 0, 0 };
-		transform->scale = { 1, 1, 1 };
-		return;
-	}
 
 	/////////////////////////////////////////////////
 	// READ ROTATION
@@ -569,26 +699,33 @@ void Win32_ApplyInputToTransform(InputTick input, Transform* transform)
 	if (input.yawLeft) { testInput.rotation.y += 1; }
 	if (input.yawRight) { testInput.rotation.y += -1; }
 
-	//if (input.pitchUp) { testInput.rotation.x += -1; }
-	//if (input.pitchDown) { testInput.rotation.x += 1; }
+	if (input.pitchUp) { testInput.rotation.x += -1; }
+	if (input.pitchDown) { testInput.rotation.x += 1; }
 
-	//if (input.rollLeft) { testInput.rotation.z += -1; }
-	//if (input.rollRight) { testInput.rotation.z += 1; }
+	if (input.rollLeft) { testInput.rotation.z += -1; }
+	if (input.rollRight) { testInput.rotation.z += 1; }
+
+	// /this rotation is world axis aligned and thus broken!
+	t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time.deltaTime);
+	t->rot.x = COM_CapAngleDegrees(t->rot.x);
+
+	t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time.deltaTime);
+	t->rot.y = COM_CapAngleDegrees(t->rot.y);
+
+	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time.deltaTime);
+	t->rot.z = COM_CapAngleDegrees(t->rot.z);
 
 
-	transform->rot.x += testInput.rotation.x * testInput.rotSpeed;
-	transform->rot.x = COM_CapAngleDegrees(transform->rot.x);
-	transform->rot.y += testInput.rotation.y * testInput.rotSpeed;
-	transform->rot.y = COM_CapAngleDegrees(transform->rot.y);
-	transform->rot.z += testInput.rotation.z * testInput.rotSpeed;
-	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
 
-	//if (input.moveLeft) { testInput.movement.x += -1; }
-	//if (input.moveRight) { testInput.movement.x += 1; }
+	if (input.moveLeft) { testInput.movement.x += -1; }
+	if (input.moveRight) { testInput.movement.x += 1; }
 
 	if (input.moveForward) { testInput.movement.z += -1; }
 	if (input.moveBackward) { testInput.movement.z += 1; }
 
+	if (input.moveDown) { testInput.movement.y += -1; }
+	if (input.moveUp) { testInput.movement.y += 1; }
+	
 /*
 Movement forward requires creating a vector in the direction of
 the object's "forward". Object in this case has rotation, so must convert
@@ -605,46 +742,52 @@ sin(theta),	cos(theta),			0,			0,
 0,			0,					1,			0,
 0,			0,					0,			1
 */
-	//f32 matrix[16];
-	//M4x4_SetToIdentity(matrix);
-	//M4x4_SetRotation_Z(matrix, );
-
-	if (Vec3_Magnitude(&testInput.movement) == 0)
-	{
-		return;
-	}
-
-	Vec3 forward = {};
-	Vec3 left = {};
-	Vec3 up = {};
-
-	AngleToAxes(&transform->rot, &left, &up, &forward);
-
-	Vec3_SetMagnitude(&forward, (testInput.speed * testInput.movement.z));
+	Vec3 frameMove = {};
 	
+	// Sideways: X Input
+	// Vertical: Y Input
+	// Forward: Z input
+
+	// if (Vec3_Magnitude(&testInput.movement) == 0)
+	// {
+	// 	return;
+	// }
+
+	AngleToAxes(&t->rot, &t->left, &t->up, &t->forward);
+
+	Vec3 forward = t->forward;
+	Vec3 left = t->left;
+	Vec3 up = t->up;
+
+	// If input is blank mag will be speed * 0?
+	Vec3_SetMagnitude(&left, ((testInput.speed * time.deltaTime) * testInput.movement.x));
+	Vec3_SetMagnitude(&up, ((testInput.speed * time.deltaTime) * testInput.movement.y));
+	Vec3_SetMagnitude(&forward, ((testInput.speed * time.deltaTime) * testInput.movement.z));
+	
+	frameMove.x = forward.x + up.x + left.x;
+	frameMove.y = forward.y + up.y + left.y;
+	frameMove.z = forward.z + up.z + left.z;
+
+	t->pos.x += frameMove.x;
+	t->pos.y += frameMove.y;
+	t->pos.z += frameMove.z;
+
 	char output[256];
-	sprintf_s(output, "Forward\nPos: %.2f, %.2f, %.2f\n",
-		forward.x, forward.y, forward.z
+	sprintf_s(output, "FRAME MOVE\n\nPos: %.2f, %.2f, %.2f\n",
+		frameMove.x, frameMove.y, frameMove.z
 		);
 	OutputDebugStringA(output);
-
-	transform->pos.x += forward.x;
-	transform->pos.y += forward.y;
-	transform->pos.z += forward.z;
 
 	//Vec3_MultiplyByMatrix(&matrix, &forward);
 	
 
-	//if (input.moveDown) { testInput.movement.y += -1; }
-	//if (input.moveUp) { testInput.movement.y += 1; }
-	
 	// naive input with no rotation
-	// transform->pos.x += testInput.movement.x * testInput.speed;
-	// transform->pos.y += testInput.movement.y * testInput.speed;
-	// transform->pos.z += testInput.movement.z * testInput.speed;
+	// t->pos.x += testInput.movement.x * testInput.speed;
+	// t->pos.y += testInput.movement.y * testInput.speed;
+	// t->pos.z += testInput.movement.z * testInput.speed;
 }
 
-void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform)
+void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform, GameTime time)
 {
 	testInput.movement = { 0, 0, 0 };
 	testInput.rotation = { 0, 0, 0 };
@@ -688,33 +831,61 @@ void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Trans
 	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
 }
 
-void Win32_DrawGLTest(InputTick inputTick)
+void Win32_DrawGLTest(InputTick input, GameTime gameTime)
 {
-	Win32_ApplyInputToTransform(inputTick, &cameraTransform);
+	OutputDebugStringA("******* FRAME *******\n");
+	Transform* t;
 
-	char output[256];
-	sprintf_s(output, "InputTick\nLeft: %d, Right: %d, Foward: %d, Backward: %d, Up: %d, Down: %d\n",
-		inputTick.moveLeft, inputTick.moveRight,
-		inputTick.moveForward, inputTick.moveBackward,
-		inputTick.moveUp, inputTick.moveDown
-		);
-	OutputDebugStringA(output);
+	//t = &cameraTransform;
+	t = &entityTransform;
 
-	sprintf_s(output, "Input\nMove: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\nSpeed: %.2f\n",
-		testInput.movement.x, testInput.movement.y, testInput.movement.z,
-		testInput.rotation.x, testInput.rotation.y, testInput.rotation.z,
-		testInput.speed
-		);
-	OutputDebugStringA(output);
+	
+	if (input.reset)
+	{
+		cameraTransform.pos = { 0, 0, 2 };
+		cameraTransform.rot = { 0, 0, 0 };
+		cameraTransform.scale = { 1, 1, 1 };
 
-	sprintf_s(output, "Camera\nPos: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\n",
-		cameraTransform.pos.x,cameraTransform.pos.y, cameraTransform.pos.z,
-		cameraTransform.rot.x,cameraTransform.rot.y, cameraTransform.rot.z
-		);
-	OutputDebugStringA(output);
+		entityTransform.pos = { 0, 0, 0 };
+		entityTransform.rot = { 0, 0, 0 };
+		entityTransform.scale = { 1, 1, 1 };
+		return;
+	}
+	else
+	{
+		Win32_ApplyInputToTransform(input, t, gameTime);
+	}
 
-	sprintf_s(output, "Aspect Ratio: %.2f\n", win32_aspectRatio);
-	OutputDebugStringA(output);
+	//char output[256];
+	// sprintf_s(output, "InputTick\nLeft: %d, Right: %d, Foward: %d, Backward: %d, Up: %d, Down: %d\n",
+	// 	inputTick.moveLeft, inputTick.moveRight,
+	// 	inputTick.moveForward, inputTick.moveBackward,
+	// 	inputTick.moveUp, inputTick.moveDown
+	// 	);
+	// OutputDebugStringA(output);
+
+	// sprintf_s(output, "Input\nMove: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\nSpeed: %.2f\n",
+	// 	testInput.movement.x, testInput.movement.y, testInput.movement.z,
+	// 	testInput.rotation.x, testInput.rotation.y, testInput.rotation.z,
+	// 	testInput.speed
+	// 	);
+	// OutputDebugStringA(output);
+
+	// sprintf_s(output, "Camera\nPos: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\n",
+	// 	t->pos.x, t->pos.y, t->pos.z,
+	// 	t->rot.x, t->rot.y, t->rot.z
+	// 	);
+	// OutputDebugStringA(output);
+
+	// sprintf_s(output, "\nForward: %.2f, %.2f, %.2f\nUp %.2f, %.2f, %.2f\nLeft %.2f, %.2f, %.2f\n",
+	// 	t->forward.x, t->forward.y, t->forward.z,
+	// 	t->up.x, t->up.y, t->up.z,
+	// 	t->left.x, t->left.y, t->left.z
+	// 	);
+	// OutputDebugStringA(output);
+
+	// sprintf_s(output, "Aspect Ratio: %.2f\n", win32_aspectRatio);
+	// OutputDebugStringA(output);
 
     //Win32_DrawToggleTriangle(testInput);
 

@@ -31,7 +31,7 @@ MACROS
 #define global_variable static
 
 #define pi32 3.14159265359f
-#define DEG2RAD 3.141593f / 180.0f;
+#define DEG2RAD 3.141593f / 180.0f
 
 #define ArrayCount(array) (sizeof(array) / sizeof(array)[0]))
 
@@ -284,6 +284,9 @@ struct Transform
 	Vec3 pos;
 	Vec3 rot;
 	Vec3 scale;
+    Vec3 forward;
+    Vec3 up;
+    Vec3 left;
 };
 
 struct Transform2

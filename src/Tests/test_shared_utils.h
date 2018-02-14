@@ -67,13 +67,13 @@ void Test_COM_PrintMatrix(f32* m)
     printf("%.2f, %.2f, %.2f, %.2f\n", m[W0], m[W1], m[W2], m[W3]);
 }
 
-void Test_COM_PrintMatrix(M4x4* m)
-{
-    printf("%.2f, %.2f, %.2f, %.2f\n", m->x0, m->x1, m->x2, m->x3);
-    printf("%.2f, %.2f, %.2f, %.2f\n", m->y0, m->y1, m->y2, m->y3);
-    printf("%.2f, %.2f, %.2f, %.2f\n", m->z0, m->z1, m->z2, m->z3);
-    printf("%.2f, %.2f, %.2f, %.2f\n", m->w0, m->w1, m->w2, m->w3);
-}
+// void Test_COM_PrintMatrix(M4x4* m)
+// {
+//     printf("%.2f, %.2f, %.2f, %.2f\n", m->x0, m->x1, m->x2, m->x3);
+//     printf("%.2f, %.2f, %.2f, %.2f\n", m->y0, m->y1, m->y2, m->y3);
+//     printf("%.2f, %.2f, %.2f, %.2f\n", m->z0, m->z1, m->z2, m->z3);
+//     printf("%.2f, %.2f, %.2f, %.2f\n", m->w0, m->w1, m->w2, m->w3);
+// }
 
 void Test_COM_PrintVector4(f32* v)
 {
@@ -106,7 +106,9 @@ void Test_COM_MatrixMaths()
     printf("Vector b:\n");
     Test_COM_PrintVector3(b);
     printf("c = a * b:\n");
-    c = a * b;
+    c.x = a.x * b.x;
+    c.y = a.y * b.y;
+    c.z = a.z * b.z;
     Test_COM_PrintVector3(c);
     
     Vec2 v2a;
@@ -128,11 +130,11 @@ void Test_COM_MatrixMaths_ArrayTypes()
     
     printf("\nSet to Identity Matrix:\n");
     f32 m0[16];
-    COM_SetToIdentityMatrix(m0);
+    M4x4_SetToIdentity(m0);
     Test_COM_PrintMatrix(m0);
 
     printf("\nSet to scale by 2:\n");
-    COM_SetAsScaleMatrix(m0, 2, 2, 2);
+    M4x4_SetAsScale(m0, 2, 2, 2);
     Test_COM_PrintMatrix(m0);
 
     f32 v0[4];
@@ -144,31 +146,31 @@ void Test_COM_MatrixMaths_ArrayTypes()
     Test_COM_PrintVector4(v0);
 
     printf("\nMultiply v by m\n");
-    COM_MultiplyVectorByMatrix(m0, v0);
+    Vec3_MultiplyByMatrix(m0, v0);
     Test_COM_PrintVector4(v0);
 
     printf("\nCreate Translation Matrix\n");
-    COM_SetToIdentityMatrix(m0);
-    COM_SetMoveMatrix(m0, 9, -3, 2);
+    M4x4_SetToIdentity(m0);
+    M4x4_SetMove(m0, 9, -3, 2);
     Test_COM_PrintMatrix(m0);
 
     printf("Multiply v by m\n");
-    COM_MultiplyVectorByMatrix(m0, v0);
+    Vec3_MultiplyByMatrix(m0, v0);
     Test_COM_PrintVector4(v0);
 
     f32 m1[16];
-    COM_SetToIdentityMatrix(m1);
-    printf("\nCopy\n");
-    COM_CopyMatrix(m0, m1);
+    M4x4_SetToIdentity(m1);
+    printf("\nCopy M0 into M1\n");
+    M4x4_Copy(m0, m1);
     Test_COM_PrintMatrix(m1);
 
     printf("\nMultiply matrices\n");
     printf("M0:\n");
-    COM_SetAsScaleMatrix(m0, 3, 2, 4);
+    M4x4_SetAsScale(m0, 3, 2, 4);
     Test_COM_PrintMatrix(m0);
     printf("M1:\n");
     Test_COM_PrintMatrix(m1);
-    COM_MultiplyMatrices(m0, m1, m1);
+    M4x4_Multiply(m0, m1, m1);
     printf("Result:\n");
     Test_COM_PrintMatrix(m1);
 

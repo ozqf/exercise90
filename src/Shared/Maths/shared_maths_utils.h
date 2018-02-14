@@ -22,7 +22,7 @@ void M4x4_SetAsScale(f32* matrix, f32 scaleX, f32 scaleY, f32 scaleZ)
     matrix[Z2] = scaleZ;
 }
 
-void M4x4_SetAsMove(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
+void M4x4_SetMove(f32* matrix, f32 deltaX, f32 deltaY, f32 deltaZ)
 {
     matrix[X3] = deltaX;
     matrix[Y3] = deltaY;
@@ -60,12 +60,12 @@ void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRig
 	m[15] = 0;
 }
 
-void Vec3_MultiplyByMatrix(f32* m, f32* v)
+void Vec3_MultiplyByMatrix(f32* m, f32* v, f32* result)
 {
-    v[VEC_X] =   (m[X0] * v[VEC_X]) + (m[X1] * v[VEC_Y]) + (m[X2] * v[VEC_Z]) + (m[X3] * v[VEC_W]);
-    v[VEC_Y] =   (m[Y0] * v[VEC_X]) + (m[Y1] * v[VEC_Y]) + (m[Y2] * v[VEC_Z]) + (m[Y3] * v[VEC_W]);
-    v[VEC_Z] =   (m[Z0] * v[VEC_X]) + (m[Z1] * v[VEC_Y]) + (m[Z2] * v[VEC_Z]) + (m[Z3] * v[VEC_W]);
-    v[VEC_W] =   (m[W0] * v[VEC_X]) + (m[W1] * v[VEC_Y]) + (m[W2] * v[VEC_Z]) + (m[W3] * v[VEC_W]);
+    result[0] =   (m[X0] * v[VEC_X]) + (m[X1] * v[VEC_Y]) + (m[X2] * v[VEC_Z]) + (m[X3] * v[VEC_W]);
+    result[1] =   (m[Y0] * v[VEC_X]) + (m[Y1] * v[VEC_Y]) + (m[Y2] * v[VEC_Z]) + (m[Y3] * v[VEC_W]);
+    result[2] =   (m[Z0] * v[VEC_X]) + (m[Z1] * v[VEC_Y]) + (m[Z2] * v[VEC_Z]) + (m[Z3] * v[VEC_W]);
+    //v[VEC_W] =   (m[W0] * v[VEC_X]) + (m[W1] * v[VEC_Y]) + (m[W2] * v[VEC_Z]) + (m[W3] * v[VEC_W]);
 }
 
 f32 COM_CapAngleDegrees(f32 angle)
@@ -90,6 +90,104 @@ f32 COM_CapAngleDegrees(f32 angle)
 /////////////////////////////////////////////////////////////////////////////
 // Rotations
 /////////////////////////////////////////////////////////////////////////////
+/*
+Handmade Hero day 361 - Introduction to 3D Rotation Matrices
+https://hero.handmade.network/episode/code/day361/
+
+https://hero.handmade.network/episode/code/day362/
+Starts coding at 1:32:38
+*/
+
+void M4x4_SetColumns3x3(f32* m, Vec3 x, Vec3 y, Vec3 z)
+{
+    m[0] = x.x;   m[4] = y.x;   m[8] = z.x;//   m[12] = 0;
+    m[1] = x.y;   m[5] = y.y;   m[9] = z.y;//   m[13] = 0;
+    m[2] = x.z;   m[6] = y.z;   m[10] = z.z;//   m[14] = 0;
+    //m[3] = 0;   m[7] = 0;   m[11] = 0;   m[15] = 0;
+}
+
+void M4x4_SetRows3x3(f32* m, Vec3 x, Vec3 y, Vec3 z)
+{
+    m[0] = x.x;   m[4] = x.y;   m[8] = x.z;//   m[12] = 0;
+    m[1] = y.x;   m[5] = y.y;   m[9] = y.z;//   m[13] = 0;
+    m[2] = z.x;   m[6] = z.y;   m[10] = z.z;//   m[14] = 0;
+    //m[3] = 0;   m[7] = 0;   m[11] = 0;   m[15] = 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// This set rotation matrix does a (x) correctly but b and c (y / z)
+// Are handled via world coordinates
+// So, useless
+///////////////////////////////////////////////////////////////////////////////
+void M4x4_SetCameraMatrix(f32* m, Vec3 xAxis, Vec3 yAxis, Vec3 zAxis, Vec3 pos)
+{
+    m[0] = 0;   m[4] = 0;   m[8] = 0;   m[12] = 0;
+    m[1] = 0;   m[5] = 0;   m[9] = 0;   m[13] = 0;
+    m[2] = 0;   m[6] = 0;   m[10] = 0;   m[14] = 0;
+    m[3] = 0;   m[7] = 0;   m[11] = 0;   m[15] = 0;
+
+    M4x4_SetColumns3x3(m, xAxis, yAxis, zAxis);
+    
+    Vec3 cameraP;
+    Vec3_MultiplyByMatrix(m, (f32*)&pos.e, cameraP.e);
+    M4x4_SetMove(m, cameraP.x, cameraP.y, cameraP.z);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// This set rotation matrix does a (x) correctly but b and c (y / z)
+// Are handled via world coordinates
+// So, useless
+///////////////////////////////////////////////////////////////////////////////
+void M4x4_SetRotation(f32* m, f32 a, f32 b, f32 c)
+{
+    m[0] = (f32)(cos(b) * cos(c));
+	m[1] = (f32)((sin(a) * sin(b) * cos(c)) + (cos(a) * sin(c)));			
+	m[2] = (f32)((-cos(a) * sin(b) * cos(c)) + (sin(a) * sin(c)));
+	m[3] = 0;
+
+
+    m[4] = (f32)(-cos(b) * sin(c));
+    m[5] = (f32)((-sin(a) * sin(b) * sin(c)) + (cos(a) * cos(c)));
+    m[6] = (f32)((cos(a) * sin(b) * sin(c)) + (sin(a) * cos(c)));
+    m[7] = 0;
+
+    m[8] = (f32)(sin(b));
+    m[9] = (f32)(-sin(a) * cos(b));
+    m[10] = (f32)(cos(a) * cos(b));
+    m[11] = 0;
+
+    m[12] = 0;
+    m[13] = 0;
+    m[14] = 0;
+    m[15] = 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Create rotation matrix
+// http://planning.cs.uiuc.edu/node102.html
+// In the formula A = Z, B = Y, Y = X... because maths
+// (cosA * cosB)      (cosA * sinB * sinY) - (sinA * cosY)      (cosA * sinB * cosY) + (sinA * sinY)
+// 
+// 
+///////////////////////////////////////////////////////////////////////////////
+void M4x4_CreateRotation2(f32* matrix, Vec3* degrees)
+{
+    // NOT IMPLEMENTED
+    AssertAlways(false);
+
+    f32 sinX, sinY, sinZ, cosX, cosY, cosZ, theta;
+    theta = degrees->x * DEG2RAD;
+    sinX = (float)sin(theta);
+    cosX = (float)cos(theta);
+
+    theta = degrees->y * DEG2RAD;
+    sinY = (float)sin(theta);
+    cosY = (float)cos(theta);
+
+    theta = degrees->z * DEG2RAD;
+    sinZ = (float)sin(theta);
+    cosZ = (float)cos(theta);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // convert Euler angles(x,y,z) to axes(left, up, forward)
@@ -151,17 +249,13 @@ void LookAtToAxes(Vec3* pos, Vec3* target, Vec3* upDir, Vec3* left, Vec3* up, Ve
     forward->y = target->y - pos->y;
     forward->z = target->z - pos->z;
 	Vec3_Normalise(forward);
-    //forward.normalize();
 
     // compute the left vector
 	Vec3_CrossProduct(upDir, forward, left);
 	Vec3_Normalise(left);
-    //left = upDir.cross(forward);  // cross product
-    //left.normalize();
-
     // compute the orthonormal up vector
 	Vec3_CrossProduct(forward, left, up);
 	Vec3_Normalise(up);
-    //up = forward.cross(left);     // cross product
-    //up.normalize();
 }
+
+

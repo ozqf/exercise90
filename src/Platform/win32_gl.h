@@ -26,8 +26,8 @@ i32 Win32_InitOpenGL(HWND window)
 {
     entityTransform = {};
     testInput = {};
-	testInput.speed = 0.2f;
-    testInput.rotSpeed = 5;
+	testInput.speed = 3.0f;
+    testInput.rotSpeed = 90.0f;
 
 	HDC windowContext = GetDC(window);
     /** 
@@ -85,7 +85,7 @@ i32 Win32_InitOpenGL(HWND window)
 }
 
 //bool renderedOnce = false;
-void Win32_RenderFrame(HWND window, InputTick inputTick)
+void Win32_RenderFrame(HWND window, InputTick inputTick, GameTime time)
 {
     /*if (renderedOnce == false)
     {
@@ -128,7 +128,7 @@ void Win32_RenderFrame(HWND window, InputTick inputTick)
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-	Win32_DrawGLTest(inputTick);
+	Win32_DrawGLTest(inputTick, time);
 
 	// Finished, display
     SwapBuffers(deviceContext);
