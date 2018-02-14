@@ -394,6 +394,16 @@ void Win32_DebugPrintMatrix(char* label, f32* matrix)
 	OutputDebugStringA(output);
 }
 
+void Win32_DebugPrintVec3(char* label, Vec3* v)
+{
+	char output[256];
+	sprintf_s(output, "%s\n: %.2f, %.2f, %.2f\n",
+		label,
+		v->x, v->y, v->z
+		);
+	OutputDebugStringA(output);
+}
+
 void Win32_DebugPrintTransform(char* label, Transform* t)
 {
 	char output[256];
@@ -404,7 +414,7 @@ void Win32_DebugPrintTransform(char* label, Transform* t)
 		);
 	OutputDebugStringA(output);
 
-	sprintf_s(output, "\nForward: %.2f, %.2f, %.2f\nUp %.2f, %.2f, %.2f\nLeft %.2f, %.2f, %.2f\n",
+	sprintf_s(output, "Forward: %.2f, %.2f, %.2f\nUp %.2f, %.2f, %.2f\nLeft %.2f, %.2f, %.2f\n\n",
 		t->forward.x, t->forward.y, t->forward.z,
 		t->up.x, t->up.y, t->up.z,
 		t->left.x, t->left.y, t->left.z
@@ -533,7 +543,10 @@ void Win32_DrawCameraTriangle()
 
 	glMatrixMode(GL_MODELVIEW);
 
-#define USE_CUSTOM_VIEWMODEL 1
+// USE_OPENGL_VIEWMODEL works... the others less so...
+#define USE_OPENGL_VIEWMODEL
+//#define USE_CUSTOM_VIEWMODEL_2 1
+//#define USE_CUSTOM_VIEWMODEL 1
 
 #ifdef USE_OPENGL_VIEWMODEL
 
@@ -574,8 +587,8 @@ void Win32_DrawCameraTriangle()
 	// axis = entityTransform.forward;
 	// glRotatef(entityTransform.rot.z, axis.x, axis.y, axis.z);
 
-	glRotatef(entityTransform.rot.x, 1, 0, 0);
 	glRotatef(entityTransform.rot.y, 0, 1, 0);
+	glRotatef(entityTransform.rot.x, 1, 0, 0);
 	glRotatef(entityTransform.rot.z, 0, 0, 1);
 
 #endif
@@ -585,14 +598,13 @@ void Win32_DrawCameraTriangle()
 	f32 mv[16];
 	M4x4_SetToIdentity(mv);
 
-	f32 pitch = entityTransform.rot.x * DEG2RAD;
-	f32 yaw = entityTransform.rot.y * DEG2RAD;
+	f32 pitch = cameraTransform.rot.x * DEG2RAD;
+	f32 yaw = cameraTransform.rot.y * DEG2RAD;
 
 	f32 rotX = pitch * (f32)sin(yaw);
 	f32 rotY = yaw;// (f32)sin(pitch);
 	f32 rotZ = pitch * (f32)cos(yaw);
 
-	
 	M4x4_SetRotation(
 		mv,
 		rotX,
@@ -600,13 +612,12 @@ void Win32_DrawCameraTriangle()
 		rotZ
 	);
 
-
-	// M4x4_SetRotation(
-	// 	mv,
-	// 	entityTransform.rot.x * DEG2RAD,
-	// 	entityTransform.rot.y * DEG2RAD,
-	// 	entityTransform.rot.z * DEG2RAD
-	// );
+	M4x4_SetRotation(
+		mv,
+		cameraTransform.rot.x * DEG2RAD,
+		cameraTransform.rot.y * DEG2RAD,
+		cameraTransform.rot.z * DEG2RAD
+	);
 
 	Vec3 mvTranslation = {};
 	mvTranslation.x += -cameraTransform.pos.x + entityTransform.pos.x;
@@ -618,15 +629,51 @@ void Win32_DrawCameraTriangle()
 	glLoadMatrixf(mv);
 
 	f32 test[16];
-	M4x4_SetCameraMatrix(test, entityTransform.left, entityTransform.up, entityTransform.forward, entityTransform.pos);
-	Win32_DebugPrintTransform("Camera Transform", &entityTransform);
+	M4x4_SetCameraMatrix(test, cameraTransform.left, cameraTransform.up, cameraTransform.forward, cameraTransform.pos);
+	Win32_DebugPrintTransform("Camera Transform", &cameraTransform);
 	Win32_DebugPrintTransform("Entity Transform", &entityTransform);
 	Win32_DebugPrintMatrix("Test Rot matrix", test);
-
 #endif
 
-	
+#ifdef USE_CUSTOM_VIEWMODEL_2
+	f32 mv[16];
+	M4x4_SetToIdentity(mv);
 
+	/////////////////////////////////////////////
+	// Apply Rotation
+	/////////////////////////////////////////////
+	Vec3 eye, centre;
+
+	eye.x = cameraTransform.pos.x;
+	eye.y = cameraTransform.pos.y;
+	eye.z = cameraTransform.pos.z;
+	centre.x = eye.x + cameraTransform.forward.x;
+	centre.y = eye.y + cameraTransform.forward.y;
+	centre.z = eye.z + cameraTransform.forward.z;
+	
+	M4x4_LookAt(mv, &eye, &centre, &cameraTransform.up);
+
+	/////////////////////////////////////////////
+	// Apply Translation
+	/////////////////////////////////////////////
+	Vec3 mvTranslation = {};
+	// mvTranslation.x += -cameraTransform.pos.x + entityTransform.pos.x;
+	// mvTranslation.y += -cameraTransform.pos.y + entityTransform.pos.y;
+	// mvTranslation.z += -cameraTransform.pos.z + entityTransform.pos.z;
+	mvTranslation.x += -cameraTransform.pos.x + entityTransform.pos.x;
+	mvTranslation.y += -cameraTransform.pos.y + entityTransform.pos.y;
+	mvTranslation.z += -cameraTransform.pos.z + entityTransform.pos.z;
+	M4x4_SetMove(mv, mvTranslation.x, mvTranslation.y, mvTranslation.z);
+
+	glLoadMatrixf(mv);
+
+	//M4x4_SetCameraMatrix(test, cameraTransform.left, cameraTransform.up, cameraTransform.forward, cameraTransform.pos);
+	Win32_DebugPrintVec3("Eye Position", &eye);
+	Win32_DebugPrintVec3("Look At Position", &centre);
+	Win32_DebugPrintTransform("Camera Transform", &cameraTransform);
+	Win32_DebugPrintTransform("Entity Transform", &entityTransform);
+	//Win32_DebugPrintMatrix("Test Rot matrix", mv);
+#endif
 
 	GLfloat modelView[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, modelView);
@@ -715,8 +762,6 @@ void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)
 	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time.deltaTime);
 	t->rot.z = COM_CapAngleDegrees(t->rot.z);
 
-
-
 	if (input.moveLeft) { testInput.movement.x += -1; }
 	if (input.moveRight) { testInput.movement.x += 1; }
 
@@ -777,14 +822,6 @@ sin(theta),	cos(theta),			0,			0,
 		frameMove.x, frameMove.y, frameMove.z
 		);
 	OutputDebugStringA(output);
-
-	//Vec3_MultiplyByMatrix(&matrix, &forward);
-	
-
-	// naive input with no rotation
-	// t->pos.x += testInput.movement.x * testInput.speed;
-	// t->pos.y += testInput.movement.y * testInput.speed;
-	// t->pos.z += testInput.movement.z * testInput.speed;
 }
 
 void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform, GameTime time)
@@ -836,10 +873,9 @@ void Win32_DrawGLTest(InputTick input, GameTime gameTime)
 	OutputDebugStringA("******* FRAME *******\n");
 	Transform* t;
 
-	//t = &cameraTransform;
-	t = &entityTransform;
+	t = &cameraTransform;
+	//t = &entityTransform;
 
-	
 	if (input.reset)
 	{
 		cameraTransform.pos = { 0, 0, 2 };
@@ -855,39 +891,6 @@ void Win32_DrawGLTest(InputTick input, GameTime gameTime)
 	{
 		Win32_ApplyInputToTransform(input, t, gameTime);
 	}
-
-	//char output[256];
-	// sprintf_s(output, "InputTick\nLeft: %d, Right: %d, Foward: %d, Backward: %d, Up: %d, Down: %d\n",
-	// 	inputTick.moveLeft, inputTick.moveRight,
-	// 	inputTick.moveForward, inputTick.moveBackward,
-	// 	inputTick.moveUp, inputTick.moveDown
-	// 	);
-	// OutputDebugStringA(output);
-
-	// sprintf_s(output, "Input\nMove: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\nSpeed: %.2f\n",
-	// 	testInput.movement.x, testInput.movement.y, testInput.movement.z,
-	// 	testInput.rotation.x, testInput.rotation.y, testInput.rotation.z,
-	// 	testInput.speed
-	// 	);
-	// OutputDebugStringA(output);
-
-	// sprintf_s(output, "Camera\nPos: %.2f, %.2f, %.2f\nRot %.2f, %.2f, %.2f\n",
-	// 	t->pos.x, t->pos.y, t->pos.z,
-	// 	t->rot.x, t->rot.y, t->rot.z
-	// 	);
-	// OutputDebugStringA(output);
-
-	// sprintf_s(output, "\nForward: %.2f, %.2f, %.2f\nUp %.2f, %.2f, %.2f\nLeft %.2f, %.2f, %.2f\n",
-	// 	t->forward.x, t->forward.y, t->forward.z,
-	// 	t->up.x, t->up.y, t->up.z,
-	// 	t->left.x, t->left.y, t->left.z
-	// 	);
-	// OutputDebugStringA(output);
-
-	// sprintf_s(output, "Aspect Ratio: %.2f\n", win32_aspectRatio);
-	// OutputDebugStringA(output);
-
-    //Win32_DrawToggleTriangle(testInput);
 
 	Win32_DrawCameraTriangle();
 }

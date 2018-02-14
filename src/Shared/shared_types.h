@@ -158,6 +158,21 @@ inline f32 Vec3_DotProduct(Vec3* a, Vec3* b)
 {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
 }
+
+inline void Vec3_NormaliseOrForward(Vec3* v)
+{
+    f32 mag = Vec3_Magnitude(v);
+    if (mag == 0)
+    {
+        v->x = 0;
+        v->y = 0;
+        v->z = 1;
+        return;
+    }
+    v->x = v->x /= mag;
+    v->y = v->y /= mag;
+    v->z = v->z /= mag;
+}
 /////////////////////////////////////////////////////////////////////////////
 // MATRIX 4x4
 /////////////////////////////////////////////////////////////////////////////

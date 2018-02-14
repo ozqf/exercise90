@@ -340,6 +340,10 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         {
             inputTick.reset = isDown;
         }
+        else if (VKCode == 'P' && isDown)
+        {
+            MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
+        }
         else if (VKCode == 'T')
         {
             //printf("Spacebar superstar\n");

@@ -258,4 +258,38 @@ void LookAtToAxes(Vec3* pos, Vec3* target, Vec3* upDir, Vec3* left, Vec3* up, Ve
 	Vec3_Normalise(up);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// compute transform axis from object position, target and up direction
+///////////////////////////////////////////////////////////////////////////////
+void M4x4_LookAt(f32* m, Vec3* eye, Vec3* centre, Vec3* up)
+{
+    Vec3 forward, side;
+    forward.x = centre->x - eye->x,
+    forward.y = centre->y - eye->y,
+    forward.z = centre->z - eye->z;
+    Vec3_NormaliseOrForward(&forward);
 
+    Vec3_CrossProduct(&forward, up, &side);
+    Vec3_Normalise(&side);
+    // Top row
+    m[0] = side.x;
+    m[4] = side.y;
+    m[8] = side.z;
+    m[12] = 0.0;
+    // Middle row
+    m[1] = up->x;
+    m[5] = up->y;
+    m[9] = up->z;
+    m[13] = 0.0;
+    // bottom row
+    m[2] = -forward.x;
+    m[6] = -forward.y;
+    m[10] = -forward.z;
+    m[14] = 0.0;
+    // empty (translation) row
+    m[3] = 0;
+    m[7] = 0;
+    m[11] = 0;
+    m[15] = 1.0;
+
+}
