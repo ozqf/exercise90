@@ -619,6 +619,12 @@ void Win32_DrawCameraTriangle()
 		cameraTransform.rot.z * DEG2RAD
 	);
 
+	f32 model[16];
+	M4x4_SetToIdentity(model);
+	M4x4_SetRotation(model, entityTransform.rot.x,entityTransform.rot.y, entityTransform.rot.z);
+
+	M4x4_Multiply(model, mv, model);
+
 	Vec3 mvTranslation = {};
 	mvTranslation.x += -cameraTransform.pos.x + entityTransform.pos.x;
 	mvTranslation.y += -cameraTransform.pos.y + entityTransform.pos.y;
