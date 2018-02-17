@@ -147,28 +147,26 @@ void Win32_InitTestScene()
 	Transform* obj = g_renderObjects;
 
 	*obj = {};
+	obj->pos.z = -2;
 	g_numRenderObjects++;
 	obj++;
 	
 
     *obj = {};
     obj->rot.y = 90;
-    obj->pos.x = -1;
-    obj->pos.z = 1;
+    obj->pos.x = -2;
 	g_numRenderObjects++;
 	obj++;
 
     *obj = {};
     obj->rot.y = 270;
-    obj->pos.x = 1;
-    obj->pos.z = 1;
+    obj->pos.x = 2;
 	g_numRenderObjects++;
 	obj++;
     
     *obj = {};
     obj->rot.y = 180;
-    obj->pos.x = 0;
-    obj->pos.z = 3;
+    obj->pos.z = 2;
 	g_numRenderObjects++;
 	obj++;
     
