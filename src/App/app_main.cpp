@@ -9,7 +9,7 @@
 
 PlatformInterface platform;
 
-GameBlock player = {};
+GameObject player = {};
 
 int numBlitItems = 0;
 BlitItem blitItems[4096];

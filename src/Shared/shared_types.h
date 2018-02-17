@@ -274,16 +274,6 @@ struct InputTick
     char reset;
 };
 
-struct GameBlock
-{
-    i32 ID;
-    f32 pos[3];
-    f32 vel[3];
-    f32 halfWidth;
-    f32 halfHeight;
-    f32 speed;
-};
-
 struct GL_Test_Input
 {
 	// +z = forward, +y = up, +x = left
@@ -306,12 +296,31 @@ struct Transform
 
 struct Transform2
 {
-	i32 ID;
 	Vec3 pos;
 	Vec3 forward;
     Vec3 up;
     Vec3 left;
 	Vec3 scale;
+};
+
+struct RenderItem
+{
+    i32 id;
+    Transform transform;
+    i32 model;
+};
+
+struct GameObject
+{
+    i32 ID;
+    Transform transform;
+    f32 speed;
+    i32 model;
+    f32 timeToLive;
+    f32 tick;
+    f32 tock;
+
+    u32 flags;
 };
 
 /****************************************************************

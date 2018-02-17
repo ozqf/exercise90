@@ -24,10 +24,7 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 
 i32 Win32_InitOpenGL(HWND window)
 {
-    entityTransform = {};
-    testInput = {};
-	testInput.speed = 3.0f;
-    testInput.rotSpeed = 90.0f;
+    Win32_InitTestScene();
 
 	HDC windowContext = GetDC(window);
     /** 
@@ -84,6 +81,140 @@ i32 Win32_InitOpenGL(HWND window)
     return 1;
 }
 
+////////////////////////////////////////////////////////////////////
+// Projection
+////////////////////////////////////////////////////////////////////
+void R_SetupProjection()
+{
+	glMatrixMode(GL_PROJECTION);
+
+	f32 prj[16];
+	M4x4_SetToIdentity(prj);
+	f32 prjNear = 1;
+	f32 prjFar = 1000;
+	f32 prjLeft = -0.5f * win32_aspectRatio;
+	f32 prjRight = 0.5f * win32_aspectRatio;
+	f32 prjTop = 0.5f;
+	f32 prjBottom = -0.5f;
+
+	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+
+	glLoadMatrixf(prj);
+
+}
+
+void R_SetupTestTexture()
+{
+	GLuint texToBind = textureHandles[g_gl_primitive_mode];
+    glBindTexture(GL_TEXTURE_2D, texToBind);
+
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+
+}
+
+////////////////////////////////////////////////////////////////////
+// Build Display list
+////////////////////////////////////////////////////////////////////
+void R_BuildDisplayList()
+{
+    
+}
+
+////////////////////////////////////////////////////////////////////
+// ModelView
+////////////////////////////////////////////////////////////////////
+void R_SetModelViewMatrix(Transform *view, Transform *model)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// http://www.songho.ca/opengl/gl_transform.html
+	// First, transform the camera (viewing matrix) from world space to eye space
+	// Notice all values are negated, because we move the whole scene with the
+	// inverse of camera transform
+	glRotatef(-view->rot.y, 0, 1, 0);
+	glRotatef(-view->rot.z, 0, 0, 1);
+	glRotatef(-view->rot.x, 1, 0, 0);
+
+	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
+	
+	// transform the object (model matrix)
+	// The result of GL_MODELVIEW matrix will be:
+	// ModelView_M = View_M * Model_M
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+
+	glRotatef(model->rot.y, 0, 1, 0);
+	glRotatef(model->rot.x, 1, 0, 0);
+	glRotatef(model->rot.z, 0, 0, 1);
+}
+
+////////////////////////////////////////////////////////////////////
+// Geometry
+////////////////////////////////////////////////////////////////////
+void R_RenderTestGeometry()
+{
+    glBegin(GL_TRIANGLES);
+
+	// Set vertex Array
+	// glVertexPointer(3, GL_FLOAT, 0, pointer);
+
+	f32 size = 0.8f;
+
+	// lower triangle. Bottom left -> Bottom Right -> Top Right
+	glColor3f(1, 0, 0);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(-size, -size);
+
+	glColor3f(0, 1, 0);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(size, -size);
+
+	glColor3f(0, 0, 1);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(size, size);
+
+	// upper triangle
+	glColor3f(1, 0, 0);
+	glVertex2f(-size, -size);
+	glColor3f(0, 0, 1);
+	glVertex2f(size, size);
+	glColor3f(1, 1, 0);
+	glVertex2f(-size, size);
+
+	// // Foreground
+	// size = 0.1f;
+	// glColor3f(1, 1, 1);
+	// glVertex3f(-size, -size, -1);
+	// glColor3f(1, 1, 1);
+	// glVertex3f(size, -size, -1);
+	// glColor3f(1, 1, 1);
+	// glVertex3f(size, size, -1);
+    glEnd();
+}
+
+void R_RenderModel(Transform* model)
+{
+	R_SetModelViewMatrix(&cameraTransform, model);
+	R_SetupTestTexture();
+	R_RenderTestGeometry();
+}
+
+void R_RenderScene()
+{
+	R_SetupProjection();
+    for (int i = 0; i < g_numRenderObjects; ++i)
+    {
+        R_RenderModel(&g_renderObjects[i]);    
+        R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
+        R_SetupTestTexture();
+        R_RenderTestGeometry();
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+// FRAME LOOP
+////////////////////////////////////////////////////////////////////
 //bool renderedOnce = false;
 void Win32_RenderFrame(HWND window, InputTick inputTick, GameTime time)
 {
@@ -128,7 +259,8 @@ void Win32_RenderFrame(HWND window, InputTick inputTick, GameTime time)
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-	Win32_DrawGLTest(inputTick, time);
+	Win32_ProcessTestInput(inputTick, time);
+    R_RenderScene();
 
 	// Finished, display
     SwapBuffers(deviceContext);
