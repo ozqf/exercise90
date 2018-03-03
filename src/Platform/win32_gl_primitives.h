@@ -151,7 +151,6 @@ void Win32_InitTestScene()
 	g_numRenderObjects++;
 	obj++;
 	
-
     *obj = {};
     obj->rot.y = 90;
     obj->pos.x = -2;

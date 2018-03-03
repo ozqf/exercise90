@@ -60,6 +60,18 @@ void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRig
 	m[15] = 0;
 }
 
+void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f32 prjNear, f32 prjFar)
+{
+    M4x4_SetToIdentity(m);
+    m[0] = 2 / (right - left);
+    m[5] = 2 / (top - bottom);
+    m[10] = -2 / (prjFar - prjNear);
+
+    m[12] = (right + left) / (right - left);
+    m[13] = (top + bottom) / (top - bottom);
+    m[14] = (prjFar + prjNear) / (prjFar - prjNear);
+}
+
 void Vec3_MultiplyByMatrix(f32* m, f32* v, f32* result)
 {
     result[0] =   (m[X0] * v[VEC_X]) + (m[X1] * v[VEC_Y]) + (m[X2] * v[VEC_Z]) + (m[X3] * v[VEC_W]);

@@ -103,6 +103,18 @@ void R_SetupProjection()
 
 }
 
+void R_SetupOrthoProjection(f32 halfScreenHeight)
+{
+	glMatrixMode(GL_PROJECTION);
+
+	f32 halfWidth = halfScreenHeight * win32_aspectRatio;
+	f32 halfHeight = halfScreenHeight;
+
+	f32 prj[16];
+	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, -1, 1);
+	glLoadMatrixf(prj);
+}
+
 void R_SetupTestTexture()
 {
 	GLuint texToBind = textureHandles[g_gl_primitive_mode];
@@ -147,6 +159,34 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glRotatef(model->rot.y, 0, 1, 0);
 	glRotatef(model->rot.x, 1, 0, 0);
 	glRotatef(model->rot.z, 0, 0, 1);
+}
+
+////////////////////////////////////////////////////////////////////
+// Draw Quad
+////////////////////////////////////////////////////////////////////
+void R_DrawQuad(f32 posX, f32 posY, f32 halfWidth, f32 halfHeight, f32 red, f32 green, f32 blue)
+{
+	f32 minX = posX - halfWidth;
+	f32 maxX = posX + halfWidth;
+	f32 minY = posY + halfHeight;
+	f32 maxY = posY - halfHeight;
+	
+	glBegin(GL_TRIANGLES);
+	glColor3f(red, green, blue);
+	glVertex2f(-minX, -minY);
+	glColor3f(red, green, blue);
+	glVertex2f(maxX, -minY);
+	glColor3f(red, green, blue);
+	glVertex2f(maxX, maxY);
+
+	// upper triangle
+	glColor3f(red, green, blue);
+	glVertex2f(-minX, -minY);
+	glColor3f(red, green, blue);
+	glVertex2f(maxX, maxY);
+	glColor3f(red, green, blue);
+	glVertex2f(-minX, maxY);
+	glEnd();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -203,11 +243,13 @@ void R_RenderModel(Transform* model)
 void R_RenderScene()
 {
 	R_SetupProjection();
+	//R_SetupOrthoProjection(8);
     for (int i = 0; i < g_numRenderObjects; ++i)
     {
         R_RenderModel(&g_renderObjects[i]);    
         R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
         R_SetupTestTexture();
+		//R_DrawQuad(0, 0, 1.5, 1.5, 1, 0, 0);
         R_RenderTestGeometry();
     }
 }
