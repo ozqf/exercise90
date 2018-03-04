@@ -145,20 +145,21 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	// First, transform the camera (viewing matrix) from world space to eye space
 	// Notice all values are negated, because we move the whole scene with the
 	// inverse of camera transform
-	glRotatef(-view->rot.y, 0, 1, 0);
+	// x = pitch, y = yaw, z = roll
+	
 	glRotatef(-view->rot.z, 0, 0, 1);
 	glRotatef(-view->rot.x, 1, 0, 0);
-
+	glRotatef(-view->rot.y, 0, 1, 0);
 	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
+	
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(model->rot.z, 0, 0, 1);
+	glRotatef(model->rot.x, 1, 0, 0);
+	glRotatef(model->rot.y, 0, 1, 0);
 	
 	// transform the object (model matrix)
 	// The result of GL_MODELVIEW matrix will be:
 	// ModelView_M = View_M * Model_M
-	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
-
-	glRotatef(model->rot.y, 0, 1, 0);
-	glRotatef(model->rot.x, 1, 0, 0);
-	glRotatef(model->rot.z, 0, 0, 1);
 }
 
 ////////////////////////////////////////////////////////////////////

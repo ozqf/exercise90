@@ -417,13 +417,15 @@ void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Trans
 	if (input.moveDown) { testInput.movement.y += -1; }
 	if (input.moveUp) { testInput.movement.y += 1; }
 	
-	
+	// yaw
 	if (input.yawLeft) { testInput.rotation.y += -1; }
 	if (input.yawRight) { testInput.rotation.y += 1; }
 
+	// pitch
 	if (input.pitchUp) { testInput.rotation.x += -1; }
 	if (input.pitchDown) { testInput.rotation.x += 1; }
 
+	// roll
 	if (input.rollLeft) { testInput.rotation.z += -1; }
 	if (input.rollRight) { testInput.rotation.z += 1; }
 

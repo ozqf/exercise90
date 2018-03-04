@@ -521,7 +521,7 @@ int CALLBACK WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-    MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
+    //MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
 
     Win32_ReadCommandLine(lpCmdLine);
     //Assert(false);
@@ -561,10 +561,11 @@ int CALLBACK WinMain(
     AdjustWindowRect(&r, WindowClass.style, false);
 
     Win32_InitPlatformInterface();
-    if (!Win32_LinkToApplication())
-    {
-        return 1;
-    }
+    // not using game yet
+    // if (!Win32_LinkToApplication())
+    // {
+    //     return 1;
+    // }
 
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
