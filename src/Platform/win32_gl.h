@@ -163,6 +163,31 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 }
 
 ////////////////////////////////////////////////////////////////////
+// ModelView
+////////////////////////////////////////////////////////////////////
+void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// http://www.songho.ca/opengl/gl_transform.html
+	// First, transform the camera (viewing matrix) from world space to eye space
+	// Notice all values are negated, because we move the whole scene with the
+	// inverse of camera transform
+	// x = pitch, y = yaw, z = roll
+	
+	glRotatef(-view->rot.z, 0, 0, 1);
+	glRotatef(-view->rot.x, 1, 0, 0);
+	glRotatef(-view->rot.y, 0, 1, 0);
+	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
+	
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	//glRotatef(view->rot.z, 0, 0, 1);
+	//glRotatef(view->rot.x, 1, 0, 0);
+	glRotatef(view->rot.y, 0, 1, 0);
+}
+
+////////////////////////////////////////////////////////////////////
 // Draw Quad
 ////////////////////////////////////////////////////////////////////
 void R_DrawQuad(f32 posX, f32 posY, f32 halfWidth, f32 halfHeight, f32 red, f32 green, f32 blue)
@@ -234,24 +259,36 @@ void R_RenderTestGeometry()
     glEnd();
 }
 
-void R_RenderModel(Transform* model)
+void R_RenderEntity(Transform* camera, Entity* entity)
 {
-	R_SetModelViewMatrix(&cameraTransform, model);
+	switch(entity->displayMode)
+	{
+		case 1:
+		{
+			R_SetModelViewMatrix_Billboard(camera, &entity->transform);
+		} break;
+		default:
+		{
+			R_SetModelViewMatrix(camera, &entity->transform);
+		} break;
+	}
+	
 	R_SetupTestTexture();
 	R_RenderTestGeometry();
 }
 
-void R_RenderScene()
+void R_RenderScene(RenderScene* scene)
 {
 	R_SetupProjection();
 	//R_SetupOrthoProjection(8);
-    for (int i = 0; i < g_numRenderObjects; ++i)
+    for (u32 i = 0; i < scene->numEntities; ++i)
     {
-        R_RenderModel(&g_renderObjects[i]);    
-        R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
-        R_SetupTestTexture();
+        R_RenderEntity(&scene->cameraTransform, &scene->entities[i]);
+
+        //R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
+        //R_SetupTestTexture();
 		//R_DrawQuad(0, 0, 1.5, 1.5, 1, 0, 0);
-        R_RenderTestGeometry();
+        //R_RenderTestGeometry();
     }
 }
 
@@ -259,7 +296,7 @@ void R_RenderScene()
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////
 //bool renderedOnce = false;
-void Win32_RenderFrame(HWND window, InputTick inputTick, GameTime time)
+void Win32_RenderFrame(HWND window, RenderScene* scene)
 {
     /*if (renderedOnce == false)
     {
@@ -302,8 +339,8 @@ void Win32_RenderFrame(HWND window, InputTick inputTick, GameTime time)
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-	Win32_ProcessTestInput(inputTick, time);
-    R_RenderScene();
+	//Win32_ProcessTestInput(inputTick, time);
+    R_RenderScene(scene);
 
 	// Finished, display
     SwapBuffers(deviceContext);

@@ -12,6 +12,7 @@
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
+#include "../Shared/g_scene.h"
 
 #include "win32_main.h"
 #include "win32_draw.cpp"
@@ -595,6 +596,8 @@ int CALLBACK WinMain(
             float previousTime = Win32_InitFloatTime();
             GameTime time = {};
 
+            Scene_Init();
+
             while (globalRunning)
             {
                 MSG message;
@@ -616,7 +619,9 @@ int CALLBACK WinMain(
                 sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
                 OutputDebugString(buf);
 
-                Win32_RenderFrame(appWindow, inputTick, time);
+                Win32_ProcessTestInput(inputTick, time, &g_scene);
+                Scene_Tick(time, &g_scene);
+                Win32_RenderFrame(appWindow, &g_scene);
 
                 /* Stuff to add:
                 > PlatformReadNetworkPackets();

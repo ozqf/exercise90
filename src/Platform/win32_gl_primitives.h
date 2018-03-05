@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "../Shared/shared.h"
+#include "../Shared/g_scene.h"
 #include "win32_main.h"
 
 #include "../Shared/linmath.h"
@@ -14,8 +15,6 @@
 #define TEST_BUFFER_PIXEL_COUNT (32 * 32)
 #define TEST_BUFFER_MEM_SIZE (TEST_BUFFER_PIXEL_COUNT * 4)
 
-#define GL_MAX_RENDER_OBJECTS 2048
-
 #define NUM_GL_PRIMITIVE_MODES 3
 global_variable i32 g_gl_primitive_mode = 0;
 global_variable f32 g_gl_primitive_degrees_X = 0;
@@ -25,10 +24,7 @@ global_variable f32 win32_aspectRatio = 0;
 
 global_variable GL_Test_Input testInput;
 
-global_variable Transform g_renderObjects[GL_MAX_RENDER_OBJECTS];
-global_variable i32 g_numRenderObjects = 0;
-
-global_variable Transform cameraTransform;
+//global_variable Transform cameraTransform;
 
 global_variable Transform entityTransform;
 global_variable Transform entityTransform2;
@@ -144,30 +140,30 @@ void Win32_InitTestScene()
     // entityTransform3.pos.x = 1;
     // entityTransform3.pos.z = 1;
 
-	Transform* obj = g_renderObjects;
+	// Transform* obj = g_renderObjects;
 
-	*obj = {};
-	obj->pos.z = -2;
-	g_numRenderObjects++;
-	obj++;
+	// *obj = {};
+	// obj->pos.z = -2;
+	// g_numRenderObjects++;
+	// obj++;
 	
-    *obj = {};
-    obj->rot.y = 90;
-    obj->pos.x = -2;
-	g_numRenderObjects++;
-	obj++;
+    // *obj = {};
+    // obj->rot.y = 90;
+    // obj->pos.x = -2;
+	// g_numRenderObjects++;
+	// obj++;
 
-    *obj = {};
-    obj->rot.y = 270;
-    obj->pos.x = 2;
-	g_numRenderObjects++;
-	obj++;
+    // *obj = {};
+    // obj->rot.y = 270;
+    // obj->pos.x = 2;
+	// g_numRenderObjects++;
+	// obj++;
     
-    *obj = {};
-    obj->rot.y = 180;
-    obj->pos.z = 2;
-	g_numRenderObjects++;
-	obj++;
+    // *obj = {};
+    // obj->rot.y = 180;
+    // obj->pos.z = 2;
+	// g_numRenderObjects++;
+	// obj++;
     
     testInput = {};
 	testInput.speed = 3.0f;
@@ -441,23 +437,23 @@ void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Trans
 	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
 }
 
-void Win32_ProcessTestInput(InputTick input, GameTime gameTime)
+void Win32_ProcessTestInput(InputTick input, GameTime gameTime, RenderScene* scene)
 {
 	OutputDebugStringA("******* FRAME *******\n");
 	Transform* t;
 
-	t = &cameraTransform;
+	t = &scene->cameraTransform;
 	//t = &entityTransform;
 
 	if (input.reset)
 	{
-		cameraTransform.pos = { 0, 0, 2 };
-		cameraTransform.rot = { 0, 0, 0 };
-		cameraTransform.scale = { 1, 1, 1 };
+		scene->cameraTransform.pos = { 0, 0, 2 };
+		scene->cameraTransform.rot = { 0, 0, 0 };
+		scene->cameraTransform.scale = { 1, 1, 1 };
 
-		entityTransform.pos = { 0, 0, 0 };
-		entityTransform.rot = { 0, 0, 0 };
-		entityTransform.scale = { 1, 1, 1 };
+		//entityTransform.pos = { 0, 0, 0 };
+		//entityTransform.rot = { 0, 0, 0 };
+		//entityTransform.scale = { 1, 1, 1 };
 		return;
 	}
 	else

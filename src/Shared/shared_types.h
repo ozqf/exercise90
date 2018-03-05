@@ -308,19 +308,28 @@ struct RenderItem
     i32 id;
     Transform transform;
     i32 model;
+    i32 displayMode;
 };
 
-struct GameObject
+struct Entity
 {
     i32 ID;
     Transform transform;
     f32 speed;
     i32 model;
+    i32 displayMode;
     f32 timeToLive;
     f32 tick;
     f32 tock;
 
     u32 flags;
+};
+
+struct RenderScene
+{
+    Entity* entities;
+    u32 numEntities;
+    Transform cameraTransform;
 };
 
 /****************************************************************
