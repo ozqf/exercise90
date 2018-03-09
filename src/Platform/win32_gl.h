@@ -135,6 +135,7 @@ void R_BuildDisplayList()
 
 ////////////////////////////////////////////////////////////////////
 // ModelView
+// Standard 3D transformation
 ////////////////////////////////////////////////////////////////////
 void R_SetModelViewMatrix(Transform *view, Transform *model)
 {
@@ -163,7 +164,8 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 }
 
 ////////////////////////////////////////////////////////////////////
-// ModelView
+// ModelView - Billboard
+// Faces the camera (more or less)
 ////////////////////////////////////////////////////////////////////
 void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 {
@@ -218,14 +220,11 @@ void R_DrawQuad(f32 posX, f32 posY, f32 halfWidth, f32 halfHeight, f32 red, f32 
 ////////////////////////////////////////////////////////////////////
 // Geometry
 ////////////////////////////////////////////////////////////////////
-void R_RenderTestGeometry()
+void R_RenderTestGeometry_RainbowQuad()
 {
     glBegin(GL_TRIANGLES);
 
-	// Set vertex Array
-	// glVertexPointer(3, GL_FLOAT, 0, pointer);
-
-	f32 size = 0.8f;
+	f32 size = 1;
 
 	// lower triangle. Bottom left -> Bottom Right -> Top Right
 	glColor3f(1, 0, 0);
@@ -247,34 +246,83 @@ void R_RenderTestGeometry()
 	glVertex2f(size, size);
 	glColor3f(1, 1, 0);
 	glVertex2f(-size, size);
-
-	// // Foreground
-	// size = 0.1f;
-	// glColor3f(1, 1, 1);
-	// glVertex3f(-size, -size, -1);
-	// glColor3f(1, 1, 1);
-	// glVertex3f(size, -size, -1);
-	// glColor3f(1, 1, 1);
-	// glVertex3f(size, size, -1);
     glEnd();
+}
+
+void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b)
+{
+    glBegin(GL_TRIANGLES);
+
+	f32 size = 1;
+
+	// lower triangle. Bottom left -> Bottom Right -> Top Right
+	glColor3f(r, g, b);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(-size, -size);
+
+	glColor3f(r, g, b);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(size, -size);
+
+	glColor3f(r, g, b);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(size, size);
+
+	// upper triangle
+	glColor3f(r, g, b);
+	glVertex2f(-size, -size);
+	glColor3f(r, g, b);
+	glVertex2f(size, size);
+	glColor3f(r, g, b);
+	glVertex2f(-size, size);
+    glEnd();
+}
+
+void R_RenderPrimitive(Transform* camera, Entity* entity)
+{
+	R_SetModelViewMatrix(camera, &entity->transform);
+	R_SetupTestTexture();
+	RendObj_Primitive* prim = &entity->rendObj.obj.primitive;
+	switch (prim->primitiveType)
+	{
+		case REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD:
+		{
+			R_RenderTestGeometry_ColouredQuad(prim->red, prim->green, prim->blue);
+		} break;
+
+		case REND_PRIMITIVE_TYPE_RAINBOW_QUAD:
+		{
+			R_RenderTestGeometry_RainbowQuad();
+		} break;
+
+		default:
+		{
+			R_RenderTestGeometry_RainbowQuad();
+		} break;
+	}
+}
+
+void R_RenderBillboard(Transform* camera, Entity* entity)
+{
+	R_SetModelViewMatrix_Billboard(camera, &entity->transform);
+	R_SetupTestTexture();
+	R_RenderTestGeometry_RainbowQuad();
 }
 
 void R_RenderEntity(Transform* camera, Entity* entity)
 {
-	switch(entity->displayMode)
+	switch(entity->rendObj.type)
 	{
-		case 1:
+		case RENDOBJ_TYPE_PRIMITIVE:
 		{
-			R_SetModelViewMatrix_Billboard(camera, &entity->transform);
+			R_RenderPrimitive(camera, entity);
 		} break;
-		default:
+
+		case RENDOBJ_TYPE_BILLBOARD:
 		{
-			R_SetModelViewMatrix(camera, &entity->transform);
+			R_RenderBillboard(camera, entity);
 		} break;
 	}
-	
-	R_SetupTestTexture();
-	R_RenderTestGeometry();
 }
 
 void R_RenderScene(RenderScene* scene)
@@ -291,7 +339,7 @@ void R_RenderScene(RenderScene* scene)
         //R_RenderTestGeometry();
     }
 }
-
+ 
 ////////////////////////////////////////////////////////////////////
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////

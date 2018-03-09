@@ -171,6 +171,12 @@ u8 Win32_LinkToApplication()
     //app = GetAppInterfaceStub(platInterface);
 }
 
+u8 Win32_LinkToAppStub()
+{
+    app = GetAppInterfaceStub(platInterface);
+    return 1;
+}
+
 /****************************************************************
 ALLOC MAIN MEMORY
 TODO: Return error code if it fails?
@@ -562,12 +568,23 @@ int CALLBACK WinMain(
     AdjustWindowRect(&r, WindowClass.style, false);
 
     Win32_InitPlatformInterface();
-    // not using game yet
-    // if (!Win32_LinkToApplication())
-    // {
-    //     return 1;
-    // }
 
+    #if 0
+    // not using game dll yet
+    if (!Win32_LinkToApplication())
+    {
+        return 1;
+    }
+    #endif
+
+    #if 1
+    if (!Win32_LinkToAppStub())
+    {
+        MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
+        return 1;
+    }
+    #endif
+    
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
     {
@@ -620,6 +637,7 @@ int CALLBACK WinMain(
                 OutputDebugString(buf);
 
                 Win32_ProcessTestInput(inputTick, time, &g_scene);
+                //app->AppUpdate(&time, &inputTick);
                 Scene_Tick(time, &g_scene);
                 Win32_RenderFrame(appWindow, &g_scene);
 

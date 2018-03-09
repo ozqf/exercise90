@@ -8,7 +8,7 @@
 
 PlatformInterface platform;
 
-GameObject player = {};
+Entity player = {};
 
 int numBlitItems = 0;
 BlitItem blitItems[4096];

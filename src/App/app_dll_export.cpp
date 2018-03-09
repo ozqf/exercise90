@@ -1,5 +1,4 @@
-#ifndef APP_DLL_EXPORT_CPP
-#define APP_DLL_EXPORT_CPP
+#pragma once
 
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"
@@ -31,5 +30,3 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     printf("DLL Main\n");
 	return 1;
 }
-
-#endif

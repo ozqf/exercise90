@@ -17,6 +17,7 @@ void Scene_CreateTestScene()
     // 0
     *ent = {};
     ent->transform.pos.z = -2;
+    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 0);
     g_scene.numEntities++;
     ent++;
 
@@ -24,6 +25,7 @@ void Scene_CreateTestScene()
     *ent = {};
     ent->transform.rot.y = 90;
     ent->transform.pos.x = -2;
+    RendObj_SetAsColouredQuad(&ent->rendObj, 0, 1, 0);
     g_scene.numEntities++;
     ent++;
     
@@ -31,6 +33,7 @@ void Scene_CreateTestScene()
     *ent = {};
     ent->transform.rot.y = 270;
     ent->transform.pos.x = 2;
+    RendObj_SetAsColouredQuad(&ent->rendObj, 0, 0, 1);
     g_scene.numEntities++;
     ent++;
 
@@ -38,6 +41,7 @@ void Scene_CreateTestScene()
     *ent = {};
     ent->transform.rot.y = 180;
     ent->transform.pos.z = 2;
+    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 0);
     g_scene.numEntities++;
     ent++;
 
@@ -46,7 +50,7 @@ void Scene_CreateTestScene()
     ent->transform.rot.y = 0;
     ent->transform.pos.x = -3;
     ent->transform.pos.z = -4;
-    ent->displayMode = 1;
+    ent->rendObj.type = RENDOBJ_TYPE_BILLBOARD;
     g_scene.numEntities++;
     ent++;
     
@@ -55,6 +59,7 @@ void Scene_CreateTestScene()
     ent->transform.rot.y = 0;
     ent->transform.pos.x = 3;
     ent->transform.pos.z = -4;
+    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 0);
     g_scene.numEntities++;
     ent++;
 }
