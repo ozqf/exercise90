@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
-#include <windows.h>
+#include "win32_system_include.h"
 
 /****************************************************************
 Create a command window for debug output

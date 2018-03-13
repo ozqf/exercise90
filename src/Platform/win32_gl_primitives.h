@@ -316,14 +316,19 @@ void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)
 	if (input.pitchUp) { testInput.rotation.x += -1; }
 	if (input.pitchDown) { testInput.rotation.x += 1; }
 
-	if (input.rollLeft) { testInput.rotation.z += -1; }
-	if (input.rollRight) { testInput.rotation.z += 1; }
+	if (input.rollLeft) { testInput.rotation.z += 1; }
+	if (input.rollRight) { testInput.rotation.z += -1; }
 
-	// /this rotation is world axis aligned and thus broken!
-	t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time.deltaTime);
+	// x = pitch, y = yaw, z = roll
+	f32 sensitivity = 150.0f;
+	i8 inverted = -1;
+
+	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time.deltaTime);
+	t->rot.x -= (((f32)input.mouseMovement[1] * sensitivity) * time.deltaTime) * inverted;
 	t->rot.x = COM_CapAngleDegrees(t->rot.x);
 
-	t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time.deltaTime);
+	//t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time.deltaTime);
+	t->rot.y -= ((f32)input.mouseMovement[0] * sensitivity) * time.deltaTime;
 	t->rot.y = COM_CapAngleDegrees(t->rot.y);
 
 	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time.deltaTime);
@@ -384,13 +389,13 @@ sin(theta),	cos(theta),			0,			0,
 	t->pos.y += frameMove.y;
 	t->pos.z += frameMove.z;
 
-	char output[256];
-	sprintf_s(output, "FRAME MOVE\n\nPos: %.2f, %.2f, %.2f\n",
-		frameMove.x, frameMove.y, frameMove.z
-		);
-	OutputDebugStringA(output);
+	// char output[256];
+	// sprintf_s(output, "FRAME MOVE\n\nPos: %.2f, %.2f, %.2f\n",
+	// 	frameMove.x, frameMove.y, frameMove.z
+	// 	);
+	// OutputDebugStringA(output);
 }
-
+#if 0
 void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform, GameTime time)
 {
 	testInput.movement = { 0, 0, 0 };
@@ -436,10 +441,10 @@ void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Trans
 	transform->rot.z += testInput.rotation.z * testInput.rotSpeed;
 	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
 }
-
+#endif
 void Win32_ProcessTestInput(InputTick input, GameTime gameTime, RenderScene* scene)
 {
-	OutputDebugStringA("******* FRAME *******\n");
+	//OutputDebugStringA("******* FRAME *******\n");
 	Transform* t;
 
 	t = &scene->cameraTransform;

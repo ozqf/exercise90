@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Shared/shared.h"
-#include <windows.h>
+#include "win32_system_include.h"
 
 /****************************************************************
 RENDERING

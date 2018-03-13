@@ -4,6 +4,20 @@
 
 /*
 Requirements app has of platform interface:
+> Render Scene
+	> Set camera tranform.
+	> Set Projection mode (3D vs Ortho for 2D)
+> Update loop
+	> Variable step (rendering)
+	> Fixed step (for physics/network)
+> Raw Input
+	> Mouse
+	> Keyboard (raw keys?)
+	> Gamepad...?
+> Raw Sound
+> File IO
+> Network IO
+
 Maintaining rendering Scene graph options:
     > Pass through display object list every frame.
         The display list is maintained on the app site.
@@ -12,8 +26,6 @@ Maintaining rendering Scene graph options:
         displaylist and diplay objects on the Platform
         side.
         > cleaner?
-Set camera tranform.
-Set Projection mode (3D vs Ortho for 2D)
 */
 
 struct PlatformInterface

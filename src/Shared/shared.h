@@ -9,3 +9,4 @@
 #include "Memory/shared_memory_utils.h"
 #include "shared_string_utils.h"
 #include "blit_types.h"
+#include "shared_assets.h"

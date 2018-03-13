@@ -1,13 +1,13 @@
 #pragma once
 
-#include <stdint.h>
+//#include <stdint.h>
 
 #define BLOCK_HEADER_SIZE sizeof(HeapBlock)
 #define HEAP_DEFAULT_ALIGNMENT 16
 #define BLOCK_LABEL_SIZE 20
 
 // Size of array used to track fragments during defragging
-#define HEAP_FRAGMENT_TALLY_MAX 256
+#define Z_HEAP_FRAGMENT_TALLY_MAX 256
 
 /*****************************
  * A reference to specific block on the Heap

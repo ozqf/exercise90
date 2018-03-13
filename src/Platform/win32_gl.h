@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gl/gl.h>
-#include <windows.h>
+#include "win32_system_include.h"
 
 #include "../Shared/shared.h"
 #include "win32_main.h"
@@ -302,6 +302,12 @@ void R_RenderPrimitive(Transform* camera, Entity* entity)
 	}
 }
 
+/*
+glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+to switch on,
+glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+*/
+
 void R_RenderBillboard(Transform* camera, Entity* entity)
 {
 	R_SetModelViewMatrix_Billboard(camera, &entity->transform);
@@ -309,10 +315,30 @@ void R_RenderBillboard(Transform* camera, Entity* entity)
 	R_RenderTestGeometry_RainbowQuad();
 }
 
+void R_RenderMesh(Transform* camera, Entity* entity)
+{
+	R_SetModelViewMatrix(camera, &entity->transform);
+	R_SetupTestTexture();
+	RendObj_ColouredMesh* meshRend = &entity->rendObj.obj.mesh;
+
+	AssertAlways(meshRend->mesh != NULL);
+	//f32* meshVerts = mesh->verts;
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, meshRend->mesh->verts);
+	glDrawArrays(GL_TRIANGLES, 0, meshRend->mesh->numVerts);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void R_RenderEntity(Transform* camera, Entity* entity)
 {
 	switch(entity->rendObj.type)
 	{
+		case RENDOBJ_TYPE_MESH:
+		{
+			R_RenderMesh(camera, entity);
+		} break;
+
 		case RENDOBJ_TYPE_PRIMITIVE:
 		{
 			R_RenderPrimitive(camera, entity);

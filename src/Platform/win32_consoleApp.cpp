@@ -6,7 +6,7 @@
 #pragma once
 
 #include <stdio.h>
-#include <windows.h>
+#include "win32_system_include.h"
 
 #include "../Shared/shared.h"
 #include "../Shared/Memory/Heap.cpp"

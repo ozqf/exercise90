@@ -17,7 +17,9 @@ void Scene_CreateTestScene()
     // 0
     *ent = {};
     ent->transform.pos.z = -2;
-    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 0);
+    //g_meshPrimitive_quad
+    //RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 1);
+    RendObj_SetAsMesh(&ent->rendObj, &g_meshPrimitive_quad, 0, 1, 0, 0);
     g_scene.numEntities++;
     ent++;
 
@@ -36,12 +38,12 @@ void Scene_CreateTestScene()
     RendObj_SetAsColouredQuad(&ent->rendObj, 0, 0, 1);
     g_scene.numEntities++;
     ent++;
-
+    
     // 3
     *ent = {};
     ent->transform.rot.y = 180;
     ent->transform.pos.z = 2;
-    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 0, 0);
+    RendObj_SetAsColouredQuad(&ent->rendObj, 1, 1, 0);
     g_scene.numEntities++;
     ent++;
 

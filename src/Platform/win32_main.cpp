@@ -4,9 +4,7 @@
 #pragma once
 
 #include <stdio.h>
-#include <windows.h>
-
-
+#include "win32_system_include.h"
 
 #include "../Shared/shared.h"
 #include "../interface/platform_interface.h"
@@ -17,6 +15,7 @@
 #include "win32_main.h"
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
+#include "win32_fileIO.h"
 #include "win32_gl.h"
 
 global_variable PlatformInterface platInterface;
@@ -124,8 +123,8 @@ f32 Win32_GetViewPortMinX() { return 0; }
 f32 Win32_GetViewPortMinY() { return 0; }
 f32 Win32_GetViewPortMaxX() { return 1280; }
 f32 Win32_GetViewPortMaxY() { return 768; }
-void Win32_ClearScreen(void) { }
-void Win32_DrawBlitItems(BlitItem* items, i32 numItems) { }
+void Win32_ClearScreen(void) {}
+void Win32_DrawBlitItems(BlitItem *items, i32 numItems) {}
 
 void Win32_InitPlatformInterface()
 {
@@ -142,7 +141,7 @@ u8 Win32_LinkToApplication()
     gameModule = LoadLibraryA(appModulePath);
     if (gameModule != NULL)
     {
-        Func_LinkToApp* linkToApp = (Func_LinkToApp*)GetProcAddress(gameModule, "LinkToApp");
+        Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(gameModule, "LinkToApp");
         if (linkToApp != NULL)
         {
             app = linkToApp(platInterface);
@@ -298,6 +297,91 @@ win32_window_dimension Win32_GetWindowDimension(HWND window)
     return result;
 }
 
+global_variable POINT g_win32_mousePos = {};
+global_variable POINT g_win32_mousePosLast = {};
+global_variable POINT g_win32_mousePosMove = {};
+void Win32_InitInput()
+{
+    //DebugBreak();
+    
+    g_win32_mousePos.x = 0;
+    g_win32_mousePos.y = 0;
+    g_win32_mousePosLast.x = 0;
+    g_win32_mousePosLast.y = 0;
+    g_win32_mousePosMove.x = 0;
+    g_win32_mousePosMove.y = 0;
+
+	// Register a handle for receiving raw mouse input via WM_INPUT
+    // Copied from MSDN article
+    #ifndef HID_USAGE_PAGE_GENERIC
+    #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+    #endif
+    #ifndef HID_USAGE_GENERIC_MOUSE
+    #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+    #endif
+
+    RAWINPUTDEVICE Rid[1];
+    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
+    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
+    Rid[0].dwFlags = RIDEV_INPUTSINK;   
+    Rid[0].hwndTarget = appWindow;
+    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+}
+
+void Win32_PollMouse(InputTick *input)
+{
+#if 1
+    // Output mouse position. Sampling occurred in WM_INPUT EVENT
+    char buf[128];
+    sprintf_s(buf, 128, "Mouse pos: %d, %d\nMove: %d, %d\n",
+              g_win32_mousePos.x,
+              g_win32_mousePos.y,
+              g_win32_mousePosMove.x,
+              g_win32_mousePosMove.y);
+    OutputDebugString(buf);
+	input->mouseMovement[0] = g_win32_mousePosMove.x;
+	input->mouseMovement[1] = g_win32_mousePosMove.y;
+	// Clear mouse input and accumulate for next read
+	g_win32_mousePosMove.x = 0;
+	g_win32_mousePosMove.y = 0;
+#endif
+    // static i32 lastMouseX;
+    // static i32 lastMouseY;
+#if 0
+    if (GetCursorPos(&g_win32_mousePos))
+    {
+        if (ScreenToClient(appWindow, &g_win32_mousePos))
+        {
+            g_win32_mousePosMove.x = g_win32_mousePos.x - g_win32_mousePosLast.x;
+            g_win32_mousePosMove.y = g_win32_mousePos.y - g_win32_mousePosLast.y;
+            g_win32_mousePosLast.x = g_win32_mousePos.x;
+            g_win32_mousePosLast.y = g_win32_mousePos.y;
+
+            if (g_win32_mousePosMove.x > 9999 || g_win32_mousePosMove.y > 9999)
+            {
+                Assert(false);
+            }
+
+            input->mouse[0] = g_win32_mousePos.x;
+	        input->mouse[1] = g_win32_mousePos.y;
+	        input->mouseMovement[0] = g_win32_mousePosMove.x;
+	        input->mouseMovement[1] = g_win32_mousePosMove.y;
+            if (g_win32_mousePosMove.x != 0 || g_win32_mousePosMove.y != 0)
+            {
+                char buf[128];
+                sprintf_s(buf, 128, "Mouse pos: %d, %d\nMove: %d, %d\n",
+	        	    g_win32_mousePos.x,
+    	        	g_win32_mousePos.y,
+	        	    g_win32_mousePosMove.x,
+	        	    g_win32_mousePosMove.y);
+                OutputDebugString(buf);
+            }
+
+        }
+    }
+#endif
+}
+
 /*********************************************************************
 Windows message callback
 *********************************************************************/
@@ -311,6 +395,51 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     {
     }
     break;
+
+#if 1
+    case WM_INPUT:
+    {
+        /*
+        Taken from
+        https://msdn.microsoft.com/en-us/library/windows/desktop/ee418864(v=vs.100).aspx
+        article on reading mouse input
+        */
+        UINT dwSize = 40;
+        static BYTE lpb[40];
+
+        GetRawInputData((HRAWINPUT)lParam, RID_INPUT,
+                        lpb, &dwSize, sizeof(RAWINPUTHEADER));
+
+        RAWINPUT *raw = (RAWINPUT *)lpb;
+
+        if (raw->header.dwType == RIM_TYPEMOUSE)
+        {
+            int xPosRelative = raw->data.mouse.lLastX;
+            int yPosRelative = raw->data.mouse.lLastY;
+
+            g_win32_mousePosMove.x += raw->data.mouse.lLastX;
+			g_win32_mousePosMove.y += raw->data.mouse.lLastY;
+        }
+    }
+    break;
+#endif
+
+#if 0
+    case WM_MOUSEMOVE:
+    {
+        POINT mouseP;
+        if (GetCursorPos(&mouseP))
+        {
+            if (ScreenToClient(appWindow, &mouseP))
+            {
+                char buf[64];
+                sprintf_s(buf, 64, "Mouse pos: %d, %d\n", mouseP.x, mouseP.y);
+                OutputDebugString(buf);
+            }
+        }
+    }
+    break;
+#endif
 
     case WM_CLOSE:
     {
@@ -361,15 +490,15 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
                 //printf("Spacebar superstar\n");
                 //global_timePassed = 0;
                 //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
-				
+
                 ++g_gl_primitive_mode;
                 if (g_gl_primitive_mode >= NUM_GL_PRIMITIVE_MODES)
                 {
                     g_gl_primitive_mode = 0;
                 }
-				char output[256];
-				sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
-				OutputDebugStringA(output);
+                char output[256];
+                sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
+                OutputDebugStringA(output);
             }
         }
         else if (VKCode == 'W')
@@ -421,7 +550,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             //     g_gl_primitive_degrees_X -= 5;
             //     if (g_gl_primitive_degrees_X < 0) { g_gl_primitive_degrees_X += 360; }
             // }
-            
         }
         else if (VKCode == VK_DOWN)
         {
@@ -431,7 +559,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             //     g_gl_primitive_degrees_X += 5;
             //     if (g_gl_primitive_degrees_X >= 360) { g_gl_primitive_degrees_X -= 360; }
             // }
-            
         }
         else if (VKCode == VK_LEFT)
         {
@@ -442,8 +569,8 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             //     if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y += 360; }
             //     //if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y = 0; }
             //     // char output[256];
-			// 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-			// 	// OutputDebugStringA(output);
+            // 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+            // 	// OutputDebugStringA(output);
             // }
         }
         else if (VKCode == VK_RIGHT)
@@ -455,8 +582,8 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             //     //if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y = 360; }
             //     if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y -= 360; }
             //     // char output[256];
-			// 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-			// 	// OutputDebugStringA(output);
+            // 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
+            // 	// OutputDebugStringA(output);
             // }
         }
         else if (VKCode == VK_SPACE)
@@ -514,7 +641,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     return result;
 }
 
-void Win32_ErrorBox(char* msg, char* title)
+void Win32_ErrorBox(char *msg, char *title)
 {
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
 }
@@ -529,6 +656,7 @@ int CALLBACK WinMain(
     int nCmdShow)
 {
     //MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
+    //DebugBreak();
 
     Win32_ReadCommandLine(lpCmdLine);
     //Assert(false);
@@ -569,22 +697,22 @@ int CALLBACK WinMain(
 
     Win32_InitPlatformInterface();
 
-    #if 0
+#if 0
     // not using game dll yet
     if (!Win32_LinkToApplication())
     {
         return 1;
     }
-    #endif
+#endif
 
-    #if 1
+#if 1
     if (!Win32_LinkToAppStub())
     {
         MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
         return 1;
     }
-    #endif
-    
+#endif
+
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
     {
@@ -610,9 +738,14 @@ int CALLBACK WinMain(
                 globalRunning = false;
             }
 
+			// Input requires appWindow handle to register for mouse events
+			Win32_InitInput();
+
             float previousTime = Win32_InitFloatTime();
             GameTime time = {};
 
+            // Make sure assets are ready before scene!
+            SharedAssets_Init();
             Scene_Init();
 
             while (globalRunning)
@@ -632,10 +765,30 @@ int CALLBACK WinMain(
                 time.deltaTime = newTime - previousTime;
                 previousTime = newTime;
 
+                //AssertAlways(time.deltaTime >= 0);
+                if (time.deltaTime < 0)
+                {
+                    MessageBox(0, "Error: Negative timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
+                    return 1;
+                }
+
+                /*if (time.deltaTime > 1)
+                {
+                    MessageBox(0, "Error: Excessive timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
+                    return 1;
+                }*/
+
                 char buf[64];
                 sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
                 OutputDebugString(buf);
 
+                // RECT selfRect;
+                // GetWindowRect(appWindow, &selfRect);
+                // SetCursorPos(selfRect.right - selfRect.left, selfRect.bottom - selfRect.top);
+
+                // ClipCursor(&selfRect);
+
+                Win32_PollMouse(&inputTick);
                 Win32_ProcessTestInput(inputTick, time, &g_scene);
                 //app->AppUpdate(&time, &inputTick);
                 Scene_Tick(time, &g_scene);

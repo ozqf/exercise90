@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdio.h>
+// #include <stdint.h>
+// #include <stdio.h>
 #include "Heap.h"
 #include "../shared.h"
 
@@ -80,8 +80,8 @@ void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
     heap->freeSpace = allocatedSize;
 
     u32 lastAddress = (u32)allocatedMemory + allocatedSize;
-    printf("Heap init with %d bytes. Address range: %d to %d\n",
-           allocatedSize, (u32)allocatedMemory, lastAddress);
+    // printf("Heap init with %d bytes. Address range: %d to %d\n",
+    //        allocatedSize, (u32)allocatedMemory, lastAddress);
 }
 
 HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId)
@@ -145,65 +145,81 @@ u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
         u32 distToNext = (u32)next->mem.ptrMemory - (u32)block->mem.ptrMemory;
         result = distToNext - (BLOCK_HEADER_SIZE + block->mem.volumeSize);
 
-#if VERBOSE
-        printf(" Space between block %d and block %d: %d\n",
-               block->mem.id, next->mem.id, result);
-#endif
+// #if VERBOSE
+//         printf(" Space between block %d and block %d: %d\n",
+//                block->mem.id, next->mem.id, result);
+// #endif
     }
     else
     {
         // No block after this one. result = end of heap - end of block volume
         result = ((u32)heap->ptrEnd - (u32)block) - (BLOCK_HEADER_SIZE + block->mem.volumeSize);
 
-#if VERBOSE
-        printf(" Space between block %d and Heap end: %d\n",
-               block->mem.id, result);
-#endif
+// #if VERBOSE
+//         printf(" Space between block %d and Heap end: %d\n",
+//                block->mem.id, result);
+// #endif
     }
     return result;
 }
 
-void Heap_DebugPrintAllocations(Heap *heap)
+void Heap_DebugPrintAllocations2(Heap *heap)
 {
-    printf("\n** HEAP PRINT **\n");
+
+    printf_s("\n** HEAP PRINT **\n");
     u32 startAddress = (u32)heap->ptrMemory;
-    u32 fragments[HEAP_FRAGMENT_TALLY_MAX];
+    u32 fragments[Z_HEAP_FRAGMENT_TALLY_MAX];
+    fragments[0] = 0;
+
     u32 fragmentIndex = 0;
-    HeapBlock *block = heap->headBlock;
-    if (block == NULL)
+    HeapBlock *heapBlock = heap->headBlock;
+    if (heapBlock == NULL)
     {
-        printf("Heap is empty. Size: %d\n", heap->size);
+        //printf("Heap is empty. Size: %d\n", heap->size);
         return;
     }
-    u32 spaceBeforeHead = (u32)block - (u32)heap->ptrMemory;
-    printf("Space before Block head: %d.\n", spaceBeforeHead);
+
+    u32 spaceBeforeHead = (u32)heapBlock - (u32)heap->ptrMemory;
+    //printf("Space before Block head: %d.\n", spaceBeforeHead);
     u32 totalSpace = 0;
     if (totalSpace > 0) { fragments[fragmentIndex++] = totalSpace; }
-
-    while (block != NULL)
+    i32 j = 0;
+    for (;j < 4;) { j++; }
+#if 1
+    while (heapBlock != NULL)
     {
-        u32 space = Heap_CalcSpaceAfterBlock(heap, block);
-        u32 blockVolume = block->mem.volumeSize + BLOCK_HEADER_SIZE;
+#if 1
+        u32 space = Heap_CalcSpaceAfterBlock(heap, heapBlock);
+        u32 blockVolume = heapBlock->mem.volumeSize + BLOCK_HEADER_SIZE;
         totalSpace += blockVolume;
-        if (space > 0 && fragmentIndex < HEAP_FRAGMENT_TALLY_MAX)
+        if (space > 0 && fragmentIndex < Z_HEAP_FRAGMENT_TALLY_MAX)
         {
             fragments[fragmentIndex++] = space;
         }
-        u32 address = (u32)block - startAddress;
-        printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
-               address, block->mem.id, block->mem.debugLabel, block->mem.objectSize, blockVolume, space);
-        
-        block = block->mem.next;
-    }
+        u32 address = (u32)heapBlock - startAddress;
 
-    printf("Fragments: ");
+        // printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
+        //        address,
+        //        heapBlock->mem.id,
+        //        heapBlock->mem.debugLabel,
+        //        heapBlock->mem.objectSize,
+        //        blockVolume,
+        //        space);
+
+        heapBlock = heapBlock->mem.next;
+#endif
+    }
+#endif
+    //printf("Fragments: ");
     for (u32 i = 0; i < fragmentIndex; ++i)
     {
         printf("%d, ", fragments[i]);
     }
 
     printf("\nUsed: %d of %d\n", totalSpace, heap->size);
+
 }
+
 
 /*****************************
  * LINKED LIST OPERATIONS
@@ -299,28 +315,28 @@ void Heap_FreeBlock(Heap *heap, HeapBlock *block)
 u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
 {
     Assert(heap != NULL);
-#if VERBOSE
-    printf("> HEAP ALLOC %d bytes\n", objectSize);
-#endif
+// #if VERBOSE
+//     printf("> HEAP ALLOC %d bytes\n", objectSize);
+// #endif
     u32 volumeSize = Com_AlignSize(objectSize, heap->alignmentBytes);
     HeapBlock *newBlock = NULL;
     if (heap->headBlock == NULL)
     {
         // No blocks are in the heap. Create first
         u32 heapSpace = (u32)heap->ptrEnd - (u32)heap->ptrMemory;
-#if VERBOSE
-        printf("  First alloc Heap space: %d vs volume size: %d\n", heapSpace, volumeSize);
-#endif
-        printf("Vol Size (%d) < Heap Space (%d)?\n", volumeSize, heapSpace);
+// #if VERBOSE
+//         printf("  First alloc Heap space: %d vs volume size: %d\n", heapSpace, volumeSize);
+// #endif
+//         printf("Vol Size (%d) < Heap Space (%d)?\n", volumeSize, heapSpace);
         AssertAlways(volumeSize <= heapSpace);
 
         newBlock = (HeapBlock *)heap->ptrMemory;
         *newBlock = {};
         Heap_InsertBlock(heap, newBlock, NULL);
 
-#if VERBOSE
-        printf("  Allocating first block, no jump\n");
-#endif
+// #if VERBOSE
+//         printf("  Allocating first block, no jump\n");
+// #endif
     }
     else
     {
@@ -345,7 +361,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
             {
                 if (count > 10)
                 {
-                    printf("Block scan ran away... aborting");
+                    //printf("Block scan ran away... aborting");
                     AssertAlways(false);
                     break;
                 }
@@ -360,17 +376,17 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
                     Heap_InsertBlock(heap, newBlock, iterator);
 
                     iterator->mem.next = newBlock;
-#if VERBOSE
-                    printf("  Address at block %d: %d. Volume size: %d. Jumping %d\n",
-                           count, (u32)iterator, iterator->mem.volumeSize, jumpDistance);
-#endif
+// #if VERBOSE
+//                     printf("  Address at block %d: %d. Volume size: %d. Jumping %d\n",
+//                            count, (u32)iterator, iterator->mem.volumeSize, jumpDistance);
+// #endif
                     break;
                 }
                 else
                 {
-#if VERBOSE
-                    printf("  No space at block %d\n", count);
-#endif
+// #if VERBOSE
+//                     printf("  No space at block %d\n", count);
+// #endif
                     iterator = iterator->mem.next;
                     // If space check failed and no more blocks are available
                     // then the heap is full... realloc or crash
@@ -393,10 +409,10 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
     Com_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0XCC);
     #endif
 
-#if VERBOSE
-    printf("    NEW BLOCK %d - BLOCK ADDRESS: %d, MEM ADDRESS: %d, OBJECT SIZE: %d VOLUME SIZE: %d\n",
-           heap->nextID, (i32)newBlock, (u32)newBlock->mem.ptrMemory, objectSize, newBlock->mem.volumeSize);
-#endif
+// #if VERBOSE
+//     printf("    NEW BLOCK %d - BLOCK ADDRESS: %d, MEM ADDRESS: %d, OBJECT SIZE: %d VOLUME SIZE: %d\n",
+//            heap->nextID, (i32)newBlock, (u32)newBlock->mem.ptrMemory, objectSize, newBlock->mem.volumeSize);
+// #endif
 
     if (bRef != NULL)
     {
@@ -456,7 +472,7 @@ example:    < Distance > < numBytes >
  * fill the given array with fragments
  * Returns the number of fragments found
  */
-i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment fragments[], i32 arraySize)
+i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize)
 {
     i32 fragIndex = 0;
     // space before headblock, different between block address and heap memory address
@@ -492,17 +508,22 @@ i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment fragments[], i32 arraySize)
     return fragIndex;
 }
 
-void Heap_Defrag(Heap *heap)
+void Heap_Defrag2(Heap *heap)
 {
-    heap->iteration++;
+    //heap->iteration++;
     /*
     - Naive Defrag -
     > Scan for first gap, then count blocks to the next gap
     > Shift block range to close gap
     > Repeat until space is only after last block
     */
+    // char strArray[32];
+    // char* str = strArray;
+    // str = "boo";
+    // printf("%s\n", str);
 
-
-    Heap_Fragment fragments[HEAP_FRAGMENT_TALLY_MAX];
-    i32 numFragments = Heap_ScanForFragments(heap, fragments, HEAP_FRAGMENT_TALLY_MAX);
+    // Heap_Fragment fragments[1];
+    // i32 numFragments = Heap_ScanForFragments(heap, fragments, 1);
 }
+#if 0
+#endif

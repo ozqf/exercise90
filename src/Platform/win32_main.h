@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+#include "win32_system_include.h"
 
 /****************************************************************
 STRUCTS

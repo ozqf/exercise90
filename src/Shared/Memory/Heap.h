@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../Shared/shared.h"
+//#include "../Shared/shared.h"
 #include "HeapTypes.h"
+#include "Heap.cpp"
 
 // void Heap_Init(Heap* heap, void* allocatedMemory, uint32_t allocatedSize);
 // void* Heap_FindBlock(Heap* heap, uint32_t blockId);

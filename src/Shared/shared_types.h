@@ -242,9 +242,9 @@ struct Mesh
 
 	u32 numVerts;
 
-	Vec3* verts;
-	Vec3* normals;
-	Vec3* uvs;
+	f32* verts;
+	f32* normals;
+	f32* uvs;
 };
 
 /*****************************************************
@@ -268,6 +268,7 @@ struct GameTime
 struct InputTick
 {
     i32 mouse[2];
+    i32 mouseMovement[2];
     char moveLeft, moveRight, moveUp, moveDown, moveForward, moveBackward;
     char yawLeft, yawRight, pitchUp, pitchDown;
     char rollLeft, rollRight;
@@ -306,7 +307,8 @@ struct Transform2
 #define RENDOBJ_TYPE_NONE 0
 #define RENDOBJ_TYPE_PRIMITIVE 1
 #define RENDOBJ_TYPE_BILLBOARD 2
-#define RENDOBJ_TYPE_LINE 3
+#define RENDOBJ_TYPE_MESH 3
+#define RENDOBJ_TYPE_LINE 4
 
 struct RendObj_Primitive
 {
@@ -331,13 +333,15 @@ struct RendObj_Line
 
 struct RendObj_ColouredMesh
 {
-    Vec3* verts;
-    Vec3* colours;
+    Mesh* mesh;
+    f32 r, g, b;
+    i32 textureIndex;
 };
 
 union RendObj_Union
 {
     RendObj_Primitive primitive;
+    RendObj_ColouredMesh mesh;
 };
 
 struct RendObj
@@ -348,6 +352,18 @@ struct RendObj
 
 #define REND_PRIMITIVE_TYPE_RAINBOW_QUAD 0
 #define REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD 1
+
+void RendObj_SetAsMesh(RendObj* obj, Mesh* mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
+{
+    obj->type = RENDOBJ_TYPE_MESH;
+
+    RendObj_ColouredMesh* rend = &obj->obj.mesh;
+    rend->mesh = mesh;
+    rend->r = red;
+    rend->g = green;
+    rend->b = blue;
+    rend->textureIndex = textureIndex;   
+}
 
 void RendObj_SetAsRainbowQuad(RendObj* obj)
 {
