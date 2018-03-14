@@ -10,3 +10,4 @@
 #include "shared_string_utils.h"
 #include "blit_types.h"
 #include "shared_assets.h"
+#include "shared_render_types.h"

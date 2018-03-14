@@ -278,11 +278,11 @@ void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b)
     glEnd();
 }
 
-void R_RenderPrimitive(Transform* camera, Entity* entity)
+void R_RenderPrimitive(Transform* camera, RendObj* obj)
 {
-	R_SetModelViewMatrix(camera, &entity->transform);
+	R_SetModelViewMatrix(camera, &obj->transform);
 	R_SetupTestTexture();
-	RendObj_Primitive* prim = &entity->rendObj.obj.primitive;
+	RendObj_Primitive* prim = &obj->obj.primitive;
 	switch (prim->primitiveType)
 	{
 		case REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD:
@@ -308,18 +308,18 @@ to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
 
-void R_RenderBillboard(Transform* camera, Entity* entity)
+void R_RenderBillboard(Transform* camera, RendObj* obj)
 {
-	R_SetModelViewMatrix_Billboard(camera, &entity->transform);
+	R_SetModelViewMatrix_Billboard(camera, &obj->transform);
 	R_SetupTestTexture();
 	R_RenderTestGeometry_RainbowQuad();
 }
 
-void R_RenderMesh(Transform* camera, Entity* entity)
+void R_RenderMesh(Transform* camera, RendObj* obj)
 {
-	R_SetModelViewMatrix(camera, &entity->transform);
+	R_SetModelViewMatrix(camera, &obj->transform);
 	R_SetupTestTexture();
-	RendObj_ColouredMesh* meshRend = &entity->rendObj.obj.mesh;
+	RendObj_ColouredMesh* meshRend = &obj->obj.mesh;
 
 	AssertAlways(meshRend->mesh != NULL);
 	//f32* meshVerts = mesh->verts;
@@ -330,23 +330,23 @@ void R_RenderMesh(Transform* camera, Entity* entity)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void R_RenderEntity(Transform* camera, Entity* entity)
+void R_RenderEntity(Transform* camera, RendObj* obj)
 {
-	switch(entity->rendObj.type)
+	switch(obj->type)
 	{
 		case RENDOBJ_TYPE_MESH:
 		{
-			R_RenderMesh(camera, entity);
+			R_RenderMesh(camera, obj);
 		} break;
 
 		case RENDOBJ_TYPE_PRIMITIVE:
 		{
-			R_RenderPrimitive(camera, entity);
+			R_RenderPrimitive(camera, obj);
 		} break;
 
 		case RENDOBJ_TYPE_BILLBOARD:
 		{
-			R_RenderBillboard(camera, entity);
+			R_RenderBillboard(camera, obj);
 		} break;
 	}
 }
@@ -355,9 +355,9 @@ void R_RenderScene(RenderScene* scene)
 {
 	R_SetupProjection();
 	//R_SetupOrthoProjection(8);
-    for (u32 i = 0; i < scene->numEntities; ++i)
+    for (u32 i = 0; i < scene->numObjects; ++i)
     {
-        R_RenderEntity(&scene->cameraTransform, &scene->entities[i]);
+        R_RenderEntity(&scene->cameraTransform, &scene->rendObjects[i]);
 
         //R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
         //R_SetupTestTexture();

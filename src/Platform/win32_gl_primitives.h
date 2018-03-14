@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "../Shared/shared.h"
-#include "../Shared/g_scene.h"
+#include "../Shared/r_scene.h"
 #include "win32_main.h"
 
 #include "../Shared/linmath.h"
@@ -320,7 +320,7 @@ void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)
 	if (input.rollRight) { testInput.rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
-	f32 sensitivity = 150.0f;
+	f32 sensitivity = 10.0f;
 	i8 inverted = -1;
 
 	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time.deltaTime);

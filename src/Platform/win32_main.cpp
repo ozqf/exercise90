@@ -4,74 +4,20 @@
 #pragma once
 
 #include <stdio.h>
-#include "win32_system_include.h"
-
-#include "../Shared/shared.h"
-#include "../interface/platform_interface.h"
-#include "../interface/app_interface.h"
-#include "../interface/app_stub.h"
-#include "../Shared/g_scene.h"
 
 #include "win32_main.h"
+
+#include "win32_timing.cpp"
+#include "win32_input.cpp"
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
 #include "win32_fileIO.h"
+#include "win32_app_interface.cpp"
 #include "win32_gl.h"
-
-global_variable PlatformInterface platInterface;
-global_variable AppInterface app;
-global_variable HMODULE gameModule;
-global_variable char *appModulePath = "base/gamex86.dll";
-
-global_variable bool globalRunning = true;
-
-global_variable MemoryBlock gameMemory;
-
-global_variable InputTick inputTick;
-
-global_variable HWND appWindow;
-
-global_variable win32_offscreen_buffer globalBackBuffer;
-
-/**********************************************************************
- * TIMING
- *********************************************************************/
-global_variable double global_timePassed = 0;
-global_variable double global_secondsPerTick = 0;
-global_variable __int64 global_timeCount = 0;
-global_variable LARGE_INTEGER tick, tock;
-
-f32 Win32_InitFloatTime()
-{
-    LARGE_INTEGER frequency;
-    QueryPerformanceFrequency(&frequency);
-    global_secondsPerTick = 1.0 / (double)frequency.QuadPart;
-    LARGE_INTEGER counter;
-    QueryPerformanceCounter(&counter);
-    global_timeCount = counter.QuadPart;
-    return 0;
-}
-
-f32 Win32_FloatTime()
-{
-    LARGE_INTEGER counter;
-    QueryPerformanceCounter(&counter);
-
-    __int64 interval = counter.QuadPart - global_timeCount;
-    global_timeCount = counter.QuadPart;
-
-    double secondsGoneBy = (double)interval * global_secondsPerTick;
-    global_timePassed += secondsGoneBy;
-    return (float)global_timePassed;
-}
 
 /****************************************************************
 Command line
 ****************************************************************/
-// Nice array of points to the start of each token in the launch param string
-#define MAX_LAUNCH_PARAMS 50
-global_variable char *launchParams[MAX_LAUNCH_PARAMS];
-i32 numLaunchParams = 0;
 
 void Win32_ReadCommandLine(LPSTR lpCmdLine)
 {
@@ -115,167 +61,6 @@ void Win32_Shutdown()
     globalRunning = false;
 }
 
-/**********************************************************************
- * Attach to application DLL
- *********************************************************************/
-
-f32 Win32_GetViewPortMinX() { return 0; }
-f32 Win32_GetViewPortMinY() { return 0; }
-f32 Win32_GetViewPortMaxX() { return 1280; }
-f32 Win32_GetViewPortMaxY() { return 768; }
-void Win32_ClearScreen(void) {}
-void Win32_DrawBlitItems(BlitItem *items, i32 numItems) {}
-
-void Win32_InitPlatformInterface()
-{
-    platInterface.PlatformGetViewPortMinX = Win32_GetViewPortMinX;
-    platInterface.PlatformGetViewPortMinY = Win32_GetViewPortMinY;
-    platInterface.PlatformGetViewPortMaxX = Win32_GetViewPortMaxX;
-    platInterface.PlatformGetViewPortMaxY = Win32_GetViewPortMaxY;
-    platInterface.PlatformClearScreen = Win32_ClearScreen;
-    platInterface.PlatformRenderBlitItems = Win32_DrawBlitItems;
-}
-
-u8 Win32_LinkToApplication()
-{
-    gameModule = LoadLibraryA(appModulePath);
-    if (gameModule != NULL)
-    {
-        Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(gameModule, "LinkToApp");
-        if (linkToApp != NULL)
-        {
-            app = linkToApp(platInterface);
-            return 1;
-            // if (app != NULL)
-            // {
-            //     return 1;
-            // }
-            // else
-            // {
-            //     MessageBox(0, "No app returned from dll link", "Error", MB_OK | MB_ICONINFORMATION);
-            //     return 0;
-            // }
-        }
-        else
-        {
-            MessageBox(0, "Failed to find dll link function", "Error", MB_OK | MB_ICONINFORMATION);
-            return 0;
-        }
-    }
-    else
-    {
-        MessageBox(0, "Failed to find game dll", "Error", MB_OK | MB_ICONINFORMATION);
-        return 0;
-    }
-    //app = GetAppInterfaceStub(platInterface);
-}
-
-u8 Win32_LinkToAppStub()
-{
-    app = GetAppInterfaceStub(platInterface);
-    return 1;
-}
-
-/****************************************************************
-ALLOC MAIN MEMORY
-TODO: Return error code if it fails?
-****************************************************************/
-void Win32_Alloc(MemoryBlock *mem)
-{
-    i32 size = MegaBytes(2);
-    mem->size = size;
-    mem->ptrMemory = VirtualAlloc(0, mem->size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-}
-
-void Win32_Free(MemoryBlock *mem)
-{
-    if (mem)
-    {
-        // Reset to 0
-        char *cursor = (char *)mem->ptrMemory;
-        for (int i = 0; i < mem->size; ++i)
-        {
-            *cursor = 0;
-            cursor++;
-        }
-        VirtualFree(mem->ptrMemory, 0, MEM_RELEASE);
-        mem->ptrMemory = 0;
-    }
-}
-
-/**********************************************************************
- * PRIMITIVE FILE I/O
-/*********************************************************************/
-void Win32_FreeFileMemory(void *mem)
-{
-    VirtualFree(mem, 0, MEM_RELEASE);
-}
-
-void *Win32_ReadEntireFile(char *fileName)
-{
-    void *result = 0;
-    HANDLE fileHandle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-    if (fileHandle != INVALID_HANDLE_VALUE)
-    {
-        LARGE_INTEGER fileSize;
-        if (GetFileSizeEx(fileHandle, &fileSize))
-        {
-            LPDWORD bytesRead = 0;
-            u32 fileSize32 = SafeTruncateUInt64(fileSize.QuadPart);
-            result = VirtualAlloc(0, fileSize32, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-            if (result)
-            {
-                if (ReadFile(fileHandle, result, fileSize32, bytesRead, 0) && fileSize32 == (u32)bytesRead)
-                {
-                    // File read successfully
-                }
-                else
-                {
-                    Win32_FreeFileMemory(result);
-                    result = 0;
-                }
-            }
-            else
-            {
-                // TODO: Logging
-            }
-        }
-
-        CloseHandle(fileHandle);
-    }
-    return result;
-}
-
-bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
-{
-    bool32 result = false;
-
-    HANDLE fileHandle = CreateFileA(fileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
-    if (fileHandle != INVALID_HANDLE_VALUE)
-    {
-        DWORD bytesWritten;
-        if (WriteFile(fileHandle, memory, memorySize, &bytesWritten, 0))
-        {
-            // Make sure entire file was written
-            result = (bytesWritten == memorySize);
-        }
-        else
-        {
-            // TODO logging
-        }
-    }
-    else
-    {
-        // TODO logging
-    }
-    return result;
-}
-
-void Win32_PrintDebug(char *str)
-{
-    OutputDebugStringA(str);
-}
-
 /*********************************************************************
 Windows generic concat string
 *********************************************************************/
@@ -295,91 +80,6 @@ win32_window_dimension Win32_GetWindowDimension(HWND window)
     result.width = clientRect.right - clientRect.left;
     result.height = clientRect.bottom - clientRect.top;
     return result;
-}
-
-global_variable POINT g_win32_mousePos = {};
-global_variable POINT g_win32_mousePosLast = {};
-global_variable POINT g_win32_mousePosMove = {};
-void Win32_InitInput()
-{
-    //DebugBreak();
-    
-    g_win32_mousePos.x = 0;
-    g_win32_mousePos.y = 0;
-    g_win32_mousePosLast.x = 0;
-    g_win32_mousePosLast.y = 0;
-    g_win32_mousePosMove.x = 0;
-    g_win32_mousePosMove.y = 0;
-
-	// Register a handle for receiving raw mouse input via WM_INPUT
-    // Copied from MSDN article
-    #ifndef HID_USAGE_PAGE_GENERIC
-    #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
-    #endif
-    #ifndef HID_USAGE_GENERIC_MOUSE
-    #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
-    #endif
-
-    RAWINPUTDEVICE Rid[1];
-    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
-    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
-    Rid[0].dwFlags = RIDEV_INPUTSINK;   
-    Rid[0].hwndTarget = appWindow;
-    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
-}
-
-void Win32_PollMouse(InputTick *input)
-{
-#if 1
-    // Output mouse position. Sampling occurred in WM_INPUT EVENT
-    char buf[128];
-    sprintf_s(buf, 128, "Mouse pos: %d, %d\nMove: %d, %d\n",
-              g_win32_mousePos.x,
-              g_win32_mousePos.y,
-              g_win32_mousePosMove.x,
-              g_win32_mousePosMove.y);
-    OutputDebugString(buf);
-	input->mouseMovement[0] = g_win32_mousePosMove.x;
-	input->mouseMovement[1] = g_win32_mousePosMove.y;
-	// Clear mouse input and accumulate for next read
-	g_win32_mousePosMove.x = 0;
-	g_win32_mousePosMove.y = 0;
-#endif
-    // static i32 lastMouseX;
-    // static i32 lastMouseY;
-#if 0
-    if (GetCursorPos(&g_win32_mousePos))
-    {
-        if (ScreenToClient(appWindow, &g_win32_mousePos))
-        {
-            g_win32_mousePosMove.x = g_win32_mousePos.x - g_win32_mousePosLast.x;
-            g_win32_mousePosMove.y = g_win32_mousePos.y - g_win32_mousePosLast.y;
-            g_win32_mousePosLast.x = g_win32_mousePos.x;
-            g_win32_mousePosLast.y = g_win32_mousePos.y;
-
-            if (g_win32_mousePosMove.x > 9999 || g_win32_mousePosMove.y > 9999)
-            {
-                Assert(false);
-            }
-
-            input->mouse[0] = g_win32_mousePos.x;
-	        input->mouse[1] = g_win32_mousePos.y;
-	        input->mouseMovement[0] = g_win32_mousePosMove.x;
-	        input->mouseMovement[1] = g_win32_mousePosMove.y;
-            if (g_win32_mousePosMove.x != 0 || g_win32_mousePosMove.y != 0)
-            {
-                char buf[128];
-                sprintf_s(buf, 128, "Mouse pos: %d, %d\nMove: %d, %d\n",
-	        	    g_win32_mousePos.x,
-    	        	g_win32_mousePos.y,
-	        	    g_win32_mousePosMove.x,
-	        	    g_win32_mousePosMove.y);
-                OutputDebugString(buf);
-            }
-
-        }
-    }
-#endif
 }
 
 /*********************************************************************
@@ -664,9 +364,7 @@ int CALLBACK WinMain(
     InitDebug();
     printf("Debug init\n");
     printf("File %s, line: %d\n", __FILE__, __LINE__);
-    gameMemory = {};
-    Win32_Alloc(&gameMemory);
-
+    
     // Created basic window
     WNDCLASS WindowClass = {}; // {} initialises all variables to 0 (cpp only)
     WindowClass.style =
@@ -746,8 +444,11 @@ int CALLBACK WinMain(
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
-            Scene_Init();
+            R_Scene_Init();
 
+            /****************************************************************
+            Game loop
+            ****************************************************************/
             while (globalRunning)
             {
                 MSG message;
@@ -791,7 +492,7 @@ int CALLBACK WinMain(
                 Win32_PollMouse(&inputTick);
                 Win32_ProcessTestInput(inputTick, time, &g_scene);
                 //app->AppUpdate(&time, &inputTick);
-                Scene_Tick(time, &g_scene);
+                R_Scene_Tick(time, &g_scene);
                 Win32_RenderFrame(appWindow, &g_scene);
 
                 /* Stuff to add:

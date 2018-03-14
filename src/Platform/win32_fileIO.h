@@ -4,6 +4,78 @@
 
 #include "../Shared/Memory/Heap.h"
 
+/**********************************************************************
+ * PRIMITIVE FILE I/O
+/*********************************************************************/
+void Win32_FreeFileMemory(void *mem)
+{
+    VirtualFree(mem, 0, MEM_RELEASE);
+}
+
+void *Win32_ReadEntireFile(char *fileName)
+{
+    void *result = 0;
+    HANDLE fileHandle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    if (fileHandle != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER fileSize;
+        if (GetFileSizeEx(fileHandle, &fileSize))
+        {
+            LPDWORD bytesRead = 0;
+            u32 fileSize32 = SafeTruncateUInt64(fileSize.QuadPart);
+            result = VirtualAlloc(0, fileSize32, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+            if (result)
+            {
+                if (ReadFile(fileHandle, result, fileSize32, bytesRead, 0) && fileSize32 == (u32)bytesRead)
+                {
+                    // File read successfully
+                }
+                else
+                {
+                    Win32_FreeFileMemory(result);
+                    result = 0;
+                }
+            }
+            else
+            {
+                // TODO: Logging
+            }
+        }
+
+        CloseHandle(fileHandle);
+    }
+    return result;
+}
+
+bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
+{
+    bool32 result = false;
+
+    HANDLE fileHandle = CreateFileA(fileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    if (fileHandle != INVALID_HANDLE_VALUE)
+    {
+        DWORD bytesWritten;
+        if (WriteFile(fileHandle, memory, memorySize, &bytesWritten, 0))
+        {
+            // Make sure entire file was written
+            result = (bytesWritten == memorySize);
+        }
+        else
+        {
+            // TODO logging
+        }
+    }
+    else
+    {
+        // TODO logging
+    }
+    return result;
+}
+
+/**********************************************************************
+ * PRIMITIVE FILE I/O B version
+/*********************************************************************/
+
 //#include <stdio.h>
 //#include <stdarg.h>
 
