@@ -6,7 +6,6 @@
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
-#include "../Shared/r_scene.h"
 
 /****************************************************************
 STRUCTS
