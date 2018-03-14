@@ -48,9 +48,9 @@ void Win32_PrintDebug(char *str)
 /**********************************************************************
  * PLATFORM INTERFACE FUNCTIONS
  *********************************************************************/
-void Platform_R_DrawScene()
+void Platform_R_DrawScene(RenderScene* scene)
 {
-    
+    Win32_RenderFrame(appWindow, scene);
 }
 
 
@@ -60,12 +60,13 @@ void Platform_R_DrawScene()
 
 void Win32_InitPlatformInterface()
 {
-    platInterface.PlatformGetViewPortMinX = Platform_GetViewPortMinX;
-    platInterface.PlatformGetViewPortMinY = Platform_GetViewPortMinY;
-    platInterface.PlatformGetViewPortMaxX = Platform_GetViewPortMaxX;
-    platInterface.PlatformGetViewPortMaxY = Platform_GetViewPortMaxY;
-    platInterface.PlatformClearScreen = Platform_ClearScreen;
-    platInterface.PlatformRenderBlitItems = Platform_DrawBlitItems;
+    // platInterface.PlatformGetViewPortMinX = Platform_GetViewPortMinX;
+    // platInterface.PlatformGetViewPortMinY = Platform_GetViewPortMinY;
+    // platInterface.PlatformGetViewPortMaxX = Platform_GetViewPortMaxX;
+    // platInterface.PlatformGetViewPortMaxY = Platform_GetViewPortMaxY;
+    // platInterface.PlatformClearScreen = Platform_ClearScreen;
+    // platInterface.PlatformRenderBlitItems = Platform_DrawBlitItems;
+    platInterface.PlatformRenderScene = Platform_R_DrawScene;
 }
 
 u8 Win32_LinkToApplication()

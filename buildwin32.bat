@@ -1,6 +1,4 @@
 @echo off
-cls
-
 @echo Build SDL Platform
 
 if not exist bin mkdir bin

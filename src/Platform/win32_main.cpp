@@ -12,8 +12,10 @@
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
 #include "win32_fileIO.h"
-#include "win32_app_interface.cpp"
 #include "win32_gl.h"
+
+// Last as it probably calls into the others
+#include "win32_app_interface.cpp"
 
 /****************************************************************
 Command line
@@ -118,7 +120,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             int yPosRelative = raw->data.mouse.lLastY;
 
             g_win32_mousePosMove.x += raw->data.mouse.lLastX;
-			g_win32_mousePosMove.y += raw->data.mouse.lLastY;
+            g_win32_mousePosMove.y += raw->data.mouse.lLastY;
         }
     }
     break;
@@ -364,7 +366,7 @@ int CALLBACK WinMain(
     InitDebug();
     printf("Debug init\n");
     printf("File %s, line: %d\n", __FILE__, __LINE__);
-    
+
     // Created basic window
     WNDCLASS WindowClass = {}; // {} initialises all variables to 0 (cpp only)
     WindowClass.style =
@@ -393,24 +395,6 @@ int CALLBACK WinMain(
     //
     AdjustWindowRect(&r, WindowClass.style, false);
 
-    Win32_InitPlatformInterface();
-
-#if 0
-    // not using game dll yet
-    if (!Win32_LinkToApplication())
-    {
-        return 1;
-    }
-#endif
-
-#if 1
-    if (!Win32_LinkToAppStub())
-    {
-        MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
-        return 1;
-    }
-#endif
-
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
     {
@@ -436,15 +420,37 @@ int CALLBACK WinMain(
                 globalRunning = false;
             }
 
-			// Input requires appWindow handle to register for mouse events
-			Win32_InitInput();
+            // Input requires appWindow handle to register for mouse events
+            Win32_InitInput();
 
             float previousTime = Win32_InitFloatTime();
             GameTime time = {};
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
-            R_Scene_Init();
+
+            // Init interfaces and attach external stuff
+            Win32_InitPlatformInterface();
+
+#if 1
+            if (!Win32_LinkToApplication())
+            {
+                return 1;
+            }
+            if (!app.AppInit())
+            {
+                MessageBox(0, "Init App failed", "Error", MB_OK | MB_ICONINFORMATION);
+                return 1;
+            }
+#endif
+
+#if 0
+    if (!Win32_LinkToAppStub())
+    {
+        MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
+        return 1;
+    }
+#endif
 
             /****************************************************************
             Game loop
@@ -490,10 +496,10 @@ int CALLBACK WinMain(
                 // ClipCursor(&selfRect);
 
                 Win32_PollMouse(&inputTick);
-                Win32_ProcessTestInput(inputTick, time, &g_scene);
-                //app->AppUpdate(&time, &inputTick);
-                R_Scene_Tick(time, &g_scene);
-                Win32_RenderFrame(appWindow, &g_scene);
+                //Win32_ProcessTestInput(inputTick, time, &g_scene);
+                app.AppUpdate(&time, &inputTick);
+                // R_Scene_Tick(time, &g_scene);
+                // Win32_RenderFrame(appWindow, &g_scene);
 
                 /* Stuff to add:
                 > PlatformReadNetworkPackets();

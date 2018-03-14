@@ -63,4 +63,3 @@ global_variable LARGE_INTEGER tick, tock;
 #define MAX_LAUNCH_PARAMS 50
 global_variable char *launchParams[MAX_LAUNCH_PARAMS];
 global_variable i32 numLaunchParams = 0;
-

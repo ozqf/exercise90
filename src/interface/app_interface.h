@@ -8,10 +8,10 @@
 struct AppInterface
 {
     i32 isvalid;
-    void (*AppInit)();
-    void (*AppShutdown)();
+    i32 (*AppInit)();
+    i32 (*AppShutdown)();
     void (*AppUpdate)(GameTime* time, InputTick* tick);
-    void (*AppFixedUpdate)(GameTime* time, InputTick* tick);
+    //void (*AppFixedUpdate)(GameTime* time, InputTick* tick);
 };
 
 /*****************************************************

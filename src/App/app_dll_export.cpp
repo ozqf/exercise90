@@ -16,10 +16,10 @@ AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
 
     AppInterface app;
     app.isvalid = true;
-    app.AppInit = AppInit;
-    app.AppShutdown = AppShutdown;
-    app.AppFixedUpdate = AppFixedFrame;
-    app.AppUpdate = AppFrame;
+    app.AppInit = App_Init;
+    app.AppShutdown = App_Shutdown;
+    //app.AppFixedUpdate = App_FixedFrame;
+    app.AppUpdate = App_Frame;
 
     return app;
 }

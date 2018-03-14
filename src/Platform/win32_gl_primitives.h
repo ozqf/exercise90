@@ -3,11 +3,7 @@
 #include <gl/gl.h>
 #include <math.h>
 
-#include "../Shared/shared.h"
-#include "../Shared/r_scene.h"
 #include "win32_main.h"
-
-#include "../Shared/linmath.h"
 
 
 #define TEST_BUFFER_WIDTH 32
@@ -21,8 +17,6 @@ global_variable f32 g_gl_primitive_degrees_X = 0;
 global_variable f32 g_gl_primitive_degrees_Y = 0;
 
 global_variable f32 win32_aspectRatio = 0;
-
-global_variable GL_Test_Input testInput;
 
 //global_variable Transform cameraTransform;
 
@@ -165,9 +159,6 @@ void Win32_InitTestScene()
 	// g_numRenderObjects++;
 	// obj++;
     
-    testInput = {};
-	testInput.speed = 3.0f;
-    testInput.rotSpeed = 90.0f;
 
 }
 
@@ -302,6 +293,7 @@ void Win32_DebugPrintTransform(char* label, Transform* t)
 	OutputDebugStringA(output);
 }
 
+#if 0
 void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)
 {
 	testInput.movement = { 0, 0, 0 };
@@ -395,53 +387,7 @@ sin(theta),	cos(theta),			0,			0,
 	// 	);
 	// OutputDebugStringA(output);
 }
-#if 0
-void Win32_ApplyInputToTransform_OldNaiveRotationIgnoring(InputTick input, Transform* transform, GameTime time)
-{
-	testInput.movement = { 0, 0, 0 };
-	testInput.rotation = { 0, 0, 0 };
 
-	if (input.reset)
-	{
-		transform->pos = { 0, 0, 0 };
-		transform->rot = { 0, 0, 0 };
-		transform->scale = { 1, 1, 1 };
-		return;
-	}
-
-	if (input.moveLeft) { testInput.movement.x += -1; }
-	if (input.moveRight) { testInput.movement.x += 1; }
-
-	if (input.moveForward) { testInput.movement.z += -1; }
-	if (input.moveBackward) { testInput.movement.z += 1; }
-	
-	if (input.moveDown) { testInput.movement.y += -1; }
-	if (input.moveUp) { testInput.movement.y += 1; }
-	
-	// yaw
-	if (input.yawLeft) { testInput.rotation.y += -1; }
-	if (input.yawRight) { testInput.rotation.y += 1; }
-
-	// pitch
-	if (input.pitchUp) { testInput.rotation.x += -1; }
-	if (input.pitchDown) { testInput.rotation.x += 1; }
-
-	// roll
-	if (input.rollLeft) { testInput.rotation.z += -1; }
-	if (input.rollRight) { testInput.rotation.z += 1; }
-
-	transform->pos.x += testInput.movement.x * testInput.speed;
-	transform->pos.y += testInput.movement.y * testInput.speed;
-	transform->pos.z += testInput.movement.z * testInput.speed;
-
-	transform->rot.x += testInput.rotation.x * testInput.rotSpeed;
-	transform->rot.x = COM_CapAngleDegrees(transform->rot.x);
-	transform->rot.y += testInput.rotation.y * testInput.rotSpeed;
-	transform->rot.y = COM_CapAngleDegrees(transform->rot.y);
-	transform->rot.z += testInput.rotation.z * testInput.rotSpeed;
-	transform->rot.z = COM_CapAngleDegrees(transform->rot.z);
-}
-#endif
 void Win32_ProcessTestInput(InputTick input, GameTime gameTime, RenderScene* scene)
 {
 	//OutputDebugStringA("******* FRAME *******\n");
@@ -466,3 +412,4 @@ void Win32_ProcessTestInput(InputTick input, GameTime gameTime, RenderScene* sce
 		Win32_ApplyInputToTransform(input, t, gameTime);
 	}
 }
+#endif

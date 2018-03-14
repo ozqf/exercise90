@@ -1,24 +1,203 @@
 #pragma once
 
-#include "../Shared/shared.h"
-#include "../interface/app_interface.h"
-#include "../interface/platform_interface.h"
+#include "app_main.h"
 
 #include <stdio.h>
 
-PlatformInterface platform;
+#include "../Platform/win32_system_include.h"
 
-Entity player = {};
-
-int numBlitItems = 0;
-BlitItem blitItems[4096];
-
-void ClearBlitItems()
+void R_Scene_CreateTestScene()
 {
-    numBlitItems = 0;
+    RendObj* obj = g_rendObjects;
+
+    // 0
+    *obj = {};
+    obj->transform.pos.z = -2;
+    //g_meshPrimitive_quad
+    RendObj_SetAsColouredQuad(obj, 1, 0, 1);
+    //RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 0, 1, 0, 0);
+    g_scene.numObjects++;
+    obj++;
+
+    // 1
+    *obj = {};
+    obj->transform.rot.y = 90;
+    obj->transform.pos.x = -2;
+    RendObj_SetAsColouredQuad(obj, 0, 1, 0);
+    g_scene.numObjects++;
+    obj++;
+    
+    // 2
+    *obj = {};
+    obj->transform.rot.y = 270;
+    obj->transform.pos.x = 2;
+    RendObj_SetAsColouredQuad(obj, 0, 0, 1);
+    g_scene.numObjects++;
+    obj++;
+    
+    // 3
+    *obj = {};
+    obj->transform.rot.y = 180;
+    obj->transform.pos.z = 2;
+    RendObj_SetAsColouredQuad(obj, 1, 1, 0);
+    g_scene.numObjects++;
+    obj++;
+
+    // 4
+    *obj = {};
+    obj->transform.rot.y = 0;
+    obj->transform.pos.x = -3;
+    obj->transform.pos.z = -4;
+    obj->type = RENDOBJ_TYPE_BILLBOARD;
+    g_scene.numObjects++;
+    obj++;
+    
+    // 5
+    *obj = {};
+    obj->transform.rot.y = 0;
+    obj->transform.pos.x = 3;
+    obj->transform.pos.z = -4;
+    RendObj_SetAsColouredQuad(obj, 1, 0, 0);
+    g_scene.numObjects++;
+    obj++;
 }
 
-void AppInit()
+void R_Scene_Init()
+{
+    g_scene = {};
+    g_scene.numObjects = 0;
+    g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
+    g_scene.rendObjects = g_rendObjects;
+}
+
+void R_Scene_Tick(GameTime* time, RenderScene* scene)
+{
+    RendObj* obj;
+    i32 rotatingEntity = 5;
+
+    obj = &scene->rendObjects[5];
+    obj->transform.rot.y += 90 * time->deltaTime;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Process Input
+////////////////////////////////////////////////////////////////////////////
+void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
+{
+	testInput.movement = { 0, 0, 0 };
+	testInput.rotation = { 0, 0, 0 };
+
+	/////////////////////////////////////////////////
+	// READ ROTATION
+	/////////////////////////////////////////////////
+	if (input->yawLeft) { testInput.rotation.y += 1; }
+	if (input->yawRight) { testInput.rotation.y += -1; }
+
+	if (input->pitchUp) { testInput.rotation.x += -1; }
+	if (input->pitchDown) { testInput.rotation.x += 1; }
+
+	if (input->rollLeft) { testInput.rotation.z += 1; }
+	if (input->rollRight) { testInput.rotation.z += -1; }
+
+	// x = pitch, y = yaw, z = roll
+	f32 sensitivity = 10.0f;
+	i8 inverted = -1;
+
+	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time->deltaTime);
+	t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
+	t->rot.x = COM_CapAngleDegrees(t->rot.x);
+
+	//t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time->deltaTime);
+	t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity) * time->deltaTime;
+	t->rot.y = COM_CapAngleDegrees(t->rot.y);
+
+	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time->deltaTime);
+	t->rot.z = COM_CapAngleDegrees(t->rot.z);
+
+	if (input->moveLeft)
+	{
+		testInput.movement.x += -1;
+	}
+	if (input->moveRight)
+	{
+		testInput.movement.x += 1;
+	}
+	if (input->moveForward)
+	{
+		testInput.movement.z += -1;
+	}
+	if (input->moveBackward)
+	{
+		testInput.movement.z += 1;
+	}
+
+	if (input->moveDown)
+	{
+		testInput.movement.y += -1;
+	}
+	if (input->moveUp)
+	{
+		testInput.movement.y += 1;
+	}
+	
+/*
+Movement forward requires creating a vector in the direction of
+the object's "forward". Object in this case has rotation, so must convert
+rotation to a forward vector, and then scale this vector by desired speed
+to create a velocity change in the desired direction
+
+> Read rotation input and rotate angles
+> Calculate forward vector
+> Scale forward to desired speed and add to position
+
+Rotation Matrix to rotate on Z axis
+cos(theta),	-sin(theta),		0,			0,
+sin(theta),	cos(theta),			0,			0,
+0,			0,					1,			0,
+0,			0,					0,			1
+*/
+	Vec3 frameMove = {};
+	
+	// Sideways: X Input
+	// Vertical: Y Input
+	// Forward: Z input
+
+	// if (Vec3_Magnitude(&testInput.movement) == 0)
+	// {
+	// 	return;
+	// }
+
+	AngleToAxes(&t->rot, &t->left, &t->up, &t->forward);
+
+	Vec3 forward = t->forward;
+	Vec3 left = t->left;
+	Vec3 up = t->up;
+
+	// If input is blank mag will be speed * 0?
+	Vec3_SetMagnitude(&left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
+	Vec3_SetMagnitude(&up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
+	Vec3_SetMagnitude(&forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
+	
+	frameMove.x = forward.x + up.x + left.x;
+	frameMove.y = forward.y + up.y + left.y;
+	frameMove.z = forward.z + up.z + left.z;
+
+	t->pos.x += frameMove.x;
+	t->pos.y += frameMove.y;
+	t->pos.z += frameMove.z;
+
+	// char output[256];
+	// sprintf_s(output, "FRAME MOVE\n\nPos: %.2f, %.2f, %.2f\n",
+	// 	frameMove.x, frameMove.y, frameMove.z
+	// 	);
+	// OutputDebugStringA(output);
+}
+
+////////////////////////////////////////////////////////////////////////////
+// App Interface
+// App_ == interface function
+////////////////////////////////////////////////////////////////////////////
+i32 App_Init()
 {
     printf("DLL Init\n");
     // Init player
@@ -29,96 +208,44 @@ void AppInit()
     // player.vel[0] = 0;
     // player.vel[1] = 0;
     // player.speed = 10;
+    R_Scene_Init();
+    R_Scene_CreateTestScene();
+
+    testInput = {};
+	testInput.speed = 3.0f;
+    testInput.rotSpeed = 90.0f;
+    
+    return 1;
 }
 
-void AppShutdown()
+i32 App_Shutdown()
 {
     printf("DLL Shutdown\n");
+    return 1;
 }
 
-void AppFrame(GameTime* time, InputTick* input)
+void App_Frame(GameTime* time, InputTick* input)
 {
-    //printf("APP FRAME: Ticks: %d\n", time.frameNumber);
-    
-    platform.PlatformClearScreen();
-    ClearBlitItems();
-    
-    // blitItems[numBlitItems].type = BLIT_ITEM_BLOCK;
-    // blitItems[numBlitItems].content.block.red = 0xFF;
-    // blitItems[numBlitItems].content.block.green = 0x00;
-    // blitItems[numBlitItems].content.block.blue = 0x00;
-    // blitItems[numBlitItems].content.block.centre[0] = player.pos[0] + 3;
-    // blitItems[numBlitItems].content.block.centre[1] = player.pos[1] + 1;
-    // blitItems[numBlitItems].content.block.halfWidth = player.halfWidth;
-    // blitItems[numBlitItems].content.block.halfHeight = player.halfHeight;
-    // numBlitItems++;
+    if (input->reset)
+    {
+        g_scene.cameraTransform.pos = { 0, 0, 2 };
+        g_scene.cameraTransform.rot = { 0, 0, 0 };
+        g_scene.cameraTransform.scale = { 0, 0, 0 };
+    }
+    else
+    {
+        Input_ApplyInputToTransform(input, &g_scene.cameraTransform, time);
+        //Input_ApplyInputToTransform()
+    }
 
-    // blitItems[numBlitItems].type = BLIT_ITEM_BLOCK;
-    // blitItems[numBlitItems].content.block.red = 0x00;
-    // blitItems[numBlitItems].content.block.green = 0xFF;
-    // blitItems[numBlitItems].content.block.blue = 0x00;
-    // blitItems[numBlitItems].content.block.centre[0] = 12;
-    // blitItems[numBlitItems].content.block.centre[1] = 12;
-    // blitItems[numBlitItems].content.block.halfWidth = 4;
-    // blitItems[numBlitItems].content.block.halfHeight = 3;
-    // numBlitItems++;
-
-    // blitItems[numBlitItems].type = BLIT_ITEM_IMAGE;
-    // blitItems[numBlitItems].content.image.centre[0] = player.pos[0];
-    // blitItems[numBlitItems].content.image.centre[1] = player.pos[1];
-    // numBlitItems++;
-
-    
-    // platform.PlatformRenderBlitItems(blitItems, numBlitItems);
+    R_Scene_Tick(time, &g_scene);
+    platform.PlatformRenderScene(&g_scene);
 }
 
-void AppFixedFrame(GameTime* time, InputTick* inputTick)
-{
-    //printf("FIXED FRAME: FixedTicks: %d, Ticks %d, frames: %d, now: %I64d, last: %I64d, diff: %I64d, deltaTime: %f\n", time.fixedFrameNumber, time.ticks, time.frameNumber, now, last, diff, time.deltaTime);
+// void App_FixedFrame(GameTime* time, InputTick* inputTick)
+// {
 
-    //printf("APP FIXED: FixedTicks: %d\n", time.fixedFrameNumber);
-
-    //printf("Input: U: %d, D: %d, L: %d, R: %d\nb", inputTick->up, inputTick->down, inputTick->left, inputTick->right);
-
-    // f32 dt = time->fixedDeltaTime;
-    // player.vel[0] = 0;
-    // player.vel[1] = 0;
-    // player.vel[0] += (inputTick->right * player.speed) * dt;
-    // player.vel[0] -= (inputTick->left * player.speed) * dt;
-    // player.vel[1] -= (inputTick->up * player.speed) * dt;
-    // player.vel[1] += (inputTick->down * player.speed) * dt;
-
-    // // Update
-    // player.pos[0] += player.vel[0];
-    // player.pos[1] += player.vel[1];
-
-    // //printf("Player pos %f, %f\n", player.vel[0], player.vel[1]);
-
-    // f32 minX = platform.PlatformGetViewPortMinX();
-    // f32 minY = platform.PlatformGetViewPortMinY();
-    // f32 maxX = platform.PlatformGetViewPortMaxX();
-    // f32 maxY = platform.PlatformGetViewPortMaxY();
-
-    // if (player.pos[0] < minX)
-    // {
-    //     player.pos[0] = maxX;
-    // }
-
-    // if (player.pos[0] > maxX)
-    // {
-    //     player.pos[0] = minX;
-    // }
-
-    // if (player.pos[1] < minY)
-    // {
-    //     player.pos[1] = maxY;
-    // }
-
-    // if (player.pos[1] > maxY)
-    // {
-    //     player.pos[1] = minY;
-    // }
-}
+// }
 
 /***************************************
 * Export DLL functions
