@@ -6,5 +6,6 @@
 /debug/
 *.db
 /lib/*/
+/lib/*.lib
 !/lib/libraries.md
 /xercise.VC.VC.opendb
