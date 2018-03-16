@@ -1,3 +1,4 @@
-call buildwin32.bat
+@cls
+@call buildwin32.bat
 
-call buildgame.bat
+@call buildgame.bat

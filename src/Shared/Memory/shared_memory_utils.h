@@ -4,7 +4,7 @@
 #pragma once
 #include "shared_types.h"
 
-void Com_CopyMemory(u8* source, u8* target, u32 numBytes)
+void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {
     u32 progress = 0;
     while (progress < numBytes)
@@ -15,19 +15,19 @@ void Com_CopyMemory(u8* source, u8* target, u32 numBytes)
     };
 }
 
-void Com_ZeroMemory(u8 *ptr, u32 numBytes)
+void COM_ZeroMemory(u8 *ptr, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr++ = 0; }
 }
 
-void Com_SetMemory(u8 *ptr, u32 numBytes, u8 val)
+void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr++ = val; }
 }
 
-void Com_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)
+void COM_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr = value; }
@@ -46,7 +46,7 @@ but
 64 + 32 = 96
 
 */
-u32 Com_AlignSize(u32 value, u32 alignment)
+u32 COM_AlignSize(u32 value, u32 alignment)
 {
     u32 remainder = value % alignment;
     if (remainder == 0) { return value; }

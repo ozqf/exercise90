@@ -196,6 +196,7 @@ sin(theta),	cos(theta),			0,			0,
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 // App_ == interface function
+// Return 1 if successful, 0 if failed
 ////////////////////////////////////////////////////////////////////////////
 i32 App_Init()
 {
@@ -208,6 +209,18 @@ i32 App_Init()
     // player.vel[0] = 0;
     // player.vel[1] = 0;
     // player.speed = 10;
+
+    u32 mainMemorySize = MegaBytes(64);
+    MemoryBlock mem = {};
+    if (!platform.Platform_Malloc(&mem, mainMemorySize))
+    {
+        return 0;
+    }
+    else
+    {
+        Heap_Init(&g_heap, mem.ptrMemory, mem.size);
+    }
+
     R_Scene_Init();
     R_Scene_CreateTestScene();
 
@@ -221,6 +234,13 @@ i32 App_Init()
 i32 App_Shutdown()
 {
     printf("DLL Shutdown\n");
+
+    // Free memory, assuming a new APP might be loaded in it's place
+    MemoryBlock mem = {};
+    mem.ptrMemory = g_heap.ptrMemory;
+    mem.size = g_heap.size;
+    platform.Platform_Free(&mem);
+
     return 1;
 }
 
@@ -239,7 +259,7 @@ void App_Frame(GameTime* time, InputTick* input)
     }
 
     R_Scene_Tick(time, &g_scene);
-    platform.PlatformRenderScene(&g_scene);
+    platform.Platform_RenderScene(&g_scene);
 }
 
 // void App_FixedFrame(GameTime* time, InputTick* inputTick)

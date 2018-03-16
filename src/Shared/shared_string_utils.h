@@ -9,7 +9,8 @@
  * if a is first alphabetically, return -1
  * if b is first alphabetically, return 1
  */
-i32 Com_CompareStrings(const char *a, const char *b)
+
+i32 COM_CompareStrings(const char *a, const char *b)
 {
     while (*a == *b)
     {
@@ -25,7 +26,7 @@ i32 Com_CompareStrings(const char *a, const char *b)
     return ((*a < *b) ? -1 : 1);
 }
 
-void Com_CopyStringA(const char *source, char *target)
+void COM_CopyStringA(const char *source, char *target)
 {
     while (true)
     {
@@ -39,7 +40,7 @@ void Com_CopyStringA(const char *source, char *target)
     }
 }
 
-void Com_CopyString(const char *source, char *target)
+void COM_CopyString(const char *source, char *target)
 {
     while (*source)
     {
@@ -52,7 +53,7 @@ void Com_CopyString(const char *source, char *target)
  * Copy a string without exceeding the specified limit
  * Limit does NOT include NULL terminator
  */
-void Com_CopyStringLimited(const char *source, char *target, i32 limit)
+void COM_CopyStringLimited(const char *source, char *target, i32 limit)
 {
     while (*source)
     {
@@ -67,7 +68,7 @@ void Com_CopyStringLimited(const char *source, char *target, i32 limit)
  * No checking whether source/target will clash
  * No checking that target has enough room!
  */
-void Com_CopyStringCount(const char *source, char *target, i32 count)
+void COM_CopyStringCount(const char *source, char *target, i32 count)
 {
     if (count <= 0) { return; }
     while (*source && count)
@@ -86,7 +87,7 @@ void Com_CopyStringCount(const char *source, char *target, i32 count)
     *target = 0;
 }
 
-i32 Com_StrLenA(const char* str)
+i32 COM_StrLenA(const char* str)
 {
     i32 result = 0;
     while (*str)
@@ -97,7 +98,7 @@ i32 Com_StrLenA(const char* str)
     return result;
 }
 
-i32 Com_StrLen(const char* str)
+i32 COM_StrLen(const char* str)
 {
     i32 count = 0;
     while (str[count]) { ++count; }
@@ -107,7 +108,7 @@ i32 Com_StrLen(const char* str)
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
-i32 Com_AsciToInt32(const char *str)
+i32 COM_AsciToInt32(const char *str)
 {
     i32 sign = 1;
     i32 val = 0;
@@ -165,7 +166,7 @@ i32 Com_AsciToInt32(const char *str)
     return val * sign;
 }
 
-f32 Com_AsciToFloat32(const char *str)
+f32 COM_AsciToFloat32(const char *str)
 {
     return 0.0f;
 }

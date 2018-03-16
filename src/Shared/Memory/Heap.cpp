@@ -103,7 +103,7 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
     HeapBlock *block = heap->headBlock;
     while (block)
     {
-        if (Com_CompareStrings(block->mem.debugLabel, label) == 0) { return block; }
+        if (COM_CompareStrings(block->mem.debugLabel, label) == 0) { return block; }
         block = block->mem.next;
     }
     return NULL;
@@ -162,7 +162,7 @@ u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
     }
     return result;
 }
-
+#if 0
 void Heap_DebugPrintAllocations2(Heap *heap)
 {
 
@@ -175,20 +175,17 @@ void Heap_DebugPrintAllocations2(Heap *heap)
     HeapBlock *heapBlock = heap->headBlock;
     if (heapBlock == NULL)
     {
-        //printf("Heap is empty. Size: %d\n", heap->size);
+        printf("Heap is empty. Size: %d\n", heap->size);
         return;
     }
 
     u32 spaceBeforeHead = (u32)heapBlock - (u32)heap->ptrMemory;
-    //printf("Space before Block head: %d.\n", spaceBeforeHead);
+    printf("Space before Block head: %d.\n", spaceBeforeHead);
     u32 totalSpace = 0;
     if (totalSpace > 0) { fragments[fragmentIndex++] = totalSpace; }
-    i32 j = 0;
-    for (;j < 4;) { j++; }
-#if 1
+
     while (heapBlock != NULL)
     {
-#if 1
         u32 space = Heap_CalcSpaceAfterBlock(heap, heapBlock);
         u32 blockVolume = heapBlock->mem.volumeSize + BLOCK_HEADER_SIZE;
         totalSpace += blockVolume;
@@ -198,28 +195,27 @@ void Heap_DebugPrintAllocations2(Heap *heap)
         }
         u32 address = (u32)heapBlock - startAddress;
 
-        // printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
-        //        address,
-        //        heapBlock->mem.id,
-        //        heapBlock->mem.debugLabel,
-        //        heapBlock->mem.objectSize,
-        //        blockVolume,
-        //        space);
+        printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
+               address,
+               heapBlock->mem.id,
+               heapBlock->mem.debugLabel,
+               heapBlock->mem.objectSize,
+               blockVolume,
+               space);
 
         heapBlock = heapBlock->mem.next;
-#endif
+
     }
-#endif
     //printf("Fragments: ");
     for (u32 i = 0; i < fragmentIndex; ++i)
     {
-        printf("%d, ", fragments[i]);
+        //printf("%d, ", fragments[i]);
     }
 
-    printf("\nUsed: %d of %d\n", totalSpace, heap->size);
+    //printf("\nUsed: %d of %d\n", totalSpace, heap->size);
 
 }
-
+#endif
 
 /*****************************
  * LINKED LIST OPERATIONS
@@ -261,7 +257,7 @@ void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
     // Zero out space
     u32 startAddress = (u32)block;
     u32 numBytes = BLOCK_HEADER_SIZE + block->mem.volumeSize;
-    Com_ZeroMemory((u8*)startAddress, numBytes);
+    COM_ZeroMemory((u8*)startAddress, numBytes);
     #endif
     // unsew list
     if (prev != NULL)
@@ -318,7 +314,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
 // #if VERBOSE
 //     printf("> HEAP ALLOC %d bytes\n", objectSize);
 // #endif
-    u32 volumeSize = Com_AlignSize(objectSize, heap->alignmentBytes);
+    u32 volumeSize = COM_AlignSize(objectSize, heap->alignmentBytes);
     HeapBlock *newBlock = NULL;
     if (heap->headBlock == NULL)
     {
@@ -402,11 +398,11 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
     newBlock->mem.objectSize = objectSize;
     newBlock->mem.volumeSize = volumeSize;
     newBlock->mem.ptrMemory = (void *)((u8 *)newBlock + BLOCK_HEADER_SIZE);
-    Com_CopyStringLimited(label, newBlock->mem.debugLabel, BLOCK_LABEL_SIZE);
+    COM_CopyStringLimited(label, newBlock->mem.debugLabel, BLOCK_LABEL_SIZE);
 
     heap->nextID += 1;
     #if PARANOID
-    Com_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0XCC);
+    COM_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0XCC);
     #endif
 
 // #if VERBOSE

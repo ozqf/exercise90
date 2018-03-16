@@ -193,9 +193,9 @@ void Win32_InitOpenGLTestAssets()
 	testBuffer3.pitch = TEST_BUFFER_WIDTH;
 
 	//Com_ZeroMemory((u8*)testBufferPixels, TEST_BUFFER_PIXEL_COUNT * sizeof(u32));
-	Com_SetMemory((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, 0x44);
-    Com_SetMemory((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, 0x88);
-    Com_SetMemory((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, 0xCC);
+	COM_SetMemory((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, 0x44);
+    COM_SetMemory((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, 0x88);
+    COM_SetMemory((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, 0xCC);
 
 	// 
 	glMatrixMode(GL_PROJECTION);

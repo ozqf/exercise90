@@ -30,14 +30,9 @@ Maintaining rendering Scene graph options:
 
 struct PlatformInterface
 {
-    // f32 (*PlatformGetViewPortMinX)();
-    // f32 (*PlatformGetViewPortMinY)();
-    // f32 (*PlatformGetViewPortMaxX)();
-    // f32 (*PlatformGetViewPortMaxY)();
-    // void (*PlatformClearScreen)();
-    // void (*PlatformRenderBlitItems)(BlitItem* items, i32 numItems);
-
-    void (*PlatformRenderScene)(RenderScene* scene);
+    u8 (*Platform_Malloc)(MemoryBlock* mem, u32 bytesToAllocate);
+    void (*Platform_Free)(MemoryBlock *mem);
+    void (*Platform_RenderScene)(RenderScene* scene);
 };
 
 // struct PlatformInterface2
@@ -69,5 +64,5 @@ void GetPlatformInterfaceStub(PlatformInterface *platInterface)
     // platInterface->PlatformGetViewPortMaxY = PlatformGetViewPortMaxY_Stub;
     // platInterface->PlatformClearScreen = PlatformClearScreen_Stub;
     // platInterface->PlatformRenderBlitItems = PlatformRenderBlitItems_Stub;
-    platInterface->PlatformRenderScene = PlatformRenderScene_Stub;
+    platInterface->Platform_RenderScene = PlatformRenderScene_Stub;
 }

@@ -6,22 +6,15 @@ Anything with platform_ is a function to export
 
 #include "win32_system_include.h"
 
-f32 Platform_GetViewPortMinX() { return 0; }
-f32 Platform_GetViewPortMinY() { return 0; }
-f32 Platform_GetViewPortMaxX() { return 1280; }
-f32 Platform_GetViewPortMaxY() { return 768; }
-void Platform_ClearScreen(void) {}
-void Platform_DrawBlitItems(BlitItem *items, i32 numItems) {}
-
 /****************************************************************
 ALLOC MAIN MEMORY
-TODO: Return error code if it fails?
+Returns true if alloc succeeded
 ****************************************************************/
-void Platform_Alloc(MemoryBlock *mem)
+u8 Platform_Alloc(MemoryBlock *mem, u32 bytesToAllocate)
 {
-    i32 size = MegaBytes(2);
-    mem->size = size;
+    mem->size = bytesToAllocate;
     mem->ptrMemory = VirtualAlloc(0, mem->size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    return (mem->ptrMemory != NULL);
 }
 
 void Platform_Free(MemoryBlock *mem)
@@ -53,20 +46,15 @@ void Platform_R_DrawScene(RenderScene* scene)
     Win32_RenderFrame(appWindow, scene);
 }
 
-
 /**********************************************************************
  * Attach to application DLL
  *********************************************************************/
 
 void Win32_InitPlatformInterface()
 {
-    // platInterface.PlatformGetViewPortMinX = Platform_GetViewPortMinX;
-    // platInterface.PlatformGetViewPortMinY = Platform_GetViewPortMinY;
-    // platInterface.PlatformGetViewPortMaxX = Platform_GetViewPortMaxX;
-    // platInterface.PlatformGetViewPortMaxY = Platform_GetViewPortMaxY;
-    // platInterface.PlatformClearScreen = Platform_ClearScreen;
-    // platInterface.PlatformRenderBlitItems = Platform_DrawBlitItems;
-    platInterface.PlatformRenderScene = Platform_R_DrawScene;
+    platInterface.Platform_Malloc = Platform_Alloc;
+    platInterface.Platform_Free = Platform_Free;
+    platInterface.Platform_RenderScene = Platform_R_DrawScene;
 }
 
 u8 Win32_LinkToApplication()
