@@ -76,6 +76,10 @@ i32 Win32_InitOpenGL(HWND window)
 
     ReleaseDC(window, windowContext);
 
+	// Depth buffer
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	Win32_InitOpenGLTestAssets();
 
     return 1;
@@ -421,7 +425,7 @@ void Win32_RenderFrame(HWND window, RenderScene* scene)
 	//glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Win32_ProcessTestInput(inputTick, time);
     R_RenderScene(scene);
