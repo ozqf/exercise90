@@ -191,8 +191,13 @@ sin(theta),	cos(theta),			0,			0,
 	// {
 	// 	return;
 	// }
+    
+    // Quick hack to force movement to occur on a flat x/z plane only
+    Vec3 groundRot = t->rot;
+    groundRot.x = 0;
+    groundRot.z = 0;
 
-	AngleToAxes(&t->rot, &t->left, &t->up, &t->forward);
+	AngleToAxes(&groundRot, &t->left, &t->up, &t->forward);
 
 	Vec3 forward = t->forward;
 	Vec3 left = t->left;
