@@ -347,7 +347,7 @@ void R_RenderAsciChar(RendObj* obj)
 
 	RendObj_AsciChar* c = &obj->obj.asciChar;
 	R_SetupTestTexture(4);
-	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0);
+	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
 void R_RenderBillboard(Transform* camera, RendObj* obj)
