@@ -17,7 +17,7 @@ void R_Scene_CreateTestScene()
     Transform_SetToIdentity(&obj->transform);
     obj->transform.pos.z = 0;
     obj->transform.pos.y = -1;
-    obj->transform.rot.x = 90;
+    obj->transform.rot.x = 270;
     obj->transform.scale.x = 4;
     obj->transform.scale.y = 4;
     //g_meshPrimitive_quad
@@ -60,7 +60,7 @@ void R_Scene_CreateTestScene()
     obj->transform.rot.y = 0;
     obj->transform.pos.x = -2;
     obj->transform.pos.z = -3;
-    RendObj_SetAsBillboard(obj, 1, 1, 1, 3);
+    RendObj_SetAsBillboard(obj, 1, 1, 1, 4);
     g_scene.numObjects++;
     obj++;
     
@@ -80,8 +80,22 @@ void R_Scene_CreateTestScene()
     obj->transform.rot.y = 0;
     obj->transform.pos.x = -3;
     obj->transform.pos.z = -2;
-    RendObj_SetAsBillboard(obj, 1, 1, 1, 3);
+    RendObj_SetAsBillboard(obj, 1, 1, 1, 6);
+    obj->transform.scale.x = 0.25;
+    obj->transform.scale.y = 0.25;
     g_scene.numObjects++;
+    obj++;
+
+
+
+
+    // UI
+    obj = g_ui_rendObjects;
+
+    // test char
+    *obj = {};
+    RendObj_SetAsAsciChar(obj, 'a');
+    g_scene.numUIObjects++;
     obj++;
 }
 
@@ -91,6 +105,10 @@ void R_Scene_Init()
     g_scene.numObjects = 0;
     g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
     g_scene.rendObjects = g_rendObjects;
+
+    g_scene.numUIObjects = 0;
+    g_scene.maxUIObjects = R_MAX_RENDER_OBJECTS;
+    g_scene.uiObjects = g_ui_rendObjects;
 }
 
 void R_Scene_Tick(GameTime* time, RenderScene* scene)

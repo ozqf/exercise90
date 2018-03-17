@@ -7,6 +7,7 @@
 #define RENDOBJ_TYPE_BILLBOARD 2
 #define RENDOBJ_TYPE_MESH 3
 #define RENDOBJ_TYPE_LINE 4
+#define RENDOBJ_TYPE_ASCI_CHAR 5
 
 struct Texture2DHeader
 {
@@ -43,6 +44,11 @@ struct RendObj_Line
     Vec3 colourB;
 };
 
+struct RendObj_AsciChar
+{
+    u8 asciChar;
+};
+
 struct RendObj_ColouredMesh
 {
     Mesh* mesh;
@@ -55,6 +61,7 @@ union RendObj_Union
     RendObj_Primitive primitive;
     RendObj_Billboard billboard;
     RendObj_ColouredMesh mesh;
+    RendObj_AsciChar asciChar;
 };
 
 // Individual render item
@@ -73,6 +80,10 @@ struct RenderScene
     u32 numObjects;
     u32 maxObjects;
     Transform cameraTransform;
+
+    RendObj* uiObjects;
+    u32 numUIObjects;
+    u32 maxUIObjects;
 };
 
 #define REND_PRIMITIVE_TYPE_RAINBOW_QUAD 0
@@ -119,4 +130,11 @@ void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
     rend->b = b;
     rend->a = 1;
     rend->textureIndex = textureIndex;
+}
+
+void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
+{
+    obj->type = RENDOBJ_TYPE_ASCI_CHAR;
+    RendObj_AsciChar* c = &obj->obj.asciChar;
+    c->asciChar = asciCharacter;
 }

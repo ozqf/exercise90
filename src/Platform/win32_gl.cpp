@@ -5,6 +5,7 @@
 
 // #include "../Shared/shared.h"
 #include "win32_main.h"
+#include "win32_gl_text.h"
 //#include "win32_gl_primitives.h"
 
 /*
@@ -91,7 +92,7 @@ i32 Win32_InitOpenGL(HWND window)
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	// Enable back-face culling
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 	Win32_InitOpenGLTestAssets();
 
@@ -334,6 +335,21 @@ to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
 
+void R_RenderAsciChar(RendObj* obj)
+{
+	glEnable(GL_TEXTURE_2D);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	RendObj_AsciChar* c = &obj->obj.asciChar;
+	R_SetupTestTexture(4);
+	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0);
+}
+
 void R_RenderBillboard(Transform* camera, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
@@ -384,6 +400,11 @@ void R_RenderEntity(Transform* camera, RendObj* obj)
 		{
 			R_RenderBillboard(camera, obj);
 		} break;
+
+		case RENDOBJ_TYPE_ASCI_CHAR:
+		{
+			R_RenderAsciChar(obj);
+		} break;
 	}
 }
 
@@ -400,6 +421,12 @@ void R_RenderScene(RenderScene* scene)
 		//R_DrawQuad(0, 0, 1.5, 1.5, 1, 0, 0);
         //R_RenderTestGeometry();
     }
+
+	for (u32 i = 0; i < scene->numUIObjects; ++i)
+	{
+		//DebugBreak();
+		R_RenderEntity(&scene->cameraTransform, &scene->uiObjects[i]);
+	}
 }
  
 ////////////////////////////////////////////////////////////////////
