@@ -8,6 +8,15 @@
 #define RENDOBJ_TYPE_MESH 3
 #define RENDOBJ_TYPE_LINE 4
 
+struct Texture2DHeader
+{
+	i32 id;
+	char name[32];
+	i32 width;
+	i32 height;
+	u32 *ptrMemory;
+};
+
 struct RendObj_Primitive
 {
     i32 primitiveType;
@@ -18,7 +27,7 @@ struct RendObj_Primitive
 
 struct RendObj_Billboard
 {
-
+    i32 textureIndex;
 };
 
 struct RendObj_Line
@@ -39,6 +48,7 @@ struct RendObj_ColouredMesh
 union RendObj_Union
 {
     RendObj_Primitive primitive;
+    RendObj_Billboard billboard;
     RendObj_ColouredMesh mesh;
 };
 
@@ -81,7 +91,7 @@ void RendObj_SetAsRainbowQuad(RendObj* obj)
     
     RendObj_Primitive* prim = &obj->obj.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_RAINBOW_QUAD;
-};
+}
 
 void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
 {

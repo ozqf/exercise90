@@ -1,9 +1,11 @@
 #pragma once
 
 #include "app_main.h"
+#include "../Shared/shared_assets.h"
 
 #include <stdio.h>
 
+// TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
 #include "../Platform/win32_system_include.h"
 
 void R_Scene_CreateTestScene()
@@ -14,8 +16,8 @@ void R_Scene_CreateTestScene()
     *obj = {};
     obj->transform.pos.z = -2;
     //g_meshPrimitive_quad
-    RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    //RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 0, 1, 0, 0);
+    //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
+    RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 1, 1, 1, 3);
     g_scene.numObjects++;
     obj++;
 
@@ -103,6 +105,7 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	f32 sensitivity = 10.0f;
 	i8 inverted = -1;
 
+#if 1 // Disabled mouse input for debugging
 	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time->deltaTime);
 	t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
 	t->rot.x = COM_CapAngleDegrees(t->rot.x);
@@ -113,6 +116,7 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 
 	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time->deltaTime);
 	t->rot.z = COM_CapAngleDegrees(t->rot.z);
+#endif
 
 	if (input->moveLeft)
 	{
@@ -193,6 +197,45 @@ sin(theta),	cos(theta),			0,			0,
 	// OutputDebugStringA(output);
 }
 
+#if 0
+#define BMP_FILE_TYPE 19778
+
+// TODO: This needs to be in the platform layer!
+u8 ReadBMPTest(BlockRef ref)
+{
+    void* mem = Heap_GetBlockMemoryAddress(&g_heap, &ref);
+	
+	WINBMPFILEHEADER* fileHeader = (WINBMPFILEHEADER*)mem;
+	AssertAlways(fileHeader->FileType == BMP_FILE_TYPE);
+	
+	const i32 fileHeaderSize = sizeof(WINBMPFILEHEADER);
+
+	WINNTBITMAPHEADER* bmpHeader = (WINNTBITMAPHEADER*)((u8*)mem + fileHeaderSize);
+
+	// only supporting 32 bit bitmaps right now!
+	AssertAlways(bmpHeader->BitsPerPixel == 32);
+	AssertAlways(bmpHeader->Compression == 3);
+	
+	u32* pixels = (u32*)((u8*)mem + fileHeaderSize + bmpHeader->Size);
+	u32 firstPixel = *pixels;
+
+	// Byte order is AA BB GG RR
+	// Little endian 0xRRGGBBAA
+
+	u8 alpha = (u8)(firstPixel);
+	u8 blue = (u8)(firstPixel >> 8);
+	u8 green = (u8)(firstPixel >> 16);
+	u8 red = (u8)(firstPixel >> 24);
+
+	//  GL_RGBA
+
+	// Rearrange to rgba
+	
+    DebugBreak();
+	return 1;
+}
+#endif
+
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 // App_ == interface function
@@ -212,6 +255,10 @@ i32 App_Init()
 
     u32 mainMemorySize = MegaBytes(64);
     MemoryBlock mem = {};
+
+	//u8 readBMP1;
+	//u8 readBMP2;
+
     if (!platform.Platform_Malloc(&mem, mainMemorySize))
     {
         return 0;
@@ -219,8 +266,24 @@ i32 App_Init()
     else
     {
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
+        //char* filePath = "ReadTest.txt";
+        // BlockRef fileRef2 = platform.Platform_LoadFileIntoHeap(&g_heap, "ReadTest2.txt");
+        // BlockRef fileRef1 = platform.Platform_LoadFileIntoHeap(&g_heap, "ReadTest.txt");
+
+		// BlockRef bitmapReadTestRef = platform.Platform_LoadFileIntoHeap(&g_heap, "base/BitmapTest.bmp");
+		// readBMP1 = ReadBMPTest(bitmapReadTestRef);
+
+		/*BlockRef consoleCharsRef = platform.Platform_LoadFileIntoHeap(&g_heap, "base/charset.bmp");
+		readBMP2 = ReadBMPTest(consoleCharsRef);*/
+		
+        
+		//readBMP2 = ReadBMPTest(fileRef1);
     }
 
+    SharedAssets_Init();
+
+    i32 numTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    //DebugBreak();
     R_Scene_Init();
     R_Scene_CreateTestScene();
 
@@ -244,8 +307,41 @@ i32 App_Shutdown()
     return 1;
 }
 
+void CycleTestTexture()
+{
+    
+    RendObj* obj = g_rendObjects + 0;
+    RendObj_ColouredMesh* rMesh = &obj->obj.mesh;
+	//DebugBreak();
+    rMesh->textureIndex++;
+    if (rMesh->textureIndex > 3)
+    {
+        rMesh->textureIndex = 0;
+    }
+    char buf[128];
+        sprintf_s(buf, 128, "Cycled test texture to: %d\n", rMesh->textureIndex);
+        OutputDebugString(buf);
+}
+
+u8 cycleTexturePressed = 0;
+
 void App_Frame(GameTime* time, InputTick* input)
 {
+    // Trap to do single presses of this key
+    if (input->debug_cycleTexture)
+    {
+        if (cycleTexturePressed == 0)
+        {
+            cycleTexturePressed = 1;
+            CycleTestTexture();
+        }
+        
+    }
+    else if (cycleTexturePressed == 1)
+    {
+        cycleTexturePressed = 0;
+    }
+
     if (input->reset)
     {
         g_scene.cameraTransform.pos = { 0, 0, 2 };

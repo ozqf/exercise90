@@ -184,24 +184,23 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
         else if (VKCode == 'T')
         {
-            //printf("Spacebar superstar\n");
-            //global_timePassed = 0;
-            //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
-            if (wasDown && !isDown)
-            {
-                //printf("Spacebar superstar\n");
-                //global_timePassed = 0;
-                //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
+            inputTick.debug_cycleTexture = isDown;
+            // //global_timePassed = 0;
+            // //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
+            // if (wasDown && !isDown)
+            // {
+            //     //global_timePassed = 0;
+            //     //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
 
-                ++g_gl_primitive_mode;
-                if (g_gl_primitive_mode >= NUM_GL_PRIMITIVE_MODES)
-                {
-                    g_gl_primitive_mode = 0;
-                }
-                char output[256];
-                sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
-                OutputDebugStringA(output);
-            }
+            //     ++g_gl_primitive_mode;
+            //     if (g_gl_primitive_mode >= NUM_GL_PRIMITIVE_MODES)
+            //     {
+            //         g_gl_primitive_mode = 0;
+            //     }
+            //     char output[256];
+            //     sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
+            //     OutputDebugStringA(output);
+            // }
         }
         else if (VKCode == 'W')
         {
@@ -485,9 +484,9 @@ int CALLBACK WinMain(
                     return 1;
                 }*/
 
-                char buf[64];
-                sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
-                OutputDebugString(buf);
+                // char buf[64];
+                // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
+                // OutputDebugString(buf);
 
                 // RECT selfRect;
                 // GetWindowRect(appWindow, &selfRect);

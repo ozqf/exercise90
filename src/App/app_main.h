@@ -24,3 +24,5 @@ global_variable RenderScene g_scene;
 global_variable GL_Test_Input testInput;
 
 global_variable Heap g_heap;
+
+global_variable i32 g_numDebugTextures;

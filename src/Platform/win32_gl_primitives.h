@@ -1,42 +1,44 @@
 #pragma once
 
-#include <gl/gl.h>
-#include <math.h>
+#include "win32_gl.h"
 
-#include "win32_main.h"
+// #include <gl/gl.h>
+// #include <math.h>
 
+// #include "win32_main.h"
+// #include "win32_gl.h"
 
-#define TEST_BUFFER_WIDTH 32
-#define TEST_BUFFER_HEIGHT 32
-#define TEST_BUFFER_PIXEL_COUNT (32 * 32)
-#define TEST_BUFFER_MEM_SIZE (TEST_BUFFER_PIXEL_COUNT * 4)
+// #define TEST_BUFFER_WIDTH 32
+// #define TEST_BUFFER_HEIGHT 32
+// #define TEST_BUFFER_PIXEL_COUNT (32 * 32)
+// #define TEST_BUFFER_MEM_SIZE (TEST_BUFFER_PIXEL_COUNT * 4)
 
-#define NUM_GL_PRIMITIVE_MODES 3
-global_variable i32 g_gl_primitive_mode = 0;
-global_variable f32 g_gl_primitive_degrees_X = 0;
-global_variable f32 g_gl_primitive_degrees_Y = 0;
+// #define NUM_GL_PRIMITIVE_MODES 3
+// global_variable i32 g_gl_primitive_mode = 0;
+// global_variable f32 g_gl_primitive_degrees_X = 0;
+// global_variable f32 g_gl_primitive_degrees_Y = 0;
 
-global_variable f32 win32_aspectRatio = 0;
+// global_variable f32 win32_aspectRatio = 0;
 
-//global_variable Transform cameraTransform;
+// //global_variable Transform cameraTransform;
 
-global_variable Transform entityTransform;
-global_variable Transform entityTransform2;
-global_variable Transform entityTransform3;
+// global_variable Transform entityTransform;
+// global_variable Transform entityTransform2;
+// global_variable Transform entityTransform3;
 
-global_variable int xOffset = 0;
-global_variable int yOffset = 0;
+// global_variable int xOffset = 0;
+// global_variable int yOffset = 0;
 
-win32_offscreen_buffer testBuffer;
-i32 testBufferPixels[TEST_BUFFER_PIXEL_COUNT];
+// win32_offscreen_buffer testBuffer;
+// i32 testBufferPixels[TEST_BUFFER_PIXEL_COUNT];
 
-win32_offscreen_buffer testBuffer2;
-i32 testBufferPixels2[TEST_BUFFER_PIXEL_COUNT];
+// win32_offscreen_buffer testBuffer2;
+// i32 testBufferPixels2[TEST_BUFFER_PIXEL_COUNT];
 
-win32_offscreen_buffer testBuffer3;
-i32 testBufferPixels3[TEST_BUFFER_PIXEL_COUNT];
+// win32_offscreen_buffer testBuffer3;
+// i32 testBufferPixels3[TEST_BUFFER_PIXEL_COUNT];
 
-f32 mat[TRANSFORM_MATRIX_SIZE];
+// f32 mat[TRANSFORM_MATRIX_SIZE];
 
 /*
 6 sides, 2 triangles per side = 12 tris
@@ -162,9 +164,6 @@ void Win32_InitTestScene()
 
 }
 
-#define NUM_TEST_TEXTURES 3
-GLuint textureHandles[NUM_TEST_TEXTURES];
-
 void Win32_InitOpenGLTestAssets()
 {
 	// TODO: Remove texture test
@@ -193,8 +192,8 @@ void Win32_InitOpenGLTestAssets()
 	testBuffer3.pitch = TEST_BUFFER_WIDTH;
 
 	//Com_ZeroMemory((u8*)testBufferPixels, TEST_BUFFER_PIXEL_COUNT * sizeof(u32));
-	COM_SetMemory((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, 0x44);
-    COM_SetMemory((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, 0x88);
+	COM_SetMemory((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, 0x22);
+    COM_SetMemory((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, 0x77);
     COM_SetMemory((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, 0xCC);
 
 	// 
@@ -212,9 +211,17 @@ void Win32_InitOpenGLTestAssets()
 		glBindTexture -> set the current texture settings to the specified texture id
 	*/
 	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    glGenTextures(NUM_TEST_TEXTURES, textureHandles);
+    glGenTextures(NUM_TEST_TEXTURES, g_textureHandles);
 
+#if 1
+	Win32_R_RegisterTexture(testBuffer.ptrMemory, 32, 32);
+	Win32_R_RegisterTexture(testBuffer2.ptrMemory, 32, 32);
+	Win32_R_RegisterTexture(testBuffer3.ptrMemory, 32, 32);
+#endif
+
+#if 0
 	// tex 1
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32, 32, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, testBuffer.ptrMemory);
 
@@ -225,7 +232,8 @@ void Win32_InitOpenGLTestAssets()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-	glBindTexture(GL_TEXTURE_2D, 1);
+	glBindTexture(GL_TEXTURE_2D, g_nextTexture);
+	++g_nextTexture;
 
 	// tex 2
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32, 32, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, testBuffer2.ptrMemory);
@@ -235,7 +243,8 @@ void Win32_InitOpenGLTestAssets()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-	glBindTexture(GL_TEXTURE_2D, 2);
+	glBindTexture(GL_TEXTURE_2D, g_nextTexture);
+	++g_nextTexture;
 
 	// tex 3
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32, 32, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, testBuffer3.ptrMemory);
@@ -245,8 +254,9 @@ void Win32_InitOpenGLTestAssets()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-	glBindTexture(GL_TEXTURE_2D, 3);
-
+	glBindTexture(GL_TEXTURE_2D, g_nextTexture);
+	++g_nextTexture;
+#endif
 	/*
 	Handle 1, 2, 3
 	*/

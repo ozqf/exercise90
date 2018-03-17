@@ -5,6 +5,7 @@ Anything with platform_ is a function to export
 */
 
 #include "win32_system_include.h"
+#include "win32_fileIO.h"
 
 /****************************************************************
 ALLOC MAIN MEMORY
@@ -46,6 +47,17 @@ void Platform_R_DrawScene(RenderScene* scene)
     Win32_RenderFrame(appWindow, scene);
 }
 
+// Returns number of textures loaded
+i32 Platform_LoadDebugTextures(Heap* heap)
+{
+    // BlockRef testBmpRef = Platform_LoadFileIntoHeap(heap, "base/BitmapTest.bmp");
+    // Win32_IO_ReadBMPTest(&testBmpRef);
+
+    Win32_ReadBMPToHeap(heap, "base/BitmapTest.bmp");
+
+    return 1;
+}
+
 /**********************************************************************
  * Attach to application DLL
  *********************************************************************/
@@ -54,6 +66,9 @@ void Win32_InitPlatformInterface()
 {
     platInterface.Platform_Malloc = Platform_Alloc;
     platInterface.Platform_Free = Platform_Free;
+    platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;
+    platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
+    
     platInterface.Platform_RenderScene = Platform_R_DrawScene;
 }
 

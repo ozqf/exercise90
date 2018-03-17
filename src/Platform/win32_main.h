@@ -1,6 +1,7 @@
 #pragma once
 
 #include "win32_system_include.h"
+#include <gl/gl.h>
 
 #include "../Shared/shared.h"
 #include "../interface/platform_interface.h"

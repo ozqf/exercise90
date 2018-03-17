@@ -297,8 +297,10 @@ bool Heap_RemoveBlockById(Heap *heap, i32 id)
 /*****************************
  * ALLOC/FREE
  ****************************/
-void Heap_FreeBlock(Heap *heap, HeapBlock *block)
+void Heap_Free(Heap *heap, u32 id)
 {
+	HeapBlock* block = Heap_FindBlock(heap, id);
+	Assert(block != NULL);
     Heap_RemoveBlock(heap, block);
 }
 

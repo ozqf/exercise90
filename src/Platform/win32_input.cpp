@@ -33,7 +33,7 @@ void Win32_InitInput()
 
 void Win32_PollMouse(InputTick *input)
 {
-#if 1
+#if 0
     // Output mouse position. Sampling occurred in WM_INPUT EVENT
     char buf[128];
     sprintf_s(buf, 128, "Mouse pos: %d, %d\nMove: %d, %d\n",
@@ -42,12 +42,13 @@ void Win32_PollMouse(InputTick *input)
               g_win32_mousePosMove.x,
               g_win32_mousePosMove.y);
     OutputDebugString(buf);
-	input->mouseMovement[0] = g_win32_mousePosMove.x;
+#endif
+    input->mouseMovement[0] = g_win32_mousePosMove.x;
 	input->mouseMovement[1] = g_win32_mousePosMove.y;
 	// Clear mouse input and accumulate for next read
 	g_win32_mousePosMove.x = 0;
 	g_win32_mousePosMove.y = 0;
-#endif
+
     // static i32 lastMouseX;
     // static i32 lastMouseY;
 #if 0

@@ -2,6 +2,8 @@
 
 #include "../Shared/shared.h"
 
+#include "../Shared/Memory/Heap.h"
+
 /*
 Requirements app has of platform interface:
 > Render Scene
@@ -30,8 +32,13 @@ Maintaining rendering Scene graph options:
 
 struct PlatformInterface
 {
+    // Memory
     u8 (*Platform_Malloc)(MemoryBlock* mem, u32 bytesToAllocate);
     void (*Platform_Free)(MemoryBlock *mem);
+    BlockRef (*Platform_LoadFileIntoHeap)(Heap* heap, char* fileName);
+    i32 (*Platform_LoadDebugTextures)(Heap* heap);
+
+    // Rendering
     void (*Platform_RenderScene)(RenderScene* scene);
 };
 
@@ -47,22 +54,9 @@ struct PlatformInterface
 Empty, default Platform interface
 *****************************************************/
 
-// f32 PlatformGetViewPortMinX_Stub() { return 0; }
-// f32 PlatformGetViewPortMinY_Stub() { return 0; }
-// f32 PlatformGetViewPortMaxX_Stub() { return 0; }
-// f32 PlatformGetViewPortMaxY_Stub() { return 0; }
-// void PlatformClearScreen_Stub() { }
-// void PlatformRenderBlitItems_Stub(BlitItem* items, i32 numItems) { }
-
 void PlatformRenderScene_Stub(RenderScene* scene) { }
 
 void GetPlatformInterfaceStub(PlatformInterface *platInterface)
 {
-    // platInterface->PlatformGetViewPortMinX = PlatformGetViewPortMinX_Stub;
-    // platInterface->PlatformGetViewPortMinY = PlatformGetViewPortMinY_Stub;
-    // platInterface->PlatformGetViewPortMaxX = PlatformGetViewPortMaxX_Stub;
-    // platInterface->PlatformGetViewPortMaxY = PlatformGetViewPortMaxY_Stub;
-    // platInterface->PlatformClearScreen = PlatformClearScreen_Stub;
-    // platInterface->PlatformRenderBlitItems = PlatformRenderBlitItems_Stub;
     platInterface->Platform_RenderScene = PlatformRenderScene_Stub;
 }

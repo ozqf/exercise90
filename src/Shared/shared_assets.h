@@ -5,6 +5,7 @@
 Mesh g_meshPrimitive_quad;
 // 2 triangles, 3 verts per tri, 3 floats per vert
 f32 g_meshPrimitiveQuad_Verts[(2 * 3 * 3)];
+f32 g_meshPrimitiveQuad_uvs[(2 * 3 * 2)];
 
 void ZGL_SetTriangleInArray(
 	f32* array,
@@ -14,19 +15,6 @@ void ZGL_SetTriangleInArray(
 	)
 
 {
-    // u32 triangleNumber;
-	// triangleNumber = 0;
-	// array[triangleNumber + 0] = aX;
-	// array[triangleNumber + 1] = aY;
-	// array[triangleNumber + 2] = aZ;
-	// triangleNumber = 1 * 3;
-	// array[triangleNumber + 0] = bX;
-	// array[triangleNumber + 1] = bY;
-	// array[triangleNumber + 2] = bZ;
-	// triangleNumber = 2 * 3;
-	// array[triangleNumber + 0] = cX;
-	// array[triangleNumber + 1] = cY;
-	// array[triangleNumber + 2] = cZ;
 	array[0] = aX;
 	array[1] = aY;
 	array[2] = aZ;
@@ -40,19 +28,45 @@ void ZGL_SetTriangleInArray(
 	array[8] = cZ;
 }
 
+void ZGL_SetTriangleUVsInArray(
+	f32* array,
+	f32 vertATexX, f32 vertATexY,
+	f32 vertBTexX, f32 vertBTexY,
+	f32 vertCTexX, f32 vertCTexY
+	)
+{
+	array[0] = vertATexX;
+	array[1] = vertATexY;
+	array[2] = vertBTexX;
+	array[3] = vertBTexY;
+	array[4] = vertCTexX;
+	array[5] = vertCTexY;
+}
+
 void SharedAssets_Init()
 {
     g_meshPrimitive_quad = {};
     g_meshPrimitive_quad.verts = g_meshPrimitiveQuad_Verts;
+	g_meshPrimitive_quad.uvs = g_meshPrimitiveQuad_uvs;
     g_meshPrimitive_quad.numVerts = 6;
 
 	ZGL_SetTriangleInArray(g_meshPrimitiveQuad_Verts,
 		-1, -1, 0,
-		1, -1, 0,
+		0.75, -1, 0,
 		1, 1, 0);
 	
 	ZGL_SetTriangleInArray(g_meshPrimitiveQuad_Verts + 9,
 		-1, -1, 0,
 		1, 1, 0,
-		-1, 1, 0);
+		-0.75, 1, 0);
+	
+	ZGL_SetTriangleUVsInArray(g_meshPrimitiveQuad_uvs, 
+		0, 0,
+		1, 0,
+		1, 1);
+
+	ZGL_SetTriangleUVsInArray(g_meshPrimitiveQuad_uvs + 6, 
+		0, 0,
+		1, 1,
+		0, 1);
 }

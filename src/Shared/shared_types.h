@@ -232,9 +232,23 @@ void M4x4_Copy(f32* src, f32* tar)
 
 }
 
+/****************************************************************
+Conversion
+****************************************************************/
+union f32_union
+{
+    f32 f;
+    u8 bytes[sizeof(f32)];
+};
+
+union u32_union
+{
+    u32 value;
+    u8 bytes[sizeof(u32)];
+};
 
 /****************************************************************
-Graphcs
+Graphics
 ****************************************************************/
 struct Mesh
 {
@@ -273,6 +287,7 @@ struct InputTick
     char yawLeft, yawRight, pitchUp, pitchDown;
     char rollLeft, rollRight;
     char reset;
+    char debug_cycleTexture;
 };
 
 struct GL_Test_Input
