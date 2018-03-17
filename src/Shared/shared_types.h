@@ -323,6 +323,15 @@ struct Transform2
 Global Functions
 ****************************************************************/
 
+inline void Transform_SetToIdentity(Transform* t)
+{
+    *t = {};
+    t->scale.x = 1;
+    t->scale.y = 1;
+    t->scale.z = 1;
+
+}
+
 inline u32 SafeTruncateUInt64(u64 value)
 {
 	// TODO: Defines for max value

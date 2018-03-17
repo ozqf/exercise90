@@ -14,52 +14,73 @@ void R_Scene_CreateTestScene()
 
     // 0
     *obj = {};
-    obj->transform.pos.z = -2;
+    Transform_SetToIdentity(&obj->transform);
+    obj->transform.pos.z = 0;
+    obj->transform.pos.y = -1;
+    obj->transform.rot.x = 90;
+    obj->transform.scale.x = 4;
+    obj->transform.scale.y = 4;
     //g_meshPrimitive_quad
     //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 1, 1, 1, 3);
+    RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
 
     // 1
     *obj = {};
+    Transform_SetToIdentity(&obj->transform);
+    obj->transform.scale.x = 4;
     obj->transform.rot.y = 90;
-    obj->transform.pos.x = -2;
+    obj->transform.pos.x = -4;
     RendObj_SetAsColouredQuad(obj, 0, 1, 0);
     g_scene.numObjects++;
     obj++;
     
     // 2
     *obj = {};
+    Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 270;
-    obj->transform.pos.x = 2;
+    obj->transform.pos.x = 4;
     RendObj_SetAsColouredQuad(obj, 0, 0, 1);
     g_scene.numObjects++;
     obj++;
     
     // 3
     *obj = {};
+    Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 180;
-    obj->transform.pos.z = 2;
+    obj->transform.pos.z = 4;
     RendObj_SetAsColouredQuad(obj, 1, 1, 0);
     g_scene.numObjects++;
     obj++;
 
     // 4
     *obj = {};
+    Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 0;
-    obj->transform.pos.x = -3;
-    obj->transform.pos.z = -4;
-    obj->type = RENDOBJ_TYPE_BILLBOARD;
+    obj->transform.pos.x = -2;
+    obj->transform.pos.z = -3;
+    RendObj_SetAsBillboard(obj, 1, 1, 1, 3);
     g_scene.numObjects++;
     obj++;
     
     // 5
     *obj = {};
+    Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 0;
     obj->transform.pos.x = 3;
     obj->transform.pos.z = -4;
     RendObj_SetAsColouredQuad(obj, 1, 0, 0);
+    g_scene.numObjects++;
+    obj++;
+    
+    // 6
+    *obj = {};
+    Transform_SetToIdentity(&obj->transform);
+    obj->transform.rot.y = 0;
+    obj->transform.pos.x = -3;
+    obj->transform.pos.z = -2;
+    RendObj_SetAsBillboard(obj, 1, 1, 1, 3);
     g_scene.numObjects++;
     obj++;
 }
@@ -197,45 +218,6 @@ sin(theta),	cos(theta),			0,			0,
 	// OutputDebugStringA(output);
 }
 
-#if 0
-#define BMP_FILE_TYPE 19778
-
-// TODO: This needs to be in the platform layer!
-u8 ReadBMPTest(BlockRef ref)
-{
-    void* mem = Heap_GetBlockMemoryAddress(&g_heap, &ref);
-	
-	WINBMPFILEHEADER* fileHeader = (WINBMPFILEHEADER*)mem;
-	AssertAlways(fileHeader->FileType == BMP_FILE_TYPE);
-	
-	const i32 fileHeaderSize = sizeof(WINBMPFILEHEADER);
-
-	WINNTBITMAPHEADER* bmpHeader = (WINNTBITMAPHEADER*)((u8*)mem + fileHeaderSize);
-
-	// only supporting 32 bit bitmaps right now!
-	AssertAlways(bmpHeader->BitsPerPixel == 32);
-	AssertAlways(bmpHeader->Compression == 3);
-	
-	u32* pixels = (u32*)((u8*)mem + fileHeaderSize + bmpHeader->Size);
-	u32 firstPixel = *pixels;
-
-	// Byte order is AA BB GG RR
-	// Little endian 0xRRGGBBAA
-
-	u8 alpha = (u8)(firstPixel);
-	u8 blue = (u8)(firstPixel >> 8);
-	u8 green = (u8)(firstPixel >> 16);
-	u8 red = (u8)(firstPixel >> 24);
-
-	//  GL_RGBA
-
-	// Rearrange to rgba
-	
-    DebugBreak();
-	return 1;
-}
-#endif
-
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 // App_ == interface function
@@ -244,20 +226,9 @@ u8 ReadBMPTest(BlockRef ref)
 i32 App_Init()
 {
     printf("DLL Init\n");
-    // Init player
-    // player.halfWidth = 1;
-    // player.halfHeight = 1;
-    // player.pos[0] = 0;
-    // player.pos[1] = 0;
-    // player.vel[0] = 0;
-    // player.vel[1] = 0;
-    // player.speed = 10;
 
     u32 mainMemorySize = MegaBytes(64);
     MemoryBlock mem = {};
-
-	//u8 readBMP1;
-	//u8 readBMP2;
 
     if (!platform.Platform_Malloc(&mem, mainMemorySize))
     {
@@ -266,23 +237,11 @@ i32 App_Init()
     else
     {
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
-        //char* filePath = "ReadTest.txt";
-        // BlockRef fileRef2 = platform.Platform_LoadFileIntoHeap(&g_heap, "ReadTest2.txt");
-        // BlockRef fileRef1 = platform.Platform_LoadFileIntoHeap(&g_heap, "ReadTest.txt");
-
-		// BlockRef bitmapReadTestRef = platform.Platform_LoadFileIntoHeap(&g_heap, "base/BitmapTest.bmp");
-		// readBMP1 = ReadBMPTest(bitmapReadTestRef);
-
-		/*BlockRef consoleCharsRef = platform.Platform_LoadFileIntoHeap(&g_heap, "base/charset.bmp");
-		readBMP2 = ReadBMPTest(consoleCharsRef);*/
-		
-        
-		//readBMP2 = ReadBMPTest(fileRef1);
     }
 
     SharedAssets_Init();
 
-    i32 numTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
     //DebugBreak();
     R_Scene_Init();
     R_Scene_CreateTestScene();
@@ -314,7 +273,7 @@ void CycleTestTexture()
     RendObj_ColouredMesh* rMesh = &obj->obj.mesh;
 	//DebugBreak();
     rMesh->textureIndex++;
-    if (rMesh->textureIndex > 3)
+    if (rMesh->textureIndex >= g_numDebugTextures)
     {
         rMesh->textureIndex = 0;
     }
@@ -351,7 +310,6 @@ void App_Frame(GameTime* time, InputTick* input)
     else
     {
         Input_ApplyInputToTransform(input, &g_scene.cameraTransform, time);
-        //Input_ApplyInputToTransform()
     }
 
     R_Scene_Tick(time, &g_scene);

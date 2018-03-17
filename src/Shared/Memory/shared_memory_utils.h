@@ -27,6 +27,25 @@ void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
     while ((u32)ptr < endPoint) { *ptr++ = val; }
 }
 
+/**
+ * Repeatedly write the given pattern into ptr
+ * Pattern size must fit exactly into numBytes!
+ */
+void COM_SetMemoryPattern(u8* ptr, u32 numBytes, u8* pattern, u32 patternSize)
+{
+    u32 numCopies = numBytes / patternSize;
+    AssertAlways((numBytes % patternSize) == 0);
+    u32 endPoint = (u32) ptr + numBytes;
+    for (u32 i = 0; i < numCopies; ++i)
+    {
+        for (u32 j = 0; j < patternSize; ++j)
+        {
+            *ptr = pattern[j];
+            ptr++;
+        }
+    }
+}
+
 void COM_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;

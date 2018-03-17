@@ -52,13 +52,13 @@ void SharedAssets_Init()
 
 	ZGL_SetTriangleInArray(g_meshPrimitiveQuad_Verts,
 		-1, -1, 0,
-		0.75, -1, 0,
+		1, -1, 0,
 		1, 1, 0);
 	
 	ZGL_SetTriangleInArray(g_meshPrimitiveQuad_Verts + 9,
 		-1, -1, 0,
 		1, 1, 0,
-		-0.75, 1, 0);
+		-1, 1, 0);
 	
 	ZGL_SetTriangleUVsInArray(g_meshPrimitiveQuad_uvs, 
 		0, 0,

@@ -54,8 +54,10 @@ i32 Platform_LoadDebugTextures(Heap* heap)
     // Win32_IO_ReadBMPTest(&testBmpRef);
 
     Win32_ReadBMPToHeap(heap, "base/BitmapTest.bmp");
-
-    return 1;
+    Win32_ReadBMPToHeap(heap, "base/charset.bmp");
+    Win32_ReadBMPToHeap(heap, "base/brbrick2.bmp");
+    
+    return g_nextTexture;
 }
 
 /**********************************************************************

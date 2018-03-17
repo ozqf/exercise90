@@ -23,11 +23,16 @@ struct RendObj_Primitive
     f32 red;
     f32 green;
     f32 blue;
+    f32 alpha;
 };
 
 struct RendObj_Billboard
 {
     i32 textureIndex;
+    f32 r;
+    f32 g;
+    f32 b;
+    f32 a;
 };
 
 struct RendObj_Line
@@ -102,4 +107,16 @@ void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
     prim->red = red;
     prim->green = green;
     prim->blue = blue;
+    prim->alpha = 1;
+}
+
+void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
+{
+    obj->type = RENDOBJ_TYPE_BILLBOARD;
+    RendObj_Billboard* rend = &obj->obj.billboard;
+    rend->r = r;
+    rend->g = g;
+    rend->b = b;
+    rend->a = 1;
+    rend->textureIndex = textureIndex;
 }

@@ -80,6 +80,19 @@ i32 Win32_InitOpenGL(HWND window)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	// Transparent textures
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Enable alpha rejection for transparency
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
+
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	// Enable back-face culling
+	//glEnable(GL_CULL_FACE);
+
 	Win32_InitOpenGLTestAssets();
 
     return 1;
@@ -162,6 +175,7 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glRotatef(model->rot.z, 0, 0, 1);
 	glRotatef(model->rot.x, 1, 0, 0);
 	glRotatef(model->rot.y, 0, 1, 0);
+	glScalef(model->scale.x, model->scale.y, model->scale.z);
 	
 	// transform the object (model matrix)
 	// The result of GL_MODELVIEW matrix will be:
@@ -254,32 +268,38 @@ void R_RenderTestGeometry_RainbowQuad()
     glEnd();
 }
 
-void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b)
+void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b, f32 a)
 {
     glBegin(GL_TRIANGLES);
 
 	f32 size = 1;
 
 	// lower triangle. Bottom left -> Bottom Right -> Top Right
-	glColor3f(r, g, b);
+	glColor4f(r, g, b, a);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
 
-	glColor3f(r, g, b);
+	glColor4f(r, g, b, a);
 	glTexCoord2f(1.0f, 0.0f);
 	glVertex2f(size, -size);
 
-	glColor3f(r, g, b);
+	glColor4f(r, g, b, a);
 	glTexCoord2f(1.0f, 1.0f);
 	glVertex2f(size, size);
 
 	// upper triangle
-	glColor3f(r, g, b);
+	glColor4f(r, g, b, a);
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
-	glColor3f(r, g, b);
+
+	glColor4f(r, g, b, a);
+	glTexCoord2f(1.0f, 1.0f);
 	glVertex2f(size, size);
-	glColor3f(r, g, b);
+
+	glColor4f(r, g, b, a);
+	glTexCoord2f(0.0f, 1.0f);
 	glVertex2f(-size, size);
+
     glEnd();
 }
 
@@ -293,7 +313,7 @@ void R_RenderPrimitive(Transform* camera, RendObj* obj)
 	{
 		case REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD:
 		{
-			R_RenderTestGeometry_ColouredQuad(prim->red, prim->green, prim->blue);
+			R_RenderTestGeometry_ColouredQuad(prim->red, prim->green, prim->blue, prim->alpha);
 		} break;
 
 		case REND_PRIMITIVE_TYPE_RAINBOW_QUAD:
@@ -317,9 +337,11 @@ glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 void R_RenderBillboard(Transform* camera, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
+	glColor3f(1, 1, 1);
 	R_SetModelViewMatrix_Billboard(camera, &obj->transform);
-	R_SetupTestTexture(obj->obj.billboard.textureIndex);
-	R_RenderTestGeometry_RainbowQuad();
+	RendObj_Billboard* b = &obj->obj.billboard;
+	R_SetupTestTexture(b->textureIndex);
+	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);
 }
 
 void R_RenderMesh(Transform* camera, RendObj* obj)

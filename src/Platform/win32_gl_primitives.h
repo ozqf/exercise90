@@ -192,10 +192,26 @@ void Win32_InitOpenGLTestAssets()
 	testBuffer3.pitch = TEST_BUFFER_WIDTH;
 
 	//Com_ZeroMemory((u8*)testBufferPixels, TEST_BUFFER_PIXEL_COUNT * sizeof(u32));
-	COM_SetMemory((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, 0x22);
-    COM_SetMemory((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, 0x77);
-    COM_SetMemory((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, 0xCC);
+	u8 colour[4];
+	// rgba
+	colour[0] = 255;
+	colour[1] = 0;
+	colour[2] = 0;
+	colour[3] = 128;
+	COM_SetMemoryPattern((u8*)testBufferPixels, TEST_BUFFER_MEM_SIZE, colour, 4);
 
+	colour[0] = 0;
+	colour[1] = 255;
+	colour[2] = 0;
+	colour[3] = 255;
+    COM_SetMemoryPattern((u8*)testBufferPixels2, TEST_BUFFER_MEM_SIZE, colour, 4);
+	
+	colour[0] = 0;
+	colour[1] = 0;
+	colour[2] = 255;
+	colour[3] = 255;
+    COM_SetMemoryPattern((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, colour, 4);
+	
 	// 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
