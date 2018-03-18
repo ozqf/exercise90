@@ -18,7 +18,6 @@ void R_LoadAsciCharGeometry(
 	)
 {
     //DebugBreak();
-    #if 1
     i32 resultX = asciChar % ZTXT_CONSOLE_CHAR_SHEET_WIDTH_CHARS;
     i32 resultY = asciChar / ZTXT_CONSOLE_CHAR_SHEET_WIDTH_CHARS;
     //resultY = resultY / ZTXT_CONSOLE_CHAR_STRIDE;
@@ -70,37 +69,88 @@ void R_LoadAsciCharGeometry(
 	glVertex3f(-sizeX, sizeY, zPos);
 
     glEnd();
-    #endif
+}
+void R_LoadAsciCharArrayGeometry(
+	char* charArray,
+	i32 sheetWidthPixels,
+	f32 screenOriginX,
+	f32 screenOriginY,
+	f32 charsPerScreenHalf,
+	f32 aspectRatio
+	)
+{
+	glBegin(GL_TRIANGLES);
 
-    #if 0
-    glBegin(GL_TRIANGLES);
+	u8* current = (u8*)charArray;
+	f32 posX = screenOriginX;
+	f32 posY = screenOriginY;
+	f32 posZ = 0;
 
-	f32 size = 1;
-    f32 zPos = -1;
+	// asci char sheet will be 256 characters, 16x16
+    f32 strideX = 1.0f / 16;
+    f32 strideY = 1.0f / 16;
 
-	// lower triangle. Bottom left -> Bottom Right -> Top Right
-	glColor3f(1, 0, 0);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-size, -size, zPos);
+	f32 letterWidth = (aspectRatio - 1) / charsPerScreenHalf;
+	f32 letterHeight = 1 / charsPerScreenHalf;
+    
+	while (*current)
+	{
+		if (*current == '\n')
+		{
+			posX = screenOriginX;
+			posY -= letterHeight;
+			++current;
+			continue;
+		}
 
-	glColor3f(0, 1, 0);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(size, -size, zPos);
+    	i32 sheetX = *current % 16;
+    	i32 sheetY = *current / 16;
+    	// Sheet is top -> down but opengl is bottom -> up so flip the Y coord
+    	sheetY = (16 - 1) - sheetY;
 
-	glColor3f(0, 0, 1);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(size, size, zPos);
+    	f32 uvLeft = (f32)strideX * (f32)sheetX;
+    	f32 uvRight = (f32)uvLeft + (f32)strideX;
 
-	// upper triangle
-	glColor3f(1, 0, 0);
-	glVertex3f(-size, -size, zPos);
+    	f32 uvBottom = (f32)strideY * (f32)sheetY;
+    	f32 uvTop = (f32)uvBottom + (f32)strideY;
 
-	glColor3f(0, 0, 1);
-	glVertex3f(size, size, zPos);
+		f32 hw = letterWidth * 0.5f;
+		f32 hh = letterHeight * 0.5f;
+		f32 minX = posX - hw;
+		f32 maxX = posX + hw;
+		f32 minY = posY - hh;
+		f32 maxY = posY + hh;
 
-	glColor3f(1, 1, 0);
-	glVertex3f(-size, size, zPos);
+		// lower triangle. Bottom left -> Bottom Right -> Top Right
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvLeft, uvBottom);
+		glVertex3f(minX, minY, posZ);
 
-    glEnd();
-    #endif
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvRight, uvBottom);
+		glVertex3f(maxX, minY, posZ);
+
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvRight, uvTop);
+		glVertex3f(maxX, maxY, posZ);
+
+		// upper triangle
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvLeft, uvBottom);
+		glVertex3f(minX, minY, posZ);
+
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvRight, uvTop);
+		glVertex3f(maxX, maxY, posZ);
+
+		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glTexCoord2f(uvLeft, uvTop);
+		glVertex3f(minX, maxY, posZ);
+
+		// Step
+		++current;
+		posX += letterWidth;
+	}
+
+	glEnd();
 }

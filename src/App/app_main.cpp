@@ -86,17 +86,31 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
 
-
-
-
     // UI
     obj = g_ui_rendObjects;
 
-    // test char
+    // test sprite
     *obj = {};
-    RendObj_SetAsAsciChar(obj, 'a');
+    RendObj_SetAsSprite(obj, SPRITE_MODE_UI, 4, 0.1f, 0.1f);
+    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
+    RendObj_CalculateSpriteAsciUVs(&obj->obj.sprite, g_testAsciChar);
+    obj->transform.pos.z = -1;
     g_scene.numUIObjects++;
     obj++;
+
+    // test string
+    *obj = {};
+    RendObj_SetAsAsciCharArray(obj, g_testString, COM_StrLenA(g_testString), 16);
+    obj->transform.pos.x = -0.75f;
+    obj->transform.pos.y = 0.75f;
+    g_scene.numUIObjects++;
+    obj++;
+
+    // test char
+    // *obj = {};
+    // RendObj_SetAsAsciChar(obj, '+');
+    // g_scene.numUIObjects++;
+    // obj++;
 }
 
 void R_Scene_Init()
@@ -305,6 +319,13 @@ void CycleTestTexture()
         OutputDebugString(buf);
 }
 
+void CycleTestAsciChar()
+{
+    RendObj* obj = g_ui_rendObjects + 0;
+    RendObj_Sprite* sprite = &obj->obj.sprite;
+    g_testAsciChar++;
+    RendObj_CalculateSpriteAsciUVs(sprite, g_testAsciChar);
+}
 u8 cycleTexturePressed = 0;
 
 void App_Frame(GameTime* time, InputTick* input)
@@ -315,7 +336,8 @@ void App_Frame(GameTime* time, InputTick* input)
         if (cycleTexturePressed == 0)
         {
             cycleTexturePressed = 1;
-            CycleTestTexture();
+            CycleTestAsciChar();
+            //CycleTestTexture();
         }
         
     }

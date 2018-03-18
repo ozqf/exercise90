@@ -212,28 +212,45 @@ void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 ////////////////////////////////////////////////////////////////////
 // Draw Quad
 ////////////////////////////////////////////////////////////////////
-void R_DrawQuad(f32 posX, f32 posY, f32 halfWidth, f32 halfHeight, f32 red, f32 green, f32 blue)
+void R_DrawSpriteGeometry(f32 posX, f32 posY, f32 posZ, RendObj_Sprite* sprite)
 {
-	f32 minX = posX - halfWidth;
-	f32 maxX = posX + halfWidth;
-	f32 minY = posY + halfHeight;
-	f32 maxY = posY - halfHeight;
+	f32 hw = sprite->width * 0.5f;
+	f32 hh = sprite->height * 0.5f;
+	f32 minX = posX - hw;
+	f32 maxX = posX + hw;
+	f32 minY = posY - hh;
+	f32 maxY = posY + hh;
+
+	minX /= win32_aspectRatio;
+	maxX /= win32_aspectRatio;
 	
 	glBegin(GL_TRIANGLES);
-	glColor3f(red, green, blue);
-	glVertex2f(-minX, -minY);
-	glColor3f(red, green, blue);
-	glVertex2f(maxX, -minY);
-	glColor3f(red, green, blue);
-	glVertex2f(maxX, maxY);
+
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvLeft, sprite->uvBottom);
+	glVertex3f(minX, minY, posZ);
+
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvRight, sprite->uvBottom);
+	glVertex3f(maxX, minY, posZ);
+
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvRight, sprite->uvTop);
+	glVertex3f(maxX, maxY, posZ);
 
 	// upper triangle
-	glColor3f(red, green, blue);
-	glVertex2f(-minX, -minY);
-	glColor3f(red, green, blue);
-	glVertex2f(maxX, maxY);
-	glColor3f(red, green, blue);
-	glVertex2f(-minX, maxY);
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvLeft, sprite->uvBottom);
+	glVertex3f(minX, minY, posZ);
+
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvRight, sprite->uvTop);
+	glVertex3f(maxX, maxY, posZ);
+
+	glColor3f(sprite->r, sprite->g, sprite->b);
+	glTexCoord2f(sprite->uvLeft, sprite->uvTop);
+	glVertex3f(minX, maxY, posZ);
+
 	glEnd();
 }
 
@@ -261,10 +278,15 @@ void R_RenderTestGeometry_RainbowQuad()
 
 	// upper triangle
 	glColor3f(1, 0, 0);
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-size, -size);
+	
 	glColor3f(0, 0, 1);
+	glTexCoord2f(1.0f, 1.0f);
 	glVertex2f(size, size);
+
 	glColor3f(1, 1, 0);
+	glTexCoord2f(0.0f, 1.0f);
 	glVertex2f(-size, size);
     glEnd();
 }
@@ -350,6 +372,24 @@ void R_RenderAsciChar(RendObj* obj)
 	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
+void R_RenderAsciCharArray(Transform* camera, RendObj* obj)
+{
+	glEnable(GL_TEXTURE_2D);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	RendObj_AsciCharArray* c = &obj->obj.charArray;
+	R_SetupTestTexture(4);
+	R_LoadAsciCharArrayGeometry(
+		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
+		obj->transform.pos.x, obj->transform.pos.y, 16, win32_aspectRatio);
+	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
+}
+
 void R_RenderBillboard(Transform* camera, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
@@ -358,6 +398,39 @@ void R_RenderBillboard(Transform* camera, RendObj* obj)
 	RendObj_Billboard* b = &obj->obj.billboard;
 	R_SetupTestTexture(b->textureIndex);
 	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);
+}
+
+void R_RenderSprite(Transform* camera, RendObj* obj)
+{
+	//DebugBreak();
+	glEnable(GL_TEXTURE_2D);
+	RendObj_Sprite* sprite = &obj->obj.sprite;
+	switch (sprite->mode)
+	{
+		case SPRITE_MODE_MESH:
+		{
+
+		} break;
+
+		case SPRITE_MODE_UI:
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+			R_SetupTestTexture(sprite->textureIndex);
+			//R_RenderTestGeometry_RainbowQuad();
+			R_DrawSpriteGeometry(obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z, sprite);
+
+		} break;
+
+		case SPRITE_MODE_BILLBOARD:
+		{
+
+		} break;
+	}
 }
 
 void R_RenderMesh(Transform* camera, RendObj* obj)
@@ -391,11 +464,21 @@ void R_RenderEntity(Transform* camera, RendObj* obj)
 			R_RenderMesh(camera, obj);
 		} break;
 
+		case RENDOBJ_TYPE_SPRITE:
+		{
+			R_RenderSprite(camera, obj);
+		} break;
+		
 		case RENDOBJ_TYPE_PRIMITIVE:
 		{
 			R_RenderPrimitive(camera, obj);
 		} break;
 
+		case RENDOBJ_TYPE_ASCI_CHAR_ARRAY:
+		{
+			R_RenderAsciCharArray(camera, obj);
+		} break;
+		
 		case RENDOBJ_TYPE_BILLBOARD:
 		{
 			R_RenderBillboard(camera, obj);
@@ -415,16 +498,10 @@ void R_RenderScene(RenderScene* scene)
     for (u32 i = 0; i < scene->numObjects; ++i)
     {
         R_RenderEntity(&scene->cameraTransform, &scene->rendObjects[i]);
-
-        //R_SetModelViewMatrix(&cameraTransform, &g_renderObjects[i]);
-        //R_SetupTestTexture();
-		//R_DrawQuad(0, 0, 1.5, 1.5, 1, 0, 0);
-        //R_RenderTestGeometry();
     }
 
 	for (u32 i = 0; i < scene->numUIObjects; ++i)
 	{
-		//DebugBreak();
 		R_RenderEntity(&scene->cameraTransform, &scene->uiObjects[i]);
 	}
 }

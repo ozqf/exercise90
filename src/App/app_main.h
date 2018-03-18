@@ -28,3 +28,7 @@ global_variable GL_Test_Input testInput;
 global_variable Heap g_heap;
 
 global_variable i32 g_numDebugTextures;
+
+global_variable u8 g_testAsciChar = '+';
+
+global_variable char* g_testString = "Hello, World...\nHey look, new line!";

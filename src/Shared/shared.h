@@ -11,3 +11,4 @@
 #include "blit_types.h"
 #include "shared_assets.h"
 #include "shared_render_types.h"
+#include "shared_render_types.cpp"
