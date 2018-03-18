@@ -386,7 +386,7 @@ void R_RenderAsciCharArray(Transform* camera, RendObj* obj)
 	R_SetupTestTexture(4);
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
-		obj->transform.pos.x, obj->transform.pos.y, 16, win32_aspectRatio);
+		obj->transform.pos.x, obj->transform.pos.y, c->size, win32_aspectRatio);
 	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 

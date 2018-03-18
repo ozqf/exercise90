@@ -82,7 +82,7 @@ struct RendObj_AsciCharArray
 {
     char* chars;
     i32 numChars;
-    i32 size;
+    f32 size;
 };
 
 struct RendObj_ColouredMesh

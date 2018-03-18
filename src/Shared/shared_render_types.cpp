@@ -88,7 +88,7 @@ void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
     c->asciChar = asciCharacter;
 }
 
-void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, i32 size)
+void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size)
 {
     obj->type = RENDOBJ_TYPE_ASCI_CHAR_ARRAY;
     RendObj_AsciCharArray* c = &obj->obj.charArray;

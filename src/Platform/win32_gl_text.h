@@ -75,24 +75,30 @@ void R_LoadAsciCharArrayGeometry(
 	i32 sheetWidthPixels,
 	f32 screenOriginX,
 	f32 screenOriginY,
-	f32 charsPerScreenHalf,
+	f32 charSize,
 	f32 aspectRatio
 	)
 {
 	glBegin(GL_TRIANGLES);
 
 	u8* current = (u8*)charArray;
-	f32 posX = screenOriginX;
-	f32 posY = screenOriginY;
-	f32 posZ = 0;
 
+	// Setup values to find uv position on char sheet
 	// asci char sheet will be 256 characters, 16x16
     f32 strideX = 1.0f / 16;
     f32 strideY = 1.0f / 16;
 
-	f32 letterWidth = (aspectRatio - 1) / charsPerScreenHalf;
-	f32 letterHeight = 1 / charsPerScreenHalf;
-    
+	f32 letterWidth = charSize / aspectRatio;
+	f32 letterHeight = charSize;
+
+	// Setup drawing position
+	// Align to top left of text block:
+	screenOriginX += (letterWidth * 0.5f);
+	screenOriginY -= (letterHeight * 0.5f);
+	f32 posX = screenOriginX;
+	f32 posY = screenOriginY;
+	f32 posZ = -1;
+
 	while (*current)
 	{
 		if (*current == '\n')

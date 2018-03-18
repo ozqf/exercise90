@@ -86,7 +86,8 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
 
-    // UI
+    /////////////////////////////////////////////////////////////////////////////
+    // UI Tests
     obj = g_ui_rendObjects;
 
     // test sprite
@@ -100,9 +101,9 @@ void R_Scene_CreateTestScene()
 
     // test string
     *obj = {};
-    RendObj_SetAsAsciCharArray(obj, g_testString, COM_StrLenA(g_testString), 16);
-    obj->transform.pos.x = -0.75f;
-    obj->transform.pos.y = 0.75f;
+    RendObj_SetAsAsciCharArray(obj, g_testString, COM_StrLenA(g_testString), 0.05f);
+    obj->transform.pos.x = -1;//-0.75f;
+    obj->transform.pos.y = 1;//0.75f;
     g_scene.numUIObjects++;
     obj++;
 
