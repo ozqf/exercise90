@@ -2,6 +2,7 @@
 
 #include "app_main.h"
 #include "../Shared/shared_assets.h"
+#include "../Shared/Memory/HeapUtils.h"
 
 #include <stdio.h>
 
@@ -101,7 +102,13 @@ void R_Scene_CreateTestScene()
 
     // test string
     *obj = {};
-    RendObj_SetAsAsciCharArray(obj, g_testString, COM_StrLenA(g_testString), 0.05f);
+	/*char* chars = g_testString;
+	i32 numChars = COM_StrLenA(g_testString);*/
+
+	char* chars = (char*)g_debugBuffer.ptrMemory;
+	i32 numChars = g_debugBuffer.objectSize;
+
+    RendObj_SetAsAsciCharArray(obj, chars, numChars, 0.05f);
     obj->transform.pos.x = -1;//-0.75f;
     obj->transform.pos.y = 1;//0.75f;
     g_scene.numUIObjects++;
@@ -126,13 +133,79 @@ void R_Scene_Init()
     g_scene.uiObjects = g_ui_rendObjects;
 }
 
-void R_Scene_Tick(GameTime* time, RenderScene* scene)
+void AllocateDebugStrings(Heap* heap)
 {
-    RendObj* obj;
-    i32 rotatingEntity = 5;
+	// Buffer used for live stat output
+	Heap_AllocString(&g_heap, &g_debugBuffer, 1024);
+	char* writeStart = (char*)g_debugBuffer.ptrMemory;
+	i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
+	sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
+	OutputDebugStringA("Done");
+}
 
-    obj = &scene->rendObjects[5];
-    obj->transform.rot.y += 90 * time->deltaTime;
+i32 AllocateTestStrings(Heap* heap)
+{
+	BlockRef ref = {};
+    Heap_AllocString(&g_heap, &ref, 128);
+    char* testStr1 = "This is a test string. It should get copied onto the heap";
+	COM_CopyStringLimited(testStr1, (char*)ref.ptrMemory, ref.objectSize);
+
+	ref = {};
+	Heap_AllocString(&g_heap, &ref, 256);
+	char* testStr2 = "Welcome to another test string. This one goes on and on and on and on and on and blooooody on. At most 256 though, no more, but possible less. Enough to require 256 bytes of capacity certainly. I mean, with more than that it would just break right? It'll go right off the end and just...";
+	COM_CopyStringLimited(testStr2, (char*)ref.ptrMemory, ref.objectSize);
+    return 1;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// App Interface
+// App_ == interface function
+// Return 1 if successful, 0 if failed
+////////////////////////////////////////////////////////////////////////////
+i32 App_Init()
+{
+    printf("DLL Init\n");
+
+    u32 mainMemorySize = MegaBytes(1);
+    MemoryBlock mem = {};
+
+    if (!platform.Platform_Malloc(&mem, mainMemorySize))
+    {
+        return 0;
+    }
+    else
+    {
+        Heap_Init(&g_heap, mem.ptrMemory, mem.size);
+    }
+
+	AllocateDebugStrings(&g_heap);
+	//AllocateTestStrings(&g_heap);
+
+    SharedAssets_Init();
+
+    g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    
+    R_Scene_Init();
+    R_Scene_CreateTestScene();
+    
+    testInput = {};
+	testInput.speed = 3.0f;
+    testInput.rotSpeed = 90.0f;
+    
+    return 1;
+}
+
+i32 App_Shutdown()
+{
+    printf("DLL Shutdown\n");
+
+    // Free memory, assuming a new APP might be loaded in it's place
+    MemoryBlock mem = {};
+    mem.ptrMemory = g_heap.ptrMemory;
+    mem.size = g_heap.size;
+    platform.Platform_Free(&mem);
+
+    return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -197,25 +270,25 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	{
 		testInput.movement.y += 1;
 	}
-	
-/*
-Movement forward requires creating a vector in the direction of
-the object's "forward". Object in this case has rotation, so must convert
-rotation to a forward vector, and then scale this vector by desired speed
-to create a velocity change in the desired direction
 
-> Read rotation input and rotate angles
-> Calculate forward vector
-> Scale forward to desired speed and add to position
+	/*
+	Movement forward requires creating a vector in the direction of
+	the object's "forward". Object in this case has rotation, so must convert
+	rotation to a forward vector, and then scale this vector by desired speed
+	to create a velocity change in the desired direction
 
-Rotation Matrix to rotate on Z axis
-cos(theta),	-sin(theta),		0,			0,
-sin(theta),	cos(theta),			0,			0,
-0,			0,					1,			0,
-0,			0,					0,			1
-*/
+	> Read rotation input and rotate angles
+	> Calculate forward vector
+	> Scale forward to desired speed and add to position
+
+	Rotation Matrix to rotate on Z axis
+	cos(theta),	-sin(theta),		0,			0,
+	sin(theta),	cos(theta),			0,			0,
+	0,			0,					1,			0,
+	0,			0,					0,			1
+	*/
 	Vec3 frameMove = {};
-	
+
 	// Sideways: X Input
 	// Vertical: Y Input
 	// Forward: Z input
@@ -224,11 +297,11 @@ sin(theta),	cos(theta),			0,			0,
 	// {
 	// 	return;
 	// }
-    
-    // Quick hack to force movement to occur on a flat x/z plane only
-    Vec3 groundRot = t->rot;
-    groundRot.x = 0;
-    groundRot.z = 0;
+
+	// Quick hack to force movement to occur on a flat x/z plane only
+	Vec3 groundRot = t->rot;
+	groundRot.x = 0;
+	groundRot.z = 0;
 
 	AngleToAxes(&groundRot, &t->left, &t->up, &t->forward);
 
@@ -240,7 +313,7 @@ sin(theta),	cos(theta),			0,			0,
 	Vec3_SetMagnitude(&left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
 	Vec3_SetMagnitude(&up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
 	Vec3_SetMagnitude(&forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
-	
+
 	frameMove.x = forward.x + up.x + left.x;
 	frameMove.y = forward.y + up.y + left.y;
 	frameMove.z = forward.z + up.z + left.z;
@@ -257,51 +330,16 @@ sin(theta),	cos(theta),			0,			0,
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// App Interface
-// App_ == interface function
-// Return 1 if successful, 0 if failed
+// UPDATE
 ////////////////////////////////////////////////////////////////////////////
-i32 App_Init()
+
+void R_Scene_Tick(GameTime* time, RenderScene* scene)
 {
-    printf("DLL Init\n");
+	RendObj* obj;
+	i32 rotatingEntity = 5;
 
-    u32 mainMemorySize = MegaBytes(64);
-    MemoryBlock mem = {};
-
-    if (!platform.Platform_Malloc(&mem, mainMemorySize))
-    {
-        return 0;
-    }
-    else
-    {
-        Heap_Init(&g_heap, mem.ptrMemory, mem.size);
-    }
-
-    SharedAssets_Init();
-
-    g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
-    //DebugBreak();
-    R_Scene_Init();
-    R_Scene_CreateTestScene();
-
-    testInput = {};
-	testInput.speed = 3.0f;
-    testInput.rotSpeed = 90.0f;
-    
-    return 1;
-}
-
-i32 App_Shutdown()
-{
-    printf("DLL Shutdown\n");
-
-    // Free memory, assuming a new APP might be loaded in it's place
-    MemoryBlock mem = {};
-    mem.ptrMemory = g_heap.ptrMemory;
-    mem.size = g_heap.size;
-    platform.Platform_Free(&mem);
-
-    return 1;
+	obj = &scene->rendObjects[5];
+	obj->transform.rot.y += 90 * time->deltaTime;
 }
 
 void CycleTestTexture()

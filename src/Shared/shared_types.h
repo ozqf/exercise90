@@ -14,7 +14,6 @@ PRIMITIVE TYPES
 #define i32 int32_t
 #define i64 int64_t
 
-
 #define u8 uint8_t
 #define uChar uint8_t
 #define u16 uint16_t
@@ -268,6 +267,13 @@ struct MemoryBlock
 {
     void *ptrMemory;
     i32 size;
+};
+
+struct ZStringHeader
+{
+    char* chars;
+    i32 length;
+    i32 maxLength;
 };
 
 struct GameTime

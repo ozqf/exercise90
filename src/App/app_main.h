@@ -32,3 +32,6 @@ global_variable i32 g_numDebugTextures;
 global_variable u8 g_testAsciChar = '+';
 
 global_variable char* g_testString = "Hello, World...\nHey look, new line!";
+
+global_variable BlockRef g_debugBuffer;
+

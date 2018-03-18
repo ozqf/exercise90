@@ -1,5 +1,7 @@
 @echo off
-@echo Build Game DLL
+
+@echo -----------------------------
+@echo Build Exercise 90 Game dll
 
 if not exist bin mkdir bin
 cd bin

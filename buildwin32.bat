@@ -1,5 +1,7 @@
 @echo off
-@echo Build SDL Platform
+
+@echo -----------------------------
+@echo Build Exercise 90 Win32 Platform Layer
 
 if not exist bin mkdir bin
 if not exist build mkdir build
