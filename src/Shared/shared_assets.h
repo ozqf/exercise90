@@ -10,7 +10,11 @@ Very basic meshes/textures embedded in source
 
 #include "EmbeddedAssets/primitive_quad.h"
 #include "EmbeddedAssets/primitive_cube.h"
+#include "EmbeddedAssets/primitive_octahedron.h"
 
+
+
+#if 0
 Mesh g_meshPrimitive_quad2;
 // 2 triangles, 3 verts per tri, 3 floats per vert
 f32 g_meshPrimitiveQuad_Verts[(2 * 3 * 3)];
@@ -101,3 +105,6 @@ void SharedAssets_Init()
 		1, 1,
 		0, 1);
 }
+#endif
+
+void SharedAssets_Init() {}

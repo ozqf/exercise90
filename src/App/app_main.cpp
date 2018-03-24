@@ -40,7 +40,8 @@ void R_Scene_CreateTestScene()
     obj->transform.scale.z = 0.5;
     //g_meshPrimitive_quad
     //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
+    RendObj_SetAsMesh(obj, &g_meshOctahedron, 1, 1, 1, 5);
+    //RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
 
@@ -359,8 +360,8 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
 	obj->transform.rot.y += 90 * time->deltaTime;
 
     
-	obj = &scene->rendObjects[1];
-	obj->transform.rot.y += 90 * time->deltaTime;
+	// obj = &scene->rendObjects[1];
+	// obj->transform.rot.y += 90 * time->deltaTime;
 }
 
 void CycleTestTexture()

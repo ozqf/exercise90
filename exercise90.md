@@ -29,21 +29,21 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 * **ZBuffer** - Currently no hidden surface removal.
 * **Basic Text** - Just some means of rendering text for debug output and placeholder UI.
     * **Render from Char sheet** - Can double for sprite sheet rendering too.
-        * Done 2018/3/18 **Render an asci char**
-        * Done 2018/3/18 **Render a char array**
+        * Done 2018/3/18 *Render an asci char*
+        * Done 2018/3/18 *Render a char array*
         * **Basic UI System** - System in App to lay out basic UI elements on screen and modify them.
         * **String Struct** - Internal structure for storing fixed sized char arrays in a Heap.
 * **Textures**
-    * Done 2018/3/15 **Loading Textures** - Need to load in bitmaps
-    * Done 2018/3/16 **Transparent textures** - Required generally, but of special importance if using sprite objects ala Doom.
+    * Done 2018/3/15 *Loading Textures* - Need to load in bitmaps
+    * Done 2018/3/16 *Transparent textures* - Required generally, but of special importance if using sprite objects ala Doom.
     * **Tiling Textures** - Making textures repeat over large world surfaces ala old BSP engines.
 * **3D Meshes**
     * **More Primitives** - Very basic shapes that are hardcoded into primitives header file
-        * Done 2018/3/24 **Cube**
+        * Done 2018/3/24 *Cube*
         * **Sphere**
-        * **Octahedron**
+        * Done 2018/3/24 *Octahedron*
     * **Improved Billboards** - Billboards (quads that always face the camera) aren't quite right orientation wise.
-* Done 2018/3/16 **Scale** - X/Y/Z Scale is in the Transform data type but is not used.
+* Done 2018/3/16 *Scale* - X/Y/Z Scale is in the Transform data type but is not used.
 
 ### Platform
 * **Mouse Input**
@@ -51,5 +51,5 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
     * **Hide cursor** -  cursor is currently always shown. Require a game state switch to allow the cursor to be toggled on/off
     for UI stuff.
 * **Input binding is Engine-side** - Engine should pass input events to game and let game handle it to make input more modable/less platform specific.
-* Done 2018/3/15 **Test File Loading**
-* Done 2018/3/14 **Alloc memory for game**
+* Done 2018/3/15 *Test File Loading*
+* Done 2018/3/14 *Alloc memory for game*
