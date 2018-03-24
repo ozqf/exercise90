@@ -256,8 +256,8 @@ struct Mesh
 	u32 numVerts;
 
 	f32* verts;
-	f32* normals;
 	f32* uvs;
+    f32* normals;
 };
 
 /*****************************************************

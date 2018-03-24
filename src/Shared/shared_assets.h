@@ -1,11 +1,40 @@
+/*
+Very basic meshes/textures embedded in source
+> Quad
+> Cube
+
+*/
 #pragma once
 
 #include "shared.h"
 
-Mesh g_meshPrimitive_quad;
+#include "EmbeddedAssets/primitive_quad.h"
+#include "EmbeddedAssets/primitive_cube.h"
+
+Mesh g_meshPrimitive_quad2;
 // 2 triangles, 3 verts per tri, 3 floats per vert
 f32 g_meshPrimitiveQuad_Verts[(2 * 3 * 3)];
 f32 g_meshPrimitiveQuad_uvs[(2 * 3 * 2)];
+
+f32 g_prim_quadVerts2[] =
+{
+	-1, -1, 0,
+	1, -1, 0,
+	1, 1, 0,
+	-1, -1, 0,
+	1, 1, 0,
+	-1, 1, 0
+};
+
+f32 g_prim_quadUVs2[] =
+{
+	0, 0,
+	1, 0,
+	1, 1,
+	0, 0,
+	1, 1,
+	0, 1
+};
 
 void ZGL_SetTriangleInArray(
 	f32* array,
@@ -46,8 +75,10 @@ void ZGL_SetTriangleUVsInArray(
 void SharedAssets_Init()
 {
     g_meshPrimitive_quad = {};
-    g_meshPrimitive_quad.verts = g_meshPrimitiveQuad_Verts;
-	g_meshPrimitive_quad.uvs = g_meshPrimitiveQuad_uvs;
+    // g_meshPrimitive_quad.verts = g_meshPrimitiveQuad_Verts;
+	// g_meshPrimitive_quad.uvs = g_meshPrimitiveQuad_uvs;
+	g_meshPrimitive_quad.verts = g_prim_quadVerts;
+	g_meshPrimitive_quad.uvs = g_prim_quadUVs;
     g_meshPrimitive_quad.numVerts = 6;
 
 	ZGL_SetTriangleInArray(g_meshPrimitiveQuad_Verts,

@@ -30,6 +30,23 @@ void R_Scene_CreateTestScene()
     // 1
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
+    obj->transform.pos.x = 0;
+    obj->transform.pos.y = 0;
+    obj->transform.pos.z = -4;
+    
+    obj->transform.rot.x = 0;
+    obj->transform.scale.x = 0.5;
+    obj->transform.scale.y = 0.5;
+    obj->transform.scale.z = 0.5;
+    //g_meshPrimitive_quad
+    //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
+    RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
+    g_scene.numObjects++;
+    obj++;
+
+    // 2
+    *obj = {};
+    Transform_SetToIdentity(&obj->transform);
     obj->transform.scale.x = 4;
     obj->transform.rot.y = 90;
     obj->transform.pos.x = -4;
@@ -37,7 +54,7 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
     
-    // 2
+    // 3
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 270;
@@ -46,7 +63,7 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
     
-    // 3
+    // 4
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 180;
@@ -55,7 +72,7 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
 
-    // 4
+    // 5
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 0;
@@ -65,7 +82,7 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
     
-    // 5
+    // 6
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 0;
@@ -75,7 +92,7 @@ void R_Scene_CreateTestScene()
     g_scene.numObjects++;
     obj++;
     
-    // 6
+    // 7
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 0;
@@ -338,7 +355,11 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
 	RendObj* obj;
 	i32 rotatingEntity = 5;
 
-	obj = &scene->rendObjects[5];
+	obj = &scene->rendObjects[6];
+	obj->transform.rot.y += 90 * time->deltaTime;
+
+    
+	obj = &scene->rendObjects[1];
 	obj->transform.rot.y += 90 * time->deltaTime;
 }
 

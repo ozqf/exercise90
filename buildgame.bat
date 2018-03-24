@@ -14,9 +14,9 @@ del *.* /q
 
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
-
+@echo on
 cl %compilerFlags% %compilerDefines% /LD /Fe../bin/base/gamex86.dll ../src/App/app_main.cpp
-
+@echo off
 set compilerFlags=
 set compilerDefines=
 

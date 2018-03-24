@@ -39,7 +39,7 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
     * **Tiling Textures** - Making textures repeat over large world surfaces ala old BSP engines.
 * **3D Meshes**
     * **More Primitives** - Very basic shapes that are hardcoded into primitives header file
-        * **Cube**
+        * Done 2018/3/24 **Cube**
         * **Sphere**
         * **Octahedron**
     * **Improved Billboards** - Billboards (quads that always face the camera) aren't quite right orientation wise.
