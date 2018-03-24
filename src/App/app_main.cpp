@@ -16,14 +16,16 @@ void R_Scene_CreateTestScene()
     // 0
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
+    obj->transform.pos.x = 0;
+    obj->transform.pos.y = 0;
     obj->transform.pos.z = 0;
-    obj->transform.pos.y = -1;
     obj->transform.rot.x = 270;
-    obj->transform.scale.x = 4;
-    obj->transform.scale.y = 4;
+    obj->transform.scale.x = 6;
+    obj->transform.scale.y = 6;
+    obj->transform.scale.z = 2;
     //g_meshPrimitive_quad
     //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    RendObj_SetAsMesh(obj, &g_meshPrimitive_quad, 1, 1, 1, 5);
+    RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
 
@@ -89,7 +91,8 @@ void R_Scene_CreateTestScene()
     obj->transform.rot.y = 0;
     obj->transform.pos.x = 3;
     obj->transform.pos.z = -4;
-    RendObj_SetAsColouredQuad(obj, 1, 0, 0);
+    //RendObj_SetAsColouredQuad(obj, 1, 0, 0);
+    RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
     
@@ -145,6 +148,9 @@ void R_Scene_Init()
     g_scene.numObjects = 0;
     g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
     g_scene.rendObjects = g_rendObjects;
+    g_scene.fov = 90;
+    g_scene.orthographicHalfHeight = 8;
+    g_scene.projectionMode = 2;
 
     g_scene.numUIObjects = 0;
     g_scene.maxUIObjects = R_MAX_RENDER_OBJECTS;

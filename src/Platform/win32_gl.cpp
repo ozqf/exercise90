@@ -102,8 +102,10 @@ i32 Win32_InitOpenGL(HWND window)
 ////////////////////////////////////////////////////////////////////
 // Projection
 ////////////////////////////////////////////////////////////////////
-void R_SetupProjection()
+
+void R_Setup3DProjectionA(i32 fov)
 {
+	if (fov <= 0) { fov = 90; }
 	glMatrixMode(GL_PROJECTION);
 
 	f32 prj[16];
@@ -118,7 +120,6 @@ void R_SetupProjection()
 	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
 
 	glLoadMatrixf(prj);
-
 }
 
 void R_SetupOrthoProjection(f32 halfScreenHeight)
@@ -129,8 +130,46 @@ void R_SetupOrthoProjection(f32 halfScreenHeight)
 	f32 halfHeight = halfScreenHeight;
 
 	f32 prj[16];
-	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, -1, 1);
+	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, 0, 1000);
 	glLoadMatrixf(prj);
+}
+
+void R_Setup3DProjectionB(i32 fov)
+{
+	if (fov <= 0) { fov = 90; }
+	glMatrixMode(GL_PROJECTION);
+	
+	f32 prj[16];
+	M4x4_SetToIdentity(prj);
+	f32 prjNear = 0.1f;
+	f32 prjFar = 1000;
+	f32 prjLeft = -0.075f * win32_aspectRatio;
+	f32 prjRight = 0.075f * win32_aspectRatio;
+	f32 prjTop = 0.075f;
+	f32 prjBottom = -0.075f;
+
+	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+
+	glLoadMatrixf(prj);
+}
+
+void R_SetupProjection(RenderScene* scene)
+{
+	switch (scene->projectionMode)
+	{
+		case 1:
+		{
+			R_SetupOrthoProjection(scene->orthographicHalfHeight);
+		} break;
+		case 2:
+		{
+			R_Setup3DProjectionB(scene->fov);
+		} break;
+		default :
+		{
+			R_Setup3DProjectionA(scene->fov);
+		} break;
+	}
 }
 
 void R_SetupTestTexture(i32 textureIndex)
@@ -493,7 +532,7 @@ void R_RenderEntity(Transform* camera, RendObj* obj)
 
 void R_RenderScene(RenderScene* scene)
 {
-	R_SetupProjection();
+	R_SetupProjection(scene);
 	//R_SetupOrthoProjection(8);
     for (u32 i = 0; i < scene->numObjects; ++i)
     {

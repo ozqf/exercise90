@@ -120,6 +120,9 @@ struct RenderScene
     u32 numObjects;
     u32 maxObjects;
     Transform cameraTransform;
+    i32 projectionMode;
+    f32 orthographicHalfHeight;
+    i32 fov;
 
     RendObj* uiObjects;
     u32 numUIObjects;
