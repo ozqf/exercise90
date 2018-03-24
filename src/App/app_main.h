@@ -35,3 +35,5 @@ global_variable char* g_testString = "Hello, World...\nHey look, new line!";
 
 global_variable BlockRef g_debugBuffer;
 
+global_variable ZMouseMode g_mouseMode;
+global_variable u8 g_input_escapePressed = 0;

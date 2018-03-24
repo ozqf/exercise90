@@ -19,10 +19,10 @@ void R_Scene_CreateTestScene()
     obj->transform.pos.x = 0;
     obj->transform.pos.y = 0;
     obj->transform.pos.z = 0;
-    obj->transform.rot.x = 270;
+    //obj->transform.rot.x = 270;
     obj->transform.scale.x = 6;
-    obj->transform.scale.y = 6;
-    obj->transform.scale.z = 2;
+    obj->transform.scale.y = 2;
+    obj->transform.scale.z = 6;
     //g_meshPrimitive_quad
     //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
     RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
@@ -155,6 +155,24 @@ void R_Scene_Init()
     g_scene.numUIObjects = 0;
     g_scene.maxUIObjects = R_MAX_RENDER_OBJECTS;
     g_scene.uiObjects = g_ui_rendObjects;
+}
+
+void Input_SetMouseMode(ZMouseMode mode)
+{
+    g_mouseMode = mode;
+    platform.Platform_SetMouseMode(mode);
+}
+
+void Input_ToggleMouseMode()
+{
+    if (g_mouseMode == Free)
+    {
+        Input_SetMouseMode(Captured);
+    }
+    else
+    {
+        Input_SetMouseMode(Free);
+    }
 }
 
 void AllocateDebugStrings(Heap* heap)
@@ -412,6 +430,16 @@ void App_Frame(GameTime* time, InputTick* input)
     {
         cycleTexturePressed = 0;
     }
+
+    if (input->escape)
+    {
+        if (g_input_escapePressed == 0)
+        {
+            g_input_escapePressed = 1;
+            Input_ToggleMouseMode();
+        }
+    }
+    else if (g_input_escapePressed == 1) { g_input_escapePressed = 0; }
 
     if (input->reset)
     {

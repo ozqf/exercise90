@@ -38,6 +38,9 @@ struct PlatformInterface
     BlockRef (*Platform_LoadFileIntoHeap)(Heap* heap, char* fileName);
     i32 (*Platform_LoadDebugTextures)(Heap* heap);
 
+    // Input
+    void (*Platform_SetMouseMode)(enum ZMouseMode mode);
+
     // Rendering
     void (*Platform_RenderScene)(RenderScene* scene);
 };

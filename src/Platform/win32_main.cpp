@@ -297,14 +297,15 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
         else if (VKCode == VK_ESCAPE)
         {
-            if (isDown)
-            {
-                OutputDebugStringA("ESC is down");
-            }
-            if (wasDown)
-            {
-                OutputDebugStringA("ESC was down ");
-            }
+            inputTick.escape = isDown;
+            // if (isDown)
+            // {
+            //     OutputDebugStringA("ESC is down");
+            // }
+            // if (wasDown)
+            // {
+            //     OutputDebugStringA("ESC was down ");
+            // }
         }
 
         if (VKCode == VK_F4 && (lParam & (1 << 29)))
@@ -494,7 +495,7 @@ int CALLBACK WinMain(
 
                 // ClipCursor(&selfRect);
 
-                Win32_PollMouse(&inputTick);
+                Win32_TickInput(&inputTick);
                 //Win32_ProcessTestInput(inputTick, time, &g_scene);
                 app.AppUpdate(&time, &inputTick);
                 // R_Scene_Tick(time, &g_scene);

@@ -72,6 +72,8 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;
     platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
     
+    platInterface.Platform_SetMouseMode = Win32_SetMouseMode;
+
     platInterface.Platform_RenderScene = Platform_R_DrawScene;
 }
 
