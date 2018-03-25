@@ -395,6 +395,34 @@ glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
+void R_RenderLine(Transform* camera, RendObj* obj)
+{
+	glDisable(GL_TEXTURE_2D);
+	//DebugBreak();
+	R_SetModelViewMatrix(camera, &obj->transform);
+	RendObj_Line* line = &obj->obj.line;
+	//glDisable(GL_DEPTH_TEST);
+	//glTranslatef(0.0f,0.0f,-10.0f);
+
+	// glLineWidth(10.0);
+	// glBegin(GL_LINES);
+	// glColor3f(1, 1, 1);
+	// glVertex3f(-1, -1, -1);
+	// glVertex3f(1, 1, 1);
+	// glEnd();
+
+	glLineWidth(10.0);
+	glBegin(GL_LINES);
+	
+	glColor3f(line->colourA.x, line->colourA.y, line->colourA.z);
+	glVertex3f(line->a.x, line->a.y, line->a.z);
+	
+	glColor3f(line->colourB.x, line->colourB.y, line->colourB.z);
+	glVertex3f(line->b.x, line->b.y, line->b.z);
+	
+	glEnd();
+	//glEnable(GL_DEPTH_TEST);
+}
 
 void R_RenderAsciChar(RendObj* obj)
 {
@@ -506,6 +534,11 @@ void R_RenderEntity(Transform* camera, RendObj* obj)
 		case RENDOBJ_TYPE_SPRITE:
 		{
 			R_RenderSprite(camera, obj);
+		} break;
+
+		case RENDOBJ_TYPE_LINE:
+		{
+			R_RenderLine(camera, obj);
 		} break;
 		
 		case RENDOBJ_TYPE_PRIMITIVE:

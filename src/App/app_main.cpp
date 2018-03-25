@@ -28,7 +28,7 @@ void R_Scene_CreateTestScene()
     RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
-
+    #if 1
     // 1
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
@@ -92,7 +92,7 @@ void R_Scene_CreateTestScene()
     obj->transform.pos.x = 3;
     obj->transform.pos.z = -4;
     //RendObj_SetAsColouredQuad(obj, 1, 0, 0);
-    RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
+    RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
     g_scene.numObjects++;
     obj++;
     
@@ -107,6 +107,20 @@ void R_Scene_CreateTestScene()
     obj->transform.scale.y = 0.25;
     g_scene.numObjects++;
     obj++;
+    #endif
+
+    // 8
+    *obj = {};
+    Transform_SetToIdentity(&obj->transform);
+    obj->transform.pos.x = 0;
+    obj->transform.rot.y = 0;
+    obj->transform.pos.z = 0;
+    RendObj_SetAsLine(obj,
+        -2, -2, -2, 2, 2, 2,
+        1, 0, 0, 0, 1, 0);
+    g_scene.numObjects++;
+    obj++;
+    
 
     /////////////////////////////////////////////////////////////////////////////
     // UI Tests

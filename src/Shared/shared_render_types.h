@@ -65,13 +65,13 @@ struct RendObj_Sprite
     f32 a;
 };
 
-// struct RendObj_Line
-// {
-//     Vec3 a;
-//     Vec3 b;
-//     Vec3 colourA;
-//     Vec3 colourB;
-// };
+struct RendObj_Line
+{
+    Vec3 a;
+    Vec3 b;
+    Vec3 colourA;
+    Vec3 colourB;
+};
 
 struct RendObj_AsciChar
 {
@@ -97,6 +97,7 @@ union RendObj_Union
     RendObj_ColouredMesh mesh;
     RendObj_Sprite sprite;
     RendObj_Primitive primitive;
+    RendObj_Line line;
 
     // TODO: Remove these, billboard replced by sprite, ascichar removed
     RendObj_Billboard billboard;

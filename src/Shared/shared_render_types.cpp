@@ -57,6 +57,22 @@ void RendObj_SetAsSprite(RendObj* obj,
     rend->a = 1;
 }
 
+void RendObj_SetAsLine(RendObj* obj,
+    f32 x0, f32 y0, f32 z0,
+    f32 x1, f32 y1, f32 z1,
+    f32 r0, f32 g0, f32 b0,
+    f32 r1, f32 g1, f32 b1
+    )
+{
+    obj->type = RENDOBJ_TYPE_LINE;
+    RendObj_Line* rend = &obj->obj.line;
+    rend->a.x = x0; rend->a.y = y0; rend->a.z = z0;
+    rend->b.x = x1; rend->b.y = y1; rend->b.z = z1;
+
+    rend->colourA.x = r0; rend->colourA.y = g0; rend->colourA.z = b0;
+    rend->colourB.x = r1; rend->colourB.y = g1; rend->colourB.z = b1;
+}
+
 void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
     f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop)
 {
