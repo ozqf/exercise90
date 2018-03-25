@@ -34,7 +34,7 @@ void R_Scene_CreateTestScene()
     Transform_SetToIdentity(&obj->transform);
     obj->transform.pos.x = 0;
     obj->transform.pos.y = 0;
-    obj->transform.pos.z = -4;
+    obj->transform.pos.z = 0;
     
     obj->transform.rot.x = 0;
     obj->transform.scale.x = 0.5;
@@ -60,11 +60,11 @@ void R_Scene_CreateTestScene()
     // 3
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
-    obj->transform.rot.y = 270;
+    // obj->transform.rot.y = 270;
     obj->transform.pos.x = 1;
-    obj->transform.pos.z = -2;
+    // obj->transform.pos.z = -2;
     //RendObj_SetAsColouredQuad(obj, 0, 0, 1);
-    RendObj_SetAsAABB(obj, 1, 1, 1);
+    RendObj_SetAsAABB(obj, 1, 2, 1);
     g_scene.numObjects++;
     obj++;
     
@@ -400,8 +400,8 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
 	obj->transform.rot.y += 90 * time->deltaTime;
 
     
-	// obj = &scene->rendObjects[1];
-	// obj->transform.rot.y += 90 * time->deltaTime;
+	obj = &scene->rendObjects[3];
+	obj->transform.rot.y += 90 * time->deltaTime;
 }
 
 void CycleTestTexture()

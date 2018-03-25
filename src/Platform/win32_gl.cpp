@@ -370,8 +370,10 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ)
 	f32 halfX = sizeX / 2;
 	f32 halfY = sizeY / 2;
 	f32 halfZ = sizeZ / 2;
-	Vec3 a = { x - halfX, y - halfY, z - halfZ };
-	Vec3 b = { x + halfX, y + halfY, z + halfZ };
+	// Vec3 a = { x - halfX, y - halfY, z - halfZ };
+	// Vec3 b = { x + halfX, y + halfY, z + halfZ };
+	Vec3 a = { -halfX, -halfY, -halfZ };
+	Vec3 b = { halfX, halfY, halfZ };
 
 	glLineWidth(5.0);
 	glBegin(GL_LINES);
