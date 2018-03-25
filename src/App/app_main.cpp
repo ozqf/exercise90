@@ -61,8 +61,10 @@ void R_Scene_CreateTestScene()
     *obj = {};
     Transform_SetToIdentity(&obj->transform);
     obj->transform.rot.y = 270;
-    obj->transform.pos.x = 4;
-    RendObj_SetAsColouredQuad(obj, 0, 0, 1);
+    obj->transform.pos.x = 1;
+    obj->transform.pos.z = -2;
+    //RendObj_SetAsColouredQuad(obj, 0, 0, 1);
+    RendObj_SetAsAABB(obj, 1, 1, 1);
     g_scene.numObjects++;
     obj++;
     

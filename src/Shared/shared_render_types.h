@@ -17,6 +17,7 @@
 
 #define REND_PRIMITIVE_TYPE_RAINBOW_QUAD 0
 #define REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD 1
+#define REND_PRIMITIVE_TYPE_AABB 2
 
 struct Texture2DHeader
 {
@@ -34,6 +35,9 @@ struct RendObj_Primitive
     f32 green;
     f32 blue;
     f32 alpha;
+    f32 sizeX;
+    f32 sizeY;
+    f32 sizeZ;
 };
 
 struct RendObj_Billboard

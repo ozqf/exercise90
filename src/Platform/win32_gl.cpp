@@ -365,6 +365,58 @@ void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b, f32 a)
     glEnd();
 }
 
+void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ)
+{
+	f32 halfX = sizeX / 2;
+	f32 halfY = sizeY / 2;
+	f32 halfZ = sizeZ / 2;
+	Vec3 a = { x - halfX, y - halfY, z - halfZ };
+	Vec3 b = { x + halfX, y + halfY, z + halfZ };
+
+	glLineWidth(5.0);
+	glBegin(GL_LINES);
+	glColor3f(0, 1, 0);
+	// front face
+	glVertex3f(a.x, a.y, a.z);
+	glVertex3f(b.x, a.y, a.z);
+
+	glVertex3f(b.x, a.y, a.z);
+	glVertex3f(b.x, b.y, a.z);
+
+	glVertex3f(b.x, b.y, a.z);
+	glVertex3f(a.x, b.y, a.z);
+
+	glVertex3f(a.x, b.y, a.z);
+	glVertex3f(a.x, a.y, a.z);
+
+	// back face
+	glVertex3f(a.x, a.y, b.z);
+	glVertex3f(b.x, a.y, b.z);
+
+	glVertex3f(b.x, a.y, b.z);
+	glVertex3f(b.x, b.y, b.z);
+
+	glVertex3f(b.x, b.y, b.z);
+	glVertex3f(a.x, b.y, b.z);
+
+	glVertex3f(a.x, b.y, b.z);
+	glVertex3f(a.x, a.y, b.z);
+
+	// connecting lines
+	glVertex3f(a.x, a.y, a.z);
+	glVertex3f(a.x, a.y, b.z);
+
+	glVertex3f(b.x, a.y, a.z);
+	glVertex3f(b.x, a.y, b.z);
+
+	glVertex3f(b.x, b.y, a.z);
+	glVertex3f(b.x, b.y, b.z);
+
+	glVertex3f(a.x, b.y, a.z);
+	glVertex3f(a.x, b.y, b.z);
+	glEnd();
+}
+
 void R_RenderPrimitive(Transform* camera, RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
@@ -381,6 +433,12 @@ void R_RenderPrimitive(Transform* camera, RendObj* obj)
 		case REND_PRIMITIVE_TYPE_RAINBOW_QUAD:
 		{
 			R_RenderTestGeometry_RainbowQuad();
+		} break;
+
+		case REND_PRIMITIVE_TYPE_AABB:
+		{
+			R_RenderAABBGeometry(obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z,
+				prim->sizeX, prim->sizeY, prim->sizeZ);
 		} break;
 
 		default:
@@ -413,7 +471,7 @@ void R_RenderLine(Transform* camera, RendObj* obj)
 
 	glLineWidth(10.0);
 	glBegin(GL_LINES);
-	
+
 	glColor3f(line->colourA.x, line->colourA.y, line->colourA.z);
 	glVertex3f(line->a.x, line->a.y, line->a.z);
 	
