@@ -278,6 +278,8 @@ void Win32_InitOpenGLTestAssets()
 	*/
 }
 
+#if 0
+
 void Win32_DebugPrintMatrix(char* label, f32* matrix)
 {
 	char output[256];
@@ -318,6 +320,8 @@ void Win32_DebugPrintTransform(char* label, Transform* t)
 		);
 	OutputDebugStringA(output);
 }
+
+#endif
 
 #if 0
 void Win32_ApplyInputToTransform(InputTick input, Transform* t, GameTime time)

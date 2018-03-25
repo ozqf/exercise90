@@ -1,27 +1,26 @@
-#ifndef GAME_CPP
-#define GAME_CPP
+#pragma once
 
-#include "../Shared/shared.h"
+#include "game.h"
 
-// struct Transform
-// {
-//     f32 pos[3];
-//     f32 rot[3];
-//     f32 scale[3];
-// };
+Ent* Game_CreateEntity()
+{
+    // Find a free slot in the entity list and return it with a new id assigned
+    return NULL;
+}
 
-// struct Entity
-// {
-//     i32 id;
-//     Transform transform;
-//     i32 type;
-// };
+Ent* Game_FindEntityById(i32 id)
+{
+    for (i32 i = 0; i < g_num_entities; ++i)
+    {
+        if (g_entities[i].id == id)
+        {
+            return &g_entities[i];
+        }
+    }
+    return NULL;
+}
 
-// struct CompTrigger
-// {
-//     i32 id;
-//     char name[16];
-// };
-
-
-#endif
+void Game_BuildRenderList(RenderScene* scene)
+{
+    
+}

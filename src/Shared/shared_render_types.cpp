@@ -22,7 +22,8 @@ void RendObj_SetAsRainbowQuad(RendObj* obj)
     prim->primitiveType = REND_PRIMITIVE_TYPE_RAINBOW_QUAD;
 }
 
-void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ)
+void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ,
+    f32 red, f32 green, f32 blue)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
     
@@ -31,6 +32,9 @@ void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ)
     prim->sizeX = sizeX;
     prim->sizeY = sizeY;
     prim->sizeZ = sizeZ;
+    prim->red = red;
+    prim->green = green;
+    prim->blue = blue;
 }
 
 void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)

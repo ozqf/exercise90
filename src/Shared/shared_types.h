@@ -287,10 +287,13 @@ struct GameTime
 
 struct Transform
 {
-	i32 ID;
 	Vec3 pos;
 	Vec3 rot;
 	Vec3 scale;
+};
+
+struct AngleVectors
+{
     Vec3 forward;
     Vec3 up;
     Vec3 left;

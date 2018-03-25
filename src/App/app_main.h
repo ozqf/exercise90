@@ -7,6 +7,7 @@
 #include "../interface/platform_interface.h"
 
 #include "app_types.h"
+#include "../Game/game.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DLL GLOBALS
@@ -15,25 +16,24 @@
 // Interface to the external world
 PlatformInterface platform;
 
-// Render Scene
-#define R_MAX_RENDER_OBJECTS 2048
-
-global_variable RendObj g_rendObjects[R_MAX_RENDER_OBJECTS];
-global_variable RenderScene g_scene;
-
-global_variable RendObj g_ui_rendObjects[R_MAX_RENDER_OBJECTS];
-
-global_variable GL_Test_Input testInput;
-
+// Heap + Preallocated lists
 global_variable Heap g_heap;
 
+
+//global_variable World g_world;
+
+// Input
+global_variable ZMouseMode g_mouseMode;
+global_variable GL_Test_Input testInput;
+
+// Assets
 global_variable i32 g_numDebugTextures;
 
-global_variable u8 g_testAsciChar = '+';
-
-global_variable char* g_testString = "Hello, World...\nHey look, new line!";
-
+// Debugging
 global_variable BlockRef g_debugBuffer;
 
-global_variable ZMouseMode g_mouseMode;
+// TODO: Remove this stuff sometime
+global_variable u8 g_testAsciChar = '+';
+global_variable char* g_testString = "Hello, World...\nHey look, new line!";
 global_variable u8 g_input_escapePressed = 0;
+global_variable u8 cycleTexturePressed = 0;

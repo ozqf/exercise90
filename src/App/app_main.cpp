@@ -1,3 +1,7 @@
+/*
+APP MAIN - base level of the game DLL,
+holding game/menu state and calling game update when required
+*/
 #pragma once
 
 #include "app_main.h"
@@ -11,7 +15,7 @@
 
 void R_Scene_CreateTestScene()
 {
-    RendObj* obj = g_rendObjects;
+    RendObj* obj = g_game_rendObjects;
 
     // 0
     *obj = {};
@@ -64,7 +68,7 @@ void R_Scene_CreateTestScene()
     obj->transform.pos.x = 1;
     // obj->transform.pos.z = -2;
     //RendObj_SetAsColouredQuad(obj, 0, 0, 1);
-    RendObj_SetAsAABB(obj, 1, 2, 1);
+    RendObj_SetAsAABB(obj, 1, 2, 1, 1, 0, 0);
     g_scene.numObjects++;
     obj++;
     
@@ -163,7 +167,7 @@ void R_Scene_Init()
     g_scene = {};
     g_scene.numObjects = 0;
     g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
-    g_scene.rendObjects = g_rendObjects;
+    g_scene.rendObjects = g_game_rendObjects;
     g_scene.fov = 90;
     g_scene.orthographicHalfHeight = 8;
     g_scene.projectionMode = 2;
@@ -361,20 +365,22 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	groundRot.x = 0;
 	groundRot.z = 0;
 
-	AngleToAxes(&groundRot, &t->left, &t->up, &t->forward);
+    AngleVectors angleVectors = {};
 
-	Vec3 forward = t->forward;
-	Vec3 left = t->left;
-	Vec3 up = t->up;
+	AngleToAxes(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
+
+	// Vec3 forward = t->forward;
+	// Vec3 left = t->left;
+	// Vec3 up = t->up;
 
 	// If input is blank mag will be speed * 0?
-	Vec3_SetMagnitude(&left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
-	Vec3_SetMagnitude(&up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
-	Vec3_SetMagnitude(&forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
+	Vec3_SetMagnitude(&angleVectors.left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
+	Vec3_SetMagnitude(&angleVectors.up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
+	Vec3_SetMagnitude(&angleVectors.forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
 
-	frameMove.x = forward.x + up.x + left.x;
-	frameMove.y = forward.y + up.y + left.y;
-	frameMove.z = forward.z + up.z + left.z;
+	frameMove.x = angleVectors.forward.x + angleVectors.up.x + angleVectors.left.x;
+	frameMove.y = angleVectors.forward.y + angleVectors.up.y + angleVectors.left.y;
+	frameMove.z = angleVectors.forward.z + angleVectors.up.z + angleVectors.left.z;
 
 	t->pos.x += frameMove.x;
 	t->pos.y += frameMove.y;
@@ -407,7 +413,7 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
 void CycleTestTexture()
 {
     
-    RendObj* obj = g_rendObjects + 0;
+    RendObj* obj = g_game_rendObjects + 0;
     RendObj_ColouredMesh* rMesh = &obj->obj.mesh;
 	//DebugBreak();
     rMesh->textureIndex++;
@@ -427,7 +433,6 @@ void CycleTestAsciChar()
     g_testAsciChar++;
     RendObj_CalculateSpriteAsciUVs(sprite, g_testAsciChar);
 }
-u8 cycleTexturePressed = 0;
 
 void App_Frame(GameTime* time, InputTick* input)
 {
@@ -468,6 +473,11 @@ void App_Frame(GameTime* time, InputTick* input)
         Input_ApplyInputToTransform(input, &g_scene.cameraTransform, time);
     }
 
+    // Game state update
+    // Update all inputs, entity components and colliders/physics
+    Game_UpdateAI(time);
+
+    // Render
     R_Scene_Tick(time, &g_scene);
     platform.Platform_RenderScene(&g_scene);
 }

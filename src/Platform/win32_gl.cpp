@@ -365,7 +365,7 @@ void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b, f32 a)
     glEnd();
 }
 
-void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ)
+void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, f32 red, f32 green, f32 blue)
 {
 	f32 halfX = sizeX / 2;
 	f32 halfY = sizeY / 2;
@@ -377,7 +377,7 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ)
 
 	glLineWidth(5.0);
 	glBegin(GL_LINES);
-	glColor3f(0, 1, 0);
+	glColor3f(red, green, blue);
 	// front face
 	glVertex3f(a.x, a.y, a.z);
 	glVertex3f(b.x, a.y, a.z);
@@ -439,8 +439,10 @@ void R_RenderPrimitive(Transform* camera, RendObj* obj)
 
 		case REND_PRIMITIVE_TYPE_AABB:
 		{
-			R_RenderAABBGeometry(obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z,
-				prim->sizeX, prim->sizeY, prim->sizeZ);
+			R_RenderAABBGeometry(
+				obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z,
+				prim->sizeX, prim->sizeY, prim->sizeZ,
+				prim->red, prim->green, prim->blue);
 		} break;
 
 		default:
