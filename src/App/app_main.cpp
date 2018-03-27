@@ -15,6 +15,19 @@ holding game/menu state and calling game update when required
 
 void R_Scene_CreateTestScene()
 {
+    RenderListItem* item = g_scene_renderList;
+    *item = {};
+    Transform_SetToIdentity(&item->transform);
+    RendObj_SetAsMesh(&item->obj, &g_meshInverseCube, 1, 1, 1, 5);
+    item->transform.pos.x = 0;
+    item->transform.pos.y = 0;
+    item->transform.pos.z = 0;
+    item->transform.scale.x = 6;
+    item->transform.scale.y = 2;
+    item->transform.scale.z = 6;
+    g_scene.numObjects++;
+    item++;
+    #if 0
     RendObj* obj = g_game_rendObjects;
 
     // 0
@@ -136,7 +149,7 @@ void R_Scene_CreateTestScene()
     *obj = {};
     RendObj_SetAsSprite(obj, SPRITE_MODE_UI, 4, 0.1f, 0.1f);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
-    RendObj_CalculateSpriteAsciUVs(&obj->obj.sprite, g_testAsciChar);
+    RendObj_CalculateSpriteAsciUVs(&obj->data.sprite, g_testAsciChar);
     obj->transform.pos.z = -1;
     g_scene.numUIObjects++;
     obj++;
@@ -160,6 +173,7 @@ void R_Scene_CreateTestScene()
     // RendObj_SetAsAsciChar(obj, '+');
     // g_scene.numUIObjects++;
     // obj++;
+    #endif
 }
 
 void R_Scene_Init()
@@ -167,14 +181,14 @@ void R_Scene_Init()
     g_scene = {};
     g_scene.numObjects = 0;
     g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
-    g_scene.rendObjects = g_game_rendObjects;
+    g_scene.sceneItems = g_scene_renderList;
     g_scene.fov = 90;
     g_scene.orthographicHalfHeight = 8;
     g_scene.projectionMode = 2;
 
     g_scene.numUIObjects = 0;
     g_scene.maxUIObjects = R_MAX_RENDER_OBJECTS;
-    g_scene.uiObjects = g_ui_rendObjects;
+    g_scene.uiItems = g_ui_renderList;
 }
 
 void Input_SetMouseMode(ZMouseMode mode)
@@ -254,6 +268,8 @@ i32 App_Init()
 	testInput.speed = 3.0f;
     testInput.rotSpeed = 90.0f;
     
+    Game_Init();
+
     return 1;
 }
 
@@ -287,8 +303,19 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->pitchUp) { testInput.rotation.x += -1; }
 	if (input->pitchDown) { testInput.rotation.x += 1; }
 
-	if (input->rollLeft) { testInput.rotation.z += 1; }
-	if (input->rollRight) { testInput.rotation.z += -1; }
+    if (input->rollLeft)
+    {
+        Ent* e = Game_GetEntityByIndex(1);
+        e->transform.pos.x -= 1 * time->deltaTime;
+    }
+    if (input->rollRight)
+    {
+        Ent* e = Game_GetEntityByIndex(1);
+        e->transform.pos.x += 1 * time->deltaTime;
+    }
+
+	// if (input->rollLeft) { testInput.rotation.z += 1; }
+	// if (input->rollRight) { testInput.rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
 	f32 sensitivity = 10.0f;
@@ -399,6 +426,7 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 
 void R_Scene_Tick(GameTime* time, RenderScene* scene)
 {
+    #if 0
 	RendObj* obj;
 	i32 rotatingEntity = 5;
 
@@ -408,13 +436,14 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
     
 	obj = &scene->rendObjects[3];
 	obj->transform.rot.y += 90 * time->deltaTime;
+    #endif
 }
 
 void CycleTestTexture()
 {
-    
+    #if 0
     RendObj* obj = g_game_rendObjects + 0;
-    RendObj_ColouredMesh* rMesh = &obj->obj.mesh;
+    RendObj_ColouredMesh* rMesh = &obj->data.mesh;
 	//DebugBreak();
     rMesh->textureIndex++;
     if (rMesh->textureIndex >= g_numDebugTextures)
@@ -424,14 +453,17 @@ void CycleTestTexture()
     char buf[128];
         sprintf_s(buf, 128, "Cycled test texture to: %d\n", rMesh->textureIndex);
         OutputDebugString(buf);
+    #endif
 }
 
 void CycleTestAsciChar()
 {
+    #if 0
     RendObj* obj = g_ui_rendObjects + 0;
-    RendObj_Sprite* sprite = &obj->obj.sprite;
+    RendObj_Sprite* sprite = &obj->data.sprite;
     g_testAsciChar++;
     RendObj_CalculateSpriteAsciUVs(sprite, g_testAsciChar);
+    #endif
 }
 
 void App_Frame(GameTime* time, InputTick* input)
@@ -479,6 +511,7 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Render
     R_Scene_Tick(time, &g_scene);
+    Game_BuildRenderList(&g_scene);
     platform.Platform_RenderScene(&g_scene);
 }
 

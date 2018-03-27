@@ -6,7 +6,7 @@ void RendObj_SetAsMesh(RendObj* obj, Mesh* mesh, f32 red, f32 green, f32 blue, i
 {
     obj->type = RENDOBJ_TYPE_MESH;
 
-    RendObj_ColouredMesh* rend = &obj->obj.mesh;
+    RendObj_ColouredMesh* rend = &obj->data.mesh;
     rend->mesh = mesh;
     rend->r = red;
     rend->g = green;
@@ -18,7 +18,7 @@ void RendObj_SetAsRainbowQuad(RendObj* obj)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
     
-    RendObj_Primitive* prim = &obj->obj.primitive;
+    RendObj_Primitive* prim = &obj->data.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_RAINBOW_QUAD;
 }
 
@@ -27,7 +27,7 @@ void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ,
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
     
-    RendObj_Primitive* prim = &obj->obj.primitive;
+    RendObj_Primitive* prim = &obj->data.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_AABB;
     prim->sizeX = sizeX;
     prim->sizeY = sizeY;
@@ -41,7 +41,7 @@ void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
 
-    RendObj_Primitive* prim = &obj->obj.primitive;
+    RendObj_Primitive* prim = &obj->data.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD;
     prim->red = red;
     prim->green = green;
@@ -54,7 +54,7 @@ void RendObj_SetAsSprite(RendObj* obj,
     f32 width, f32 height)
 {
     obj->type = RENDOBJ_TYPE_SPRITE;
-    RendObj_Sprite* rend = &obj->obj.sprite;
+    RendObj_Sprite* rend = &obj->data.sprite;
     rend->textureIndex = textureIndex;
     rend->mode = mode;
 
@@ -80,7 +80,7 @@ void RendObj_SetAsLine(RendObj* obj,
     )
 {
     obj->type = RENDOBJ_TYPE_LINE;
-    RendObj_Line* rend = &obj->obj.line;
+    RendObj_Line* rend = &obj->data.line;
     rend->a.x = x0; rend->a.y = y0; rend->a.z = z0;
     rend->b.x = x1; rend->b.y = y1; rend->b.z = z1;
 
@@ -100,7 +100,7 @@ void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
 void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_BILLBOARD;
-    RendObj_Billboard* rend = &obj->obj.billboard;
+    RendObj_Billboard* rend = &obj->data.billboard;
     rend->r = r;
     rend->g = g;
     rend->b = b;
@@ -115,14 +115,14 @@ void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
 void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
 {
     obj->type = RENDOBJ_TYPE_ASCI_CHAR;
-    RendObj_AsciChar* c = &obj->obj.asciChar;
+    RendObj_AsciChar* c = &obj->data.asciChar;
     c->asciChar = asciCharacter;
 }
 
 void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size)
 {
     obj->type = RENDOBJ_TYPE_ASCI_CHAR_ARRAY;
-    RendObj_AsciCharArray* c = &obj->obj.charArray;
+    RendObj_AsciCharArray* c = &obj->data.charArray;
     c->chars = asciCharArray;
     c->numChars = numChars;
     c->size = size;

@@ -112,24 +112,31 @@ union RendObj_Union
 // Individual render item
 struct RendObj
 {
-    u32 type;
-    i32 ID;
+    u16 ownerIndex;
+    u16 inUse;
+    u16 type;
+    RendObj_Union data;
+};
+
+struct RenderListItem
+{
     Transform transform;
-    RendObj_Union obj;
+    RendObj obj;
 };
 
 // Scene container for render call each frame
 struct RenderScene
-{
-    RendObj* rendObjects;
-    u32 numObjects;
-    u32 maxObjects;
+{    
     Transform cameraTransform;
     i32 projectionMode;
     f32 orthographicHalfHeight;
     i32 fov;
 
-    RendObj* uiObjects;
+    RenderListItem* sceneItems;
+    u32 numObjects;
+    u32 maxObjects;
+    
+    RenderListItem* uiItems;
     u32 numUIObjects;
     u32 maxUIObjects;
 };

@@ -419,12 +419,12 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, 
 	glEnd();
 }
 
-void R_RenderPrimitive(Transform* camera, RendObj* obj)
+void R_RenderPrimitive(Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
-	R_SetModelViewMatrix(camera, &obj->transform);
+	R_SetModelViewMatrix(camera, objTransform);
 	//R_SetupTestTexture();
-	RendObj_Primitive* prim = &obj->obj.primitive;
+	RendObj_Primitive* prim = &obj->data.primitive;
 	switch (prim->primitiveType)
 	{
 		case REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD:
@@ -440,7 +440,7 @@ void R_RenderPrimitive(Transform* camera, RendObj* obj)
 		case REND_PRIMITIVE_TYPE_AABB:
 		{
 			R_RenderAABBGeometry(
-				obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z,
+				objTransform->pos.x, objTransform->pos.y, objTransform->pos.z,
 				prim->sizeX, prim->sizeY, prim->sizeZ,
 				prim->red, prim->green, prim->blue);
 		} break;
@@ -457,12 +457,12 @@ glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
-void R_RenderLine(Transform* camera, RendObj* obj)
+void R_RenderLine(Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
 	//DebugBreak();
-	R_SetModelViewMatrix(camera, &obj->transform);
-	RendObj_Line* line = &obj->obj.line;
+	R_SetModelViewMatrix(camera, objTransform);
+	RendObj_Line* line = &obj->data.line;
 	//glDisable(GL_DEPTH_TEST);
 	//glTranslatef(0.0f,0.0f,-10.0f);
 
@@ -496,12 +496,12 @@ void R_RenderAsciChar(RendObj* obj)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	RendObj_AsciChar* c = &obj->obj.asciChar;
+	RendObj_AsciChar* c = &obj->data.asciChar;
 	R_SetupTestTexture(4);
 	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
-void R_RenderAsciCharArray(Transform* camera, RendObj* obj)
+void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 
@@ -511,29 +511,29 @@ void R_RenderAsciCharArray(Transform* camera, RendObj* obj)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	RendObj_AsciCharArray* c = &obj->obj.charArray;
+	RendObj_AsciCharArray* c = &obj->data.charArray;
 	R_SetupTestTexture(4);
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
-		obj->transform.pos.x, obj->transform.pos.y, c->size, win32_aspectRatio);
+		objTransform->pos.x, objTransform->pos.y, c->size, win32_aspectRatio);
 	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
-void R_RenderBillboard(Transform* camera, RendObj* obj)
+void R_RenderBillboard(Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
-	R_SetModelViewMatrix_Billboard(camera, &obj->transform);
-	RendObj_Billboard* b = &obj->obj.billboard;
+	R_SetModelViewMatrix_Billboard(camera, objTransform);
+	RendObj_Billboard* b = &obj->data.billboard;
 	R_SetupTestTexture(b->textureIndex);
 	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);
 }
 
-void R_RenderSprite(Transform* camera, RendObj* obj)
+void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	//DebugBreak();
 	glEnable(GL_TEXTURE_2D);
-	RendObj_Sprite* sprite = &obj->obj.sprite;
+	RendObj_Sprite* sprite = &obj->data.sprite;
 	switch (sprite->mode)
 	{
 		case SPRITE_MODE_MESH:
@@ -551,7 +551,7 @@ void R_RenderSprite(Transform* camera, RendObj* obj)
 
 			R_SetupTestTexture(sprite->textureIndex);
 			//R_RenderTestGeometry_RainbowQuad();
-			R_DrawSpriteGeometry(obj->transform.pos.x, obj->transform.pos.y, obj->transform.pos.z, sprite);
+			R_DrawSpriteGeometry(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z, sprite);
 
 		} break;
 
@@ -562,9 +562,9 @@ void R_RenderSprite(Transform* camera, RendObj* obj)
 	}
 }
 
-void R_RenderMesh(Transform* camera, RendObj* obj)
+void R_RenderMesh(Transform* camera, Transform* objTransform, RendObj* obj)
 {
-	RendObj_ColouredMesh* meshRend = &obj->obj.mesh;
+	RendObj_ColouredMesh* meshRend = &obj->data.mesh;
 	AssertAlways(meshRend->mesh != NULL);
 	Mesh* mesh = meshRend->mesh;
 
@@ -572,7 +572,7 @@ void R_RenderMesh(Transform* camera, RendObj* obj)
 
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(meshRend->r, meshRend->g, meshRend->b);
-	R_SetModelViewMatrix(camera, &obj->transform);
+	R_SetModelViewMatrix(camera, objTransform);
 	R_SetupTestTexture(meshRend->textureIndex);
 	
 	//f32* meshVerts = mesh->verts;
@@ -584,43 +584,43 @@ void R_RenderMesh(Transform* camera, RendObj* obj)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void R_RenderEntity(Transform* camera, RendObj* obj)
+void R_RenderEntity(Transform* camera, RenderListItem* item)
 {
-	switch(obj->type)
+	switch(item->obj.type)
 	{
 		case RENDOBJ_TYPE_MESH:
 		{
-			R_RenderMesh(camera, obj);
+			R_RenderMesh(camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_SPRITE:
 		{
-			R_RenderSprite(camera, obj);
+			R_RenderSprite(camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_LINE:
 		{
-			R_RenderLine(camera, obj);
+			R_RenderLine(camera, &item->transform,  &item->obj);
 		} break;
 		
 		case RENDOBJ_TYPE_PRIMITIVE:
 		{
-			R_RenderPrimitive(camera, obj);
+			R_RenderPrimitive(camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_ASCI_CHAR_ARRAY:
 		{
-			R_RenderAsciCharArray(camera, obj);
+			R_RenderAsciCharArray(camera, &item->transform,  &item->obj);
 		} break;
 		
 		case RENDOBJ_TYPE_BILLBOARD:
 		{
-			R_RenderBillboard(camera, obj);
+			R_RenderBillboard(camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_ASCI_CHAR:
 		{
-			R_RenderAsciChar(obj);
+			R_RenderAsciChar(&item->obj);
 		} break;
 	}
 }
@@ -631,12 +631,12 @@ void R_RenderScene(RenderScene* scene)
 	//R_SetupOrthoProjection(8);
     for (u32 i = 0; i < scene->numObjects; ++i)
     {
-        R_RenderEntity(&scene->cameraTransform, &scene->rendObjects[i]);
+        R_RenderEntity(&scene->cameraTransform, &scene->sceneItems[i]);
     }
 
 	for (u32 i = 0; i < scene->numUIObjects; ++i)
 	{
-		R_RenderEntity(&scene->cameraTransform, &scene->uiObjects[i]);
+		R_RenderEntity(&scene->cameraTransform, &scene->uiItems[i]);
 	}
 }
  

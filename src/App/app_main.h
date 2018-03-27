@@ -19,7 +19,6 @@ PlatformInterface platform;
 // Heap + Preallocated lists
 global_variable Heap g_heap;
 
-
 //global_variable World g_world;
 
 // Input
