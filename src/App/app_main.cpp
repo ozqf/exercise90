@@ -305,12 +305,12 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 
     if (input->rollLeft)
     {
-        Ent* e = Game_GetEntityByIndex(1);
+        Ent* e = Ent_GetEntityByIndex(1);
         e->transform.pos.x -= 1 * time->deltaTime;
     }
     if (input->rollRight)
     {
-        Ent* e = Game_GetEntityByIndex(1);
+        Ent* e = Ent_GetEntityByIndex(1);
         e->transform.pos.x += 1 * time->deltaTime;
     }
 
@@ -510,10 +510,11 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateAI(time);
+    Ent_UpdateAIControllers(g_aiControllers, time);
+    //Game_UpdateAI(time);
 
     // Render
-    R_Scene_Tick(time, &g_scene);
+    //R_Scene_Tick(time, &g_scene);
     Game_BuildRenderList(&g_scene);
     platform.Platform_RenderScene(&g_scene);
 }
