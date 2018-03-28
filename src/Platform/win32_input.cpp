@@ -4,6 +4,8 @@
 
 enum ZMouseMode mouseMode = Free;
 
+#define Z_ALLOW_MOUSE_LOCK 1
+
 void Win32_SetMouseMode(enum ZMouseMode mode)
 {
     if (mode == mouseMode)
@@ -11,6 +13,7 @@ void Win32_SetMouseMode(enum ZMouseMode mode)
         return;
     }
     mouseMode = mode;
+    #if Z_ALLOW_MOUSE_LOCK
     if (mouseMode == Free)
     {
         ShowCursor(true);
@@ -23,6 +26,7 @@ void Win32_SetMouseMode(enum ZMouseMode mode)
         GetWindowRect(appWindow, &selfRect);
         ClipCursor(&selfRect);
     }
+    #endif
 }
 
 void Win32_InitInput()
@@ -124,7 +128,7 @@ void Win32_TickInput(InputTick *input)
 {
     if (mouseMode == Captured)
     {
-
+#if Z_ALLOW_MOUSE_LOCK
         RECT selfRect;
         GetWindowRect(appWindow, &selfRect);
         i32 halfWidth = (selfRect.right - selfRect.left) / 2;
@@ -134,7 +138,7 @@ void Win32_TickInput(InputTick *input)
         // SetCursorPos(selfRect.right - selfRect.left, selfRect.bottom - selfRect.top);
 
         // ClipCursor(&selfRect);
-
+#endif
         Win32_PollMouse(input);
     }
     else

@@ -318,16 +318,19 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	// if (input->rollRight) { testInput.rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
-	f32 sensitivity = 10.0f;
+	f32 sensitivity = 0.1f;
 	i8 inverted = -1;
 
-#if 1 // Disabled mouse input for debugging
+#if 1
+    // Disabled mouse input for debugging
 	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time->deltaTime);
-	t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
+	//t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
+    t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
 	t->rot.x = COM_CapAngleDegrees(t->rot.x);
 
 	//t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time->deltaTime);
-	t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity) * time->deltaTime;
+	//t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity) * time->deltaTime;
+    t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity);
 	t->rot.y = COM_CapAngleDegrees(t->rot.y);
 
 	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time->deltaTime);
