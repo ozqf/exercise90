@@ -303,19 +303,8 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->pitchUp) { testInput.rotation.x += -1; }
 	if (input->pitchDown) { testInput.rotation.x += 1; }
 
-    if (input->rollLeft)
-    {
-        Ent* e = Ent_GetEntityByIndex(1);
-        e->transform.pos.x -= 1 * time->deltaTime;
-    }
-    if (input->rollRight)
-    {
-        Ent* e = Ent_GetEntityByIndex(1);
-        e->transform.pos.x += 1 * time->deltaTime;
-    }
-
-	// if (input->rollLeft) { testInput.rotation.z += 1; }
-	// if (input->rollRight) { testInput.rotation.z += -1; }
+	//if (input->rollLeft) { testInput.rotation.z += 1; }
+	//if (input->rollRight) { testInput.rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
 	f32 sensitivity = 0.1f;
@@ -510,8 +499,9 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
+    Game_UpdateActorMotors(&g_world, time, input);
     Ent_UpdateAIControllers(g_aiControllers, time);
-    Game_UpdateColliders(&g_world);
+    Game_UpdateColliders(&g_world, time);
     //Game_UpdateAI(time);
 
     // Render

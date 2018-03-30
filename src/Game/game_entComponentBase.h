@@ -29,6 +29,7 @@ Functions:
 EC_AddFoo
 EC_RemoveFoo
 Ent_HasFoo
+EC_FindFoo
 */
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
@@ -58,4 +59,19 @@ static inline void EC_Remove##type##(Ent* ent, World* world, EC_##type* comp) \
 }; \
 \
 static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
+\
+static inline EC_##type* EC_Find##type##(Ent* ent, World* world) \
+{ \
+    if (!Ent_Has##type##(ent)) { return 0; } \
+    EC_##type* comp; \
+    for (u32 i = 0; i < world->##typeCamelCase##List.count; ++i) \
+    { \
+        comp = &world->##typeCamelCase##List.items[i]; \
+        if (comp->inUse == 1 && EntId_Equals(&ent->entId, &comp->entId)) \
+        { \
+            return comp; \
+        } \
+    } \
+    return 0; \
+} \
 

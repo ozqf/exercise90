@@ -17,6 +17,7 @@ Ent* Ent_GetFreeEntity()
             // new iteration of this entity
             u16 iteration = e->entId.iteration;
             *e = {};
+            Transform_SetToIdentity(&e->transform);
             e->inUse = 1;
             e->entId.iteration = iteration + 1;
             e->entId.index = i;
@@ -42,8 +43,9 @@ inline Ent* Ent_GetEntityByIndex(u16 index)
 
 void Ent_InitEntityList()
 {
-    for (i32 i = 0; i < GAME_MAX_ENTITIES; ++i)
+    for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
     {
         g_entities[i].entId.iteration = 0;
+        g_entities[i].entId.index = i;
     }
 }

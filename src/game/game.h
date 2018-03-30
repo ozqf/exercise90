@@ -16,11 +16,9 @@ global_variable Ent g_entities[GAME_MAX_ENTITIES];
 global_variable i32 g_num_entities;
 
 // Components
-global_variable EC_Collider g_colliders[GAME_MAX_ENTITIES];
-global_variable i32 g_num_colliders;
-
-global_variable EC_Renderer g_renderers[GAME_MAX_ENTITIES];
-global_variable u32 g_numSceneRendComponents;
+global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
+global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
+global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 
 
 

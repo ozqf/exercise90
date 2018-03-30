@@ -14,13 +14,51 @@
 //     }
 // }
 
-void Game_UpdateColliders(World* world)
+///////////////////////////////////////////////////////////////////
+// Player
+///////////////////////////////////////////////////////////////////
+void Game_UpdateActorMotors(World* world, GameTime* time, InputTick* input)
+{
+    Ent* ent = Ent_GetEntityByIndex(world->playerEntityIndex);
+    EC_ActorMotor* aMotor = EC_FindActorMotor(ent, world);
+    EC_Collider* collider = EC_FindCollider(ent, world);
+    if (aMotor == 0) { return; }
+
+    aMotor->move = { 0, 0, 0 };
+    
+    collider->velocity = {};
+
+    if (input->rollLeft)
+    {
+        collider->velocity.x = -aMotor->speed;
+        //aMotor->move.x = -speed;
+        //ent->transform.pos.x -= 1 * time->deltaTime;
+    }
+    if (input->rollRight)
+    {
+        collider->velocity.x = aMotor->speed;
+        //aMotor->move.x = speed;
+        //ent->transform.pos.x += 1 * time->deltaTime;
+    }
+
+}
+
+///////////////////////////////////////////////////////////////////
+// Colliders
+///////////////////////////////////////////////////////////////////
+
+void Game_UpdateColliders(World* world, GameTime* time)
 {
     for (u32 i = 0; i < world->colliderList.max; ++i)
     {
         EC_Collider* a = &world->colliderList.items[i];
         if (a->inUse == 0) { continue; }
         Ent* entA = Ent_GetEntityByIndex(a->entId.index);
+
+        // Move collider
+        entA->transform.pos.x += a->velocity.x * time->deltaTime;
+        entA->transform.pos.y += a->velocity.y * time->deltaTime;
+        entA->transform.pos.z += a->velocity.z * time->deltaTime;
 
         for (u32 j = 0; j < world->colliderList.max; ++j)
         {

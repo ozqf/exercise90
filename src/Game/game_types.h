@@ -58,6 +58,7 @@ struct World;
 #define COMP_FLAG_AICONTROLLER (1 << 0)
 #define COMP_FLAG_COLLIDER (1 << 1)
 #define COMP_FLAG_RENDERER (1 << 2)
+#define COMP_FLAG_ACTORMOTOR (1 << 3)
 
 // A quick test component
 struct EC_AIController
@@ -73,6 +74,7 @@ struct EC_Collider
     EntId entId;
     u8 inUse;
     Vec3 size;
+    Vec3 velocity;
     i32 isOverlapping;
 };
 
@@ -83,6 +85,14 @@ struct EC_Renderer
     RendObj rendObj;
 };
 
+struct EC_ActorMotor
+{
+    EntId entId;
+    u8 inUse;
+    Vec3 move;
+    f32 speed;
+};
+
 //////////////////////////////////////////////////
 // Define component list structs and World objects...
 //////////////////////////////////////////////////
@@ -91,20 +101,27 @@ struct EC_Renderer
 DEFINE_ENT_COMPONENT_LIST(AIController)
 DEFINE_ENT_COMPONENT_LIST(Renderer)
 DEFINE_ENT_COMPONENT_LIST(Collider)
+DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 
 struct World
 {
+    // Components
     EC_AIControllerList aiControllerList;
     EC_RendererList rendererList;
     EC_ColliderList colliderList;
+    EC_ActorMotorList actorMotorList;
+
+    // specifics
+    u16 playerEntityIndex;
 };
 
 //////////////////////////////////////////////////
-// ...and Component Add/Remove/Has functions.
+// ...and Component Add/Remove/Has/Find functions.
 //////////////////////////////////////////////////
 DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
 DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
+DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 
 
 // Defined last as it contains macro defined structs from above
