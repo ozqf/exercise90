@@ -37,6 +37,8 @@ void Ent_InitAIController(EC_AIController* controller, f32 dirX, f32 dirY, f32 d
     controller->speed = speed;
 }
 
+f32 moveDistance = 12;
+
 void Ent_UpdateAIControllers(EC_AIController* controllers, GameTime* time)
 {
     for (i32 i = 0; i < GAME_MAX_ENTITIES; ++i)
@@ -46,18 +48,18 @@ void Ent_UpdateAIControllers(EC_AIController* controllers, GameTime* time)
         if (controller->dir.x < 0)
         {
             ent->transform.pos.x -= controller->speed * time->deltaTime;
-            if (ent->transform.pos.x < -3)
+            if (ent->transform.pos.x < -moveDistance)
             {
-                ent->transform.pos.x = -3;
+                ent->transform.pos.x = -moveDistance;
                 controller->dir.x = 1;
             }
         }
         else if (controller->dir.x > 0)
         {
             ent->transform.pos.x += controller->speed * time->deltaTime;
-            if (ent->transform.pos.x > 3)
+            if (ent->transform.pos.x > moveDistance)
             {
-                ent->transform.pos.x = 3;
+                ent->transform.pos.x = moveDistance;
                 controller->dir.x = -1;
             }
         }

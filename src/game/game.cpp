@@ -12,6 +12,8 @@ void Game_Init()
 
     Ent* ent;
     EC_Renderer* renderer;
+    EC_AIController* controller;
+    EC_Collider* collider;
 
     // Init world and component lists
     g_world = {};
@@ -27,7 +29,7 @@ void Game_Init()
     g_world.colliderList.count = GAME_MAX_ENTITIES;
     g_world.colliderList.max = GAME_MAX_ENTITIES;
 
-    // Ent 0, walls
+    // Ent 0, walls mesh
     ent = Ent_GetFreeEntity();
 
     ent->transform.pos.x = 0;
@@ -40,21 +42,27 @@ void Game_Init()
     renderer = EC_AddRenderer(ent, &g_world);
     
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
+    // Ground AABB
 
-    
-    // Ent 1, Octahedron
     ent = Ent_GetFreeEntity();
-    ent->transform.scale.x = 0.5;
-    ent->transform.scale.y = 0.5;
-    ent->transform.scale.z = 0.5;
-    EC_AIController* controller = EC_AddAIController(ent, &g_world);
+
+    ent->transform.pos.y = 0;
+    collider = EC_AddCollider(ent, &g_world);
+    collider->size = { 6, 1, 6 };
+    
+    // Octahedron object
+    ent = Ent_GetFreeEntity();
+    ent->transform.scale.x = 1;
+    ent->transform.scale.y = 1;
+    ent->transform.scale.z = 1;
+
+    controller = EC_AddAIController(ent, &g_world);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
     renderer = EC_AddRenderer(ent, &g_world);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 4);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 3);
 
-    EC_Collider* collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, &g_world);
+    collider->size = { 1, 1, 1 };
 
-    #if 0
-    #endif
 }

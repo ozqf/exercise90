@@ -72,7 +72,8 @@ struct EC_Collider
 {
     EntId entId;
     u8 inUse;
-    i32 someValue;
+    Vec3 size;
+    i32 isOverlapping;
 };
 
 struct EC_Renderer

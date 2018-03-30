@@ -511,6 +511,7 @@ void App_Frame(GameTime* time, InputTick* input)
     // Game state update
     // Update all inputs, entity components and colliders/physics
     Ent_UpdateAIControllers(g_aiControllers, time);
+    Game_UpdateColliders(&g_world);
     //Game_UpdateAI(time);
 
     // Render

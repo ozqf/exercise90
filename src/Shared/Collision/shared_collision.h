@@ -25,3 +25,5 @@ struct ZCollider
         ZAABB aabb;
     };
 };
+
+#include "shared_collision_narrow.cpp"
