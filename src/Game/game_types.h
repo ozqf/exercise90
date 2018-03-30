@@ -89,18 +89,20 @@ struct EC_Renderer
 #include "game_entComponentBase.h"
 DEFINE_ENT_COMPONENT_LIST(AIController)
 DEFINE_ENT_COMPONENT_LIST(Renderer)
+DEFINE_ENT_COMPONENT_LIST(Collider)
 
 struct World
 {
     EC_AIControllerList aiControllerList;
     EC_RendererList rendererList;
+    EC_ColliderList colliderList;
 };
 
 //////////////////////////////////////////////////
 // ...and Component Add/Remove/Has functions.
 //////////////////////////////////////////////////
 DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
-//DEFINE_ENT_COMPONENT_BASE(EC_Collider, collider, COMP_FLAG_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 
 

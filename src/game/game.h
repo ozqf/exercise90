@@ -15,11 +15,15 @@ global_variable RenderScene g_uiScene;
 global_variable Ent g_entities[GAME_MAX_ENTITIES];
 global_variable i32 g_num_entities;
 
-global_variable ZCollider g_game_colliders[GAME_MAX_ENTITIES];
+// Components
+global_variable EC_Collider g_colliders[GAME_MAX_ENTITIES];
 global_variable i32 g_num_colliders;
 
 global_variable EC_Renderer g_renderers[GAME_MAX_ENTITIES];
 global_variable u32 g_numSceneRendComponents;
+
+
+
 global_variable RendObj g_ui_rendObjects[GAME_MAX_ENTITIES];
 global_variable u32 g_numUIRendComponents;
 

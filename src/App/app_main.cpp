@@ -515,7 +515,9 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Render
     //R_Scene_Tick(time, &g_scene);
-    g_worldScene.numObjects = Game_BuildRenderList(&g_world, &g_worldScene);
+    g_worldScene.numObjects = 0;
+    Game_BuildRenderList(&g_world, &g_worldScene);
+    Game_DrawColliderAABBs(&g_world, &g_worldScene);
     platform.Platform_RenderScene(&g_worldScene);
 }
 

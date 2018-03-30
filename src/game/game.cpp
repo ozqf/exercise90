@@ -18,9 +18,14 @@ void Game_Init()
     g_world.aiControllerList.items = g_aiControllers;
     g_world.aiControllerList.count = GAME_MAX_ENTITIES;
     g_world.aiControllerList.max = GAME_MAX_ENTITIES;
+
     g_world.rendererList.items = g_renderers;
     g_world.rendererList.count = GAME_MAX_ENTITIES;
     g_world.rendererList.max = GAME_MAX_ENTITIES;
+
+    g_world.colliderList.items = g_colliders;
+    g_world.colliderList.count = GAME_MAX_ENTITIES;
+    g_world.colliderList.max = GAME_MAX_ENTITIES;
 
     // Ent 0, walls
     ent = Ent_GetFreeEntity();
@@ -47,6 +52,8 @@ void Game_Init()
 
     renderer = EC_AddRenderer(ent, &g_world);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 4);
+
+    EC_Collider* collider = EC_AddCollider(ent, &g_world);
 
     #if 0
     #endif

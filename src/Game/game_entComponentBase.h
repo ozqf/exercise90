@@ -27,6 +27,8 @@ struct EC_##type##List \
 /*
 Functions:
 EC_AddFoo
+EC_RemoveFoo
+Ent_HasFoo
 */
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
@@ -48,10 +50,8 @@ static inline EC_##type* EC_Add##type##(Ent* ent, World* world) \
     } \
     return NULL; \
 }; \
-
-#if 0
 \
-static inline void EC_Remove##type##(Ent* ent, World* world, type* comp) \
+static inline void EC_Remove##type##(Ent* ent, World* world, EC_##type* comp) \
 { \
     ent->componentFlags &= ~typeFlagDefine; \
     comp->inUse = 0; \
@@ -59,4 +59,3 @@ static inline void EC_Remove##type##(Ent* ent, World* world, type* comp) \
 \
 static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
 
-#endif
