@@ -9,7 +9,7 @@
 Ent* Ent_GetFreeEntity()
 {
     Ent* e = NULL;
-    for (u16 i = 0; i < WORLD_MAX_ENTITIES; ++i)
+    for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
     {
         e = &g_entities[i];
         if (e->inUse == 0)
@@ -36,13 +36,13 @@ inline void Ent_Free(Ent* ent)
 
 inline Ent* Ent_GetEntityByIndex(u16 index)
 {
-    Assert(index < WORLD_MAX_ENTITIES)
+    Assert(index < GAME_MAX_ENTITIES)
     return &g_entities[index];
 }
 
 void Ent_InitEntityList()
 {
-    for (i32 i = 0; i < WORLD_MAX_ENTITIES; ++i)
+    for (i32 i = 0; i < GAME_MAX_ENTITIES; ++i)
     {
         g_entities[i].entId.iteration = 0;
     }

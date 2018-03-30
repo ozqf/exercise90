@@ -2,11 +2,6 @@
 
 #include "../Shared/shared.h"
 
-// Max of 32 components
-#define ECOMP_FLAG_RENDOBJ          (1 << 0)
-#define ECOMP_FLAG_AI_CONTROLLER    (1 << 1)
-#define ECOMP_FLAG_COLLIDER         (1 << 2)
-
 /*
 Entity system:
 Entities are a combination of components grouped via an ent id
@@ -15,10 +10,12 @@ To create an entity:
 > Allocate/find free components and assign it the entity id.
 */
 
-/**
- * iteration: Incremented for each use of this entity index
- * index: direct index into the entity array
- */
+//////////////////////////////////////////////////
+// Define Entity
+// index: direct index into the entity array
+// iteration: Incremented for each use of this entity index
+//   to make recycled uses unique
+//////////////////////////////////////////////////
 union EntId
 {
     struct
@@ -29,9 +26,15 @@ union EntId
     u16 arr[2];
 };
 
-inline u8 EntIdsEqual(EntId a, EntId b)
+inline void EntId_Copy(EntId* source, EntId* target)
 {
-    return (a.iteration == b.iteration && a.index == b.index);
+    target->index = source->index;
+    target->iteration = source->iteration;
+}
+
+inline u8 EntId_Equals(EntId* a, EntId* b)
+{
+    return (a->index == b->index && a->iteration == b->iteration);
 }
 
 struct Ent
@@ -42,8 +45,22 @@ struct Ent
     u32 componentFlags;
 };
 
+//////////////////////////////////////////////////
+// Define Components
+// All components required:
+//   EntId entId;
+//   u8 inUse;
+//////////////////////////////////////////////////
+
+// Max of 32 components per entity
+
+struct World;
+#define COMP_FLAG_AICONTROLLER (1 << 0)
+#define COMP_FLAG_COLLIDER (1 << 1)
+#define COMP_FLAG_RENDERER (1 << 2)
+
 // A quick test component
-struct EntComp_AIController
+struct EC_AIController
 {
     EntId entId;
     u8 inUse;
@@ -51,16 +68,43 @@ struct EntComp_AIController
     f32 speed;
 };
 
-struct EntComp_Collider
+struct EC_Collider
 {
+    EntId entId;
+    u8 inUse;
     i32 someValue;
 };
 
-struct Ent_Renderer
+struct EC_Renderer
 {
+    EntId entId;
+    u8 inUse;
     RendObj rendObj;
 };
 
+//////////////////////////////////////////////////
+// Define component list structs and World objects...
+//////////////////////////////////////////////////
+// World will require component lists to be defined already!
+#include "game_entComponentBase.h"
+DEFINE_ENT_COMPONENT_LIST(AIController)
+DEFINE_ENT_COMPONENT_LIST(Renderer)
+
+struct World
+{
+    EC_AIControllerList aiControllerList;
+    EC_RendererList rendererList;
+};
+
+//////////////////////////////////////////////////
+// ...and Component Add/Remove/Has functions.
+//////////////////////////////////////////////////
+DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
+//DEFINE_ENT_COMPONENT_BASE(EC_Collider, collider, COMP_FLAG_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
+
+
+// Defined last as it contains macro defined structs from above
 struct GameState
 {
     i32 nextEntityID;

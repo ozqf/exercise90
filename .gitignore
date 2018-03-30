@@ -9,3 +9,4 @@
 /lib/*.lib
 !/lib/libraries.md
 /xercise.VC.VC.opendb
+*.i

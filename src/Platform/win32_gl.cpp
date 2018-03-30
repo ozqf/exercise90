@@ -634,10 +634,10 @@ void R_RenderScene(RenderScene* scene)
         R_RenderEntity(&scene->cameraTransform, &scene->sceneItems[i]);
     }
 
-	for (u32 i = 0; i < scene->numUIObjects; ++i)
-	{
-		R_RenderEntity(&scene->cameraTransform, &scene->uiItems[i]);
-	}
+	// for (u32 i = 0; i < scene->numUIObjects; ++i)
+	// {
+	// 	R_RenderEntity(&scene->cameraTransform, &scene->uiItems[i]);
+	// }
 }
  
 ////////////////////////////////////////////////////////////////////

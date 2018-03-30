@@ -11,7 +11,16 @@ void Game_Init()
     g_numUIRendComponents = 0;
 
     Ent* ent;
-    RendObj* obj;
+    EC_Renderer* renderer;
+
+    // Init world and component lists
+    g_world = {};
+    g_world.aiControllerList.items = g_aiControllers;
+    g_world.aiControllerList.count = GAME_MAX_ENTITIES;
+    g_world.aiControllerList.max = GAME_MAX_ENTITIES;
+    g_world.rendererList.items = g_renderers;
+    g_world.rendererList.count = GAME_MAX_ENTITIES;
+    g_world.rendererList.max = GAME_MAX_ENTITIES;
 
     // Ent 0, walls
     ent = Ent_GetFreeEntity();
@@ -23,19 +32,22 @@ void Game_Init()
     ent->transform.scale.y = 2;
     ent->transform.scale.z = 6;
 
-    obj = Ent_AddRenderObj(ent);
+    renderer = EC_AddRenderer(ent, &g_world);
     
-    RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
 
+    
     // Ent 1, Octahedron
     ent = Ent_GetFreeEntity();
     ent->transform.scale.x = 0.5;
     ent->transform.scale.y = 0.5;
     ent->transform.scale.z = 0.5;
-    EntComp_AIController* controller = Ent_AddAIController(ent);
+    EC_AIController* controller = EC_AddAIController(ent, &g_world);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
-    obj = Ent_AddRenderObj(ent);
-    RendObj_SetAsMesh(obj, &g_meshOctahedron, 1, 1, 1, 4);
+    renderer = EC_AddRenderer(ent, &g_world);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 4);
 
+    #if 0
+    #endif
 }

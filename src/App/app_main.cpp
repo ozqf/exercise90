@@ -15,6 +15,7 @@ holding game/menu state and calling game update when required
 
 void R_Scene_CreateTestScene()
 {
+    #if 0
     RenderListItem* item = g_scene_renderList;
     *item = {};
     Transform_SetToIdentity(&item->transform);
@@ -25,9 +26,9 @@ void R_Scene_CreateTestScene()
     item->transform.scale.x = 6;
     item->transform.scale.y = 2;
     item->transform.scale.z = 6;
-    g_scene.numObjects++;
+    g_worldScene.numObjects++;
     item++;
-    #if 0
+    
     RendObj* obj = g_game_rendObjects;
 
     // 0
@@ -178,17 +179,16 @@ void R_Scene_CreateTestScene()
 
 void R_Scene_Init()
 {
-    g_scene = {};
-    g_scene.numObjects = 0;
-    g_scene.maxObjects = R_MAX_RENDER_OBJECTS;
-    g_scene.sceneItems = g_scene_renderList;
-    g_scene.fov = 90;
-    g_scene.orthographicHalfHeight = 8;
-    g_scene.projectionMode = 2;
-
-    g_scene.numUIObjects = 0;
-    g_scene.maxUIObjects = R_MAX_RENDER_OBJECTS;
-    g_scene.uiItems = g_ui_renderList;
+    g_worldScene = {};
+    g_worldScene.numObjects = 0;
+    g_worldScene.maxObjects = GAME_MAX_ENTITIES;
+    g_worldScene.sceneItems = g_scene_renderList;
+    g_worldScene.fov = 90;
+    g_worldScene.orthographicHalfHeight = 8;
+    g_worldScene.projectionMode = 2;
+    // g_worldScene.numUIObjects = 0;
+    // g_worldScene.maxUIObjects = GAME_MAX_ENTITIES;
+    // g_worldScene.uiItems = g_ui_renderList;
 }
 
 void Input_SetMouseMode(ZMouseMode mode)
@@ -499,13 +499,13 @@ void App_Frame(GameTime* time, InputTick* input)
 
     if (input->reset)
     {
-        g_scene.cameraTransform.pos = { 0, 0, 2 };
-        g_scene.cameraTransform.rot = { 0, 0, 0 };
-        g_scene.cameraTransform.scale = { 0, 0, 0 };
+        g_worldScene.cameraTransform.pos = { 0, 0, 2 };
+        g_worldScene.cameraTransform.rot = { 0, 0, 0 };
+        g_worldScene.cameraTransform.scale = { 0, 0, 0 };
     }
     else
     {
-        Input_ApplyInputToTransform(input, &g_scene.cameraTransform, time);
+        Input_ApplyInputToTransform(input, &g_worldScene.cameraTransform, time);
     }
 
     // Game state update
@@ -515,8 +515,8 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Render
     //R_Scene_Tick(time, &g_scene);
-    Game_BuildRenderList(&g_scene);
-    platform.Platform_RenderScene(&g_scene);
+    g_worldScene.numObjects = Game_BuildRenderList(&g_world, &g_worldScene);
+    platform.Platform_RenderScene(&g_worldScene);
 }
 
 // void App_FixedFrame(GameTime* time, InputTick* inputTick)

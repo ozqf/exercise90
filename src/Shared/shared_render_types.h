@@ -135,8 +135,4 @@ struct RenderScene
     RenderListItem* sceneItems;
     u32 numObjects;
     u32 maxObjects;
-    
-    RenderListItem* uiItems;
-    u32 numUIObjects;
-    u32 maxUIObjects;
 };
