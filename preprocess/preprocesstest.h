@@ -82,12 +82,12 @@ struct type##List \
     unsigned int count; \
 }; \
 \
-static inline type* EntComp_Add##type##(Ent* ent, World* world) \
+static inline type* EntComp_Add##type##(Ent* ent, GameState* gs) \
 { \
     type* comp; \
-    for (u32 i = 0; i < world->##typeCamelCase##List.count; ++i) \
+    for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
-        comp = &world->##typeCamelCase##List.items[i]; \
+        comp = &gs->##typeCamelCase##List.items[i]; \
         if (comp->inUse == 0) \
         { \
             comp->inUse = 1; \
@@ -100,7 +100,7 @@ static inline type* EntComp_Add##type##(Ent* ent, World* world) \
     return NULL; \
 }; \
 \
-static inline void EntComp_Remove##type##(Ent* ent, World* world, type* comp) \
+static inline void EntComp_Remove##type##(Ent* ent, GameState* gs, type* comp) \
 { \
     ent->componentFlags &= ~typeFlagDefine; \
     comp->inUse = 0; \
@@ -117,7 +117,7 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
 //DEFINE_ENT_COMPONENT_BASE(Bar, bar, COMP_FLAG_BAR)
 
 // Lists are constructed via macro
-struct World
+struct GameState
 {
     FooList fooList;
     //BarList barList;

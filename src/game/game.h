@@ -35,7 +35,7 @@ global_variable RenderListItem g_ui_renderList[GAME_MAX_ENTITIES];
 #include "comp_rendObj.h"
 #include "comp_aiController.h"
 
-global_variable World g_world;
+global_variable GameState g_gameState;
 
 #include "game.cpp"
 #include "game_ent_components.cpp"

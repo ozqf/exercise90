@@ -19,7 +19,7 @@ PlatformInterface platform;
 // Heap + Preallocated lists
 global_variable Heap g_heap;
 
-//global_variable World g_world;
+//global_variable GameState g_world;
 
 // Input
 global_variable ZMouseMode g_mouseMode;
@@ -33,6 +33,6 @@ global_variable BlockRef g_debugBuffer;
 
 // TODO: Remove this stuff sometime
 global_variable u8 g_testAsciChar = '+';
-global_variable char* g_testString = "Hello, World...\nHey look, new line!";
+global_variable char* g_testString = "Hello, GameState...\nHey look, new line!";
 global_variable u8 g_input_escapePressed = 0;
 global_variable u8 cycleTexturePressed = 0;

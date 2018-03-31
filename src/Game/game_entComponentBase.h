@@ -34,12 +34,12 @@ EC_FindFoo
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
 \
-static inline EC_##type* EC_Add##type##(Ent* ent, World* world) \
+static inline EC_##type* EC_Add##type##(Ent* ent, GameState* gs) \
 { \
     EC_##type* comp; \
-    for (u32 i = 0; i < world->##typeCamelCase##List.count; ++i) \
+    for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
-        comp = &world->##typeCamelCase##List.items[i]; \
+        comp = &gs->##typeCamelCase##List.items[i]; \
         if (comp->inUse == 0) \
         { \
             comp->inUse = 1; \
@@ -52,7 +52,7 @@ static inline EC_##type* EC_Add##type##(Ent* ent, World* world) \
     return NULL; \
 }; \
 \
-static inline void EC_Remove##type##(Ent* ent, World* world, EC_##type* comp) \
+static inline void EC_Remove##type##(Ent* ent, GameState* gs, EC_##type* comp) \
 { \
     ent->componentFlags &= ~typeFlagDefine; \
     comp->inUse = 0; \
@@ -60,13 +60,13 @@ static inline void EC_Remove##type##(Ent* ent, World* world, EC_##type* comp) \
 \
 static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
 \
-static inline EC_##type* EC_Find##type##(Ent* ent, World* world) \
+static inline EC_##type* EC_Find##type##(Ent* ent, GameState* gs) \
 { \
     if (!Ent_Has##type##(ent)) { return 0; } \
     EC_##type* comp; \
-    for (u32 i = 0; i < world->##typeCamelCase##List.count; ++i) \
+    for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
-        comp = &world->##typeCamelCase##List.items[i]; \
+        comp = &gs->##typeCamelCase##List.items[i]; \
         if (comp->inUse == 1 && EntId_Equals(&ent->entId, &comp->entId)) \
         { \
             return comp; \

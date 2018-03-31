@@ -241,6 +241,7 @@ i32 AllocateTestStrings(Heap* heap)
 i32 App_Init()
 {
     printf("DLL Init\n");
+    //DebugBreak();
 
     u32 mainMemorySize = MegaBytes(1);
     MemoryBlock mem = {};
@@ -503,16 +504,16 @@ void App_Frame(GameTime* time, InputTick* input)
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(&g_world, time, input);
+    Game_UpdateActorMotors(&g_gameState, time, input);
     Ent_UpdateAIControllers(g_aiControllers, time);
-    Game_UpdateColliders(&g_world, time);
+    Game_UpdateColliders(&g_gameState, time);
     //Game_UpdateAI(time);
 
     // Render
     //R_Scene_Tick(time, &g_scene);
     g_worldScene.numObjects = 0;
-    Game_BuildRenderList(&g_world, &g_worldScene);
-    Game_DrawColliderAABBs(&g_world, time, &g_worldScene);
+    Game_BuildRenderList(&g_gameState, &g_worldScene);
+    Game_DrawColliderAABBs(&g_gameState, time, &g_worldScene);
     platform.Platform_RenderScene(&g_worldScene);
 }
 

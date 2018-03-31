@@ -54,7 +54,7 @@ struct Ent
 
 // Max of 32 components per entity
 
-struct World;
+//struct GameState;
 #define COMP_FLAG_AICONTROLLER (1 << 0)
 #define COMP_FLAG_COLLIDER (1 << 1)
 #define COMP_FLAG_RENDERER (1 << 2)
@@ -95,17 +95,23 @@ struct EC_ActorMotor
 };
 
 //////////////////////////////////////////////////
-// Define component list structs and World objects...
+// Define component list structs and GameState objects...
 //////////////////////////////////////////////////
-// World will require component lists to be defined already!
+// GameState will require component lists to be defined already!
 #include "game_entComponentBase.h"
 DEFINE_ENT_COMPONENT_LIST(AIController)
 DEFINE_ENT_COMPONENT_LIST(Renderer)
 DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 
-struct World
+struct GameState
 {
+    // Entities
+    i32 nextEntityID;
+    Ent* entities;
+    i32 maxEntities;
+    i32 lastEntityIndex;
+
     // Components
     EC_AIControllerList aiControllerList;
     EC_RendererList rendererList;
@@ -118,22 +124,12 @@ struct World
 
 //////////////////////////////////////////////////
 // ...and Component Add/Remove/Has/Find functions.
+// Note: requires that GameState struct is defined!
 //////////////////////////////////////////////////
 DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
 DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
-
-
-// Defined last as it contains macro defined structs from above
-struct GameState
-{
-    i32 nextEntityID;
-    Ent* entities;
-    i32 maxEntities;
-    i32 lastEntityIndex;
-
-};
 
 void World_Init(GameState* gs, Ent* entityList, i32 maxEntities)
 {

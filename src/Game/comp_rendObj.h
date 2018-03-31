@@ -13,11 +13,11 @@
  * > maximum number of render items (RenderScene)
  * 
  */
-inline void Game_BuildRenderList(World* world, RenderScene* scene)
+inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 {
-    for (u32 i = 0; i < world->rendererList.max; ++i)
+    for (u32 i = 0; i < gs->rendererList.max; ++i)
     {
-        EC_Renderer* rend = &world->rendererList.items[i];
+        EC_Renderer* rend = &gs->rendererList.items[i];
         if (rend->inUse == 1)
         {
             Ent* ent = Ent_GetEntityByIndex(rend->entId.index);
