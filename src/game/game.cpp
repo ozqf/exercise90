@@ -17,13 +17,13 @@ void Game_BuildTestScene(GameState* gs)
     gs->entList.count = GAME_MAX_ENTITIES;
     gs->entList.max = GAME_MAX_ENTITIES;
 
-    gs->aiControllerList.items = g_aiControllers;
-    gs->aiControllerList.count = GAME_MAX_ENTITIES;
-    gs->aiControllerList.max = GAME_MAX_ENTITIES;
-
     gs->rendererList.items = g_renderers;
     gs->rendererList.count = GAME_MAX_ENTITIES;
     gs->rendererList.max = GAME_MAX_ENTITIES;
+
+    gs->aiControllerList.items = g_aiControllers;
+    gs->aiControllerList.count = GAME_MAX_ENTITIES;
+    gs->aiControllerList.max = GAME_MAX_ENTITIES;
 
     gs->colliderList.items = g_colliders;
     gs->colliderList.count = GAME_MAX_ENTITIES;
@@ -122,7 +122,72 @@ void Game_BuildTestScene(GameState* gs)
 
 void Game_BuildTestHud(GameState* state)
 {
+    Ent* ent;
+    EC_Renderer* renderer;
     
+    // Init gs and component lists
+    *state = {};
+
+    state->entList.items = g_uiEntities;
+    state->entList.count = UI_MAX_ENTITIES;
+    state->entList.max = UI_MAX_ENTITIES;
+
+    state->rendererList.items = g_ui_renderers;
+    state->rendererList.count = UI_MAX_ENTITIES;
+    state->rendererList.max = UI_MAX_ENTITIES;
+
+
+    /////////////////////////////////////////////////////////////
+    // A test HUD
+    /////////////////////////////////////////////////////////////
+    
+    // UI
+    ent = Ent_GetFreeEntity(&state->entList);
+    ent->transform.pos.z = 0;
+    ent->transform.scale.x = 0.1f;
+    ent->transform.scale.y = 0.1f;
+    ent->transform.scale.z = 0.1f;
+
+    renderer = EC_AddRenderer(ent, state);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+
+    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, 4, 1, 1);
+    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
+    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '.');
+
+    #if 0
+    // Sentence
+    ent = Ent_GetFreeEntity(&state->entList);
+    ent->transform.pos.x = -1;
+    ent->transform.pos.y = 1;
+    renderer = EC_AddRenderer(ent, state);
+
+    char* chars = g_debugStr->chars;
+    i32 numChars = COM_StrLen(chars);
+	//i32 numChars = g_testString;
+
+    RendObj_SetAsAsciCharArray(&renderer->rendObj, chars, numChars, 0.05f);
+    //obj->transform.pos.x = -1;//-0.75f;
+    //obj->transform.pos.y = 1;//0.75f;
+    #endif
+
+    #if 0
+    /////////////////////////////////////////////////////////////
+    // Walls mesh
+    /////////////////////////////////////////////////////////////
+    ent = Ent_GetFreeEntity(&state->entList);
+
+    ent->transform.pos.x = 0;
+    ent->transform.pos.y = 0;
+    ent->transform.pos.z = 0;
+    ent->transform.scale.x = 12;
+    ent->transform.scale.y = 4;
+    ent->transform.scale.z = 12;
+
+    renderer = EC_AddRenderer(ent, state);
+    
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
+    #endif
 }
 
 void Game_BuildTestMenu()

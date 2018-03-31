@@ -19,6 +19,7 @@
 ///////////////////////////////////////////////////////////////////
 void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
 {
+    #if 0
     Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
     EC_ActorMotor* aMotor = EC_FindActorMotor(ent, gs);
     EC_Collider* collider = EC_FindCollider(ent, gs);
@@ -40,7 +41,7 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
         //aMotor->move.x = speed;
         //ent->transform.pos.x += 1 * time->deltaTime;
     }
-
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -109,5 +110,37 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             }
             
         }
+    }
+}
+
+void Game_UpdateUI(GameState* gs, GameTime* time, InputTick* input)
+{
+    f32 speed = 8.0f;
+    Ent* ent = &gs->entList.items[0];
+    if (input->yawLeft)
+    {
+        ent->transform.pos.x -= speed * time->deltaTime;
+    }
+    if (input->yawRight)
+    {
+        ent->transform.pos.x += speed * time->deltaTime;
+    }
+
+    if (input->pitchUp)
+    {
+        ent->transform.pos.y += speed * time->deltaTime;
+    }
+    if (input->pitchDown)
+    {
+        ent->transform.pos.y -= speed * time->deltaTime;
+    }
+
+    if (input->rollLeft)
+    {
+        ent->transform.pos.z -= speed * time->deltaTime;
+    }
+    if (input->rollRight)
+    {
+        ent->transform.pos.z += speed * time->deltaTime;
     }
 }

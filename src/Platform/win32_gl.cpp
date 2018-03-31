@@ -157,17 +157,26 @@ void R_SetupProjection(RenderScene* scene)
 {
 	switch (scene->projectionMode)
 	{
-		case 1:
-		{
-			R_SetupOrthoProjection(scene->orthographicHalfHeight);
-		} break;
-		case 2:
+		case RENDER_PROJECTION_MODE_3D:
 		{
 			R_Setup3DProjectionB(scene->fov);
 		} break;
-		default :
+		case RENDER_PROJECTION_MODE_ORTHOGRAPHIC:
+		{
+			R_SetupOrthoProjection(scene->orthographicHalfHeight);
+		} break;
+		case RENDER_PROJECTION_MODE_IDENTITY:
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+		} break;
+		case RENDER_PROJECTION_MODE_3D_OLD:
 		{
 			R_Setup3DProjectionA(scene->fov);
+		} break;
+		default :
+		{
+			R_Setup3DProjectionB(scene->fov);
 		} break;
 	}
 }
@@ -490,8 +499,8 @@ void R_RenderAsciChar(RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -505,8 +514,8 @@ void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* 
 {
 	glEnable(GL_TEXTURE_2D);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -543,12 +552,18 @@ void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 
 		case SPRITE_MODE_UI:
 		{
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
+			//R_SetupOrthoProjection(8);
+			//glMatrixMode(GL_PROJECTION);
+			//glLoadIdentity();
+			
+            char buf[64];
+            sprintf_s(buf, 64, "SPRITE POS: %3.7f, %3.7f, %3.7f\n", objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
+            OutputDebugString(buf);
+
 
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
-
+			
 			R_SetupTestTexture(sprite->textureIndex);
 			//R_RenderTestGeometry_RainbowQuad();
 			R_DrawSpriteGeometry(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z, sprite);
@@ -643,10 +658,9 @@ void R_RenderScene(RenderScene* scene)
 ////////////////////////////////////////////////////////////////////
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////
-//bool renderedOnce = false;
-void Win32_RenderFrame(HWND window, RenderScene* scene)
+void Win32_R_SetupFrame(HWND window)
 {
-    /*if (renderedOnce == false)
+	/*if (renderedOnce == false)
     {
         renderedOnce = true;
         MessageBox(0, "Render", "Error", MB_OK | MB_ICONINFORMATION);
@@ -687,11 +701,24 @@ void Win32_RenderFrame(HWND window, RenderScene* scene)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Win32_ProcessTestInput(inputTick, time);
-    R_RenderScene(scene);
+}
+
+void Win32_R_FinishFrame(HWND window)
+{
+    HDC deviceContext = GetDC(window);
 
 	// Finished, display
     SwapBuffers(deviceContext);
 
     ReleaseDC(window, deviceContext);
+}
+
+//bool renderedOnce = false;
+void Win32_RenderFrame(RenderScene* scene)
+{
+    //Win32_R_SetupFrame(appWindow);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	//Win32_ProcessTestInput(inputTick, time);
+    R_RenderScene(scene);
+
 }

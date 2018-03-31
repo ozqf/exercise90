@@ -177,18 +177,22 @@ void R_Scene_CreateTestScene()
     #endif
 }
 
-void R_Scene_Init()
+void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects,
+    i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {
-    g_worldScene = {};
-    g_worldScene.numObjects = 0;
-    g_worldScene.maxObjects = GAME_MAX_ENTITIES;
-    g_worldScene.sceneItems = g_scene_renderList;
-    g_worldScene.fov = 90;
-    g_worldScene.orthographicHalfHeight = 8;
-    g_worldScene.projectionMode = 2;
-    // g_worldScene.numUIObjects = 0;
-    // g_worldScene.maxUIObjects = GAME_MAX_ENTITIES;
-    // g_worldScene.uiItems = g_ui_renderList;
+    *scene = {};
+    Transform_SetToIdentity(&scene->cameraTransform);
+    scene->numObjects = 0;
+    scene->maxObjects = maxObjects;
+    scene->sceneItems = objectArray;
+    scene->fov = fov;
+    scene->projectionMode = projectionMode;
+    scene->orthographicHalfHeight = orthographicHalfHeight;
+}
+
+void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects)
+{
+    R_Scene_Init(scene, objectArray, maxObjects, 90, RENDER_PROJECTION_MODE_3D, 8);
 }
 
 void Input_SetMouseMode(ZMouseMode mode)
@@ -261,9 +265,15 @@ i32 App_Init()
     SharedAssets_Init();
 
     g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
-    
-    R_Scene_Init();
-    R_Scene_CreateTestScene();
+    Game_InitDebugStr();
+    R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
+    R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
+        90,
+        RENDER_PROJECTION_MODE_IDENTITY,
+        //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
+        8
+    );
+    //R_Scene_CreateTestScene();
     
     testInput = {};
 	testInput.speed = 3.0f;
@@ -459,6 +469,18 @@ void CycleTestAsciChar()
     #endif
 }
 
+void App_WriteCameraDebug()
+{
+    Transform t = g_worldScene.cameraTransform;
+    char buf[512];
+    i32 numWritten = sprintf_s(buf, 512, "Camera:\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f",
+        t.pos.x, t.pos.y, t.pos.z,
+        t.rot.x, t.rot.y, t.rot.z
+    );
+    //OutputDebugString(buf);
+    ZSTR_WriteChars(&g_debugStr, buf, numWritten);
+}
+
 void App_Frame(GameTime* time, InputTick* input)
 {
     #if 0
@@ -496,25 +518,60 @@ void App_Frame(GameTime* time, InputTick* input)
         g_worldScene.cameraTransform.pos = { 0, 0, 2 };
         g_worldScene.cameraTransform.rot = { 0, 0, 0 };
         g_worldScene.cameraTransform.scale = { 0, 0, 0 };
+
+        // g_uiScene.cameraTransform.pos = { 0, 0, 2 };
+        // g_uiScene.cameraTransform.rot = { 0, 0, 0 };
+        // g_uiScene.cameraTransform.scale = { 0, 0, 0 };
     }
     else
     {
         Input_ApplyInputToTransform(input, &g_worldScene.cameraTransform, time);
+
+        // Input_ApplyInputToTransform(input, &g_uiScene.cameraTransform, time);
     }
+
+    ///////////////////////////////////////
+    // Process gamestate
+    ///////////////////////////////////////
+
+    // clear debug buffer
+    g_debugStr.length = 0;
+
+    GameState* gs = &g_gameState;
+    GameState* ui = &g_uiState;
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(&g_gameState, time, input);
-    Ent_UpdateAIControllers(&g_gameState, time);
-    Game_UpdateColliders(&g_gameState, time);
+    Game_UpdateActorMotors(gs, time, input);
+    Ent_UpdateAIControllers(gs, time);
+    Game_UpdateColliders(gs, time);
     //Game_UpdateAI(time);
 
     // Render
-    //R_Scene_Tick(time, &g_scene);
+    // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
-    Game_BuildRenderList(&g_gameState, &g_worldScene);
-    Game_DrawColliderAABBs(&g_gameState, time, &g_worldScene);
+    g_uiScene.numObjects = 0;
+    
+    #if 1
+    Game_BuildRenderList(gs, &g_worldScene);
+    Game_DrawColliderAABBs(gs, time, &g_worldScene);
     platform.Platform_RenderScene(&g_worldScene);
+    #endif
+
+    #if 1
+    Game_UpdateUI(ui, time, input);
+    Game_BuildRenderList(ui, &g_uiScene);
+    // Render debug string
+    //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
+    App_WriteCameraDebug();
+    Game_SetDebugStringRender();
+    Transform t = {};
+    t.pos.x = -1;
+    t.pos.y = 1;
+    Game_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
+    platform.Platform_RenderScene(&g_uiScene);
+    #endif
+    
 }
 
 // void App_FixedFrame(GameTime* time, InputTick* inputTick)

@@ -30,9 +30,3 @@ global_variable i32 g_numDebugTextures;
 
 // Debugging
 global_variable BlockRef g_debugBuffer;
-
-// TODO: Remove this stuff sometime
-global_variable u8 g_testAsciChar = '+';
-global_variable char* g_testString = "Hello, GameState...\nHey look, new line!";
-global_variable u8 g_input_escapePressed = 0;
-global_variable u8 cycleTexturePressed = 0;

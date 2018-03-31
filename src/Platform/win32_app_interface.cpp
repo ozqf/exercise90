@@ -44,7 +44,7 @@ void Win32_PrintDebug(char *str)
  *********************************************************************/
 void Platform_R_DrawScene(RenderScene* scene)
 {
-    Win32_RenderFrame(appWindow, scene);
+    Win32_RenderFrame(scene);
 }
 
 // Returns number of textures loaded

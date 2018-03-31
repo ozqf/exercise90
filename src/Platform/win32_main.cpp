@@ -485,7 +485,10 @@ int CALLBACK WinMain(
                 // OutputDebugString(buf);
 
                 Win32_TickInput(&inputTick);
+
+                Win32_R_SetupFrame(appWindow);
                 app.AppUpdate(&time, &inputTick);
+                Win32_R_FinishFrame(appWindow);
             }
         }
         else
