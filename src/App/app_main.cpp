@@ -505,7 +505,7 @@ void App_Frame(GameTime* time, InputTick* input)
     // Game state update
     // Update all inputs, entity components and colliders/physics
     Game_UpdateActorMotors(&g_gameState, time, input);
-    Ent_UpdateAIControllers(g_aiControllers, time);
+    Ent_UpdateAIControllers(&g_gameState, time);
     Game_UpdateColliders(&g_gameState, time);
     //Game_UpdateAI(time);
 

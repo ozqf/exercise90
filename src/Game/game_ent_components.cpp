@@ -19,7 +19,7 @@
 ///////////////////////////////////////////////////////////////////
 void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
 {
-    Ent* ent = Ent_GetEntityByIndex(gs->playerEntityIndex);
+    Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
     EC_ActorMotor* aMotor = EC_FindActorMotor(ent, gs);
     EC_Collider* collider = EC_FindCollider(ent, gs);
     if (aMotor == 0) { return; }
@@ -54,7 +54,7 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
     {
         EC_Collider* a = &gs->colliderList.items[i];
         if (a->inUse == 0) { continue; }
-        Ent* entA = Ent_GetEntityByIndex(a->entId.index);
+        Ent* entA = Ent_GetEntityByIndex(&gs->entList, a->entId.index);
 
         // Move collider
         entA->transform.pos.x += a->velocity.x * time->deltaTime;
@@ -66,7 +66,7 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
             if (i == j) { continue; }
             EC_Collider* b = &gs->colliderList.items[j];
             if (b->inUse == 0) { continue; }
-            Ent* entB = Ent_GetEntityByIndex(b->entId.index);
+            Ent* entB = Ent_GetEntityByIndex(&gs->entList, b->entId.index);
 
             if (AABBVsAABB(
                 entA->transform.pos.x,
@@ -94,7 +94,7 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
         EC_Collider* collider = &gs->colliderList.items[i];
         if (collider->inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(collider->entId.index);
+            Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->entId.index);
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;

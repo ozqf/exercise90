@@ -20,7 +20,7 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
         EC_Renderer* rend = &gs->rendererList.items[i];
         if (rend->inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(rend->entId.index);
+            Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->entId.index);
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;

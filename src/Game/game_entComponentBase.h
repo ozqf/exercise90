@@ -17,8 +17,8 @@ struct FooList
 struct EC_##type##List \
 { \
     EC_##type* items; \
-    unsigned int max; \
     unsigned int count; \
+    unsigned int max; \
 }; \
 
 //////////////////////////////////////////////////

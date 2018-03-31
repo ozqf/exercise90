@@ -4,12 +4,6 @@
 
 void Game_BuildTestScene(GameState* gs)
 {
-    g_num_entities = 0;
-    //g_num_brains = 0;
-    //g_num_colliders = 0;
-    //g_numSceneRendComponents = 0;
-    //g_numUIRendComponents = 0;
-
     Ent* ent;
     EC_Renderer* renderer;
     EC_AIController* controller;
@@ -18,6 +12,11 @@ void Game_BuildTestScene(GameState* gs)
 
     // Init gs and component lists
     *gs = {};
+
+    gs->entList.items = g_gameEntities;
+    gs->entList.count = GAME_MAX_ENTITIES;
+    gs->entList.max = GAME_MAX_ENTITIES;
+
     gs->aiControllerList.items = g_aiControllers;
     gs->aiControllerList.count = GAME_MAX_ENTITIES;
     gs->aiControllerList.max = GAME_MAX_ENTITIES;
@@ -25,9 +24,11 @@ void Game_BuildTestScene(GameState* gs)
     gs->rendererList.items = g_renderers;
     gs->rendererList.count = GAME_MAX_ENTITIES;
     gs->rendererList.max = GAME_MAX_ENTITIES;
+
     gs->colliderList.items = g_colliders;
     gs->colliderList.count = GAME_MAX_ENTITIES;
     gs->colliderList.max = GAME_MAX_ENTITIES;
+
     gs->actorMotorList.items = g_actorMotors;
     gs->actorMotorList.count = GAME_MAX_ENTITIES;
     gs->actorMotorList.max = GAME_MAX_ENTITIES;
@@ -45,7 +46,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////
     // Walls mesh
     /////////////////////////////////////////////////////////////
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
 
     ent->transform.pos.x = 0;
     ent->transform.pos.y = 0;
@@ -62,29 +63,29 @@ void Game_BuildTestScene(GameState* gs)
     // Room
     /////////////////////////////////////////////////////////////
     // Floor
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
     collider = EC_AddCollider(ent, gs);
     collider->size = { testArenaWidth, 1, testArenaWidth };
 
     // walls
     
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = { 1, testArenaHeight, testArenaWidth };
     
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = { 1, testArenaHeight, testArenaWidth };
     
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = { testArenaWidth, testArenaHeight, 1 };
     
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = { testArenaWidth, testArenaHeight, 1 };
@@ -94,7 +95,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////
     // Player
     /////////////////////////////////////////////////////////////
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     
     collider = EC_AddCollider(ent, gs);
     collider->size = { 1, 2, 1 };
@@ -107,7 +108,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////
     // Octahedron object
     /////////////////////////////////////////////////////////////
-    ent = Ent_GetFreeEntity();
+    ent = Ent_GetFreeEntity(&gs->entList);
     
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
@@ -119,7 +120,7 @@ void Game_BuildTestScene(GameState* gs)
     collider->size = { 1, 1, 1 };
 }
 
-void Game_BuildTestHud()
+void Game_BuildTestHud(GameState* state)
 {
     
 }
@@ -132,5 +133,6 @@ void Game_BuildTestMenu()
 void Game_Init()
 {
     Game_BuildTestScene(&g_gameState);
-
+    Game_BuildTestHud(&g_uiState);
+    Game_BuildTestMenu();
 }

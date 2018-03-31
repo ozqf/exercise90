@@ -6,12 +6,12 @@
 /**
  * Find a free slot in the entity list
  */
-Ent* Ent_GetFreeEntity()
+Ent* Ent_GetFreeEntity(EntList* ents)
 {
     Ent* e = NULL;
-    for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
+    for (u16 i = 0; i < ents->max; ++i)
     {
-        e = &g_entities[i];
+        e = &ents->items[i];
         if (e->inUse == 0)
         {
             // new iteration of this entity
@@ -35,17 +35,17 @@ inline void Ent_Free(Ent* ent)
     ent->componentFlags = 0;
 }
 
-inline Ent* Ent_GetEntityByIndex(u16 index)
+inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
 {
-    Assert(index < GAME_MAX_ENTITIES)
-    return &g_entities[index];
+    Assert(index < ents->max)
+    return &ents->items[index];
 }
 
-void Ent_InitEntityList()
-{
-    for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
-    {
-        g_entities[i].entId.iteration = 0;
-        g_entities[i].entId.index = i;
-    }
-}
+// void Ent_InitEntityList()
+// {
+//     for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
+//     {
+//         g_entities[i].entId.iteration = 0;
+//         g_entities[i].entId.index = i;
+//     }
+// }

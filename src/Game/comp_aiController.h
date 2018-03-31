@@ -39,12 +39,14 @@ void Ent_InitAIController(EC_AIController* controller, f32 dirX, f32 dirY, f32 d
 
 f32 moveDistance = 12;
 
-void Ent_UpdateAIControllers(EC_AIController* controllers, GameTime* time)
+void Ent_UpdateAIControllers(GameState* gs, GameTime* time)
 {
-    for (i32 i = 0; i < GAME_MAX_ENTITIES; ++i)
+    u32 max = gs->aiControllerList.max;
+    for (u32 i = 0; i < max; ++i)
     {
-        EC_AIController* controller = &controllers[i];
-        Ent* ent = Ent_GetEntityByIndex(controller->entId.index);
+        EC_AIController* controller = &gs->aiControllerList.items[i];
+        if (controller->inUse == 0) { continue; }
+        Ent* ent = Ent_GetEntityByIndex(&gs->entList, controller->entId.index);
         if (controller->dir.x < 0)
         {
             ent->transform.pos.x -= controller->speed * time->deltaTime;

@@ -45,6 +45,13 @@ struct Ent
     u32 componentFlags;
 };
 
+struct EntList
+{
+    Ent* items;
+    u32 count;
+    u32 max;
+};
+
 //////////////////////////////////////////////////
 // Define Components
 // All components required:
@@ -108,9 +115,8 @@ struct GameState
 {
     // Entities
     i32 nextEntityID;
-    Ent* entities;
-    i32 maxEntities;
-    i32 lastEntityIndex;
+    EntList entList;
+    //i32 lastEntityIndex;
 
     // Components
     EC_AIControllerList aiControllerList;
@@ -131,9 +137,9 @@ DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 
-void World_Init(GameState* gs, Ent* entityList, i32 maxEntities)
-{
-    *gs = {};
-    gs->entities = entityList;
-    gs->maxEntities = maxEntities;
-}
+// void World_Init(GameState* gs, i32 maxEntities)
+// {
+//     *gs = {};
+//     gs->entities = entityList;
+//     gs->maxEntities = maxEntities;
+// }
