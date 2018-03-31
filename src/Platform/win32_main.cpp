@@ -445,13 +445,12 @@ int CALLBACK WinMain(
 #endif
 
 #if 0
-    if (!Win32_LinkToAppStub())
-    {
-        MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
-        return 1;
-    }
+            if (!Win32_LinkToAppStub())
+            {
+                MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
+                return 1;
+            }
 #endif
-
             /****************************************************************
             Game loop
             ****************************************************************/
@@ -472,55 +471,34 @@ int CALLBACK WinMain(
                 time.deltaTime = newTime - previousTime;
                 previousTime = newTime;
 
-                //AssertAlways(time.deltaTime >= 0);
+                time.frameNumber++;
+
+                // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
                 if (time.deltaTime < 0)
                 {
                     MessageBox(0, "Error: Negative timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
                     return 1;
                 }
-
-                /*if (time.deltaTime > 1)
-                {
-                    MessageBox(0, "Error: Excessive timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
-                    return 1;
-                }*/
-
+                
                 // char buf[64];
                 // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
                 // OutputDebugString(buf);
 
-                // RECT selfRect;
-                // GetWindowRect(appWindow, &selfRect);
-                // SetCursorPos(selfRect.right - selfRect.left, selfRect.bottom - selfRect.top);
-
-                // ClipCursor(&selfRect);
-
                 Win32_TickInput(&inputTick);
-                //Win32_ProcessTestInput(inputTick, time, &g_scene);
                 app.AppUpdate(&time, &inputTick);
-                // R_Scene_Tick(time, &g_scene);
-                // Win32_RenderFrame(appWindow, &g_scene);
-
-                /* Stuff to add:
-                > PlatformReadNetworkPackets();
-                    > game->ReadNetworkPackets();
-
-                > game->Frame(time);
-                > game->FixedFrame(time);
-
-                Render();
-                */
             }
         }
         else
         {
             // Oh dear
+            MessageBox(0, "Failed to acquire app window", "Error", MB_OK | MB_ICONINFORMATION);
             return 1;
         }
     }
     else
     {
         // Oh dear
+        MessageBox(0, "Failed to register window class", "Error", MB_OK | MB_ICONINFORMATION);
         return 1;
     }
     return 0;

@@ -460,6 +460,7 @@ void CycleTestAsciChar()
 
 void App_Frame(GameTime* time, InputTick* input)
 {
+    #if 0
     // Trap to do single presses of this key
     if (input->debug_cycleTexture)
     {
@@ -475,7 +476,10 @@ void App_Frame(GameTime* time, InputTick* input)
     {
         cycleTexturePressed = 0;
     }
-
+    #endif
+    
+    // TODO: Move this to a better location
+    // ...requires better button handling though!
     if (input->escape)
     {
         if (g_input_escapePressed == 0)
@@ -485,7 +489,7 @@ void App_Frame(GameTime* time, InputTick* input)
         }
     }
     else if (g_input_escapePressed == 1) { g_input_escapePressed = 0; }
-
+    
     if (input->reset)
     {
         g_worldScene.cameraTransform.pos = { 0, 0, 2 };
@@ -508,7 +512,7 @@ void App_Frame(GameTime* time, InputTick* input)
     //R_Scene_Tick(time, &g_scene);
     g_worldScene.numObjects = 0;
     Game_BuildRenderList(&g_world, &g_worldScene);
-    Game_DrawColliderAABBs(&g_world, &g_worldScene);
+    Game_DrawColliderAABBs(&g_world, time, &g_worldScene);
     platform.Platform_RenderScene(&g_worldScene);
 }
 

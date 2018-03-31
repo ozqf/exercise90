@@ -73,6 +73,7 @@ struct EC_Collider
 {
     EntId entId;
     u8 inUse;
+    u32 lastFrameOverlapping;
     Vec3 size;
     Vec3 velocity;
     i32 isOverlapping;

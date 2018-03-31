@@ -49,6 +49,7 @@ void Game_UpdateActorMotors(World* world, GameTime* time, InputTick* input)
 
 void Game_UpdateColliders(World* world, GameTime* time)
 {
+    u32 currentFrame = time->frameNumber;
     for (u32 i = 0; i < world->colliderList.max; ++i)
     {
         EC_Collider* a = &world->colliderList.items[i];
@@ -79,19 +80,14 @@ void Game_UpdateColliders(World* world, GameTime* time)
 
             ))
             {
-                a->isOverlapping = 1;
-                b->isOverlapping = 1;
-            }
-            else
-            {
-                a->isOverlapping = 0;
-                b->isOverlapping = 0;
+                a->lastFrameOverlapping = currentFrame;
+                b->lastFrameOverlapping = currentFrame;
             }
         }
     }
 }
 
-void Game_DrawColliderAABBs(World* world, RenderScene* scene)
+void Game_DrawColliderAABBs(World* world, GameTime* time, RenderScene* scene)
 {
     for (u32 i = 0; i < world->colliderList.max; ++i)
     {
@@ -103,7 +99,7 @@ void Game_DrawColliderAABBs(World* world, RenderScene* scene)
             scene->numObjects++;
             item->transform = ent->transform;
             item->transform.scale = { 1, 1, 1 };
-            if (collider->isOverlapping)
+            if (collider->lastFrameOverlapping == time->frameNumber)
             {
                 RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 1, 0, 0);
             }

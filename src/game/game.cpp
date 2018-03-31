@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-void Game_Init()
+void Game_BuildTestScene(World* world)
 {
     g_num_entities = 0;
     //g_num_brains = 0;
@@ -17,22 +17,20 @@ void Game_Init()
     EC_ActorMotor* motor;
 
     // Init world and component lists
-    g_world = {};
-    g_world.aiControllerList.items = g_aiControllers;
-    g_world.aiControllerList.count = GAME_MAX_ENTITIES;
-    g_world.aiControllerList.max = GAME_MAX_ENTITIES;
+    *world = {};
+    world->aiControllerList.items = g_aiControllers;
+    world->aiControllerList.count = GAME_MAX_ENTITIES;
+    world->aiControllerList.max = GAME_MAX_ENTITIES;
 
-    g_world.rendererList.items = g_renderers;
-    g_world.rendererList.count = GAME_MAX_ENTITIES;
-    g_world.rendererList.max = GAME_MAX_ENTITIES;
-
-    g_world.colliderList.items = g_colliders;
-    g_world.colliderList.count = GAME_MAX_ENTITIES;
-    g_world.colliderList.max = GAME_MAX_ENTITIES;
-
-    g_world.actorMotorList.items = g_actorMotors;
-    g_world.actorMotorList.count = GAME_MAX_ENTITIES;
-    g_world.actorMotorList.max = GAME_MAX_ENTITIES;
+    world->rendererList.items = g_renderers;
+    world->rendererList.count = GAME_MAX_ENTITIES;
+    world->rendererList.max = GAME_MAX_ENTITIES;
+    world->colliderList.items = g_colliders;
+    world->colliderList.count = GAME_MAX_ENTITIES;
+    world->colliderList.max = GAME_MAX_ENTITIES;
+    world->actorMotorList.items = g_actorMotors;
+    world->actorMotorList.count = GAME_MAX_ENTITIES;
+    world->actorMotorList.max = GAME_MAX_ENTITIES;
 
     const f32 testArenaSize = 6;
 
@@ -46,7 +44,7 @@ void Game_Init()
     ent->transform.scale.y = 2;
     ent->transform.scale.z = testArenaSize;
 
-    renderer = EC_AddRenderer(ent, &g_world);
+    renderer = EC_AddRenderer(ent, world);
     
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
     
@@ -56,64 +54,59 @@ void Game_Init()
     // Floor
     ent = Ent_GetFreeEntity();
     ent->transform.pos.y = -1.5f;
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { testArenaSize, 1, testArenaSize };
 
     // walls
-    ent = Ent_GetFreeEntity();
-    ent->transform.pos.x = 3.5f;
-    collider = EC_AddCollider(ent, &g_world);
-    collider->size = { 1, 2, testArenaSize };
     
     ent = Ent_GetFreeEntity();
     ent->transform.pos.x = 3.5f;
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { 1, 2, testArenaSize };
     
     ent = Ent_GetFreeEntity();
     ent->transform.pos.x = -3.5f;
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { 1, 2, testArenaSize };
     
     ent = Ent_GetFreeEntity();
     ent->transform.pos.z = 3.5f;
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { testArenaSize, 2, 1 };
     
     ent = Ent_GetFreeEntity();
     ent->transform.pos.z = -3.5f;
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { testArenaSize, 2, 1 };
     
     // Player
     ent = Ent_GetFreeEntity();
-    ent->transform.scale.x = 1;
-    ent->transform.scale.y = 1;
-    ent->transform.scale.z = 1;
-
-    collider = EC_AddCollider(ent, &g_world);
+    
+    collider = EC_AddCollider(ent, world);
     collider->size = { 1, 2, 1 };
     
-    motor = EC_AddActorMotor(ent, &g_world);
+    motor = EC_AddActorMotor(ent, world);
     motor->speed = 5;
 
-    g_world.playerEntityIndex = ent->entId.index;
+    world->playerEntityIndex = ent->entId.index;
 
     // end room
 
     // Octahedron object
     ent = Ent_GetFreeEntity();
-    ent->transform.scale.x = 1;
-    ent->transform.scale.y = 1;
-    ent->transform.scale.z = 1;
-
-    controller = EC_AddAIController(ent, &g_world);
+    
+    controller = EC_AddAIController(ent, world);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
-    renderer = EC_AddRenderer(ent, &g_world);
+    renderer = EC_AddRenderer(ent, world);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
 
-    collider = EC_AddCollider(ent, &g_world);
+    collider = EC_AddCollider(ent, world);
     collider->size = { 1, 1, 1 };
+}
+
+void Game_Init()
+{
+    Game_BuildTestScene(&g_world);
 
 }
