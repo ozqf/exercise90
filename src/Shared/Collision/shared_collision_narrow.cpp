@@ -118,11 +118,12 @@ inline u8 LineSegmentVsAABB(
 {
     f32 vx = lineEndX - lineOriginX;
     f32 vy = lineEndY - lineOriginY;
-    //f32 vz = lineEndZ - lineOriginZ;
+    f32 vz = lineEndZ - lineOriginZ;
 
     // avoid divide by zero
     f32 dirFracX = (vx != 0) ? (1.0f / vx) : (ZINFINITY());
     f32 dirFracY = (vy != 0) ? (1.0f / vy) : (ZINFINITY());
+    f32 dirFracZ = (vz != 0) ? (1.0f / vz) : (ZINFINITY());
     //f32 dirFracZ = (vz != 0) ? (1.0f / vz) : (INFINITE);
     
     f32 t1 = (boxMinX - lineOriginX) * dirFracX;
@@ -130,8 +131,18 @@ inline u8 LineSegmentVsAABB(
     f32 t3 = (boxMinY - lineOriginY) * dirFracY;
     f32 t4 = (boxMaxY - lineOriginY) * dirFracY;
 
-    f32 tMin = ZMAX((ZMIN(t1, t2)), ZMIN(t3, t4));
-    f32 tMax = ZMIN((ZMAX(t1, t2)), ZMAX(t3, t4));
+    f32 t5 = (boxMinZ - lineOriginZ) * dirFracZ;
+    f32 t6 = (boxMaxZ - lineOriginZ) * dirFracZ;
+
+    // f32 tMin = ZMAX((ZMIN(t1, t2)), ZMIN(t3, t4));
+    // f32 tMax = ZMIN((ZMAX(t1, t2)), ZMAX(t3, t4));
+
+    // ZMAX3(ZMIN(t1, t2), ZMIN(t3, t4), ZMIN(t5, t6));
+    // ZMIN3(ZMAX(t1, t2), ZMAX(t3, t4), ZMAX(t5, t6));
+
+    f32 tMin = ZMAX(ZMAX(ZMIN(t1, t2), ZMIN(t3, t4)), ZMIN(t5, t6));
+    f32 tMax = ZMIN(ZMIN(ZMAX(t1, t2), ZMAX(t3, t4)), ZMAX(t5, t6));
+
 
     if (tMax < 0)
     {
@@ -149,11 +160,13 @@ inline u8 LineSegmentVsAABB(
     {
         f32 collisionFracX = vx * tMin;
         f32 collisionFracY = vy * tMin;
+        f32 collisionFracZ = vz * tMin;
         // hurray we do stuff now!
         if (point != 0)
         {
             point[0] = lineOriginX + collisionFracX;
             point[1] = lineOriginY + collisionFracY;
+            point[2] = lineOriginZ + collisionFracZ;
         }
         return 1;
     }

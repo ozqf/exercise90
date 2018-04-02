@@ -42,6 +42,22 @@ inline f32 ZNaN() { return *(float*)&g_z_nan; }
 #define ZMIN(x, y) ((x) < (y) ? (x) : (y))
 #define ZMAX(x, y) ((x) > (y) ? (x) : (y))
 
+inline f32 ZMAX3(f32 a, f32 b, f32 c)
+{
+    f32 result = a;
+    if (b > result) { result = b; }
+    if (c > result) { result = c;}
+    return result;
+}
+
+inline f32 ZMIN3(f32 a, f32 b, f32 c)
+{
+    f32 result = a;
+    if (b < result) { result = b; }
+    if (c < result) { result = c;}
+    return result;
+}
+
 inline void ZSWAPF(f32* x, f32* y)
 {
     f32 temp = *x;

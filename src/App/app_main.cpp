@@ -394,6 +394,25 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	Vec3 groundRot = t->rot;
 	groundRot.x = 0;
 	groundRot.z = 0;
+#if 0
+    AngleVectors* angleVectors = &g_worldScene.cameraAngleVectors;
+
+	AngleToAxes(&groundRot, &angleVectors->left, &angleVectors->up, &angleVectors->forward);
+
+	// Vec3 forward = t->forward;
+	// Vec3 left = t->left;
+	// Vec3 up = t->up;
+
+	// If input is blank mag will be speed * 0?
+	Vec3_SetMagnitude(&angleVectors->left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
+	Vec3_SetMagnitude(&angleVectors->up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
+	Vec3_SetMagnitude(&angleVectors->forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
+
+	frameMove.x = angleVectors->forward.x + angleVectors->up.x + angleVectors->left.x;
+	frameMove.y = angleVectors->forward.y + angleVectors->up.y + angleVectors->left.y;
+	frameMove.z = angleVectors->forward.z + angleVectors->up.z + angleVectors->left.z;
+#endif
+#if 1
 
     AngleVectors angleVectors = {};
 
@@ -411,6 +430,8 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	frameMove.x = angleVectors.forward.x + angleVectors.up.x + angleVectors.left.x;
 	frameMove.y = angleVectors.forward.y + angleVectors.up.y + angleVectors.left.y;
 	frameMove.z = angleVectors.forward.z + angleVectors.up.z + angleVectors.left.z;
+
+#endif
 
 	t->pos.x += frameMove.x;
 	t->pos.y += frameMove.y;
@@ -556,7 +577,6 @@ void App_Frame(GameTime* time, InputTick* input)
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
 
-    RendObj rendObj;
     #if 0
     // Vec3 lineOrigin = g_worldScene->cameraTransform.pos;
     // Vec3 lineDest = lineOrigin;
@@ -565,6 +585,8 @@ void App_Frame(GameTime* time, InputTick* input)
     Vec3 lineDest = { -1, -1, -1 };
     Transform t;
     Transform_SetToIdentity(&t);
+
+    RendObj rendObj;
     RendObj_SetAsLine(&rendObj,
         lineOrigin.x, lineOrigin.y, lineOrigin.z,
         lineDest.x, lineDest.y, lineDest.z,
@@ -589,7 +611,7 @@ void App_Frame(GameTime* time, InputTick* input)
     t.pos.x = -1;
     t.pos.y = 1;
     //Game_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
-    RScene_AddRenderItem(&g_worldScene, &t, &rendObj);
+    RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     platform.Platform_RenderScene(&g_uiScene);
     #endif
     

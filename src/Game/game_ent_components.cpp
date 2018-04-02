@@ -61,7 +61,7 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
         entA->transform.pos.x += a->velocity.x * time->deltaTime;
         entA->transform.pos.y += a->velocity.y * time->deltaTime;
         entA->transform.pos.z += a->velocity.z * time->deltaTime;
-
+        
         for (u32 j = 0; j < gs->colliderList.max; ++j)
         {
             if (i == j) { continue; }

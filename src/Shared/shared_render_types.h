@@ -133,6 +133,8 @@ struct RenderListItem
 struct RenderScene
 {    
     Transform cameraTransform;
+    AngleVectors cameraAngleVectors;
+
     i32 projectionMode;
     f32 orthographicHalfHeight;
     i32 fov;

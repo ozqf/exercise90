@@ -10,7 +10,7 @@ void Game_BuildTestScene(GameState* gs)
     EC_Renderer* renderer;
     EC_AIController* controller;
     EC_Collider* collider;
-    //EC_ActorMotor* motor;
+    EC_ActorMotor* motor;
 
     // Init gs and component lists
     *gs = {};
@@ -97,7 +97,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////
     // Player
     /////////////////////////////////////////////////////////////
-    #if 0
+    #if 1
     ent = Ent_GetFreeEntity(&gs->entList);
     
     collider = EC_AddCollider(ent, gs);
