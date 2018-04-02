@@ -245,9 +245,18 @@ void AngleToAxes(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
     up->z = cx*sy*sz + sx*cz;
 
     // determine forward axis
+    #if 1
+    // Original, seems to give a reversed forward vector...?
     forward->x = sy;
     forward->y = -sx*cy;
     forward->z = cx*cy;
+    #endif
+    #if 0
+    // fixed...?
+    forward->x = -(sy);
+    forward->y = -(-sx*cy);
+    forward->z = -(cx*cy);
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

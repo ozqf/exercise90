@@ -24,6 +24,16 @@ void DEBUG_DrawLineToScene(
     RScene_AddRenderItem(scene, &t, &obj);
 }
 
+void DEBUG_DrawWorldOriginWidget(RenderScene* scene, f32 originX, f32 originY, f32 originZ)
+{
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ, originX + 1, originY, originZ,
+        1, 0, 0, 1, 0, 0);
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ, originX, originY + 1, originZ,
+        0, 1, 0, 0, 1, 0);
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ, originX, originY, originZ + 1,
+        0, 0, 1, 0, 0, 1);
+}
+
 void Game_IntersectionTest_2D(RenderScene* scene)
 {
     Vec3 cPos = scene->cameraTransform.pos;
@@ -198,6 +208,8 @@ void Game_IntersectionTest_3D(RenderScene* scene)
         boxMax.x, boxMax.y, 0,
         0, 0, 1, 0, 0, 1
     );
+
+    DEBUG_DrawWorldOriginWidget(scene, 4, 0, 0);
 }
 
 void Game_IntersectionTest(RenderScene* scene)

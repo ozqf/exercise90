@@ -1,14 +1,39 @@
 # Exercise 90
 A simple fps as a learning exercise in C, opengl and games/engines generally.
 
+## Intended Features:
+
+### High Concept
+* Basic Doom/Quake level 3D engine capable of prototyping 3D games.
+* Written from scratch and avoiding the use of external libraries/plugins where possible for maximum education and fun...yay.
+
+### Basic Architecture
+* Platform/Engine layer is the exe that handles basic input, update loop, rendering, file/network IO etc.
+* Game is separated into a DLL which is sealed from the outside world. All platform specific functionality goes through the platform layer.
+* Renderer is simple (hey I'm learning) and uses opengl.
+
+### Future thoughts:
+* Rewrite platform/engine layer for linux once engine is developed enough.
+
+#### Engine
+* Split the renderer off from the platform layer as another DLL, and use the platform layer simply as a kernal which intermediates between the game and specific services such as rendering or networking?
+* Upgrade to later version of opengl.
+* Proper tree based scene graph with parent/child object transforms.
+
+#### Game
+
 ## Random todo list
+
+### Bugs or fundamental issues
+* **Calculation of Foward/Up Vectors is wrong (added 2018/4/2)** - This was hacked in someway to make movement work. Now needs to be unhacked, as it is preventing the casting of rays out of the camera.
+* **Game requires asset files to launch (added 2018/4/2)** - Some very basic assets should be baked into the code for such early development work. Only thing that cannot be procedurally generated is the console char sheet. So that first.
 
 ### Game
 * Done 2018/3/16 **Player movement** - Current player movement is messed up - rebuild.
 * **Basic Arena Level** - Something to stand on and contain the player!
 * **Collision Detection**
     * **Ray vs plane** - For hitscan vs world.
-    * **Ray vs AABB** - For hitscan vs actor.
+    * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.
     * **Actor vs World** - AABB vs plane or perhaps ray vs expanded plane
     * **Actor vs Actor** - For now just AABB vs AABB?
     * Done 2018/3/30 *Binary AABB vs AABB collision detection*

@@ -492,11 +492,25 @@ void CycleTestAsciChar()
 
 void App_WriteCameraDebug()
 {
-    Transform t = g_worldScene.cameraTransform;
+    Vec3 pos = g_worldScene.cameraTransform.pos;
+    Vec3 rot = g_worldScene.cameraTransform.rot;
+
+    AngleVectors vectors = {};
+    // rot.x = 0;
+    // rot.z = 0;
+    AngleToAxes(&rot, &vectors.left, &vectors.up, &vectors.forward);
+    vectors.forward.x = -vectors.forward.x;
+    vectors.forward.y = vectors.forward.y;
+    vectors.forward.z = -vectors.forward.z;
+
     char buf[512];
-    i32 numWritten = sprintf_s(buf, 512, "Camera:\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f",
-        t.pos.x, t.pos.y, t.pos.z,
-        t.rot.x, t.rot.y, t.rot.z
+    i32 numWritten = sprintf_s(buf, 512,
+    "Camera:\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\nForward: %3.3f, %3.3f, %3.3f\nUp: %3.3f, %3.3f, %3.3f\nLeft: %3.3f, %3.3f, %3.3f\n",
+        pos.x, pos.y, pos.z,
+        rot.x, rot.y, rot.z,
+        vectors.forward.x, vectors.forward.y, vectors.forward.z,
+        vectors.up.x, vectors.up.y, vectors.up.z,
+        vectors.left.x, vectors.left.y, vectors.left.z
     );
     //OutputDebugString(buf);
     ZSTR_WriteChars(&g_debugStr, buf, numWritten);
