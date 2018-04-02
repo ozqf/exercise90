@@ -2,13 +2,15 @@
 
 #include "game.h"
 
+#include "game_intersection_test.cpp"
+
 void Game_BuildTestScene(GameState* gs)
 {
     Ent* ent;
     EC_Renderer* renderer;
     EC_AIController* controller;
     EC_Collider* collider;
-    EC_ActorMotor* motor;
+    //EC_ActorMotor* motor;
 
     // Init gs and component lists
     *gs = {};
@@ -95,6 +97,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////
     // Player
     /////////////////////////////////////////////////////////////
+    #if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     
     collider = EC_AddCollider(ent, gs);
@@ -104,7 +107,7 @@ void Game_BuildTestScene(GameState* gs)
     motor->speed = 5;
 
     gs->playerEntityIndex = ent->entId.index;
-
+    #endif
     /////////////////////////////////////////////////////////////
     // Octahedron object
     /////////////////////////////////////////////////////////////

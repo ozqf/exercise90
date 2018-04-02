@@ -2,6 +2,24 @@
 
 #include "shared.h"
 
+///////////////////////////////////////////////////////////////////
+// Build a render scene
+///////////////////////////////////////////////////////////////////
+
+inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
+{
+    Assert(scene->numObjects < scene->maxObjects);
+    RenderListItem* item = &scene->sceneItems[scene->numObjects];
+    scene->numObjects++;
+    item->transform = *t;
+    item->obj = *rendObj;
+}
+
+
+///////////////////////////////////////////////////////////////////
+// Init Render Objects
+///////////////////////////////////////////////////////////////////
+
 void RendObj_SetAsMesh(RendObj* obj, Mesh* mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_MESH;

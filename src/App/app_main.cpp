@@ -555,6 +555,26 @@ void App_Frame(GameTime* time, InputTick* input)
     #if 1
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
+
+    RendObj rendObj;
+    #if 0
+    // Vec3 lineOrigin = g_worldScene->cameraTransform.pos;
+    // Vec3 lineDest = lineOrigin;
+    // lineDest.z -= 10;
+    Vec3 lineOrigin = { 1, 1, 1 };
+    Vec3 lineDest = { -1, -1, -1 };
+    Transform t;
+    Transform_SetToIdentity(&t);
+    RendObj_SetAsLine(&rendObj,
+        lineOrigin.x, lineOrigin.y, lineOrigin.z,
+        lineDest.x, lineDest.y, lineDest.z,
+        0, 1, 0, 1, 0, 0);
+    Game_AddRenderItem(&g_worldScene, &t, &rendObj);
+    #endif
+    //RScene_AddRenderItem(&g_worldScene, &t, &rendObj);
+
+    Game_IntersectionTest(&g_worldScene);
+
     platform.Platform_RenderScene(&g_worldScene);
     #endif
 
@@ -568,7 +588,8 @@ void App_Frame(GameTime* time, InputTick* input)
     Transform t = {};
     t.pos.x = -1;
     t.pos.y = 1;
-    Game_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
+    //Game_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
+    RScene_AddRenderItem(&g_worldScene, &t, &rendObj);
     platform.Platform_RenderScene(&g_uiScene);
     #endif
     

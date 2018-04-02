@@ -32,6 +32,23 @@ MACROS
 #define pi32 3.14159265359f
 #define DEG2RAD 3.141593f / 180.0f
 
+i32 g_z_inf = 0x7F800000;
+inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
+
+i32 g_z_nan = 0x7F800001;
+inline f32 ZNaN() { return *(float*)&g_z_nan; }
+
+#define ZABS(value) { if (value < ) return -value; }
+#define ZMIN(x, y) ((x) < (y) ? (x) : (y))
+#define ZMAX(x, y) ((x) > (y) ? (x) : (y))
+
+inline void ZSWAPF(f32* x, f32* y)
+{
+    f32 temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
 #define ArrayCount(array) (sizeof(array) / sizeof(array)[0]))
 
 // Quick cross platform assert. Read from address zero if expression is false
@@ -84,8 +101,6 @@ OpenGL uses column major, y/x matrices
 #define Y3 13
 #define Z3 14
 #define W3 15
-
-#define Zabs(value) { if (value < ) return -value; }
 
 /*****************************************************
 MATHS TYPES
