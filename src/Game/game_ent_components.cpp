@@ -115,6 +115,7 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
 
 void Game_UpdateUI(GameState* gs, GameTime* time, InputTick* input)
 {
+    #if 0
     f32 speed = 8.0f;
     Ent* ent = &gs->entList.items[0];
     if (input->yawLeft)
@@ -143,4 +144,5 @@ void Game_UpdateUI(GameState* gs, GameTime* time, InputTick* input)
     {
         ent->transform.pos.z += speed * time->deltaTime;
     }
+    #endif
 }

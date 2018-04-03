@@ -259,6 +259,36 @@ void AngleToAxes(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
     #endif
 }
 
+void AngleToAxes2(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
+{
+    ///////////////////////////////////
+    //z-y-x
+    //////////////////////////////////
+    f32 a = angles->x * DEG2RAD;
+    f32 b = angles->y * DEG2RAD;
+    f32 c = angles->z * DEG2RAD;
+
+    f32 sa, sb, sc, ca, cb, cc;
+    sa = (f32)sin(a);
+    sb = (f32)sin(b);
+    sc = (f32)sin(c);
+    ca = (f32)cos(a);
+    cb = (f32)cos(b);
+    cc = (f32)cos(c);
+
+    left->x = cc * cb;
+    left->y = sc * cb;
+    left->z = -sb;
+
+    up->x = (-sc * ca) + (cc * sb * sa);
+    up->y = (cc * ca) + (sc * sb * sa);
+    up->z = cb * sa;
+
+    forward->x = (sc * sa) + (cc * sb * ca);
+    forward->y = (-cc * sa) + (sc * sb * ca);
+    forward->z = cb * ca;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // compute transform axis from object position, target and up direction
 ///////////////////////////////////////////////////////////////////////////////

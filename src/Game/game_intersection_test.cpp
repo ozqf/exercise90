@@ -34,6 +34,22 @@ void DEBUG_DrawWorldOriginWidget(RenderScene* scene, f32 originX, f32 originY, f
         0, 0, 1, 0, 0, 1);
 }
 
+void DEBUG_DrawAngleVectorsWidget(RenderScene* scene, AngleVectors* vectors, f32 originX, f32 originY, f32 originZ)
+{
+    Vec3* f = &vectors->forward;
+    Vec3* l = &vectors->left;
+    Vec3* u = &vectors->up;
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ,
+        originX + f->x, originY + f->y, originZ + f->z, 
+        1, 0, 0, 1, 0, 0);
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ,
+        originX + l->x, originY + l->y, originZ + l->z, 
+        0, 1, 0, 0, 1, 0);
+    DEBUG_DrawLineToScene(scene, originX, originY, originZ,
+        originX + u->x, originY + u->y, originZ + u->z, 
+        0, 0, 1, 0, 0, 1);
+}
+
 void Game_IntersectionTest_2D(RenderScene* scene)
 {
     Vec3 cPos = scene->cameraTransform.pos;
@@ -208,12 +224,22 @@ void Game_IntersectionTest_3D(RenderScene* scene)
         boxMax.x, boxMax.y, 0,
         0, 0, 1, 0, 0, 1
     );
-
-    DEBUG_DrawWorldOriginWidget(scene, 4, 0, 0);
 }
 
 void Game_IntersectionTest(RenderScene* scene)
 {
     //Game_IntersectionTest_2D(scene);
     Game_IntersectionTest_3D(scene);
+
+    DEBUG_DrawWorldOriginWidget(scene, 4, 0, 0);
+
+    Vec3 rot = scene->cameraTransform.rot;
+    //ZSWAPF(&rot.x, &rot.y);
+    //rot.x = 0;
+    //rot.z = 0;
+
+    AngleVectors vecs;
+    AngleToAxes2(&rot, &vecs.left, &vecs.up, &vecs.forward);
+
+    DEBUG_DrawAngleVectorsWidget(scene, &vecs, -4, 0, 0);
 }

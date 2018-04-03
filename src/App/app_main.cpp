@@ -314,8 +314,8 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->pitchUp) { testInput.rotation.x += -1; }
 	if (input->pitchDown) { testInput.rotation.x += 1; }
 
-	//if (input->rollLeft) { testInput.rotation.z += 1; }
-	//if (input->rollRight) { testInput.rotation.z += -1; }
+	if (input->rollLeft) { testInput.rotation.z += 1; }
+	if (input->rollRight) { testInput.rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
 	f32 sensitivity = 0.1f;
@@ -499,9 +499,9 @@ void App_WriteCameraDebug()
     // rot.x = 0;
     // rot.z = 0;
     AngleToAxes(&rot, &vectors.left, &vectors.up, &vectors.forward);
-    vectors.forward.x = -vectors.forward.x;
-    vectors.forward.y = vectors.forward.y;
-    vectors.forward.z = -vectors.forward.z;
+    // vectors.forward.x = vectors.forward.x;
+    // vectors.forward.y = vectors.forward.y;
+    // vectors.forward.z = vectors.forward.z;
 
     char buf[512];
     i32 numWritten = sprintf_s(buf, 512,
