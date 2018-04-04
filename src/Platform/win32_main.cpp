@@ -143,6 +143,26 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     break;
 #endif
 
+    case WM_LBUTTONDOWN:
+    {
+        inputTick.attack1 = 1;
+    } break;
+
+    case WM_LBUTTONUP:
+    {
+        inputTick.attack1 = 0;
+    } break;
+
+    case WM_RBUTTONDOWN:
+    {
+        inputTick.attack2 = 1;
+    } break;
+
+    case WM_RBUTTONUP:
+    {
+        inputTick.attack2 = 0;
+    } break;
+
     case WM_CLOSE:
     {
         //PostQuitMessage(0);

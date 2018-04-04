@@ -50,11 +50,21 @@ void DEBUG_DrawAngleVectorsWidget(RenderScene* scene, AngleVectors* vectors, f32
         0, 0, 1, 0, 0, 1);
 }
 
-void Game_IntersectionTest_2D(RenderScene* scene)
+void Game_IntersectionTest_2D(RenderScene* scene, Vec3* origin, Vec3* dest)
 {
-    Vec3 cPos = scene->cameraTransform.pos;
-    Vec3 lineOrigin = { cPos.x - 1, cPos.y + 0.5f, 0 };
-    Vec3 lineDest = { cPos.x + 1, cPos.y + -0.5f, 0 };
+    Vec3 lineOrigin;
+    Vec3 lineDest;
+    if (origin == 0 || dest == 0)
+    {
+        Vec3 cPos = scene->cameraTransform.pos;
+        lineOrigin = { cPos.x - 1, cPos.y + 0.5f, 0 };
+        lineDest = { cPos.x + 1, cPos.y + -0.5f, 0 };
+    }
+    else
+    {
+        lineOrigin = *origin;
+        lineDest = *dest;
+    }
 
     Vec3 boxMin = { -0.5f, -1, -0.5f };
     Vec3 boxMax = { 0.5f, 1, 0.5f };
@@ -125,36 +135,15 @@ void Game_IntersectionTest_2D(RenderScene* scene)
     );
 }
 
-void Game_IntersectionTest_3D(RenderScene* scene)
+void Game_IntersectionTest_3D(RenderScene* scene, Vec3* origin, Vec3* dest)
 {
-    #if 0
-    f32 distance = 10.0f;
-
-    AngleVectors angleVectors = {};
-
-	AngleToAxes(&scene->cameraTransform.rot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
-
-    Vec3 lineOrigin = scene->cameraTransform.pos;
-    lineOrigin.x -= 4.0f;
-    lineOrigin.y -= 4.0f;
-    lineOrigin.z -= 4.0f;
-
-    Vec3 lineDest;
-    lineDest.x = lineOrigin.x + 4.0f;
-    lineDest.y = lineOrigin.y;
-    lineDest.z = lineOrigin.z + 4.0f;
-    // lineDest.x = lineOrigin.x - (angleVectors.forward.x * distance);
-    // lineDest.y = lineOrigin.y - (angleVectors.forward.y * distance);
-    // lineDest.z = lineOrigin.z - (angleVectors.forward.z * distance);
-    #endif
-    //Vec3 cPos;
-    //Vec3 lineOrigin = { cPos.x - 1, cPos.y + 0.5f, -1 };
-    //Vec3 lineDest = { cPos.x + 1, cPos.y + -0.5f, 1 };
-
-    #if 1    
     Vec3 lineOrigin = { -0.25f, 0.5f, -1 };
     Vec3 lineDest = { 0.25f, -0.5f, 1 };
-    #endif
+    if (origin != 0 && dest != 0)
+    {
+        lineOrigin = *origin;
+        lineDest = *dest;
+    }
     
     Vec3 boxMin = { -0.5f, -1, -0.5f };
     Vec3 boxMax = { 0.5f, 1, 0.5f };
@@ -229,7 +218,7 @@ void Game_IntersectionTest_3D(RenderScene* scene)
 void Game_IntersectionTest(RenderScene* scene)
 {
     //Game_IntersectionTest_2D(scene);
-    Game_IntersectionTest_3D(scene);
+    Game_IntersectionTest_3D(scene, NULL, NULL);
 
     DEBUG_DrawWorldOriginWidget(scene, 4, 0, 0);
 
@@ -239,7 +228,27 @@ void Game_IntersectionTest(RenderScene* scene)
     //rot.z = 0;
 
     AngleVectors vecs;
-    AngleToAxes2(&rot, &vecs.left, &vecs.up, &vecs.forward);
+    Calc_AnglesToAxesZYX(&rot, &vecs.left, &vecs.up, &vecs.forward);
 
     DEBUG_DrawAngleVectorsWidget(scene, &vecs, -4, 0, 0);
+
+    Vec3 origin = scene->cameraTransform.pos;
+    origin.x = origin.x - (vecs.up.x * 0.2f);
+    origin.y = origin.y - (vecs.up.y * 0.2f);
+    origin.z = origin.z - (vecs.up.z * 0.2f);
+
+    origin.x = origin.x - (vecs.left.x * 0.2f);
+    origin.y = origin.y - (vecs.left.y * 0.2f);
+    origin.z = origin.z - (vecs.left.z * 0.2f);
+
+    Vec3 dest = {};
+    dest.x = origin.x + -(vecs.forward.x * 1);
+    dest.y = origin.y + -(vecs.forward.y * 1);
+    dest.z = origin.z + -(vecs.forward.z * 1);
+    // DEBUG_DrawLineToScene(scene,
+    //     origin.x, origin.y, origin.z,
+    //     dest.x, dest.y, dest.z,
+    //     0, 1, 0, 1, 0, 0);
+    
+    Game_IntersectionTest_3D(scene, &origin, &dest);
 }

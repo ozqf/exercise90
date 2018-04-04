@@ -66,6 +66,7 @@ struct EntList
 #define COMP_FLAG_COLLIDER (1 << 1)
 #define COMP_FLAG_RENDERER (1 << 2)
 #define COMP_FLAG_ACTORMOTOR (1 << 3)
+#define COMP_FLAG_PROJECTILE (1 << 4)
 
 // A quick test component
 struct EC_AIController
@@ -101,6 +102,16 @@ struct EC_ActorMotor
     f32 speed;
 };
 
+struct EC_Projectile
+{
+    EntId entId;
+    u8 inUse;
+    Vec3 move;
+    f32 speed;
+    f32 tick;
+    f32 tock;
+};
+
 //////////////////////////////////////////////////
 // Define component list structs and GameState objects...
 //////////////////////////////////////////////////
@@ -110,6 +121,7 @@ DEFINE_ENT_COMPONENT_LIST(AIController)
 DEFINE_ENT_COMPONENT_LIST(Renderer)
 DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
+DEFINE_ENT_COMPONENT_LIST(Projectile)
 
 struct GameState
 {
@@ -123,6 +135,7 @@ struct GameState
     EC_RendererList rendererList;
     EC_ColliderList colliderList;
     EC_ActorMotorList actorMotorList;
+    EC_ProjectileList projectileList;
 
     // specifics
     u16 playerEntityIndex;
@@ -136,6 +149,7 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
 DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
+DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
 
 // void World_Init(GameState* gs, i32 maxEntities)
 // {

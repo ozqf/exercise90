@@ -92,6 +92,9 @@ struct RendObj_AsciCharArray
     char* chars;
     i32 numChars;
     f32 size;
+    f32 r;
+    f32 g;
+    f32 b;
 };
 
 struct RendObj_ColouredMesh

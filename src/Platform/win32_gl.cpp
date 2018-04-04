@@ -520,7 +520,10 @@ void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	
+
 	RendObj_AsciCharArray* c = &obj->data.charArray;
+	glColor3f(c->r, c->g, c->b);
 	R_SetupTestTexture(4);
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,

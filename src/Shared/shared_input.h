@@ -9,6 +9,7 @@ struct InputTick
 {
     i32 mouse[2];
     i32 mouseMovement[2];
+    char attack1, attack2;
     char moveLeft, moveRight, moveUp, moveDown, moveForward, moveBackward;
     char yawLeft, yawRight, pitchUp, pitchDown;
     char rollLeft, rollRight;

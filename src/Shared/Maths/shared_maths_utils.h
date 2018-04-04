@@ -259,7 +259,26 @@ void AngleToAxes(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
     #endif
 }
 
-void AngleToAxes2(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
+inline void Calc_CameraForward(Vec3* angles, Vec3* result)
+{
+    f32 a = angles->x * DEG2RAD;
+    f32 b = angles->y * DEG2RAD;
+    f32 c = angles->z * DEG2RAD;
+
+    f32 sa, sb, sc, ca, cb, cc;
+    sa = (f32)sin(a);
+    sb = (f32)sin(b);
+    sc = (f32)sin(c);
+    ca = (f32)cos(a);
+    cb = (f32)cos(b);
+    cc = (f32)cos(c);
+
+    result->x = (sc * sa) + (cc * sb * ca);
+    result->y = (-cc * sa) + (sc * sb * ca);
+    result->z = cb * ca;
+}
+
+void Calc_AnglesToAxesZYX(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
 {
     ///////////////////////////////////
     //z-y-x

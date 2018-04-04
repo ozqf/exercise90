@@ -317,6 +317,10 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->rollLeft) { testInput.rotation.z += 1; }
 	if (input->rollRight) { testInput.rotation.z += -1; }
 
+    // test mouse input
+    // if (input->attack1) { testInput.rotation.z += 1; }
+	// if (input->attack2) { testInput.rotation.z += -1; }
+
 	// x = pitch, y = yaw, z = roll
 	f32 sensitivity = 0.1f;
 	i8 inverted = -1;
@@ -416,7 +420,13 @@ void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 
     AngleVectors angleVectors = {};
 
-	AngleToAxes(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
+	Calc_AnglesToAxesZYX(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
+
+
+    // Set the cameras own
+    // TODO: Clean this whole messy function up!
+    AngleVectors* camVecs = &g_worldScene.cameraAngleVectors;
+    Calc_AnglesToAxesZYX(&t->rot, &camVecs->left, &camVecs->up, &camVecs->forward);
 
 	// Vec3 forward = t->forward;
 	// Vec3 left = t->left;
@@ -490,29 +500,26 @@ void CycleTestAsciChar()
     #endif
 }
 
-void App_WriteCameraDebug()
+void App_WriteCameraDebug(GameTime* time)
 {
     Vec3 pos = g_worldScene.cameraTransform.pos;
     Vec3 rot = g_worldScene.cameraTransform.rot;
 
     AngleVectors vectors = {};
-    // rot.x = 0;
-    // rot.z = 0;
-    AngleToAxes(&rot, &vectors.left, &vectors.up, &vectors.forward);
-    // vectors.forward.x = vectors.forward.x;
-    // vectors.forward.y = vectors.forward.y;
-    // vectors.forward.z = vectors.forward.z;
-
+    
+    Calc_AnglesToAxesZYX(&rot, &vectors.left, &vectors.up, &vectors.forward);
+    
     char buf[512];
     i32 numWritten = sprintf_s(buf, 512,
-    "Camera:\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\nForward: %3.3f, %3.3f, %3.3f\nUp: %3.3f, %3.3f, %3.3f\nLeft: %3.3f, %3.3f, %3.3f\n",
+    "TimeDelta: %3.7f\n-- Camera --\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\nForward: %3.3f, %3.3f, %3.3f\nUp: %3.3f, %3.3f, %3.3f\nLeft: %3.3f, %3.3f, %3.3f\n",
+        time->deltaTime,
         pos.x, pos.y, pos.z,
         rot.x, rot.y, rot.z,
         vectors.forward.x, vectors.forward.y, vectors.forward.z,
         vectors.up.x, vectors.up.y, vectors.up.z,
         vectors.left.x, vectors.left.y, vectors.left.z
     );
-    //OutputDebugString(buf);
+    
     ZSTR_WriteChars(&g_debugStr, buf, numWritten);
 }
 
@@ -580,6 +587,7 @@ void App_Frame(GameTime* time, InputTick* input)
     Game_UpdateActorMotors(gs, time, input);
     Ent_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
+    Game_UpdateProjectiles(gs, time);
     //Game_UpdateAI(time);
 
     // Render
@@ -619,7 +627,7 @@ void App_Frame(GameTime* time, InputTick* input)
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
-    App_WriteCameraDebug();
+    App_WriteCameraDebug(time);
     Game_SetDebugStringRender();
     Transform t = {};
     t.pos.x = -1;

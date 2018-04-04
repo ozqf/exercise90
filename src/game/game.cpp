@@ -35,6 +35,10 @@ void Game_BuildTestScene(GameState* gs)
     gs->actorMotorList.count = GAME_MAX_ENTITIES;
     gs->actorMotorList.max = GAME_MAX_ENTITIES;
 
+    gs->projectileList.items = g_prjControllers;
+    gs->projectileList.count = GAME_MAX_ENTITIES;
+    gs->projectileList.max = GAME_MAX_ENTITIES;
+
     const f32 testArenaWidth = 12;
     const f32 testArenaHeight = 4;
     const f32 wallHalfWidth = 0.5f;
@@ -112,12 +116,17 @@ void Game_BuildTestScene(GameState* gs)
     // Octahedron object
     /////////////////////////////////////////////////////////////
     ent = Ent_GetFreeEntity(&gs->entList);
+    ent->transform.pos.z += 1;
+    ent->transform.scale.x = 0.1f;
+    ent->transform.scale.y = 0.1f;
+    ent->transform.scale.z = 0.5f;
     
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
     renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
 
     collider = EC_AddCollider(ent, gs);
     collider->size = { 1, 1, 1 };
@@ -125,6 +134,7 @@ void Game_BuildTestScene(GameState* gs)
 
 void Game_BuildTestHud(GameState* state)
 {
+    #if 0
     Ent* ent;
     EC_Renderer* renderer;
     
@@ -138,12 +148,12 @@ void Game_BuildTestHud(GameState* state)
     state->rendererList.items = g_ui_renderers;
     state->rendererList.count = UI_MAX_ENTITIES;
     state->rendererList.max = UI_MAX_ENTITIES;
-
+    #endif
 
     /////////////////////////////////////////////////////////////
     // A test HUD
     /////////////////////////////////////////////////////////////
-    
+    #if 0
     // UI
     ent = Ent_GetFreeEntity(&state->entList);
     ent->transform.pos.z = 0;
@@ -157,6 +167,7 @@ void Game_BuildTestHud(GameState* state)
     RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, 4, 1, 1);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
     RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '.');
+    #endif
 
     #if 0
     // Sentence

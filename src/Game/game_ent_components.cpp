@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "../Shared/Collision/shared_collision.h"
+#include "../Shared/shared_assets.h"
 
 // void Game_UpdateAI(GameTime* time)
 // {
@@ -14,13 +15,48 @@
 //     }
 // }
 
+void Game_SpawnTestBullet(GameState* gs, Transform* originT)
+{
+    Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    ent->transform = *originT;
+    ent->transform.scale = { 0.1f, 0.1f, 0.5f };
+
+    EC_Renderer* rend = EC_AddRenderer(ent, gs);
+    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 2);
+
+    EC_Projectile* prj = EC_AddProjectile(ent, gs);
+    Calc_CameraForward(&originT->rot, &prj->move);
+    prj->move.x = -prj->move.x * 20.0f;
+    prj->move.y = -prj->move.y * 20.0f;
+    prj->move.z = -prj->move.z * 20.0f;
+    prj->tick = 1.0f;
+    prj->tock = 1.0f;
+}
+
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
 void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
 {
-    #if 0
+    static float fireTick = 0;
     Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
+
+    if (fireTick <= 0)
+    {
+        if (input->attack1)
+        {
+            fireTick = 0.2f;
+            Transform* t = &g_worldScene.cameraTransform;
+            
+            Game_SpawnTestBullet(gs, t);
+        }
+    }
+    else
+    {
+        fireTick -= time->deltaTime;
+    }
+
+    #if 0
     EC_ActorMotor* aMotor = EC_FindActorMotor(ent, gs);
     EC_Collider* collider = EC_FindCollider(ent, gs);
     if (aMotor == 0) { return; }
@@ -42,6 +78,27 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
         //ent->transform.pos.x += 1 * time->deltaTime;
     }
     #endif
+}
+
+///////////////////////////////////////////////////////////////////
+// Projectiles
+///////////////////////////////////////////////////////////////////
+void Game_UpdateProjectiles(GameState* gs, GameTime* time)
+{
+    for (u32 i = 0; i < gs->projectileList.max; ++i)
+    {
+        EC_Projectile* prj = &gs->projectileList.items[i];
+        if (prj->inUse == 0) { continue; }
+
+        Ent* e = Ent_GetEntityByIndex(&gs->entList, prj->entId.index);
+
+
+
+        Transform* t = &e->transform;
+        t->pos.x += prj->move.x * time->deltaTime;
+        t->pos.y += prj->move.y * time->deltaTime;
+        t->pos.z += prj->move.z * time->deltaTime;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -31,7 +31,7 @@ void Game_InitDebugStr()
 
 void Game_SetDebugStringRender()
 {
-    RendObj_SetAsAsciCharArray(&g_debugStrRenderer, g_debugStr.chars, g_debugStr.length, 0.05f);
+    RendObj_SetAsAsciCharArray(&g_debugStrRenderer, g_debugStr.chars, g_debugStr.length, 0.05f, 0, 1, 1);
 }
 
 /////////////////////////////////////////////////////////////
@@ -64,6 +64,7 @@ global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
+global_variable EC_Projectile        g_prjControllers[GAME_MAX_ENTITIES];
 
 // UI
 global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
