@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32_system_include.h"
+#include "win32_main.h"
 #include "win32_asset_types.h"
 #include "win32_gl.h"
 
@@ -100,6 +100,11 @@ BlockRef Platform_LoadFileIntoHeap(Heap* heap, char* fileName)
     
     FILE* f;
     fopen_s(&f, fileName, "rb");
+
+    if (f == NULL)
+    {
+        Win32_Error(fileName, "Cannot open to read");
+    }
 
     i32 end;
 
@@ -282,3 +287,32 @@ u8 Win32_IO_ReadBMPTest(BlockRef ref)
 	return 1;
 }
 #endif
+
+void Win32_CopyFile(char* sourcePath, char* targetPath)
+{
+    FILE *source, *target;
+
+    fopen_s(&source, sourcePath, "rb");
+
+    if (source == NULL) { Win32_Error(sourcePath, "Failed to open for reading"); }
+
+    i32 end;
+    
+    fseek(source, 0, SEEK_END);
+    end = ftell(source);
+    fseek(source, 0, SEEK_SET);
+
+    fopen_s(&target, targetPath, "wb");
+
+    if (target == NULL) { Win32_Error(targetPath, "Failed to open for writing"); }
+
+    while (ftell(source) < end)
+    {
+        u8 data; // TODO: OMG this is awful rewrite it!
+        fread_s(&data, 1, 1, 1, source);
+        fwrite(&data, 1, 1, target);
+    }
+    
+    fclose(source);
+    fclose(target);
+}

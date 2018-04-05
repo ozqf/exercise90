@@ -9,6 +9,15 @@
 #include "../interface/app_stub.h"
 
 /****************************************************************
+When something goes wrong
+****************************************************************/
+void Win32_Error(char *msg, char *title)
+{
+    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
+    AssertAlways(false);
+}
+
+/****************************************************************
 STRUCTS
 ****************************************************************/
 
@@ -39,6 +48,12 @@ struct win32_window_dimension
 global_variable PlatformInterface platInterface;
 global_variable AppInterface app;
 global_variable char *appModulePath = "base/gamex86.dll";
+global_variable char *appModulePathCopy = "base/gamex86copy.dll";
+
+global_variable u8 appModuleState = 0;
+global_variable ULARGE_INTEGER g_appModuleTimestamp = {};
+global_variable FILETIME* appModuleTime;
+global_variable f32 g_checkAppReloadTick = 1;
 
 // system handles etc
 global_variable HWND appWindow;

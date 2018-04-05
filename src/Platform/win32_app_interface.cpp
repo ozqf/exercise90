@@ -77,15 +77,32 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_RenderScene = Platform_R_DrawScene;
 }
 
+void Win32_CloseAppLink()
+{
+    app.AppShutdown();
+    FreeLibrary(gameModule);
+    app.isvalid = false;
+}
+
 u8 Win32_LinkToApplication()
 {
-    gameModule = LoadLibraryA(appModulePath);
+    if (app.isvalid == 1)
+    {
+        Win32_CloseAppLink();
+    }
+    Win32_CopyFile(appModulePath, appModulePathCopy);
+    gameModule = LoadLibraryA(appModulePathCopy);
     if (gameModule != NULL)
     {
         Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(gameModule, "LinkToApp");
         if (linkToApp != NULL)
         {
             app = linkToApp(platInterface);
+            if (!app.AppInit())
+            {
+                Win32_Error("Init App failed", "Error");
+                return 1;
+            }
             return 1;
             // if (app != NULL)
             // {
@@ -99,16 +116,37 @@ u8 Win32_LinkToApplication()
         }
         else
         {
-            MessageBox(0, "Failed to find dll link function", "Error", MB_OK | MB_ICONINFORMATION);
+            Win32_Error("Failed to find dll link function", "Error");
             return 0;
         }
     }
     else
     {
-        MessageBox(0, "Failed to find game dll", "Error", MB_OK | MB_ICONINFORMATION);
+        Win32_Error("Failed to find game dll", "Error");
         return 0;
     }
     //app = GetAppInterfaceStub(platInterface);
+}
+
+void Win32_CheckApplicationLink()
+{
+    //DebugBreak();
+    FILETIME time;// = NULL;
+    HANDLE fileHandle = CreateFileA(appModulePath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    BOOL gotTime = GetFileTime(fileHandle, NULL, NULL, &time);
+    CloseHandle(fileHandle);
+    if(gotTime)
+    {
+        ULARGE_INTEGER large;
+        large.LowPart = time.dwLowDateTime;
+        large.HighPart = time.dwHighDateTime;
+        
+        if (large.QuadPart != g_appModuleTimestamp.QuadPart)
+        {
+			g_appModuleTimestamp.QuadPart = large.QuadPart;
+            Win32_LinkToApplication();
+        }
+    }
 }
 
 u8 Win32_LinkToAppStub()

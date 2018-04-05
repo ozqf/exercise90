@@ -363,11 +363,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     return result;
 }
 
-void Win32_ErrorBox(char *msg, char *title)
-{
-    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
-}
-
 /**********************************************************************
  * WIN32 ENTRY POINT
  *********************************************************************/
@@ -452,16 +447,13 @@ int CALLBACK WinMain(
             // Init interfaces and attach external stuff
             Win32_InitPlatformInterface();
 
+            //Win32_CheckApplicationLink();
 #if 1
             if (!Win32_LinkToApplication())
             {
                 return 1;
             }
-            if (!app.AppInit())
-            {
-                MessageBox(0, "Init App failed", "Error", MB_OK | MB_ICONINFORMATION);
-                return 1;
-            }
+            
 #endif
 
 #if 0
@@ -493,6 +485,13 @@ int CALLBACK WinMain(
 
                 time.frameNumber++;
 
+                g_checkAppReloadTick -= time.deltaTime;
+                if (g_checkAppReloadTick <= 0)
+                {
+                    g_checkAppReloadTick = 1;
+                    Win32_CheckApplicationLink();
+                }
+
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
                 if (time.deltaTime < 0)
                 {
@@ -507,7 +506,11 @@ int CALLBACK WinMain(
                 Win32_TickInput(&inputTick);
 
                 Win32_R_SetupFrame(appWindow);
-                app.AppUpdate(&time, &inputTick);
+                if (app.isvalid)
+                {
+                    app.AppUpdate(&time, &inputTick);
+                }
+                
                 Win32_R_FinishFrame(appWindow);
             }
         }
