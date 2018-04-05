@@ -117,8 +117,8 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
 //DEFINE_ENT_COMPONENT_BASE(Bar, bar, COMP_FLAG_BAR)
 
 // Lists are constructed via macro
-struct GameState
-{
-    FooList fooList;
-    //BarList barList;
-};
+// struct GameState
+// {
+//     FooList fooList;
+//     //BarList barList;
+// };

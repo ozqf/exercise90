@@ -116,10 +116,14 @@ void Game_BuildTestScene(GameState* gs)
     // Octahedron object
     /////////////////////////////////////////////////////////////
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.z += 1;
+    ent->tag = 1;
+    ent->transform.pos.z = -3;
     ent->transform.scale.x = 0.1f;
     ent->transform.scale.y = 0.1f;
     ent->transform.scale.z = 0.5f;
+    ent->transform.rot.x = 45;       // Pitch
+    ent->transform.rot.y = 45;       // Yaw
+    ent->transform.rot.z = 0;   // Roll
     
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);

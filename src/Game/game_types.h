@@ -43,6 +43,7 @@ struct Ent
     u8 inUse;               // if 0 this entity is free to be recycled
     Transform transform;
     u32 componentFlags;
+    i32 tag;
 };
 
 struct EntList

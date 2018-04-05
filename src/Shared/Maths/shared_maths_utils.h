@@ -278,6 +278,42 @@ inline void Calc_CameraForward(Vec3* angles, Vec3* result)
     result->z = cb * ca;
 }
 
+void Calc_AnglesToAxesZXY(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
+{
+    ///////////////////////////////////
+    //Z-X-Y
+    // http://www.songho.ca/opengl/gl_anglestoaxes.html
+    //////////////////////////////////
+    f32 a = angles->x * DEG2RAD;
+    f32 b = angles->y * DEG2RAD;
+    f32 c = angles->z * DEG2RAD;
+
+    f32 sa, sb, sc, ca, cb, cc;
+    sa = (f32)sin(a);
+    sb = (f32)sin(b);
+    sc = (f32)sin(c);
+    ca = (f32)cos(a);
+    cb = (f32)cos(b);
+    cc = (f32)cos(c);
+
+    left->x = (cc * cb) - (sc * sa * sb);
+    left->y = (sc * cb) + (cc * sa * sb);
+    left->z = -ca * sb;
+
+    up->x = -sc * ca;
+    up->y = cc * ca;
+    up->z = sa;
+
+    forward->x = (cc * sb) + (sc * sa * cb);
+    forward->y = (sc * sb) - (cc * sa * cb);
+    forward->z = (ca * cb);
+}
+
+void Calc_AnglesToAxesZXY(Vec3* angles, AngleVectors* vectors)
+{
+    Calc_AnglesToAxesZXY(angles, &vectors->left, &vectors->up, &vectors->forward);
+}
+
 void Calc_AnglesToAxesZYX(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
 {
     ///////////////////////////////////
@@ -306,6 +342,11 @@ void Calc_AnglesToAxesZYX(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
     forward->x = (sc * sa) + (cc * sb * ca);
     forward->y = (-cc * sa) + (sc * sb * ca);
     forward->z = cb * ca;
+}
+
+void Calc_AnglesToAxesZYX(Vec3* angles, AngleVectors* vectors)
+{
+    Calc_AnglesToAxesZYX(angles, &vectors->left, &vectors->up, &vectors->forward);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

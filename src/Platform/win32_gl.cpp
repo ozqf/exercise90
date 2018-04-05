@@ -214,6 +214,9 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	// Notice all values are negated, because we move the whole scene with the
 	// inverse of camera transform
 	// x = pitch, y = yaw, z = roll
+	// Working order
+	// view: Z/X/Y or roll/pitch/yaw
+	// model is reversed: Y/X/Z
 	
 	glRotatef(-view->rot.z, 0, 0, 1);
 	glRotatef(-view->rot.x, 1, 0, 0);
@@ -221,9 +224,10 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
 	
 	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
-	glRotatef(model->rot.z, 0, 0, 1);
-	glRotatef(model->rot.x, 1, 0, 0);
 	glRotatef(model->rot.y, 0, 1, 0);
+	glRotatef(model->rot.x, 1, 0, 0);
+	glRotatef(model->rot.z, 0, 0, 1);
+	
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
 	
 	// transform the object (model matrix)

@@ -617,7 +617,7 @@ void App_Frame(GameTime* time, InputTick* input)
     #endif
     //RScene_AddRenderItem(&g_worldScene, &t, &rendObj);
 
-    Game_IntersectionTest(&g_worldScene);
+    Game_IntersectionTest(gs, &g_worldScene);
 
     platform.Platform_RenderScene(&g_worldScene);
     #endif

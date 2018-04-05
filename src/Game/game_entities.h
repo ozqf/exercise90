@@ -41,6 +41,16 @@ inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
     return &ents->items[index];
 }
 
+inline Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)
+{
+    if (tag == 0) { return NULL; }
+    for (u32 i = 0; i < ents->max; ++i)
+    {
+        if (ents->items[i].tag == tag) { return &ents->items[i]; }
+    }
+    return NULL;
+}
+
 // void Ent_InitEntityList()
 // {
 //     for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)

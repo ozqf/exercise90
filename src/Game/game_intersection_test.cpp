@@ -215,7 +215,20 @@ void Game_IntersectionTest_3D(RenderScene* scene, Vec3* origin, Vec3* dest)
     );
 }
 
-void Game_IntersectionTest(RenderScene* scene)
+void DEBUG_AngleTestEntity(GameState* gs, RenderScene* scene)
+{
+    Ent* testEnt = Ent_GetEntityByTag(&gs->entList, 1);
+    if (testEnt != NULL)
+    {
+        AngleVectors vecs;
+        Calc_AnglesToAxesZYX(&testEnt->transform.rot, &vecs);
+        Vec3 pos = testEnt->transform.pos;
+        DEBUG_DrawAngleVectorsWidget(scene, &vecs, pos.x, pos.y, pos.z);
+    }
+
+}
+
+void Game_IntersectionTest(GameState* gs, RenderScene* scene)
 {
     //Game_IntersectionTest_2D(scene);
     Game_IntersectionTest_3D(scene, NULL, NULL);
@@ -228,9 +241,11 @@ void Game_IntersectionTest(RenderScene* scene)
     //rot.z = 0;
 
     AngleVectors vecs;
-    Calc_AnglesToAxesZYX(&rot, &vecs.left, &vecs.up, &vecs.forward);
+    Calc_AnglesToAxesZYX(&rot, &vecs);
 
     DEBUG_DrawAngleVectorsWidget(scene, &vecs, -4, 0, 0);
+
+    DEBUG_AngleTestEntity(gs, scene);
 
     Vec3 origin = scene->cameraTransform.pos;
     origin.x = origin.x - (vecs.up.x * 0.2f);
