@@ -180,6 +180,18 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     }
     break;
 
+    case WM_SETFOCUS:
+    {
+        g_windowActive = 1;
+        Win32_CheckMouseState();
+    } break;
+
+    case WM_KILLFOCUS:
+    {
+        g_windowActive = 0;
+        Win32_CheckMouseState();
+    } break;
+
     case WM_ACTIVATEAPP:
     {
         OutputDebugStringA("WM_ACTIVATEAPP\n");
@@ -477,6 +489,11 @@ int CALLBACK WinMain(
                     }
                     TranslateMessage(&message);
                     DispatchMessage(&message);
+                }
+
+                if (g_windowActive == 0)
+                {
+                    Sleep(30);
                 }
 
                 float newTime = Win32_FloatTime();

@@ -3,30 +3,48 @@
 #include "win32_main.h"
 
 enum ZMouseMode mouseMode = Free;
+enum ZMouseMode mouseState = Free;
 
 #define Z_ALLOW_MOUSE_LOCK 1
 
-void Win32_SetMouseMode(enum ZMouseMode mode)
+void Win32_CaptureMouse()
 {
-    if (mode == mouseMode)
+    if (mouseState == Captured) { return; }
+    mouseState = Captured;
+    ShowCursor(false);
+    RECT selfRect;
+    GetWindowRect(appWindow, &selfRect);
+    ClipCursor(&selfRect);
+}
+
+void Win32_ReleaseMouse()
+{
+    if (mouseState == Free) { return; }
+    mouseState = Free;
+    ShowCursor(true);
+    ClipCursor(NULL);
+}
+
+void Win32_CheckMouseState()
+{
+    if (mouseMode == Captured && g_windowActive)
     {
-        return;
-    }
-    mouseMode = mode;
-    #if Z_ALLOW_MOUSE_LOCK
-    if (mouseMode == Free)
-    {
-        ShowCursor(true);
-        ClipCursor(NULL);
+        Win32_CaptureMouse();
     }
     else
     {
-        ShowCursor(false);
-        RECT selfRect;
-        GetWindowRect(appWindow, &selfRect);
-        ClipCursor(&selfRect);
+        Win32_ReleaseMouse();
     }
-    #endif
+}
+
+void Win32_SetMouseMode(enum ZMouseMode mode)
+{
+    // if (mode == mouseMode)
+    // {
+    //     return;
+    // }
+    mouseMode = mode;
+    Win32_CheckMouseState();
 }
 
 void Win32_InitInput()
@@ -126,7 +144,7 @@ void Win32_SetMouseScreenPosition(InputTick *input)
 
 void Win32_TickInput(InputTick *input)
 {
-    if (mouseMode == Captured)
+    if (mouseMode == Captured && g_windowActive)
     {
 #if Z_ALLOW_MOUSE_LOCK
         RECT selfRect;

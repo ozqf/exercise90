@@ -248,18 +248,19 @@ void Game_IntersectionTest(GameState* gs, RenderScene* scene)
     DEBUG_AngleTestEntity(gs, scene);
 
     Vec3 origin = scene->cameraTransform.pos;
-    origin.x = origin.x - (vecs.up.x * 0.2f);
-    origin.y = origin.y - (vecs.up.y * 0.2f);
-    origin.z = origin.z - (vecs.up.z * 0.2f);
+    origin.x = origin.x - (vecs.up.x * 0.075f);
+    origin.y = origin.y - (vecs.up.y * 0.075f);
+    origin.z = origin.z - (vecs.up.z * 0.075f);
 
-    origin.x = origin.x - (vecs.left.x * 0.2f);
-    origin.y = origin.y - (vecs.left.y * 0.2f);
-    origin.z = origin.z - (vecs.left.z * 0.2f);
+    origin.x = origin.x - (vecs.left.x * 0.05f);
+    origin.y = origin.y - (vecs.left.y * 0.05f);
+    origin.z = origin.z - (vecs.left.z * 0.05f);
 
+    // offset origin backward for dest
     Vec3 dest = {};
-    dest.x = origin.x + -(vecs.forward.x * 1);
-    dest.y = origin.y + -(vecs.forward.y * 1);
-    dest.z = origin.z + -(vecs.forward.z * 1);
+    dest.x = origin.x + -(vecs.forward.x * 0.2f);
+    dest.y = origin.y + -(vecs.forward.y * 0.2f);
+    dest.z = origin.z + -(vecs.forward.z * 0.2f);
     // DEBUG_DrawLineToScene(scene,
     //     origin.x, origin.y, origin.z,
     //     dest.x, dest.y, dest.z,

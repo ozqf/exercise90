@@ -59,6 +59,7 @@ global_variable f32 g_checkAppReloadTick = 1;
 global_variable HWND appWindow;
 global_variable HMODULE gameModule;
 global_variable win32_offscreen_buffer globalBackBuffer;
+global_variable u8 g_windowActive = 1;
 
 // Control/Input
 global_variable bool globalRunning = true;
