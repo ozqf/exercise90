@@ -210,6 +210,14 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         {
             inputTick.reset = isDown;
         }
+        else if (VKCode == 'Z' && isDown)
+        {
+            Win32_R_Shutdown();
+        }
+        else if (VKCode == 'X' && isDown)
+        {
+            Win32_InitOpenGL(appWindow);
+        }
         else if (VKCode == 'P' && isDown)
         {
             MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
@@ -278,46 +286,18 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         else if (VKCode == VK_UP)
         {
             inputTick.pitchUp = isDown;
-            // if (isDown)
-            // {
-            //     g_gl_primitive_degrees_X -= 5;
-            //     if (g_gl_primitive_degrees_X < 0) { g_gl_primitive_degrees_X += 360; }
-            // }
         }
         else if (VKCode == VK_DOWN)
         {
             inputTick.pitchDown = isDown;
-            // if (isDown)
-            // {
-            //     g_gl_primitive_degrees_X += 5;
-            //     if (g_gl_primitive_degrees_X >= 360) { g_gl_primitive_degrees_X -= 360; }
-            // }
         }
         else if (VKCode == VK_LEFT)
         {
             inputTick.yawLeft = isDown;
-            // if (isDown)
-            // {
-            //     g_gl_primitive_degrees_Y -= 5;
-            //     if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y += 360; }
-            //     //if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y = 0; }
-            //     // char output[256];
-            // 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-            // 	// OutputDebugStringA(output);
-            // }
         }
         else if (VKCode == VK_RIGHT)
         {
             inputTick.yawRight = isDown;
-            // if (isDown)
-            // {
-            //     g_gl_primitive_degrees_Y += 5;
-            //     //if (g_gl_primitive_degrees_Y < 0) { g_gl_primitive_degrees_Y = 360; }
-            //     if (g_gl_primitive_degrees_Y >= 360) { g_gl_primitive_degrees_Y -= 360; }
-            //     // char output[256];
-            // 	// sprintf_s(output, "Rot left: %.2f\n", g_gl_primitive_degrees_Y);
-            // 	// OutputDebugStringA(output);
-            // }
         }
         else if (VKCode == VK_SPACE)
         {
@@ -330,14 +310,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         else if (VKCode == VK_ESCAPE)
         {
             inputTick.escape = isDown;
-            // if (isDown)
-            // {
-            //     OutputDebugStringA("ESC is down");
-            // }
-            // if (wasDown)
-            // {
-            //     OutputDebugStringA("ESC was down ");
-            // }
         }
 
         if (VKCode == VK_F4 && (lParam & (1 << 29)))

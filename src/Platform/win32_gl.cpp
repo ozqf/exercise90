@@ -23,8 +23,11 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 
 */
 
+HGLRC g_openglRC = NULL;
+
 i32 Win32_InitOpenGL(HWND window)
 {
+	if (g_openglRC != NULL) { return 1; }
     Win32_InitTestScene();
 
 	HDC windowContext = GetDC(window);
@@ -54,16 +57,16 @@ i32 Win32_InitOpenGL(HWND window)
 	// Create a context for our window
 	// HDC "HandleDeviceContext"
 	// HGLRC "HandleOpenGLRenderingContext"
-	HGLRC openglRC = wglCreateContext(windowContext);
+	g_openglRC = wglCreateContext(windowContext);
 
-	if (openglRC == NULL)
+	if (g_openglRC == NULL)
 	{
 		MessageBox(0, "wglCreateContext failed", "Error", MB_OK | MB_ICONINFORMATION);
 		AssertAlways(false);
 	}
 
 
-    if (wglMakeCurrent(windowContext, openglRC))
+    if (wglMakeCurrent(windowContext, g_openglRC))
     {
 
     }
@@ -97,6 +100,14 @@ i32 Win32_InitOpenGL(HWND window)
 	Win32_InitOpenGLTestAssets();
 
     return 1;
+}
+
+i32 Win32_R_Shutdown()
+{
+	if (g_openglRC == NULL) { return 1; }
+	wglDeleteContext(g_openglRC);
+	g_openglRC = NULL;
+	return 1;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -667,6 +678,7 @@ void R_RenderScene(RenderScene* scene)
 ////////////////////////////////////////////////////////////////////
 void Win32_R_SetupFrame(HWND window)
 {
+	if (g_openglRC == NULL) { return; }
 	/*if (renderedOnce == false)
     {
         renderedOnce = true;
@@ -712,6 +724,7 @@ void Win32_R_SetupFrame(HWND window)
 
 void Win32_R_FinishFrame(HWND window)
 {
+	if (g_openglRC == NULL) { return; }
     HDC deviceContext = GetDC(window);
 
 	// Finished, display
@@ -723,6 +736,7 @@ void Win32_R_FinishFrame(HWND window)
 //bool renderedOnce = false;
 void Win32_RenderFrame(RenderScene* scene)
 {
+	if (g_openglRC == NULL) { return; }
     //Win32_R_SetupFrame(appWindow);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	//Win32_ProcessTestInput(inputTick, time);
