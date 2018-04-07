@@ -8,6 +8,8 @@ Very basic meshes/textures embedded in source
 
 #include "shared.h"
 
+#include "shared_asset_types.h"
+
 #include "EmbeddedAssets/primitive_quad.h"
 #include "EmbeddedAssets/primitive_cube.h"
 #include "EmbeddedAssets/primitive_octahedron.h"

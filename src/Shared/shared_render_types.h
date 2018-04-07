@@ -24,15 +24,6 @@
 #define REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD 1
 #define REND_PRIMITIVE_TYPE_AABB 2
 
-struct Texture2DHeader
-{
-	i32 id;
-	char name[32];
-	i32 width;
-	i32 height;
-	u32 *ptrMemory;
-};
-
 struct RendObj_Primitive
 {
     i32 primitiveType;

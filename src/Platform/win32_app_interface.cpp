@@ -6,6 +6,7 @@ Anything with platform_ is a function to export
 
 #include "win32_system_include.h"
 #include "win32_fileIO.h"
+#include "win32_gl_loading.h"
 
 /****************************************************************
 ALLOC MAIN MEMORY
@@ -52,14 +53,21 @@ i32 Platform_LoadDebugTextures(Heap* heap)
 {
     // BlockRef testBmpRef = Platform_LoadFileIntoHeap(heap, "base/BitmapTest.bmp");
     // Win32_IO_ReadBMPTest(&testBmpRef);
-
-    Win32_ReadBMPToHeap(heap, "base/BitmapTest.bmp");
-    Win32_ReadBMPToHeap(heap, "base/charset.bmp");
-    Win32_ReadBMPToHeap(heap, "base/brbrick2.bmp");
-    Win32_ReadBMPToHeap(heap, "base/BKEYA0.bmp");
+    BlockRef ref = {};
+    Win32_ReadBMPToHeap(heap, &ref, "base/BitmapTest.bmp");
+    Win32_ReadBMPToHeap(heap, &ref, "base/charset.bmp");
+    Win32_ReadBMPToHeap(heap, &ref, "base/brbrick2.bmp");
+    Win32_ReadBMPToHeap(heap, &ref, "base/BKEYA0.bmp");
     
     return g_nextTexture;
 }
+
+void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
+{
+    return;
+}
+
+
 
 /**********************************************************************
  * Attach to application DLL
@@ -71,6 +79,7 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_Free = Platform_Free;
     platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;
     platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
+    platInterface.Platform_LoadTexture = Platform_LoadTexture;
     
     platInterface.Platform_SetMouseMode = Win32_SetMouseMode;
 

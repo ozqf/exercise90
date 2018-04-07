@@ -35,8 +35,9 @@ struct PlatformInterface
     // Memory
     u8 (*Platform_Malloc)(MemoryBlock* mem, u32 bytesToAllocate);
     void (*Platform_Free)(MemoryBlock *mem);
-    BlockRef (*Platform_LoadFileIntoHeap)(Heap* heap, char* fileName);
+    void (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName);
     i32 (*Platform_LoadDebugTextures)(Heap* heap);
+    void (*Platform_LoadTexture)(Heap* heap, BlockRef* destRef, char* path);
 
     // Input
     void (*Platform_SetMouseMode)(enum ZMouseMode mode);

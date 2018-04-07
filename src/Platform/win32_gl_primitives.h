@@ -55,6 +55,7 @@
 |______|/
 v0		v1
 */
+#if 0
 Vec3 primitive_cubeVerts[8];
 Vec3 primitive_triangleVerts[12 * 3];
 Vec3 primitive_cubeNormals[12 * 3];
@@ -66,6 +67,7 @@ void ZSetTriangle(Vec3* vectors, Vec3 a, Vec3 b, Vec3 c)
 	vectors[VEC_Y] = b;
 	vectors[VEC_Z] = c;
 }
+
 
 void win32_glBuildPrimitives()
 {
@@ -163,7 +165,7 @@ void Win32_InitTestScene()
     
 
 }
-
+#endif
 void Win32_InitOpenGLTestAssets()
 {
 	// TODO: Remove texture test

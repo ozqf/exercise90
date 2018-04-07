@@ -28,7 +28,7 @@ HGLRC g_openglRC = NULL;
 i32 Win32_InitOpenGL(HWND window)
 {
 	if (g_openglRC != NULL) { return 1; }
-    Win32_InitTestScene();
+    //Win32_InitTestScene();
 
 	HDC windowContext = GetDC(window);
     /** 

@@ -9,6 +9,15 @@
 #include "app_types.h"
 #include "../Game/game.h"
 
+#define MAX_TEXTURES 128
+
+struct TextureHandles
+{
+    BlockRef textureRefs[MAX_TEXTURES];
+    u32 numTextures = 0;
+    u32 maxTextures = MAX_TEXTURES;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // DLL GLOBALS
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,6 +36,7 @@ global_variable GL_Test_Input testInput;
 
 // Assets
 global_variable i32 g_numDebugTextures;
+global_variable TextureHandles g_textures;
 
 // Debugging
 global_variable BlockRef g_debugBuffer;

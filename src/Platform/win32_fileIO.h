@@ -89,8 +89,9 @@ void BlockRefTest()
     //BlockRef ref = {};
 }
 #if 1
-BlockRef Platform_LoadFileIntoHeap(Heap* heap, char* fileName)
+void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 {
+    AssertAlways(destRef != NULL);
     /*
     > Open file, find size
     > Prepare block on heap
@@ -115,11 +116,10 @@ BlockRef Platform_LoadFileIntoHeap(Heap* heap, char* fileName)
     fseek(f, 0, SEEK_SET);
 
     // Alloc on Heap
-    BlockRef ref = {};
-    Heap_Allocate(heap, &ref, end, fileName);
+    Heap_Allocate(heap, destRef, end, fileName);
 
     // Get position on heap
-    void* memory = Heap_GetBlockMemoryAddress(heap, &ref);
+    void* memory = Heap_GetBlockMemoryAddress(heap, destRef);
 
     // Read!
     // heap has made a space the size of the file, so buffer size and read size
@@ -128,13 +128,14 @@ BlockRef Platform_LoadFileIntoHeap(Heap* heap, char* fileName)
 
     // Close file stream
     fclose(f);
-    return ref;
+    return;
 }
 #endif
 
 #if 1
-void Win32_ReadBMPToHeap(Heap* heap, char* filePath)
+void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 {
+    AssertAlways(destRef != NULL);
     FILE* f;
     fopen_s(&f, filePath, "rb");
 
@@ -176,10 +177,10 @@ void Win32_ReadBMPToHeap(Heap* heap, char* filePath)
 	u32 targetSize = sizeof(Texture2DHeader) + targetImageBytes;
 	
 	// Allocate space for results on Heap
-	BlockRef destRef = {};
-	Heap_Allocate(heap, &destRef, targetSize, filePath);
-	Texture2DHeader* tex = (Texture2DHeader*)destRef.ptrMemory;
-	u32* pixels = (u32*)((u8*)destRef.ptrMemory + sizeof(Texture2DHeader));
+	//BlockRef destRef = {};
+	Heap_Allocate(heap, destRef, targetSize, filePath);
+	Texture2DHeader* tex = (Texture2DHeader*)destRef->ptrMemory;
+	u32* pixels = (u32*)((u8*)destRef->ptrMemory + sizeof(Texture2DHeader));
 	COM_SetMemory((u8*)pixels, targetImageBytes, 0xAB);
 
 	// Allocate temporary space on the heap for converting the file
@@ -241,7 +242,7 @@ void Win32_ReadBMPToHeap(Heap* heap, char* filePath)
 
 	u32 id = Win32_R_RegisterTexture(pixels, w, h);
 	//Heap_Free(heap, sourceRef.id);
-
+    
     //DebugBreak();
 
     fclose(f);

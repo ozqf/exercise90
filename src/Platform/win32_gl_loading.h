@@ -8,7 +8,7 @@ u32 Win32_R_RegisterTexture(void* rgbaPixels, u32 width, u32 height)
 {
 	GLuint texID = g_textureHandles[g_nextTexture];
 	glBindTexture(GL_TEXTURE_2D, texID);
-
+	
 	// GL_BGRA_EXT or GL_RGBA?
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, rgbaPixels);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaPixels);

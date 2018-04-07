@@ -465,7 +465,7 @@ int CALLBACK WinMain(
 
                 if (g_windowActive == 0)
                 {
-                    Sleep(30);
+                    Sleep(100);
                 }
 
                 float newTime = Win32_FloatTime();
