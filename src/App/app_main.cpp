@@ -239,37 +239,128 @@ i32 AllocateTestStrings(Heap* heap)
     return 1;
 }
 
+/**
+ * Record that a texture has been loaded
+ * > header information will be copied and updated
+ * > BlockRef should be a Heap block for a Texture2DHeader!
+ */
+void AppRegisterTexture(Texture2DHeader* header, BlockRef* ref)
+{
+    i32 index = g_textureHandles.numTextures;
+    header->index = index;
+    g_textureHandles.textureHeaders[index] = *header;
+    if (ref != NULL)
+    {
+        g_textureHandles.blockRefs[index] = *ref;
+    }
+    else
+    {
+        g_textureHandles.blockRefs[index] = {};
+    }
+    g_textureHandles.numTextures++;
+    //Heap_GetBlockMemoryAddress(&g_heap, ref);
+
+
+    // g_textureHandles.textureRefs[g_textureHandles.numTextures] = ref;
+    // Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
+    // header->index = g_textureHandles.numTextures;
+    // g_textureHandles.numTextures++;
+}
+
+/**
+ * Upload a texture to the GPU
+ */
 void AppBindTexture(Texture2DHeader* header)
 {
     //AssertAlways(g_textures.numTextures < g_textures.maxTextures);
     //g_textures.textureRefs[g_textures.numTextures++] = ref;
     //Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
-    header->id = g_nextTextureIndex;
-    platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, g_nextTextureIndex++);
+    //header->id = g_nextTextureIndex;
+    platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, header->index);
 }
 
-void AppLoadTexture(char* filePath)
+/**
+ * Read a texture onto the Global Heap
+ */
+BlockRef AppLoadTexture(char* filePath)
 {
     BlockRef ref = {};
     platform.Platform_LoadTexture(&g_heap, &ref, filePath);
+    return ref;
+}
 
-    Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    AppBindTexture((Texture2DHeader*)ref.ptrMemory);
+/**
+ * Read a texture onto the global heap and then immediately bind it
+ */
+void AppLoadAndRegisterTexture(char* filePath)
+{
+    BlockRef ref = AppLoadTexture(filePath);
     
-    //AppRegisterTexture(ref);
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+    //AppBindTexture((Texture2DHeader*)ref.ptrMemory, &ref);
+}
+
+/**
+ * Upload all registered textures
+ */
+void AppBindAllTextures()
+{
+    i32 numTextures = g_textureHandles.numTextures;
+    for (i32 i = 0; i < numTextures; ++i)
+    {
+        AppBindTexture(&g_textureHandles.textureHeaders[i]);
+    }
 }
 
 void AppLoadTestTextures()
 {
-    AppInitTestTextures();
-    AppBindTexture(&testBuffer);
-    AppBindTexture(&testBuffer2);
-    AppBindTexture(&testBuffer3);
+    BlockRef ref;
+    Texture2DHeader* header;
 
-    AppLoadTexture("base/Bitmaptest.bmp");
-    AppLoadTexture("base/charset.bmp");
-    AppLoadTexture("base/brbrick2.bmp");
-    AppLoadTexture("base/BKEYA0.bmp");
+    AppInitTestTextures();
+
+    AppRegisterTexture(&testBuffer, NULL);
+    //AppBindTexture(&testBuffer);
+
+    AppRegisterTexture(&testBuffer2, NULL);
+    //AppBindTexture(&testBuffer2);
+
+    AppRegisterTexture(&testBuffer3, NULL);
+    //AppBindTexture(&testBuffer3);
+
+    ref = AppLoadTexture("base/Bitmaptest.bmp");
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    header = (Texture2DHeader*)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+    //AppBindTexture(header);
+
+    ref = AppLoadTexture("base/charset.bmp");
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    header = (Texture2DHeader*)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+    //AppBindTexture(header);
+    
+    ref = AppLoadTexture("base/brbrick2.bmp");
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    header = (Texture2DHeader*)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+    //AppBindTexture(header);
+
+    ref = AppLoadTexture("base/BKEYA0.bmp");
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    header = (Texture2DHeader*)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+    //AppBindTexture(header);
+
+    AppBindAllTextures();
+}
+
+i32 AppRendererReloaded()
+{
+    AppBindAllTextures();
+    return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -303,6 +394,7 @@ i32 App_Init()
 
 
     //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    g_textureHandles.numTextures = 0;
     AppLoadTestTextures();
     Game_InitDebugStr();
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);

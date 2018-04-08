@@ -217,6 +217,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         else if (VKCode == 'X' && isDown)
         {
             Win32_InitOpenGL(appWindow);
+            app.AppRendererReloaded();
         }
         else if (VKCode == 'P' && isDown)
         {

@@ -10,6 +10,7 @@ struct AppInterface
     i32 isvalid;
     i32 (*AppInit)();
     i32 (*AppShutdown)();
+    i32 (*AppRendererReloaded)();
     void (*AppUpdate)(GameTime* time, InputTick* tick);
     //void (*AppFixedUpdate)(GameTime* time, InputTick* tick);
 };

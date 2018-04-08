@@ -5,7 +5,7 @@
 
 struct Texture2DHeader
 {
-	i32 id;
+	i32 index;
 	char name[32];
 	i32 width;
 	i32 height;
