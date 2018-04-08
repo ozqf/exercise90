@@ -65,7 +65,6 @@ i32 Win32_InitOpenGL(HWND window)
 		AssertAlways(false);
 	}
 
-
     if (wglMakeCurrent(windowContext, g_openglRC))
     {
 
@@ -97,7 +96,13 @@ i32 Win32_InitOpenGL(HWND window)
 	// Enable back-face culling
 	glEnable(GL_CULL_FACE);
 
-	Win32_InitOpenGLTestAssets();
+	//Win32_InitOpenGLTestAssets();
+	// Setup and Generate texture handles
+	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glGenTextures(NUM_TEST_TEXTURES, g_textureHandles);
+
 
     return 1;
 }

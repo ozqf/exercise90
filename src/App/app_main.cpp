@@ -8,6 +8,8 @@ holding game/menu state and calling game update when required
 #include "../Shared/shared_assets.h"
 #include "../Shared/Memory/HeapUtils.h"
 
+#include "app_testTextures.h"
+
 #include <stdio.h>
 
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
@@ -220,7 +222,7 @@ void AllocateDebugStrings(Heap* heap)
 	char* writeStart = (char*)g_debugBuffer.ptrMemory;
 	i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
 	sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
-	OutputDebugStringA("Done");
+	OutputDebugStringA("Allocated debug string\n");
 }
 
 i32 AllocateTestStrings(Heap* heap)
@@ -237,6 +239,39 @@ i32 AllocateTestStrings(Heap* heap)
     return 1;
 }
 
+void AppBindTexture(Texture2DHeader* header)
+{
+    //AssertAlways(g_textures.numTextures < g_textures.maxTextures);
+    //g_textures.textureRefs[g_textures.numTextures++] = ref;
+    //Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
+    header->id = g_nextTextureIndex;
+    platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, g_nextTextureIndex++);
+}
+
+void AppLoadTexture(char* filePath)
+{
+    BlockRef ref = {};
+    platform.Platform_LoadTexture(&g_heap, &ref, filePath);
+
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    AppBindTexture((Texture2DHeader*)ref.ptrMemory);
+    
+    //AppRegisterTexture(ref);
+}
+
+void AppLoadTestTextures()
+{
+    AppInitTestTextures();
+    AppBindTexture(&testBuffer);
+    AppBindTexture(&testBuffer2);
+    AppBindTexture(&testBuffer3);
+
+    AppLoadTexture("base/Bitmaptest.bmp");
+    AppLoadTexture("base/charset.bmp");
+    AppLoadTexture("base/brbrick2.bmp");
+    AppLoadTexture("base/BKEYA0.bmp");
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 // App_ == interface function
@@ -247,7 +282,7 @@ i32 App_Init()
     printf("DLL Init\n");
     //DebugBreak();
 
-    u32 mainMemorySize = MegaBytes(1);
+    u32 mainMemorySize = MegaBytes(64);
     MemoryBlock mem = {};
 
     if (!platform.Platform_Malloc(&mem, mainMemorySize))
@@ -264,7 +299,11 @@ i32 App_Init()
 
     SharedAssets_Init();
 
-    g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    BlockRef ref = {};
+
+
+    //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
+    AppLoadTestTextures();
     Game_InitDebugStr();
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,

@@ -4,9 +4,24 @@
 
 #include <gl/gl.h>
 
-u32 Win32_R_RegisterTexture(void* rgbaPixels, u32 width, u32 height)
+/**
+ * Load a texture into a specific texture index
+ */
+void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
 {
-	GLuint texID = g_textureHandles[g_nextTexture];
+	/**
+	--- setup textures ---
+	> enable textures
+	> generate texture ids, as many as required
+	> loop through textures
+		> load texture data and settings via
+		glTexImage2D
+		glTexParameteri
+		glBindTexture -> set the current texture settings to the specified texture id
+	*/
+
+	//GLuint texID = g_textureHandles[g_nextTexture];
+	GLuint texID = g_textureHandles[textureIndex];
 	glBindTexture(GL_TEXTURE_2D, texID);
 	
 	// GL_BGRA_EXT or GL_RGBA?
@@ -19,9 +34,9 @@ u32 Win32_R_RegisterTexture(void* rgbaPixels, u32 width, u32 height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     char buf[128];
-        sprintf_s(buf, 128, "Binding texture index: %d - GLuint: %d. Next: %d\n\tImg size: %d / %d\n",
-        g_nextTexture, texID, g_textureHandles[g_nextTexture + 1], width, height);
+        sprintf_s(buf, 128, "Binding texture index: %d - GLuint: %d.\n\tImg size: %d / %d\n",
+        textureIndex, texID, width, height);
         OutputDebugString(buf);
 
-	return g_nextTexture++;
+	//return g_nextTexture++;
 }

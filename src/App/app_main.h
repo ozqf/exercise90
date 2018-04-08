@@ -35,8 +35,8 @@ global_variable ZMouseMode g_mouseMode;
 global_variable GL_Test_Input testInput;
 
 // Assets
-global_variable i32 g_numDebugTextures;
-global_variable TextureHandles g_textures;
+global_variable i32 g_nextTextureIndex = 0;
+//global_variable TextureHandles g_textures;
 
 // Debugging
 global_variable BlockRef g_debugBuffer;

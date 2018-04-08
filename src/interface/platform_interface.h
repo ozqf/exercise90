@@ -32,12 +32,15 @@ Maintaining rendering Scene graph options:
 
 struct PlatformInterface
 {
-    // Memory
+    // Memory Allocation
     u8 (*Platform_Malloc)(MemoryBlock* mem, u32 bytesToAllocate);
     void (*Platform_Free)(MemoryBlock *mem);
+    
+    // Loading assets
+    //i32 (*Platform_LoadDebugTextures)(Heap* heap);
     void (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName);
-    i32 (*Platform_LoadDebugTextures)(Heap* heap);
     void (*Platform_LoadTexture)(Heap* heap, BlockRef* destRef, char* path);
+    void (*Platform_BindTexture)(void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
 
     // Input
     void (*Platform_SetMouseMode)(enum ZMouseMode mode);

@@ -49,6 +49,7 @@ void Platform_R_DrawScene(RenderScene* scene)
 }
 
 // Returns number of textures loaded
+#if 0
 i32 Platform_LoadDebugTextures(Heap* heap)
 {
     // BlockRef testBmpRef = Platform_LoadFileIntoHeap(heap, "base/BitmapTest.bmp");
@@ -61,13 +62,16 @@ i32 Platform_LoadDebugTextures(Heap* heap)
     
     return g_nextTexture;
 }
-
+#endif
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
-    return;
+    Win32_ReadBMPToHeap(heap, result, path);
 }
 
-
+void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
+{
+    Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
+}
 
 /**********************************************************************
  * Attach to application DLL
@@ -78,8 +82,9 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_Malloc = Platform_Alloc;
     platInterface.Platform_Free = Platform_Free;
     platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;
-    platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
+    //platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
     platInterface.Platform_LoadTexture = Platform_LoadTexture;
+    platInterface.Platform_BindTexture = Platform_BindTexture;
     
     platInterface.Platform_SetMouseMode = Win32_SetMouseMode;
 

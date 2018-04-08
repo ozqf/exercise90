@@ -17,6 +17,7 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 
 #### Engine
 * Split the renderer off from the platform layer as another DLL, and use the platform layer simply as a kernal which intermediates between the game and specific services such as rendering or networking?
+    * Like this idea, hot reloading the renderer will make it easier to iterate and debug!
 * Upgrade to later version of opengl.
 * Proper tree based scene graph with parent/child object transforms.
 
@@ -49,6 +50,10 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
     * **Basic Text log** - A scrolling block of text.
     * **Frame-updated status text** - Displays live debugging information (eg framerate).
     * **Input box** - Type in and execute commands.
+* **Split Renderer to DLL** - Allow live reloading of a renderer DLL for easier renderer development
+    * Done 2018/4/8 *Texture load calls are now initiated by the game layer not the platform layer.*
+    * **Texture Database** - App must keep track of textures it has loaded so they can be found by entities or rebound to the GPU.
+    * **Rebindable Textures** - Allow platform to rebind loaded textures at any time, allowing a reloaded renderer
 
 ### Rendering
 * Done 2018/3/18 *ZBuffer - Currently no hidden surface removal.*

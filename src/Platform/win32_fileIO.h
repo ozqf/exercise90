@@ -176,11 +176,15 @@ void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 	u32 targetImageBytes = sizeof(u32) * numPixels;
 	u32 targetSize = sizeof(Texture2DHeader) + targetImageBytes;
 	
+    //DebugBreak();
 	// Allocate space for results on Heap
 	//BlockRef destRef = {};
 	Heap_Allocate(heap, destRef, targetSize, filePath);
 	Texture2DHeader* tex = (Texture2DHeader*)destRef->ptrMemory;
 	u32* pixels = (u32*)((u8*)destRef->ptrMemory + sizeof(Texture2DHeader));
+    tex->ptrMemory = pixels;
+    tex->width = w;
+    tex->height = h;
 	COM_SetMemory((u8*)pixels, targetImageBytes, 0xAB);
 
 	// Allocate temporary space on the heap for converting the file
@@ -240,8 +244,9 @@ void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 		++sourcePixel;
 	}
 
-	u32 id = Win32_R_RegisterTexture(pixels, w, h);
-	//Heap_Free(heap, sourceRef.id);
+	//u32 id = Win32_Platform_R_RegisterTexture(pixels, w, h);
+    // TODO: Sooo can we load without using this temporary space...?
+	Heap_Free(heap, sourceRef.id);
     
     //DebugBreak();
 

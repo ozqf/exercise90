@@ -166,6 +166,8 @@ void Win32_InitTestScene()
 
 }
 #endif
+#if 0
+// Cut this stuff out and move to app/delete altogether
 void Win32_InitOpenGLTestAssets()
 {
 	// TODO: Remove texture test
@@ -234,9 +236,9 @@ void Win32_InitOpenGLTestAssets()
     glGenTextures(NUM_TEST_TEXTURES, g_textureHandles);
 
 #if 1
-	Win32_R_RegisterTexture(testBuffer.ptrMemory, 32, 32);
-	Win32_R_RegisterTexture(testBuffer2.ptrMemory, 32, 32);
-	Win32_R_RegisterTexture(testBuffer3.ptrMemory, 32, 32);
+	Win32_Platform_R_RegisterTexture(testBuffer.ptrMemory, 32, 32);
+	Win32_Platform_R_RegisterTexture(testBuffer2.ptrMemory, 32, 32);
+	Win32_Platform_R_RegisterTexture(testBuffer3.ptrMemory, 32, 32);
 #endif
 
 #if 0
@@ -279,7 +281,7 @@ void Win32_InitOpenGLTestAssets()
 	Handle 1, 2, 3
 	*/
 }
-
+#endif
 #if 0
 
 void Win32_DebugPrintMatrix(char* label, f32* matrix)
