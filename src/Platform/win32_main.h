@@ -8,6 +8,8 @@
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
 
+#include "win32_gl/win32_R_interface.h"
+
 /****************************************************************
 When something goes wrong
 ****************************************************************/
@@ -49,6 +51,13 @@ global_variable PlatformInterface platInterface;
 global_variable AppInterface app;
 global_variable char *appModulePath = "base/gamex86.dll";
 global_variable char *appModulePathCopy = "base/gamex86copy.dll";
+global_variable char *renderModulePath = "win32gl.dll";
+global_variable char *renderModulePathCopy = "win32gl.dll";
+
+global_variable RenderInterface renderer;
+global_variable ULARGE_INTEGER g_renderModuleTimestamp = {};
+global_variable FILETIME* renderModuleTime;
+global_variable f32 g_checkRenderReloadTick = 1;
 
 global_variable u8 appModuleState = 0;
 global_variable ULARGE_INTEGER g_appModuleTimestamp = {};
@@ -58,6 +67,7 @@ global_variable f32 g_checkAppReloadTick = 1;
 // system handles etc
 global_variable HWND appWindow;
 global_variable HMODULE gameModule;
+global_variable HMODULE renderModule;
 global_variable win32_offscreen_buffer globalBackBuffer;
 global_variable u8 g_windowActive = 1;
 

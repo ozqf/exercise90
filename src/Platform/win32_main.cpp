@@ -12,7 +12,7 @@
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
 #include "win32_fileIO.h"
-#include "win32_gl.h"
+#include "win32_gl/win32_gl.h"
 
 // Last as it probably calls into the others
 #include "win32_app_interface.cpp"
@@ -479,7 +479,11 @@ int CALLBACK WinMain(
                 if (g_checkAppReloadTick <= 0)
                 {
                     g_checkAppReloadTick = 1;
-                    Win32_CheckApplicationLink();
+                    if (Win32_CheckFileModified(appModulePath, &g_appModuleTimestamp))
+                    {
+                        Win32_LinkToApplication();
+                    }
+                    //Win32_CheckApplicationLink();
                 }
 
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour

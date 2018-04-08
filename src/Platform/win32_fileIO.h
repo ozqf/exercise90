@@ -2,7 +2,7 @@
 
 #include "win32_main.h"
 #include "win32_asset_types.h"
-#include "win32_gl.h"
+//#include "win32_gl.h"
 
 #include "../Shared/shared_types.h"
 #include "../Shared/Memory/Heap.h"
@@ -296,6 +296,22 @@ u8 Win32_IO_ReadBMPTest(BlockRef ref)
 
 void Win32_CopyFile(char* sourcePath, char* targetPath)
 {
+    #if 1
+    /*
+    BOOL WINAPI CopyFileEx(
+      _In_     LPCTSTR            lpExistingFileName,
+      _In_     LPCTSTR            lpNewFileName,
+      _In_opt_ LPPROGRESS_ROUTINE lpProgressRoutine,
+      _In_opt_ LPVOID             lpData,
+      _In_opt_ LPBOOL             pbCancel,
+      _In_     DWORD              dwCopyFlags
+    );
+    */
+    BOOL cancel = false;
+    
+    CopyFileEx(sourcePath, targetPath, NULL, NULL, &cancel, 0);
+    #endif
+    #if 0
     FILE *source, *target;
 
     fopen_s(&source, sourcePath, "rb");
@@ -321,4 +337,5 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     
     fclose(source);
     fclose(target);
+    #endif
 }

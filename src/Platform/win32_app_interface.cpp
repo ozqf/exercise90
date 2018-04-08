@@ -6,7 +6,7 @@ Anything with platform_ is a function to export
 
 #include "win32_system_include.h"
 #include "win32_fileIO.h"
-#include "win32_gl_loading.h"
+//#include "win32_gl_loading.h"
 
 /****************************************************************
 ALLOC MAIN MEMORY
@@ -142,6 +142,28 @@ u8 Win32_LinkToApplication()
     //app = GetAppInterfaceStub(platInterface);
 }
 
+u8 Win32_CheckFileModified(char* path, ULARGE_INTEGER* timeStamp)
+{
+    FILETIME time;// = NULL;
+    HANDLE fileHandle = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    BOOL gotTime = GetFileTime(fileHandle, NULL, NULL, &time);
+    CloseHandle(fileHandle);
+    if(gotTime)
+    {
+        ULARGE_INTEGER large;
+        large.LowPart = time.dwLowDateTime;
+        large.HighPart = time.dwHighDateTime;
+        
+        if (large.QuadPart != timeStamp->QuadPart)
+        {
+			timeStamp->QuadPart = large.QuadPart;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+#if 0
 void Win32_CheckApplicationLink()
 {
     //DebugBreak();
@@ -162,6 +184,7 @@ void Win32_CheckApplicationLink()
         }
     }
 }
+#endif
 
 u8 Win32_LinkToAppStub()
 {
