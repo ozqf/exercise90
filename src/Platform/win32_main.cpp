@@ -12,7 +12,7 @@
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
 #include "win32_fileIO.h"
-#include "win32_gl/win32_gl.h"
+#include "win32_gl/win32_gl_interface.h"
 
 // Last as it probably calls into the others
 #include "win32_app_interface.cpp"
@@ -212,12 +212,18 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
         else if (VKCode == 'Z' && isDown)
         {
-            Win32_R_Shutdown();
+            //Win32_R_Shutdown();
+            Win32_CloseRendererLink();
         }
         else if (VKCode == 'X' && isDown)
         {
-            Win32_InitOpenGL(appWindow);
-            app.AppRendererReloaded();
+            //Win32_InitOpenGL(appWindow);
+            //app.AppRendererReloaded();
+            Win32_LinkToRenderer();
+            if (app.isvalid)
+            {
+                app.AppRendererReloaded();
+            }
         }
         else if (VKCode == 'P' && isDown)
         {
@@ -414,17 +420,18 @@ int CALLBACK WinMain(
 
         if (appWindow)
         {
-            if (Win32_InitOpenGL(appWindow) == false)
+            if (Win32_LinkToRenderer() == false)
             {
                 MessageBox(0, "InitOpenGL failed", "Error", MB_OK | MB_ICONINFORMATION);
                 globalRunning = false;
+                return 1;
             }
 
             // Input requires appWindow handle to register for mouse events
             Win32_InitInput();
 
             float previousTime = Win32_InitFloatTime();
-            GameTime time = {};
+            g_gameTime = {};
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
@@ -470,12 +477,12 @@ int CALLBACK WinMain(
                 }
 
                 float newTime = Win32_FloatTime();
-                time.deltaTime = newTime - previousTime;
+                g_gameTime.deltaTime = newTime - previousTime;
                 previousTime = newTime;
 
-                time.frameNumber++;
+                g_gameTime.frameNumber++;
 
-                g_checkAppReloadTick -= time.deltaTime;
+                g_checkAppReloadTick -= g_gameTime.deltaTime;
                 if (g_checkAppReloadTick <= 0)
                 {
                     g_checkAppReloadTick = 1;
@@ -487,7 +494,7 @@ int CALLBACK WinMain(
                 }
 
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
-                if (time.deltaTime < 0)
+                if (g_gameTime.deltaTime < 0)
                 {
                     MessageBox(0, "Error: Negative timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
                     return 1;
@@ -499,13 +506,21 @@ int CALLBACK WinMain(
 
                 Win32_TickInput(&inputTick);
 
-                Win32_R_SetupFrame(appWindow);
+                if (renderModuleState == 1)
+                {
+                    renderer.R_SetupFrame(appWindow);  
+                }
+                //Win32_R_SetupFrame(appWindow);
                 if (app.isvalid)
                 {
-                    app.AppUpdate(&time, &inputTick);
+                    app.AppUpdate(&g_gameTime, &inputTick);
                 }
                 
-                Win32_R_FinishFrame(appWindow);
+                if (renderModuleState == 1)
+                {
+                    renderer.R_FinishFrame(appWindow);
+                }
+                //Win32_R_FinishFrame(appWindow);
             }
         }
         else

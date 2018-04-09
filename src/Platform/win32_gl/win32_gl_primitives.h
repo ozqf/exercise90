@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32_gl.h"
+#include "win32_gl_main.h"
 
 // #include <gl/gl.h>
 // #include <math.h>

@@ -45,7 +45,11 @@ void Win32_PrintDebug(char *str)
  *********************************************************************/
 void Platform_R_DrawScene(RenderScene* scene)
 {
-    Win32_RenderFrame(scene);
+    if (renderModuleState == 1)
+    {
+        renderer.R_RenderScene(scene, &g_gameTime);
+    }
+    //Win32_RenderFrame(scene);
 }
 
 // Returns number of textures loaded
@@ -70,7 +74,11 @@ void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 
 void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
 {
-    Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
+    if (renderModuleState == 1)
+    {
+        renderer.R_BindTexture(rgbaPixels, width, height, textureIndex);
+    }
+    //Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
 }
 
 /**********************************************************************
@@ -98,6 +106,9 @@ void Win32_CloseAppLink()
     app.isvalid = false;
 }
 
+///////////////////////////////////////////////////////////
+// Link to App
+///////////////////////////////////////////////////////////
 u8 Win32_LinkToApplication()
 {
     if (app.isvalid == 1)
@@ -118,15 +129,6 @@ u8 Win32_LinkToApplication()
                 return 1;
             }
             return 1;
-            // if (app != NULL)
-            // {
-            //     return 1;
-            // }
-            // else
-            // {
-            //     MessageBox(0, "No app returned from dll link", "Error", MB_OK | MB_ICONINFORMATION);
-            //     return 0;
-            // }
         }
         else
         {
@@ -139,7 +141,6 @@ u8 Win32_LinkToApplication()
         Win32_Error("Failed to find game dll", "Error");
         return 0;
     }
-    //app = GetAppInterfaceStub(platInterface);
 }
 
 u8 Win32_CheckFileModified(char* path, ULARGE_INTEGER* timeStamp)
@@ -192,3 +193,52 @@ u8 Win32_LinkToAppStub()
     return 1;
 }
 
+///////////////////////////////////////////////////////////
+// Link to Renderer
+///////////////////////////////////////////////////////////
+
+void Win32_CloseRendererLink()
+{
+    renderModuleState = 0;
+    renderer.R_Shutdown();
+    FreeLibrary(renderModule);
+    renderer = {};
+}
+
+u8 Win32_LinkToRenderer()
+{
+    if (renderModuleState == 1)
+    {
+        Win32_CloseRendererLink();
+    }
+    Win32_CopyFile(renderModulePath, renderModulePathCopy);
+    renderModule = LoadLibraryA(renderModulePathCopy);
+    if (renderModule != NULL)
+    {
+        Func_LinkToRenderer *link = (Func_LinkToRenderer *)GetProcAddress(renderModule, "LinkToRenderer");
+        if (link != NULL)
+        {
+            renderer = link();
+            if (!renderer.R_Init(appWindow))
+            {
+                Win32_Error("Init Renderer failed", "Error");
+                renderModuleState = 0;
+                return 0;
+            }
+            renderModuleState = 1;
+            return 1;
+        }
+        else
+        {
+            Win32_Error("Failed to find renderer dll link function", "Error");
+            renderModuleState = 0;
+            return 0;
+        }
+    }
+    else
+    {
+        Win32_Error("Failed to find game dll", "Error");
+        renderModuleState = 0;
+        return 0;
+    }
+}

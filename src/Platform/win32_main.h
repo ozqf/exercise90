@@ -8,7 +8,7 @@
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
 
-#include "win32_gl/win32_R_interface.h"
+#include "win32_gl/win32_gl_interface.h"
 
 /****************************************************************
 When something goes wrong
@@ -46,6 +46,8 @@ struct win32_window_dimension
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
+global_variable GameTime g_gameTime;
+
 // App/platform interface
 global_variable PlatformInterface platInterface;
 global_variable AppInterface app;
@@ -54,7 +56,8 @@ global_variable char *appModulePathCopy = "base/gamex86copy.dll";
 global_variable char *renderModulePath = "win32gl.dll";
 global_variable char *renderModulePathCopy = "win32gl.dll";
 
-global_variable RenderInterface renderer;
+global_variable RenderInterface renderer = {};
+global_variable u8 renderModuleState = 0;
 global_variable ULARGE_INTEGER g_renderModuleTimestamp = {};
 global_variable FILETIME* renderModuleTime;
 global_variable f32 g_checkRenderReloadTick = 1;
