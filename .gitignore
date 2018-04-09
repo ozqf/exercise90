@@ -3,6 +3,7 @@
 /bin/
 /build/
 /buildgame/
+/buildrenderer/
 /debug/
 *.db
 /lib/*/
