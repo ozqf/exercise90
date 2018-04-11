@@ -136,8 +136,10 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 {
     AssertAlways(destRef != NULL);
+    AssertAlways(heap != NULL);
     FILE* f;
     fopen_s(&f, filePath, "rb");
+    AssertAlways(f != NULL);
 
     i32 end;
 
