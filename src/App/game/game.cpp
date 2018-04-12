@@ -121,9 +121,9 @@ void Game_BuildTestScene(GameState* gs)
     ent->transform.scale.x = 0.1f;
     ent->transform.scale.y = 0.1f;
     ent->transform.scale.z = 0.5f;
-    ent->transform.rot.x = 22.5f;       // Pitch
-    ent->transform.rot.y = 35;       // Yaw
-    ent->transform.rot.z = 0;   // Roll
+    ent->transform.rot.x = 22.5;       // Pitch
+    ent->transform.rot.y = 330;       // Yaw
+    //ent->transform.rot.z = 0;   // Roll
     
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);

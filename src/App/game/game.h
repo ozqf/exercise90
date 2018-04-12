@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Shared/shared.h"
-#include "../Shared/Collision/shared_collision.h"
+#include "../../Shared/shared.h"
+#include "../../Shared/Collision/shared_collision.h"
 
 #include "game_types.h"
 

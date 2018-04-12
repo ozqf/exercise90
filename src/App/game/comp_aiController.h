@@ -41,6 +41,7 @@ f32 moveDistance = 12;
 
 void Ent_UpdateAIControllers(GameState* gs, GameTime* time)
 {
+    
     #if 0
     u32 max = gs->aiControllerList.max;
     for (u32 i = 0; i < max; ++i)

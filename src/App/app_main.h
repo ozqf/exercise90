@@ -7,7 +7,7 @@
 #include "../interface/platform_interface.h"
 
 #include "app_types.h"
-#include "../Game/game.h"
+#include "Game/game.h"
 
 #define MAX_TEXTURES 128
 

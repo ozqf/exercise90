@@ -1,5 +1,8 @@
 @echo off
 
+@echo Setup vs
+@call vsvars2015
+
 @echo -----------------------------
 @echo Build Exercise 90 Game dll
 
@@ -16,9 +19,18 @@ set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
 @echo on
 cl %compilerFlags% %compilerDefines% /LD /Fe../bin/base/gamex86.dll ../src/App/app_main.cpp
-@echo off
-set compilerFlags=
-set compilerDefines=
 
-cd..
+@if %ERRORLEVEL% == 0 goto :FINISHED
+
+@echo Error: %ERRORLEVEL%
+
+@PAUSE
+
+:FINISHED
+
+@set compilerFlags=
+@set compilerDefines=
+
+@cd..
+
 @echo on
