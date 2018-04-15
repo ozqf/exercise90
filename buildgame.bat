@@ -1,7 +1,7 @@
 @echo off
 
 @echo Setup vs
-@call vsvars2015
+@rem @call vsvars2015
 
 @echo -----------------------------
 @echo Build Exercise 90 Game dll
@@ -15,10 +15,19 @@ if not exist buildGame mkdir buildGame
 cd buildGame
 del *.* /q
 
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
+set compIn=../src/App/app_main.cpp
+set compOut=/Fe../bin/base/gamex86.dll
+
+@rem /EHsc to avoid exception handling issues.
+@rem Warnings as Errors
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /EHsc
+
+@rem No warning elevation
+@rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi /EHsc
 set compilerDefines=/DPARANOID=1
+set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @echo on
-cl %compilerFlags% %compilerDefines% /LD /Fe../bin/base/gamex86.dll ../src/App/app_main.cpp
+cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
 
 @if %ERRORLEVEL% == 0 goto :FINISHED
 

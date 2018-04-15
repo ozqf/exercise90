@@ -411,6 +411,9 @@ i32 App_Init()
     testInput.rotSpeed = 90.0f;
     
     Game_Init();
+    g_worldScene.cameraTransform.rot.x = -22.5;
+    g_worldScene.cameraTransform.pos.z = 12;
+    g_worldScene.cameraTransform.pos.y = 7;
 
     return 1;
 }
@@ -418,6 +421,8 @@ i32 App_Init()
 i32 App_Shutdown()
 {
     printf("DLL Shutdown\n");
+
+    Game_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};
@@ -713,14 +718,11 @@ void App_Frame(GameTime* time, InputTick* input)
     GameState* gs = &g_gameState;
     GameState* ui = &g_uiState;
 
-    // Game state update
-    // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(gs, time, input);
-    Ent_UpdateAIControllers(gs, time);
-    Game_UpdateColliders(gs, time);
-    Game_UpdateProjectiles(gs, time);
-    //Game_UpdateAI(time);
 
+
+    // Game state update
+    Game_Tick(gs, time, input);
+    
     // Render
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;

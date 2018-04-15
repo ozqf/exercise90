@@ -445,7 +445,8 @@ int CALLBACK WinMain(
             {
                 return 1;
             }
-            
+            // Set timestamp so that we don't instantly reload the app
+            Win32_UpdateFileTimeStamp(appModulePath, &g_appModuleTimestamp);
 #endif
 
 #if 0
@@ -473,7 +474,7 @@ int CALLBACK WinMain(
 
                 if (g_windowActive == 0)
                 {
-                    Sleep(100);
+                    Sleep(50);
                 }
 
                 float newTime = Win32_FloatTime();

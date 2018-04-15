@@ -5,6 +5,8 @@
 
 #include "game_types.h"
 
+#include "game_physics.h"
+
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
 
@@ -74,5 +76,5 @@ global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 #include "comp_rendObj.h"
 #include "comp_aiController.h"
 
-#include "game.cpp"
 #include "game_ent_components.cpp"
+#include "game.cpp"

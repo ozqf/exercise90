@@ -143,6 +143,30 @@ u8 Win32_LinkToApplication()
     }
 }
 
+void Win32_UpdateFileTimeStamp(char* path, ULARGE_INTEGER* timeStamp)
+{
+    FILETIME time;// = NULL;
+    HANDLE fileHandle = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    BOOL gotTime = GetFileTime(fileHandle, NULL, NULL, &time);
+    CloseHandle(fileHandle);
+    if(gotTime)
+    {
+        
+        ULARGE_INTEGER large;
+        large.LowPart = time.dwLowDateTime;
+        large.HighPart = time.dwHighDateTime;
+        
+        timeStamp->QuadPart = large.QuadPart;
+        
+        // if (large.QuadPart != timeStamp->QuadPart)
+        // {
+		// 	timeStamp->QuadPart = large.QuadPart;
+        //     return;
+        // }
+    }
+    return;
+}
+
 u8 Win32_CheckFileModified(char* path, ULARGE_INTEGER* timeStamp)
 {
     FILETIME time;// = NULL;
@@ -237,7 +261,7 @@ u8 Win32_LinkToRenderer()
     }
     else
     {
-        Win32_Error("Failed to find game dll", "Error");
+        Win32_Error("Failed to find renderer dll", "Error");
         renderModuleState = 0;
         return 0;
     }

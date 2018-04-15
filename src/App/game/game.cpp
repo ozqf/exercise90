@@ -122,7 +122,7 @@ void Game_BuildTestScene(GameState* gs)
     ent->transform.scale.y = 0.1f;
     ent->transform.scale.z = 0.5f;
     ent->transform.rot.x = 22.5;       // Pitch
-    ent->transform.rot.y = 330;       // Yaw
+    ent->transform.rot.y = 45;       // Yaw
     //ent->transform.rot.z = 0;   // Roll
     
     controller = EC_AddAIController(ent, gs);
@@ -211,11 +211,41 @@ void Game_BuildTestHud(GameState* state)
 void Game_BuildTestMenu()
 {
 
+    
 }
 
 void Game_Init()
 {
+    PHYS_Init();
+
     Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
+}
+
+void Game_Shutdown()
+{
+    PHYS_Shutdown();
+}
+
+void Game_Tick(GameState* gs, GameTime* time, InputTick* input)
+{
+    PHYS_Step(gs, time);
+
+    Ent* ent = Ent_GetEntityByTag(&gs->entList, 1);
+    if (ent != NULL)
+    {
+        ent->transform.pos.x = g_testPos.x;
+        ent->transform.pos.y = g_testPos.y;
+        ent->transform.pos.z = g_testPos.z;
+    }
+
+    // Game state update
+    // Update all inputs, entity components and colliders/physics
+    Game_UpdateActorMotors(gs, time, input);
+    Ent_UpdateAIControllers(gs, time);
+    Game_UpdateColliders(gs, time);
+    Game_UpdateProjectiles(gs, time);
+    //Game_UpdateAI(time);
+
 }

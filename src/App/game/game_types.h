@@ -126,6 +126,7 @@ DEFINE_ENT_COMPONENT_LIST(Projectile)
 
 struct GameState
 {
+    u8 netMode; // 0 == server, 1 == client
     // Entities
     i32 nextEntityID;
     EntList entList;
