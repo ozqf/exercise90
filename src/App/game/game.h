@@ -5,7 +5,8 @@
 
 #include "game_types.h"
 
-#include "game_physics.h"
+//#include "game_physics.h"
+#include "../Physics/ZPhysics_interface.h"
 
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048

@@ -1,93 +1,43 @@
 #pragma once
 
-#if 0
-/**
- * !NO BULLET PHYSICS LIBRARY BEYOND THIS POINT!
- * 
- */
-#include "../../Shared/shared.h"
+#include "../../Shared/shared_types.h"
 
-#include "../../../lib/bullet/btBulletCollisionCommon.h"
-#include "../../../lib/bullet/btBulletDynamicsCommon.h"
-
-#include <windows.h>
-
-/**
- * Contains Pointers to a Bullet Physics Shape
- */
-struct PhysBodyHandle
+/////////////////////////////////////////////////////////////
+// List operations
+/////////////////////////////////////////////////////////////
+int Phys_CreateShape()
 {
-    u8 inUse;
-    i32 id;
-    btCollisionShape* shape;
-    btDefaultMotionState* motionState;
-    btRigidBody* rigidBody;
-};
-
-struct PhysBodyList
-{
-    PhysBodyHandle* items;
-    i32 capacity;
-};
-
-struct ZBulletWorld
-{
-    PhysBodyList bodies;
-
-    btBroadphaseInterface* broadphase;
-    btDefaultCollisionConfiguration* collisionConfiguration;
-    btCollisionDispatcher* dispatcher;
-    btSequentialImpulseConstraintSolver* solver;
-
-    btDiscreteDynamicsWorld* dynamicsWorld;
-};
-
-struct PhysicsTestState
-{
-    btCollisionShape* groundShape;
-    btDefaultMotionState* groundMotionState;
-    btRigidBody* groundRigidBody;
-
-    btCollisionShape* sphereShape;
-    btDefaultMotionState* sphereMotionState;
-    btRigidBody* sphereRigidBody;
-};
-
-ZBulletWorld g_world;
-PhysicsTestState g_physTest;
-
-Vec3 g_testPos;
-
-#define MAX_PHYS_BODIES 2048
-
-global_variable PhysBodyHandle g_bodies[MAX_PHYS_BODIES];
-
-PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
-{
-    
-    for(i32 i = 0; i < list->capacity; ++i)
-    {
-        PhysBodyHandle* handle = &list->items[i];
-        if (!handle->inUse)
-        {
-            handle->inUse = 1;
-            return handle;
-        }
-    }
-    return NULL;
+    return 0;
 }
 
-PhysBodyHandle* PHYS_CreateRigidBody(ZBulletWorld* world)
+int Phys_RemoveShape()
 {
-    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
-
-
-
-    return handle;
+    return 0;
 }
 
-void PHYS_Init()
+/////////////////////////////////////////////////////////////
+// Querying
+/////////////////////////////////////////////////////////////
+int Phys_QueryHitscan()
+{
+    return 0;
+}
+
+int Phys_QueryVolume()
+{
+    return 0;
+}
+
+Vec3 Phys_DebugGetPosition()
+{
+    return g_testPos;
+}
+
+/////////////////////////////////////////////////////////////
+// Lifetime
+/////////////////////////////////////////////////////////////
+
+void Phys_Init()
 {
     g_physTest = {};
     g_world = {};
@@ -133,9 +83,9 @@ void PHYS_Init()
     g_world.dynamicsWorld->addRigidBody(g_physTest.sphereRigidBody);
 }
 
-void PHYS_Step(GameState* gs, GameTime* time)
+void Phys_Step(f32 deltaTime)
 {
-    g_world.dynamicsWorld->stepSimulation(time->deltaTime, 10);
+    g_world.dynamicsWorld->stepSimulation(deltaTime, 10);
     btTransform t;
     g_physTest.sphereRigidBody->getMotionState()->getWorldTransform(t);
 
@@ -149,6 +99,17 @@ void PHYS_Step(GameState* gs, GameTime* time)
         OutputDebugString(buf);
     
 }
+
+void Phys_Shutdown()
+{
+    // Get order right or it will cause an access violation
+	delete g_world.dynamicsWorld;
+	delete g_world.solver;
+	delete g_world.dispatcher;
+	delete g_world.collisionConfiguration;
+    delete g_world.broadphase;
+}
+
 
 /*
 
@@ -201,15 +162,3 @@ void	BasicDemo::exitPhysics()
 	
 }
 */
-
-void PHYS_Shutdown()
-{
-    // Get order right or it will cause an access violation
-	delete g_world.dynamicsWorld;
-	delete g_world.solver;
-	delete g_world.dispatcher;
-	delete g_world.collisionConfiguration;
-    delete g_world.broadphase;
-}
-
-#endif

@@ -1,1 +1,2 @@
-cl /P /C ../preprocess/preprocess.h
+
+cl /P /C preprocess/preprocesstest.h

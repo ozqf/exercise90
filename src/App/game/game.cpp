@@ -216,7 +216,7 @@ void Game_BuildTestMenu()
 
 void Game_Init()
 {
-    PHYS_Init();
+    Phys_Init();
 
     Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
@@ -225,19 +225,20 @@ void Game_Init()
 
 void Game_Shutdown()
 {
-    PHYS_Shutdown();
+    Phys_Shutdown();
 }
 
 void Game_Tick(GameState* gs, GameTime* time, InputTick* input)
 {
-    PHYS_Step(gs, time);
+    Phys_Step(time->deltaTime);
 
     Ent* ent = Ent_GetEntityByTag(&gs->entList, 1);
     if (ent != NULL)
     {
-        ent->transform.pos.x = g_testPos.x;
-        ent->transform.pos.y = g_testPos.y;
-        ent->transform.pos.z = g_testPos.z;
+        Vec3 p = Phys_DebugGetPosition();
+        ent->transform.pos.x = p.x;
+        ent->transform.pos.y = p.y;
+        ent->transform.pos.z = p.z;
     }
 
     // Game state update

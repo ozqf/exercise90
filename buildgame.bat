@@ -15,7 +15,7 @@ if not exist buildGame mkdir buildGame
 cd buildGame
 del *.* /q
 
-set compIn=../src/App/app_main.cpp
+set compIn=../src/App/app_main.cpp ../src/App/Physics/ZPhysics.cpp
 set compOut=/Fe../bin/base/gamex86.dll
 
 @rem /EHsc to avoid exception handling issues.

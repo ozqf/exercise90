@@ -122,3 +122,7 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
 //     FooList fooList;
 //     //BarList barList;
 // };
+
+#define GET_CUBOID(data) &data->cuboid;
+
+GET_CUBOID(shape)
