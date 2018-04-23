@@ -5,37 +5,40 @@
 //////////////////////////////////////////////////////////////////
 // Collision Shapes
 //////////////////////////////////////////////////////////////////
-struct Collider_Cuboid
+#define ZCOLLIDER_TYPE_SPHERE 0
+#define ZCOLLIDER_TYPE_CUBOID 1
+#define ZCOLLIDER_TYPE_MESH 2
+
+struct ZCuboidCollider
 {
-	int w;
-    int h;
+	f32 size[3];
 };
 
-struct Collider_Sphere
+struct ZSphereCollider
 {
-	int radius;
+	f32 radius;
 };
 
-struct Collider_Mesh
+struct ZMeshCollider
 {
 	unsigned  char* mesh;
 };
 
 
-union Collider_U
+union ZCollider_U
 {
-	Collider_Cuboid cuboid;
-	Collider_Sphere sphere;
-	Collider_Mesh mesh;
+	ZCuboidCollider cuboid;
+	ZSphereCollider sphere;
+	ZMeshCollider mesh;
 };
 
 #define CAST_CUBOID(obj) &obj->data.cuboid;
 
-struct Phys_Shape
+struct ZCollider
 {
 	 int flags;
 	 int type;
-	 Collider_U data;
+	 ZCollider_U data;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -47,7 +50,7 @@ struct ZRayHit
 	Vec3 pos;
 	Vec3 normal;
 	Vec3 penetration;
-	Phys_Shape* victim;
+	ZCollider* victim;
 };
 
 struct ZRayHitscan
@@ -59,11 +62,11 @@ struct ZRayHitscan
 struct ZVolumeSearch
 {
 	int searchId;
-	Phys_Shape* shapes[100];
+	ZCollider* shapes[100];
 };
 
 struct ZTouchPair
 {
-	Phys_Shape* a;
-	Phys_Shape* b;
+	ZCollider* a;
+	ZCollider* b;
 };

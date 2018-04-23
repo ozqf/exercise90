@@ -14,13 +14,13 @@
 // Collision API
 //////////////////////////////////////////////////////////////////
 
-int Phys_CreateShape();
+i32 Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius);
 
-int Phys_RemoveShape();
+i32 Phys_RemoveShape();
 
-int Phys_QueryHitscan();
+i32 Phys_QueryHitscan();
 
-int Phys_QueryVolume();
+i32 Phys_QueryVolume();
 
 Vec3 Phys_DebugGetPosition();
 

@@ -82,6 +82,8 @@ struct EC_Collider
 {
     EntId entId;
     u8 inUse;
+    i32 shapeId;
+
     u32 lastFrameOverlapping;
     Vec3 size;
     Vec3 velocity;

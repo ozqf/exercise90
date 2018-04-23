@@ -12,7 +12,15 @@
 struct PhysBodyHandle
 {
     u8 inUse;
+    // internal id
     i32 id;
+    // external id
+    i32 ownerId;
+    // written every frame, report state to outside world
+    Transform transform;
+    //ZCollider collider; // 'shadow' presented to the external interface
+
+    // pointers to bullet physics objects
     btCollisionShape* shape;
     btDefaultMotionState* motionState;
     btRigidBody* rigidBody;

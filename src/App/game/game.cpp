@@ -134,6 +134,12 @@ void Game_BuildTestScene(GameState* gs)
 
     collider = EC_AddCollider(ent, gs);
     collider->size = { 1, 1, 1 };
+    collider->shapeId = Phys_CreateSphere(
+        ent->transform.pos.x,
+        ent->transform.pos.y,
+        ent->transform.pos.z,
+        1
+        );
 }
 
 void Game_BuildTestHud(GameState* state)

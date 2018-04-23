@@ -486,7 +486,7 @@ int CALLBACK WinMain(
                 g_checkAppReloadTick -= g_gameTime.deltaTime;
                 if (g_checkAppReloadTick <= 0)
                 {
-                    g_checkAppReloadTick = 1;
+                    g_checkAppReloadTick = 0.1f;
                     if (Win32_CheckFileModified(appModulePath, &g_appModuleTimestamp))
                     {
                         Win32_LinkToApplication();

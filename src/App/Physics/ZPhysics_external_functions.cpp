@@ -5,9 +5,10 @@
 /////////////////////////////////////////////////////////////
 // List operations
 /////////////////////////////////////////////////////////////
-int Phys_CreateShape()
+int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius)
 {
-    return 0;
+    PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, x, y, z, radius);
+    return h->id;
 }
 
 int Phys_RemoveShape()
@@ -37,6 +38,37 @@ Vec3 Phys_DebugGetPosition()
 // Lifetime
 /////////////////////////////////////////////////////////////
 
+void Phys_CreateTestScene(ZBulletWorld* world)
+{
+    // hello bullet physics
+
+    // Add static ground-plane
+    g_physTest.groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -1);
+    g_physTest.groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, g_physTest.groundMotionState, g_physTest.groundShape, btVector3(0, 0, 0));
+    groundRigidBodyCI.m_restitution = 1.0f;
+    g_physTest.groundRigidBody = new btRigidBody(groundRigidBodyCI);
+    world->dynamicsWorld->addRigidBody(g_physTest.groundRigidBody);
+
+#if 0
+    // Add dynamic sphere, 50m above the ground
+    g_physTest.sphereShape = new btSphereShape(1);
+    g_physTest.sphereMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0.2f, 12, 0.5f)));
+    
+    btScalar mass = 1;
+    btVector3 fallInertia(0, 0, 0);
+    g_physTest.sphereShape->calculateLocalInertia(mass, fallInertia);
+
+    btRigidBody::btRigidBodyConstructionInfo sphereBodyCI(mass, g_physTest.sphereMotionState, g_physTest.sphereShape, fallInertia);
+    sphereBodyCI.m_restitution = 0.75f;
+    sphereBodyCI.m_friction = 0.0f;
+    
+    g_physTest.sphereRigidBody = new btRigidBody(sphereBodyCI);
+    //g_physTest.sphereRigidBody->setRestitution(1);
+    world->dynamicsWorld->addRigidBody(g_physTest.sphereRigidBody);
+#endif
+}
+
 void Phys_Init()
 {
     g_physTest = {};
@@ -54,50 +86,46 @@ void Phys_Init()
     g_world.dynamicsWorld = new btDiscreteDynamicsWorld(g_world.dispatcher, g_world.broadphase, g_world.solver, g_world.collisionConfiguration);
 
     g_world.dynamicsWorld->setGravity(btVector3(0, -15, 0));
-
-
-    // hello bullet physics
-
-    // Add static ground-plane
-    g_physTest.groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -1);
-    g_physTest.groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
-    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, g_physTest.groundMotionState, g_physTest.groundShape, btVector3(0, 0, 0));
-    groundRigidBodyCI.m_restitution = 1.0f;
-    g_physTest.groundRigidBody = new btRigidBody(groundRigidBodyCI);
-    g_world.dynamicsWorld->addRigidBody(g_physTest.groundRigidBody);
-
-    // Add dynamic sphere, 50m above the ground
-    g_physTest.sphereShape = new btSphereShape(1);
-    g_physTest.sphereMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 15, 0)));
     
-    btScalar mass = 1;
-    btVector3 fallInertia(0, 0, 0);
-    g_physTest.sphereShape->calculateLocalInertia(mass, fallInertia);
+    Phys_CreateTestScene(&g_world);
+}
 
-    btRigidBody::btRigidBodyConstructionInfo sphereBodyCI(mass, g_physTest.sphereMotionState, g_physTest.sphereShape, fallInertia);
-    sphereBodyCI.m_restitution = 0.75f;
-    sphereBodyCI.m_friction = 0.0f;
+void Phys_StepWorld(ZBulletWorld* world, f32 deltaTime)
+{
+    world->dynamicsWorld->stepSimulation(deltaTime, 10);
+#if 0
+    btTransform trans;
+    g_physTest.sphereRigidBody->getMotionState()->getWorldTransform(trans);
+
+    btVector3 pos = trans.getOrigin();
+    g_testPos.x = pos.getX();
+    g_testPos.y = pos.getY();
+    g_testPos.z = pos.getZ();
+#endif
+    i32 len = world->bodies.capacity;
+    for (int i = 0; i < len; ++i)
+    {
+        PhysBodyHandle* h = &world->bodies.items[i];
+        if (h->inUse == FALSE) { continue; }
+        Assert(h->motionState != NULL);
+        btTransform t;
+        //h->motionState->getWorldTransform(t);
+        h->rigidBody->getMotionState()->getWorldTransform(t);
+        btVector3 p = t.getOrigin();
+        h->transform.pos.x = p.getX();
+        h->transform.pos.y = p.getY();
+        h->transform.pos.z = p.getZ();
+    }
+
+    /*char buf[128];
+        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
+        OutputDebugString(buf);*/
     
-    g_physTest.sphereRigidBody = new btRigidBody(sphereBodyCI);
-    //g_physTest.sphereRigidBody->setRestitution(1);
-    g_world.dynamicsWorld->addRigidBody(g_physTest.sphereRigidBody);
 }
 
 void Phys_Step(f32 deltaTime)
 {
-    g_world.dynamicsWorld->stepSimulation(deltaTime, 10);
-    btTransform t;
-    g_physTest.sphereRigidBody->getMotionState()->getWorldTransform(t);
-
-    btVector3 pos = t.getOrigin();
-    g_testPos.x = pos.getX();
-    g_testPos.y = pos.getY();
-    g_testPos.z = pos.getZ();
-
-    char buf[128];
-        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
-        OutputDebugString(buf);
-    
+    Phys_StepWorld(&g_world, deltaTime);
 }
 
 void Phys_Shutdown()
