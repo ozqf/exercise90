@@ -387,6 +387,8 @@ i32 App_Init()
 
 	AllocateDebugStrings(&g_heap);
 	//AllocateTestStrings(&g_heap);
+    //g_collisionEventBuffer
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2024, "Collision Buf");
 
     SharedAssets_Init();
 
@@ -718,10 +720,14 @@ void App_Frame(GameTime* time, InputTick* input)
     GameState* gs = &g_gameState;
     GameState* ui = &g_uiState;
 
-
+    MemoryBlock collisionBuffer = {};
+    
+    Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
+    collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
+    collisionBuffer.size = g_collisionEventBuffer.objectSize;
 
     // Game state update
-    Game_Tick(gs, time, input);
+    Game_Tick(gs, &collisionBuffer, time, input);
     
     // Render
     // Make sure  render lists have been cleared or bad stuff will happen

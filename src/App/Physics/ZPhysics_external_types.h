@@ -70,3 +70,15 @@ struct ZTouchPair
 	ZCollider* a;
 	ZCollider* b;
 };
+
+//////////////////////////////////////////////////////////////////
+// Collision query data
+//////////////////////////////////////////////////////////////////
+
+struct ZTransformUpdateEvent
+{
+	i32 type;
+	u16 ownerId;
+	u16 ownerIteration;
+	Vec3 pos;
+};

@@ -15,7 +15,8 @@ struct PhysBodyHandle
     // internal id
     i32 id;
     // external id
-    i32 ownerId;
+    u16 ownerId;
+    u16 ownerIteration;
     // written every frame, report state to outside world
     Transform transform;
     //ZCollider collider; // 'shadow' presented to the external interface

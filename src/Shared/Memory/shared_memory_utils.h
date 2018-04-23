@@ -2,16 +2,19 @@
  * Utility functions for manipulating raw memory
  ******************************************/
 #pragma once
-#include "shared_types.h"
+#include "../shared_types.h"
 
 void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {
+	Assert(source != NULL);
+	Assert(target != NULL);
     u32 progress = 0;
     while (progress < numBytes)
     {
         *target = *source;
         source++;
         target++;
+		progress++;
     };
 }
 

@@ -138,8 +138,71 @@ void Game_BuildTestScene(GameState* gs)
         ent->transform.pos.x,
         ent->transform.pos.y,
         ent->transform.pos.z,
-        1
+        1,
+        ent->entId.index,
+        ent->entId.iteration
         );
+
+	// and again
+	ent = Ent_GetFreeEntity(&gs->entList);
+	ent->tag = 1;
+	ent->transform.pos.z = -4;
+	ent->transform.pos.z = -8;
+	ent->transform.scale.x = 0.1f;
+	ent->transform.scale.y = 0.1f;
+	ent->transform.scale.z = 0.5f;
+	ent->transform.rot.x = 22.5;       // Pitch
+	ent->transform.rot.y = 45;       // Yaw
+									 //ent->transform.rot.z = 0;   // Roll
+
+	controller = EC_AddAIController(ent, gs);
+	Ent_InitAIController(controller, 1, 0, 0, 5);
+
+	renderer = EC_AddRenderer(ent, gs);
+	//RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+	RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
+
+	collider = EC_AddCollider(ent, gs);
+	collider->size = { 1, 1, 1 };
+	collider->shapeId = Phys_CreateSphere(
+		ent->transform.pos.x,
+		ent->transform.pos.y,
+		ent->transform.pos.z,
+		1,
+		ent->entId.index,
+		ent->entId.iteration
+	);
+
+
+	// and again
+	ent = Ent_GetFreeEntity(&gs->entList);
+	ent->tag = 1;
+	ent->transform.pos.z = -4;
+	ent->transform.pos.z = -8;
+	ent->transform.scale.x = 0.1f;
+	ent->transform.scale.y = 0.1f;
+	ent->transform.scale.z = 0.5f;
+	ent->transform.rot.x = 22.5;       // Pitch
+	ent->transform.rot.y = 45;       // Yaw
+									 //ent->transform.rot.z = 0;   // Roll
+
+	controller = EC_AddAIController(ent, gs);
+	Ent_InitAIController(controller, 1, 0, 0, 5);
+
+	renderer = EC_AddRenderer(ent, gs);
+	//RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+	RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
+
+	collider = EC_AddCollider(ent, gs);
+	collider->size = { 1, 1, 1 };
+	collider->shapeId = Phys_CreateSphere(
+		ent->transform.pos.x,
+		ent->transform.pos.y,
+		ent->transform.pos.z,
+		1,
+		ent->entId.index,
+		ent->entId.iteration
+	);
 }
 
 void Game_BuildTestHud(GameState* state)
@@ -234,18 +297,56 @@ void Game_Shutdown()
     Phys_Shutdown();
 }
 
-void Game_Tick(GameState* gs, GameTime* time, InputTick* input)
+inline void Game_UpdateEntityPosition(GameState* gs, EntId* entId, f32 x, f32 y, f32 z)
 {
-    Phys_Step(time->deltaTime);
+	Ent* ent = Ent_GetEntity(&gs->entList, entId);
+	if (ent != NULL)
+	{
+		ent->transform.pos.x = x;
+		ent->transform.pos.y = y;
+		ent->transform.pos.z = z;
+	}
+}
 
-    Ent* ent = Ent_GetEntityByTag(&gs->entList, 1);
+void Game_Tick(GameState* gs, MemoryBlock* eventBuffer, GameTime* time, InputTick* input)
+{
+    Phys_Step(eventBuffer, time->deltaTime);
+    //u8* ptr = (u8*)eventBuffer->ptrMemory;
+	i32 ptrOffset = 0;
+    u8 reading = 1;
+    while (reading && ptrOffset < eventBuffer->size)
+    {
+		u8* mem = (u8*)((u8*)eventBuffer->ptrMemory + ptrOffset);
+		i32 type = *(i32*)mem;
+        switch (type)
+        {
+            case 1:
+            {
+                ZTransformUpdateEvent tUpdate = {};
+                COM_CopyMemory(mem, (u8*)&tUpdate, sizeof(ZTransformUpdateEvent));
+				ptrOffset += sizeof(ZTransformUpdateEvent);
+				EntId entId = {};
+				entId.index = tUpdate.ownerId;
+				entId.iteration = tUpdate.ownerIteration;
+				Game_UpdateEntityPosition(gs, &entId, tUpdate.pos.x, tUpdate.pos.y, tUpdate.pos.z);
+                //ptr += sizeof(ZTransformUpdateEvent);
+            } break;
+
+            default:
+            {
+                reading = 0;
+            } break;
+        }
+    }
+
+    /*Ent* ent = Ent_GetEntityByTag(&gs->entList, 1);
     if (ent != NULL)
     {
         Vec3 p = Phys_DebugGetPosition();
         ent->transform.pos.x = p.x;
         ent->transform.pos.y = p.y;
         ent->transform.pos.z = p.z;
-    }
+    }*/
 
     // Game state update
     // Update all inputs, entity components and colliders/physics

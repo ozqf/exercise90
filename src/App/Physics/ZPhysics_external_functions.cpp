@@ -1,13 +1,15 @@
 #pragma once
 
-#include "../../Shared/shared_types.h"
+#include "../../Shared/shared_module.h"
 
 /////////////////////////////////////////////////////////////
 // List operations
 /////////////////////////////////////////////////////////////
-int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius)
+int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u16 ownerId, u16 ownerIteration)
 {
     PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, x, y, z, radius);
+	h->ownerId = ownerId;
+	h->ownerIteration = ownerIteration;
     return h->id;
 }
 
@@ -90,7 +92,7 @@ void Phys_Init()
     Phys_CreateTestScene(&g_world);
 }
 
-void Phys_StepWorld(ZBulletWorld* world, f32 deltaTime)
+void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
 {
     world->dynamicsWorld->stepSimulation(deltaTime, 10);
 #if 0
@@ -102,20 +104,46 @@ void Phys_StepWorld(ZBulletWorld* world, f32 deltaTime)
     g_testPos.y = pos.getY();
     g_testPos.z = pos.getZ();
 #endif
+    u8* writePosition = (u8*)eventBuffer->ptrMemory;
     i32 len = world->bodies.capacity;
     for (int i = 0; i < len; ++i)
     {
         PhysBodyHandle* h = &world->bodies.items[i];
         if (h->inUse == FALSE) { continue; }
         Assert(h->motionState != NULL);
+
+        // Get position
         btTransform t;
         //h->motionState->getWorldTransform(t);
         h->rigidBody->getMotionState()->getWorldTransform(t);
         btVector3 p = t.getOrigin();
+
+        // Write position to handle
         h->transform.pos.x = p.getX();
         h->transform.pos.y = p.getY();
         h->transform.pos.z = p.getZ();
+
+        // write position update
+        ZTransformUpdateEvent tUpdate = {};
+        tUpdate.type = 1;
+        tUpdate.ownerId = h->ownerId;
+		tUpdate.ownerIteration = h->ownerIteration;
+        tUpdate.pos.x = h->transform.pos.x;
+        tUpdate.pos.y = h->transform.pos.y;
+        tUpdate.pos.z = h->transform.pos.z;
+
+        // write event to buffer
+        i32 size = sizeof(tUpdate);
+		ZTransformUpdateEvent* ptrTUpdate = &tUpdate;
+		//u8* ptrUpdate = (u8*)&tUpdate;
+		u8* ptrUpdate = (u8*)ptrTUpdate;
+        //i32 written = ptr - eventBuffer->ptrMemory;
+        COM_CopyMemory(ptrUpdate, writePosition, size);
+        writePosition += size;
     }
+    
+    // Mark end of buffer
+    *writePosition = 0;
 
     /*char buf[128];
         sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
@@ -123,9 +151,9 @@ void Phys_StepWorld(ZBulletWorld* world, f32 deltaTime)
     
 }
 
-void Phys_Step(f32 deltaTime)
+void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
 {
-    Phys_StepWorld(&g_world, deltaTime);
+    Phys_StepWorld(&g_world, eventBuffer, deltaTime);
 }
 
 void Phys_Shutdown()

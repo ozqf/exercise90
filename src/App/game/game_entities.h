@@ -35,6 +35,18 @@ inline void Ent_Free(Ent* ent)
     ent->componentFlags = 0;
 }
 
+inline Ent* Ent_GetEntity(EntList* ents, EntId* entId)
+{
+	for (u32 i = 0; i < ents->max; ++i)
+	{
+		if (EntId_Equals(&ents->items[i].entId, entId))
+		{
+			return &ents->items[i];
+		}
+	}
+	return NULL;
+}
+
 inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
 {
     Assert(index < ents->max)
