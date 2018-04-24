@@ -1,7 +1,7 @@
 @echo off
 
 @echo Setup vs
-@rem @call vsvars2015
+@call vsvars2015
 
 @echo -----------------------------
 @echo Build Exercise 90 Game dll

@@ -12,6 +12,61 @@
 
 #define NULL 0
 
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+// Copy Struct
+/////////////////////////////////////////////////////////////////////////////////
+void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
+{
+	ASSERT(source != NULL);
+	ASSERT(target != NULL);
+    u32 progress = 0;
+    while (progress < numBytes)
+    {
+        *target = *source;
+        source++;
+        target++;
+		progress++;
+    };
+}
+
+#ifndef COM_COPY
+#define COM_COPY(ptrSource, ptrDestination, structType) \
+COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
+#endif
+// /COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##));
+#ifndef COM_COPY_AND_MOVE
+#define COM_COPY_AND_MOVE(ptrSource, ptrDestination, structType) \
+COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##)); \
+ptrDestination = (u8*)(##ptrDestination + sizeof(##structType##));
+#endif
+
+struct Foo
+{
+    u32 value1;
+    u32 value2;
+};
+
+void WriteFoo()
+{
+    Foo foo = {};
+    Foo* ptrFoo = &foo;
+    u8 buffer[64];
+    // copy
+    COM_COPY(ptrFoo, buffer, Foo);
+    u8* b2 = buffer;
+    // copy and move
+    COM_COPY_AND_MOVE(ptrFoo, b2, Foo)
+
+    COM_CopyMemory((unsigned char*)ptrFoo, (unsigned char*)b2, sizeof(Foo)); b2 = (unsigned char*)(b2 + sizeof(Foo));
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+// Entity system
+/////////////////////////////////////////////////////////////////////////////////
 union EntId
 {
     struct
@@ -112,17 +167,17 @@ static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFl
 // Create Some dummy components
 //////////////////////////////////////////////////
 
-DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
+DEFINE_ENT_COMPONENT_BASE(FooList, fooList, COMP_FLAG_FOO)
 
 //DEFINE_ENT_COMPONENT_BASE(Bar, bar, COMP_FLAG_BAR)
 
 // Lists are constructed via macro
-// struct GameState
-// {
-//     FooList fooList;
-//     //BarList barList;
-// };
+struct GameState
+{
+    FooList fooList;
+    //BarList barList;
+};
 
 #define GET_CUBOID(data) &data->cuboid;
 
-GET_CUBOID(shape)
+//GET_CUBOID(shape)

@@ -1,7 +1,7 @@
-/*******************************************
- * Utility functions for manipulating raw memory
- ******************************************/
 #pragma once
+///////////////////////////////////////////////////////////////////////
+// Utility functions for manipulating raw memory
+///////////////////////////////////////////////////////////////////////
 #include "../shared_types.h"
 
 void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
@@ -74,4 +74,28 @@ u32 COM_AlignSize(u32 value, u32 alignment)
     if (remainder == 0) { return value; }
     remainder = alignment - remainder;
     return value + remainder;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Macros
+///////////////////////////////////////////////////////////////////////
+#ifndef COM_COPY
+#define COM_COPY(ptrSource, ptrDestination, structType) \
+COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
+#endif
+
+#ifndef COM_COPY_STEP
+#define COM_COPY_STEP(ptrSource, ptrDestination, structType) \
+ptrDestination = (u8*)((u32)ptrDestination + (u32)sizeof(##structType##))
+#endif
+
+void COM_Mem_Test()
+{
+    Vec3 v = {};
+    u8 buffer[64];
+    u8* b2 = 0;
+    // copy
+    COM_COPY(&v, buffer, Vec3);
+    // copy and move
+    COM_COPY_STEP(&v, b2, Vec3);
 }

@@ -117,6 +117,7 @@ void Game_BuildTestScene(GameState* gs)
     /////////////////////////////////////////////////////////////'
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 1;
+    ent->transform.pos.y = 5;
     ent->transform.pos.z = -3;
     ent->transform.scale.x = 0.1f;
     ent->transform.scale.y = 0.1f;
@@ -146,8 +147,9 @@ void Game_BuildTestScene(GameState* gs)
 	// and again
 	ent = Ent_GetFreeEntity(&gs->entList);
 	ent->tag = 1;
-	ent->transform.pos.z = -4;
-	ent->transform.pos.z = -8;
+    ent->transform.pos.x = 5;
+	ent->transform.pos.y = 6;
+	ent->transform.pos.z = 3;
 	ent->transform.scale.x = 0.1f;
 	ent->transform.scale.y = 0.1f;
 	ent->transform.scale.z = 0.5f;
@@ -177,8 +179,9 @@ void Game_BuildTestScene(GameState* gs)
 	// and again
 	ent = Ent_GetFreeEntity(&gs->entList);
 	ent->tag = 1;
-	ent->transform.pos.z = -4;
-	ent->transform.pos.z = -8;
+	ent->transform.pos.y = 16;
+    ent->transform.pos.x = -3;
+	ent->transform.pos.z = -3;
 	ent->transform.scale.x = 0.1f;
 	ent->transform.scale.y = 0.1f;
 	ent->transform.scale.z = 0.5f;

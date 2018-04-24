@@ -74,7 +74,7 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, f32 x, f32 y, f32 z
     btRigidBody* rigidBody;
     */
     handle->shape = new btSphereShape(radius);
-    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0.2f, 12, 0.5f)));
+    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(x, y, z)));
     
     btScalar mass = 1;
     btVector3 fallInertia(0, 0, 0);
