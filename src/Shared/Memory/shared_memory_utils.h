@@ -89,6 +89,18 @@ COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType#
 ptrDestination = (u8*)((u32)ptrDestination + (u32)sizeof(##structType##))
 #endif
 
+
+#ifndef COM_HANDLE_EVENT_CASE
+#define COM_HANDLE_EVENT_CASE(eventTypeInteger, structType, ptrBytes, ptrBufferStart, bufferSize, functionName) \
+case eventTypeInteger##: \
+{ \
+	ASSERT(COM_CheckBufferHasSpace((u8*)##ptrBytes##, (u8*)ptrBufferStart##, bufferSize##, sizeof(##structType##))); \
+    structType ev = {}; \
+    COM_COPY(##ptrBytes##, &##ev##, structType##); \
+    ptrBytes = ((u8*)##ptrBytes + sizeof(##structType##)); \
+} break;
+#endif
+
 void COM_Mem_Test()
 {
     Vec3 v = {};

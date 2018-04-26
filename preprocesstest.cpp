@@ -1,26 +1,27 @@
+#line 1 "preprocess/preprocesstest.h"
 #pragma once
 //////////////////////////////////////////////////
 // Preprocessor Test
 // Generated basic component functions
 //////////////////////////////////////////////////
-#define u32 unsigned int
-#define u8 unsigned char
-#define ASSERT(expr) if (!(expr)) { *(int *)0 = 0; }
 
-#define MAX_FOO 2048
-#define MAX_BAR 2048
 
-#define NULL 0
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // Buffer read/write test
 //////////////////////////////////////////////////
 
-void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
+void COM_CopyMemory(unsigned char* source, unsigned char* target, unsigned int numBytes)
 {
-	ASSERT(source != NULL);
-	ASSERT(target != NULL);
-    u32 progress = 0;
+	if (!(source != 0)) { *(int *)0 = 0; };
+	if (!(target != 0)) { *(int *)0 = 0; };
+    unsigned int progress = 0;
     while (progress < numBytes)
     {
         *target = *source;
@@ -30,22 +31,22 @@ void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
     };
 }
 
-inline u32 COM_GetBufferSpace(u8* currentPosition, u8* bufferStart, u32 bufferSize)
+inline unsigned int COM_GetBufferSpace(unsigned char* currentPosition, unsigned char* bufferStart, unsigned int bufferSize)
 {
-	u8* end = bufferStart + bufferSize;
+	unsigned char* end = bufferStart + bufferSize;
 	return end - currentPosition;
 }
 
-inline u8 COM_CheckBufferHasSpace(u8* currentPosition, u8* bufferStart, u32 bufferSize, u32 objectSize)
+inline unsigned char COM_CheckBufferHasSpace(unsigned char* currentPosition, unsigned char* bufferStart, unsigned int bufferSize, unsigned int objectSize)
 {
 	return (COM_GetBufferSpace(currentPosition, bufferStart, bufferSize) >= objectSize);
 }
 
-#ifndef COM_COPY
-#define COM_COPY(ptrSrc, ptrDest, dataType) \
-COM_CopyMemory((u8*)##ptrSrc##, (u8*)##ptrDest##, sizeof(##dataType##))
+
+
+
 //ptrPosition = (u8*)
-#endif
+#line 49 "preprocess/preprocesstest.h"
 
 /*
 To handle an event:
@@ -54,16 +55,16 @@ To handle an event:
 > Event handler function name (with common interface)
 */
 
-#ifndef COM_HANDLE_EVENT_CASE
-#define COM_HANDLE_EVENT_CASE(eventTypeInteger, structType, ptrBytes, ptrBufferStart, bufferSize, functionName) \
-case eventTypeInteger##: \
-{ \
-	ASSERT(COM_CheckBufferHasSpace((u8*)##ptrBytes##, (u8*)ptrBufferStart##, bufferSize##, sizeof(##structType##))); \
-    structType ev = {}; \
-    COM_COPY(##ptrBytes##, &##ev##, structType##); \
-    ptrBytes = ((u8*)##ptrBytes + sizeof(##structType##)); \
-} break;
-#endif
+
+
+
+
+
+
+
+
+
+#line 67 "preprocess/preprocesstest.h"
 /*
 #ifndef COM_HANDLE_EVENT_CASE
 #define COM_HANDLE_EVENT_CASE(eventTypeInteger, structType, ptrBytes, ptrBufferStart, bufferSize, functionName) \
@@ -80,14 +81,14 @@ case eventTypeInteger##: \
 
 struct TestEvent
 {
-    u32 type;
-    u32 data;
+    unsigned int type;
+    unsigned int data;
 };
 
 struct TestEvent_B
 {
-    u32 type;
-    u32 data;
+    unsigned int type;
+    unsigned int data;
 };
 
 void HandleTestEvent(TestEvent* ev)
@@ -105,18 +106,23 @@ void SomeFunction()
     TestEvent s1 = {};
     TestEvent* ptrS1 = &s1;
 
-    char buffer[32];
-    char* pos = buffer;
-    COM_COPY(ptrS1, buffer, TestEvent);
+    unsigned char buffer[32];
+    unsigned char* pos = buffer;
+    COM_CopyMemory((unsigned char*)ptrS1, (unsigned char*)buffer, sizeof(TestEvent));
 
-    COM_COPY(buffer, ptrS1, TestEvent);
+    COM_CopyMemory((unsigned char*)buffer, (unsigned char*)ptrS1, sizeof(TestEvent));
 	
-	u32 val = 1;
+	unsigned int val = 1;
 	
 	switch (val)
 	{
-		COM_HANDLE_EVENT_CASE(1, TestEvent, pos, buffer, 32, HandleTestEvent)
-		COM_HANDLE_EVENT_CASE(2, TestEvent_B, pos, buffer, 32, HandleTestEvent_B)
+		case 1:
+        {
+            if (!(COM_CheckBufferHasSpace((unsigned char*)pos, (unsigned char*)buffer, 32, sizeof(TestEvent)))) { *(int *)0 = 0; };
+            TestEvent ev = {};
+            COM_CopyMemory((unsigned char*)pos, (unsigned char*)&ev, sizeof(TestEvent));
+            pos = ((unsigned char*)pos + sizeof(TestEvent)); } break;
+		case 2: { if (!(COM_CheckBufferHasSpace((unsigned char*)pos, (unsigned char*)buffer, 32, sizeof(TestEvent_B)))) { *(int *)0 = 0; }; TestEvent_B ev = {}; COM_CopyMemory((unsigned char*)pos, (unsigned char*)&ev, sizeof(TestEvent_B)); pos = ((unsigned char*)pos + sizeof(TestEvent_B)); } break;
 	}
 }
 
@@ -127,10 +133,10 @@ union EntId
 {
     struct
     {
-        u32 index;
-        u32 iteration;
+        unsigned int index;
+        unsigned int iteration;
     };
-    u32 arr[2];
+    unsigned int arr[2];
 };
 
 inline void EntId_Copy(EntId* source, EntId* target)
@@ -139,7 +145,7 @@ inline void EntId_Copy(EntId* source, EntId* target)
     target->iteration = source->iteration;
 }
 
-inline u8 EntId_Equals(EntId* a, EntId* b)
+inline unsigned char EntId_Equals(EntId* a, EntId* b)
 {
     return (a->index == b->index && a->iteration == b->iteration);
 }
@@ -147,25 +153,25 @@ inline u8 EntId_Equals(EntId* a, EntId* b)
 struct Ent
 {
     EntId entId;
-    u32 componentFlags;
+    unsigned int componentFlags;
 };
 
 struct Foo
 {
     EntId entId;
-    u8 inUse;
+    unsigned char inUse;
 };
 
 struct Bar
 {
     EntId entId;
-    u8 inUse;
+    unsigned char inUse;
 };
 
 struct AIController
 {
     EntId entId;
-    u8 inUse;
+    unsigned char inUse;
 };
 
 //////////////////////////////////////////////////
@@ -178,52 +184,52 @@ struct AIController
 // Define Component flags
 //////////////////////////////////////////////////
 
-#define COMP_FLAG_FOO 0x0001
-#define COMP_FLAG_BAR 0x0002
+
+
 
 //////////////////////////////////////////////////
 // Define component list struct
 // and Component Add/Remove/Has functions
 //////////////////////////////////////////////////
-#define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
-\
-struct type##List \
-{ \
-    type* items; \
-    unsigned int count; \
-}; \
-\
-static inline type* EntComp_Add##type##(Ent* ent, GameState* gs) \
-{ \
-    type* comp; \
-    for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
-    { \
-        comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->inUse == 0) \
-        { \
-            comp->inUse = 1; \
-            comp->entId.index = ent->entId.index; \
-            comp->entId.iteration = ent->entId.iteration; \
-            ent->componentFlags |= typeFlagDefine; \
-            return comp; \
-        } \
-    } \
-    return NULL; \
-}; \
-\
-static inline void EntComp_Remove##type##(Ent* ent, GameState* gs, type* comp) \
-{ \
-    ent->componentFlags &= ~typeFlagDefine; \
-    comp->inUse = 0; \
-}; \
-\
-static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // Create Some dummy components
 //////////////////////////////////////////////////
 
-DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
+struct AIControllerList { AIController* items; unsigned int count; }; static inline AIController* EntComp_AddAIController(Ent* ent, GameState* gs) { AIController* comp; for (unsigned int i = 0; i < gs->aiControllerList.count; ++i) { comp = &gs->aiControllerList.items[i]; if (comp->inUse == 0) { comp->inUse = 1; comp->entId.index = ent->entId.index; comp->entId.iteration = ent->entId.iteration; ent->componentFlags |= 0x0001; return comp; } } return 0; }; static inline void EntComp_RemoveAIController(Ent* ent, GameState* gs, AIController* comp) { ent->componentFlags &= ~0x0001; comp->inUse = 0; }; static inline unsigned char Ent_HasAIController(Ent* ent) { return (ent->componentFlags & 0x0001); }
 
 //DEFINE_ENT_COMPONENT_BASE(Bar, bar, COMP_FLAG_BAR)
 
@@ -234,6 +240,6 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
 //     //BarList barList;
 // };
 
-#define GET_CUBOID(data) &data->cuboid;
 
-GET_CUBOID(shape)
+
+&shape->cuboid;

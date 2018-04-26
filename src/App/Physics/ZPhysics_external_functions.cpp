@@ -133,16 +133,6 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         tUpdate.pos.z = h->transform.pos.z;
 
         COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
-#if 0
-        // write event to buffer
-        i32 size = sizeof(tUpdate);
-		ZTransformUpdateEvent* ptrTUpdate = &tUpdate;
-		//u8* ptrUpdate = (u8*)&tUpdate;
-		u8* ptrUpdate = (u8*)ptrTUpdate;
-        //i32 written = ptr - eventBuffer->ptrMemory;
-        COM_CopyMemory(ptrUpdate, writePosition, size);
-        writePosition += size;
-#endif
     }
     
     // Mark end of buffer
