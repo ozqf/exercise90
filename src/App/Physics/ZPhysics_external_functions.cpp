@@ -133,21 +133,46 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         tUpdate.pos.z = h->transform.pos.z;
         
         // attempt to read angle:
-        btMatrix3x3 m = t.getBasis();
 
-        //
+        // Bullet Appears to use X = roll, Y = pitch, Z = Yaw
+        // Ex90 uses x = pitch, y = yaw, z = roll
+        //          Bullet      Ex90
+        // Roll     X           Z
+        // Pitch    Y           X
+        // Yaw      Z           Y
+
+#if 1
+        btScalar openglM[16];
+        t.getOpenGLMatrix(openglM);
+
+        // btScalar m[16];
+        // t.getOpenGLMatrix(m);
+        f32 fAngZ = atan2f(openglM[1], openglM[5]);
+        f32 fAngY = atan2f(openglM[8], openglM[10]);
+        f32 fAngX = -asinf(openglM[9]);
+        // tUpdate.rot.x = COM_CapAngleDegrees(fAngX * RAD2DEG);
+        // tUpdate.rot.y = COM_CapAngleDegrees(fAngY * RAD2DEG);
+        // tUpdate.rot.z = COM_CapAngleDegrees(fAngZ * RAD2DEG);
+        tUpdate.rot.x = fAngX * RAD2DEG;
+        tUpdate.rot.y = fAngY * RAD2DEG;
+        tUpdate.rot.z = fAngZ * RAD2DEG;
+#endif
+#if 0
+        btMatrix3x3 m = t.getBasis();
         btScalar pitchX;
         btScalar yawY;
         btScalar rollZ;
         m.getEulerYPR(yawY, pitchX, rollZ);
+        m.getEulerZYX(yawY, pitchX, rollZ);
+        tUpdate.rot.x = COM_CapAngleDegrees(pitchX * RAD2DEG);
+        tUpdate.rot.y = COM_CapAngleDegrees(yawY * RAD2DEG);
+        tUpdate.rot.z = COM_CapAngleDegrees(rollZ * RAD2DEG);
 
-        tUpdate.rot.x = pitchX;
-        tUpdate.rot.y = yawY;
-        tUpdate.rot.z = rollZ;
-
-
+        // tUpdate.rot.x = pitchX * RAD2DEG;
+        // tUpdate.rot.y = yawY * RAD2DEG;
+        // tUpdate.rot.z = rollZ * RAD2DEG;
     
-
+#endif
         COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
     }
     

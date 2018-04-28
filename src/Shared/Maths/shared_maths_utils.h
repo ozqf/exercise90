@@ -1,7 +1,7 @@
 #pragma once
 
 #include <math.h>
-#include "shared.h"
+#include "shared_types.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // 4x4 MATRIX OPERATIONS

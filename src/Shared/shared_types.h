@@ -31,6 +31,7 @@ MACROS
 
 #define pi32 3.14159265359f
 #define DEG2RAD 3.141593f / 180.0f
+#define RAD2DEG 57.2958f
 
 internal i32 g_z_inf = 0x7F800000;
 inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
