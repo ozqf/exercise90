@@ -252,10 +252,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         else if (VKCode == 'W')
         {
             inputTick.moveForward = isDown;
-            // if (isDown)
-            // {
-            //     testInput.movement.z  = 1;
-            // }
             //OutputDebugStringA("W\n");
             //printf("Up\n");
             //toneHz += 10;
@@ -269,10 +265,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         else if (VKCode == 'S')
         {
             inputTick.moveBackward = isDown;
-            // if (isDown)
-            // {
-            //     testInput.movement.z  = -1;
-            // }
             //toneHz -= 10;
             //printf("Down\n");
         }

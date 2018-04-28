@@ -105,8 +105,8 @@ void SomeFunction()
     TestEvent s1 = {};
     TestEvent* ptrS1 = &s1;
 
-    char buffer[32];
-    char* pos = buffer;
+    u8 buffer[32];
+    u8* pos = buffer;
     COM_COPY(ptrS1, buffer, TestEvent);
 
     COM_COPY(buffer, ptrS1, TestEvent);

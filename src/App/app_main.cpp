@@ -15,170 +15,6 @@ holding game/menu state and calling game update when required
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
 #include "../Platform/win32_system_include.h"
 
-void R_Scene_CreateTestScene()
-{
-    #if 0
-    RenderListItem* item = g_scene_renderList;
-    *item = {};
-    Transform_SetToIdentity(&item->transform);
-    RendObj_SetAsMesh(&item->obj, &g_meshInverseCube, 1, 1, 1, 5);
-    item->transform.pos.x = 0;
-    item->transform.pos.y = 0;
-    item->transform.pos.z = 0;
-    item->transform.scale.x = 6;
-    item->transform.scale.y = 2;
-    item->transform.scale.z = 6;
-    g_worldScene.numObjects++;
-    item++;
-    
-    RendObj* obj = g_game_rendObjects;
-
-    // 0
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.pos.x = 0;
-    obj->transform.pos.y = 0;
-    obj->transform.pos.z = 0;
-    //obj->transform.rot.x = 270;
-    obj->transform.scale.x = 6;
-    obj->transform.scale.y = 2;
-    obj->transform.scale.z = 6;
-    //g_meshPrimitive_quad
-    //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    RendObj_SetAsMesh(obj, &g_meshInverseCube, 1, 1, 1, 5);
-    g_scene.numObjects++;
-    obj++;
-    #if 1
-    // 1
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.pos.x = 0;
-    obj->transform.pos.y = 0;
-    obj->transform.pos.z = 0;
-    
-    obj->transform.rot.x = 0;
-    obj->transform.scale.x = 0.5;
-    obj->transform.scale.y = 0.5;
-    obj->transform.scale.z = 0.5;
-    //g_meshPrimitive_quad
-    //RendObj_SetAsColouredQuad(obj, 1, 0, 1);
-    RendObj_SetAsMesh(obj, &g_meshOctahedron, 1, 1, 1, 5);
-    //RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
-    g_scene.numObjects++;
-    obj++;
-
-    // 2
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.scale.x = 4;
-    obj->transform.rot.y = 90;
-    obj->transform.pos.x = -4;
-    RendObj_SetAsColouredQuad(obj, 0, 1, 0);
-    g_scene.numObjects++;
-    obj++;
-    
-    // 3
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    // obj->transform.rot.y = 270;
-    obj->transform.pos.x = 1;
-    // obj->transform.pos.z = -2;
-    //RendObj_SetAsColouredQuad(obj, 0, 0, 1);
-    RendObj_SetAsAABB(obj, 1, 2, 1, 1, 0, 0);
-    g_scene.numObjects++;
-    obj++;
-    
-    // 4
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.rot.y = 180;
-    obj->transform.pos.z = 4;
-    RendObj_SetAsColouredQuad(obj, 1, 1, 0);
-    g_scene.numObjects++;
-    obj++;
-
-    // 5
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.rot.y = 0;
-    obj->transform.pos.x = -2;
-    obj->transform.pos.z = -3;
-    RendObj_SetAsBillboard(obj, 1, 1, 1, 4);
-    g_scene.numObjects++;
-    obj++;
-    
-    // 6
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.rot.y = 0;
-    obj->transform.pos.x = 3;
-    obj->transform.pos.z = -4;
-    //RendObj_SetAsColouredQuad(obj, 1, 0, 0);
-    RendObj_SetAsMesh(obj, &g_meshCube, 1, 1, 1, 5);
-    g_scene.numObjects++;
-    obj++;
-    
-    // 7
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.rot.y = 0;
-    obj->transform.pos.x = -3;
-    obj->transform.pos.z = -2;
-    RendObj_SetAsBillboard(obj, 1, 1, 1, 6);
-    obj->transform.scale.x = 0.25;
-    obj->transform.scale.y = 0.25;
-    g_scene.numObjects++;
-    obj++;
-    #endif
-
-    // 8
-    *obj = {};
-    Transform_SetToIdentity(&obj->transform);
-    obj->transform.pos.x = 0;
-    obj->transform.rot.y = 0;
-    obj->transform.pos.z = 0;
-    RendObj_SetAsLine(obj,
-        -2, -2, -2, 2, 2, 2,
-        1, 0, 0, 0, 1, 0);
-    g_scene.numObjects++;
-    obj++;
-    
-
-    /////////////////////////////////////////////////////////////////////////////
-    // UI Tests
-    obj = g_ui_rendObjects;
-
-    // test sprite
-    *obj = {};
-    RendObj_SetAsSprite(obj, SPRITE_MODE_UI, 4, 0.1f, 0.1f);
-    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
-    RendObj_CalculateSpriteAsciUVs(&obj->data.sprite, g_testAsciChar);
-    obj->transform.pos.z = -1;
-    g_scene.numUIObjects++;
-    obj++;
-
-    // test string
-    *obj = {};
-	/*char* chars = g_testString;
-	i32 numChars = COM_StrLenA(g_testString);*/
-
-	char* chars = (char*)g_debugBuffer.ptrMemory;
-	i32 numChars = g_debugBuffer.objectSize;
-
-    RendObj_SetAsAsciCharArray(obj, chars, numChars, 0.05f);
-    obj->transform.pos.x = -1;//-0.75f;
-    obj->transform.pos.y = 1;//0.75f;
-    g_scene.numUIObjects++;
-    obj++;
-
-    // test char
-    // *obj = {};
-    // RendObj_SetAsAsciChar(obj, '+');
-    // g_scene.numUIObjects++;
-    // obj++;
-    #endif
-}
-
 void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects,
     i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {
@@ -258,13 +94,6 @@ void AppRegisterTexture(Texture2DHeader* header, BlockRef* ref)
         g_textureHandles.blockRefs[index] = {};
     }
     g_textureHandles.numTextures++;
-    //Heap_GetBlockMemoryAddress(&g_heap, ref);
-
-
-    // g_textureHandles.textureRefs[g_textureHandles.numTextures] = ref;
-    // Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
-    // header->index = g_textureHandles.numTextures;
-    // g_textureHandles.numTextures++;
 }
 
 /**
@@ -272,10 +101,6 @@ void AppRegisterTexture(Texture2DHeader* header, BlockRef* ref)
  */
 void AppBindTexture(Texture2DHeader* header)
 {
-    //AssertAlways(g_textures.numTextures < g_textures.maxTextures);
-    //g_textures.textureRefs[g_textures.numTextures++] = ref;
-    //Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
-    //header->id = g_nextTextureIndex;
     platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, header->index);
 }
 
@@ -322,38 +147,31 @@ void AppLoadTestTextures()
     AppInitTestTextures();
 
     AppRegisterTexture(&testBuffer, NULL);
-    //AppBindTexture(&testBuffer);
-
+    
     AppRegisterTexture(&testBuffer2, NULL);
-    //AppBindTexture(&testBuffer2);
-
+    
     AppRegisterTexture(&testBuffer3, NULL);
-    //AppBindTexture(&testBuffer3);
-
+    
     ref = AppLoadTexture("base/Bitmaptest.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    //AppBindTexture(header);
-
+    
     ref = AppLoadTexture("base/charset.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    //AppBindTexture(header);
     
     ref = AppLoadTexture("base/brbrick2.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    //AppBindTexture(header);
-
+    
     ref = AppLoadTexture("base/BKEYA0.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    //AppBindTexture(header);
-
+    
     AppBindAllTextures();
 }
 
@@ -406,11 +224,6 @@ i32 App_Init()
         //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
         8
     );
-    //R_Scene_CreateTestScene();
-    
-    testInput = {};
-	testInput.speed = 3.0f;
-    testInput.rotSpeed = 90.0f;
     
     Game_Init();
     g_worldScene.cameraTransform.rot.x = -22.5;
@@ -433,163 +246,6 @@ i32 App_Shutdown()
     platform.Platform_Free(&mem);
 
     return 1;
-}
-
-////////////////////////////////////////////////////////////////////////////
-// Process Input
-////////////////////////////////////////////////////////////////////////////
-void Input_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
-{
-	testInput.movement = { 0, 0, 0 };
-	testInput.rotation = { 0, 0, 0 };
-
-	/////////////////////////////////////////////////
-	// READ ROTATION
-	/////////////////////////////////////////////////
-	if (input->yawLeft) { testInput.rotation.y += 1; }
-	if (input->yawRight) { testInput.rotation.y += -1; }
-
-	if (input->pitchUp) { testInput.rotation.x += -1; }
-	if (input->pitchDown) { testInput.rotation.x += 1; }
-
-	if (input->rollLeft) { testInput.rotation.z += 1; }
-	if (input->rollRight) { testInput.rotation.z += -1; }
-
-    // test mouse input
-    // if (input->attack1) { testInput.rotation.z += 1; }
-	// if (input->attack2) { testInput.rotation.z += -1; }
-
-	// x = pitch, y = yaw, z = roll
-	f32 sensitivity = 0.1f;
-	i8 inverted = -1;
-
-#if 1
-    // Disabled mouse input for debugging
-	//t->rot.x += testInput.rotation.x * (testInput.rotSpeed * time->deltaTime);
-	//t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
-    t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
-	t->rot.x = COM_CapAngleDegrees(t->rot.x);
-
-	//t->rot.y += testInput.rotation.y * (testInput.rotSpeed * time->deltaTime);
-	//t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity) * time->deltaTime;
-    t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity);
-	t->rot.y = COM_CapAngleDegrees(t->rot.y);
-
-	t->rot.z += testInput.rotation.z * (testInput.rotSpeed * time->deltaTime);
-	t->rot.z = COM_CapAngleDegrees(t->rot.z);
-#endif
-
-	if (input->moveLeft)
-	{
-		testInput.movement.x += -1;
-	}
-	if (input->moveRight)
-	{
-		testInput.movement.x += 1;
-	}
-	if (input->moveForward)
-	{
-		testInput.movement.z += -1;
-	}
-	if (input->moveBackward)
-	{
-		testInput.movement.z += 1;
-	}
-
-	if (input->moveDown)
-	{
-		testInput.movement.y += -1;
-	}
-	if (input->moveUp)
-	{
-		testInput.movement.y += 1;
-	}
-
-	/*
-	Movement forward requires creating a vector in the direction of
-	the object's "forward". Object in this case has rotation, so must convert
-	rotation to a forward vector, and then scale this vector by desired speed
-	to create a velocity change in the desired direction
-
-	> Read rotation input and rotate angles
-	> Calculate forward vector
-	> Scale forward to desired speed and add to position
-
-	Rotation Matrix to rotate on Z axis
-	cos(theta),	-sin(theta),		0,			0,
-	sin(theta),	cos(theta),			0,			0,
-	0,			0,					1,			0,
-	0,			0,					0,			1
-	*/
-	Vec3 frameMove = {};
-
-	// Sideways: X Input
-	// Vertical: Y Input
-	// Forward: Z input
-
-	// if (Vec3_Magnitude(&testInput.movement) == 0)
-	// {
-	// 	return;
-	// }
-
-	// Quick hack to force movement to occur on a flat x/z plane only
-	Vec3 groundRot = t->rot;
-	groundRot.x = 0;
-	groundRot.z = 0;
-#if 0
-    AngleVectors* angleVectors = &g_worldScene.cameraAngleVectors;
-
-	AngleToAxes(&groundRot, &angleVectors->left, &angleVectors->up, &angleVectors->forward);
-
-	// Vec3 forward = t->forward;
-	// Vec3 left = t->left;
-	// Vec3 up = t->up;
-
-	// If input is blank mag will be speed * 0?
-	Vec3_SetMagnitude(&angleVectors->left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
-	Vec3_SetMagnitude(&angleVectors->up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
-	Vec3_SetMagnitude(&angleVectors->forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
-
-	frameMove.x = angleVectors->forward.x + angleVectors->up.x + angleVectors->left.x;
-	frameMove.y = angleVectors->forward.y + angleVectors->up.y + angleVectors->left.y;
-	frameMove.z = angleVectors->forward.z + angleVectors->up.z + angleVectors->left.z;
-#endif
-#if 1
-
-    AngleVectors angleVectors = {};
-
-	Calc_AnglesToAxesZYX(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
-
-
-    // Set the cameras own
-    // TODO: Clean this whole messy function up!
-    AngleVectors* camVecs = &g_worldScene.cameraAngleVectors;
-    Calc_AnglesToAxesZYX(&t->rot, &camVecs->left, &camVecs->up, &camVecs->forward);
-
-	// Vec3 forward = t->forward;
-	// Vec3 left = t->left;
-	// Vec3 up = t->up;
-
-	// If input is blank mag will be speed * 0?
-	Vec3_SetMagnitude(&angleVectors.left, ((testInput.speed * time->deltaTime) * testInput.movement.x));
-	Vec3_SetMagnitude(&angleVectors.up, ((testInput.speed * time->deltaTime) * testInput.movement.y));
-	Vec3_SetMagnitude(&angleVectors.forward, ((testInput.speed * time->deltaTime) * testInput.movement.z));
-
-	frameMove.x = angleVectors.forward.x + angleVectors.up.x + angleVectors.left.x;
-	frameMove.y = angleVectors.forward.y + angleVectors.up.y + angleVectors.left.y;
-	frameMove.z = angleVectors.forward.z + angleVectors.up.z + angleVectors.left.z;
-
-#endif
-
-	t->pos.x += frameMove.x;
-	t->pos.y += frameMove.y;
-	t->pos.z += frameMove.z;
-
-	// char output[256];
-	// sprintf_s(output, "FRAME MOVE\n\nPos: %.2f, %.2f, %.2f\n",
-	// 	frameMove.x, frameMove.y, frameMove.z
-	// 	);
-	// OutputDebugStringA(output);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -638,29 +294,6 @@ void CycleTestAsciChar()
     #endif
 }
 
-void App_WriteCameraDebug(GameTime* time)
-{
-    Vec3 pos = g_worldScene.cameraTransform.pos;
-    Vec3 rot = g_worldScene.cameraTransform.rot;
-
-    AngleVectors vectors = {};
-    
-    Calc_AnglesToAxesZYX(&rot, &vectors.left, &vectors.up, &vectors.forward);
-    
-    char buf[512];
-    i32 numWritten = sprintf_s(buf, 512,
-    "TimeDelta: %3.7f\n-- Camera --\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\nForward: %3.3f, %3.3f, %3.3f\nUp: %3.3f, %3.3f, %3.3f\nLeft: %3.3f, %3.3f, %3.3f\n",
-        time->deltaTime,
-        pos.x, pos.y, pos.z,
-        rot.x, rot.y, rot.z,
-        vectors.forward.x, vectors.forward.y, vectors.forward.z,
-        vectors.up.x, vectors.up.y, vectors.up.z,
-        vectors.left.x, vectors.left.y, vectors.left.z
-    );
-    
-    ZSTR_WriteChars(&g_debugStr, buf, numWritten);
-}
-
 void App_Frame(GameTime* time, InputTick* input)
 {
     #if 0
@@ -693,23 +326,6 @@ void App_Frame(GameTime* time, InputTick* input)
     }
     else if (g_input_escapePressed == 1) { g_input_escapePressed = 0; }
     
-    if (input->reset)
-    {
-        g_worldScene.cameraTransform.pos = { 0, 0, 2 };
-        g_worldScene.cameraTransform.rot = { 0, 0, 0 };
-        g_worldScene.cameraTransform.scale = { 0, 0, 0 };
-
-        // g_uiScene.cameraTransform.pos = { 0, 0, 2 };
-        // g_uiScene.cameraTransform.rot = { 0, 0, 0 };
-        // g_uiScene.cameraTransform.scale = { 0, 0, 0 };
-    }
-    else
-    {
-        Input_ApplyInputToTransform(input, &g_worldScene.cameraTransform, time);
-
-        // Input_ApplyInputToTransform(input, &g_uiScene.cameraTransform, time);
-    }
-
     ///////////////////////////////////////
     // Process gamestate
     ///////////////////////////////////////
@@ -729,59 +345,38 @@ void App_Frame(GameTime* time, InputTick* input)
     // Game state update
     Game_Tick(gs, &collisionBuffer, time, input);
     
+    ///////////////////////////////////////
     // Render
+    ///////////////////////////////////////
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
     g_uiScene.numObjects = 0;
     
-    #if 1
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
-
-    #if 0
-    // Vec3 lineOrigin = g_worldScene->cameraTransform.pos;
-    // Vec3 lineDest = lineOrigin;
-    // lineDest.z -= 10;
-    Vec3 lineOrigin = { 1, 1, 1 };
-    Vec3 lineDest = { -1, -1, -1 };
-    Transform t;
-    Transform_SetToIdentity(&t);
-
-    RendObj rendObj;
-    RendObj_SetAsLine(&rendObj,
-        lineOrigin.x, lineOrigin.y, lineOrigin.z,
-        lineDest.x, lineDest.y, lineDest.z,
-        0, 1, 0, 1, 0, 0);
-    Game_AddRenderItem(&g_worldScene, &t, &rendObj);
-    #endif
-    //RScene_AddRenderItem(&g_worldScene, &t, &rendObj);
 
     Game_IntersectionTest(gs, &g_worldScene);
 
     platform.Platform_RenderScene(&g_worldScene);
-    #endif
-
+    
     #if 1
     Game_UpdateUI(ui, time, input);
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
-    App_WriteCameraDebug(time);
+    //App_WriteCameraDebug(time);
+
+    g_debugStr = Game_WriteDebugString(gs, time);
+
     Game_SetDebugStringRender();
     Transform t = {};
     t.pos.x = -1;
     t.pos.y = 1;
-    //Game_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     platform.Platform_RenderScene(&g_uiScene);
     #endif
     
 }
-
-// void App_FixedFrame(GameTime* time, InputTick* inputTick)
-// {
-
-// }
 
 /***************************************
 * Export DLL functions

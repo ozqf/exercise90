@@ -15,6 +15,9 @@
 
 #define GAME_DEBUG_BUFFER_LENGTH 1024
 
+#define PLAYER_MOVE_SPEED 3.0f
+#define PLAYER_ROTATION_SPEED 90.0f
+
 // TODO: Remove this stuff sometime
 global_variable u8 g_testAsciChar = '+';
 global_variable char* g_testString = "Hello, World!...\nHey look, new line!";
@@ -78,4 +81,5 @@ global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 #include "comp_aiController.h"
 
 #include "game_ent_components.cpp"
+#include "game_input.cpp"
 #include "game.cpp"

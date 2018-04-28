@@ -123,7 +123,7 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         h->transform.pos.y = p.getY();
         h->transform.pos.z = p.getZ();
 
-        // write position update
+        // write transform update
         ZTransformUpdateEvent tUpdate = {};
         tUpdate.type = 1;
         tUpdate.ownerId = h->ownerId;
@@ -131,6 +131,22 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         tUpdate.pos.x = h->transform.pos.x;
         tUpdate.pos.y = h->transform.pos.y;
         tUpdate.pos.z = h->transform.pos.z;
+        
+        // attempt to read angle:
+        btMatrix3x3 m = t.getBasis();
+
+        //
+        btScalar pitchX;
+        btScalar yawY;
+        btScalar rollZ;
+        m.getEulerYPR(yawY, pitchX, rollZ);
+
+        tUpdate.rot.x = pitchX;
+        tUpdate.rot.y = yawY;
+        tUpdate.rot.z = rollZ;
+
+
+    
 
         COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
     }

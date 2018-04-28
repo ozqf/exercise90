@@ -311,8 +311,50 @@ inline void Game_UpdateEntityPosition(GameState* gs, EntId* entId, f32 x, f32 y,
 	}
 }
 
+inline void Game_HandleEntityUpdate(GameState* gs, ZTransformUpdateEvent* ev)
+{
+    EntId entId = {};
+	entId.index = ev->ownerId;
+	entId.iteration = ev->ownerIteration;
+    Ent* ent = Ent_GetEntity(&gs->entList, &entId);
+    if (ent == NULL) { return; }
+    ent->transform.pos.x = ev->pos.x;
+    ent->transform.pos.y = ev->pos.y;
+    ent->transform.pos.z = ev->pos.z;
+
+    ent->transform.rot.x = ev->rot.x;
+    ent->transform.rot.y = ev->rot.y;
+    ent->transform.rot.z = ev->rot.z;
+}
+
+ZStringHeader Game_WriteDebugString(GameState* gs, GameTime* time)
+{
+    Vec3 pos = gs->cameraTransform.pos;
+    Vec3 rot = gs->cameraTransform.rot;
+
+    AngleVectors vectors = {};
+    
+    Calc_AnglesToAxesZYX(&rot, &vectors.left, &vectors.up, &vectors.forward);
+    
+    ZStringHeader h;
+    h.chars = gs->debugString;
+    h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
+    "Game.DLL:\nTimeDelta: %3.7f\n-- Camera --\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\nForward: %3.3f, %3.3f, %3.3f\nUp: %3.3f, %3.3f, %3.3f\nLeft: %3.3f, %3.3f, %3.3f\n",
+        time->deltaTime,
+        pos.x, pos.y, pos.z,
+        rot.x, rot.y, rot.z,
+        vectors.forward.x, vectors.forward.y, vectors.forward.z,
+        vectors.up.x, vectors.up.y, vectors.up.z,
+        vectors.left.x, vectors.left.y, vectors.left.z
+    );
+
+    return h;
+}
+
 void Game_Tick(GameState* gs, MemoryBlock* eventBuffer, GameTime* time, InputTick* input)
 {
+    Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
+
     Phys_Step(eventBuffer, time->deltaTime);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
 	i32 ptrOffset = 0;
@@ -328,10 +370,8 @@ void Game_Tick(GameState* gs, MemoryBlock* eventBuffer, GameTime* time, InputTic
                 ZTransformUpdateEvent tUpdate = {};
                 COM_CopyMemory(mem, (u8*)&tUpdate, sizeof(ZTransformUpdateEvent));
 				ptrOffset += sizeof(ZTransformUpdateEvent);
-				EntId entId = {};
-				entId.index = tUpdate.ownerId;
-				entId.iteration = tUpdate.ownerIteration;
-				Game_UpdateEntityPosition(gs, &entId, tUpdate.pos.x, tUpdate.pos.y, tUpdate.pos.z);
+				Game_HandleEntityUpdate(gs, &tUpdate);
+				//Game_UpdateEntityPosition(gs, &entId, tUpdate.pos.x, tUpdate.pos.y, tUpdate.pos.z);
                 //ptr += sizeof(ZTransformUpdateEvent);
             } break;
 

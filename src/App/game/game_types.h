@@ -140,9 +140,17 @@ struct GameState
     EC_ColliderList colliderList;
     EC_ActorMotorList actorMotorList;
     EC_ProjectileList projectileList;
+    
+    // view
+    Transform cameraTransform;
+    AngleVectors cameraAngleVectors;
 
     // specifics
     u16 playerEntityIndex;
+
+    char debugString[2048];
+    u32 debugStringLength = 0;
+    u32 debugStringCapacity = 2048;
 };
 
 //////////////////////////////////////////////////

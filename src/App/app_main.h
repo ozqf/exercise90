@@ -34,7 +34,6 @@ global_variable BlockRef g_collisionEventBuffer;
 
 // Input
 global_variable ZMouseMode g_mouseMode;
-global_variable GL_Test_Input testInput;
 
 // Assets
 //global_variable i32 g_nextTextureIndex = 0;

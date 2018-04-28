@@ -11,6 +11,8 @@
 #include "../../../lib/bullet/btBulletCollisionCommon.h"
 #include "../../../lib/bullet/btBulletDynamicsCommon.h"
 
+#include "../../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
+
 // For debug output ONLY
 #include <windows.h>
 
@@ -86,6 +88,19 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, f32 x, f32 y, f32 z
 
     handle->rigidBody = new btRigidBody(sphereBodyCI);
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
+
+    // TODO: Remove me: Set angular v test
+    btVector3 v(0, 0, 0);
+    handle->rigidBody->setLinearVelocity(v);
+    btVector3 angularV(0, 10, 0);
+    handle->rigidBody->setAngularVelocity(angularV);
+    
+    // Create sensor
+    btGhostObject* ghost = new btGhostObject();
+    ghost->setCollisionShape(new btSphereShape(radius));
+    ghost->setWorldTransform(btTransform());
+
+    // Init Ghost object for collision detection
     
     // handle->inUse;
     // handle->id;
