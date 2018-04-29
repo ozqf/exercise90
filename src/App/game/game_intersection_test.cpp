@@ -56,7 +56,8 @@ void Game_IntersectionTest_2D(RenderScene* scene, Vec3* origin, Vec3* dest)
     Vec3 lineDest;
     if (origin == 0 || dest == 0)
     {
-        Vec3 cPos = scene->cameraTransform.pos;
+        //Vec3 cPos = scene->cameraTransform.pos;
+        Vec4 cPos = M4x4_GetPosition(scene->cameraTransform.matrix.cells);
         lineOrigin = { cPos.x - 1, cPos.y + 0.5f, 0 };
         lineDest = { cPos.x + 1, cPos.y + -0.5f, 0 };
     }
@@ -217,19 +218,28 @@ void Game_IntersectionTest_3D(RenderScene* scene, Vec3* origin, Vec3* dest)
 
 void DEBUG_AngleTestEntity(GameState* gs, RenderScene* scene)
 {
+#if 0
     Ent* testEnt = Ent_GetEntityByTag(&gs->entList, 1);
     if (testEnt != NULL)
     {
+        Vec4 pos = M4x4_GetPosition(testEnt->transform.matrix.cells);
+        Vec4 rot = 
         AngleVectors vecs;
         Calc_AnglesToAxesZYX(&testEnt->transform.rot, &vecs);
         Vec3 pos = testEnt->transform.pos;
         DEBUG_DrawAngleVectorsWidget(scene, &vecs, pos.x, pos.y, pos.z);
-    }
 
+        // AngleVectors vecs;
+        // Calc_AnglesToAxesZYX(&testEnt->transform.rot, &vecs);
+        // Vec3 pos = testEnt->transform.pos;
+        // DEBUG_DrawAngleVectorsWidget(scene, &vecs, pos.x, pos.y, pos.z);
+    }
+#endif
 }
 
 void Game_IntersectionTest(GameState* gs, RenderScene* scene)
 {
+#if 0
     //Game_IntersectionTest_2D(scene);
     Game_IntersectionTest_3D(scene, NULL, NULL);
 
@@ -267,4 +277,5 @@ void Game_IntersectionTest(GameState* gs, RenderScene* scene)
     //     0, 1, 0, 1, 0, 0);
     
     Game_IntersectionTest_3D(scene, &origin, &dest);
+#endif
 }

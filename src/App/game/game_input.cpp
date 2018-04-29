@@ -7,11 +7,13 @@
 ////////////////////////////////////////////////////////////////////////////
 void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 {
+	#if 0
     if (input->reset)
     {
-        t->pos = { 0, 0, 2 };
-        t->rot = { 0, 0, 0 };
-        t->scale = { 0, 0, 0};
+		M4x4_SetToIdentity(t->matrix.cells);
+        // t->pos = { 0, 0, 2 };
+        // t->rot = { 0, 0, 0 };
+        // t->scale = { 0, 0, 0};
         return;
     }
 
@@ -118,4 +120,5 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	t->pos.x += frameMove.x;
 	t->pos.y += frameMove.y;
 	t->pos.z += frameMove.z;
+	#endif
 }

@@ -53,13 +53,14 @@ void Game_BuildTestScene(GameState *gs)
     // Walls mesh
     /////////////////////////////////////////////////////////////
     ent = Ent_GetFreeEntity(&gs->entList);
-
-    ent->transform.pos.x = 0;
-    ent->transform.pos.y = 0;
-    ent->transform.pos.z = 0;
-    ent->transform.scale.x = testArenaWidth;
-    ent->transform.scale.y = testArenaHeight;
-    ent->transform.scale.z = testArenaWidth;
+    M4x4_SetPosition(ent->transform.matrix.cells, 0, 0, 0);
+    // ent->transform.pos.x = 0;
+    // ent->transform.pos.y = 0;
+    // ent->transform.pos.z = 0;
+    M4x4_SetScale(ent->transform.matrix.cells, testArenaWidth, testArenaWidth, testArenaWidth);
+    // ent->transform.scale.x = testArenaWidth;
+    // ent->transform.scale.y = testArenaHeight;
+    // ent->transform.scale.z = testArenaWidth;
 
     renderer = EC_AddRenderer(ent, gs);
 
@@ -70,29 +71,34 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////
     // Floor
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
+    //ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
+    ent->transform.matrix.posY = -((testArenaHeight / 2) + 0.5);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, 1, testArenaWidth};
 
     // walls
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
+    //ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
+    ent->transform.matrix.posX = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
+    //ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
+    ent->transform.matrix.posX = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
+    //ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
+    ent->transform.matrix.posZ = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
+    //ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
+    ent->transform.matrix.posZ = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
 
@@ -117,13 +123,16 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////'
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 1;
-    ent->transform.pos.y = 5;
-    ent->transform.pos.z = -3;
-    ent->transform.scale.x = 0.1f;
-    ent->transform.scale.y = 0.1f;
-    ent->transform.scale.z = 0.5f;
-    ent->transform.rot.x = 22.5; // Pitch
-    ent->transform.rot.y = 45;   // Yaw
+    M4x4_SetPosition(ent->transform.matrix.cells, 0, 5, -3);
+    // ent->transform.pos.y = 5;
+    // ent->transform.pos.z = -3;
+    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45.0f);
+    // ent->transform.scale.x = 0.1f;
+    // ent->transform.scale.y = 0.1f;
+    // ent->transform.scale.z = 0.5f;
+    // ent->transform.rot.x = 22.5; // Pitch
+    // ent->transform.rot.y = 45;   // Yaw
     //ent->transform.rot.z = 0;   // Roll
 
     controller = EC_AddAIController(ent, gs);
@@ -136,9 +145,9 @@ void Game_BuildTestScene(GameState *gs)
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
+        ent->transform.matrix.posX,
+        ent->transform.matrix.posY,
+        ent->transform.matrix.posZ,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -146,14 +155,17 @@ void Game_BuildTestScene(GameState *gs)
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 2;
-    ent->transform.pos.x = 5;
-    ent->transform.pos.y = 6;
-    ent->transform.pos.z = 3;
-    ent->transform.scale.x = 0.1f;
-    ent->transform.scale.y = 0.1f;
-    ent->transform.scale.z = 0.5f;
-    ent->transform.rot.x = 22.5; // Pitch
-    ent->transform.rot.y = 45;   // Yaw
+    M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
+    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
+    // ent->transform.pos.x = 5;
+    // ent->transform.pos.y = 6;
+    // ent->transform.pos.z = 3;
+    // ent->transform.scale.x = 0.1f;
+    // ent->transform.scale.y = 0.1f;
+    // ent->transform.scale.z = 0.5f;
+    // ent->transform.rot.x = 22.5; // Pitch
+    // ent->transform.rot.y = 45;   // Yaw
                                  //ent->transform.rot.z = 0;   // Roll
 
     controller = EC_AddAIController(ent, gs);
@@ -166,9 +178,9 @@ void Game_BuildTestScene(GameState *gs)
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
+        ent->transform.matrix.posX,
+        ent->transform.matrix.posY,
+        ent->transform.matrix.posZ,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -176,14 +188,17 @@ void Game_BuildTestScene(GameState *gs)
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
-    ent->transform.pos.y = 16;
-    ent->transform.pos.x = -3;
-    ent->transform.pos.z = -3;
-    ent->transform.scale.x = 0.1f;
-    ent->transform.scale.y = 0.1f;
-    ent->transform.scale.z = 0.5f;
-    ent->transform.rot.x = 22.5; // Pitch
-    ent->transform.rot.y = 45;   // Yaw
+    M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
+    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
+    // ent->transform.pos.y = 16;
+    // ent->transform.pos.x = -3;
+    // ent->transform.pos.z = -3;
+    // ent->transform.scale.x = 0.1f;
+    // ent->transform.scale.y = 0.1f;
+    // ent->transform.scale.z = 0.5f;
+    // ent->transform.rot.x = 22.5; // Pitch
+    // ent->transform.rot.y = 45;   // Yaw
                                  //ent->transform.rot.z = 0;   // Roll
 
     controller = EC_AddAIController(ent, gs);
@@ -196,9 +211,9 @@ void Game_BuildTestScene(GameState *gs)
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
+        ent->transform.matrix.posX,
+        ent->transform.matrix.posY,
+        ent->transform.matrix.posZ,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -294,16 +309,16 @@ void Game_Shutdown()
     Phys_Shutdown();
 }
 
-inline void Game_UpdateEntityPosition(GameState *gs, EntId *entId, f32 x, f32 y, f32 z)
-{
-    Ent *ent = Ent_GetEntity(&gs->entList, entId);
-    if (ent != NULL)
-    {
-        ent->transform.pos.x = x;
-        ent->transform.pos.y = y;
-        ent->transform.pos.z = z;
-    }
-}
+// inline void Game_UpdateEntityPosition(GameState *gs, EntId *entId, f32 x, f32 y, f32 z)
+// {
+//     Ent *ent = Ent_GetEntity(&gs->entList, entId);
+//     if (ent != NULL)
+//     {
+//         ent->transform.pos.x = x;
+//         ent->transform.pos.y = y;
+//         ent->transform.pos.z = z;
+//     }
+// }
 
 inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 {
@@ -315,7 +330,14 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
     {
         return;
     }
-    M4x4* m = (M4x4*)&ev->matrix;
+    M4x4* updateM = (M4x4*)&ev->matrix;
+    M4x4* transM = (M4x4*)&ent->transform.matrix;
+    for (i32 i = 0; i < 16; ++i)
+    {
+        transM->cells[i] = updateM->cells[i];
+        //ent->transform.matrix.cells[i] = m.cells[i];
+    }
+#if 0
     // ent->transform.pos.x = ev->matrix[X3];
     // ent->transform.pos.y = ev->matrix[Y3];
     // ent->transform.pos.z = ev->matrix[Z3];
@@ -335,7 +357,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
     ent->transform.rot.x = mRot.x;
     ent->transform.rot.y = mRot.y;
     ent->transform.rot.z = mRot.z;
-
+#endif
     if (ent->tag == 1)
     {
         COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
@@ -351,12 +373,12 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 
 ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
 {
-    Vec3 pos, rot;
+    //Vec3 pos, rot;
 
     ZStringHeader h;
     h.chars = gs->debugString;
     h.length = 0;
-
+#if 0
     switch (gs->debugMode)
     {
         case GAME_DEBUG_MODE_CAMERA:
@@ -443,7 +465,7 @@ M4x4:\n\
         }
         break;
     }
-
+#endif
     return h;
 }
 

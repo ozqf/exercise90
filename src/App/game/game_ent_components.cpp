@@ -19,16 +19,28 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform = *originT;
-    ent->transform.scale = { 0.1f, 0.1f, 0.5f };
+    //ent->transform.scale = { 0.1f, 0.1f, 0.5f };
+    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
 
     EC_Renderer* rend = EC_AddRenderer(ent, gs);
     RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 2);
 
     EC_Projectile* prj = EC_AddProjectile(ent, gs);
-    Calc_CameraForward(&originT->rot, &prj->move);
+    Vec4 forward;
+    forward.x = originT->matrix.zAxisX;
+    forward.y = originT->matrix.zAxisY;
+    forward.z = originT->matrix.zAxisZ;
+    #if 1
+    prj->move.x = -forward.x * 20.0f;
+    prj->move.y = -forward.y * 20.0f;
+    prj->move.z = -forward.z * 20.0f;
+    #endif
+    #if 0
+    Calc_CameraGameForward(&originT->rot, &prj->move);
     prj->move.x = -prj->move.x * 20.0f;
     prj->move.y = -prj->move.y * 20.0f;
     prj->move.z = -prj->move.z * 20.0f;
+    #endif
     prj->tick = 1.0f;
     prj->tock = 1.0f;
 }
@@ -95,9 +107,12 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
 
         Transform* t = &e->transform;
-        t->pos.x += prj->move.x * time->deltaTime;
-        t->pos.y += prj->move.y * time->deltaTime;
-        t->pos.z += prj->move.z * time->deltaTime;
+        t->matrix.posX += prj->move.x * time->deltaTime;
+        t->matrix.posY += prj->move.y * time->deltaTime;
+        t->matrix.posZ += prj->move.z * time->deltaTime;
+        // t->pos.x += prj->move.x * time->deltaTime;
+        // t->pos.y += prj->move.y * time->deltaTime;
+        // t->pos.z += prj->move.z * time->deltaTime;
     }
 }
 
@@ -113,11 +128,14 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
         EC_Collider* a = &gs->colliderList.items[i];
         if (a->inUse == 0) { continue; }
         Ent* entA = Ent_GetEntityByIndex(&gs->entList, a->entId.index);
-
+        Transform* transA = &entA->transform;
         // Move collider
-        entA->transform.pos.x += a->velocity.x * time->deltaTime;
-        entA->transform.pos.y += a->velocity.y * time->deltaTime;
-        entA->transform.pos.z += a->velocity.z * time->deltaTime;
+        transA->matrix.posX += a->velocity.x * time->deltaTime;
+        transA->matrix.posY += a->velocity.y * time->deltaTime;
+        transA->matrix.posZ += a->velocity.z * time->deltaTime;
+        // entA->transform.pos.x += a->velocity.x * time->deltaTime;
+        // entA->transform.pos.y += a->velocity.y * time->deltaTime;
+        // entA->transform.pos.z += a->velocity.z * time->deltaTime;
         
         for (u32 j = 0; j < gs->colliderList.max; ++j)
         {
@@ -125,14 +143,15 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
             EC_Collider* b = &gs->colliderList.items[j];
             if (b->inUse == 0) { continue; }
             Ent* entB = Ent_GetEntityByIndex(&gs->entList, b->entId.index);
+            Transform* transB = &entB->transform;
 
             if (AABBVsAABB(
-                entA->transform.pos.x,
-                entA->transform.pos.y,
-                entA->transform.pos.z,
-                entB->transform.pos.x,
-                entB->transform.pos.y,
-                entB->transform.pos.z,
+                transA->matrix.posX,
+                transA->matrix.posY,
+                transA->matrix.posZ,
+                transB->matrix.posX,
+                transB->matrix.posY,
+                transB->matrix.posZ,
                 a->size.x / 2, a->size.y / 2, a->size.z / 2,
                 b->size.x / 2, b->size.y / 2, b->size.z / 2
 
@@ -156,7 +175,8 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;
-            item->transform.scale = { 1, 1, 1 };
+            M4x4_SetScale(item->transform.matrix.cells, 1, 1, 1);
+            //item->transform.scale = { 1, 1, 1 };
             if (collider->lastFrameOverlapping == time->frameNumber)
             {
                 RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 1, 0, 0);

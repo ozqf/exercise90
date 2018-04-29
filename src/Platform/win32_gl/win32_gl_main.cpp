@@ -233,19 +233,51 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	// Working order
 	// view: Z/X/Y or roll/pitch/yaw
 	// model is reversed: Y/X/Z
+
+#if 1 // Extra pos/rot/scale from matrix
+
+	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
+	Vec4 camRot = M4x4_GetEulerAngles(view->matrix.cells);
 	
+	glRotatef(-camRot.z, 0, 0, 1);
+	glRotatef(-camRot.x, 1, 0, 0);
+	glRotatef(-camRot.y, 0, 1, 0);
+	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+
+	f32 x = model->matrix.posX;
+	f32 y = model->matrix.posY;
+	f32 z = model->matrix.posZ;
+
+	f32 rotX = M4x4_GetAngleX(model->matrix.cells);
+	f32 rotY = M4x4_GetAngleY(model->matrix.cells);
+	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells);
+
+	f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
+	f32 scaleY = M4x4_GetScaleY(model->matrix.cells);
+	f32 scaleZ = M4x4_GetScaleZ(model->matrix.cells);
+
+	glTranslatef(x, y, z);
+	glRotatef(rotX, 0, 1, 0);
+	glRotatef(rotY, 1, 0, 0);
+	glRotatef(rotZ, 0, 0, 1);
+
+	glScalef(scaleX, scaleY, scaleZ);
+#endif
+
+#if 0 // Previous system, using Transform with pos/rot/scale vectors
+
 	glRotatef(-view->rot.z, 0, 0, 1);
 	glRotatef(-view->rot.x, 1, 0, 0);
 	glRotatef(-view->rot.y, 0, 1, 0);
 	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
-	
+
 	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
 	glRotatef(model->rot.y, 0, 1, 0);
 	glRotatef(model->rot.x, 1, 0, 0);
 	glRotatef(model->rot.z, 0, 0, 1);
 	
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
-	
+#endif
 	// transform the object (model matrix)
 	// The result of GL_MODELVIEW matrix will be:
 	// ModelView_M = View_M * Model_M
@@ -266,15 +298,24 @@ void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 	// inverse of camera transform
 	// x = pitch, y = yaw, z = roll
 	
-	glRotatef(-view->rot.z, 0, 0, 1);
-	glRotatef(-view->rot.x, 1, 0, 0);
-	glRotatef(-view->rot.y, 0, 1, 0);
-	glTranslatef(-view->pos.x, -view->pos.y, -view->pos.z);
+	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
+	Vec4 camRot = M4x4_GetEulerAngles(view->matrix.cells);
 	
-	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(-camRot.z, 0, 0, 1);
+	glRotatef(-camRot.x, 1, 0, 0);
+	glRotatef(-camRot.y, 0, 1, 0);
+	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+
+	Vec4 modelPos = M4x4_GetPosition(model->matrix.cells);
+	Vec4 modelRot = M4x4_GetEulerAngles(model->matrix.cells);
+
+	glTranslatef(modelPos.x, modelPos.y, modelPos.z);
+	glRotatef(modelRot.y, 0, 1, 0);
+
+	//glTranslatef(modelPos.x, modelPos.y, modelPos.z);
 	//glRotatef(view->rot.z, 0, 0, 1);
 	//glRotatef(view->rot.x, 1, 0, 0);
-	glRotatef(view->rot.y, 0, 1, 0);
+	//glRotatef(view->rot.y, 0, 1, 0);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -468,8 +509,9 @@ void R_RenderPrimitive(Transform* camera, Transform* objTransform, RendObj* obj)
 
 		case REND_PRIMITIVE_TYPE_AABB:
 		{
+			Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
 			R_RenderAABBGeometry(
-				objTransform->pos.x, objTransform->pos.y, objTransform->pos.z,
+				pos.x, pos.y, pos.z,
 				prim->sizeX, prim->sizeY, prim->sizeZ,
 				prim->red, prim->green, prim->blue);
 		} break;
@@ -545,9 +587,10 @@ void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* 
 	RendObj_AsciCharArray* c = &obj->data.charArray;
 	glColor3f(c->r, c->g, c->b);
 	R_SetupTestTexture(4);
+	Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
-		objTransform->pos.x, objTransform->pos.y, c->size, win32_aspectRatio);
+		pos.x, pos.y, c->size, win32_aspectRatio);
 	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
@@ -575,13 +618,14 @@ void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 
 		case SPRITE_MODE_UI:
 		{
+			Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
 			//R_SetupOrthoProjection(8);
 			//glMatrixMode(GL_PROJECTION);
 			//glLoadIdentity();
 			
-            char buf[64];
-            sprintf_s(buf, 64, "SPRITE POS: %3.7f, %3.7f, %3.7f\n", objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
-            OutputDebugString(buf);
+            // char buf[64];
+            // sprintf_s(buf, 64, "SPRITE POS: %3.7f, %3.7f, %3.7f\n", objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
+            // OutputDebugString(buf);
 
 
 			glMatrixMode(GL_MODELVIEW);
@@ -589,7 +633,7 @@ void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 			
 			R_SetupTestTexture(sprite->textureIndex);
 			//R_RenderTestGeometry_RainbowQuad();
-			R_DrawSpriteGeometry(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z, sprite);
+			R_DrawSpriteGeometry(pos.x, pos.y, pos.z, sprite);
 
 		} break;
 

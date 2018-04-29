@@ -259,8 +259,9 @@ void AngleToAxes(Vec3* angles, Vec3* left, Vec3* up, Vec3* forward)
     #endif
 }
 
-inline void Calc_CameraForward(Vec3* angles, Vec3* result)
+inline void Calc_CameraGameForward(Vec3* angles, Vec3* result)
 {
+    // Forward according to opengl is actually backwards...
     f32 a = angles->x * DEG2RAD;
     f32 b = angles->y * DEG2RAD;
     f32 c = angles->z * DEG2RAD;

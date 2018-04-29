@@ -153,6 +153,24 @@ struct Vec3
 internal Vec3 global_vec3_Up = { 0, 1, 0 };
 internal Vec3 global_vec3_Forward = { 0, 0, 1 };
 
+struct Vec4
+{
+    union 
+    {
+        struct
+        {
+            f32 x, y, z, w;
+        };    
+        f32 e[4];
+    };
+    // f32 x, y, z, w;
+    // // overload array operator to return a pointer to x + index
+    // f32 &operator[](int index) { return ((&x)[index]); }
+};
+
+internal Vec4 global_vec4_Up = { 0, 1, 0, 1 };
+internal Vec4 global_vec4_Forward = { 0, 0, 1, 1 };
+
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 3 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
@@ -211,20 +229,33 @@ struct M4x4
 {
     union
     {
-        struct
-        {
-            /* Column order!
+        /* Careful! Column order!
             X   Y   Z   W
             0   4   8   12
             1   5   9   13
             2   6   10  14
             3   7   11  15
             */
+        struct
+        {
             f32
             x0, x1, x2, x3,
             y0, y1, y2, y3,
             z0, z1, z2, z3,
             w0, w1, w2, w3;
+        };
+        struct
+        {
+            f32
+            // xAxisX, yAxisX, zAxisX, posX,
+            // xAxisY, yAxisY, zAxisY, posY,
+            // xAxisZ, yAxisZ, zAxisZ, posZ,
+            // xAxisW, yAxisW, zAxisW, posW;
+
+            xAxisX, xAxisY, xAxisZ, xAxisW,
+            yAxisX, yAxisY, yAxisZ, yAxisW,
+            zAxisX, zAxisY, zAxisZ, zAxisW,
+            posX, posY, posZ, posW;
         };
         f32 cells[16];
     };
@@ -279,9 +310,9 @@ inline f32 M4x4_GetScaleX(f32* m)
 
 inline f32 M4x4_GetScaleY(f32* m)
 {
-    f32 x = m[X0] * m[X0];
-    f32 y = m[Y0] * m[Y0];
-    f32 z = m[Z0] * m[Z0];
+    f32 x = m[X1] * m[X1];
+    f32 y = m[Y1] * m[Y1];
+    f32 z = m[Z1] * m[Z1];
     return (f32)sqrt(x + y + z);
 }
 
@@ -291,6 +322,66 @@ inline f32 M4x4_GetScaleZ(f32* m)
     f32 y = m[Y0] * m[Y0];
     f32 z = m[Z0] * m[Z0];
     return (f32)sqrt(x + y + z);
+}
+
+inline f32 M4x4_GetAngleX(f32* m)
+{
+    return (f32)-asinf(m[9]);
+}
+
+inline f32 M4x4_GetAngleY(f32* m)
+{
+    return (f32)atan2(m[8], m[10]);
+}
+
+inline f32 M4x4_GetAngleZ(f32* m)
+{
+    return (f32)atan2(m[1], m[5]);
+}
+
+inline void M4x4_SetPosition(f32* m, f32 x, f32 y, f32 z)
+{
+    m[W0] = x, m[W1] = y; m[W2] = z;
+}
+
+inline void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
+{
+    // TODO: Implement
+}
+
+inline Vec4 M4x4_GetPosition(f32* m)
+{
+    Vec4 result;
+    result.x = m[W0];
+    result.y = m[W1];
+    result.z = m[W2];
+    result.w = 1;
+    return result;
+}
+
+inline Vec4 M4x4_GetEulerAngles(f32* m)
+{
+    Vec4 result;
+    result.x = (f32)-asinf(m[9]);
+    result.y = (f32)atan2(m[8], m[10]);
+    result.z = (f32)atan2(m[1], m[5]);
+    result.w = 1;
+    return result;
+}
+
+inline void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
+{
+    // TODO: Implement
+}
+
+inline Vec4 M4x4_GetScale(f32* m)
+{
+    Vec4 result;
+    result.x = (f32)sqrt(m[X0] * m[X0] + m[Y0] * m[Y0] + m[Z0] * m[Z0]);
+    result.y = (f32)sqrt(m[X1] * m[X1] + m[Y1] * m[Y1] + m[Z1] * m[Z1]);
+    result.z = (f32)sqrt(m[X2] * m[X2] + m[Y2] * m[Y2] + m[Z2] * m[Z2]);
+    result.w = 1;
+    return result;
 }
 
 /****************************************************************
@@ -349,9 +440,9 @@ struct GameTime
 
 struct Transform
 {
-	Vec3 pos;
-	Vec3 rot;
-	Vec3 scale;
+	// Vec3 pos;
+	// Vec3 rot;
+	// Vec3 scale;
     M4x4 matrix;
 };
 
@@ -378,9 +469,9 @@ Global Functions
 inline void Transform_SetToIdentity(Transform* t)
 {
     *t = {};
-    t->scale.x = 1;
-    t->scale.y = 1;
-    t->scale.z = 1;
+    // t->scale.x = 1;
+    // t->scale.y = 1;
+    // t->scale.z = 1;
 
     t->matrix.x0 = 1;
     t->matrix.y1 = 1;
