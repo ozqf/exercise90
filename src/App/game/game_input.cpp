@@ -7,6 +7,40 @@
 ////////////////////////////////////////////////////////////////////////////
 void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 {
+	f32 sensitivity = 0.1f;
+	i8 inverted = -1;
+
+    Vec4 movement = {};
+    Vec4 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
+	
+	// if (input->yawLeft) { rotation.y += 1 * 90; }
+	// if (input->yawRight) { rotation.y += -1 * 90; }
+	// rotation.y *= time->deltaTime;
+
+	//rotation.y = ((f32)input->mouseMovement[0] * sensitivity);
+
+	rotation.x = (((f32)input->mouseMovement[1] * sensitivity)) * inverted; 
+	rotation.y = ((f32)input->mouseMovement[0] * sensitivity);
+
+	rotation.y = -rotation.y;
+
+	if (rotation.y != 0)
+	{
+		M4x4_RotateY(t->matrix.cells, rotation.y);
+	}
+
+	//rotation.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
+	//rotation.x = COM_CapAngleDegrees(t->rot.x);
+
+	// if (rotation.x != 0)
+	// {
+	// 	M4x4_RotateX(t->matrix.cells, rotation.x);
+	// }
+
+	
+	//rotation.y = COM_CapAngleDegrees(t->rot.y);
+
+
 	#if 0
     if (input->reset)
     {
@@ -19,7 +53,7 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 
     Vec3 movement = {};
     Vec3 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
-
+	
 	/////////////////////////////////////////////////
 	// READ ROTATION
 	/////////////////////////////////////////////////
@@ -33,9 +67,7 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->rollRight) { rotation.z += -1; }
 
 	// x = pitch, y = yaw, z = roll
-	f32 sensitivity = 0.1f;
-	i8 inverted = -1;
-
+	
 #if 0
     // Disabled mouse input for debugging
 	//t->rot.x += rotation.x * (PLAYER_ROTATION_SPEED * time->deltaTime);

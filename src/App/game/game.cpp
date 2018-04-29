@@ -14,6 +14,7 @@ void Game_BuildTestScene(GameState *gs)
 
     // Init gs and component lists
     *gs = {};
+    M4x4_SetToIdentity(gs->cameraTransform.matrix.cells);
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
@@ -360,7 +361,8 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 #endif
     if (ent->tag == 1)
     {
-        COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
+        //COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
+        COM_COPY(&gs->cameraTransform.matrix, &g_debugMatrix, M4x4);
     }
 }
 
@@ -369,7 +371,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 /////////////////////////////////////////////////////////////////////////////
 #define GAME_DEBUG_MODE_NONE 0
 #define GAME_DEBUG_MODE_CAMERA 1
-#define GAME_DEBUG_MODE_ENT 2
+#define GAME_DEBUG_MODE_TRANSFORM 2
 
 ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
 {
@@ -399,7 +401,7 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
         }
         break;
         #endif
-        case GAME_DEBUG_MODE_ENT:
+        case GAME_DEBUG_MODE_TRANSFORM:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 1);
             if (ent == NULL)
@@ -429,7 +431,7 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
                 AngleVectors vectors = {};
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
 "Game.DLL:\nTimeDelta: %3.7f\n\
--- Debug Entity --\n\
+-- Debug Transform --\n\
 mPos: %3.3f, %3.3f, %3.3f\n\
 mRot: %3.3f, %3.3f, %3.3f\n\
 scale: %3.3f, %3.3f, %3.3f\n\
