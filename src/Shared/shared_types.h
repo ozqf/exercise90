@@ -338,7 +338,12 @@ inline void M4x4_Multiply(f32* m0, f32* m1, f32* result)
     3   7   11  15-
     */
     // 0 = 
+    // Copy original
     f32 r[16];
+    for (i32 i = 0; i < 16; ++i)
+    {
+        r[i] = m0[i];
+    }
     r[0] = (m0[0] * m1[0]) + (m0[4] * m1[1]) + (m0[8] * m1[2]) + (m0[12] * m1[3]);
     r[1] = (m0[1] * m1[0]) + (m0[5] * m1[1]) + (m0[9] * m1[2]) + (m0[13] * m1[3]);
     r[2] = (m0[2] * m1[0]) + (m0[6] * m1[1]) + (m0[10] * m1[2]) + (m0[14] * m1[3]);
@@ -420,20 +425,36 @@ inline f32 M4x4_GetScaleZ(f32* m)
 inline void M4x4_RotateX(f32* m, f32 degreesY)
 {
 	M4x4 rotM = {};
+    rotM.xAxisX = 1;
     rotM.yAxisY = (f32)cos(degreesY * DEG2RAD);
     rotM.yAxisZ = (f32)sin(degreesY * DEG2RAD);
     rotM.zAxisY = (f32)-sin(degreesY * DEG2RAD);
     rotM.zAxisZ = (f32)cos(degreesY * DEG2RAD);
+    rotM.posW = 1;
     M4x4_Multiply(m, rotM.cells, m);
 }
 
 inline void M4x4_RotateY(f32* m, f32 degreesY)
 {
 	M4x4 rotM = {};
+    rotM.yAxisY = 1;
     rotM.xAxisX = (f32)cos(degreesY * DEG2RAD);
     rotM.xAxisZ = (f32)-sin(degreesY * DEG2RAD);
     rotM.zAxisX = (f32)sin(degreesY * DEG2RAD);
     rotM.zAxisZ = (f32)cos(degreesY * DEG2RAD);
+    rotM.posW = 1;
+    M4x4_Multiply(m, rotM.cells, m);
+}
+
+inline void M4x4_RotateZ(f32* m, f32 degreesY)
+{
+	M4x4 rotM = {};
+    rotM.zAxisZ = 1;
+    rotM.xAxisX = (f32)cos(degreesY * DEG2RAD);
+    rotM.xAxisY = (f32)sin(degreesY * DEG2RAD);
+    rotM.yAxisX = (f32)-sin(degreesY * DEG2RAD);
+    rotM.yAxisY = (f32)cos(degreesY * DEG2RAD);
+    rotM.posW = 1;
     M4x4_Multiply(m, rotM.cells, m);
 }
 
