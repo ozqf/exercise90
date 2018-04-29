@@ -36,7 +36,7 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	f32 sensitivity = 0.1f;
 	i8 inverted = -1;
 
-#if 1
+#if 0
     // Disabled mouse input for debugging
 	//t->rot.x += rotation.x * (PLAYER_ROTATION_SPEED * time->deltaTime);
 	//t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
@@ -100,6 +100,7 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	groundRot.z = 0;
 
     AngleVectors angleVectors = {};
+	angleVectors.
 
 	Calc_AnglesToAxesZYX(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
 

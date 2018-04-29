@@ -361,12 +361,14 @@ inline f32 M4x4_GetScaleZ(f32* m)
 
 inline f32 M4x4_GetAngleX(f32* m)
 {
+    //return (f32)atan2(m[8], m[10]);
     return (f32)-asinf(m[9]);
 }
 
 inline f32 M4x4_GetAngleY(f32* m)
 {
     return (f32)atan2(m[8], m[10]);
+    //return (f32)-asinf(m[9]);
 }
 
 inline f32 M4x4_GetAngleZ(f32* m)

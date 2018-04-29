@@ -259,8 +259,8 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	f32 y = model->matrix.posY;
 	f32 z = model->matrix.posZ;
 
-	f32 rotY = M4x4_GetAngleX(model->matrix.cells) * RAD2DEG;
-	f32 rotX = M4x4_GetAngleY(model->matrix.cells) * RAD2DEG;
+	f32 rotX = M4x4_GetAngleX(model->matrix.cells) * RAD2DEG;
+	f32 rotY = M4x4_GetAngleY(model->matrix.cells) * RAD2DEG;
 	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells) * RAD2DEG;
 
 	f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
@@ -268,8 +268,8 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	f32 scaleZ = M4x4_GetScaleZ(model->matrix.cells);
 
 	glTranslatef(x, y, z);
-	glRotatef(rotX, 0, 1, 0);
-	glRotatef(rotY, 1, 0, 0);
+	glRotatef(rotY, 0, 1, 0);
+	glRotatef(rotX, 1, 0, 0);
 	glRotatef(rotZ, 0, 0, 1);
 
 	glScalef(scaleX, scaleY, scaleZ);
