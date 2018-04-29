@@ -378,9 +378,10 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
     ZStringHeader h;
     h.chars = gs->debugString;
     h.length = 0;
-#if 0
+#if 1
     switch (gs->debugMode)
     {
+        #if 0
         case GAME_DEBUG_MODE_CAMERA:
         {
             pos = gs->cameraTransform.pos;
@@ -397,7 +398,7 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
                                  vectors.left.x, vectors.left.y, vectors.left.z);
         }
         break;
-
+        #endif
         case GAME_DEBUG_MODE_ENT:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 1);
@@ -424,15 +425,11 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
                 mRot.z = atan2f(m[1], m[5]);
                 mRot.y = atan2f(m[8], m[10]);
                 mRot.x = -asinf(m[9]);
-
-                pos = ent->transform.pos;
-                rot = ent->transform.rot;
+                
                 AngleVectors vectors = {};
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
 "Game.DLL:\nTimeDelta: %3.7f\n\
 -- Debug Entity --\n\
-Pos: %3.3f, %3.3f, %3.3f\n\
-Rot: %3.3f, %3.3f, %3.3f\n\
 mPos: %3.3f, %3.3f, %3.3f\n\
 mRot: %3.3f, %3.3f, %3.3f\n\
 scale: %3.3f, %3.3f, %3.3f\n\
@@ -443,8 +440,6 @@ M4x4:\n\
 (3) %3.3f, (7) %3.3f, (11) %3.3f, (15) %3.3f\n\
 ",
                                      time->deltaTime,
-                                     pos.x, pos.y, pos.z,
-                                     rot.x, rot.y, rot.z,
                                      mPos.x, mPos.y, mPos.z,
                                      mRot.x * RAD2DEG, mRot.y * RAD2DEG, mRot.z * RAD2DEG,
                                      scale.x, scale.y, scale.z,

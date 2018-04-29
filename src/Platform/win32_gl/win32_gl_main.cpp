@@ -233,11 +233,22 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	// Working order
 	// view: Z/X/Y or roll/pitch/yaw
 	// model is reversed: Y/X/Z
+#if 0 // matrices directly... requires matrix multiplication to work
+	f32* cells = view->matrix.cells;
+	glLoadMatrixf((GLfloat*)cells);
 
-#if 1 // Extra pos/rot/scale from matrix
+	cells = model->matrix.cells;
+	glLoadMatrixf((GLfloat*)cells);
+#endif
+
+#if 1 // Extra pos/rot/scale from matrix - broken... ?
 
 	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
-	Vec4 camRot = M4x4_GetEulerAngles(view->matrix.cells);
+	Vec4 camRot = M4x4_GetEulerAnglesDegrees(view->matrix.cells);
+	// f32 fAngZ = atan2f(openglM[1], openglM[5]);
+    // f32 fAngY = atan2f(openglM[8], openglM[10]);
+    // f32 fAngX = -asinf(openglM[9]);
+	//f32* m = view->
 	
 	glRotatef(-camRot.z, 0, 0, 1);
 	glRotatef(-camRot.x, 1, 0, 0);
@@ -248,9 +259,9 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	f32 y = model->matrix.posY;
 	f32 z = model->matrix.posZ;
 
-	f32 rotX = M4x4_GetAngleX(model->matrix.cells);
-	f32 rotY = M4x4_GetAngleY(model->matrix.cells);
-	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells);
+	f32 rotY = M4x4_GetAngleX(model->matrix.cells) * RAD2DEG;
+	f32 rotX = M4x4_GetAngleY(model->matrix.cells) * RAD2DEG;
+	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells) * RAD2DEG;
 
 	f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
 	f32 scaleY = M4x4_GetScaleY(model->matrix.cells);
@@ -262,6 +273,14 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glRotatef(rotZ, 0, 0, 1);
 
 	glScalef(scaleX, scaleY, scaleZ);
+
+	char buf[512];
+	sprintf_s(buf, 512,
+"\nView: Rot: %3.3f, %3.3f, %3.3f\nModel: Rot: %3.3f, %3.3f, %3.3f",
+camRot.x, camRot.y, camRot.z, rotX, rotY, rotZ
+);
+	OutputDebugStringA(buf);
+
 #endif
 
 #if 0 // Previous system, using Transform with pos/rot/scale vectors
@@ -299,7 +318,7 @@ void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 	// x = pitch, y = yaw, z = roll
 	
 	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
-	Vec4 camRot = M4x4_GetEulerAngles(view->matrix.cells);
+	Vec4 camRot = M4x4_GetEulerAnglesDegrees(view->matrix.cells);
 	
 	glRotatef(-camRot.z, 0, 0, 1);
 	glRotatef(-camRot.x, 1, 0, 0);
@@ -307,7 +326,7 @@ void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
 
 	Vec4 modelPos = M4x4_GetPosition(model->matrix.cells);
-	Vec4 modelRot = M4x4_GetEulerAngles(model->matrix.cells);
+	Vec4 modelRot = M4x4_GetEulerAnglesDegrees(model->matrix.cells);
 
 	glTranslatef(modelPos.x, modelPos.y, modelPos.z);
 	glRotatef(modelRot.y, 0, 1, 0);

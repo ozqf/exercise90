@@ -222,6 +222,34 @@ inline void Vec3_NormaliseOrForward(Vec3* v)
     v->y = v->y /= mag;
     v->z = v->z /= mag;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////
+// VECTOR 3 OPERATIONS
+/////////////////////////////////////////////////////////////////////////////
+
+inline f32 Vec4_Magnitude(Vec4* v)
+{
+    return (f32)sqrt((f32)(v->x * v->x) + (v->y * v->y) + (v->z * v->z));
+}
+
+inline void Vec4_Normalise(Vec4* v)
+{
+    f32 vectorMagnitude = Vec4_Magnitude(v);
+    v->x /= vectorMagnitude;
+    v->y /= vectorMagnitude;
+    v->z /= vectorMagnitude;
+}
+
+inline void Vec4_SetMagnitude(Vec4* v, f32 newMagnitude)
+{
+    Vec4_Normalise(v);
+    v->x = v->x * newMagnitude;
+    v->y = v->y * newMagnitude;
+    v->z = v->z * newMagnitude;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // MATRIX 4x4
 /////////////////////////////////////////////////////////////////////////////
@@ -256,6 +284,13 @@ struct M4x4
             yAxisX, yAxisY, yAxisZ, yAxisW,
             zAxisX, zAxisY, zAxisZ, zAxisW,
             posX, posY, posZ, posW;
+        };
+        struct
+        {
+            Vec4 xAxis;
+            Vec4 yAxis;
+            Vec4 zAxis;
+            Vec4 wAxis;
         };
         f32 cells[16];
     };
@@ -346,7 +381,10 @@ inline void M4x4_SetPosition(f32* m, f32 x, f32 y, f32 z)
 
 inline void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
 {
-    // TODO: Implement
+    M4x4* mat = (M4x4*)m;
+    Vec4_SetMagnitude(&mat->xAxis, x);
+    Vec4_SetMagnitude(&mat->yAxis, y);
+    Vec4_SetMagnitude(&mat->zAxis, z);
 }
 
 inline Vec4 M4x4_GetPosition(f32* m)
@@ -359,12 +397,25 @@ inline Vec4 M4x4_GetPosition(f32* m)
     return result;
 }
 
-inline Vec4 M4x4_GetEulerAngles(f32* m)
+inline Vec4 M4x4_GetEulerAnglesRadians(f32* m)
 {
     Vec4 result;
     result.x = (f32)-asinf(m[9]);
     result.y = (f32)atan2(m[8], m[10]);
     result.z = (f32)atan2(m[1], m[5]);
+    result.w = 1;
+    return result;
+}
+
+inline Vec4 M4x4_GetEulerAnglesDegrees(f32* m)
+{
+    Vec4 result;
+    result.x = (f32)-asinf(m[9]) * RAD2DEG;
+    result.y = ((f32)atan2(m[8], m[10])) * RAD2DEG;
+    result.z = ((f32)atan2(m[1], m[5])) * RAD2DEG;
+    // result.y = (f32)-asinf(m[9]) * RAD2DEG;
+    // result.x = ((f32)atan2(m[8], m[10])) * RAD2DEG;
+    // result.z = ((f32)atan2(m[1], m[5])) * RAD2DEG;
     result.w = 1;
     return result;
 }

@@ -93,7 +93,7 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, f32 x, f32 y, f32 z
     btVector3 v(0, 0, 0);
     handle->rigidBody->setLinearVelocity(v);
     // x = roll, y = pitch, z = yaw
-    btVector3 angularV(2, 0, 0);
+    btVector3 angularV(0, 2, 0);
     handle->rigidBody->setAngularVelocity(angularV);
     
     // Create sensor
