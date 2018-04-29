@@ -43,9 +43,10 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	// M4x4_RotateX(rotM.cells, rotation.x);
 	// M4x4_RotateY(rotM.cells, rotation.y);
 
+	M4x4_RotateZ(t->matrix.cells, rotation.z);
 	M4x4_RotateY(t->matrix.cells, rotation.y);
 	M4x4_RotateX(t->matrix.cells, rotation.x);
-	M4x4_RotateZ(t->matrix.cells, rotation.z);
+	
 
 	// 6 degrees of freedom:
 	// M4x4_RotateX(t->matrix.cells, rotation.x);
@@ -68,6 +69,53 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	
 	//rotation.y = COM_CapAngleDegrees(t->rot.y);
 
+	// Read movement input
+	
+	if (input->moveLeft)
+	{
+		movement.x += -1;
+	}
+	if (input->moveRight)
+	{
+		movement.x += 1;
+	}
+	if (input->moveForward)
+	{
+		movement.z += -1;
+	}
+	if (input->moveBackward)
+	{
+		movement.z += 1;
+	}
+
+	if (input->moveDown)
+	{
+		movement.y += -1;
+	}
+	if (input->moveUp)
+	{
+		movement.y += 1;
+	}
+
+	// Apply movement
+	Vec4 left;
+	Vec4 up;
+	Vec4 forward;
+	left.x = (t->matrix.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.y = (t->matrix.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.z = (t->matrix.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+
+	up.x = (t->matrix.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.y = (t->matrix.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.z = (t->matrix.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+
+	forward.x = (t->matrix.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.y = (t->matrix.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.z = (t->matrix.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+
+	t->matrix.posX += (forward.x + left.x + up.x);
+	t->matrix.posY += (forward.y + left.y + up.y);
+	t->matrix.posZ += (forward.z + left.z + up.z);
 
 	#if 0
     if (input->reset)
