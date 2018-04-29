@@ -75,39 +75,3 @@ u32 COM_AlignSize(u32 value, u32 alignment)
     remainder = alignment - remainder;
     return value + remainder;
 }
-
-///////////////////////////////////////////////////////////////////////
-// Macros
-///////////////////////////////////////////////////////////////////////
-#ifndef COM_COPY
-#define COM_COPY(ptrSource, ptrDestination, structType) \
-COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
-#endif
-
-#ifndef COM_COPY_STEP
-#define COM_COPY_STEP(ptrSource, ptrDestination, structType) \
-ptrDestination = (u8*)((u32)ptrDestination + (u32)sizeof(##structType##))
-#endif
-
-
-#ifndef COM_HANDLE_EVENT_CASE
-#define COM_HANDLE_EVENT_CASE(eventTypeInteger, structType, ptrBytes, ptrBufferStart, bufferSize, functionName) \
-case eventTypeInteger##: \
-{ \
-	ASSERT(COM_CheckBufferHasSpace((u8*)##ptrBytes##, (u8*)ptrBufferStart##, bufferSize##, sizeof(##structType##))); \
-    structType ev = {}; \
-    COM_COPY(##ptrBytes##, &##ev##, structType##); \
-    ptrBytes = ((u8*)##ptrBytes + sizeof(##structType##)); \
-} break;
-#endif
-
-void COM_Mem_Test()
-{
-    Vec3 v = {};
-    u8 buffer[64];
-    u8* b2 = 0;
-    // copy
-    COM_COPY(&v, buffer, Vec3);
-    // copy and move
-    COM_COPY_STEP(&v, b2, Vec3);
-}

@@ -42,16 +42,4 @@ void COM_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes);
 
 u32 COM_AlignSize(u32 value, u32 alignment);
 
-///////////////////////////////////////////////////////////////////////
-// Macros
-///////////////////////////////////////////////////////////////////////
-#ifndef COM_COPY
-#define COM_COPY(ptrSource, ptrDestination, structType) \
-COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
-#endif
-
-#ifndef COM_COPY_STEP
-#define COM_COPY_STEP(ptrSource, ptrDestination, structType) \
-COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##)); \
-ptrDestination = (u8*)((u32)ptrDestination + (u32)sizeof(##structType##))
-#endif
+#include "shared_macros.h"

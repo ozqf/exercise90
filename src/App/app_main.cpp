@@ -354,7 +354,7 @@ void App_Frame(GameTime* time, InputTick* input)
     
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
-
+    
     Game_IntersectionTest(gs, &g_worldScene);
 
     platform.Platform_RenderScene(&g_worldScene);

@@ -100,23 +100,23 @@ OpenGL uses column major, y/x matrices
 
 #define TRANSFORM_MATRIX_SIZE 16
 #define X0 0
-#define Y0 1
-#define Z0 2
-#define W0 3
+#define X1 1
+#define X2 2
+#define X3 3
 
-#define X1 4
+#define Y0 4
 #define Y1 5
-#define Z1 6
-#define W1 7
+#define Y2 6
+#define Y3 7
 
-#define X2 8
-#define Y2 9
+#define Z0 8
+#define Z1 9
 #define Z2 10
-#define W2 11
+#define Z3 11
 
-#define X3 12
-#define Y3 13
-#define Z3 14
+#define W0 12
+#define W1 13
+#define W2 14
 #define W3 15
 
 /*****************************************************
@@ -213,11 +213,18 @@ struct M4x4
     {
         struct
         {
+            /* Column order!
+            X   Y   Z   W
+            0   4   8   12
+            1   5   9   13
+            2   6   10  14
+            3   7   11  15
+            */
             f32
-            x0, y0, z0, w0,
-            x1, y1, z1, w1,
-            x2, y2, z2, w2,
-            x3, y3, z3, w3;
+            x0, x1, x2, x3,
+            y0, y1, y2, y3,
+            z0, z1, z2, z3,
+            w0, w1, w2, w3;
         };
         f32 cells[16];
     };
@@ -260,7 +267,30 @@ inline void M4x4_Copy(f32* src, f32* tar)
     tar[Y0] = src[Y0];  tar[Y1] = src[Y1];  tar[Y2] = src[Y2];  tar[Y3] = src[Y3];
     tar[Z0] = src[Z0];  tar[Z1] = src[Z1];  tar[Z2] = src[Z2];  tar[Z3] = src[Z3];
     tar[W0] = src[W0];  tar[W1] = src[W1];  tar[W2] = src[W2];  tar[W3] = src[W3];
+}
 
+inline f32 M4x4_GetScaleX(f32* m)
+{
+    f32 x = m[X0] * m[X0];
+    f32 y = m[Y0] * m[Y0];
+    f32 z = m[Z0] * m[Z0];
+    return (f32)sqrt(x + y + z);
+}
+
+inline f32 M4x4_GetScaleY(f32* m)
+{
+    f32 x = m[X0] * m[X0];
+    f32 y = m[Y0] * m[Y0];
+    f32 z = m[Z0] * m[Z0];
+    return (f32)sqrt(x + y + z);
+}
+
+inline f32 M4x4_GetScaleZ(f32* m)
+{
+    f32 x = m[X0] * m[X0];
+    f32 y = m[Y0] * m[Y0];
+    f32 z = m[Z0] * m[Z0];
+    return (f32)sqrt(x + y + z);
 }
 
 /****************************************************************
@@ -322,6 +352,7 @@ struct Transform
 	Vec3 pos;
 	Vec3 rot;
 	Vec3 scale;
+    M4x4 matrix;
 };
 
 struct AngleVectors
@@ -351,6 +382,10 @@ inline void Transform_SetToIdentity(Transform* t)
     t->scale.y = 1;
     t->scale.z = 1;
 
+    t->matrix.x0 = 1;
+    t->matrix.y1 = 1;
+    t->matrix.z2 = 1;
+    t->matrix.w3 = 1;
 }
 
 inline u32 SafeTruncateUInt64(u64 value)

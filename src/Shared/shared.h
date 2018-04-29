@@ -28,3 +28,4 @@ u32 COM_AlignSize(u32 value, u32 alignment);
 #include "shared_render_types.h"
 #include "shared_render_types.cpp"
 #include "shared_input.h"
+#include "shared_macros.h"

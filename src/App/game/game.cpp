@@ -315,15 +315,36 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
     {
         return;
     }
-    ent->transform.pos.x = ev->pos.x;
-    ent->transform.pos.y = ev->pos.y;
-    ent->transform.pos.z = ev->pos.z;
+    M4x4* m = (M4x4*)&ev->matrix;
+    // ent->transform.pos.x = ev->matrix[X3];
+    // ent->transform.pos.y = ev->matrix[Y3];
+    // ent->transform.pos.z = ev->matrix[Z3];
+    ent->transform.pos.x = m->w0;
+    ent->transform.pos.y = m->w1;
+    ent->transform.pos.z = m->w2;
 
-    ent->transform.rot.x = ev->rot.x;
-    ent->transform.rot.y = ev->rot.y;
-    ent->transform.rot.z = ev->rot.z;
+    Vec3 mRot;
+    mRot.z = atan2f(ev->matrix[1], ev->matrix[5]);
+    mRot.y = atan2f(ev->matrix[8], ev->matrix[10]);
+    mRot.x = -asinf(ev->matrix[9]);
+
+    mRot.x *= RAD2DEG;
+    mRot.y *= RAD2DEG;
+    mRot.z *= RAD2DEG;
+
+    ent->transform.rot.x = mRot.x;
+    ent->transform.rot.y = mRot.y;
+    ent->transform.rot.z = mRot.z;
+
+    if (ent->tag == 1)
+    {
+        COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Write Debug String
+/////////////////////////////////////////////////////////////////////////////
 #define GAME_DEBUG_MODE_NONE 0
 #define GAME_DEBUG_MODE_CAMERA 1
 #define GAME_DEBUG_MODE_ENT 2
@@ -364,14 +385,52 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             }
             else
             {
+                f32* m;
+                m = g_debugMatrix.cells;
+                
+                Vec3 scale = {};
+                scale.x = M4x4_GetScaleX(m);
+                scale.y = M4x4_GetScaleY(m);
+                scale.z = M4x4_GetScaleZ(m);
+
+                Vec3 mPos = {};
+                mPos.x = m[W0];
+                mPos.y = m[W1];
+                mPos.z = m[W2];
+
+                Vec3 mRot;
+                mRot.z = atan2f(m[1], m[5]);
+                mRot.y = atan2f(m[8], m[10]);
+                mRot.x = -asinf(m[9]);
+
                 pos = ent->transform.pos;
                 rot = ent->transform.rot;
                 AngleVectors vectors = {};
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
-                                     "Game.DLL:\nTimeDelta: %3.7f\n-- Debug Entity --\nPos: %3.3f, %3.3f, %3.3f\nRot: %3.3f, %3.3f, %3.3f\n",
+"Game.DLL:\nTimeDelta: %3.7f\n\
+-- Debug Entity --\n\
+Pos: %3.3f, %3.3f, %3.3f\n\
+Rot: %3.3f, %3.3f, %3.3f\n\
+mPos: %3.3f, %3.3f, %3.3f\n\
+mRot: %3.3f, %3.3f, %3.3f\n\
+scale: %3.3f, %3.3f, %3.3f\n\
+M4x4:\n\
+(0) %3.3f, (4) %3.3f, (8) %3.3f, (12) %3.3f\n\
+(1) %3.3f, (5) %3.3f, (9) %3.3f, (13) %3.3f\n\
+(2) %3.3f, (6) %3.3f, (10) %3.3f, (14) %3.3f\n\
+(3) %3.3f, (7) %3.3f, (11) %3.3f, (15) %3.3f\n\
+",
                                      time->deltaTime,
                                      pos.x, pos.y, pos.z,
-                                     rot.x, rot.y, rot.z);
+                                     rot.x, rot.y, rot.z,
+                                     mPos.x, mPos.y, mPos.z,
+                                     mRot.x * RAD2DEG, mRot.y * RAD2DEG, mRot.z * RAD2DEG,
+                                     scale.x, scale.y, scale.z,
+                                     m[0], m[4], m[8], m[12],
+                                     m[1], m[5], m[9], m[13],
+                                     m[2], m[6], m[10], m[14],
+                                     m[3], m[7], m[11], m[15]
+                                     );
             }
             
         }
@@ -388,6 +447,9 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
     return h;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Game Tick
+/////////////////////////////////////////////////////////////////////////////
 void Game_Tick(GameState *gs, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);

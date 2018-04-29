@@ -116,21 +116,21 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         btTransform t;
         //h->motionState->getWorldTransform(t);
         h->rigidBody->getMotionState()->getWorldTransform(t);
-        btVector3 p = t.getOrigin();
+        // btVector3 p = t.getOrigin();
 
-        // Write position to handle
-        h->transform.pos.x = p.getX();
-        h->transform.pos.y = p.getY();
-        h->transform.pos.z = p.getZ();
+        // // Write position to handle
+        // h->transform.pos.x = p.getX();
+        // h->transform.pos.y = p.getY();
+        // h->transform.pos.z = p.getZ();
 
         // write transform update
         ZTransformUpdateEvent tUpdate = {};
         tUpdate.type = 1;
         tUpdate.ownerId = h->ownerId;
 		tUpdate.ownerIteration = h->ownerIteration;
-        tUpdate.pos.x = h->transform.pos.x;
-        tUpdate.pos.y = h->transform.pos.y;
-        tUpdate.pos.z = h->transform.pos.z;
+        // tUpdate.pos.x = h->transform.pos.x;
+        // tUpdate.pos.y = h->transform.pos.y;
+        // tUpdate.pos.z = h->transform.pos.z;
         
         // attempt to read angle:
 
@@ -140,10 +140,23 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         // Roll     X           Z
         // Pitch    Y           X
         // Yaw      Z           Y
-
-#if 1
+#if 1 // Pure matrix
         btScalar openglM[16];
         t.getOpenGLMatrix(openglM);
+        for (i32 j = 0; j < 16; ++j)
+        {
+            tUpdate.matrix[j] = openglM[j];
+        }
+#endif
+
+#if 0 // Matrix and angles
+        btScalar openglM[16];
+        t.getOpenGLMatrix(openglM);
+        for (i32 j = 0; j < 16; ++j)
+        {
+            tUpdate.matrix.cells[j] = openglM[j];
+        }
+        
 
         // btScalar m[16];
         // t.getOpenGLMatrix(m);
@@ -157,7 +170,7 @@ void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime
         tUpdate.rot.y = fAngY * RAD2DEG;
         tUpdate.rot.z = fAngZ * RAD2DEG;
 #endif
-#if 0
+#if 0 // angles etc
         btMatrix3x3 m = t.getBasis();
         btScalar pitchX;
         btScalar yawY;

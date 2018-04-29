@@ -75,6 +75,10 @@ global_variable EC_Projectile        g_prjControllers[GAME_MAX_ENTITIES];
 // UI
 global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 
+/////////////////////////////////////////////////////////////
+// Debug
+/////////////////////////////////////////////////////////////
+M4x4 g_debugMatrix = {};
 
 #include "game_entities.h"
 #include "comp_rendObj.h"
