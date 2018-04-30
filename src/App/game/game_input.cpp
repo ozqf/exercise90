@@ -5,7 +5,7 @@
 #define GAME_INPUT_FULL_FREEDOM 0
 #define GAME_INPUT_ON_FOOT 1
 
-internal u8 GAME_INPUT_MODE = GAME_INPUT_ON_FOOT;
+internal u8 GAME_INPUT_MODE = GAME_INPUT_FULL_FREEDOM;//GAME_INPUT_ON_FOOT;
 
 ////////////////////////////////////////////////////////////////////////////
 // Full freedom
@@ -25,14 +25,18 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
     Vec4 movement = {};
     Vec4 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
 	
-	if (input->yawLeft) { rotation.y += 1 * 90; }
-	if (input->yawRight) { rotation.y += -1 * 90; }
-	rotation.y *= time->deltaTime;
+	// if (input->yawLeft) { rotation.y += 1 * 90; }
+	// if (input->yawRight) { rotation.y += -1 * 90; }
+	// rotation.y *= time->deltaTime;
 
-	if (input->pitchUp) { rotation.x += -1 * 90; }
-	if (input->pitchDown) { rotation.x += 1 * 90; }
-	rotation.x *= time->deltaTime;
-
+	// if (input->pitchUp) { rotation.x += -1 * 90; }
+	// if (input->pitchDown) { rotation.x += 1 * 90; }
+	// rotation.x *= time->deltaTime;
+	
+	// TODO: Reimplement mouse rotation!
+	rotation.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
+	rotation.y -= (((f32)input->mouseMovement[0] * sensitivity));
+	
 	if (input->rollLeft) { rotation.z += 1 * 90; }
 	if (input->rollRight) { rotation.z += -1 * 90; }
 	rotation.z *= time->deltaTime;
@@ -41,10 +45,6 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 	M4x4_RotateY(t->matrix.cells, rotation.y);
 	M4x4_RotateX(t->matrix.cells, rotation.x);
 	
-	// TODO: Reimplement mouse rotation!
-	//rotation.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
-	//rotation.x = COM_CapAngleDegrees(t->rot.x);
-
 	if (input->moveLeft)
 	{
 		movement.x += -1;
@@ -117,12 +117,18 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 	f32 turnRate = 90;
 	f32 turnStep = turnRate * time->deltaTime;
 
-	if (input->yawLeft) { input->degrees.y += turnStep; }
-	if (input->yawRight) { input->degrees.y += -turnStep; }
-	input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
+	// if (input->yawLeft) { input->degrees.y += turnStep; }
+	// if (input->yawRight) { input->degrees.y += -turnStep; }
+	// input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
+
+	input->degrees.y -= (((f32)input->mouseMovement[0] * sensitivity));
+
+	//rotation.x = COM_CapAngleDegrees(t->rot.x);
 	
-	if (input->pitchUp) { input->degrees.x += -turnStep; }
-	if (input->pitchDown) { input->degrees.x += turnStep; }
+	//if (input->pitchUp) { input->degrees.x += -turnStep; }
+	//if (input->pitchDown) { input->degrees.x += turnStep; }
+
+	input->degrees.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
 
 	if (input->degrees.x < -89)
 	{
