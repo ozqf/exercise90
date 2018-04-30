@@ -263,16 +263,17 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	f32 rotY = M4x4_GetAngleY(model->matrix.cells) * RAD2DEG;
 	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells) * RAD2DEG;
 
-	f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
-	f32 scaleY = M4x4_GetScaleY(model->matrix.cells);
-	f32 scaleZ = M4x4_GetScaleZ(model->matrix.cells);
+	// f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
+	// f32 scaleY = M4x4_GetScaleY(model->matrix.cells);
+	// f32 scaleZ = M4x4_GetScaleZ(model->matrix.cells);
 
 	glTranslatef(x, y, z);
 	glRotatef(rotY, 0, 1, 0);
 	glRotatef(rotX, 1, 0, 0);
 	glRotatef(rotZ, 0, 0, 1);
 
-	glScalef(scaleX, scaleY, scaleZ);
+	//glScalef(scaleX, scaleY, scaleZ);
+	glScalef(model->scale.x, model->scale.y, model->scale.z);
 
 	char buf[512];
 	sprintf_s(buf, 512,
@@ -732,6 +733,11 @@ void R_RenderScene(RenderScene* scene)
 	//R_SetupOrthoProjection(8);
     for (u32 i = 0; i < scene->numObjects; ++i)
     {
+		if (scene->sceneItems[i].obj.flags & RENDOBJ_FLAG_DEBUG)
+		{
+			scene->sceneItems[i].obj.flags |= RENDOBJ_FLAG_DEBUG;
+			//DebugBreak();
+		}
         R_RenderEntity(&scene->cameraTransform, &scene->sceneItems[i]);
     }
 

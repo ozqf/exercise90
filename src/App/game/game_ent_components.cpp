@@ -18,22 +18,40 @@
 void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    
+    M4x4_SetToIdentity(ent->transform.matrix.cells);
+    //ent->transform.matrix.wAxis = originT->matrix.wAxis;
     ent->transform = *originT;
     //ent->transform.scale = { 0.1f, 0.1f, 0.5f };
-    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
 
     EC_Renderer* rend = EC_AddRenderer(ent, gs);
     RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 2);
+    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
+
+    //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
     EC_Projectile* prj = EC_AddProjectile(ent, gs);
-    Vec4 forward;
-    forward.x = originT->matrix.zAxisX;
-    forward.y = originT->matrix.zAxisY;
-    forward.z = originT->matrix.zAxisZ;
+    //Vec4 forward = originT->matrix.zAxis;
+    //Vec4_SetMagnitude(&forward, 1);
+
+    Vec4_SetMagnitude(&ent->transform.matrix.xAxis, 1);
+    Vec4_SetMagnitude(&ent->transform.matrix.yAxis, 1);
+    Vec4_SetMagnitude(&ent->transform.matrix.zAxis, 1);
+
+    // forward.x = originT->matrix.zAxisX;
+    // forward.y = originT->matrix.zAxisY;
+    // forward.z = originT->matrix.zAxisZ;
+    // set scale after motion to avoid scaling motion
+    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
+
     #if 1
-    prj->move.x = -forward.x * 20.0f;
-    prj->move.y = -forward.y * 20.0f;
-    prj->move.z = -forward.z * 20.0f;
+    // prj->move.x = -forward.x * 20.0f;
+    // prj->move.y = -forward.y * 20.0f;
+    // prj->move.z = -forward.z * 20.0f;
+    prj->move.x = -ent->transform.matrix.zAxis.x * 0.5f;
+    prj->move.y = -ent->transform.matrix.zAxis.y * 0.5f;
+    prj->move.z = -ent->transform.matrix.zAxis.z * 0.5f;
     #endif
     #if 0
     Calc_CameraGameForward(&originT->rot, &prj->move);
@@ -175,7 +193,8 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;
-            M4x4_SetScale(item->transform.matrix.cells, 1, 1, 1);
+            //M4x4_SetScale(item->transform.matrix.cells, 1, 1, 1);
+            Transform_SetScale(&item->transform, 1, 1, 1);
             //item->transform.scale = { 1, 1, 1 };
             if (collider->lastFrameOverlapping == time->frameNumber)
             {

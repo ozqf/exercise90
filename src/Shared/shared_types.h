@@ -398,29 +398,47 @@ inline void M4x4_Copy(f32* src, f32* tar)
     tar[W0] = src[W0];  tar[W1] = src[W1];  tar[W2] = src[W2];  tar[W3] = src[W3];
 }
 
-inline f32 M4x4_GetScaleX(f32* m)
-{
-    f32 x = m[X0] * m[X0];
-    f32 y = m[Y0] * m[Y0];
-    f32 z = m[Z0] * m[Z0];
-    return (f32)sqrt(x + y + z);
-}
+// inline f32 M4x4_GetScaleX(f32* m)
+// {
+//     f32 x = fabsf(m[X0] * m[X0]);
+//     f32 y = fabsf(m[Y0] * m[Y0]);
+//     f32 z = fabsf(m[Z0] * m[Z0]);
+//     return (f32)sqrt(x + y + z);
+// }
 
-inline f32 M4x4_GetScaleY(f32* m)
-{
-    f32 x = m[X1] * m[X1];
-    f32 y = m[Y1] * m[Y1];
-    f32 z = m[Z1] * m[Z1];
-    return (f32)sqrt(x + y + z);
-}
+// inline f32 M4x4_GetScaleY(f32* m)
+// {
+//     f32 x = fabsf(m[X1] * m[X1]);
+//     f32 y = fabsf(m[Y1] * m[Y1]);
+//     f32 z = fabsf(m[Z1] * m[Z1]);
+//     return (f32)sqrt(x + y + z);
+// }
 
-inline f32 M4x4_GetScaleZ(f32* m)
-{
-    f32 x = m[X0] * m[X0];
-    f32 y = m[Y0] * m[Y0];
-    f32 z = m[Z0] * m[Z0];
-    return (f32)sqrt(x + y + z);
-}
+// inline f32 M4x4_GetScaleZ(f32* m)
+// {
+//     f32 x = fabsf(m[X2] * m[X2]);
+//     f32 y = fabsf(m[Y2] * m[Y2]);
+//     f32 z = fabsf(m[Z2] * m[Z2]);
+//     return (f32)sqrt(x + y + z);
+// }
+
+// inline Vec4 M4x4_GetScale(f32* m)
+// {
+//     Vec4 result;
+//     result.x = fabsf((f32)sqrt(m[X0] * m[X0] + m[Y0] * m[Y0] + m[Z0] * m[Z0]));
+//     result.y = fabsf((f32)sqrt(m[X1] * m[X1] + m[Y1] * m[Y1] + m[Z1] * m[Z1]));
+//     result.z = fabsf((f32)sqrt(m[X2] * m[X2] + m[Y2] * m[Y2] + m[Z2] * m[Z2]));
+//     result.w = 1;
+//     return result;
+// }
+
+// inline void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
+// {
+//     M4x4* mat = (M4x4*)m;
+//     Vec4_SetMagnitude(&mat->xAxis, x);
+//     Vec4_SetMagnitude(&mat->yAxis, y);
+//     Vec4_SetMagnitude(&mat->zAxis, z);
+// }
 
 inline void M4x4_RotateX(f32* m, f32 degreesY)
 {
@@ -480,14 +498,6 @@ inline void M4x4_SetPosition(f32* m, f32 x, f32 y, f32 z)
     m[W0] = x, m[W1] = y; m[W2] = z;
 }
 
-inline void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
-{
-    M4x4* mat = (M4x4*)m;
-    Vec4_SetMagnitude(&mat->xAxis, x);
-    Vec4_SetMagnitude(&mat->yAxis, y);
-    Vec4_SetMagnitude(&mat->zAxis, z);
-}
-
 inline Vec4 M4x4_GetPosition(f32* m)
 {
     Vec4 result;
@@ -524,16 +534,6 @@ inline Vec4 M4x4_GetEulerAnglesDegrees(f32* m)
 inline void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
 {
     // TODO: Implement
-}
-
-inline Vec4 M4x4_GetScale(f32* m)
-{
-    Vec4 result;
-    result.x = (f32)sqrt(m[X0] * m[X0] + m[Y0] * m[Y0] + m[Z0] * m[Z0]);
-    result.y = (f32)sqrt(m[X1] * m[X1] + m[Y1] * m[Y1] + m[Z1] * m[Z1]);
-    result.z = (f32)sqrt(m[X2] * m[X2] + m[Y2] * m[Y2] + m[Z2] * m[Z2]);
-    result.w = 1;
-    return result;
 }
 
 /****************************************************************
@@ -594,8 +594,8 @@ struct Transform
 {
 	// Vec3 pos;
 	// Vec3 rot;
-	// Vec3 scale;
     M4x4 matrix;
+    Vec3 scale;
 };
 
 struct AngleVectors
@@ -617,13 +617,19 @@ struct Transform2
 /****************************************************************
 Global Functions
 ****************************************************************/
+inline void Transform_SetScale(Transform* t, f32 x, f32 y, f32 z)
+{
+    t->scale.x = x;
+    t->scale.y = y;
+    t->scale.z = z;
+}
 
 inline void Transform_SetToIdentity(Transform* t)
 {
     *t = {};
-    // t->scale.x = 1;
-    // t->scale.y = 1;
-    // t->scale.z = 1;
+    t->scale.x = 1;
+    t->scale.y = 1;
+    t->scale.z = 1;
 
     t->matrix.x0 = 1;
     t->matrix.y1 = 1;

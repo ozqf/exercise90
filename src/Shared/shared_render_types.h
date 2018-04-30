@@ -2,6 +2,9 @@
 
 #include "../Shared/shared.h"
 
+const u32 RENDOBJ_FLAG_DEBUG = 1 << 0; // 1
+//#define RENDOBJ_FLAG_DEBUG (1 << 0)
+
 #define RENDER_PROJECTION_MODE_3D 0
 #define RENDER_PROJECTION_MODE_ORTHOGRAPHIC 1
 #define RENDER_PROJECTION_MODE_IDENTITY 2
@@ -114,6 +117,7 @@ struct RendObj
     u16 ownerIndex;
     u16 inUse;
     u16 type;
+    u32 flags;
     RendObj_Union data;
 };
 

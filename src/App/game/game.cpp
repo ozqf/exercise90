@@ -58,7 +58,8 @@ void Game_BuildTestScene(GameState *gs)
     // ent->transform.pos.x = 0;
     // ent->transform.pos.y = 0;
     // ent->transform.pos.z = 0;
-    M4x4_SetScale(ent->transform.matrix.cells, testArenaWidth, testArenaWidth, testArenaWidth);
+    Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
+    //M4x4_SetScale(ent->transform.matrix.cells, testArenaWidth, testArenaHeight, testArenaWidth);
     // ent->transform.scale.x = testArenaWidth;
     // ent->transform.scale.y = testArenaHeight;
     // ent->transform.scale.z = testArenaWidth;
@@ -127,7 +128,8 @@ void Game_BuildTestScene(GameState *gs)
     M4x4_SetPosition(ent->transform.matrix.cells, 0, 5, -3);
     // ent->transform.pos.y = 5;
     // ent->transform.pos.z = -3;
-    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45.0f);
     // ent->transform.scale.x = 0.1f;
     // ent->transform.scale.y = 0.1f;
@@ -142,7 +144,7 @@ void Game_BuildTestScene(GameState *gs)
     renderer = EC_AddRenderer(ent, gs);
     //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-
+    
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
@@ -153,11 +155,13 @@ void Game_BuildTestScene(GameState *gs)
         ent->entId.index,
         ent->entId.iteration);
 
+    //////////////////////////////////////////////////////////////////////////////
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 2;
     M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
-    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
     // ent->transform.pos.x = 5;
     // ent->transform.pos.y = 6;
@@ -167,7 +171,7 @@ void Game_BuildTestScene(GameState *gs)
     // ent->transform.scale.z = 0.5f;
     // ent->transform.rot.x = 22.5; // Pitch
     // ent->transform.rot.y = 45;   // Yaw
-                                 //ent->transform.rot.z = 0;   // Roll
+    // ent->transform.rot.z = 0;   // Roll
 
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
@@ -175,7 +179,7 @@ void Game_BuildTestScene(GameState *gs)
     renderer = EC_AddRenderer(ent, gs);
     //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-
+    
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
@@ -186,11 +190,13 @@ void Game_BuildTestScene(GameState *gs)
         ent->entId.index,
         ent->entId.iteration);
 
+    //////////////////////////////////////////////////////////////////////////////
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
     M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
-    M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
     // ent->transform.pos.y = 16;
     // ent->transform.pos.x = -3;
@@ -200,7 +206,7 @@ void Game_BuildTestScene(GameState *gs)
     // ent->transform.scale.z = 0.5f;
     // ent->transform.rot.x = 22.5; // Pitch
     // ent->transform.rot.y = 45;   // Yaw
-                                 //ent->transform.rot.z = 0;   // Roll
+    //ent->transform.rot.z = 0;   // Roll
 
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
@@ -208,7 +214,7 @@ void Game_BuildTestScene(GameState *gs)
     renderer = EC_AddRenderer(ent, gs);
     //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-
+    
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
@@ -362,7 +368,8 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
     if (ent->tag == 1)
     {
         //COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
-        COM_COPY(&gs->cameraTransform.matrix, &g_debugMatrix, M4x4);
+        //COM_COPY(&gs->cameraTransform.matrix, &g_debugMatrix, M4x4);
+        COM_COPY(&gs->cameraTransform.matrix, &g_debugTransform, Transform);
     }
 }
 
@@ -411,12 +418,12 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             else
             {
                 f32* m;
-                m = g_debugMatrix.cells;
+                m = g_debugTransform.matrix.cells;
                 
-                Vec3 scale = {};
-                scale.x = M4x4_GetScaleX(m);
-                scale.y = M4x4_GetScaleY(m);
-                scale.z = M4x4_GetScaleZ(m);
+                Vec3 scale = g_debugTransform.scale;
+                // scale.x = M4x4_GetScaleX(m);
+                // scale.y = M4x4_GetScaleY(m);
+                // scale.z = M4x4_GetScaleZ(m);
 
                 Vec3 mPos = {};
                 mPos.x = m[W0];
@@ -444,6 +451,7 @@ M4x4:\n\
                                      time->deltaTime,
                                      mPos.x, mPos.y, mPos.z,
                                      mRot.x * RAD2DEG, mRot.y * RAD2DEG, mRot.z * RAD2DEG,
+                                     //scale.x, scale.y, scale.z,
                                      scale.x, scale.y, scale.z,
                                      m[0], m[4], m[8], m[12],
                                      m[1], m[5], m[9], m[13],
