@@ -80,6 +80,7 @@ global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 /////////////////////////////////////////////////////////////
 //M4x4 g_debugMatrix = {};
 Transform g_debugTransform = {};
+InputTick g_debugInput = {};
 
 #include "game_entities.h"
 #include "comp_rendObj.h"

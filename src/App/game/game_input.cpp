@@ -2,10 +2,17 @@
 
 #include "game.h"
 
+#define GAME_INPUT_FULL_FREEDOM 0
+#define GAME_INPUT_ON_FOOT 1
+
+internal u8 GAME_INPUT_MODE = GAME_INPUT_ON_FOOT;
+
 ////////////////////////////////////////////////////////////////////////////
-// Process Input
+// Full freedom
+// - rotates via direct manipulation of the camera matrix
+// - gives full freedom
 ////////////////////////////////////////////////////////////////////////////
-void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 {
 	if (input->reset)
 	{
@@ -18,9 +25,6 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
     Vec4 movement = {};
     Vec4 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
 	
-	//M4x4 rotM = {};
-	//M4x4_SetToIdentity(rotM.cells);
-
 	if (input->yawLeft) { rotation.y += 1 * 90; }
 	if (input->yawRight) { rotation.y += -1 * 90; }
 	rotation.y *= time->deltaTime;
@@ -33,44 +37,14 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	if (input->rollRight) { rotation.z += -1 * 90; }
 	rotation.z *= time->deltaTime;
 
-	//rotation.y = ((f32)input->mouseMovement[0] * sensitivity);
-
-	//rotation.x = (((f32)input->mouseMovement[1] * sensitivity)) * inverted; 
-	//rotation.y = ((f32)input->mouseMovement[0] * sensitivity);
-
-	//rotation.y = -rotation.y;
-
-	// M4x4_RotateX(rotM.cells, rotation.x);
-	// M4x4_RotateY(rotM.cells, rotation.y);
-
 	M4x4_RotateZ(t->matrix.cells, rotation.z);
 	M4x4_RotateY(t->matrix.cells, rotation.y);
 	M4x4_RotateX(t->matrix.cells, rotation.x);
 	
-
-	// 6 degrees of freedom:
-	// M4x4_RotateX(t->matrix.cells, rotation.x);
-	// M4x4_RotateY(t->matrix.cells, rotation.y);
-	// M4x4_RotateZ(t->matrix.cells, rotation.z);
-
-	//if (rotation.y != 0)
-	//{
-		//M4x4_RotateY(t->matrix.cells, rotation.y);
-	//}
-
+	// TODO: Reimplement mouse rotation!
 	//rotation.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
 	//rotation.x = COM_CapAngleDegrees(t->rot.x);
 
-	//if (rotation.x != 0)
-	//{
-		//M4x4_RotateX(t->matrix.cells, rotation.x);
-	//}
-
-	
-	//rotation.y = COM_CapAngleDegrees(t->rot.y);
-
-	// Read movement input
-	
 	if (input->moveLeft)
 	{
 		movement.x += -1;
@@ -116,50 +90,69 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 	t->matrix.posX += (forward.x + left.x + up.x);
 	t->matrix.posY += (forward.y + left.y + up.y);
 	t->matrix.posZ += (forward.z + left.z + up.z);
+}
 
-	#if 0
-    if (input->reset)
-    {
+
+////////////////////////////////////////////////////////////////////////////
+// On Foot mode
+// - rotates via incrementing input->degrees
+// - DOES NOT WORK WITH ROLL!
+////////////////////////////////////////////////////////////////////////////
+void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
+{
+	g_debugInput = *input;
+	if (input->reset)
+	{
 		M4x4_SetToIdentity(t->matrix.cells);
-        // t->pos = { 0, 0, 2 };
-        // t->rot = { 0, 0, 0 };
-        // t->scale = { 0, 0, 0};
-        return;
-    }
+		input->degrees = {};
+		return;
+	}
 
-    Vec3 movement = {};
-    Vec3 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
+	////////////////////////////////////////////////////////////////////////
+	// Rotation
+	////////////////////////////////////////////////////////////////////////
+	f32 sensitivity = 0.1f;
+	i8 inverted = -1;
+
+	f32 turnRate = 90;
+	f32 turnStep = turnRate * time->deltaTime;
+
+	if (input->yawLeft) { input->degrees.y += turnStep; }
+	if (input->yawRight) { input->degrees.y += -turnStep; }
+	input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
 	
-	/////////////////////////////////////////////////
-	// READ ROTATION
-	/////////////////////////////////////////////////
-	if (input->yawLeft) { rotation.y += 1; }
-	if (input->yawRight) { rotation.y += -1; }
+	if (input->pitchUp) { input->degrees.x += -turnStep; }
+	if (input->pitchDown) { input->degrees.x += turnStep; }
 
-	if (input->pitchUp) { rotation.x += -1; }
-	if (input->pitchDown) { rotation.x += 1; }
-
-	if (input->rollLeft) { rotation.z += 1; }
-	if (input->rollRight) { rotation.z += -1; }
-
-	// x = pitch, y = yaw, z = roll
+	if (input->degrees.x < -89)
+	{
+		input->degrees.x = -89;
+	}
+	if (input->degrees.x > 89)
+	{
+		input->degrees.x = 89;
+	}
 	
-#if 0
-    // Disabled mouse input for debugging
-	//t->rot.x += rotation.x * (PLAYER_ROTATION_SPEED * time->deltaTime);
-	//t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity) * time->deltaTime) * inverted;
-    t->rot.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
-	t->rot.x = COM_CapAngleDegrees(t->rot.x);
+	// Roll doesn't work and shouldn't be used with this input setting
+	if (input->rollLeft) { input->degrees.z += turnStep; }
+	if (input->rollRight) { input->degrees.z += -turnStep; }
+	input->degrees.z = COM_CapAngleDegrees(input->degrees.z);
 
-	//t->rot.y += rotation.y * (PLAYER_ROTATION_SPEED * time->deltaTime);
-	//t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity) * time->deltaTime;
-    t->rot.y -= ((f32)input->mouseMovement[0] * sensitivity);
-	t->rot.y = COM_CapAngleDegrees(t->rot.y);
+	Vec4 pos = t->matrix.wAxis;
+	// Construct camera matrix
+	Transform_SetToIdentity(t);
+	t->matrix.wAxis = pos;
+	// This is order sensitivity! roll -> yaw -> pitch
+	M4x4_RotateZ(t->matrix.cells, input->degrees.z);
+	M4x4_RotateY(t->matrix.cells, input->degrees.y);
+	M4x4_RotateX(t->matrix.cells, input->degrees.x);
+	
 
-	t->rot.z += rotation.z * (PLAYER_ROTATION_SPEED * time->deltaTime);
-	t->rot.z = COM_CapAngleDegrees(t->rot.z);
-#endif
 
+	////////////////////////////////////////////////////////////////////////
+	// Movement
+	////////////////////////////////////////////////////////////////////////
+	Vec4 movement = {};
 	if (input->moveLeft)
 	{
 		movement.x += -1;
@@ -186,48 +179,38 @@ void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
 		movement.y += 1;
 	}
 
-	/*
-	Movement forward requires creating a vector in the direction of
-	the object's "forward". Object in this case has rotation, so must convert
-	rotation to a forward vector, and then scale this vector by desired speed
-	to create a velocity change in the desired direction
+	// Apply movement
+	// TODO: Currently identical to Full freedom movement
+	// Should be limited to moving based on yaw only!
+	Vec4 left;
+	Vec4 up;
+	Vec4 forward;
+	left.x = (t->matrix.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.y = (t->matrix.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.z = (t->matrix.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
 
-	> Read rotation input and rotate angles
-	> Calculate forward vector
-	> Scale forward to desired speed and add to position
-    */
-	Vec3 frameMove = {};
+	up.x = (t->matrix.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.y = (t->matrix.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.z = (t->matrix.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
 
-	// Sideways: X Input
-	// Vertical: Y Input
-	// Forward: Z input
+	forward.x = (t->matrix.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.y = (t->matrix.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.z = (t->matrix.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
 
-	// Quick hack to force movement to occur on a flat x/z plane only
-	Vec3 groundRot = t->rot;
-	groundRot.x = 0;
-	groundRot.z = 0;
+	t->matrix.posX += (forward.x + left.x + up.x);
+	t->matrix.posY += (forward.y + left.y + up.y);
+	t->matrix.posZ += (forward.z + left.z + up.z);
 
-    AngleVectors angleVectors = {};
-	angleVectors.
 
-	Calc_AnglesToAxesZYX(&groundRot, &angleVectors.left, &angleVectors.up, &angleVectors.forward);
-
-    // Set the cameras own
-    // TODO: Clean this whole messy function up!
-    AngleVectors* camVecs = &g_worldScene.cameraAngleVectors;
-    Calc_AnglesToAxesZYX(&t->rot, &camVecs->left, &camVecs->up, &camVecs->forward);
-
-	// If input is blank mag will be speed * 0?
-	Vec3_SetMagnitude(&angleVectors.left, ((PLAYER_MOVE_SPEED * time->deltaTime) * movement.x));
-	Vec3_SetMagnitude(&angleVectors.up, ((PLAYER_MOVE_SPEED * time->deltaTime) * movement.y));
-	Vec3_SetMagnitude(&angleVectors.forward, ((PLAYER_MOVE_SPEED * time->deltaTime) * movement.z));
-
-	frameMove.x = angleVectors.forward.x + angleVectors.up.x + angleVectors.left.x;
-	frameMove.y = angleVectors.forward.y + angleVectors.up.y + angleVectors.left.y;
-	frameMove.z = angleVectors.forward.z + angleVectors.up.z + angleVectors.left.z;
-
-	t->pos.x += frameMove.x;
-	t->pos.y += frameMove.y;
-	t->pos.z += frameMove.z;
-	#endif
+}
+void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
+{
+	if (GAME_INPUT_MODE == GAME_INPUT_ON_FOOT)
+	{
+		Game_ApplyInputOnFootMode(input, t, time);
+	}
+	else
+	{
+		Game_ApplyInputFullFreedom(input, t, time);
+	}
 }

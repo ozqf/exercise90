@@ -16,6 +16,8 @@ struct InputTick
     char escape;
     char reset;
     char debug_cycleTexture;
+
+    Vec3 degrees = {};
 };
 
 struct GL_Test_Input

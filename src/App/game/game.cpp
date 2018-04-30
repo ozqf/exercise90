@@ -419,6 +419,8 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             {
                 f32* m;
                 m = g_debugTransform.matrix.cells;
+
+                Vec3 inputRot = g_debugInput.degrees;
                 
                 Vec3 scale = g_debugTransform.scale;
                 // scale.x = M4x4_GetScaleX(m);
@@ -438,6 +440,7 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
                 AngleVectors vectors = {};
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
 "Game.DLL:\nTimeDelta: %3.7f\n\
+Input Rot: %3.3f, %3.3f, %3.3f\n\
 -- Debug Transform --\n\
 mPos: %3.3f, %3.3f, %3.3f\n\
 mRot: %3.3f, %3.3f, %3.3f\n\
@@ -449,6 +452,7 @@ M4x4:\n\
 (3) %3.3f, (7) %3.3f, (11) %3.3f, (15) %3.3f\n\
 ",
                                      time->deltaTime,
+                                     inputRot.x, inputRot.y, inputRot.z,
                                      mPos.x, mPos.y, mPos.z,
                                      mRot.x * RAD2DEG, mRot.y * RAD2DEG, mRot.z * RAD2DEG,
                                      //scale.x, scale.y, scale.z,
