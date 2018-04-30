@@ -210,21 +210,22 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         {
             inputTick.reset = isDown;
         }
-        else if (VKCode == 'Z' && isDown)
-        {
-            //Win32_R_Shutdown();
-            Win32_CloseRendererLink();
-        }
-        else if (VKCode == 'X' && isDown)
-        {
-            //Win32_InitOpenGL(appWindow);
-            //app.AppRendererReloaded();
-            Win32_LinkToRenderer();
-            if (app.isvalid)
-            {
-                app.AppRendererReloaded();
-            }
-        }
+        // This might cause issues now that hot reloading is working:
+        // else if (VKCode == 'Z' && isDown)
+        // {
+        //     //Win32_R_Shutdown();
+        //     Win32_CloseRendererLink();
+        // }
+        // else if (VKCode == 'X' && isDown)
+        // {
+        //     //Win32_InitOpenGL(appWindow);
+        //     //app.AppRendererReloaded();
+        //     Win32_LinkToRenderer();
+        //     if (app.isvalid)
+        //     {
+        //         app.AppRendererReloaded();
+        //     }
+        // }
         else if (VKCode == 'P' && isDown)
         {
             MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
@@ -439,6 +440,7 @@ int CALLBACK WinMain(
             }
             // Set timestamp so that we don't instantly reload the app
             Win32_UpdateFileTimeStamp(appModulePath, &g_appModuleTimestamp);
+            Win32_UpdateFileTimeStamp(renderModulePath, &g_renderModuleTimestamp);
 #endif
 
 #if 0
@@ -475,6 +477,7 @@ int CALLBACK WinMain(
 
                 g_gameTime.frameNumber++;
 
+                // Check App reload
                 g_checkAppReloadTick -= g_gameTime.deltaTime;
                 if (g_checkAppReloadTick <= 0)
                 {
@@ -482,6 +485,20 @@ int CALLBACK WinMain(
                     if (Win32_CheckFileModified(appModulePath, &g_appModuleTimestamp))
                     {
                         Win32_LinkToApplication();
+                    }
+                    //Win32_CheckApplicationLink();
+                }
+                // Check renderer reload
+                g_checkRenderReloadTick -= g_gameTime.deltaTime;
+                if (g_checkRenderReloadTick <= 0)
+                {
+                    g_checkRenderReloadTick = 0.1f;
+                    if (Win32_CheckFileModified(renderModulePath, &g_renderModuleTimestamp))
+                    {
+                        if (Win32_LinkToRenderer() && app.isvalid)
+                        {
+                            app.AppRendererReloaded();
+                        }
                     }
                     //Win32_CheckApplicationLink();
                 }

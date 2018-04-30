@@ -54,7 +54,7 @@ global_variable AppInterface app;
 global_variable char *appModulePath = "base/gamex86.dll";
 global_variable char *appModulePathCopy = "base/gamex86copy.dll";
 global_variable char *renderModulePath = "win32gl.dll";
-global_variable char *renderModulePathCopy = "win32gl.dll";
+global_variable char *renderModulePathCopy = "win32glcopy.dll";
 
 global_variable RenderInterface renderer = {};
 global_variable u8 renderModuleState = 0;
