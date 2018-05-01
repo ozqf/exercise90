@@ -1,6 +1,6 @@
 @echo off
 
-@echo -----------------------------
+@echo --------------------------------------------------------
 @echo Build Exercise 90 Renderer dll
 
 if not exist bin mkdir bin
@@ -19,7 +19,7 @@ set linkInputB=user32.lib opengl32.lib Gdi32.lib
 set compilerInput=../src/Platform/win32_gl/win32_gl.cpp
 set outputDLL=/Fe../bin/win32gl.dll
 @echo on
-cl %compilerFlags% %compilerDefines% %compilerInput% %outputDLL% %linkInputB%
+@cl %compilerFlags% %compilerDefines% %compilerInput% %outputDLL% %linkInputB%
 @echo off
 set compilerFlags=
 set compilerDefines=

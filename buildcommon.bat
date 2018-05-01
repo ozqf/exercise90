@@ -1,44 +1,34 @@
 @echo off
 
 @echo --------------------------------------------------------
-@echo Build Exercise 90 Win32 Platform Layer
+@echo Build Exercise 90 Common Library
 
 if not exist bin mkdir bin
-if not exist build mkdir build
-cd build
+if not exist buildcommon mkdir buildcommon
+cd buildcommon
 del *.* /Q
 @rem === COMPILER SETTINGS ===
-set outputExe=/Fe../bin/exercise90.exe
+@set output=/Fo../lib/common.obj
 @rem main compile flags, elevating warnings
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /c
 @rem No elevated warnings
 @rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
 @rem /DVERBOSE=1
 
-@rem === Compile Win32 Window application
-set compilerInput=../src/Platform/win32_main.cpp
+@rem === Compile Common module
+set compilerInput=../src/common/com_module.cpp
 
-@rem === Compile Testing Win32 Console application
-@rem set compilerInput=../src/Platform/win32_consoleApp.cpp
-@rem set linkStr=/link /SUBSYSTEM:CONSOLE
-
-@rem === LINK SETTINGS === (disable if running win32 console application test)
-@rem set linkStr=/link
-set linkInputB=user32.lib opengl32.lib
-set linkInputC=Gdi32.lib
 @echo on
-@cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
+@cl %compilerFlags% %compilerDefines% %compilerInput% %output%
+
+@rem --
+@rem lib.exe /OUT:common.lib com_module.obj
 @echo off
 set outputExe=
 set compilerFlags=
 set compilerDefines=
 set compilerInput=
-
-set linkStr=
-set linkInputA=
-set linkInputB=
-set linkInputC=
 
 @cd..
 @echo on
@@ -64,3 +54,5 @@ set linkInputC=
 @rem -Fm Create map file (contains addresses of all variables/functions)
 @rem -opt:ref -> make compiler aggressive in removal of unused code
 @rem /LD -> compile to DLL
+@rem /c -> No link
+@rem /FoPathNameHere -> output object file

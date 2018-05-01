@@ -2,10 +2,12 @@
 /.vscode/
 /bin/
 /build/
+/buildcommon/
 /buildgame/
 /buildrenderer/
 /debug/
 /release/
+/lib/common.obj
 *.db
 /xercise.VC.VC.opendb
 *.i
