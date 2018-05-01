@@ -19,6 +19,7 @@ union HeapBlock;
 struct Heap_Fragment;
 struct Heap;
 
+#include "com_heap_types.h"
 
 void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
 HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);

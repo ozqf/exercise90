@@ -5,7 +5,7 @@
  * !NO BULLET PHYSICS LIBRARY BEYOND THIS POINT!
  * 
  */
-#include "../../Shared/shared.h"
+#include "../../common/com_module.h"
 
 #include "../../../lib/bullet/btBulletCollisionCommon.h"
 #include "../../../lib/bullet/btBulletDynamicsCommon.h"

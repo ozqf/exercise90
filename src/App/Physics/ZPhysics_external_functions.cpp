@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Shared/shared_module.h"
+#include "../../common/com_module.h"
 
 /////////////////////////////////////////////////////////////
 // List operations

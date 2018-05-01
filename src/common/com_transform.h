@@ -2,8 +2,6 @@
 
 #include "com_module.h"
 
-struct Transform;
-
 inline void Transform_ToM4x4(Transform* t, f32* m4x4);
 inline void Transform_FromM4x4(Transform* t, f32* m4x4);
 

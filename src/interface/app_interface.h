@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Shared/shared.h"
+#include "../common/com_module.h"
 #include "platform_interface.h"
 #include <stdio.h>
 

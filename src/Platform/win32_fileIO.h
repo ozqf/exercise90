@@ -4,9 +4,15 @@
 #include "win32_asset_types.h"
 //#include "win32_gl.h"
 
-#include "../Shared/shared_types.h"
-#include "../Shared/Memory/Heap.h"
-#include "../Shared/shared_render_types.h"
+#include "../common/com_module.h"
+
+inline u32 SafeTruncateUInt64(u64 value)
+{
+	// TODO: Defines for max value
+	Assert(value <= 0xFFFFFFFF);
+	u32 result = (u32)value;
+	return result;
+}
 
 /**********************************************************************
  * PRIMITIVE FILE I/O

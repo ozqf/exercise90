@@ -3,11 +3,8 @@
 #include <gl/gl.h>
 #include <math.h>
 
-#include "../Shared/shared.h"
+#include "../common/com_module.h"
 #include "win32_main.h"
-
-#include "../Shared/linmath.h"
-
 
 void Win32_DrawScreenSpaceTest1()
 {

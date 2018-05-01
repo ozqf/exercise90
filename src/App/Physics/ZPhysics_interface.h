@@ -6,7 +6,7 @@
  * Phys_Bullet
  * 
  */
-#include "../../Shared/shared_types.h"
+#include "../../common/com_module.h"
 
 #include "ZPhysics_external_types.h"
 

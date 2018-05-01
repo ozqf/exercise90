@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Shared/shared.h"
+#include "../../common/com_module.h"
 #include "win32_gl_main.h"
 
 extern "C"

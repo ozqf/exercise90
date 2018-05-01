@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Shared/shared_types.h"
+#include "../../common/com_module.h"
 
 #include <gl/gl.h>
 

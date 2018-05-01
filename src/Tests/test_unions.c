@@ -1,7 +1,7 @@
 #ifndef TEST_UNION_C
 #define TEST_UNION_C
 
-#include "../Shared/shared_types.h"
+#include "../common/com_module.h"
 
 struct GameEvent
 {

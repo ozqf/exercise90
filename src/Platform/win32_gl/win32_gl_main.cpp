@@ -3,7 +3,7 @@
 // #include <gl/gl.h>
 // #include "win32_system_include.h"
 
-// #include "../Shared/shared.h"
+// #include "../common/com_module.h"
 //#include "win32_main.h"
 #include "win32_gl_text.h"
 //#include "win32_gl_primitives.h"

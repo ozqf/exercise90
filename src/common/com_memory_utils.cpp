@@ -2,6 +2,15 @@
 
 #include "com_module.h"
 
+inline u32 SafeTruncateUInt64(u64 value)
+{
+	// TODO: Defines for max value
+	Assert(value <= 0xFFFFFFFF);
+	u32 result = (u32)value;
+	return result;
+}
+
+
 
 void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {

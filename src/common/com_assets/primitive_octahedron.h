@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../shared.h"
+#include "com_module.h"
 
 f32 g_prim_octahedronVerts[] =
 {

@@ -108,14 +108,14 @@ OpenGL uses column major, y/x matrices
 #define M4x4_W3 15
 
 
-
+#include "com_types.h"
 #include "com_maths.h"
 #include "com_transform.h"
-#include "com_types.h"
 #include "com_memory_utils.h"
 #include "com_render_types.h"
 #include "com_collision.h"
 #include "com_heap/com_heap.h"
+#include "com_assets.h"
 
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros

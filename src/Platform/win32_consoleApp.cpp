@@ -8,8 +8,7 @@
 #include <stdio.h>
 #include "win32_system_include.h"
 
-#include "../Shared/shared.h"
-#include "../Shared/Memory/Heap.cpp"
+#include "../common/com_module.h"
 #include "../tests/test_shared_utils.h"
 
 void HeapTest()

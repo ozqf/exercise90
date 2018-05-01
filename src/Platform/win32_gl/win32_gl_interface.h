@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include "../../Shared/shared.h"
+#include "../../common/com_module.h"
 
 #define RENDERER_EXPORT_FUNC_NAME LinkToRenderer
 

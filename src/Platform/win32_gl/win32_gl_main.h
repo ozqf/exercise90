@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <gl/gl.h>
 
-#include "../../Shared/shared_types.h"
+#include "../../common/com_module.h"
 
 //////////////////////////////////////////////////////////////////////////
 // Data

@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "../../Shared/shared_types.h"
-
 // header, contains data structures and function definitions
 #include "ZPhysics_interface.h"
 /**

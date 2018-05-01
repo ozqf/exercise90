@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Shared/shared_types.h"
+#include "../common/com_module.h"
 
 #define TEST_BUFFER_WIDTH 32
 #define TEST_BUFFER_HEIGHT 32

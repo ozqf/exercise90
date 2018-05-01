@@ -5,8 +5,7 @@ holding game/menu state and calling game update when required
 #pragma once
 
 #include "app_main.h"
-#include "../Shared/shared_assets.h"
-#include "../Shared/Memory/HeapUtils.h"
+#include "../common/com_module.h"
 
 #include "app_testTextures.h"
 

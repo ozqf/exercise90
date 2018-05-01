@@ -2,7 +2,7 @@
 
 #include "../com_module.h"
 
-#include "com_heap_types.cpp"
+#include "com_heap_types.h"
 
 /* Reading Material
 

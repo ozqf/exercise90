@@ -6,8 +6,6 @@ struct Vec3;
 struct Vec4;
 struct M3x3;
 struct M4x4;
-struct f32_union;
-struct u32_union;
 
 //internal i32 g_z_inf = 0x7F800000;
 inline f32 ZINFINITY();

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../Shared/shared.h"
-#include "../Shared/Memory/Heap.h"
+#include "../common/com_module.h"
 
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"

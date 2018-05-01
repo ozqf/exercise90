@@ -1,8 +1,7 @@
 #pragma once
 
 #include "game.h"
-#include "../Shared/Collision/shared_collision.h"
-#include "../Shared/shared_assets.h"
+#include "../common/com_module.h"
 
 // void Game_UpdateAI(GameTime* time)
 // {

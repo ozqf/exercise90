@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Shared/shared.h"
+#include "../common/com_module.h"
 #include <stdio.h>
 
 void Test_Com_CompareTest(char* a, char* b)

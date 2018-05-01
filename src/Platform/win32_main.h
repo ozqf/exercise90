@@ -3,7 +3,7 @@
 #include "win32_system_include.h"
 #include <gl/gl.h>
 
-#include "../Shared/shared.h"
+#include "../common/com_module.h"
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"

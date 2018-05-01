@@ -1,8 +1,8 @@
 #pragma once
-
+#if 0
 #include "com_module.h"
 
-enum ZMouseMode { Free = 0, Captured = 1 };
+//enum ZMouseMode { Free = 0, Captured = 1 };
 
 
 struct InputTick
@@ -85,3 +85,4 @@ struct ZAABB
 {
     Vec3 halfSize;
 };
+#endif
