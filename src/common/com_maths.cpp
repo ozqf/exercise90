@@ -1,6 +1,14 @@
 #pragma once
 
-#include "com_primitives.h"
+#include "com_module.h"
+
+
+internal i32 g_z_inf = 0x7F800000;
+inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
+
+internal i32 g_z_nan = 0x7F800001;
+inline f32 ZNaN() { return *(float*)&g_z_nan; }
+
 
 struct Vec3
 {

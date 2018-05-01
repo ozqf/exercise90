@@ -1,12 +1,7 @@
 #pragma once
 
-#include "com_primitives.h"
+#include "com_module.h"
 
-struct Vec2;
-struct Vec3;
-struct Vec4;
-struct M4x4;
-struct M3x3;
 struct Transform;
 
 inline void Transform_ToM4x4(Transform* t, f32* m4x4);
