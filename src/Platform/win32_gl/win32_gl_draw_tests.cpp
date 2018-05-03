@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include <gl/gl.h>
 #include <math.h>
 
@@ -502,3 +502,4 @@ void Win32_DrawCameraTriangle()
 
     glEnd();
 }
+#endif

@@ -4,6 +4,7 @@
 #include <gl/gl.h>
 
 #include "../common/com_module.h"
+
 #include "../interface/platform_interface.h"
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"

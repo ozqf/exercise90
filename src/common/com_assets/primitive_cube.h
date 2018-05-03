@@ -28,7 +28,7 @@ Cube = 6 quads
 
 #define P_SIZE 0.5
 
-f32 g_prim_cubeVerts[] =
+internal f32 g_prim_cubeVerts[] =
 {
     // face 0 (front)
     -0.5, -0.5,  0.5,
@@ -76,7 +76,7 @@ f32 g_prim_cubeVerts[] =
 
 #undef P_SIZE
 
-f32 g_prim_cubeUVs[] =
+internal f32 g_prim_cubeUVs[] =
 {
     // face 0
     0, 0,
@@ -122,7 +122,7 @@ f32 g_prim_cubeUVs[] =
     0, 1
 };
 
-f32 g_prim_cubeNormals[] = 
+internal f32 g_prim_cubeNormals[] = 
 {
         // face 0 (front)
      0,  0,  1,
@@ -168,7 +168,7 @@ f32 g_prim_cubeNormals[] =
      0, -1,  0
 };
 
-Mesh g_meshCube = {
+internal Mesh g_meshCube = {
     0,
     36,
     g_prim_cubeVerts,
@@ -182,7 +182,7 @@ Mesh g_meshCube = {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
-f32 g_prim_inverseCubeVerts[] =
+internal f32 g_prim_inverseCubeVerts[] =
 {
     // face 2 (back)
      0.5, -0.5, 0.5,
@@ -230,7 +230,7 @@ f32 g_prim_inverseCubeVerts[] =
     -0.5, -0.5, -0.5
 };
 
-f32 g_prim_inverseCubeUVs[] =
+internal f32 g_prim_inverseCubeUVs[] =
 {
     // face 0
     0, 0,
@@ -276,7 +276,7 @@ f32 g_prim_inverseCubeUVs[] =
     0, 1
 };
 
-f32 g_prim_inverseCubeNormals[] = 
+internal f32 g_prim_inverseCubeNormals[] = 
 {
         // face 0 (front)
      0,  0,  1,
@@ -322,7 +322,7 @@ f32 g_prim_inverseCubeNormals[] =
      0, -1,  0
 };
 
-Mesh g_meshInverseCube = {
+internal Mesh g_meshInverseCube = {
     0,
     36,
     g_prim_inverseCubeVerts,

@@ -16,7 +16,7 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 {
 	if (input->reset)
 	{
-		M4x4_SetToIdentity(t->matrix.cells);
+		Transform_SetToIdentity(t);
 		return;
 	}
 	f32 sensitivity = 0.1f;
@@ -39,11 +39,12 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 	
 	if (input->rollLeft) { rotation.z += 1 * 90; }
 	if (input->rollRight) { rotation.z += -1 * 90; }
+	//rotation.z *= DEG2RAD;
 	rotation.z *= time->deltaTime;
 
-	M4x4_RotateZ(t->matrix.cells, rotation.z);
-	M4x4_RotateY(t->matrix.cells, rotation.y);
-	M4x4_RotateX(t->matrix.cells, rotation.x);
+	Transform_RotateZ(t, rotation.z * DEG2RAD);
+	Transform_RotateY(t, rotation.y * DEG2RAD);
+	Transform_RotateX(t, rotation.x * DEG2RAD);
 	
 	if (input->moveLeft)
 	{
@@ -75,21 +76,21 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 	Vec4 left;
 	Vec4 up;
 	Vec4 forward;
-	left.x = (t->matrix.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.y = (t->matrix.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.z = (t->matrix.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.x = (t->rotation.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.y = (t->rotation.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.z = (t->rotation.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
 
-	up.x = (t->matrix.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.y = (t->matrix.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.z = (t->matrix.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.x = (t->rotation.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.y = (t->rotation.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.z = (t->rotation.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
 
-	forward.x = (t->matrix.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.y = (t->matrix.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.z = (t->matrix.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.x = (t->rotation.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.y = (t->rotation.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.z = (t->rotation.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
 
-	t->matrix.posX += (forward.x + left.x + up.x);
-	t->matrix.posY += (forward.y + left.y + up.y);
-	t->matrix.posZ += (forward.z + left.z + up.z);
+	t->pos.x += (forward.x + left.x + up.x);
+	t->pos.y += (forward.y + left.y + up.y);
+	t->pos.z += (forward.z + left.z + up.z);
 }
 
 
@@ -103,7 +104,7 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 	g_debugInput = *input;
 	if (input->reset)
 	{
-		M4x4_SetToIdentity(t->matrix.cells);
+		Transform_SetToIdentity(t);
 		input->degrees = {};
 		return;
 	}
@@ -144,14 +145,16 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 	if (input->rollRight) { input->degrees.z += -turnStep; }
 	input->degrees.z = COM_CapAngleDegrees(input->degrees.z);
 
-	Vec4 pos = t->matrix.wAxis;
-	// Construct camera matrix
-	Transform_SetToIdentity(t);
-	t->matrix.wAxis = pos;
+	// Reset rotation and apply based on new absolute angles
+	Transform_ClearRotation(t);
+	// Vec4 pos = t->matrix.wAxis;
+	// // Construct camera matrix
+	// Transform_SetToIdentity(t);
+	// t->matrix.wAxis = pos;
 	// This is order sensitivity! roll -> yaw -> pitch
-	M4x4_RotateZ(t->matrix.cells, input->degrees.z);
-	M4x4_RotateY(t->matrix.cells, input->degrees.y);
-	M4x4_RotateX(t->matrix.cells, input->degrees.x);
+	Transform_RotateZ(t, input->degrees.z * DEG2RAD);
+	Transform_RotateY(t, input->degrees.y * DEG2RAD);
+	Transform_RotateX(t, input->degrees.x * DEG2RAD);
 	
 
 
@@ -191,21 +194,21 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 	Vec4 left;
 	Vec4 up;
 	Vec4 forward;
-	left.x = (t->matrix.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.y = (t->matrix.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.z = (t->matrix.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.x = (t->rotation.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.y = (t->rotation.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.z = (t->rotation.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
 
-	up.x = (t->matrix.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.y = (t->matrix.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.z = (t->matrix.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.x = (t->rotation.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.y = (t->rotation.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.z = (t->rotation.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
 
-	forward.x = (t->matrix.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.y = (t->matrix.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.z = (t->matrix.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.x = (t->rotation.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.y = (t->rotation.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.z = (t->rotation.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
 
-	t->matrix.posX += (forward.x + left.x + up.x);
-	t->matrix.posY += (forward.y + left.y + up.y);
-	t->matrix.posZ += (forward.z + left.z + up.z);
+	t->pos.x += (forward.x + left.x + up.x);
+	t->pos.y += (forward.y + left.y + up.y);
+	t->pos.z += (forward.z + left.z + up.z);
 
 
 }

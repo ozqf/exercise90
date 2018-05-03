@@ -143,7 +143,7 @@ struct GameState
     
     // view
     Transform cameraTransform;
-    AngleVectors cameraAngleVectors;
+    //AngleVectors cameraAngleVectors;
 
     // specifics
     u16 playerEntityIndex;

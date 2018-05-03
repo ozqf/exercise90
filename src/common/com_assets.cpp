@@ -13,4 +13,4 @@ Very basic meshes/textures embedded in source
 #include "com_assets/primitive_octahedron.h"
 #include "com_assets/primitive_spike.h"
 
-void SharedAssets_Init() {}
+static inline void SharedAssets_Init() {}

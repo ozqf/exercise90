@@ -8,8 +8,8 @@ Very basic meshes/textures embedded in source
 
 #include "com_module.h"
 
-extern f32 g_prim_quadVerts[];
-extern f32 g_prim_quadUVs[];
-extern f32 g_prim_quadNormals[];
-extern Mesh g_meshPrimitive_quad;
-void SharedAssets_Init();
+// static f32 g_prim_quadVerts[];
+// static f32 g_prim_quadUVs[];
+// static f32 g_prim_quadNormals[];
+// static Mesh g_meshPrimitive_quad;
+static inline void SharedAssets_Init();

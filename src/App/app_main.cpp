@@ -215,6 +215,7 @@ i32 App_Init()
     //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
     g_textureHandles.numTextures = 0;
     AppLoadTestTextures();
+    Game_Init();
     Game_InitDebugStr();
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
@@ -224,13 +225,6 @@ i32 App_Init()
         8
     );
     
-    Game_Init();
-    M4x4_SetPosition(g_worldScene.cameraTransform.matrix.cells, 0, 12, 7);
-    M4x4_SetEulerAnglesByRadians(g_worldScene.cameraTransform.matrix.cells, 0, -22.5f, 0);
-    // g_worldScene.cameraTransform.rot.x = -22.5;
-    // g_worldScene.cameraTransform.pos.z = 12;
-    // g_worldScene.cameraTransform.pos.y = 7;
-
     return 1;
 }
 
@@ -371,8 +365,8 @@ void App_Frame(GameTime* time, InputTick* input)
 
     Game_SetDebugStringRender();
     Transform t = {};
-    t.matrix.posX = -1;
-    t.matrix.posY = 1;
+    t.pos.x = -1;
+    t.pos.y = 1;
     // t.pos.x = -1;
     // t.pos.y = 1;
     RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);

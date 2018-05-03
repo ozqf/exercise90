@@ -2,17 +2,17 @@
 
 #include "win32_main.h"
 #include "win32_asset_types.h"
-//#include "win32_gl.h"
 
-#include "../common/com_module.h"
+#include "../common/com_defines.h"
+#include "../common/com_memory_utils.h"
 
-inline u32 SafeTruncateUInt64(u64 value)
-{
-	// TODO: Defines for max value
-	Assert(value <= 0xFFFFFFFF);
-	u32 result = (u32)value;
-	return result;
-}
+// inline u32 SafeTruncateUInt64(u64 value)
+// {
+// 	// TODO: Defines for max value
+// 	Assert(value <= 0xFFFFFFFF);
+// 	u32 result = (u32)value;
+// 	return result;
+// }
 
 /**********************************************************************
  * PRIMITIVE FILE I/O

@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #include <math.h>
 #include <stdint.h>
 
@@ -106,8 +107,9 @@ OpenGL uses column major, y/x matrices
 #define M4x4_W1 13
 #define M4x4_W2 14
 #define M4x4_W3 15
+#endif
 
-
+#include "com_defines.h"
 #include "com_types.h"
 #include "com_maths.h"
 #include "com_transform.h"
@@ -117,6 +119,17 @@ OpenGL uses column major, y/x matrices
 #include "com_heap/com_heap.h"
 #include "com_assets.h"
 
+#include "com_types.cpp"
+#include "com_maths.cpp"
+#include "com_transform.cpp"
+#include "com_memory_utils.cpp"
+#include "com_render_types.cpp"
+#include "com_collision.cpp"
+#include "com_heap/com_heap.cpp"
+#include "com_assets.cpp"
+
+
+#if 0
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros
 ///////////////////////////////////////////////////////////////////////
@@ -143,4 +156,6 @@ case eventTypeInteger##: \
     COM_COPY(##ptrBytes##, &##ev##, structType##); \
     ptrBytes = ((u8*)##ptrBytes + sizeof(##structType##)); \
 } break;
+#endif
+
 #endif

@@ -2,7 +2,7 @@
 
 #include "com_module.h"
 
-f32 g_prim_octahedronVerts[] =
+internal f32 g_prim_octahedronVerts[] =
 {
     // TOP
     // face 0
@@ -41,7 +41,7 @@ f32 g_prim_octahedronVerts[] =
     -0.5, 0, 0.5
 };
 
-f32 g_prim_octahedronUVs[] =
+internal f32 g_prim_octahedronUVs[] =
 {
     // face 0
     0, 0,
@@ -77,7 +77,7 @@ f32 g_prim_octahedronUVs[] =
     1, 1,
 };
 
-f32 g_prim_octahedronNormals[] =
+internal f32 g_prim_octahedronNormals[] =
 {
     // TOP
     // face 0
@@ -117,7 +117,7 @@ f32 g_prim_octahedronNormals[] =
 };
 
 
-Mesh g_meshOctahedron = {
+internal Mesh g_meshOctahedron = {
     0,
     24,
     g_prim_octahedronVerts,

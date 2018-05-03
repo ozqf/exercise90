@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/com_defines.h"
 
 /*
 Requirements app has of platform interface:

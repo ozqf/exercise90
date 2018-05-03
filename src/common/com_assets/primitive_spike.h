@@ -4,7 +4,7 @@
 
 #define SPIKE_SIZE 1.0f
 
-f32 g_prim_spikeVerts[] =
+internal f32 g_prim_spikeVerts[] =
 {
     // BASE
     // face 0
@@ -27,7 +27,7 @@ f32 g_prim_spikeVerts[] =
      SPIKE_SIZE, -SPIKE_SIZE,  SPIKE_SIZE
 };
 
-f32 g_prim_spikeUVs[] =
+internal f32 g_prim_spikeUVs[] =
 {
     // face 0
     0, 0,
@@ -51,7 +51,7 @@ f32 g_prim_spikeUVs[] =
     1, 1,
 };
 
-f32 g_prim_spikeNormals[] =
+internal f32 g_prim_spikeNormals[] =
 {
     // TOP
     // face 0
@@ -79,7 +79,7 @@ f32 g_prim_spikeNormals[] =
 };
 
 
-Mesh g_meshSpike = {
+internal Mesh g_meshSpike = {
     0,
     12,
     g_prim_spikeVerts,

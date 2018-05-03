@@ -14,7 +14,9 @@ void Game_BuildTestScene(GameState *gs)
 
     // Init gs and component lists
     *gs = {};
-    M4x4_SetToIdentity(gs->cameraTransform.matrix.cells);
+    Transform_SetToIdentity(&gs->cameraTransform);
+    Transform_SetPosition(&gs->cameraTransform, 0, 12, 7);
+    Transform_SetRotationDegrees(&gs->cameraTransform, -22.5f, 0, 0);
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
@@ -54,16 +56,9 @@ void Game_BuildTestScene(GameState *gs)
     // Walls mesh
     /////////////////////////////////////////////////////////////
     ent = Ent_GetFreeEntity(&gs->entList);
-    M4x4_SetPosition(ent->transform.matrix.cells, 0, 0, 0);
-    // ent->transform.pos.x = 0;
-    // ent->transform.pos.y = 0;
-    // ent->transform.pos.z = 0;
+    Transform_SetPosition(&ent->transform, 0, 0, 0);
     Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
-    //M4x4_SetScale(ent->transform.matrix.cells, testArenaWidth, testArenaHeight, testArenaWidth);
-    // ent->transform.scale.x = testArenaWidth;
-    // ent->transform.scale.y = testArenaHeight;
-    // ent->transform.scale.z = testArenaWidth;
-
+    
     renderer = EC_AddRenderer(ent, gs);
 
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
@@ -74,7 +69,7 @@ void Game_BuildTestScene(GameState *gs)
     // Floor
     ent = Ent_GetFreeEntity(&gs->entList);
     //ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
-    ent->transform.matrix.posY = -((testArenaHeight / 2) + 0.5);
+    ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, 1, testArenaWidth};
 
@@ -82,25 +77,25 @@ void Game_BuildTestScene(GameState *gs)
 
     ent = Ent_GetFreeEntity(&gs->entList);
     //ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
-    ent->transform.matrix.posX = ((testArenaWidth / 2) + 0.5f);
+    ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
     //ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
-    ent->transform.matrix.posX = -((testArenaWidth / 2) + 0.5f);
+    ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
     //ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
-    ent->transform.matrix.posZ = -((testArenaWidth / 2) + 0.5f);
+    ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
 
     ent = Ent_GetFreeEntity(&gs->entList);
     //ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
-    ent->transform.matrix.posZ = ((testArenaWidth / 2) + 0.5f);
+    ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
 
@@ -125,32 +120,22 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////'
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 1;
-    M4x4_SetPosition(ent->transform.matrix.cells, 0, 5, -3);
-    // ent->transform.pos.y = 5;
-    // ent->transform.pos.z = -3;
-    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetPosition(&ent->transform, 0, 5, -3);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45.0f);
-    // ent->transform.scale.x = 0.1f;
-    // ent->transform.scale.y = 0.1f;
-    // ent->transform.scale.z = 0.5f;
-    // ent->transform.rot.x = 22.5; // Pitch
-    // ent->transform.rot.y = 45;   // Yaw
-    //ent->transform.rot.z = 0;   // Roll
-
+    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45.0f);
+    
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
     renderer = EC_AddRenderer(ent, gs);
-    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.matrix.posX,
-        ent->transform.matrix.posY,
-        ent->transform.matrix.posZ,
+        ent->transform.pos.x,
+        ent->transform.pos.y,
+        ent->transform.pos.z,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -159,33 +144,22 @@ void Game_BuildTestScene(GameState *gs)
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 2;
-    M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
-    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetPosition(&ent->transform, 5, 6, 3);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
-    // ent->transform.pos.x = 5;
-    // ent->transform.pos.y = 6;
-    // ent->transform.pos.z = 3;
-    // ent->transform.scale.x = 0.1f;
-    // ent->transform.scale.y = 0.1f;
-    // ent->transform.scale.z = 0.5f;
-    // ent->transform.rot.x = 22.5; // Pitch
-    // ent->transform.rot.y = 45;   // Yaw
-    // ent->transform.rot.z = 0;   // Roll
-
+    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
+    
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
     renderer = EC_AddRenderer(ent, gs);
-    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.matrix.posX,
-        ent->transform.matrix.posY,
-        ent->transform.matrix.posZ,
+        ent->transform.pos.x,
+        ent->transform.pos.y,
+        ent->transform.pos.z,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -194,33 +168,22 @@ void Game_BuildTestScene(GameState *gs)
     // and again
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
-    M4x4_SetPosition(ent->transform.matrix.cells, 5, 6, 3);
-    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
+    Transform_SetPosition(&ent->transform, 5, 6, 3);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    M4x4_SetEulerAnglesByRadians(ent->transform.matrix.cells, 0, 22.5f, 45);
-    // ent->transform.pos.y = 16;
-    // ent->transform.pos.x = -3;
-    // ent->transform.pos.z = -3;
-    // ent->transform.scale.x = 0.1f;
-    // ent->transform.scale.y = 0.1f;
-    // ent->transform.scale.z = 0.5f;
-    // ent->transform.rot.x = 22.5; // Pitch
-    // ent->transform.rot.y = 45;   // Yaw
-    //ent->transform.rot.z = 0;   // Roll
-
+    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
+    
     controller = EC_AddAIController(ent, gs);
     Ent_InitAIController(controller, 1, 0, 0, 5);
 
     renderer = EC_AddRenderer(ent, gs);
-    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 1, 1};
     collider->shapeId = Phys_CreateSphere(
-        ent->transform.matrix.posX,
-        ent->transform.matrix.posY,
-        ent->transform.matrix.posZ,
+        ent->transform.pos.x,
+        ent->transform.pos.y,
+        ent->transform.pos.z,
         1,
         ent->entId.index,
         ent->entId.iteration);
@@ -338,39 +301,18 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
         return;
     }
     M4x4* updateM = (M4x4*)&ev->matrix;
-    M4x4* transM = (M4x4*)&ent->transform.matrix;
-    for (i32 i = 0; i < 16; ++i)
-    {
-        transM->cells[i] = updateM->cells[i];
-        //ent->transform.matrix.cells[i] = m.cells[i];
-    }
-#if 0
-    // ent->transform.pos.x = ev->matrix[X3];
-    // ent->transform.pos.y = ev->matrix[Y3];
-    // ent->transform.pos.z = ev->matrix[Z3];
-    ent->transform.pos.x = m->w0;
-    ent->transform.pos.y = m->w1;
-    ent->transform.pos.z = m->w2;
 
-    Vec3 mRot;
-    mRot.z = atan2f(ev->matrix[1], ev->matrix[5]);
-    mRot.y = atan2f(ev->matrix[8], ev->matrix[10]);
-    mRot.x = -asinf(ev->matrix[9]);
+    Transform_FromM4x4(&ent->transform, updateM);
 
-    mRot.x *= RAD2DEG;
-    mRot.y *= RAD2DEG;
-    mRot.z *= RAD2DEG;
-
-    ent->transform.rot.x = mRot.x;
-    ent->transform.rot.y = mRot.y;
-    ent->transform.rot.z = mRot.z;
-#endif
-    if (ent->tag == 1)
-    {
-        //COM_COPY(&ev->matrix, &g_debugMatrix, M4x4);
-        //COM_COPY(&gs->cameraTransform.matrix, &g_debugMatrix, M4x4);
-        COM_COPY(&gs->cameraTransform.matrix, &g_debugTransform, Transform);
-    }
+    // M4x4* transM = (M4x4*)&ent->transform.matrix;
+    // for (i32 i = 0; i < 16; ++i)
+    // {
+    //     transM->cells[i] = updateM->cells[i];
+    // }
+    // if (ent->tag == 1)
+    // {
+    //     COM_COPY(&gs->cameraTransform.matrix, &g_debugTransform, Transform);
+    // }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -417,50 +359,38 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             }
             else
             {
-                f32* m;
-                m = g_debugTransform.matrix.cells;
-
+                M3x3 rotation = g_debugTransform.rotation;
                 Vec3 inputRot = g_debugInput.degrees;
-                
                 Vec3 scale = g_debugTransform.scale;
-                // scale.x = M4x4_GetScaleX(m);
-                // scale.y = M4x4_GetScaleY(m);
-                // scale.z = M4x4_GetScaleZ(m);
-
-                Vec3 mPos = {};
-                mPos.x = m[W0];
-                mPos.y = m[W1];
-                mPos.z = m[W2];
-
-                Vec3 mRot;
-                mRot.z = atan2f(m[1], m[5]);
-                mRot.y = atan2f(m[8], m[10]);
-                mRot.x = -asinf(m[9]);
+                Vec3 pos = g_debugTransform.pos;
                 
-                AngleVectors vectors = {};
+                Vec3 rot = Transform_GetEulerAnglesDegrees(&g_debugTransform);
+                // mRot.z = atan2f(m[1], m[5]);
+                // mRot.y = atan2f(m[8], m[10]);
+                // mRot.x = -asinf(m[9]);
+                
+                //AngleVectors vectors = {};
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity,
 "Game.DLL:\nTimeDelta: %3.7f\n\
 Input Rot: %3.3f, %3.3f, %3.3f\n\
 -- Debug Transform --\n\
-mPos: %3.3f, %3.3f, %3.3f\n\
-mRot: %3.3f, %3.3f, %3.3f\n\
+pos: %3.3f, %3.3f, %3.3f\n\
+euler: %3.3f, %3.3f, %3.3f\n\
 scale: %3.3f, %3.3f, %3.3f\n\
-M4x4:\n\
-(0) %3.3f, (4) %3.3f, (8) %3.3f, (12) %3.3f\n\
-(1) %3.3f, (5) %3.3f, (9) %3.3f, (13) %3.3f\n\
-(2) %3.3f, (6) %3.3f, (10) %3.3f, (14) %3.3f\n\
-(3) %3.3f, (7) %3.3f, (11) %3.3f, (15) %3.3f\n\
+Rotation:\n\
+(X0) %3.3f, (Y0) %3.3f, (Z0) %3.3f\n\
+(X1) %3.3f, (Y1) %3.3f, (Z1) %3.3f\n\
+(X2) %3.3f, (Y2) %3.3f, (Z2) %3.3f\n\
 ",
                                      time->deltaTime,
                                      inputRot.x, inputRot.y, inputRot.z,
-                                     mPos.x, mPos.y, mPos.z,
-                                     mRot.x * RAD2DEG, mRot.y * RAD2DEG, mRot.z * RAD2DEG,
+                                     pos.x, pos.y, pos.z,
+                                     rot.x, rot.y, rot.z,
                                      //scale.x, scale.y, scale.z,
                                      scale.x, scale.y, scale.z,
-                                     m[0], m[4], m[8], m[12],
-                                     m[1], m[5], m[9], m[13],
-                                     m[2], m[6], m[10], m[14],
-                                     m[3], m[7], m[11], m[15]
+                                     rotation.xAxisX, rotation.yAxisX, rotation.zAxisX,
+                                     rotation.xAxisY, rotation.yAxisY, rotation.zAxisY,
+                                     rotation.xAxisZ, rotation.yAxisZ, rotation.zAxisZ
                                      );
             }
             
@@ -484,6 +414,7 @@ M4x4:\n\
 void Game_Tick(GameState *gs, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
+    g_debugTransform = gs->cameraTransform;
 
     Phys_Step(eventBuffer, time->deltaTime);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;

@@ -1,10 +1,10 @@
+#if 0
 #ifndef SDL_MAIN_CPP
 #define SDL_MAIN_CPP
 
 #define GLEW_NO_GLU
 
 // Internal
-#include "../../common/com_module.h"
 #include "../../interface/platform_interface.h"
 #include "../../interface/app_interface.h"
 #include "../../interface/app_stub.h"
@@ -456,4 +456,5 @@ int main(int argc, char *args[])
     return 0;
 }
 
+#endif
 #endif

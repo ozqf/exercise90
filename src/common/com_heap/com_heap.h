@@ -21,18 +21,17 @@ struct Heap;
 
 #include "com_heap_types.h"
 
-void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
-HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);
-HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label);
-void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef);
-u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block);
-void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous);
-void Heap_RemoveBlock(Heap *heap, const HeapBlock *block);
-bool Heap_RemoveBlockById(Heap *heap, i32 id);
-
-void Heap_Free(Heap *heap, u32 id);
-u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label);
-void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId);
-void Heap_Purge(Heap* heap);
-i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize);
-void Heap_Defrag2(Heap *heap);
+static inline void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
+static inline HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);
+static inline HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label);
+static inline void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef);
+static inline u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block);
+static inline void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous);
+static inline void Heap_RemoveBlock(Heap *heap, const HeapBlock *block);
+static inline bool Heap_RemoveBlockById(Heap *heap, i32 id);
+static inline void Heap_Free(Heap *heap, u32 id);
+static inline u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label);
+static inline void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId);
+static inline void Heap_Purge(Heap* heap);
+static inline i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize);
+static inline void Heap_Defrag2(Heap *heap);

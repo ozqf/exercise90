@@ -18,11 +18,13 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
     
-    M4x4_SetToIdentity(ent->transform.matrix.cells);
+    //M4x4_SetToIdentity(ent->transform.matrix.cells);
     //ent->transform.matrix.wAxis = originT->matrix.wAxis;
-    ent->transform = *originT;
-    //ent->transform.scale = { 0.1f, 0.1f, 0.5f };
 
+    // Copy position and rotation
+    ent->transform = *originT;
+    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
+    
     EC_Renderer* rend = EC_AddRenderer(ent, gs);
     RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 2);
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
@@ -30,27 +32,14 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
     EC_Projectile* prj = EC_AddProjectile(ent, gs);
-    //Vec4 forward = originT->matrix.zAxis;
-    //Vec4_SetMagnitude(&forward, 1);
-
-    Vec4_SetMagnitude(&ent->transform.matrix.xAxis, 1);
-    Vec4_SetMagnitude(&ent->transform.matrix.yAxis, 1);
-    Vec4_SetMagnitude(&ent->transform.matrix.zAxis, 1);
-
-    // forward.x = originT->matrix.zAxisX;
-    // forward.y = originT->matrix.zAxisY;
-    // forward.z = originT->matrix.zAxisZ;
-    // set scale after motion to avoid scaling motion
-    //M4x4_SetScale(ent->transform.matrix.cells, 0.1f, 0.1f, 0.5f);
-    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-
+    
     #if 1
     // prj->move.x = -forward.x * 20.0f;
     // prj->move.y = -forward.y * 20.0f;
     // prj->move.z = -forward.z * 20.0f;
-    prj->move.x = -ent->transform.matrix.zAxis.x * 0.5f;
-    prj->move.y = -ent->transform.matrix.zAxis.y * 0.5f;
-    prj->move.z = -ent->transform.matrix.zAxis.z * 0.5f;
+    prj->move.x = -ent->transform.rotation.zAxis.x * 0.5f;
+    prj->move.y = -ent->transform.rotation.zAxis.y * 0.5f;
+    prj->move.z = -ent->transform.rotation.zAxis.z * 0.5f;
     #endif
     #if 0
     Calc_CameraGameForward(&originT->rot, &prj->move);
@@ -124,9 +113,9 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
 
         Transform* t = &e->transform;
-        t->matrix.posX += prj->move.x * time->deltaTime;
-        t->matrix.posY += prj->move.y * time->deltaTime;
-        t->matrix.posZ += prj->move.z * time->deltaTime;
+        t->pos.x += prj->move.x * time->deltaTime;
+        t->pos.y += prj->move.y * time->deltaTime;
+        t->pos.z += prj->move.z * time->deltaTime;
         // t->pos.x += prj->move.x * time->deltaTime;
         // t->pos.y += prj->move.y * time->deltaTime;
         // t->pos.z += prj->move.z * time->deltaTime;
@@ -147,9 +136,9 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
         Ent* entA = Ent_GetEntityByIndex(&gs->entList, a->entId.index);
         Transform* transA = &entA->transform;
         // Move collider
-        transA->matrix.posX += a->velocity.x * time->deltaTime;
-        transA->matrix.posY += a->velocity.y * time->deltaTime;
-        transA->matrix.posZ += a->velocity.z * time->deltaTime;
+        transA->pos.x += a->velocity.x * time->deltaTime;
+        transA->pos.y += a->velocity.y * time->deltaTime;
+        transA->pos.z += a->velocity.z * time->deltaTime;
         // entA->transform.pos.x += a->velocity.x * time->deltaTime;
         // entA->transform.pos.y += a->velocity.y * time->deltaTime;
         // entA->transform.pos.z += a->velocity.z * time->deltaTime;
@@ -163,12 +152,12 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
             Transform* transB = &entB->transform;
 
             if (AABBVsAABB(
-                transA->matrix.posX,
-                transA->matrix.posY,
-                transA->matrix.posZ,
-                transB->matrix.posX,
-                transB->matrix.posY,
-                transB->matrix.posZ,
+                transA->pos.x,
+                transA->pos.y,
+                transA->pos.z,
+                transB->pos.x,
+                transB->pos.y,
+                transB->pos.z,
                 a->size.x / 2, a->size.y / 2, a->size.z / 2,
                 b->size.x / 2, b->size.y / 2, b->size.z / 2
 

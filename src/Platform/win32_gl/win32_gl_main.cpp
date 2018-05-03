@@ -243,8 +243,8 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 
 #if 1 // Extra pos/rot/scale from matrix - broken... ?
 
-	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
-	Vec4 camRot = M4x4_GetEulerAnglesDegrees(view->matrix.cells);
+	Vec3 camPos = view->pos;
+	Vec3 camRot = Transform_GetEulerAnglesDegrees(view);
 	// f32 fAngZ = atan2f(openglM[1], openglM[5]);
     // f32 fAngY = atan2f(openglM[8], openglM[10]);
     // f32 fAngX = -asinf(openglM[9]);
@@ -255,32 +255,21 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glRotatef(-camRot.y, 0, 1, 0);
 	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
 
-	f32 x = model->matrix.posX;
-	f32 y = model->matrix.posY;
-	f32 z = model->matrix.posZ;
+	Vec3 modelRot = Transform_GetEulerAnglesDegrees(model);
+	
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(modelRot.y, 0, 1, 0);
+	glRotatef(modelRot.x, 1, 0, 0);
+	glRotatef(modelRot.z, 0, 0, 1);
 
-	f32 rotX = M4x4_GetAngleX(model->matrix.cells) * RAD2DEG;
-	f32 rotY = M4x4_GetAngleY(model->matrix.cells) * RAD2DEG;
-	f32 rotZ = M4x4_GetAngleZ(model->matrix.cells) * RAD2DEG;
-
-	// f32 scaleX = M4x4_GetScaleX(model->matrix.cells);
-	// f32 scaleY = M4x4_GetScaleY(model->matrix.cells);
-	// f32 scaleZ = M4x4_GetScaleZ(model->matrix.cells);
-
-	glTranslatef(x, y, z);
-	glRotatef(rotY, 0, 1, 0);
-	glRotatef(rotX, 1, 0, 0);
-	glRotatef(rotZ, 0, 0, 1);
-
-	//glScalef(scaleX, scaleY, scaleZ);
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
 
-	char buf[512];
-	sprintf_s(buf, 512,
-"\nView: Rot: %3.3f, %3.3f, %3.3f\nModel: Rot: %3.3f, %3.3f, %3.3f",
-camRot.x, camRot.y, camRot.z, rotX, rotY, rotZ
-);
-	OutputDebugStringA(buf);
+// 	char buf[512];
+// 	sprintf_s(buf, 512,
+// "\nView: Rot: %3.3f, %3.3f, %3.3f\nModel: Rot: %3.3f, %3.3f, %3.3f",
+// camRot.x, camRot.y, camRot.z, rotX, rotY, rotZ
+// );
+// 	OutputDebugStringA(buf);
 
 #endif
 
@@ -318,18 +307,17 @@ void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
 	// inverse of camera transform
 	// x = pitch, y = yaw, z = roll
 	
-	Vec4 camPos = M4x4_GetPosition(view->matrix.cells);
-	Vec4 camRot = M4x4_GetEulerAnglesDegrees(view->matrix.cells);
+	Vec3 camRot = Transform_GetEulerAnglesDegrees(view);
 	
-	glRotatef(-camRot.z, 0, 0, 1);
-	glRotatef(-camRot.x, 1, 0, 0);
-	glRotatef(-camRot.y, 0, 1, 0);
-	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+	glRotatef(-view->pos.z, 0, 0, 1);
+	glRotatef(-view->pos.x, 1, 0, 0);
+	glRotatef(-view->pos.y, 0, 1, 0);
+	glTranslatef(-camRot.x, -camRot.y, -camRot.z);
 
-	Vec4 modelPos = M4x4_GetPosition(model->matrix.cells);
-	Vec4 modelRot = M4x4_GetEulerAnglesDegrees(model->matrix.cells);
+	//Vec4 modelPos = M4x4_GetPosition(model->matrix.cells);
+	Vec3 modelRot = Transform_GetEulerAnglesDegrees(model);
 
-	glTranslatef(modelPos.x, modelPos.y, modelPos.z);
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
 	glRotatef(modelRot.y, 0, 1, 0);
 
 	//glTranslatef(modelPos.x, modelPos.y, modelPos.z);
@@ -529,7 +517,7 @@ void R_RenderPrimitive(Transform* camera, Transform* objTransform, RendObj* obj)
 
 		case REND_PRIMITIVE_TYPE_AABB:
 		{
-			Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
+			Vec3 pos = objTransform->pos;
 			R_RenderAABBGeometry(
 				pos.x, pos.y, pos.z,
 				prim->sizeX, prim->sizeY, prim->sizeZ,
@@ -607,7 +595,7 @@ void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* 
 	RendObj_AsciCharArray* c = &obj->data.charArray;
 	glColor3f(c->r, c->g, c->b);
 	R_SetupTestTexture(4);
-	Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
+	Vec3 pos = objTransform->pos;
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
 		pos.x, pos.y, c->size, win32_aspectRatio);
@@ -638,7 +626,7 @@ void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 
 		case SPRITE_MODE_UI:
 		{
-			Vec4 pos = M4x4_GetPosition(objTransform->matrix.cells);
+			Vec3 pos = objTransform->pos;
 			//R_SetupOrthoProjection(8);
 			//glMatrixMode(GL_PROJECTION);
 			//glLoadIdentity();

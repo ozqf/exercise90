@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../common/com_module.h"
 #include "win32_system_include.h"
 
 /****************************************************************

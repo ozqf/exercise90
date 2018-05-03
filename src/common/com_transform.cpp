@@ -5,6 +5,17 @@
 /////////////////////////////////////////////////////////////////////
 // Position
 /////////////////////////////////////////////////////////////////////
+inline void Transform_SetToIdentity(Transform* t)
+{
+	*t = {};
+    t->pos = { 0, 0, 0 };
+    t->scale = { 1, 1, 1 };
+    M3x3_SetToIdentity(t->rotation.cells);
+}
+
+/////////////////////////////////////////////////////////////////////
+// Position
+/////////////////////////////////////////////////////////////////////
 inline void Transform_SetPosX(Transform* t, f32 posX)
 {
     t->pos.x = posX;
@@ -18,6 +29,11 @@ inline void Transform_SetPosY(Transform* t, f32 posY)
 inline void Transform_SetPosZ(Transform* t, f32 posZ)
 {
     t->pos.z = posZ;
+}
+
+inline void Transform_SetPosition(Transform* t, f32 posX, f32 posY, f32 posZ)
+{
+    t->pos = { posX, posY, posZ };
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -38,11 +54,23 @@ inline void Transform_RotateZ(Transform* t, f32 radiansZ)
     M3x3_RotateZ(t->rotation.cells, radiansZ);
 }
 
+inline void Transform_SetRotationDegrees(Transform* t, f32 degreesX, f32 degreesY, f32 degreesZ)
+{
+	M3x3_RotateX(t->rotation.cells, degreesX * DEG2RAD);
+	M3x3_RotateY(t->rotation.cells, degreesY * DEG2RAD);
+	M3x3_RotateZ(t->rotation.cells, degreesZ * DEG2RAD);
+}
+
 inline void Transform_SetRotation(Transform* t, f32 radiansX, f32 radiansY, f32 radiansZ)
 {
 	M3x3_RotateX(t->rotation.cells, radiansX);
 	M3x3_RotateY(t->rotation.cells, radiansY);
 	M3x3_RotateZ(t->rotation.cells, radiansZ);
+}
+
+inline void Transform_ClearRotation(Transform* t)
+{
+	M3x3_SetToIdentity(t->rotation.cells);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -84,5 +112,16 @@ inline void Transform_ToM4x4(Transform* t, M4x4* result)
 
 inline void Transform_FromM4x4(Transform* t, M4x4* source)
 {
+    t->pos.x = source->w0;
+    t->pos.y = source->w1;
+    t->pos.z = source->w2;
+    M3x3_CopyFromM4x4(t->rotation.cells, source->cells);
+    t->scale.x = 1;
+    t->scale.y = 1;
+    t->scale.z = 1;
+}
 
+inline Vec3 Transform_GetEulerAnglesDegrees(Transform* t)
+{
+    return M3x3_GetEulerAnglesDegrees(t->rotation.cells);
 }

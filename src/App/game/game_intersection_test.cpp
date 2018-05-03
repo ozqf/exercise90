@@ -33,11 +33,11 @@ void DEBUG_DrawWorldOriginWidget(RenderScene* scene, f32 originX, f32 originY, f
         0, 0, 1, 0, 0, 1);
 }
 
-void DEBUG_DrawAngleVectorsWidget(RenderScene* scene, AngleVectors* vectors, f32 originX, f32 originY, f32 originZ)
+void DEBUG_DrawAngleVectorsWidget(RenderScene* scene, M3x3* rotation, f32 originX, f32 originY, f32 originZ)
 {
-    Vec3* f = &vectors->forward;
-    Vec3* l = &vectors->left;
-    Vec3* u = &vectors->up;
+    Vec3* f = &rotation->zAxis;
+    Vec3* l = &rotation->xAxis;
+    Vec3* u = &rotation->yAxis;
     DEBUG_DrawLineToScene(scene, originX, originY, originZ,
         originX + f->x, originY + f->y, originZ + f->z, 
         1, 0, 0, 1, 0, 0);
@@ -56,7 +56,7 @@ void Game_IntersectionTest_2D(RenderScene* scene, Vec3* origin, Vec3* dest)
     if (origin == 0 || dest == 0)
     {
         //Vec3 cPos = scene->cameraTransform.pos;
-        Vec4 cPos = M4x4_GetPosition(scene->cameraTransform.matrix.cells);
+        Vec3 cPos = scene->cameraTransform.pos;
         lineOrigin = { cPos.x - 1, cPos.y + 0.5f, 0 };
         lineDest = { cPos.x + 1, cPos.y + -0.5f, 0 };
     }

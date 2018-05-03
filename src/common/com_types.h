@@ -1,7 +1,7 @@
 #if 1
 #pragma once
 
-#include "com_module.h"
+#include "com_defines.h"
 
 //enum ZMouseMode;
 
@@ -302,6 +302,7 @@ struct InputTick
     char escape;
     char reset;
     char debug_cycleTexture;
+    char debug_break_game;
 
     Vec3 degrees = {};
 };

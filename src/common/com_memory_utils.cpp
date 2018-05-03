@@ -1,8 +1,8 @@
 #pragma once
 
-#include "com_module.h"
+#include "com_defines.h"
 
-inline u32 SafeTruncateUInt64(u64 value)
+static inline u32 SafeTruncateUInt64(u64 value)
 {
 	// TODO: Defines for max value
 	Assert(value <= 0xFFFFFFFF);
@@ -12,7 +12,7 @@ inline u32 SafeTruncateUInt64(u64 value)
 
 
 
-void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
+static inline void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {
 	Assert(source != NULL);
 	Assert(target != NULL);
@@ -26,13 +26,13 @@ void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
     };
 }
 
-void COM_ZeroMemory(u8 *ptr, u32 numBytes)
+static inline void COM_ZeroMemory(u8 *ptr, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr++ = 0; }
 }
 
-void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
+static inline void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr++ = val; }
@@ -42,7 +42,7 @@ void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
  * Repeatedly write the given pattern into ptr
  * Pattern size must fit exactly into numBytes!
  */
-void COM_SetMemoryPattern(u8* ptr, u32 numBytes, u8* pattern, u32 patternSize)
+static inline void COM_SetMemoryPattern(u8* ptr, u32 numBytes, u8* pattern, u32 patternSize)
 {
     u32 numCopies = numBytes / patternSize;
     AssertAlways((numBytes % patternSize) == 0);
@@ -57,7 +57,7 @@ void COM_SetMemoryPattern(u8* ptr, u32 numBytes, u8* pattern, u32 patternSize)
     }
 }
 
-void COM_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)
+static inline void COM_DebugFillMemory(u8 *ptr, u8 value, u32 numBytes)
 {
     u32 endPoint = (u32) ptr + numBytes;
     while ((u32)ptr < endPoint) { *ptr = value; }
@@ -76,7 +76,7 @@ but
 64 + 32 = 96
 
 */
-u32 COM_AlignSize(u32 value, u32 alignment)
+static inline u32 COM_AlignSize(u32 value, u32 alignment)
 {
     u32 remainder = value % alignment;
     if (remainder == 0) { return value; }
@@ -90,7 +90,7 @@ u32 COM_AlignSize(u32 value, u32 alignment)
  * if b is first alphabetically, return 1
  */
 
-i32 COM_CompareStrings(const char *a, const char *b)
+static inline i32 COM_CompareStrings(const char *a, const char *b)
 {
     while (*a == *b)
     {
@@ -106,7 +106,7 @@ i32 COM_CompareStrings(const char *a, const char *b)
     return ((*a < *b) ? -1 : 1);
 }
 
-void COM_CopyStringA(const char *source, char *target)
+static inline void COM_CopyStringA(const char *source, char *target)
 {
     while (true)
     {
@@ -120,7 +120,7 @@ void COM_CopyStringA(const char *source, char *target)
     }
 }
 
-void COM_CopyString(const char *source, char *target)
+static inline void COM_CopyString(const char *source, char *target)
 {
     while (*source)
     {
@@ -133,7 +133,7 @@ void COM_CopyString(const char *source, char *target)
  * Copy a string without exceeding the specified limit
  * Limit does NOT include NULL terminator
  */
-void COM_CopyStringLimited(const char *source, char *target, i32 limit)
+static inline void COM_CopyStringLimited(const char *source, char *target, i32 limit)
 {
     while (*source)
     {
@@ -148,7 +148,7 @@ void COM_CopyStringLimited(const char *source, char *target, i32 limit)
  * No checking whether source/target will clash
  * No checking that target has enough room!
  */
-void COM_CopyStringCount(const char *source, char *target, i32 count)
+static inline void COM_CopyStringCount(const char *source, char *target, i32 count)
 {
     if (count <= 0) { return; }
     while (*source && count)
@@ -167,7 +167,7 @@ void COM_CopyStringCount(const char *source, char *target, i32 count)
     *target = 0;
 }
 
-i32 COM_StrLenA(const char* str)
+static inline i32 COM_StrLenA(const char* str)
 {
     i32 result = 0;
     while (*str)
@@ -178,7 +178,7 @@ i32 COM_StrLenA(const char* str)
     return result;
 }
 
-i32 COM_StrLen(const char* str)
+static inline i32 COM_StrLen(const char* str)
 {
     i32 count = 0;
     while (str[count]) { ++count; }
@@ -188,7 +188,7 @@ i32 COM_StrLen(const char* str)
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
-i32 COM_AsciToInt32(const char *str)
+static inline i32 COM_AsciToInt32(const char *str)
 {
     i32 sign = 1;
     i32 val = 0;
@@ -246,12 +246,12 @@ i32 COM_AsciToInt32(const char *str)
     return val * sign;
 }
 
-f32 COM_AsciToFloat32(const char *str)
+static inline f32 COM_AsciToFloat32(const char *str)
 {
     return 0.0f;
 }
 
-i32 ZSTR_WriteChars(ZStringHeader* str, char* sourceChars, i32 numChars)
+static inline i32 ZSTR_WriteChars(ZStringHeader* str, char* sourceChars, i32 numChars)
 {
     i32 index = 0;
     while (numChars > 0 && str->length < str->maxLength)
