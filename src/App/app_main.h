@@ -22,6 +22,8 @@ struct TextureHandles
 // DLL GLOBALS
 ///////////////////////////////////////////////////////////////////////////////
 
+global_variable InputTick g_inputTick = {};
+
 // Interface to the external world
 PlatformInterface platform;
 

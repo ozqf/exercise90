@@ -76,7 +76,6 @@ global_variable u8 g_windowActive = 1;
 
 // Control/Input
 global_variable bool globalRunning = true;
-global_variable InputTick inputTick;
 global_variable POINT g_win32_mousePos = {};
 global_variable POINT g_win32_mousePosLast = {};
 global_variable POINT g_win32_mousePosMove = {};

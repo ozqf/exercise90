@@ -182,8 +182,6 @@ i32 AppRendererReloaded()
 
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
-// App_ == interface function
-// Return 1 if successful, 0 if failed
 ////////////////////////////////////////////////////////////////////////////
 i32 App_Init()
 {
@@ -290,7 +288,40 @@ void CycleTestAsciChar()
     #endif
 }
 
-void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
+void App_ReadInput(InputEvent ev)
+{
+
+    switch (ev.inputID)
+    {
+        case Z_INPUT_CODE_W: { g_inputTick.moveForward = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_S: { g_inputTick.moveBackward = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_A: { g_inputTick.moveLeft = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_D: { g_inputTick.moveRight = ev.value ? 1 : 0; } break;
+
+        case Z_INPUT_CODE_SPACE: { g_inputTick.moveUp = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_CONTROL: { g_inputTick.moveDown = ev.value ? 1 : 0; } break;
+
+        case Z_INPUT_CODE_Q: { g_inputTick.rollLeft = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_E: { g_inputTick.rollRight = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_R: { g_inputTick.reset = ev.value ? 1 : 0; } break;
+
+        case Z_INPUT_CODE_ESCAPE: { g_inputTick.escape = ev.value ? 1 : 0; } break;
+
+        case Z_INPUT_CODE_MOUSE_1: { g_inputTick.attack1 = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_MOUSE_2: { g_inputTick.attack2 = ev.value ? 1 : 0; } break;
+
+        case Z_INPUT_CODE_MOUSE_MOVE_X:
+        {
+            g_inputTick.mouseMovement[0] = ev.value;
+        } break;
+        case Z_INPUT_CODE_MOUSE_MOVE_Y:
+        {
+            g_inputTick.mouseMovement[1] = ev.value;
+        } break;
+    }
+}
+
+void App_Frame(GameTime* time, ByteBuffer commands)
 {
     #if 0
     // Trap to do single presses of this key
@@ -310,6 +341,9 @@ void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
     }
     #endif
 
+	/////////////////////////////////////////////////////
+	// Read Command buffer
+	/////////////////////////////////////////////////////
     u8* ptrRead = commands.ptrStart;
     while (ptrRead < commands.ptrEnd)
     {
@@ -320,17 +354,23 @@ void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
             {
                 InputEvent ev = {};
                 ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
-                if (ev.inputID == Z_INPUT_CODE_R)
-                {
-                    input->reset = ev.value ? 1 : 0;
-                }
+
+                App_ReadInput(ev);
+                // if (ev.inputID == Z_INPUT_CODE_R)
+                // {
+                //     input->reset = ev.value ? 1 : 0;
+                // }
+				// if (ev.inputID == Z_INPUT_CODE_M)
+				// {
+				// 	input->reset = ev.value ? 1 : 0;
+				// }
             } break;
         }
     }
     
     // TODO: Move this to a better location
     // ...requires better button handling though!
-    if (input->escape)
+    if (g_inputTick.escape)
     {
         if (g_input_escapePressed == 0)
         {
@@ -362,7 +402,7 @@ void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     // Game state update
-    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, input);
+    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, &g_inputTick);
     
     ///////////////////////////////////////
     // Render
@@ -379,7 +419,7 @@ void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
     platform.Platform_RenderScene(&g_worldScene);
     
     #if 1
-    Game_UpdateUI(ui, time, input);
+    Game_UpdateUI(ui, time, &g_inputTick);
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);

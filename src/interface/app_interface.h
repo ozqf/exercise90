@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////
 // Input codes
 //////////////////////////////////////////////////////////////////////
+#define Z_INPUT_CODE_NULL                   0
 #define Z_INPUT_CODE_MOUSE_1                1
 #define Z_INPUT_CODE_MOUSE_2                2
 #define Z_INPUT_CODE_MOUSE_3                3
@@ -42,25 +43,31 @@
 #define Z_INPUT_CODE_Y                      32
 #define Z_INPUT_CODE_Z                      33
 #define Z_INPUT_CODE_SPACE                  34
-#define Z_INPUT_CODE_LEFT_SHIFT             35
+#define Z_INPUT_CODE_SHIFT                  35
 #define Z_INPUT_CODE_RIGHT_SHIFT            36
-#define Z_INPUT_CODE_LEFT_SHIFT             35
-#define Z_INPUT_CODE_RIGHT_SHIFT            36
+#define Z_INPUT_CODE_CONTROL                35
+#define Z_INPUT_CODE_RIGHT_CONTROL          36
 #define Z_INPUT_CODE_ESCAPE                 37
 #define Z_INPUT_CODE_RETURN                 38
 #define Z_INPUT_CODE_ENTER                  39
-#define Z_INPUT_CODE__0                     40
-#define Z_INPUT_CODE__1                     41
-#define Z_INPUT_CODE__2                     42
-#define Z_INPUT_CODE__3                     43
-#define Z_INPUT_CODE__4                     44
-#define Z_INPUT_CODE__5                     45
-#define Z_INPUT_CODE__6                     46
-#define Z_INPUT_CODE__7                     47
-#define Z_INPUT_CODE__8                     48
-#define Z_INPUT_CODE__9                     49
-#define Z_INPUT_CODE_MOUSE_AXIS_X           50
-#define Z_INPUT_CODE_MOUSE_AXIS_Y           51
+#define Z_INPUT_CODE_0                      40
+#define Z_INPUT_CODE_1                      41
+#define Z_INPUT_CODE_2                      42
+#define Z_INPUT_CODE_3                      43
+#define Z_INPUT_CODE_4                      44
+#define Z_INPUT_CODE_5                      45
+#define Z_INPUT_CODE_6                      46
+#define Z_INPUT_CODE_7                      47
+#define Z_INPUT_CODE_8                      48
+#define Z_INPUT_CODE_9                      49
+#define Z_INPUT_CODE_UP                     50
+#define Z_INPUT_CODE_DOWN                   51
+#define Z_INPUT_CODE_LEFT                   52
+#define Z_INPUT_CODE_RIGHT                  53
+#define Z_INPUT_CODE_MOUSE_POS_X            54
+#define Z_INPUT_CODE_MOUSE_POS_Y            55
+#define Z_INPUT_CODE_MOUSE_MOVE_X           56
+#define Z_INPUT_CODE_MOUSE_MOVE_Y           57
 
 //////////////////////////////////////////////////////////////////////
 // System event types
@@ -75,6 +82,14 @@ struct InputEvent
     i32 value = 0;
 };
 
+inline InputEvent NewInputEvent(u32 inputID, i32 value)
+{
+    InputEvent ev;
+    ev.inputID = inputID;
+    ev.value = value;
+    return ev;
+}
+
 // struct EventHeader
 // {
 //     u32 type;
@@ -88,7 +103,7 @@ struct AppInterface
     i32 (*AppInit)();
     i32 (*AppShutdown)();
     i32 (*AppRendererReloaded)();
-    void (*AppUpdate)(GameTime* time, ByteBuffer commands, InputTick* tick);
+    void (*AppUpdate)(GameTime* time, ByteBuffer commands);
     //void (*AppFixedUpdate)(GameTime* time, InputTick* tick);
 };
 

@@ -145,22 +145,30 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
 
     case WM_LBUTTONDOWN:
     {
-        inputTick.attack1 = 1;
+        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
+        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+        //inputTick.attack1 = 1;
     } break;
 
     case WM_LBUTTONUP:
     {
-        inputTick.attack1 = 0;
+        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
+        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+        //inputTick.attack1 = 0;
     } break;
 
     case WM_RBUTTONDOWN:
     {
-        inputTick.attack2 = 1;
+        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
+        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+        //inputTick.attack2 = 1;
     } break;
 
     case WM_RBUTTONUP:
     {
-        inputTick.attack2 = 0;
+        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
+        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+        //inputTick.attack2 = 0;
     } break;
 
     case WM_CLOSE:
@@ -206,6 +214,30 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         u32 VKCode = wParam;
         bool wasDown = ((lParam & (1 << 30)) != 0);
         bool isDown = ((lParam & (1 << 31)) == 0);
+
+        // Debugging keys!
+        if (VKCode == 'P' && isDown)
+        {
+            MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
+            DebugBreak();
+        }
+        
+        if (VKCode == VK_F4 && (lParam & (1 << 29)))
+        {
+            globalRunning = false;
+        }
+
+        // Write to command buffer
+        u32 inputCode = Win32_KeyCode_To_Input_Code(VKCode);
+        if (inputCode != 0)
+        {
+            InputEvent ev;
+            ev.inputID = inputCode;
+            ev.value = (i32)isDown;
+            g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+            break;
+        }
+#if 0        
         if (VKCode == 'R')
         {
             //inputTick.reset = isDown;
@@ -231,11 +263,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         //         app.AppRendererReloaded();
         //     }
         // }
-        else if (VKCode == 'P' && isDown)
-        {
-            MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
-            DebugBreak();
-        }
         else if (VKCode == 'T')
         {
             inputTick.debug_cycleTexture = isDown;
@@ -317,11 +344,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         {
             inputTick.escape = isDown;
         }
-
-        if (VKCode == VK_F4 && (lParam & (1 << 29)))
-        {
-            globalRunning = false;
-        }
+#endif
     }
     break;
 
@@ -520,7 +543,7 @@ int CALLBACK WinMain(
                 // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
                 // OutputDebugString(buf);
 
-                Win32_TickInput(&inputTick);
+                Win32_TickInput(&g_cmdBuf);
 
                 // Called before app update as app update will call the renderer
                 // this should be buffered up so the two can be desynced!
@@ -559,7 +582,7 @@ int CALLBACK WinMain(
                 //Win32_R_SetupFrame(appWindow);
                 if (app.isvalid)
                 {
-                    app.AppUpdate(&g_gameTime, frameCommands, &inputTick);
+                    app.AppUpdate(&g_gameTime, frameCommands);
                 }
                 
                 if (renderModuleState == 1)
