@@ -25,6 +25,13 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 
 ## Random todo list
 
+### Command Structure
+Move the engine and game to using commands.
+* Commands are stored in double buffers, swapped at the start of a frame.
+* Commands will flow Platform -> App -> Game, with each level choosing what goes down to the level below.
+* Similarly outputs are commands written to an output buffer.
+* The game is 'playing back' commands it is given, either from single player, a server or a recorded demo file.
+
 ### Bugs or fundamental issues
 * **Calculation of Foward/Up Vectors is wrong (added 2018/4/2)** - This was hacked in someway to make movement work. Now needs to be unhacked, as it is preventing the casting of rays out of the camera.
 * **Game requires asset files to launch (added 2018/4/2)** - Some very basic assets should be baked into the code for such early development work. Only thing that cannot be procedurally generated is the console char sheet. So that first.
@@ -33,6 +40,10 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 * Done 2018/3/16 **Player movement** - Current player movement is messed up - rebuild.
 * **Basic Arena Level** - Something to stand on and contain the player!
 * **Collision Detection**
+    * Done 2018/4/5 *Bullet Physics Library* - Attach the bullet physics library via a wrapper
+        * **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
+        * **Overlap detection (Rigidbodies, static and triggers)** - Kinda need this to make a game out of
+        * **Querying (Rays and spheres/cube volumes)** - for object searchs, explosions and projectiles
     * **Ray vs plane** - For hitscan vs world.
     * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.
     * **Actor vs World** - AABB vs plane or perhaps ray vs expanded plane
@@ -46,6 +57,8 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 * Done 2018/3/14 **Create Heap** - Create main memory pool.
 
 ### Engine
+* **Command Buffer** - Change nature of inputs to processing of frame specific command buffers
+    * **Record Command input** - Allow for playback of game commands.
 * **Debug Console** - Console for viewing debug output and entering commands.
     * **Basic Text log** - A scrolling block of text.
     * **Frame-updated status text** - Displays live debugging information (eg framerate).
@@ -83,5 +96,6 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
     * Done 2018/3/24 *Hide cursor -  cursor is currently always shown. Require a game state switch to allow the cursor to be toggled on/off*
     for UI stuff.
 * **Input binding is Engine-side** - Engine should pass input events to game and let game handle it to make input more modable/less platform specific.
+    See command buffer stuff.
 * Done 2018/3/15 *Test File Loading*
 * Done 2018/3/14 *Alloc memory for game*

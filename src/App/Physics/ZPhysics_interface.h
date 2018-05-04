@@ -26,6 +26,8 @@ Vec3 Phys_DebugGetPosition();
 
 void Phys_Init();
 
+void Phys_ReadCommands(MemoryBlock* commandBuffer);
+
 void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime);
 
 void Phys_Shutdown();

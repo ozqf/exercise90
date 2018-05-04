@@ -11,8 +11,10 @@ static inline u32 SafeTruncateUInt64(u64 value)
 }
 
 
-
-static inline void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
+/**
+ * Returns number of bytes written
+ */
+static inline u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {
 	Assert(source != NULL);
 	Assert(target != NULL);
@@ -24,6 +26,7 @@ static inline void COM_CopyMemory(u8* source, u8* target, u32 numBytes)
         target++;
 		progress++;
     };
+    return numBytes;
 }
 
 static inline void COM_ZeroMemory(u8 *ptr, u32 numBytes)

@@ -36,10 +36,6 @@ Vec3 Phys_DebugGetPosition()
     return g_testPos;
 }
 
-/////////////////////////////////////////////////////////////
-// Lifetime
-/////////////////////////////////////////////////////////////
-
 void Phys_CreateTestScene(ZBulletWorld* world)
 {
     // hello bullet physics
@@ -71,6 +67,10 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 #endif
 }
 
+/////////////////////////////////////////////////////////////
+// Lifetime
+/////////////////////////////////////////////////////////////
+
 void Phys_Init()
 {
     g_physTest = {};
@@ -92,7 +92,12 @@ void Phys_Init()
     Phys_CreateTestScene(&g_world);
 }
 
-void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
+void Phys_ReadCommands(MemoryBlock* commandBuffer)
+{
+
+}
+
+internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
 {
     world->dynamicsWorld->stepSimulation(deltaTime, 10);
 #if 0

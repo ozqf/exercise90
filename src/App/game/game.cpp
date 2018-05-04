@@ -385,11 +385,11 @@ Rotation:\n\
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
-void Game_Tick(GameState *gs, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
+void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
     g_debugTransform = gs->cameraTransform;
-
+    Phys_ReadCommands(commandBuffer);
     Phys_Step(eventBuffer, time->deltaTime);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
     i32 ptrOffset = 0;

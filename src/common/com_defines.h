@@ -38,7 +38,7 @@ MACROS
 #endif
 #define AssertAlways(expression) if(!(expression)) { *(int *)0 = 0; }
 
-#define IllegalCodePath if (true) { *(int *)0 = 0; }
+#define ILLEGAL_CODE_PATH if (true) { *(int *)0 = 0; }
 
 #define KiloBytes(bytes) ((bytes) * 1024LL)
 #define MegaBytes(bytes) (KiloBytes(bytes) * 1024LL)
@@ -48,11 +48,13 @@ MACROS
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros
 ///////////////////////////////////////////////////////////////////////
+
 #ifndef COM_COPY
 #define COM_COPY(ptrSource, ptrDestination, structType) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
 #endif
 
+// Copy to buffer and step destiniation pointer forward by the 
 #ifndef COM_COPY_STEP
 #define COM_COPY_STEP(ptrSource, ptrDestination, structType) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##)); \

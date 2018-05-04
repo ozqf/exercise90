@@ -63,6 +63,11 @@ global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
+// Collision
+global_variable BlockRef g_collisionCommandBuffer;
+global_variable BlockRef g_collisionEventBuffer;
+
+
 /////////////////////////////////////////////////////////////
 // Entity Components Memory
 /////////////////////////////////////////////////////////////

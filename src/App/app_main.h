@@ -27,7 +27,6 @@ PlatformInterface platform;
 
 // Heap + Preallocated lists
 global_variable Heap g_heap;
-global_variable BlockRef g_collisionEventBuffer;
 
 //global_variable GameState g_world;
 

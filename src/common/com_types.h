@@ -347,6 +347,13 @@ struct MemoryBlock
     void *ptrMemory;
     i32 size;
 };
+struct ByteBuffer
+{
+    u8* ptrStart;
+    u8* ptrEnd;
+    u8* ptrWrite;
+    i32 size;
+};
 
 struct ZStringHeader
 {

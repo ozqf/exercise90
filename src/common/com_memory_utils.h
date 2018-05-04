@@ -5,7 +5,7 @@
 
 static inline u32 SafeTruncateUInt64(u64 value);
 
-static inline void COM_CopyMemory(u8* source, u8* target, u32 numBytes);
+static inline u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes);
 static inline void COM_ZeroMemory(u8 *ptr, u32 numBytes);
 static inline void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val);
 /**

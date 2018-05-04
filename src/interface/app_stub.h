@@ -21,7 +21,7 @@ PlatformInterface platformStub;
 
 i32 AppInit_Stub() { return 1; }
 i32 AppShutdown_Stub() { printf("Shutdown App Stub\n"); return 1; }
-void AppUpdate_Stub(GameTime* time, InputTick* tick) { }
+void AppUpdate_Stub(GameTime* time, ByteBuffer commands, InputTick* tick) { }
 
 // TODO: This doesn't work... lawl
 //void AppFixedUpdate_Stub(GameTime* time, InputTick* tick) { }

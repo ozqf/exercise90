@@ -208,7 +208,12 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         bool isDown = ((lParam & (1 << 31)) == 0);
         if (VKCode == 'R')
         {
-            inputTick.reset = isDown;
+            //inputTick.reset = isDown;
+
+            InputEvent ev;
+            ev.inputID = Z_INPUT_CODE_R;
+            ev.value = (i32)isDown;
+            g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
         }
         // This might cause issues now that hot reloading is working:
         // else if (VKCode == 'Z' && isDown)
@@ -517,14 +522,44 @@ int CALLBACK WinMain(
 
                 Win32_TickInput(&inputTick);
 
+                // Called before app update as app update will call the renderer
+                // this should be buffered up so the two can be desynced!
                 if (renderModuleState == 1)
                 {
                     renderer.R_SetupFrame(appWindow);  
                 }
+
+                //////////////////////////////////////////////////////////////////
+                // Command handling:
+                // > Mark buffer as ended
+                // > copy current state of command buffer
+                // > Swap platform buffer between A and B
+                // > Send copy to app
+                //////////////////////////////////////////////////////////////////
+                //*(u8*)g_cmdBuf.ptrWrite = 0;
+                g_cmdBuf.ptrEnd = g_cmdBuf.ptrWrite;
+                ByteBuffer frameCommands = g_cmdBuf;
+                if (g_cmdBuf.ptrStart == g_commandBufferA)
+                {
+                    g_cmdBuf.ptrStart = g_commandBufferB;
+                    g_cmdBuf.ptrWrite = g_commandBufferB;
+                    g_cmdBuf.ptrEnd= g_commandBufferB;
+                }
+                else if (g_cmdBuf.ptrStart == g_commandBufferB)
+                {
+                    g_cmdBuf.ptrStart = g_commandBufferA;
+                    g_cmdBuf.ptrWrite = g_commandBufferA;
+                    g_cmdBuf.ptrEnd = g_commandBufferA;
+                }
+                else
+                {
+                    ILLEGAL_CODE_PATH
+                }
+
                 //Win32_R_SetupFrame(appWindow);
                 if (app.isvalid)
                 {
-                    app.AppUpdate(&g_gameTime, &inputTick);
+                    app.AppUpdate(&g_gameTime, frameCommands, &inputTick);
                 }
                 
                 if (renderModuleState == 1)

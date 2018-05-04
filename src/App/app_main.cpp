@@ -205,7 +205,8 @@ i32 App_Init()
 	AllocateDebugStrings(&g_heap);
 	//AllocateTestStrings(&g_heap);
     //g_collisionEventBuffer
-    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2024, "Collision Buf");
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2024, "Collision EV");
+    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, 2024, "Collision CMD");
 
     SharedAssets_Init();
 
@@ -289,7 +290,7 @@ void CycleTestAsciChar()
     #endif
 }
 
-void App_Frame(GameTime* time, InputTick* input)
+void App_Frame(GameTime* time, ByteBuffer commands, InputTick* input)
 {
     #if 0
     // Trap to do single presses of this key
@@ -308,6 +309,24 @@ void App_Frame(GameTime* time, InputTick* input)
         cycleTexturePressed = 0;
     }
     #endif
+
+    u8* ptrRead = commands.ptrStart;
+    while (ptrRead < commands.ptrEnd)
+    {
+        u32 type = *(u32*)ptrRead;
+        switch (type)
+        {
+            case EV_CODE_INPUT:
+            {
+                InputEvent ev = {};
+                ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
+                if (ev.inputID == Z_INPUT_CODE_R)
+                {
+                    input->reset = ev.value ? 1 : 0;
+                }
+            } break;
+        }
+    }
     
     // TODO: Move this to a better location
     // ...requires better button handling though!
@@ -337,8 +356,13 @@ void App_Frame(GameTime* time, InputTick* input)
     collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
     collisionBuffer.size = g_collisionEventBuffer.objectSize;
 
+    MemoryBlock commandBuffer = {};
+    Heap_GetBlockMemoryAddress(&g_heap, &g_collisionCommandBuffer);
+    commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
+    commandBuffer.size = g_collisionCommandBuffer.objectSize;
+
     // Game state update
-    Game_Tick(gs, &collisionBuffer, time, input);
+    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, input);
     
     ///////////////////////////////////////
     // Render

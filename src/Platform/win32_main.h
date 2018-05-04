@@ -59,13 +59,12 @@ global_variable char *renderModulePathCopy = "win32glcopy.dll";
 
 global_variable RenderInterface renderer = {};
 global_variable u8 renderModuleState = 0;
-global_variable ULARGE_INTEGER g_renderModuleTimestamp = {};
-global_variable FILETIME* renderModuleTime;
-global_variable f32 g_checkRenderReloadTick = 1;
-
 global_variable u8 appModuleState = 0;
+global_variable ULARGE_INTEGER g_renderModuleTimestamp = {};
 global_variable ULARGE_INTEGER g_appModuleTimestamp = {};
+global_variable FILETIME* renderModuleTime;
 global_variable FILETIME* appModuleTime;
+global_variable f32 g_checkRenderReloadTick = 1;
 global_variable f32 g_checkAppReloadTick = 1;
 
 // system handles etc
@@ -81,6 +80,18 @@ global_variable InputTick inputTick;
 global_variable POINT g_win32_mousePos = {};
 global_variable POINT g_win32_mousePosLast = {};
 global_variable POINT g_win32_mousePosMove = {};
+
+#define COMMAND_BUFFER_SIZE 2048
+global_variable u8 g_commandBufferA[COMMAND_BUFFER_SIZE];
+global_variable u8 g_commandBufferB[COMMAND_BUFFER_SIZE];
+// Init command buffer to point at and write from start of buffer A
+global_variable ByteBuffer g_cmdBuf = 
+{
+	g_commandBufferA,
+	g_commandBufferA,
+	g_commandBufferA,
+	COMMAND_BUFFER_SIZE 
+};
 
 // Timing
 global_variable double global_timePassed = 0;
