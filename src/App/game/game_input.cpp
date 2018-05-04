@@ -5,7 +5,7 @@
 #define GAME_INPUT_FULL_FREEDOM 0
 #define GAME_INPUT_ON_FOOT 1
 
-internal u8 GAME_INPUT_MODE = 0;
+internal u8 GAME_INPUT_MODE = 1;
 
 ////////////////////////////////////////////////////////////////////////////
 // Full freedom
@@ -33,12 +33,11 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 	// if (input->pitchDown) { rotation.x += 1 * 90; }
 	// rotation.x *= time->deltaTime;
 	
-	// TODO: Reimplement mouse rotation!
 	rotation.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
 	rotation.y -= (((f32)input->mouseMovement[0] * sensitivity));
 	
-	if (input->rollLeft) { rotation.z += 1 * 90; }
-	if (input->rollRight) { rotation.z += -1 * 90; }
+	if (input->rollLeft) { rotation.z += 1 * PLAYER_ROTATION_SPEED; }
+	if (input->rollRight) { rotation.z += -1 * PLAYER_ROTATION_SPEED; }
 	//rotation.z *= DEG2RAD;
 	rotation.z *= time->deltaTime;
 
@@ -146,16 +145,12 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 	input->degrees.z = COM_CapAngleDegrees(input->degrees.z);
 
 	// Reset rotation and apply based on new absolute angles
-	Transform_ClearRotation(t);
-	// Vec4 pos = t->matrix.wAxis;
-	// // Construct camera matrix
-	// Transform_SetToIdentity(t);
-	// t->matrix.wAxis = pos;
 	// This is order sensitivity! roll -> yaw -> pitch
+	// NOTE: roll is unusable in this system
+	Transform_ClearRotation(t);
 	Transform_RotateZ(t, input->degrees.z * DEG2RAD);
 	Transform_RotateY(t, input->degrees.y * DEG2RAD);
 	Transform_RotateX(t, input->degrees.x * DEG2RAD);
-	
 
 
 	////////////////////////////////////////////////////////////////////////

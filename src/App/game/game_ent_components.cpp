@@ -32,21 +32,17 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
     EC_Projectile* prj = EC_AddProjectile(ent, gs);
+    prj->tock = 2.0f;
+    prj->tick = prj->tock;
     
-    #if 1
-    // prj->move.x = -forward.x * 20.0f;
-    // prj->move.y = -forward.y * 20.0f;
-    // prj->move.z = -forward.z * 20.0f;
-    prj->move.x = -ent->transform.rotation.zAxis.x * 0.5f;
-    prj->move.y = -ent->transform.rotation.zAxis.y * 0.5f;
-    prj->move.z = -ent->transform.rotation.zAxis.z * 0.5f;
-    #endif
-    #if 0
-    Calc_CameraGameForward(&originT->rot, &prj->move);
-    prj->move.x = -prj->move.x * 20.0f;
-    prj->move.y = -prj->move.y * 20.0f;
-    prj->move.z = -prj->move.z * 20.0f;
-    #endif
+    prj->move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
+    prj->move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
+    prj->move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
+    // move projectile forward a little
+    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
+    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
+    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
+    
     prj->tick = 1.0f;
     prj->tock = 1.0f;
 }
@@ -63,7 +59,7 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
     {
         if (input->attack1)
         {
-            fireTick = 0.2f;
+            fireTick = 0.1f;
             Transform* t = &g_worldScene.cameraTransform;
             
             Game_SpawnTestBullet(gs, t);
@@ -110,15 +106,21 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
         Ent* e = Ent_GetEntityByIndex(&gs->entList, prj->entId.index);
 
-
+        if (prj->tick <= 0.0f)
+        {
+            // Delete
+            
+            Ent_Free(gs, e);
+        }
+        else
+        {
+            prj->tick -= time->deltaTime;
+        }
 
         Transform* t = &e->transform;
         t->pos.x += prj->move.x * time->deltaTime;
         t->pos.y += prj->move.y * time->deltaTime;
         t->pos.z += prj->move.z * time->deltaTime;
-        // t->pos.x += prj->move.x * time->deltaTime;
-        // t->pos.y += prj->move.y * time->deltaTime;
-        // t->pos.z += prj->move.z * time->deltaTime;
     }
 }
 
@@ -139,9 +141,6 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
         transA->pos.x += a->velocity.x * time->deltaTime;
         transA->pos.y += a->velocity.y * time->deltaTime;
         transA->pos.z += a->velocity.z * time->deltaTime;
-        // entA->transform.pos.x += a->velocity.x * time->deltaTime;
-        // entA->transform.pos.y += a->velocity.y * time->deltaTime;
-        // entA->transform.pos.z += a->velocity.z * time->deltaTime;
         
         for (u32 j = 0; j < gs->colliderList.max; ++j)
         {
@@ -181,9 +180,7 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;
-            //M4x4_SetScale(item->transform.matrix.cells, 1, 1, 1);
             Transform_SetScale(&item->transform, 1, 1, 1);
-            //item->transform.scale = { 1, 1, 1 };
             if (collider->lastFrameOverlapping == time->frameNumber)
             {
                 RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 1, 0, 0);

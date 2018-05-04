@@ -68,7 +68,6 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////
     // Floor
     ent = Ent_GetFreeEntity(&gs->entList);
-    //ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
     ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, 1, testArenaWidth};
@@ -76,25 +75,21 @@ void Game_BuildTestScene(GameState *gs)
     // walls
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    //ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    //ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
     ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    //ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
     ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    //ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
     ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
@@ -279,17 +274,6 @@ void Game_Shutdown()
     Phys_Shutdown();
 }
 
-// inline void Game_UpdateEntityPosition(GameState *gs, EntId *entId, f32 x, f32 y, f32 z)
-// {
-//     Ent *ent = Ent_GetEntity(&gs->entList, entId);
-//     if (ent != NULL)
-//     {
-//         ent->transform.pos.x = x;
-//         ent->transform.pos.y = y;
-//         ent->transform.pos.z = z;
-//     }
-// }
-
 inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 {
     EntId entId = {};
@@ -303,16 +287,6 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
     M4x4* updateM = (M4x4*)&ev->matrix;
 
     Transform_FromM4x4(&ent->transform, updateM);
-
-    // M4x4* transM = (M4x4*)&ent->transform.matrix;
-    // for (i32 i = 0; i < 16; ++i)
-    // {
-    //     transM->cells[i] = updateM->cells[i];
-    // }
-    // if (ent->tag == 1)
-    // {
-    //     COM_COPY(&gs->cameraTransform.matrix, &g_debugTransform, Transform);
-    // }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -432,8 +406,6 @@ void Game_Tick(GameState *gs, MemoryBlock *eventBuffer, GameTime *time, InputTic
             COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(ZTransformUpdateEvent));
             ptrOffset += sizeof(ZTransformUpdateEvent);
             Game_HandleEntityUpdate(gs, &tUpdate);
-            //Game_UpdateEntityPosition(gs, &entId, tUpdate.pos.x, tUpdate.pos.y, tUpdate.pos.z);
-            //ptr += sizeof(ZTransformUpdateEvent);
         }
         break;
 

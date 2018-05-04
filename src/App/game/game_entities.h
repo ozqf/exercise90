@@ -29,8 +29,18 @@ Ent* Ent_GetFreeEntity(EntList* ents)
     return NULL;
 }
 
-inline void Ent_Free(Ent* ent)
+void Ent_ClearComponents(GameState* gs, Ent* ent)
 {
+    EC_RemoveAIController(ent, gs);
+    EC_RemoveCollider(ent, gs);
+    EC_RemoveRenderer(ent, gs);
+    EC_RemoveActorMotor(ent, gs);
+    EC_RemoveProjectile(ent, gs);
+}
+
+inline void Ent_Free(GameState* gs, Ent* ent)
+{
+    Ent_ClearComponents(gs, ent);
     ent->inUse = 0;
     ent->componentFlags = 0;
 }

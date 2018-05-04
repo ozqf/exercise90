@@ -14,8 +14,10 @@
 
 #define GAME_DEBUG_BUFFER_LENGTH 1024
 
-#define PLAYER_MOVE_SPEED 3.0f
-#define PLAYER_ROTATION_SPEED 90.0f
+#define PLAYER_MOVE_SPEED 5.0f
+#define PLAYER_ROTATION_SPEED 135.0f
+
+#define TEST_PROJECTILE_SPEED 20.0f
 
 // TODO: Remove this stuff sometime
 global_variable u8 g_testAsciChar = '+';
