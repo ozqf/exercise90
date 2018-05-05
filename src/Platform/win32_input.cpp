@@ -169,23 +169,24 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         // ClipCursor(&selfRect);
 #endif
         Win32_PollMouse(&mouseMoveX, &mouseMoveY);
-
-        ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
-        cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
-        ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
-        cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
     }
     else
     {
-        // inputTick.mouseMovement[0] = 0;
-        // inputTick.mouseMovement[1] = 0;
-        // Win32_SetMouseScreenPosition(&mousePosX, &mousePosY);
-        
-        ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-        cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
-        ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-        cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+        g_win32_mousePosMove.x = 0;
+        g_win32_mousePosMove.y = 0;
+        mouseMoveX = 0;
+        mouseMoveY = 0;
     }
+
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
+    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
+    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
+    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
+    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
 }
 
 u32 Win32_KeyCode_To_Input_Code(u32 vkCode)
