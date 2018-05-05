@@ -8,15 +8,23 @@ void Game_BuildTestScene(GameState *gs)
 {
     Ent *ent;
     EC_Renderer *renderer;
-    EC_AIController *controller;
+    //EC_AIController *controller;
     EC_Collider *collider;
     EC_ActorMotor *motor;
+    f32 size = 1;
+    Vec3 p = {};
 
     // Init gs and component lists
     *gs = {};
     Transform_SetToIdentity(&gs->cameraTransform);
-    Transform_SetPosition(&gs->cameraTransform, 0, 12, 7);
-    Transform_SetRotationDegrees(&gs->cameraTransform, -22.5f, 0, 0);
+    //tTransform_SetPosition(&gs->cameraTransform, 0, 5, 18);
+    Transform_SetPosition(&gs->cameraTransform, 0, 2.0f, 11.5f);
+
+    // TODO: Rotation of camera in 'walk' mode is taken from
+    // the input tick, each frame, so doing manual rotations of the
+    // camera transform here will be useless.
+    //Transform_SetRotationDegrees(&gs->cameraTransform, -45, 0, 0);
+    //Transform_RotateX(&gs->cameraTransform, 45);
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
@@ -68,9 +76,16 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////
     // Floor
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.y = -((testArenaHeight / 2) + 0.5);
+    p = {};
+    p.y = -((testArenaHeight / 2) + 0.5);
+    ent->transform.pos.y = p.y;
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, 1, testArenaWidth};
+    collider->shapeId = Phys_CreateBox(
+        p.x, p.y, p.z,
+        testArenaWidth / 2, 0.5, testArenaWidth / 2,
+        ZCOLLIDER_FLAG_STATIC,
+        ent->entId.index, ent->entId.iteration);
 
     // walls
 
@@ -78,21 +93,46 @@ void Game_BuildTestScene(GameState *gs)
     ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
+    collider->shapeId = Phys_CreateBox(
+        ent->transform.pos.x, 0, 0,
+        0.5f, testArenaHeight / 2, testArenaWidth,
+        ZCOLLIDER_FLAG_STATIC,
+        ent->entId.index, ent->entId.iteration);
+
 
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, testArenaHeight, testArenaWidth};
+    collider->shapeId = Phys_CreateBox(
+        ent->transform.pos.x, 0, 0,
+        0.5f, testArenaHeight / 2, testArenaWidth,
+        ZCOLLIDER_FLAG_STATIC,
+        ent->entId.index, ent->entId.iteration);
 
+    
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
+    p = { 0, 0, ((testArenaWidth / 2) + 0.5f) };
+    ent->transform.pos = p;
+    //ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
+    collider->shapeId = Phys_CreateBox(
+        p.x, p.y, p.z,
+        testArenaWidth, testArenaHeight / 2, 0.5f,
+        ZCOLLIDER_FLAG_STATIC,
+        ent->entId.index, ent->entId.iteration);
 
     ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.z = ((testArenaWidth / 2) + 0.5f);
+    p = { 0, 0, -((testArenaWidth / 2) + 0.5f) };
+    ent->transform.pos = p;
     collider = EC_AddCollider(ent, gs);
     collider->size = {testArenaWidth, testArenaHeight, 1};
+    collider->shapeId = Phys_CreateBox(
+        p.x, p.y, p.z,
+        testArenaWidth, testArenaHeight / 2, 0.5f,
+        ZCOLLIDER_FLAG_STATIC,
+        ent->entId.index, ent->entId.iteration);
 
 // end room
 
@@ -112,76 +152,87 @@ void Game_BuildTestScene(GameState *gs)
 #endif
     /////////////////////////////////////////////////////////////
     // Octahedron object
-    /////////////////////////////////////////////////////////////'
+    /////////////////////////////////////////////////////////////
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 1;
     Transform_SetPosition(&ent->transform, 0, 5, -3);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45.0f);
     
-    controller = EC_AddAIController(ent, gs);
-    Ent_InitAIController(controller, 1, 0, 0, 5);
+    //controller = EC_AddAIController(ent, gs);
+    //Ent_InitAIController(controller, 1, 0, 0, 5);
 
-    renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
+    // renderer = EC_AddRenderer(ent, gs);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
+    size = 0.1f;
     collider = EC_AddCollider(ent, gs);
-    collider->size = {1, 1, 1};
+    collider->size = { size, size, size };
     collider->shapeId = Phys_CreateSphere(
         ent->transform.pos.x,
         ent->transform.pos.y,
         ent->transform.pos.z,
-        1,
+        size,
+        0,
         ent->entId.index,
         ent->entId.iteration);
-
+#endif
     //////////////////////////////////////////////////////////////////////////////
     // and again
+#if 1
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 2;
-    Transform_SetPosition(&ent->transform, 5, 6, 3);
+    Transform_SetPosition(&ent->transform, 5.9f, 6, 3);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
     
-    controller = EC_AddAIController(ent, gs);
-    Ent_InitAIController(controller, 1, 0, 0, 5);
+    //controller = EC_AddAIController(ent, gs);
+    //Ent_InitAIController(controller, 1, 0, 0, 5);
 
-    renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
+    // renderer = EC_AddRenderer(ent, gs);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
+    size = 0.5f;
     collider = EC_AddCollider(ent, gs);
-    collider->size = {1, 1, 1};
-    collider->shapeId = Phys_CreateSphere(
+    collider->size = { size, size, size };
+    collider->shapeId = Phys_CreateBox(
         ent->transform.pos.x,
         ent->transform.pos.y,
         ent->transform.pos.z,
-        1,
+        size / 2.0f, size / 2.0f, size / 2.0f,
+        0,
         ent->entId.index,
         ent->entId.iteration);
+#endif
 
     //////////////////////////////////////////////////////////////////////////////
     // and again
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
-    Transform_SetPosition(&ent->transform, 5, 6, 3);
+    Transform_SetPosition(&ent->transform, 5, 7, 5);
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
-    
-    controller = EC_AddAIController(ent, gs);
-    Ent_InitAIController(controller, 1, 0, 0, 5);
 
-    renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
+    //controller = EC_AddAIController(ent, gs);
+    //Ent_InitAIController(controller, 1, 0, 0, 5);
+
+    // renderer = EC_AddRenderer(ent, gs);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
     
+    size = 1;
     collider = EC_AddCollider(ent, gs);
-    collider->size = {1, 1, 1};
+    collider->size = { size, size, size };
     collider->shapeId = Phys_CreateSphere(
         ent->transform.pos.x,
         ent->transform.pos.y,
         ent->transform.pos.z,
-        1,
+        size / 2,
+        0,
         ent->entId.index,
         ent->entId.iteration);
+#endif
 }
 
 void Game_BuildTestHud(GameState *state)
@@ -327,18 +378,30 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
         case GAME_DEBUG_MODE_TRANSFORM:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 1);
+            M3x3 rotation = {};
+            Vec3 inputRot = {};
+            Vec3 pos = {};
+            Vec3 rot = {};
+            Vec3 scale = {};
             if (ent == NULL)
             {
                 h.length = sprintf_s(gs->debugString, gs->debugStringCapacity, "No Debug Entity found\n");
+                rotation = gs->cameraTransform.rotation;
+                inputRot = g_debugInput.degrees;
+                scale = gs->cameraTransform.scale;
+                pos = gs->cameraTransform.pos;
+                rot = Transform_GetEulerAnglesDegrees(&gs->cameraTransform);
             }
             else
             {
-                M3x3 rotation = g_debugTransform.rotation;
-                Vec3 inputRot = g_debugInput.degrees;
-                Vec3 scale = g_debugTransform.scale;
-                Vec3 pos = g_debugTransform.pos;
+                rotation = g_debugTransform.rotation;
+                inputRot = g_debugInput.degrees;
+                scale = g_debugTransform.scale;
+                pos = g_debugTransform.pos;
+                rot = Transform_GetEulerAnglesDegrees(&g_debugTransform);
+            }
                 
-                Vec3 rot = Transform_GetEulerAnglesDegrees(&g_debugTransform);
+                
                 // mRot.z = atan2f(m[1], m[5]);
                 // mRot.y = atan2f(m[8], m[10]);
                 // mRot.x = -asinf(m[9]);
@@ -366,8 +429,8 @@ Rotation:\n\
                                      rotation.xAxisY, rotation.yAxisY, rotation.zAxisY,
                                      rotation.xAxisZ, rotation.yAxisZ, rotation.zAxisZ
                                      );
-            }
-            
+            //
+
         }
         break;
 

@@ -44,7 +44,7 @@ struct ZBulletWorld
 
     btDiscreteDynamicsWorld* dynamicsWorld;
 };
-
+#if 0
 struct PhysicsTestState
 {
     btCollisionShape* groundShape;
@@ -55,3 +55,4 @@ struct PhysicsTestState
     btDefaultMotionState* sphereMotionState;
     btRigidBody* sphereRigidBody;
 };
+#endif

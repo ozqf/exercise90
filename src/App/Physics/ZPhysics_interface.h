@@ -14,7 +14,9 @@
 // Collision API
 //////////////////////////////////////////////////////////////////
 
-i32 Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u16 ownerId, u16 ownerIteration);
+i32 Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u16 ownerIteration);
+
+int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfWidthX, f32 halfWidthY, f32 halfWidthZ, u32 flags, u16 ownerId, u16 ownerIteration);
 
 i32 Phys_RemoveShape();
 

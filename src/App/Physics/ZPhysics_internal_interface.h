@@ -8,6 +8,6 @@ void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 
 void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 
-PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, f32 x, f32 y, f32 z, f32 radius);
+PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def);
 
-
+PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def);

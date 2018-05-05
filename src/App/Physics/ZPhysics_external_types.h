@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/com_defines.h"
 
 //////////////////////////////////////////////////////////////////
 // Collision Shapes
@@ -9,42 +9,33 @@
 #define ZCOLLIDER_TYPE_CUBOID 1
 #define ZCOLLIDER_TYPE_MESH 2
 
-struct ZCuboidCollider
+#define ZCOLLIDER_FLAG_STATIC (1 << 0)
+#if 1
+
+struct ZShapeDef
 {
-	f32 size[3];
+	u32 type;
+	u32 flags;
+	f32 pos[3];
 };
 
-struct ZSphereCollider
+struct ZSphereDef
 {
+	ZShapeDef base;
 	f32 radius;
 };
 
-struct ZMeshCollider
+struct ZBoxDef
 {
-	unsigned  char* mesh;
+	ZShapeDef base;
+	f32 halfSize[3];
 };
 
-
-union ZCollider_U
-{
-	ZCuboidCollider cuboid;
-	ZSphereCollider sphere;
-	ZMeshCollider mesh;
-};
-
-#define CAST_CUBOID(obj) &obj->data.cuboid;
-
-struct ZCollider
-{
-	 int flags;
-	 int type;
-	 ZCollider_U data;
-};
-
+#endif
 //////////////////////////////////////////////////////////////////
 // Collision query data
 //////////////////////////////////////////////////////////////////
-
+#if 0
 struct ZRayHit
 {
 	Vec3 pos;
@@ -70,11 +61,22 @@ struct ZTouchPair
 	ZCollider* a;
 	ZCollider* b;
 };
+#endif
+//////////////////////////////////////////////////////////////////
+// Commands -> incoming instructions to the physics engine
+//////////////////////////////////////////////////////////////////
+#if 0
+struct ZTeleport
+{
+	i32 type;
+	f32 pos[3];
+};
+#endif
 
 //////////////////////////////////////////////////////////////////
-// Collision query data
+// Events -> out going data from physics engine step
 //////////////////////////////////////////////////////////////////
-
+#if 1
 struct ZTransformUpdateEvent
 {
 	i32 type;
@@ -82,3 +84,4 @@ struct ZTransformUpdateEvent
 	u16 ownerIteration;
 	f32 matrix[16];
 };
+#endif

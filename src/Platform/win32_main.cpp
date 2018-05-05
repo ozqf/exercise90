@@ -221,6 +221,11 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
             MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
             DebugBreak();
         }
+
+        if (VKCode == 'T' && isDown)
+        {
+            Assert(Win32_LinkToApplication());
+        }
         
         if (VKCode == VK_F4 && (lParam & (1 << 29)))
         {

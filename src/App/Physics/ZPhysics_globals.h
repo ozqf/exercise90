@@ -4,7 +4,7 @@
 
 
 internal ZBulletWorld g_world;
-internal PhysicsTestState g_physTest;
+//internal PhysicsTestState g_physTest;
 
 internal Vec3 g_testPos;
 

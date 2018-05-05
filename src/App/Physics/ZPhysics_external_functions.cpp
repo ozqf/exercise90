@@ -1,13 +1,41 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/com_defines.h"
 
 /////////////////////////////////////////////////////////////
 // List operations
 /////////////////////////////////////////////////////////////
-int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u16 ownerId, u16 ownerIteration)
+
+
+int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u16 ownerIteration)
 {
-    PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, x, y, z, radius);
+    ZSphereDef def = {};
+    def.base.type = ZCOLLIDER_TYPE_SPHERE;
+    def.base.pos[0] = x;
+    def.base.pos[1] = y;
+    def.base.pos[2] = z;
+    def.base.flags = flags;
+    def.radius = radius;
+
+    PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, def);
+	h->ownerId = ownerId;
+	h->ownerIteration = ownerIteration;
+    return h->id;
+}
+
+int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u32 flags, u16 ownerId, u16 ownerIteration)
+{
+    ZBoxDef def = {};
+    def.base.type = ZCOLLIDER_TYPE_SPHERE;
+    def.base.pos[0] = x;
+    def.base.pos[1] = y;
+    def.base.pos[2] = z;
+    def.base.flags = flags;
+    def.halfSize[0] = halfSizeX;
+    def.halfSize[1] = halfSizeY;
+    def.halfSize[2] = halfSizeZ;
+    
+    PhysBodyHandle* h = Phys_CreateBulletBox(&g_world, def);
 	h->ownerId = ownerId;
 	h->ownerIteration = ownerIteration;
     return h->id;
@@ -38,8 +66,8 @@ Vec3 Phys_DebugGetPosition()
 
 void Phys_CreateTestScene(ZBulletWorld* world)
 {
+#if 0
     // hello bullet physics
-
     // Add static ground-plane
     g_physTest.groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -1);
     g_physTest.groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
@@ -48,7 +76,7 @@ void Phys_CreateTestScene(ZBulletWorld* world)
     g_physTest.groundRigidBody = new btRigidBody(groundRigidBodyCI);
     world->dynamicsWorld->addRigidBody(g_physTest.groundRigidBody);
 
-#if 0
+
     // Add dynamic sphere, 50m above the ground
     g_physTest.sphereShape = new btSphereShape(1);
     g_physTest.sphereMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0.2f, 12, 0.5f)));
@@ -73,7 +101,7 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 
 void Phys_Init()
 {
-    g_physTest = {};
+    //g_physTest = {};
     g_world = {};
     g_world.bodies.items = g_bodies;
     g_world.bodies.capacity = MAX_PHYS_BODIES;
@@ -210,6 +238,10 @@ void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
 
 void Phys_Shutdown()
 {
+    for (int i = 0; i < g_world.bodies.capacity; ++i)
+    {
+        Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);
+    }
     // Get order right or it will cause an access violation
 	delete g_world.dynamicsWorld;
 	delete g_world.solver;
