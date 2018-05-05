@@ -33,10 +33,29 @@ struct PhysBodyList
     i32 capacity;
 };
 
+struct PhysDebugInfo
+{
+    u32 stepCount = 0;
+    u32 preSolves = 0;
+    u32 postSolves = 0;
+
+    u32 numManifolds = 0;
+};
+
+struct PhysOverlapPair
+{
+    i32 indexA;
+    i32 indexB;
+};
+
 struct ZBulletWorld
 {
     PhysBodyList bodies;
+    PhysDebugInfo debug;
 
+    PhysOverlapPair* overlapPairs;
+    i32 numOverlaps;
+    
     btBroadphaseInterface* broadphase;
     btDefaultCollisionConfiguration* collisionConfiguration;
     btCollisionDispatcher* dispatcher;

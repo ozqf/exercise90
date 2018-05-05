@@ -49,6 +49,12 @@ int Phys_RemoveShape()
 /////////////////////////////////////////////////////////////
 // Querying
 /////////////////////////////////////////////////////////////
+void Phys_GetDebugString(char** str, i32* length)
+{
+    *str = g_debugString;
+    *length = g_debugStringSize;
+}
+
 int Phys_QueryHitscan()
 {
     return 0;
@@ -105,6 +111,8 @@ void Phys_Init()
     g_world = {};
     g_world.bodies.items = g_bodies;
     g_world.bodies.capacity = MAX_PHYS_BODIES;
+    g_world.overlapPairs = g_overlapPairs;
+    g_world.numOverlaps = MAX_PHYS_OVERLAPS;
 
     g_world.broadphase = new btDbvtBroadphase();
 
@@ -116,27 +124,23 @@ void Phys_Init()
     g_world.dynamicsWorld = new btDiscreteDynamicsWorld(g_world.dispatcher, g_world.broadphase, g_world.solver, g_world.collisionConfiguration);
 
     g_world.dynamicsWorld->setGravity(btVector3(0, -15, 0));
+
+	g_world.dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
+    g_world.dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);
     
     Phys_CreateTestScene(&g_world);
 }
 
 void Phys_ReadCommands(MemoryBlock* commandBuffer)
 {
-
+    //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
 }
 
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
 {
+    ++world->debug.stepCount;
     world->dynamicsWorld->stepSimulation(deltaTime, 10);
-#if 0
-    btTransform trans;
-    g_physTest.sphereRigidBody->getMotionState()->getWorldTransform(trans);
 
-    btVector3 pos = trans.getOrigin();
-    g_testPos.x = pos.getX();
-    g_testPos.y = pos.getY();
-    g_testPos.z = pos.getZ();
-#endif
     u8* writePosition = (u8*)eventBuffer->ptrMemory;
     i32 len = world->bodies.capacity;
     for (int i = 0; i < len; ++i)
@@ -147,78 +151,20 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
 
         // Get position
         btTransform t;
-        //h->motionState->getWorldTransform(t);
         h->rigidBody->getMotionState()->getWorldTransform(t);
-        // btVector3 p = t.getOrigin();
-
-        // // Write position to handle
-        // h->transform.pos.x = p.getX();
-        // h->transform.pos.y = p.getY();
-        // h->transform.pos.z = p.getZ();
-
+        
         // write transform update
         ZTransformUpdateEvent tUpdate = {};
         tUpdate.type = 1;
         tUpdate.ownerId = h->ownerId;
 		tUpdate.ownerIteration = h->ownerIteration;
-        // tUpdate.pos.x = h->transform.pos.x;
-        // tUpdate.pos.y = h->transform.pos.y;
-        // tUpdate.pos.z = h->transform.pos.z;
         
-        // attempt to read angle:
-
-        // Bullet Appears to use X = roll, Y = pitch, Z = Yaw
-        // Ex90 uses x = pitch, y = yaw, z = roll
-        //          Bullet      Ex90
-        // Roll     X           Z
-        // Pitch    Y           X
-        // Yaw      Z           Y
-#if 1 // Pure matrix
         btScalar openglM[16];
         t.getOpenGLMatrix(openglM);
         for (i32 j = 0; j < 16; ++j)
         {
             tUpdate.matrix[j] = openglM[j];
         }
-#endif
-
-#if 0 // Matrix and angles
-        btScalar openglM[16];
-        t.getOpenGLMatrix(openglM);
-        for (i32 j = 0; j < 16; ++j)
-        {
-            tUpdate.matrix.cells[j] = openglM[j];
-        }
-        
-
-        // btScalar m[16];
-        // t.getOpenGLMatrix(m);
-        f32 fAngZ = atan2f(openglM[1], openglM[5]);
-        f32 fAngY = atan2f(openglM[8], openglM[10]);
-        f32 fAngX = -asinf(openglM[9]);
-        // tUpdate.rot.x = COM_CapAngleDegrees(fAngX * RAD2DEG);
-        // tUpdate.rot.y = COM_CapAngleDegrees(fAngY * RAD2DEG);
-        // tUpdate.rot.z = COM_CapAngleDegrees(fAngZ * RAD2DEG);
-        tUpdate.rot.x = fAngX * RAD2DEG;
-        tUpdate.rot.y = fAngY * RAD2DEG;
-        tUpdate.rot.z = fAngZ * RAD2DEG;
-#endif
-#if 0 // angles etc
-        btMatrix3x3 m = t.getBasis();
-        btScalar pitchX;
-        btScalar yawY;
-        btScalar rollZ;
-        m.getEulerYPR(yawY, pitchX, rollZ);
-        m.getEulerZYX(yawY, pitchX, rollZ);
-        tUpdate.rot.x = COM_CapAngleDegrees(pitchX * RAD2DEG);
-        tUpdate.rot.y = COM_CapAngleDegrees(yawY * RAD2DEG);
-        tUpdate.rot.z = COM_CapAngleDegrees(rollZ * RAD2DEG);
-
-        // tUpdate.rot.x = pitchX * RAD2DEG;
-        // tUpdate.rot.y = yawY * RAD2DEG;
-        // tUpdate.rot.z = rollZ * RAD2DEG;
-    
-#endif
         COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
     }
     
@@ -234,6 +180,7 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
 void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
 {
     Phys_StepWorld(&g_world, eventBuffer, deltaTime);
+    Phys_WriteDebugOutput(&g_world);
 }
 
 void Phys_Shutdown()

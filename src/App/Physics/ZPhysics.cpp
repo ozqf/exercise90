@@ -98,6 +98,7 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
     boxBodyCI.m_friction = 0.3f;
 
     handle->rigidBody = new btRigidBody(boxBodyCI);
+    handle->rigidBody->setUserIndex(handle->id);
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
 
     return handle;
@@ -134,6 +135,7 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     sphereBodyCI.m_friction = 0.0f;
 
     handle->rigidBody = new btRigidBody(sphereBodyCI);
+    handle->rigidBody->setUserIndex(handle->id);
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
 
     // DONE
@@ -161,3 +163,62 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     return handle;
 }
 
+internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep)
+{
+    ++g_world.debug.preSolves;
+    
+}
+
+internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
+{
+    ZBulletWorld* w = &g_world;
+    ++w->debug.postSolves;
+
+    i32 numOverlaps = 0;
+    
+    
+    int numManifolds = dynWorld->getDispatcher()->getNumManifolds();
+    g_world.debug.numManifolds = numManifolds;
+    for (int i = 0; i < numManifolds; i++)
+    {
+        btPersistentManifold* contactManifold =  dynWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        const btCollisionObject* obA = contactManifold->getBody0();
+        const btCollisionObject* obB = contactManifold->getBody1();
+
+        Assert(numOverlaps < MAX_PHYS_OVERLAPS);
+        w->overlapPairs[numOverlaps].indexA = obA->getUserIndex();
+        w->overlapPairs[numOverlaps].indexB = obB->getUserIndex();
+        numOverlaps++;
+
+        int numContacts = contactManifold->getNumContacts();
+        for (int j = 0; j < numContacts; j++)
+        {
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            if (pt.getDistance() < 0.f)
+            {
+                const btVector3& ptA = pt.getPositionWorldOnA();
+                const btVector3& ptB = pt.getPositionWorldOnB();
+                const btVector3& normalOnB = pt.m_normalWorldOnB;
+            }
+        }
+    }
+    w->numOverlaps = numOverlaps;
+}
+
+internal void Phys_WriteDebugOutput(ZBulletWorld* world)
+{
+    sprintf_s(g_debugString, g_debugStringSize,
+"Physics debug\n\
+Steps: %d\n\
+PreSolves: %d\n\
+PostSolves: %d\n\
+Num Manifolds: %d\n\
+Num Overlaps: %d\n\
+",
+world->debug.stepCount,
+world->debug.preSolves,
+world->debug.postSolves,
+world->debug.numManifolds,
+world->numOverlaps
+);
+}

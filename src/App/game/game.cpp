@@ -346,6 +346,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
 #define GAME_DEBUG_MODE_NONE 0
 #define GAME_DEBUG_MODE_CAMERA 1
 #define GAME_DEBUG_MODE_TRANSFORM 2
+#define GAME_DEBUG_MODE_PHYSICS 3
 
 ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
 {
@@ -375,6 +376,15 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
         }
         break;
         #endif
+
+        case GAME_DEBUG_MODE_PHYSICS:
+        {
+            // char* str;
+            // u32 numChars;
+            Phys_GetDebugString(&h.chars, &h.length);
+            
+        } break;
+
         case GAME_DEBUG_MODE_TRANSFORM:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 1);
@@ -385,7 +395,7 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             Vec3 scale = {};
             if (ent == NULL)
             {
-                h.length = sprintf_s(gs->debugString, gs->debugStringCapacity, "No Debug Entity found\n");
+                //h.length = sprintf_s(gs->debugString, gs->debugStringCapacity, "No Debug Entity found\n");
                 rotation = gs->cameraTransform.rotation;
                 inputRot = g_debugInput.degrees;
                 scale = gs->cameraTransform.scale;

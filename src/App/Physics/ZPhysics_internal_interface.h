@@ -11,3 +11,9 @@ void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def);
 
 PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def);
+
+internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+
+internal void Phys_PostSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+
+internal void Phys_WriteDebugOutput(ZBulletWorld* world);
