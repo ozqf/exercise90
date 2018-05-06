@@ -12,15 +12,12 @@
 struct PhysBodyHandle
 {
     u8 inUse;
-    // internal id
+    // internal id, matches user index on btRigidbody
     i32 id;
     // external id
     u16 ownerId;
     u16 ownerIteration;
-    // written every frame, report state to outside world
-    Transform transform;
-    //ZCollider collider; // 'shadow' presented to the external interface
-
+    
     // pointers to bullet physics objects
     btCollisionShape* shape;
     btDefaultMotionState* motionState;
@@ -46,6 +43,11 @@ struct PhysOverlapPair
 {
     i32 indexA;
     i32 indexB;
+};
+
+struct PhysInfinitePlane
+{
+    
 };
 
 struct ZBulletWorld

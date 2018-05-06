@@ -10,7 +10,7 @@ void Game_BuildTestScene(GameState *gs)
     EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
-    EC_ActorMotor *motor;
+    //EC_ActorMotor *motor;
     f32 size = 1;
     Vec3 p = {};
 
@@ -74,7 +74,18 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////
     // Room
     /////////////////////////////////////////////////////////////
+    // Infinite plane
+    ent = Ent_GetFreeEntity(&gs->entList);
+    p = {};
+    p.y = -2;
+    ent->transform.pos.y = p.y;
+    collider = EC_AddCollider(ent, gs);
+    collider->size = {testArenaWidth, 0.01f, testArenaWidth};
+    collider->shapeId = Phys_CreateInfinitePlane(-2, ent->entId.index, ent->entId.iteration);
+
+
     // Floor
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     p = {};
     p.y = -((testArenaHeight / 2) + 0.5);
@@ -86,7 +97,7 @@ void Game_BuildTestScene(GameState *gs)
         testArenaWidth / 2, 0.5, testArenaWidth / 2,
         ZCOLLIDER_FLAG_STATIC,
         ent->entId.index, ent->entId.iteration);
-
+#endif
     // walls
 
     ent = Ent_GetFreeEntity(&gs->entList);
@@ -141,12 +152,17 @@ void Game_BuildTestScene(GameState *gs)
 /////////////////////////////////////////////////////////////
 #if 1
     ent = Ent_GetFreeEntity(&gs->entList);
-
+    Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 2, 1};
+    collider->shapeId = Phys_CreateBox(
+        0, 0, 0,
+        0.5, 1, 0.5,
+        ZCOLLIDER_FLAG_NO_ROTATION,
+        ent->entId.index, ent->entId.iteration);
 
-    motor = EC_AddActorMotor(ent, gs);
-    motor->speed = 5;
+    // motor = EC_AddActorMotor(ent, gs);
+    // motor->speed = 5;
 
     gs->playerEntityIndex = ent->entId.index;
 #endif
@@ -208,7 +224,7 @@ void Game_BuildTestScene(GameState *gs)
 
     //////////////////////////////////////////////////////////////////////////////
     // and again
-#if 0
+#if 1
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
     Transform_SetPosition(&ent->transform, 5, 7, 5);

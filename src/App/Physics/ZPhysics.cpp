@@ -24,6 +24,9 @@
 // Implement public interface
 #include "ZPhysics_external_functions.cpp"
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// MANAGE HANDLES
+////////////////////////////////////////////////////////////////////////////////////////////
 PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
 {
     
@@ -40,6 +43,9 @@ PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
     return NULL;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// CREATE SHAPES
+////////////////////////////////////////////////////////////////////////////////////////////
 // Delete all objects on this handle
 void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle)
 {
@@ -96,9 +102,24 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
     btRigidBody::btRigidBodyConstructionInfo boxBodyCI(mass, handle->motionState, handle->shape, fallInertia);
     boxBodyCI.m_restitution = 0.3f;
     boxBodyCI.m_friction = 0.3f;
-
+    
     handle->rigidBody = new btRigidBody(boxBodyCI);
+
+    i32 btFlags = 0;
+    if (def.base.flags & ZCOLLIDER_FLAG_KINEMATIC)
+    {
+        btFlags |= CF_KINEMATIC_OBJECT;
+        // Restrict motion to specific axes (in this case, only move on X/Z)
+        //handle->rigidBody->setLinearFactor(btVector3(1, 0, 1));
+    }
+    if (def.base.flags & ZCOLLIDER_FLAG_NO_ROTATION)
+    {
+        handle->rigidBody->setAngularFactor(btVector3(0, 1, 0));
+    }
+    
     handle->rigidBody->setUserIndex(handle->id);
+    handle->rigidBody->setCollisionFlags(btFlags);
+
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
 
     return handle;
@@ -116,7 +137,12 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     btRigidBody* rigidBody;
     */
     handle->shape = new btSphereShape(def.radius);
-    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])));
+    handle->motionState = new btDefaultMotionState(
+        btTransform(
+            btQuaternion(0, 0, 0, 1),
+            btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])
+            )
+        );
     
     btScalar mass;
     if (def.base.flags & ZCOLLIDER_FLAG_STATIC)
@@ -134,8 +160,15 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     sphereBodyCI.m_restitution = 0.75f;
     sphereBodyCI.m_friction = 0.0f;
 
+    i32 btFlags = 0;
+    if (def.base.flags & ZCOLLIDER_FLAG_KINEMATIC)
+    {
+        btFlags |= CF_KINEMATIC_OBJECT;
+    }
+
     handle->rigidBody = new btRigidBody(sphereBodyCI);
     handle->rigidBody->setUserIndex(handle->id);
+    handle->rigidBody->setCollisionFlags(btFlags);
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
 
     // DONE
@@ -163,6 +196,24 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     return handle;
 }
 
+PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def)
+{
+    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
+    Assert(handle != NULL);
+
+    handle->shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, def.pos[1], 0)));
+    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, handle->motionState, handle->shape, btVector3(0, 0, 0));
+    groundRigidBodyCI.m_restitution = 1.0f;
+    handle->rigidBody = new btRigidBody(groundRigidBodyCI);
+    world->dynamicsWorld->addRigidBody(handle->rigidBody);
+    handle->rigidBody->setUserIndex(handle->id);
+    return handle;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// CALLBACKS
+////////////////////////////////////////////////////////////////////////////////////////////
 internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep)
 {
     ++g_world.debug.preSolves;
@@ -205,6 +256,9 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     w->numOverlaps = numOverlaps;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// DEBUG
+////////////////////////////////////////////////////////////////////////////////////////////
 internal void Phys_WriteDebugOutput(ZBulletWorld* world)
 {
     sprintf_s(g_debugString, g_debugStringSize,

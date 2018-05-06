@@ -26,7 +26,7 @@ int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u
 int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u32 flags, u16 ownerId, u16 ownerIteration)
 {
     ZBoxDef def = {};
-    def.base.type = ZCOLLIDER_TYPE_SPHERE;
+    def.base.type = ZCOLLIDER_TYPE_CUBOID;
     def.base.pos[0] = x;
     def.base.pos[1] = y;
     def.base.pos[2] = z;
@@ -40,6 +40,19 @@ int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSi
 	h->ownerIteration = ownerIteration;
     return h->id;
 }
+
+i32 Phys_CreateInfinitePlane(f32 y, u16 ownerId, u16 ownerIteration)
+{
+    ZShapeDef def = {};
+    def.type = ZCOLLIDER_TYPE_INFINITE_PLANE;
+    def.pos[0] = 0;
+    def.pos[1] = y;
+    def.pos[2] = 0;
+    PhysBodyHandle* h = Phys_CreateBulletInfinitePlane(&g_world, def);
+    h->ownerId = ownerId;
+    h->ownerIteration = ownerIteration;
+    return h->id;
+} 
 
 int Phys_RemoveShape()
 {
