@@ -14,6 +14,19 @@
 //     }
 // }
 
+Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
+{
+    for (u32 i = 0; i < gs->labelList.max; ++i)
+    {
+        EC_Label* entLabel = &gs->labelList.items[i];
+        if (!COM_CompareStrings(entLabel->label, queryLabel))
+        {
+            return Ent_GetEntity(&gs->entList, &entLabel->entId);
+        }
+    }
+    return NULL;
+}
+
 void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);

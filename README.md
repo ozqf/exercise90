@@ -39,22 +39,34 @@ Move the engine and game to using commands.
 ### Game
 * Done 2018/3/16 **Player movement** - Current player movement is messed up - rebuild.
 * **Basic Arena Level** - Something to stand on and contain the player!
-* **Collision Detection**
-    * Done 2018/4/5 *Bullet Physics Library* - Attach the bullet physics library via a wrapper
-        * **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
-        * **Overlap detection (Rigidbodies, static and triggers)** - Kinda need this to make a game out of
-        * **Querying (Rays and spheres/cube volumes)** - for object searchs, explosions and projectiles
-    * **Ray vs plane** - For hitscan vs world.
-    * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.
-    * **Actor vs World** - AABB vs plane or perhaps ray vs expanded plane
-    * **Actor vs Actor** - For now just AABB vs AABB?
-    * Done 2018/3/30 *Binary AABB vs AABB collision detection*
 * **Entities**
     * Done 2018/3/30 *How will entities be stored? - Exact structure of entity system. Big structs for now with separate list of render objects built each frame?*
     * Done 2018/3/30 *Entity List - Until a better idea comes up, alloc a big array (4096 odd) of entity structs and use that.*
     *Copy to keep active entities packed to start of array?*
     * **Update loop**
 * Done 2018/3/14 **Create Heap** - Create main memory pool.
+* ~Collision Detection~ - Deferred to physics engine
+    * **Ray vs plane** - For hitscan vs world.
+    * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.
+    * **Actor vs World** - AABB vs plane or perhaps ray vs expanded plane
+    * **Actor vs Actor** - For now just AABB vs AABB?
+    * Done 2018/3/30 *Binary AABB vs AABB collision detection*
+
+### Physics Wrapper
+* **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
+* **Querying (Rays and spheres/cube volumes)** - for object searchs, explosions and projectiles
+* **Overlap detection (Rigidbodies, static and triggers)** - Kinda need this to make a game out of
+    * Done 2018/5/5 *Basic detection of overlap pairs* - Inefficient and messy
+    * **Overlap detection (triggers)**
+* **Teleportation** - directly setting object positions
+* **One way collisions** - Creating planes/very thin boxes that can only be moved through in one direction (forcefields)
+* **'Static' moving shapes** - can shapes with zero mass be repositioned? If so can they be used as blocking
+    volumes ala old Box2D flash stuff?
+* **Kinematic** - examine kinematic shapes and how they might be used for player movement?
+* Done 2018/5/5 *Lock Rotation* - Create shapes that only move and cannot rotate.
+* Done 2018/4/5 *Bullet Physics Library* - Attach the bullet physics library via a wrapper
+
+
 
 ### Engine
 * **Command Buffer** - Change nature of inputs to processing of frame specific command buffers

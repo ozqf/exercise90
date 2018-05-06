@@ -211,6 +211,23 @@ PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef de
     return handle;
 }
 
+internal i32 Phys_FindOverlapPair(ZBulletWorld* world, i32 a, i32 b)
+{
+    for (int i = 0; i < world->numOverlaps; ++i)
+    {
+        // order of indices doesn't matter
+        if (
+            (world->overlapPairs[i].indexA == a && world->overlapPairs[i].indexB == b)
+            ||
+            (world->overlapPairs[i].indexA == b && world->overlapPairs[i].indexB == a)
+            )
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // CALLBACKS
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -225,9 +242,9 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     ZBulletWorld* w = &g_world;
     ++w->debug.postSolves;
 
-    i32 numOverlaps = 0;
-    
-    
+    // Reset overlap list and rebuild
+    w->numOverlaps = 0;
+
     int numManifolds = dynWorld->getDispatcher()->getNumManifolds();
     g_world.debug.numManifolds = numManifolds;
     for (int i = 0; i < numManifolds; i++)
@@ -236,24 +253,36 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
         const btCollisionObject* obA = contactManifold->getBody0();
         const btCollisionObject* obB = contactManifold->getBody1();
 
-        Assert(numOverlaps < MAX_PHYS_OVERLAPS);
-        w->overlapPairs[numOverlaps].indexA = obA->getUserIndex();
-        w->overlapPairs[numOverlaps].indexB = obB->getUserIndex();
-        numOverlaps++;
-
+        i32 indexA = obA->getUserIndex();
+        i32 indexB = obB->getUserIndex();
+        
         int numContacts = contactManifold->getNumContacts();
+        u8 areTouching = 0;
+        
         for (int j = 0; j < numContacts; j++)
         {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
-            if (pt.getDistance() < 0.f)
+            //if (pt.getDistance() < 0.05f)
+            if (pt.getDistance() < F32_EPSILON)
             {
+                areTouching = 1;
                 const btVector3& ptA = pt.getPositionWorldOnA();
                 const btVector3& ptB = pt.getPositionWorldOnB();
                 const btVector3& normalOnB = pt.m_normalWorldOnB;
             }
         }
+
+        if (areTouching)
+        {
+            if (Phys_FindOverlapPair(w, indexA, indexB) >= 0) { continue; }
+
+            Assert(w->numOverlaps < MAX_PHYS_OVERLAPS);
+            w->overlapPairs[w->numOverlaps].indexA = indexA;
+            w->overlapPairs[w->numOverlaps].indexB = indexB;
+            w->numOverlaps++;
+        
+        }
     }
-    w->numOverlaps = numOverlaps;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,13 +290,18 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
 ////////////////////////////////////////////////////////////////////////////////////////////
 internal void Phys_WriteDebugOutput(ZBulletWorld* world)
 {
-    sprintf_s(g_debugString, g_debugStringSize,
+    char* ptr = g_debugString;
+    i32 remaining = g_debugStringSize;
+    i32 written = 0;
+    
+    written = sprintf_s(ptr, remaining,
 "Physics debug\n\
 Steps: %d\n\
 PreSolves: %d\n\
 PostSolves: %d\n\
 Num Manifolds: %d\n\
 Num Overlaps: %d\n\
+--Collision Pairs--\n\
 ",
 world->debug.stepCount,
 world->debug.preSolves,
@@ -275,4 +309,16 @@ world->debug.postSolves,
 world->debug.numManifolds,
 world->numOverlaps
 );
+    ptr += written;
+    remaining -= written;
+
+    for (int i = 0; i < world->numOverlaps; ++i)
+    {
+        written = sprintf_s(ptr, remaining, "(%d vs %d)\n", world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
+        //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
+        //written = sprintf_s(ptr, remaining, "12345");
+        ptr += written;
+        remaining -= written;
+        if (remaining <= 0) { break; }
+    }
 }

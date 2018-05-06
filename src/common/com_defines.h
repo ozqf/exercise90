@@ -43,6 +43,8 @@ MACROS
 #define KiloBytes(bytes) ((bytes) * 1024LL)
 #define MegaBytes(bytes) (KiloBytes(bytes) * 1024LL)
 
+#define F32_EPSILON 1.19209290E-07F // decimal constant
+
 #define DLL_EXPORT __declspec(dllexport)
 
 ///////////////////////////////////////////////////////////////////////

@@ -76,7 +76,8 @@ global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
-global_variable EC_Projectile        g_prjControllers[GAME_MAX_ENTITIES];
+global_variable EC_Projectile       g_prjControllers[GAME_MAX_ENTITIES];
+global_variable EC_Label            g_entLabels[GAME_MAX_ENTITIES];
 
 // UI
 global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];

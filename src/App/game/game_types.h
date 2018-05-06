@@ -68,6 +68,7 @@ struct EntList
 #define COMP_FLAG_RENDERER (1 << 2)
 #define COMP_FLAG_ACTORMOTOR (1 << 3)
 #define COMP_FLAG_PROJECTILE (1 << 4)
+#define COMP_FLAG_LABEL (1 << 5)
 
 // A quick test component
 struct EC_AIController
@@ -115,6 +116,13 @@ struct EC_Projectile
     f32 tock;
 };
 
+struct EC_Label
+{
+    EntId entId;
+    u8 inUse;
+    char label[32];
+};
+
 //////////////////////////////////////////////////
 // Define component list structs and GameState objects...
 //////////////////////////////////////////////////
@@ -125,6 +133,7 @@ DEFINE_ENT_COMPONENT_LIST(Renderer)
 DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
+DEFINE_ENT_COMPONENT_LIST(Label)
 
 struct GameState
 {
@@ -140,6 +149,7 @@ struct GameState
     EC_ColliderList colliderList;
     EC_ActorMotorList actorMotorList;
     EC_ProjectileList projectileList;
+    EC_LabelList labelList;
     
     // view
     Transform cameraTransform;
@@ -163,6 +173,7 @@ DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
+DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
 
 // void World_Init(GameState* gs, i32 maxEntities)
 // {

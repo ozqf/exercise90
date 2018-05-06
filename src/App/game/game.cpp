@@ -7,7 +7,7 @@
 void Game_BuildTestScene(GameState *gs)
 {
     Ent *ent;
-    EC_Renderer *renderer;
+    //EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
     //EC_ActorMotor *motor;
@@ -49,7 +49,11 @@ void Game_BuildTestScene(GameState *gs)
     gs->projectileList.items = g_prjControllers;
     gs->projectileList.count = GAME_MAX_ENTITIES;
     gs->projectileList.max = GAME_MAX_ENTITIES;
-
+    
+    gs->labelList.items = g_entLabels;
+    gs->labelList.count = GAME_MAX_ENTITIES;
+    gs->labelList.max = GAME_MAX_ENTITIES;
+    
     const f32 testArenaWidth = 12;
     const f32 testArenaHeight = 4;
     const f32 wallHalfWidth = 0.5f;
@@ -67,9 +71,8 @@ void Game_BuildTestScene(GameState *gs)
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
     
-    renderer = EC_AddRenderer(ent, gs);
-
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
+    // renderer = EC_AddRenderer(ent, gs);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
 
     /////////////////////////////////////////////////////////////
     // Room
@@ -100,6 +103,7 @@ void Game_BuildTestScene(GameState *gs)
 #endif
     // walls
 
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
     collider = EC_AddCollider(ent, gs);
@@ -144,7 +148,7 @@ void Game_BuildTestScene(GameState *gs)
         testArenaWidth, testArenaHeight / 2, 0.5f,
         ZCOLLIDER_FLAG_STATIC,
         ent->entId.index, ent->entId.iteration);
-
+#endif
 // end room
 
 /////////////////////////////////////////////////////////////
@@ -224,7 +228,7 @@ void Game_BuildTestScene(GameState *gs)
 
     //////////////////////////////////////////////////////////////////////////////
     // and again
-#if 1
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     ent->tag = 3;
     Transform_SetPosition(&ent->transform, 5, 7, 5);
