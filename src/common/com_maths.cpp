@@ -356,6 +356,37 @@ inline void M4x4_SetToIdentity(f32* m)
     m[M4x4_W3] = 1;
 }
 
+inline void M4x4_Transpose(f32* m)
+{
+    /*
+                    0   4   8   12
+                    1   5   9   13
+                    2   6   10  14
+                    3   7   11  15
+                    |   |   |   |
+    0   1   2   3-
+    4   5   6   7-
+    8   9   10  11-
+    12  13  14  15-
+    */
+    // Create a clone to copy values from
+    f32 c[16];
+    M4x4_Copy(m, c);
+    m[1] = c[4];
+    m[4] = c[1];
+    m[2] = c[8];
+    m[8] = c[2];
+    m[3] = c[12];
+    m[12] = c[3];
+    
+    m[6] = c[9];
+    m[9] = c[6];
+    m[7] = c[13];
+    m[13] = c[7];
+    m[11] = c[14];
+    m[14] = c[11];
+}
+
 inline void M4x4_SetX(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
 {
     m[M4x4_X0] = x0; m[M4x4_X1] = x1; m[M4x4_X2] = x2; m[M4x4_X3] = x3;
@@ -422,12 +453,24 @@ inline void M4x4_Multiply(f32* m0, f32* m1, f32* result)
     }
 }
 
+// Flip rotation and position. Keep others intact
 inline void M4x4_Invert(f32* src)
 {
-    for (int i = 0; i < 16; ++i)
-    {
-        src[i] = -src[i];
-    }
+    src[M4x4_X0] = -src[M4x4_X0];
+    src[M4x4_X1] = -src[M4x4_X1];
+    src[M4x4_X2] = -src[M4x4_X2];
+
+    src[M4x4_Y0] = -src[M4x4_Y0];
+    src[M4x4_Y1] = -src[M4x4_Y1];
+    src[M4x4_Y2] = -src[M4x4_Y2];
+
+    src[M4x4_Z0] = -src[M4x4_Z0];
+    src[M4x4_Z1] = -src[M4x4_Z1];
+    src[M4x4_Z2] = -src[M4x4_Z2];
+
+    src[M4x4_W0] = -src[M4x4_W0];
+    src[M4x4_W1] = -src[M4x4_W1];
+    src[M4x4_W2] = -src[M4x4_W2];
 }
 
 inline void M4x4_Copy(f32* src, f32* tar)
@@ -436,6 +479,30 @@ inline void M4x4_Copy(f32* src, f32* tar)
     tar[M4x4_Y0] = src[M4x4_Y0];  tar[M4x4_Y1] = src[M4x4_Y1];  tar[M4x4_Y2] = src[M4x4_Y2];  tar[M4x4_Y3] = src[M4x4_Y3];
     tar[M4x4_Z0] = src[M4x4_Z0];  tar[M4x4_Z1] = src[M4x4_Z1];  tar[M4x4_Z2] = src[M4x4_Z2];  tar[M4x4_Z3] = src[M4x4_Z3];
     tar[M4x4_W0] = src[M4x4_W0];  tar[M4x4_W1] = src[M4x4_W1];  tar[M4x4_W2] = src[M4x4_W2];  tar[M4x4_W3] = src[M4x4_W3];
+}
+
+// Clear axis columns
+inline void M4x4_ClearRotation(f32* src)
+{
+    src[M4x4_X0] = 1;
+    src[M4x4_X1] = 0;
+    src[M4x4_X2] = 0;
+    
+    src[M4x4_Y0] = 0;
+    src[M4x4_Y1] = 1;
+    src[M4x4_Y2] = 0;
+    
+    src[M4x4_Z0] = 0;
+    src[M4x4_Z1] = 0;
+    src[M4x4_Z2] = 1;
+}
+
+inline void M4x4_ClearPosition(f32* src)
+{
+    src[M4x4_W0] = 0;
+    src[M4x4_W1] = 0;
+    src[M4x4_W2] = 0;
+    src[M4x4_W3] = 1;
 }
 
 // inline f32 M4x4_GetScaleX(f32* m)

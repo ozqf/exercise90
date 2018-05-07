@@ -531,6 +531,7 @@ int CALLBACK WinMain(
                     g_checkRenderReloadTick = 0.1f;
                     if (Win32_CheckFileModified(renderModulePath, &g_renderModuleTimestamp))
                     {
+                        //DebugBreak();
                         if (Win32_LinkToRenderer() && app.isvalid)
                         {
                             app.AppRendererReloaded();

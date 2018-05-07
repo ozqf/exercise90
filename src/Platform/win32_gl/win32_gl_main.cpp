@@ -171,15 +171,15 @@ void R_Setup3DProjectionB(i32 fov)
 
 void R_SetupProjection(RenderScene* scene)
 {
-	switch (scene->projectionMode)
+	switch (scene->settings.projectionMode)
 	{
 		case RENDER_PROJECTION_MODE_3D:
 		{
-			R_Setup3DProjectionB(scene->fov);
+			R_Setup3DProjectionB(scene->settings.fov);
 		} break;
 		case RENDER_PROJECTION_MODE_ORTHOGRAPHIC:
 		{
-			R_SetupOrthoProjection(scene->orthographicHalfHeight);
+			R_SetupOrthoProjection(scene->settings.orthographicHalfHeight);
 		} break;
 		case RENDER_PROJECTION_MODE_IDENTITY:
 		{
@@ -188,11 +188,11 @@ void R_SetupProjection(RenderScene* scene)
 		} break;
 		case RENDER_PROJECTION_MODE_3D_OLD:
 		{
-			R_Setup3DProjectionA(scene->fov);
+			R_Setup3DProjectionA(scene->settings.fov);
 		} break;
 		default :
 		{
-			R_Setup3DProjectionB(scene->fov);
+			R_Setup3DProjectionB(scene->settings.fov);
 		} break;
 	}
 }
@@ -220,14 +220,164 @@ void R_BuildDisplayList()
 // ModelView
 // Standard 3D transformation
 ////////////////////////////////////////////////////////////////////
-void R_SetModelViewMatrix(Transform *view, Transform *model)
+
+// DO NOT CHANGE - This actually works!
+void R_SetViewModelMatrixByEuler(Transform* view, Transform* model)
 {
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
+	Vec3 camPos = view->pos;
+	Vec3 camRot = Transform_GetEulerAnglesDegrees(view);
+
+	glRotatef(-camRot.z, 0, 0, 1);
+	glRotatef(-camRot.x, 1, 0, 0);
+	glRotatef(-camRot.y, 0, 1, 0);
+	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+
+	// *slightly* improvement on horrible jitter from physics transforms.
+	// Yeah... also breaks projectile rotations so no ta.
+	//wd(model->rotation.cells, 0.0001f);
+	Vec3 modelRot = Transform_GetEulerAnglesDegrees(model);
+	
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(modelRot.y, 0, 1, 0);
+	glRotatef(modelRot.x, 1, 0, 0);
+	glRotatef(modelRot.z, 0, 0, 1);
+	glScalef(model->scale.x, model->scale.y, model->scale.z);
+}
+
+// BROKEN
+void R_SetViewModelMatrixDirect(Transform *view, Transform *model)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	 // Calculate model/view manually
+
+	// pull out complete camera transform to M4x4
+	// offset by model position.
+	// multiply by model rotation
+	M4x4 view4x4;
+	M4x4 mv4x4;
+	M4x4_SetToIdentity(mv4x4.cells);
+	Transform_ToM4x4(view, &view4x4);
+	M4x4_Copy(view4x4.cells, mv4x4.cells);
+	mv4x4.posX += model->pos.x;
+	mv4x4.posY += model->pos.y;
+	mv4x4.posZ += model->pos.z;
+	
+	M4x4 model4x4;
+	Transform_ToM4x4(model, &model4x4);
+
+	// Clear position, position has already been applied above
+	M4x4_SetPosition(model4x4.cells, 0, 0, 0);
+
+	M4x4_Multiply(mv4x4.cells, model4x4.cells, mv4x4.cells);
+
+	glLoadMatrixf((GLfloat*)mv4x4.cells);
+}
+
+// BROKEN
+void R_SetViewModelMatrixNaive(Transform *view, Transform *model)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// VIEW
+	M4x4 viewM;
+	Transform_ToM4x4(view, &viewM);
+	viewM.posX = -viewM.posX;
+	viewM.posY = -viewM.posY;
+	viewM.posZ = -viewM.posZ;
+
+	// MODEL
+	M4x4 modelM;
+	Transform_ToM4x4(model, &modelM);
+	M4x4 result;
+	M4x4_Multiply(viewM.cells, modelM.cells, result.cells);
+
+	// COMBINE
+	glLoadMatrixf((GLfloat*)result.cells);
+}
+
+// BROKEN
+void R_SetViewModelMatrixNaive2(Transform *view, Transform *model)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// --- VIEW ---
+
+	// Split matrices
+	M4x4 viewRot;
+	Transform_ToM4x4(view, &viewRot);
+	M4x4_ClearPosition(viewRot.cells);
+
+	M4x4 viewPos;
+	Transform_ToM4x4(view, &viewPos);
+	M4x4_ClearRotation(viewPos.cells);
+
+	// viewPos.posX = -viewPos.posX;
+	// viewPos.posY = -viewPos.posY;
+	// viewPos.posZ = -viewPos.posZ;
+	M4x4_Invert(viewPos.cells);
+	// M4x4_Invert(viewRot.cells);
+
+	// MODEL
+	M4x4 modelRot;
+	M4x4 modelPos;
+	Transform_ToM4x4(model, &modelRot);
+	M4x4_ClearPosition(modelRot.cells);
+
+	Transform_ToM4x4(model, &modelPos);
+	M4x4_ClearRotation(modelPos.cells);
+	
+	// COMBINE
+	M4x4 result;
+	M4x4_SetToIdentity(result.cells);
+	
+	M4x4_Multiply(result.cells, viewRot.cells, result.cells);
+	M4x4_Multiply(result.cells, viewPos.cells, result.cells);
+	M4x4_Multiply(result.cells, modelPos.cells, result.cells);
+	M4x4_Multiply(result.cells, modelRot.cells, result.cells);
+	
+	
+	
+	glLoadMatrixf((GLfloat*)result.cells);
+}
+
+void R_SetModelViewMatrix(RenderSceneSettings* settings, Transform *view, Transform *model)
+{
+	if (settings->viewModelMode > 3) { settings->viewModelMode = 0; }
+
+	if (settings->viewModelMode == 1)
+	{
+		R_SetViewModelMatrixDirect(view, model);
+		//R_SetViewModelMatrixByEuler(view, model);
+	}
+	else if (settings->viewModelMode == 2)
+	{
+		R_SetViewModelMatrixNaive(view, model);
+		//R_SetViewModelMatrixByEuler(view, model);
+	}
+	else if (settings->viewModelMode == 3)
+	{
+		R_SetViewModelMatrixNaive2(view, model);
+		//R_SetViewModelMatrixByEuler(view, model);
+	}
+	else
+	{
+		//R_SetViewModelMatrixDirect(view, model);
+		R_SetViewModelMatrixByEuler(view, model);
+	}
+	
 	// TODO: Figure out how to construct ViewModel matrix entirely from
 	// matrices with no euler angles as they are causing awful jittering
 	// with transforms from physics engine
+#if 0
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-#if 0 // Calculate model/view manually
+	 // Calculate model/view manually
 
 	// pull out complete camera transform to M4x4
 	// offset by model position.
@@ -313,7 +463,7 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	glLoadMatrixf((GLfloat*)cells);
 #endif
 
-#if 1 // Extra pos/rot/scale from matrix - broken... ?
+#if 0 // Extra pos/rot/scale from matrix - broken... ?
 
 	Vec3 camPos = view->pos;
 	Vec3 camRot = Transform_GetEulerAnglesDegrees(view);
@@ -347,7 +497,7 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 		//glRotatef(modelRot.z, 0, 0, 1);
 	}
 #endif
-#if 1
+#if 0
 	glRotatef(modelRot.y, 0, 1, 0);
 	glRotatef(modelRot.x, 1, 0, 0);
 	glRotatef(modelRot.z, 0, 0, 1);
@@ -386,7 +536,7 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 // ModelView - Billboard
 // Faces the camera (more or less)
 ////////////////////////////////////////////////////////////////////
-void R_SetModelViewMatrix_Billboard(Transform *view, Transform *model)
+void R_SetModelViewMatrix_Billboard(RenderSceneSettings* settings, Transform *view, Transform *model)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -587,10 +737,10 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, 
 	glEnd();
 }
 
-void R_RenderPrimitive(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderPrimitive(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
-	R_SetModelViewMatrix(camera, objTransform);
+	R_SetModelViewMatrix(settings, camera, objTransform);
 	//R_SetupTestTexture();
 	RendObj_Primitive* prim = &obj->data.primitive;
 	switch (prim->primitiveType)
@@ -626,11 +776,11 @@ glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
-void R_RenderLine(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderLine(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
 	//DebugBreak();
-	R_SetModelViewMatrix(camera, objTransform);
+	R_SetModelViewMatrix(settings, camera, objTransform);
 	RendObj_Line* line = &obj->data.line;
 	//glDisable(GL_DEPTH_TEST);
 	//glTranslatef(0.0f,0.0f,-10.0f);
@@ -670,7 +820,7 @@ void R_RenderAsciChar(RendObj* obj)
 	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
-void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 
@@ -692,17 +842,17 @@ void R_RenderAsciCharArray(Transform* camera, Transform* objTransform, RendObj* 
 	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
-void R_RenderBillboard(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
-	R_SetModelViewMatrix_Billboard(camera, objTransform);
+	R_SetModelViewMatrix_Billboard(settings, camera, objTransform);
 	RendObj_Billboard* b = &obj->data.billboard;
 	R_SetupTestTexture(b->textureIndex);
 	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);
 }
 
-void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderSprite(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	//DebugBreak();
 	glEnable(GL_TEXTURE_2D);
@@ -742,7 +892,7 @@ void R_RenderSprite(Transform* camera, Transform* objTransform, RendObj* obj)
 	}
 }
 
-void R_RenderMesh(Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	RendObj_ColouredMesh* meshRend = &obj->data.mesh;
 	AssertAlways(meshRend->mesh != NULL);
@@ -752,7 +902,7 @@ void R_RenderMesh(Transform* camera, Transform* objTransform, RendObj* obj)
 
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(meshRend->r, meshRend->g, meshRend->b);
-	R_SetModelViewMatrix(camera, objTransform);
+	R_SetModelViewMatrix(settings, camera, objTransform);
 	R_SetupTestTexture(meshRend->textureIndex);
 	
 	//f32* meshVerts = mesh->verts;
@@ -764,38 +914,38 @@ void R_RenderMesh(Transform* camera, Transform* objTransform, RendObj* obj)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void R_RenderEntity(Transform* camera, RenderListItem* item)
+void R_RenderEntity(RenderSceneSettings* settings, Transform* camera, RenderListItem* item)
 {
 	switch(item->obj.type)
 	{
 		case RENDOBJ_TYPE_MESH:
 		{
-			R_RenderMesh(camera, &item->transform,  &item->obj);
+			R_RenderMesh(settings, camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_SPRITE:
 		{
-			R_RenderSprite(camera, &item->transform,  &item->obj);
+			R_RenderSprite(settings, camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_LINE:
 		{
-			R_RenderLine(camera, &item->transform,  &item->obj);
+			R_RenderLine(settings, camera, &item->transform,  &item->obj);
 		} break;
 		
 		case RENDOBJ_TYPE_PRIMITIVE:
 		{
-			R_RenderPrimitive(camera, &item->transform,  &item->obj);
+			R_RenderPrimitive(settings, camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_ASCI_CHAR_ARRAY:
 		{
-			R_RenderAsciCharArray(camera, &item->transform,  &item->obj);
+			R_RenderAsciCharArray(settings, camera, &item->transform,  &item->obj);
 		} break;
 		
 		case RENDOBJ_TYPE_BILLBOARD:
 		{
-			R_RenderBillboard(camera, &item->transform,  &item->obj);
+			R_RenderBillboard(settings, camera, &item->transform,  &item->obj);
 		} break;
 
 		case RENDOBJ_TYPE_ASCI_CHAR:
@@ -816,7 +966,7 @@ void R_RenderScene(RenderScene* scene)
 			scene->sceneItems[i].obj.flags |= RENDOBJ_FLAG_DEBUG;
 			//DebugBreak();
 		}
-        R_RenderEntity(&scene->cameraTransform, &scene->sceneItems[i]);
+        R_RenderEntity(&scene->settings, &scene->cameraTransform, &scene->sceneItems[i]);
     }
 
 	// for (u32 i = 0; i < scene->numUIObjects; ++i)

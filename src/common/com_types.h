@@ -277,14 +277,23 @@ struct RenderListItem
     RendObj obj;
 };
 
+#define VIEW_MODEL_MODE_EULER 0
+#define VIEW_MODEL_MODE_DIRECT 1
+
+struct RenderSceneSettings
+{
+    i32 projectionMode = 0;
+    f32 orthographicHalfHeight = 8;
+    i32 fov = 90;
+    i32 viewModelMode = 0;
+};
+
 // Scene container for render call each frame
 struct RenderScene
 {    
     Transform cameraTransform;
     
-    i32 projectionMode;
-    f32 orthographicHalfHeight;
-    i32 fov;
+    RenderSceneSettings settings;
 
     RenderListItem* sceneItems;
     u32 numObjects;
@@ -301,7 +310,7 @@ struct InputTick
     char rollLeft, rollRight;
     char escape;
     char reset;
-    char debug_cycleTexture;
+    char debug_cycle;
     char debug_break_game;
 
     Vec3 degrees = {};

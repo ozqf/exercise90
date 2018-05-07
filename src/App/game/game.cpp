@@ -41,7 +41,7 @@ void Game_SpawnTestBlock(GameState* gs, u8 invisible)
 void Game_BuildTestScene(GameState *gs)
 {
     Ent *ent;
-    //EC_Renderer *renderer;
+    EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
     //EC_ActorMotor *motor;
@@ -51,9 +51,9 @@ void Game_BuildTestScene(GameState *gs)
     // Init gs and component lists
     *gs = {};
     Transform_SetToIdentity(&gs->cameraTransform);
-    //tTransform_SetPosition(&gs->cameraTransform, 0, 5, 18);
-    //Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
-    Transform_SetPosition(&gs->cameraTransform, 0, 1, 0);
+    //Transform_SetPosition(&gs->cameraTransform, 0, 5, 18);
+    Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
+    //Transform_SetPosition(&gs->cameraTransform, 0, 1, 0);
 
     // TODO: Rotation of camera in 'walk' mode is taken from
     // the input tick, each frame, so doing manual rotations of the
@@ -129,6 +129,11 @@ void Game_BuildTestScene(GameState *gs)
     p = {};
     p.y = -((testArenaHeight / 2) + 0.5);
     ent->transform.pos.y = p.y;
+
+    renderer = EC_AddRenderer(ent, gs);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
+    Transform_SetScale(&ent->transform, 48, 1, 48);
+
     collider = EC_AddCollider(ent, gs);
 	collider->size = { 48, 1, 48 };
     collider->shapeId = Phys_CreateBox(

@@ -27,9 +27,9 @@ void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObject
     scene->numObjects = 0;
     scene->maxObjects = maxObjects;
     scene->sceneItems = objectArray;
-    scene->fov = fov;
-    scene->projectionMode = projectionMode;
-    scene->orthographicHalfHeight = orthographicHalfHeight;
+    scene->settings.fov = fov;
+    scene->settings.projectionMode = projectionMode;
+    scene->settings.orthographicHalfHeight = orthographicHalfHeight;
 }
 
 void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects)
@@ -322,6 +322,25 @@ void App_ReadInput(InputEvent ev)
         case Z_INPUT_CODE_MOUSE_MOVE_Y:
         {
             g_inputTick.mouseMovement[1] = ev.value;
+        } break;
+
+        case Z_INPUT_CODE_V:
+        {
+            if (ev.value == 1 && g_inputTick.debug_cycle == 0)
+            {
+                g_inputTick.debug_cycle = 1;
+            }
+            else if (ev.value == 0 && g_inputTick.debug_cycle == 1)
+            {
+                
+                g_inputTick.debug_cycle = 0;
+                g_worldScene.settings.viewModelMode++;
+                // if (g_worldScene.settings.viewModelMode > 1)
+                // {
+                //     g_worldScene.settings.viewModelMode = 0;
+                // }
+            }
+            
         } break;
     }
 }
