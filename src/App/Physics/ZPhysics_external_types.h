@@ -19,6 +19,7 @@ struct ZShapeDef
 {
 	u32 type;
 	u32 flags;
+	u16 mask;
 	f32 pos[3];
 };
 

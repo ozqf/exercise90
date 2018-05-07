@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////
 
 
-int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u16 ownerIteration)
+int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u16 flags, u16 mask, u16 ownerId, u16 ownerIteration)
 {
     ZSphereDef def = {};
     def.base.type = ZCOLLIDER_TYPE_SPHERE;
@@ -15,6 +15,7 @@ int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u
     def.base.pos[1] = y;
     def.base.pos[2] = z;
     def.base.flags = flags;
+    def.base.mask = mask;
     def.radius = radius;
 
     PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, def);
@@ -23,7 +24,7 @@ int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 ownerId, u
     return h->id;
 }
 
-int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u32 flags, u16 ownerId, u16 ownerIteration)
+int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u32 flags, u16 mask, u16 ownerId, u16 ownerIteration)
 {
     ZBoxDef def = {};
     def.base.type = ZCOLLIDER_TYPE_CUBOID;
@@ -31,6 +32,7 @@ int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSi
     def.base.pos[1] = y;
     def.base.pos[2] = z;
     def.base.flags = flags;
+    def.base.mask = mask;
     def.halfSize[0] = halfSizeX;
     def.halfSize[1] = halfSizeY;
     def.halfSize[2] = halfSizeZ;
@@ -41,13 +43,14 @@ int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSi
     return h->id;
 }
 
-i32 Phys_CreateInfinitePlane(f32 y, u16 ownerId, u16 ownerIteration)
+i32 Phys_CreateInfinitePlane(f32 y, u16 ownerId, u16 mask, u16 ownerIteration)
 {
     ZShapeDef def = {};
     def.type = ZCOLLIDER_TYPE_INFINITE_PLANE;
     def.pos[0] = 0;
     def.pos[1] = y;
-    def.pos[2] = 0;
+    def.pos[2] = 0;;
+    def.mask = mask;
     PhysBodyHandle* h = Phys_CreateBulletInfinitePlane(&g_world, def);
     h->ownerId = ownerId;
     h->ownerIteration = ownerIteration;

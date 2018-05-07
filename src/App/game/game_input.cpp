@@ -5,7 +5,7 @@
 #define GAME_INPUT_FULL_FREEDOM 0
 #define GAME_INPUT_ON_FOOT 1
 
-internal u8 GAME_INPUT_MODE = 0;
+internal u8 GAME_INPUT_MODE = 1;
 
 ////////////////////////////////////////////////////////////////////////////
 // Full freedom

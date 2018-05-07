@@ -88,6 +88,7 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
 
     handle->shape = new btBoxShape(btVector3(def.halfSize[0], def.halfSize[1], def.halfSize[2]));
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])));
+    handle->mask = def.base.mask;
 
     btScalar mass;
     if (def.base.flags & ZCOLLIDER_FLAG_STATIC)
@@ -123,7 +124,7 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
     handle->rigidBody->setUserIndex(handle->id);
     handle->rigidBody->setCollisionFlags(btFlags);
 
-    world->dynamicsWorld->addRigidBody(handle->rigidBody);
+    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.base.mask, def.base.mask);
 
     return handle;
 }
@@ -146,6 +147,8 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
             btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])
             )
         );
+    handle->mask = def.base.mask;
+    
     
     btScalar mass;
     if (def.base.flags & ZCOLLIDER_FLAG_STATIC)
@@ -176,7 +179,7 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     handle->rigidBody = new btRigidBody(sphereBodyCI);
     handle->rigidBody->setUserIndex(handle->id);
     handle->rigidBody->setCollisionFlags(btFlags);
-    world->dynamicsWorld->addRigidBody(handle->rigidBody);
+    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.base.mask, def.base.mask);
 
     // DONE
 #if 0
@@ -210,11 +213,12 @@ PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef de
 
     handle->shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, def.pos[1], 0)));
+    handle->mask = def.mask;
     btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, handle->motionState, handle->shape, btVector3(0, 0, 0));
     //groundRigidBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
     //groundRigidBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
     handle->rigidBody = new btRigidBody(groundRigidBodyCI);
-    world->dynamicsWorld->addRigidBody(handle->rigidBody);
+    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.mask, def.mask);
     handle->rigidBody->setUserIndex(handle->id);
     return handle;
 }

@@ -4,6 +4,9 @@
 
 #include "game_intersection_test.cpp"
 
+#define COLLISION_DEFAULT_MASK (1 << 0)
+#define COLLISION_LAYER_WORLD (1 << 0)
+
 void Game_SpawnTestBlock(GameState* gs, u8 invisible)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
@@ -33,7 +36,8 @@ void Game_SpawnTestBlock(GameState* gs, u8 invisible)
         ent->transform.pos.y,
         ent->transform.pos.z,
         size / 2, size / 2, size / 2,
-        0,+
+        0,
+        COLLISION_DEFAULT_MASK,
         ent->entId.index,
         ent->entId.iteration);
 }
@@ -140,6 +144,7 @@ void Game_BuildTestScene(GameState *gs)
         p.x, p.y, p.z,
         48 / 2, 0.5, 48 / 2,
         ZCOLLIDER_FLAG_STATIC,
+        COLLISION_DEFAULT_MASK,
         ent->entId.index, ent->entId.iteration);
 #endif
     // walls
@@ -204,6 +209,25 @@ void Game_BuildTestScene(GameState *gs)
         0, 0, 0,
         0.5, 1, 0.5,
         ZCOLLIDER_FLAG_NO_ROTATION,
+        COLLISION_DEFAULT_MASK,
+        ent->entId.index, ent->entId.iteration);
+
+    // motor = EC_AddActorMotor(ent, gs);
+    // motor->speed = 5;
+
+    gs->playerEntityIndex = ent->entId.index;
+#endif
+    /////////////////////////////////////////////////////////////
+#if 1
+    ent = Ent_GetFreeEntity(&gs->entList);
+    Transform_SetPosition(&ent->transform, 4, 0, 0);
+    collider = EC_AddCollider(ent, gs);
+    collider->size = {1, 2, 1};
+    collider->shapeId = Phys_CreateBox(
+        4, 2, 0,
+        0.5, 1, 0.5,
+        ZCOLLIDER_FLAG_NO_ROTATION,
+        COLLISION_DEFAULT_MASK,
         ent->entId.index, ent->entId.iteration);
 
     // motor = EC_AddActorMotor(ent, gs);
