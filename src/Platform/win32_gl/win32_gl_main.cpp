@@ -222,9 +222,81 @@ void R_BuildDisplayList()
 ////////////////////////////////////////////////////////////////////
 void R_SetModelViewMatrix(Transform *view, Transform *model)
 {
+	// TODO: Figure out how to construct ViewModel matrix entirely from
+	// matrices with no euler angles as they are causing awful jittering
+	// with transforms from physics engine
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+#if 0 // Calculate model/view manually
 
+	// pull out complete camera transform to M4x4
+	// offset by model position.
+	// multiply by model rotation
+	M4x4 view4x4;
+	M4x4 mv4x4;
+	M4x4_SetToIdentity(mv4x4.cells);
+	Transform_ToM4x4(view, &view4x4);
+	M4x4_Copy(view4x4.cells, mv4x4.cells);
+	mv4x4.posX += model->pos.x;
+	mv4x4.posY += model->pos.y;
+	mv4x4.posZ += model->pos.z;
+	
+
+	M4x4 model4x4;
+	Transform_ToM4x4(model, &model4x4);
+
+	// Clear position, position has already been applied above
+	M4x4_SetPosition(model4x4.cells, 0, 0, 0);
+
+	M4x4_Multiply(mv4x4.cells, model4x4.cells, mv4x4.cells);
+
+	glLoadMatrixf((GLfloat*)mv4x4.cells);
+	
+
+#endif
+	// VIEW
+#if 0 // Trying to do view without euler angles
+	// // ModelView_M = View_M * Model_M
+	//f32 viewM[16];
+	M4x4 viewM;
+	Transform_ToM4x4(view, &viewM);
+	//Vec3 angles;
+	viewM.posX = -viewM.posX;
+	viewM.posY = -viewM.posY;
+	viewM.posZ = -viewM.posZ;
+	//M4x4_Invert(viewM.cells);
+#endif
+#if 0 // View via euler angles.
+	M4x4 viewM;
+	M4x4_SetToIdentity(viewM.cells);
+	Vec3 camRot = Transform_GetEulerAngles(view);
+	Vec3 camPos = view->pos;
+	M4x4_RotateZ(viewM.cells, -camRot.z);
+	M4x4_RotateX(viewM.cells, -camRot.x);
+	M4x4_RotateY(viewM.cells, -camRot.y);
+	M4x4_SetPosition(viewM.cells, -camPos.x, -camPos.y, -camPos.z);
+	// glRotatef(-camRot.z, 0, 0, 1);
+	// glRotatef(-camRot.x, 1, 0, 0);
+	// glRotatef(-camRot.y, 0, 1, 0);
+	// glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+#endif
+
+#if 0
+	// MODEL
+	//f32 modelM[16];
+	M4x4 modelM;
+	Transform_ToM4x4(model, &modelM);
+	//f32 result[16];
+	M4x4 result;
+	M4x4_Multiply(viewM.cells, modelM.cells, result.cells);
+	//M4x4_Multiply(modelM.cells, viewM.cells, result.cells);
+
+	// COMBINE
+	glLoadMatrixf((GLfloat*)result.cells);
+#endif
+
+
+#if 1 // Calculate model/view using opengl fixed function operations
 	// http://www.songho.ca/opengl/gl_transform.html
 	// First, transform the camera (viewing matrix) from world space to eye space
 	// Notice all values are negated, because we move the whole scene with the
@@ -249,21 +321,38 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
     // f32 fAngY = atan2f(openglM[8], openglM[10]);
     // f32 fAngX = -asinf(openglM[9]);
 	//f32* m = view->
-	
+
 	glRotatef(-camRot.z, 0, 0, 1);
 	glRotatef(-camRot.x, 1, 0, 0);
 	glRotatef(-camRot.y, 0, 1, 0);
 	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
 
+	M3x3_ClearTinyValues(model->rotation.cells, 0.0001f);
 	Vec3 modelRot = Transform_GetEulerAnglesDegrees(model);
 	
 	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+#if 0
+	if (modelRot.y != ZNaN())
+	{
+		//glRotatef(modelRot.y, 0, 1, 0);
+	}
+	
+	if (modelRot.x != ZNaN())
+	{
+		//glRotatef(modelRot.x, 1, 0, 0);
+	}
+	
+	if (modelRot.z != ZNaN())
+	{
+		//glRotatef(modelRot.z, 0, 0, 1);
+	}
+#endif
+#if 1
 	glRotatef(modelRot.y, 0, 1, 0);
 	glRotatef(modelRot.x, 1, 0, 0);
 	glRotatef(modelRot.z, 0, 0, 1);
-
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
-
+#endif
 // 	char buf[512];
 // 	sprintf_s(buf, 512,
 // "\nView: Rot: %3.3f, %3.3f, %3.3f\nModel: Rot: %3.3f, %3.3f, %3.3f",
@@ -290,6 +379,7 @@ void R_SetModelViewMatrix(Transform *view, Transform *model)
 	// transform the object (model matrix)
 	// The result of GL_MODELVIEW matrix will be:
 	// ModelView_M = View_M * Model_M
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////

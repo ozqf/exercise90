@@ -12,6 +12,7 @@ inline void Transform_RotateZ(Transform* t, f32 radiansZ);
 
 inline void Transform_SetRotation(Transform* t, f32 radiansX, f32 radiansY, f32 radiansZ);
 
+inline Vec3 Transform_GetEulerAnglesDegrees(Transform* t);
 inline Vec3 Transform_GetEulerAngles(Transform* t);
 
 /////////////////////////////////////////////////////

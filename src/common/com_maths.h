@@ -7,7 +7,7 @@
 #define RAD2DEG 57.2958f
 
 
-#define ZABS(value) { if (value < ) return -value; }
+#define ZABS(value) (value = value >= 0 ? value : -value )
 #define ZMIN(x, y) ((x) < (y) ? (x) : (y))
 #define ZMAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -102,9 +102,9 @@ inline void M3x3_SetY(f32* m, f32 y0, f32 y1, f32 y2);
 inline void M3x3_SetZ(f32* m, f32 z0, f32 z1, f32 z2);
 inline void M3x3_Multiply(f32* a, f32* b, f32* result);
 inline void M3x3_Copy(f32* src, f32* tar);
-inline void M3x3_RotateX(f32* m, f32 degreesY);
+inline void M3x3_RotateX(f32* m, f32 degreesX);
 inline void M3x3_RotateY(f32* m, f32 degreesY);
-inline void M3x3_RotateZ(f32* m, f32 degreesY);
+inline void M3x3_RotateZ(f32* m, f32 degreesZ);
 inline f32 M3x3_GetAngleX(f32* m);
 inline f32 M3x3_GetAngleY(f32* m);
 inline f32 M3x3_GetAngleZ(f32* m);

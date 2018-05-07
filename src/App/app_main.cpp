@@ -14,6 +14,11 @@ holding game/menu state and calling game update when required
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
 #include "../Platform/win32_system_include.h"
 
+void App_ErrorStop()
+{
+    DebugBreak();
+}
+
 void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects,
     i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {

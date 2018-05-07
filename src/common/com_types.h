@@ -126,7 +126,7 @@ struct M4x4
         /* Careful! Column order!
             X   Y   Z   W
             0   4   8   12
-            1   5   9   13
+            1   5   9   13 
             2   6   10  14
             3   7   11  15
             */

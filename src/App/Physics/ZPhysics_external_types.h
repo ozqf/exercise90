@@ -86,5 +86,6 @@ struct ZTransformUpdateEvent
 	u16 ownerId;
 	u16 ownerIteration;
 	f32 matrix[16];
+	f32 rot[3];
 };
 #endif

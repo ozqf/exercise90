@@ -1,6 +1,7 @@
 #pragma once
 
 #include "com_module.h"
+#include <stdlib.h>
 #include <math.h>
 
 internal i32 g_z_inf = 0x7F800000;
@@ -30,6 +31,11 @@ static inline f32 COM_CapAngleDegrees(f32 angle)
     return angle;
 }
 
+static inline f32 COM_Randf32()
+{
+    return (f32)rand() / (f32)RAND_MAX;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 3 OPERATIONS
@@ -38,6 +44,11 @@ static inline f32 COM_CapAngleDegrees(f32 angle)
 inline f32 Vec3_Magnitude(Vec3* v)
 {
     return (f32)sqrt((f32)(v->x * v->x) + (v->y * v->y) + (v->z * v->z));
+}
+
+inline f32 Vec3_Magnitudef(f32 x, f32 y, f32 z)
+{
+	return (f32)sqrt((f32)(x * x) + (y * y) + (z * z));
 }
 
 inline void Vec3_Normalise(Vec3* v)
@@ -264,6 +275,14 @@ inline Vec3 M3x3_GetEulerAnglesDegrees(f32* m)
     result.y = ((f32)atan2(m[8], m[10])) * RAD2DEG;
     result.z = ((f32)atan2(m[1], m[5])) * RAD2DEG;*/
 
+    if (m[M3x3_Z1]> 1.0)
+    {
+        m[M3x3_Z1] = 1.0f;
+    }
+    if (m[M3x3_Z1] < -1.0)
+    {
+        m[M3x3_Z1] = -1.0f;
+    }
 	result.x = (f32)-asinf(m[M3x3_Z1]) * RAD2DEG;
 	result.y = ((f32)atan2(m[M3x3_Z0], m[M3x3_Z2])) * RAD2DEG;
 	result.z = ((f32)atan2(m[M3x3_X1], m[M3x3_Y1])) * RAD2DEG;
@@ -295,6 +314,21 @@ inline void M3x3_CopyFromM4x4(f32* m3x3, f32* m4x4)
     m3x3[M3x3_Z2] = m4x4[M4x4_Z2];
 }
 
+inline void M3x3_ClearTinyValues(f32* m, f32 cap)
+{
+    if (ZABS(m[M3x3_X0]) < cap) { m[M3x3_X0] = 0; }
+    if (ZABS(m[M3x3_X1]) < cap) { m[M3x3_X1] = 0; }
+    if (ZABS(m[M3x3_X2]) < cap) { m[M3x3_X2] = 0; }
+
+    if (ZABS(m[M3x3_Y0]) < cap) { m[M3x3_Y0] = 0; }
+    if (ZABS(m[M3x3_Y1]) < cap) { m[M3x3_Y1] = 0; }
+    if (ZABS(m[M3x3_Y2]) < cap) { m[M3x3_Y2] = 0; }
+
+    if (ZABS(m[M3x3_Z0]) < cap) { m[M3x3_Z0] = 0; }
+    if (ZABS(m[M3x3_Z1]) < cap) { m[M3x3_Z1] = 0; }
+    if (ZABS(m[M3x3_Z2]) < cap) { m[M3x3_Z2] = 0; }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // M4x4 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
@@ -311,8 +345,8 @@ inline void M4x4_SetToIdentity(f32* m)
     m[M4x4_Y2] = 0;
     m[M4x4_Y3] = 0;
 
-    m[M4x4_Z0] = 1;
-    m[M4x4_Z1] = 1;
+    m[M4x4_Z0] = 0;
+    m[M4x4_Z1] = 0;
     m[M4x4_Z2] = 1;
     m[M4x4_Z3] = 0;
 
@@ -388,6 +422,14 @@ inline void M4x4_Multiply(f32* m0, f32* m1, f32* result)
     }
 }
 
+inline void M4x4_Invert(f32* src)
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        src[i] = -src[i];
+    }
+}
+
 inline void M4x4_Copy(f32* src, f32* tar)
 {
     tar[M4x4_X0] = src[M4x4_X0];  tar[M4x4_X1] = src[M4x4_X1];  tar[M4x4_X2] = src[M4x4_X2];  tar[M4x4_X3] = src[M4x4_X3];
@@ -438,38 +480,38 @@ inline void M4x4_Copy(f32* src, f32* tar)
 //     Vec4_SetMagnitude(&mat->zAxis, z);
 // }
 
-inline void M4x4_RotateX(f32* m, f32 degreesY)
+inline void M4x4_RotateX(f32* m, f32 radiansX)
 {
 	M4x4 rotM = {};
     rotM.xAxisX = 1;
-    rotM.yAxisY = (f32)cos(degreesY * DEG2RAD);
-    rotM.yAxisZ = (f32)sin(degreesY * DEG2RAD);
-    rotM.zAxisY = (f32)-sin(degreesY * DEG2RAD);
-    rotM.zAxisZ = (f32)cos(degreesY * DEG2RAD);
+    rotM.yAxisY = (f32)cos(radiansX);
+    rotM.yAxisZ = (f32)sin(radiansX);
+    rotM.zAxisY = (f32)-sin(radiansX);
+    rotM.zAxisZ = (f32)cos(radiansX);
     rotM.posW = 1;
     M4x4_Multiply(m, rotM.cells, m);
 }
 
-inline void M4x4_RotateY(f32* m, f32 degreesY)
+inline void M4x4_RotateY(f32* m, f32 radiansY)
 {
 	M4x4 rotM = {};
     rotM.yAxisY = 1;
-    rotM.xAxisX = (f32)cos(degreesY * DEG2RAD);
-    rotM.xAxisZ = (f32)-sin(degreesY * DEG2RAD);
-    rotM.zAxisX = (f32)sin(degreesY * DEG2RAD);
-    rotM.zAxisZ = (f32)cos(degreesY * DEG2RAD);
+    rotM.xAxisX = (f32)cos(radiansY);
+    rotM.xAxisZ = (f32)-sin(radiansY);
+    rotM.zAxisX = (f32)sin(radiansY);
+    rotM.zAxisZ = (f32)cos(radiansY);
     rotM.posW = 1;
     M4x4_Multiply(m, rotM.cells, m);
 }
 
-inline void M4x4_RotateZ(f32* m, f32 degreesY)
+inline void M4x4_RotateZ(f32* m, f32 radiansZ)
 {
 	M4x4 rotM = {};
     rotM.zAxisZ = 1;
-    rotM.xAxisX = (f32)cos(degreesY * DEG2RAD);
-    rotM.xAxisY = (f32)sin(degreesY * DEG2RAD);
-    rotM.yAxisX = (f32)-sin(degreesY * DEG2RAD);
-    rotM.yAxisY = (f32)cos(degreesY * DEG2RAD);
+    rotM.xAxisX = (f32)cos(radiansZ);
+    rotM.xAxisY = (f32)sin(radiansZ);
+    rotM.yAxisX = (f32)-sin(radiansZ);
+    rotM.yAxisY = (f32)cos(radiansZ);
     rotM.posW = 1;
     M4x4_Multiply(m, rotM.cells, m);
 }
@@ -536,10 +578,10 @@ inline Vec3 M4x4_GetEulerAnglesDegrees(f32* m)
     return result;
 }
 
-inline void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
-{
-    // TODO: Implement
-}
+// inline void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
+// {
+//     // TODO: Implement... or not. euler angles suck :/
+// }
 
 
 inline void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)

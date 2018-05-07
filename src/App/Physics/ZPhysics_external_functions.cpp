@@ -152,7 +152,7 @@ void Phys_ReadCommands(MemoryBlock* commandBuffer)
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
 {
     ++world->debug.stepCount;
-    world->dynamicsWorld->stepSimulation(deltaTime, 10);
+    world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
     u8* writePosition = (u8*)eventBuffer->ptrMemory;
     i32 len = world->bodies.capacity;
@@ -160,6 +160,7 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
     {
         PhysBodyHandle* h = &world->bodies.items[i];
         if (h->inUse == FALSE) { continue; }
+		if (!h->rigidBody->getActivationState()) { continue; }
         Assert(h->motionState != NULL);
 
         // Get position
@@ -171,13 +172,58 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
         tUpdate.type = 1;
         tUpdate.ownerId = h->ownerId;
 		tUpdate.ownerIteration = h->ownerIteration;
-        
-        btScalar openglM[16];
-        t.getOpenGLMatrix(openglM);
-        for (i32 j = 0; j < 16; ++j)
-        {
-            tUpdate.matrix[j] = openglM[j];
-        }
+
+		btScalar openglM[16];
+		t.getOpenGLMatrix(openglM);
+		for (i32 j = 0; j < 16; ++j)
+		{
+			tUpdate.matrix[j] = openglM[j];
+		}
+
+		/*btVector3 pos = t.getOrigin();
+		tUpdate.matrix[12] = pos.x();
+		tUpdate.matrix[13] = pos.y();
+		tUpdate.matrix[14] = pos.z();*/
+
+#if 0	// Copy rotation via calculating euler angles in opengl matrix
+		t.getOpenGLMatrix(openglM);
+		
+		f32 fAngZ = atan2f(openglM[1], openglM[5]);
+		f32 fAngY = atan2f(openglM[8], openglM[10]);
+		f32 fAngX = -asinf(openglM[9]);
+		tUpdate.rot[0] = fAngX;// *RAD2DEG;
+		tUpdate.rot[1] = fAngY;// * RAD2DEG;
+		tUpdate.rot[2] = fAngZ;// * RAD2DEG;
+#endif
+
+		
+#if 0	// Rotation copy to matrix via euler angles into bottom row
+		btMatrix3x3& rot = t.getBasis();
+		btScalar yaw, pitch, roll;
+		rot.getEulerYPR(yaw, pitch, roll);
+		tUpdate.matrix[3] = roll;
+		tUpdate.matrix[7] = pitch;
+		tUpdate.matrix[11] = yaw;
+#endif
+
+#if 0	// Rotation copy to matrix directly
+		btMatrix3x3& rot = t.getBasis();
+		btVector3 xAxis = rot.getColumn(0);
+		btVector3 yAxis = rot.getColumn(1);
+		btVector3 zAxis = rot.getColumn(2);
+
+		tUpdate.matrix[0] = xAxis.x();
+		tUpdate.matrix[1] = xAxis.y();
+		tUpdate.matrix[2] = xAxis.z();
+
+		tUpdate.matrix[4] = yAxis.x();
+		tUpdate.matrix[5] = yAxis.y();
+		tUpdate.matrix[6] = yAxis.z();
+
+		tUpdate.matrix[8] = zAxis.x();
+		tUpdate.matrix[9] = zAxis.y();
+		tUpdate.matrix[10] = zAxis.z();
+#endif        
         COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
     }
     

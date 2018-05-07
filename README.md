@@ -33,7 +33,8 @@ Move the engine and game to using commands.
 * The game is 'playing back' commands it is given, either from single player, a server or a recorded demo file.
 
 ### Bugs or fundamental issues
-* **Calculation of Foward/Up Vectors is wrong (added 2018/4/2)** - This was hacked in someway to make movement work. Now needs to be unhacked, as it is preventing the casting of rays out of the camera.
+* **Calculate View-Model matrix in renderer manually** - View model matrix is currently constructed by extracting euler angles from transform rotations then applying those angles to opengl's internal matrix. This mostly works but causes awful jittering when transforms come from the physics engine.
+* Done with move to 3x3 rotation matrices in transforms *Calculation of Foward/Up Vectors is wrong (added 2018/4/2)* - This was hacked in someway to make movement work. Now needs to be unhacked, as it is preventing the casting of rays out of the camera.
 * **Game requires asset files to launch (added 2018/4/2)** - Some very basic assets should be baked into the code for such early development work. Only thing that cannot be procedurally generated is the console char sheet. So that first.
 
 ### Game

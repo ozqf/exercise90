@@ -5,7 +5,7 @@
 #define GAME_INPUT_FULL_FREEDOM 0
 #define GAME_INPUT_ON_FOOT 1
 
-internal u8 GAME_INPUT_MODE = 1;
+internal u8 GAME_INPUT_MODE = 0;
 
 ////////////////////////////////////////////////////////////////////////////
 // Full freedom
@@ -40,7 +40,7 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 	if (input->rollRight) { rotation.z += -1 * PLAYER_ROTATION_SPEED; }
 	//rotation.z *= DEG2RAD;
 	rotation.z *= time->deltaTime;
-
+	
 	Transform_RotateZ(t, rotation.z * DEG2RAD);
 	Transform_RotateY(t, rotation.y * DEG2RAD);
 	Transform_RotateX(t, rotation.x * DEG2RAD);

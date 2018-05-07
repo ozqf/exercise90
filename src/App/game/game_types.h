@@ -158,7 +158,7 @@ struct GameState
     // specifics
     u16 playerEntityIndex;
 
-    u16 debugMode = 3;
+    u16 debugMode = 2;
     char debugString[2048];
     u32 debugStringLength = 0;
     u32 debugStringCapacity = 2048;

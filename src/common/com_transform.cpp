@@ -125,3 +125,8 @@ inline Vec3 Transform_GetEulerAnglesDegrees(Transform* t)
 {
     return M3x3_GetEulerAnglesDegrees(t->rotation.cells);
 }
+
+inline Vec3 Transform_GetEulerAngles(Transform* t)
+{
+    return M3x3_GetEulerAnglesRadians(t->rotation.cells);
+}

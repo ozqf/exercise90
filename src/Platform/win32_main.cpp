@@ -500,10 +500,12 @@ int CALLBACK WinMain(
                     DispatchMessage(&message);
                 }
 
+#if 0 // Force app to give up CPU time if not current focus target
                 if (g_windowActive == 0)
                 {
                     Sleep(50);
                 }
+#endif
 
                 float newTime = Win32_FloatTime();
                 g_gameTime.deltaTime = newTime - previousTime;

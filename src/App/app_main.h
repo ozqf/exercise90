@@ -6,6 +6,13 @@
 #include "../interface/platform_interface.h"
 
 #include "app_types.h"
+
+
+/////////////////////////////////////////////////////
+// App functions that game can access
+/////////////////////////////////////////////////////
+void App_ErrorStop();
+
 #include "Game/game.h"
 
 #define MAX_TEXTURES 128

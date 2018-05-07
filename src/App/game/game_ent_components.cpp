@@ -143,6 +143,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
 void Game_UpdateColliders(GameState* gs, GameTime* time)
 {
+    #if 0
     u32 currentFrame = time->frameNumber;
     for (u32 i = 0; i < gs->colliderList.max; ++i)
     {
@@ -151,35 +152,36 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
         Ent* entA = Ent_GetEntityByIndex(&gs->entList, a->entId.index);
         Transform* transA = &entA->transform;
         // Move collider
-        transA->pos.x += a->velocity.x * time->deltaTime;
-        transA->pos.y += a->velocity.y * time->deltaTime;
-        transA->pos.z += a->velocity.z * time->deltaTime;
+        // transA->pos.x += a->velocity.x * time->deltaTime;
+        // transA->pos.y += a->velocity.y * time->deltaTime;
+        // transA->pos.z += a->velocity.z * time->deltaTime;
         
-        for (u32 j = 0; j < gs->colliderList.max; ++j)
-        {
-            if (i == j) { continue; }
-            EC_Collider* b = &gs->colliderList.items[j];
-            if (b->inUse == 0) { continue; }
-            Ent* entB = Ent_GetEntityByIndex(&gs->entList, b->entId.index);
-            Transform* transB = &entB->transform;
+        // for (u32 j = 0; j < gs->colliderList.max; ++j)
+        // {
+        //     if (i == j) { continue; }
+        //     EC_Collider* b = &gs->colliderList.items[j];
+        //     if (b->inUse == 0) { continue; }
+        //     Ent* entB = Ent_GetEntityByIndex(&gs->entList, b->entId.index);
+        //     Transform* transB = &entB->transform;
 
-            if (AABBVsAABB(
-                transA->pos.x,
-                transA->pos.y,
-                transA->pos.z,
-                transB->pos.x,
-                transB->pos.y,
-                transB->pos.z,
-                a->size.x / 2, a->size.y / 2, a->size.z / 2,
-                b->size.x / 2, b->size.y / 2, b->size.z / 2
+        //     if (AABBVsAABB(
+        //         transA->pos.x,
+        //         transA->pos.y,
+        //         transA->pos.z,
+        //         transB->pos.x,
+        //         transB->pos.y,
+        //         transB->pos.z,
+        //         a->size.x / 2, a->size.y / 2, a->size.z / 2,
+        //         b->size.x / 2, b->size.y / 2, b->size.z / 2
 
-            ))
-            {
-                a->lastFrameOverlapping = currentFrame;
-                b->lastFrameOverlapping = currentFrame;
-            }
-        }
+        //     ))
+        //     {
+        //         a->lastFrameOverlapping = currentFrame;
+        //         b->lastFrameOverlapping = currentFrame;
+        //     }
+        // }
     }
+    #endif
 }
 
 void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)

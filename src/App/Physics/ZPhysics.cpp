@@ -24,6 +24,9 @@
 // Implement public interface
 #include "ZPhysics_external_functions.cpp"
 
+#define PHYS_DEFAULT_FRICTION 1.0
+#define PHYS_DEFAULT_RESTITUTION 0.0
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,8 +103,8 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
     handle->shape->calculateLocalInertia(mass, fallInertia);
 
     btRigidBody::btRigidBodyConstructionInfo boxBodyCI(mass, handle->motionState, handle->shape, fallInertia);
-    boxBodyCI.m_restitution = 0.3f;
-    boxBodyCI.m_friction = 0.3f;
+    //boxBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
+    //boxBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
     
     handle->rigidBody = new btRigidBody(boxBodyCI);
 
@@ -114,7 +117,7 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
     }
     if (def.base.flags & ZCOLLIDER_FLAG_NO_ROTATION)
     {
-        handle->rigidBody->setAngularFactor(btVector3(0, 1, 0));
+        handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
     }
     
     handle->rigidBody->setUserIndex(handle->id);
@@ -157,13 +160,17 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     handle->shape->calculateLocalInertia(mass, fallInertia);
     
     btRigidBody::btRigidBodyConstructionInfo sphereBodyCI(mass, handle->motionState, handle->shape, fallInertia);
-    sphereBodyCI.m_restitution = 0.75f;
-    sphereBodyCI.m_friction = 0.0f;
+    //sphereBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
+    //sphereBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
 
     i32 btFlags = 0;
     if (def.base.flags & ZCOLLIDER_FLAG_KINEMATIC)
     {
         btFlags |= CF_KINEMATIC_OBJECT;
+    }
+    if (def.base.flags & ZCOLLIDER_FLAG_NO_ROTATION)
+    {
+        handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
     }
 
     handle->rigidBody = new btRigidBody(sphereBodyCI);
@@ -172,14 +179,14 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
 
     // DONE
-
+#if 0
     // TODO: Remove me: Set angular v test
     btVector3 v(0, 0, 0);
     handle->rigidBody->setLinearVelocity(v);
     // x = roll, y = pitch, z = yaw
     btVector3 angularV(0, 2, 0);
     handle->rigidBody->setAngularVelocity(angularV);
-    
+#endif
     // Create sensor
     // btGhostObject* ghost = new btGhostObject();
     // ghost->setCollisionShape(new btSphereShape(radius));
@@ -204,7 +211,8 @@ PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef de
     handle->shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, def.pos[1], 0)));
     btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, handle->motionState, handle->shape, btVector3(0, 0, 0));
-    groundRigidBodyCI.m_restitution = 1.0f;
+    //groundRigidBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
+    //groundRigidBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
     handle->rigidBody = new btRigidBody(groundRigidBodyCI);
     world->dynamicsWorld->addRigidBody(handle->rigidBody);
     handle->rigidBody->setUserIndex(handle->id);
@@ -309,16 +317,17 @@ world->debug.postSolves,
 world->debug.numManifolds,
 world->numOverlaps
 );
-    ptr += written;
-    remaining -= written;
+ //   ptr += written;
+ //   remaining -= written;
 
-    for (int i = 0; i < world->numOverlaps; ++i)
-    {
-        written = sprintf_s(ptr, remaining, "(%d vs %d)\n", world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
-        //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
-        //written = sprintf_s(ptr, remaining, "12345");
-        ptr += written;
-        remaining -= written;
-        if (remaining <= 0) { break; }
-    }
+ //   for (int i = 0; i < world->numOverlaps; ++i)
+ //   {
+ //       written = sprintf_s(ptr, remaining, "(%d vs %d)\n", world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
+ //       //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
+ //       //written = sprintf_s(ptr, remaining, "12345");
+ //       ptr += written;
+ //       remaining -= written;
+ //       if (remaining <= 0) { break; }
+ //   }
+	//ptr = NULL;
 }
