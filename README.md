@@ -55,6 +55,7 @@ Move the engine and game to using commands.
 
 ### Physics Wrapper
 * **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
+    * **Use command events to store factory settings** - 
 * **Querying (Rays and spheres/cube volumes)** - for object searchs, explosions and projectiles
 * **Overlap detection (Rigidbodies, static and triggers)** - Kinda need this to make a game out of
     * Done 2018/5/5 *Basic detection of overlap pairs* - Inefficient and messy

@@ -4,8 +4,13 @@
 
 #include "game_intersection_test.cpp"
 
-#define COLLISION_DEFAULT_MASK (1 << 0)
 #define COLLISION_LAYER_WORLD (1 << 0)
+#define COLLISION_LAYER_ACTOR (1 << 1)
+#define COLLISION_LAYER_DEBRIS (1 << 2)
+
+internal u16 COL_MASK_DEFAULT = COLLISION_LAYER_WORLD;
+internal u16 COL_MASK_ACTOR = COLLISION_LAYER_WORLD | COLLISION_LAYER_ACTOR;
+internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 
 void Game_SpawnTestBlock(GameState* gs, u8 invisible)
 {
@@ -37,7 +42,8 @@ void Game_SpawnTestBlock(GameState* gs, u8 invisible)
         ent->transform.pos.z,
         size / 2, size / 2, size / 2,
         0,
-        COLLISION_DEFAULT_MASK,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_DEBRIS,
         ent->entId.index,
         ent->entId.iteration);
 }
@@ -144,7 +150,8 @@ void Game_BuildTestScene(GameState *gs)
         p.x, p.y, p.z,
         48 / 2, 0.5, 48 / 2,
         ZCOLLIDER_FLAG_STATIC,
-        COLLISION_DEFAULT_MASK,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_DEFAULT,
         ent->entId.index, ent->entId.iteration);
 #endif
     // walls
@@ -209,7 +216,8 @@ void Game_BuildTestScene(GameState *gs)
         0, 0, 0,
         0.5, 1, 0.5,
         ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_DEFAULT_MASK,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_ACTOR,
         ent->entId.index, ent->entId.iteration);
 
     // motor = EC_AddActorMotor(ent, gs);
@@ -227,7 +235,8 @@ void Game_BuildTestScene(GameState *gs)
         4, 2, 0,
         0.5, 1, 0.5,
         ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_DEFAULT_MASK,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_ACTOR,
         ent->entId.index, ent->entId.iteration);
 
     // motor = EC_AddActorMotor(ent, gs);
@@ -402,10 +411,11 @@ void Game_BuildTestMenu()
 {
 }
 
-void Game_Init()
+void Game_Init(Heap* globalHeap)
 {
-    Phys_Init();
-
+    // BlockRef ref = {};
+    // Heap_Allocate(globalHeap, &ref, MegaBytes(1), "PHYS CMD");
+    
     Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
@@ -591,7 +601,7 @@ void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuff
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
     g_debugTransform = gs->cameraTransform;
-    Phys_ReadCommands(commandBuffer);
+    //Phys_ReadCommands(commandBuffer);
     Phys_Step(eventBuffer, time->deltaTime);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
     i32 ptrOffset = 0;

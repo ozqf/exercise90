@@ -14,10 +14,13 @@ struct PhysBodyHandle
     u8 inUse;
     // internal id, matches user index on btRigidbody
     i32 id;
+    i32 group;
     u16 mask;
     // external id
     u16 ownerId;
     u16 ownerIteration;
+
+    ZShapeDef def;
     
     // pointers to bullet physics objects
     btCollisionShape* shape;

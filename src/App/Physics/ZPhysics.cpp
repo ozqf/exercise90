@@ -22,6 +22,7 @@
 #include "ZPhysics_globals.h"
 
 // Implement public interface
+#include "ZPhysics_factory.cpp"
 #include "ZPhysics_external_functions.cpp"
 
 #define PHYS_DEFAULT_FRICTION 1.0
@@ -30,7 +31,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
 ////////////////////////////////////////////////////////////////////////////////////////////
-PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
+PhysBodyHandle* Phys_GetFreeBodyHandle(PhysBodyList* list)
 {
     
     for(i32 i = 0; i < list->capacity; ++i)
@@ -46,9 +47,15 @@ PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
     return NULL;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// CREATE SHAPES
-////////////////////////////////////////////////////////////////////////////////////////////
+PhysBodyHandle* Phys_GetHandleById(PhysBodyList* list, i32 queryId)
+{
+    Assert(queryId >= 0);
+    Assert(queryId < list->capacity);
+    // Handles that have not been 'issued' have no business being found!
+    Assert(list->items[queryId].inUse);
+    return &list->items[queryId];
+}
+
 // Delete all objects on this handle
 void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle)
 {
@@ -81,147 +88,9 @@ void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle)
     handle->inUse = FALSE;
 }
 
-PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def)
-{
-    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
-
-    handle->shape = new btBoxShape(btVector3(def.halfSize[0], def.halfSize[1], def.halfSize[2]));
-    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])));
-    handle->mask = def.base.mask;
-
-    btScalar mass;
-    if (def.base.flags & ZCOLLIDER_FLAG_STATIC)
-    {
-        mass = 0;
-    }
-    else
-    {
-        mass = 1;
-    }
-
-    btVector3 fallInertia(0, 0, 0);
-    handle->shape->calculateLocalInertia(mass, fallInertia);
-
-    btRigidBody::btRigidBodyConstructionInfo boxBodyCI(mass, handle->motionState, handle->shape, fallInertia);
-    //boxBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
-    //boxBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
-    
-    handle->rigidBody = new btRigidBody(boxBodyCI);
-
-    i32 btFlags = 0;
-    if (def.base.flags & ZCOLLIDER_FLAG_KINEMATIC)
-    {
-        btFlags |= CF_KINEMATIC_OBJECT;
-        // Restrict motion to specific axes (in this case, only move on X/Z)
-        //handle->rigidBody->setLinearFactor(btVector3(1, 0, 1));
-    }
-    if (def.base.flags & ZCOLLIDER_FLAG_NO_ROTATION)
-    {
-        handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
-    }
-    
-    handle->rigidBody->setUserIndex(handle->id);
-    handle->rigidBody->setCollisionFlags(btFlags);
-
-    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.base.mask, def.base.mask);
-
-    return handle;
-}
-
-PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
-{
-    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
-    /*
-    u8 inUse;
-    i32 id;
-    btCollisionShape* shape;
-    btDefaultMotionState* motionState;
-    btRigidBody* rigidBody;
-    */
-    handle->shape = new btSphereShape(def.radius);
-    handle->motionState = new btDefaultMotionState(
-        btTransform(
-            btQuaternion(0, 0, 0, 1),
-            btVector3(def.base.pos[0], def.base.pos[1], def.base.pos[2])
-            )
-        );
-    handle->mask = def.base.mask;
-    
-    
-    btScalar mass;
-    if (def.base.flags & ZCOLLIDER_FLAG_STATIC)
-    {
-        mass = 0;
-    }
-    else
-    {
-        mass = 1;
-    }
-    btVector3 fallInertia(0, 0, 0);
-    handle->shape->calculateLocalInertia(mass, fallInertia);
-    
-    btRigidBody::btRigidBodyConstructionInfo sphereBodyCI(mass, handle->motionState, handle->shape, fallInertia);
-    //sphereBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
-    //sphereBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
-
-    i32 btFlags = 0;
-    if (def.base.flags & ZCOLLIDER_FLAG_KINEMATIC)
-    {
-        btFlags |= CF_KINEMATIC_OBJECT;
-    }
-    if (def.base.flags & ZCOLLIDER_FLAG_NO_ROTATION)
-    {
-        handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
-    }
-
-    handle->rigidBody = new btRigidBody(sphereBodyCI);
-    handle->rigidBody->setUserIndex(handle->id);
-    handle->rigidBody->setCollisionFlags(btFlags);
-    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.base.mask, def.base.mask);
-
-    // DONE
-#if 0
-    // TODO: Remove me: Set angular v test
-    btVector3 v(0, 0, 0);
-    handle->rigidBody->setLinearVelocity(v);
-    // x = roll, y = pitch, z = yaw
-    btVector3 angularV(0, 2, 0);
-    handle->rigidBody->setAngularVelocity(angularV);
-#endif
-    // Create sensor
-    // btGhostObject* ghost = new btGhostObject();
-    // ghost->setCollisionShape(new btSphereShape(radius));
-    // ghost->setWorldTransform(btTransform());
-
-    // Init Ghost object for collision detection
-    
-    // handle->inUse;
-    // handle->id;
-    // handle->shape;
-    // handle->motionState;
-    // handle->rigidBody;
-
-    return handle;
-}
-
-PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def)
-{
-    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
-
-    handle->shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
-    handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, def.pos[1], 0)));
-    handle->mask = def.mask;
-    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, handle->motionState, handle->shape, btVector3(0, 0, 0));
-    //groundRigidBodyCI.m_restitution = PHYS_DEFAULT_RESTITUTION;
-    //groundRigidBodyCI.m_friction = PHYS_DEFAULT_FRICTION;
-    handle->rigidBody = new btRigidBody(groundRigidBodyCI);
-    world->dynamicsWorld->addRigidBody(handle->rigidBody, def.mask, def.mask);
-    handle->rigidBody->setUserIndex(handle->id);
-    return handle;
-}
+////////////////////////////////////////////////////////////////////////////////////////////
+// CREATE SHAPES
+////////////////////////////////////////////////////////////////////////////////////////////
 
 internal i32 Phys_FindOverlapPair(ZBulletWorld* world, i32 a, i32 b)
 {
@@ -295,6 +164,113 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
         
         }
     }
+}
+
+void Phys_NeverCall()
+{
+    ILLEGAL_CODE_PATH
+    Phys_CreateBulletBox(NULL, NULL, NULL);
+    Phys_CmdCreateShape(NULL, NULL);
+    Phys_RecycleHandle(NULL, NULL);
+    Phys_ReadCommands(NULL);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// LOOP
+////////////////////////////////////////////////////////////////////////////////////////////
+void Phys_ReadCommands(MemoryBlock* commandBuffer)
+{
+    //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
+
+}
+
+internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
+{
+    ++world->debug.stepCount;
+    world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
+
+    u8* writePosition = (u8*)eventBuffer->ptrMemory;
+    i32 len = world->bodies.capacity;
+    for (int i = 0; i < len; ++i)
+    {
+        PhysBodyHandle* h = &world->bodies.items[i];
+		// Check that a rigidbody is present and that the handle is in use.
+		// Otherwise it might be a rigidbody await recylcing
+        if (h->inUse == FALSE || h->rigidBody == NULL) { continue; }
+		if (!h->rigidBody->getActivationState()) { continue; }
+        Assert(h->motionState != NULL);
+
+        // Get position
+        btTransform t;
+        h->rigidBody->getMotionState()->getWorldTransform(t);
+        
+        // write transform update
+        ZTransformUpdateEvent tUpdate = {};
+        tUpdate.type = 1;
+        tUpdate.ownerId = h->ownerId;
+		tUpdate.ownerIteration = h->ownerIteration;
+
+		btScalar openglM[16];
+		t.getOpenGLMatrix(openglM);
+		for (i32 j = 0; j < 16; ++j)
+		{
+			tUpdate.matrix[j] = openglM[j];
+		}
+
+		/*btVector3 pos = t.getOrigin();
+		tUpdate.matrix[12] = pos.x();
+		tUpdate.matrix[13] = pos.y();
+		tUpdate.matrix[14] = pos.z();*/
+
+#if 0	// Copy rotation via calculating euler angles in opengl matrix
+		t.getOpenGLMatrix(openglM);
+		
+		f32 fAngZ = atan2f(openglM[1], openglM[5]);
+		f32 fAngY = atan2f(openglM[8], openglM[10]);
+		f32 fAngX = -asinf(openglM[9]);
+		tUpdate.rot[0] = fAngX;// *RAD2DEG;
+		tUpdate.rot[1] = fAngY;// * RAD2DEG;
+		tUpdate.rot[2] = fAngZ;// * RAD2DEG;
+#endif
+
+		
+#if 0	// Rotation copy to matrix via euler angles into bottom row
+		btMatrix3x3& rot = t.getBasis();
+		btScalar yaw, pitch, roll;
+		rot.getEulerYPR(yaw, pitch, roll);
+		tUpdate.matrix[3] = roll;
+		tUpdate.matrix[7] = pitch;
+		tUpdate.matrix[11] = yaw;
+#endif
+
+#if 0	// Rotation copy to matrix directly
+		btMatrix3x3& rot = t.getBasis();
+		btVector3 xAxis = rot.getColumn(0);
+		btVector3 yAxis = rot.getColumn(1);
+		btVector3 zAxis = rot.getColumn(2);
+
+		tUpdate.matrix[0] = xAxis.x();
+		tUpdate.matrix[1] = xAxis.y();
+		tUpdate.matrix[2] = xAxis.z();
+
+		tUpdate.matrix[4] = yAxis.x();
+		tUpdate.matrix[5] = yAxis.y();
+		tUpdate.matrix[6] = yAxis.z();
+
+		tUpdate.matrix[8] = zAxis.x();
+		tUpdate.matrix[9] = zAxis.y();
+		tUpdate.matrix[10] = zAxis.z();
+#endif        
+        COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
+    }
+    
+    // Mark end of buffer
+    *writePosition = 0;
+
+    /*char buf[128];
+        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
+        OutputDebugString(buf);*/
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

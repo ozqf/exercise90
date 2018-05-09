@@ -4,6 +4,7 @@
 
 
 internal ZBulletWorld g_world;
+internal ByteBuffer g_cmdBuf;
 //internal PhysicsTestState g_physTest;
 
 internal Vec3 g_testPos;

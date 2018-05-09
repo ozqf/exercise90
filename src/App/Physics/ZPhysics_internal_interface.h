@@ -2,6 +2,7 @@
 
 #include "ZPhysics_internal_types.h"
 
+////////////////////////////////////////////////////////////
 /*
 COPYED FROM ORIGINAL BULLET SOURCE
 - Missing in header files for lib
@@ -40,22 +41,36 @@ COPYED FROM ORIGINAL BULLET SOURCE
 		CF_ANISOTROPIC_FRICTION = 1,
 		CF_ANISOTROPIC_ROLLING_FRICTION = 2
 	};
+////////////////////////////////////////////////////////////
 
+enum ZCommandType
+{
+	Null = 0,
+	Teleport = 1,
+	Create = 2,
+	Remove = 3
+};
 
-PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list);
+internal PhysBodyHandle* Phys_GetFreeBodyHandle(PhysBodyList* list);
 
-void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle);
+internal PhysBodyHandle* Phys_GetHandleById(PhysBodyList* list, i32 queryId);
 
-void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle);
+internal void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 
-PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def);
+internal void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 
-PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZBoxDef def);
+//PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def);
 
-PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def);
+internal PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZCollisionBoxData* box);
+
+//PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def);
 
 internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 
 internal void Phys_PostSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 
 internal void Phys_WriteDebugOutput(ZBulletWorld* world);
+
+internal void Phys_ReadCommands(MemoryBlock* commandBuffer);
+
+internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime);

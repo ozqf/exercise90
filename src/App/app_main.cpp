@@ -208,8 +208,8 @@ i32 App_Init()
 	AllocateDebugStrings(&g_heap);
 	//AllocateTestStrings(&g_heap);
     //g_collisionEventBuffer
-    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2024, "Collision EV");
-    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, 2024, "Collision CMD");
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2048, "Collision EV");
+    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, 2048, "Collision CMD");
 
     SharedAssets_Init();
 
@@ -219,7 +219,8 @@ i32 App_Init()
     //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
     g_textureHandles.numTextures = 0;
     AppLoadTestTextures();
-    Game_Init();
+    Phys_Init(g_collisionCommandBuffer.ptrMemory, g_collisionCommandBuffer.objectSize);
+    Game_Init(&g_heap);
     Game_InitDebugStr();
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,

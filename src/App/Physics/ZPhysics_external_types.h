@@ -5,15 +5,24 @@
 //////////////////////////////////////////////////////////////////
 // Collision Shapes
 //////////////////////////////////////////////////////////////////
-#define ZCOLLIDER_TYPE_SPHERE 0
-#define ZCOLLIDER_TYPE_CUBOID 1
-#define ZCOLLIDER_TYPE_MESH 2
-#define ZCOLLIDER_TYPE_INFINITE_PLANE 3
+#define ZCOLLIDER_TYPE_CUBOID 0
+#define ZCOLLIDER_TYPE_SPHERE 1
+#define ZCOLLIDER_TYPE_CAPSULE 2
+#define ZCOLLIDER_TYPE_MESH 3
+
+enum ZShapeType
+{
+	box = 0,
+	sphere = 1,
+	capsule = 2,
+	mesh = 3
+};
+//#define ZCOLLIDER_TYPE_INFINITE_PLANE 99
 
 #define ZCOLLIDER_FLAG_STATIC (1 << 0)
 #define ZCOLLIDER_FLAG_KINEMATIC (1 << 1)
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
-#if 1
+#if 0
 
 struct ZShapeDef
 {
@@ -36,6 +45,53 @@ struct ZBoxDef
 };
 
 #endif
+
+#if 1
+
+struct ZCollisionBoxData
+{
+	f32 halfSize[3];
+};
+
+struct ZCollisionSphereData
+{
+	f32 radius;
+};
+#if 0
+struct ZCollisionCapsuleData
+{
+	f32 halfWidth;
+	f32 halfHeight;
+};
+
+struct ZCollisionMeshData
+{
+	f32 halfWidth;
+	f32 halfHeight;
+};
+#endif
+union ZShapeData_U
+{
+	ZCollisionBoxData box;
+	ZCollisionSphereData sphere;
+	//ZCollisionCapsuleData capsule;
+	//ZCollisionMeshData mesh;
+};
+
+struct ZShapeDef
+{
+	ZShapeType shapeType;
+	
+	u32 flags;
+	i32 handleId;
+	u16 group;
+	u16 mask;
+	f32 pos[3];
+	ZShapeData_U data;
+};
+
+#endif
+
 //////////////////////////////////////////////////////////////////
 // Collision query data
 //////////////////////////////////////////////////////////////////

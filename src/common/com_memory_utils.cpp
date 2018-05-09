@@ -10,6 +10,15 @@ static inline u32 SafeTruncateUInt64(u64 value)
 	return result;
 }
 
+/**
+ * Returns number of bytes written
+ */
+static inline u32 COM_WriteByte(u8 value, u8* target)
+{
+	Assert(target != NULL);
+    *target = value;
+    return 1;
+}
 
 /**
  * Returns number of bytes written

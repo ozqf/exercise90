@@ -3,61 +3,50 @@
 #include "../../common/com_defines.h"
 
 /////////////////////////////////////////////////////////////
-// List operations
+// ISSUE COMMAND
 /////////////////////////////////////////////////////////////
 
-
-int Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u16 flags, u16 mask, u16 ownerId, u16 ownerIteration)
+i32 Phys_CreateShape(ZShapeDef* def)
 {
-    ZSphereDef def = {};
-    def.base.type = ZCOLLIDER_TYPE_SPHERE;
-    def.base.pos[0] = x;
-    def.base.pos[1] = y;
-    def.base.pos[2] = z;
-    def.base.flags = flags;
-    def.base.mask = mask;
-    def.radius = radius;
-
-    PhysBodyHandle* h = Phys_CreateBulletSphere(&g_world, def);
-	h->ownerId = ownerId;
-	h->ownerIteration = ownerIteration;
-    return h->id;
-}
-
-int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u32 flags, u16 mask, u16 ownerId, u16 ownerIteration)
-{
-    ZBoxDef def = {};
-    def.base.type = ZCOLLIDER_TYPE_CUBOID;
-    def.base.pos[0] = x;
-    def.base.pos[1] = y;
-    def.base.pos[2] = z;
-    def.base.flags = flags;
-    def.base.mask = mask;
-    def.halfSize[0] = halfSizeX;
-    def.halfSize[1] = halfSizeY;
-    def.halfSize[2] = halfSizeZ;
+    Assert(def != NULL);
+    PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
     
-    PhysBodyHandle* h = Phys_CreateBulletBox(&g_world, def);
-	h->ownerId = ownerId;
-	h->ownerIteration = ownerIteration;
+    Assert(h != NULL);
+    def->handleId = h->id;
+    g_cmdBuf.ptrWrite += COM_WriteByte(Create, g_cmdBuf.ptrWrite);
+    g_cmdBuf.ptrWrite += COM_COPY(def, g_cmdBuf.ptrWrite, ZShapeDef);
     return h->id;
 }
 
-i32 Phys_CreateInfinitePlane(f32 y, u16 ownerId, u16 mask, u16 ownerIteration)
+i32 Phys_CreateBox(
+    f32 x,
+    f32 y,
+    f32 z,
+    f32 halfSizeX,
+    f32 halfSizeY,
+    f32 halfSizeZ,
+    u32 flags,
+    u16 group,
+    u16 mask,
+    u16 ownerId,
+    u16 ownerIteration
+    )
 {
     ZShapeDef def = {};
-    def.type = ZCOLLIDER_TYPE_INFINITE_PLANE;
-    def.pos[0] = 0;
-    def.pos[1] = y;
-    def.pos[2] = 0;;
+    def.shapeType = box;
+    def.flags = flags;
+    def.group = group;
     def.mask = mask;
-    PhysBodyHandle* h = Phys_CreateBulletInfinitePlane(&g_world, def);
-    h->ownerId = ownerId;
-    h->ownerIteration = ownerIteration;
-    return h->id;
-} 
+    def.pos[0] = x;
+    def.pos[1] = y;
+    def.pos[2] = z;
+    def.data.box.halfSize[0] = halfSizeX;
+    def.data.box.halfSize[1] = halfSizeY;
+    def.data.box.halfSize[2] = halfSizeZ;
+    return Phys_CreateShape(&def);
+}
 
-int Phys_RemoveShape()
+i32 Phys_RemoveShape()
 {
     return 0;
 }
@@ -71,12 +60,12 @@ void Phys_GetDebugString(char** str, i32* length)
     *length = g_debugStringSize;
 }
 
-int Phys_QueryHitscan()
+i32 Phys_QueryHitscan()
 {
     return 0;
 }
 
-int Phys_QueryVolume()
+i32 Phys_QueryVolume()
 {
     return 0;
 }
@@ -121,8 +110,19 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 // Lifetime
 /////////////////////////////////////////////////////////////
 
-void Phys_Init()
+// If the provided command buffer is NULL or the size is zero, fail
+void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize)
 {
+    if (commandBufferSize == 0 || ptrCommandBuffer == NULL)
+    {
+        Assert(false);
+    }
+    g_cmdBuf = {};
+    g_cmdBuf.ptrStart = (u8*)ptrCommandBuffer;
+    g_cmdBuf.ptrEnd = g_cmdBuf.ptrStart;
+    g_cmdBuf.ptrWrite = g_cmdBuf.ptrStart;
+    g_cmdBuf.size = commandBufferSize;
+
     //g_physTest = {};
     g_world = {};
     g_world.bodies.items = g_bodies;
@@ -147,104 +147,6 @@ void Phys_Init()
     Phys_CreateTestScene(&g_world);
 }
 
-void Phys_ReadCommands(MemoryBlock* commandBuffer)
-{
-    //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
-}
-
-internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
-{
-    ++world->debug.stepCount;
-    world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
-
-    u8* writePosition = (u8*)eventBuffer->ptrMemory;
-    i32 len = world->bodies.capacity;
-    for (int i = 0; i < len; ++i)
-    {
-        PhysBodyHandle* h = &world->bodies.items[i];
-        if (h->inUse == FALSE) { continue; }
-		if (!h->rigidBody->getActivationState()) { continue; }
-        Assert(h->motionState != NULL);
-
-        // Get position
-        btTransform t;
-        h->rigidBody->getMotionState()->getWorldTransform(t);
-        
-        // write transform update
-        ZTransformUpdateEvent tUpdate = {};
-        tUpdate.type = 1;
-        tUpdate.ownerId = h->ownerId;
-		tUpdate.ownerIteration = h->ownerIteration;
-
-		btScalar openglM[16];
-		t.getOpenGLMatrix(openglM);
-		for (i32 j = 0; j < 16; ++j)
-		{
-			tUpdate.matrix[j] = openglM[j];
-		}
-
-		/*btVector3 pos = t.getOrigin();
-		tUpdate.matrix[12] = pos.x();
-		tUpdate.matrix[13] = pos.y();
-		tUpdate.matrix[14] = pos.z();*/
-
-#if 0	// Copy rotation via calculating euler angles in opengl matrix
-		t.getOpenGLMatrix(openglM);
-		
-		f32 fAngZ = atan2f(openglM[1], openglM[5]);
-		f32 fAngY = atan2f(openglM[8], openglM[10]);
-		f32 fAngX = -asinf(openglM[9]);
-		tUpdate.rot[0] = fAngX;// *RAD2DEG;
-		tUpdate.rot[1] = fAngY;// * RAD2DEG;
-		tUpdate.rot[2] = fAngZ;// * RAD2DEG;
-#endif
-
-		
-#if 0	// Rotation copy to matrix via euler angles into bottom row
-		btMatrix3x3& rot = t.getBasis();
-		btScalar yaw, pitch, roll;
-		rot.getEulerYPR(yaw, pitch, roll);
-		tUpdate.matrix[3] = roll;
-		tUpdate.matrix[7] = pitch;
-		tUpdate.matrix[11] = yaw;
-#endif
-
-#if 0	// Rotation copy to matrix directly
-		btMatrix3x3& rot = t.getBasis();
-		btVector3 xAxis = rot.getColumn(0);
-		btVector3 yAxis = rot.getColumn(1);
-		btVector3 zAxis = rot.getColumn(2);
-
-		tUpdate.matrix[0] = xAxis.x();
-		tUpdate.matrix[1] = xAxis.y();
-		tUpdate.matrix[2] = xAxis.z();
-
-		tUpdate.matrix[4] = yAxis.x();
-		tUpdate.matrix[5] = yAxis.y();
-		tUpdate.matrix[6] = yAxis.z();
-
-		tUpdate.matrix[8] = zAxis.x();
-		tUpdate.matrix[9] = zAxis.y();
-		tUpdate.matrix[10] = zAxis.z();
-#endif        
-        COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
-    }
-    
-    // Mark end of buffer
-    *writePosition = 0;
-
-    /*char buf[128];
-        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
-        OutputDebugString(buf);*/
-    
-}
-
-void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
-{
-    Phys_StepWorld(&g_world, eventBuffer, deltaTime);
-    Phys_WriteDebugOutput(&g_world);
-}
-
 void Phys_Shutdown()
 {
     for (int i = 0; i < g_world.bodies.capacity; ++i)
@@ -257,6 +159,12 @@ void Phys_Shutdown()
 	delete g_world.dispatcher;
 	delete g_world.collisionConfiguration;
     delete g_world.broadphase;
+}
+
+void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
+{
+    Phys_StepWorld(&g_world, eventBuffer, deltaTime);
+    Phys_WriteDebugOutput(&g_world);
 }
 
 
