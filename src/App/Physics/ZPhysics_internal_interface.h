@@ -71,6 +71,8 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar ti
 
 internal void Phys_WriteDebugOutput(ZBulletWorld* world);
 
-internal void Phys_ReadCommands(MemoryBlock* commandBuffer);
+internal void Phys_LockCommandBuffer(ByteBuffer* buffer);
+
+internal void Phys_ReadCommands(ZBulletWorld* world);
 
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime);

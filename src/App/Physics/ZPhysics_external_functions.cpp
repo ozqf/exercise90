@@ -6,13 +6,15 @@
 // ISSUE COMMAND
 /////////////////////////////////////////////////////////////
 
-i32 Phys_CreateShape(ZShapeDef* def)
+i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
 {
     Assert(def != NULL);
     PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
     
     Assert(h != NULL);
     def->handleId = h->id;
+	h->ownerId = ownerId;
+	h->ownerIteration = ownerIteration;
     g_cmdBuf.ptrWrite += COM_WriteByte(Create, g_cmdBuf.ptrWrite);
     g_cmdBuf.ptrWrite += COM_COPY(def, g_cmdBuf.ptrWrite, ZShapeDef);
     return h->id;
@@ -43,7 +45,7 @@ i32 Phys_CreateBox(
     def.data.box.halfSize[0] = halfSizeX;
     def.data.box.halfSize[1] = halfSizeY;
     def.data.box.halfSize[2] = halfSizeZ;
-    return Phys_CreateShape(&def);
+    return Phys_CreateShape(&def, ownerId, ownerIteration);
 }
 
 i32 Phys_RemoveShape()
@@ -117,6 +119,9 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize)
     {
         Assert(false);
     }
+
+    COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
+
     g_cmdBuf = {};
     g_cmdBuf.ptrStart = (u8*)ptrCommandBuffer;
     g_cmdBuf.ptrEnd = g_cmdBuf.ptrStart;
@@ -163,6 +168,8 @@ void Phys_Shutdown()
 
 void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
 {
+    Phys_LockCommandBuffer(&g_cmdBuf);
+    Phys_ReadCommands(&g_world);
     Phys_StepWorld(&g_world, eventBuffer, deltaTime);
     Phys_WriteDebugOutput(&g_world);
 }

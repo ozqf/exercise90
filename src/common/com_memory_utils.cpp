@@ -21,6 +21,48 @@ static inline u32 COM_WriteByte(u8 value, u8* target)
 }
 
 /**
+ * Read an i32 at the target pointer position AND move the target pointer forward
+ */
+static inline u8 COM_ReadByte(u8** target)
+{
+	Assert(target != NULL);
+    u8 result = *(u8*)*target;
+    *target += sizeof(u8);
+    return result;
+}
+
+/**
+ * Read an i32 at the target position, keeping target in place
+ */
+static inline u8 COM_PeekByte(u8* target)
+{
+	Assert(target != NULL);
+    u8 result = *(u8*)target;
+    return sizeof(u8);
+}
+
+/**
+ * Read an i32 at the target pointer position AND move the target pointer forward
+ */
+static inline i32 COM_ReadI32(u8** target)
+{
+	Assert(target != NULL);
+    i32 result = *(i32*)target;
+    *target += sizeof(i32);
+    return result;
+}
+
+/**
+ * Read an i32 at the target position, keeping target in place
+ */
+static inline i32 COM_PeekI32(u8* target)
+{
+	Assert(target != NULL);
+    i32 result = *(i32*)target;
+    return sizeof(i32);
+}
+
+/**
  * Returns number of bytes written
  */
 static inline u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes)

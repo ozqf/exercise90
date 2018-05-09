@@ -178,17 +178,45 @@ void Phys_NeverCall()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP
 ////////////////////////////////////////////////////////////////////////////////////////////
-void Phys_ReadCommands(MemoryBlock* commandBuffer)
+void Phys_LockCommandBuffer(ByteBuffer* buffer)
+{
+    *buffer->ptrWrite = 0;
+    buffer->ptrEnd = buffer->ptrWrite;
+}
+
+void Phys_ReadCommands(ZBulletWorld* world)
 {
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
+    ByteBuffer* buffer = &g_cmdBuf;
+    u8* ptrRead = buffer->ptrStart;
+    while (*ptrRead != NULL && ptrRead < buffer->ptrEnd)
+    {
+        u8 cmdType = COM_ReadByte(&ptrRead);
+         switch (cmdType)
+        {
+            case Create:
+            {
+                ZShapeDef def = {};
+                ptrRead += COM_COPY(ptrRead, &def, ZShapeDef);
+                Phys_CmdCreateShape(world, &def);
+            } break;
 
+            default:
+            {
+                ILLEGAL_CODE_PATH
+            } break;
+        }
+    }
+    // Clear
+    buffer->ptrEnd = buffer->ptrStart;
+    COM_WriteByte(0, buffer->ptrStart);
 }
 
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
 {
     ++world->debug.stepCount;
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
-
+    
     u8* writePosition = (u8*)eventBuffer->ptrMemory;
     i32 len = world->bodies.capacity;
     for (int i = 0; i < len; ++i)

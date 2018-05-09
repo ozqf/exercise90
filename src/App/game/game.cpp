@@ -207,7 +207,7 @@ void Game_BuildTestScene(GameState *gs)
 /////////////////////////////////////////////////////////////
 // Player
 /////////////////////////////////////////////////////////////
-#if 1
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
@@ -226,7 +226,7 @@ void Game_BuildTestScene(GameState *gs)
     gs->playerEntityIndex = ent->entId.index;
 #endif
     /////////////////////////////////////////////////////////////
-#if 1
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     Transform_SetPosition(&ent->transform, 4, 0, 0);
     collider = EC_AddCollider(ent, gs);
@@ -245,11 +245,12 @@ void Game_BuildTestScene(GameState *gs)
     gs->playerEntityIndex = ent->entId.index;
 #endif
 
+#if 1
     for (int i = 0; i < 20; ++i)
     {
         Game_SpawnTestBlock(gs, (i == 1));
     }
-    
+#endif
     /////////////////////////////////////////////////////////////
     // Octahedron object
     /////////////////////////////////////////////////////////////

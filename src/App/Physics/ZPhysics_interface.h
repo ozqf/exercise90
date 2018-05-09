@@ -16,7 +16,7 @@
 
 void Phys_GetDebugString(char** str, i32* length);
 
-i32 Phys_CreateShape(ZShapeDef* def);
+i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration);
 
 i32 Phys_CreateBox(
     f32 x,
