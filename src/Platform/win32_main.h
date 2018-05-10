@@ -9,6 +9,8 @@
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
 
+#include "Sound/snd_module.cpp"
+
 #include "win32_gl/win32_gl_interface.h"
 
 /****************************************************************

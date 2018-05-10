@@ -47,7 +47,7 @@ static inline u8 COM_PeekByte(u8* target)
 static inline i32 COM_ReadI32(u8** target)
 {
 	Assert(target != NULL);
-    i32 result = *(i32*)target;
+    i32 result = *(i32*)*target;
     *target += sizeof(i32);
     return result;
 }

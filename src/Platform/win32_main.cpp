@@ -457,6 +457,13 @@ int CALLBACK WinMain(
             // Input requires appWindow handle to register for mouse events
             Win32_InitInput();
 
+            // Init Sound
+            if (Snd_Init() != 0)
+            {
+
+                return 1;
+            }
+
             float previousTime = Win32_InitFloatTime();
             g_gameTime = {};
 
@@ -470,6 +477,7 @@ int CALLBACK WinMain(
 #if 1
             if (!Win32_LinkToApplication())
             {
+                MessageBox(0, "Failed to init sound", "Error", MB_OK | MB_ICONINFORMATION);
                 return 1;
             }
             // Set timestamp so that we don't instantly reload the app
