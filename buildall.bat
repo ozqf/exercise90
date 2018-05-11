@@ -10,5 +10,7 @@
 
 @call buildrenderer.bat
 
+@call buildsound.bat
+
 @call buildgame.bat
 @rem @PAUSE

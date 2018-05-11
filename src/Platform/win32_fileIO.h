@@ -316,7 +316,8 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     );
     */
     BOOL cancel = false;
-    
+	Assert(sourcePath);
+	Assert(targetPath);
     CopyFileEx(sourcePath, targetPath, NULL, NULL, &cancel, 0);
     #endif
     #if 0

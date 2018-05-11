@@ -395,6 +395,20 @@ int CALLBACK WinMain(
 
     Win32_ReadCommandLine(lpCmdLine);
     //Assert(false);
+    
+    // self info for game dll
+    Win32_InitPlatformInterface();
+
+    // Prepare module link paths before trying to
+    // link to any of them
+    
+    g_appLink.path = "base/gamex86.dll";
+    g_appLink.pathForCopy = "base/gamex86copy.dll";         
+    g_rendererLink.path = "win32gl.dll";
+    g_rendererLink.pathForCopy = "win32glcopy.dll";
+    g_soundLink.path = "win32sound.dll";
+    g_soundLink.pathForCopy = "win32soundcopy.dll";
+
 
     InitDebug();
     printf("Debug init\n");
@@ -458,20 +472,13 @@ int CALLBACK WinMain(
             Win32_InitInput();
 
             // Init Sound
-            if (Snd_Init() != 0)
-            {
-
-                return 1;
-            }
+            Win32_LinkToSound();
 
             float previousTime = Win32_InitFloatTime();
             g_gameTime = {};
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
-
-            // Init interfaces and attach external stuff
-            Win32_InitPlatformInterface();
 
             //Win32_CheckApplicationLink();
 #if 1
@@ -481,8 +488,9 @@ int CALLBACK WinMain(
                 return 1;
             }
             // Set timestamp so that we don't instantly reload the app
-            Win32_UpdateFileTimeStamp(appModulePath, &g_appModuleTimestamp);
-            Win32_UpdateFileTimeStamp(renderModulePath, &g_renderModuleTimestamp);
+            Win32_UpdateFileTimeStamp(g_appLink.path, &g_appLink.timestamp);
+            Win32_UpdateFileTimeStamp(g_rendererLink.path, &g_rendererLink.timestamp);
+            Win32_UpdateFileTimeStamp(g_soundLink.path, &g_soundLink.timestamp);
 #endif
 
 #if 0
@@ -522,30 +530,42 @@ int CALLBACK WinMain(
                 g_gameTime.frameNumber++;
 
                 // Check App reload
-                g_checkAppReloadTick -= g_gameTime.deltaTime;
-                if (g_checkAppReloadTick <= 0)
+                g_appLink.checkTick -= g_gameTime.deltaTime;
+                if (g_appLink.checkTick <= 0)
                 {
-                    g_checkAppReloadTick = 0.1f;
-                    if (Win32_CheckFileModified(appModulePath, &g_appModuleTimestamp))
+                    g_appLink.checkTick = 0.1f;
+                    if (Win32_CheckFileModified(g_appLink.path, &g_appLink.timestamp))
                     {
                         Win32_LinkToApplication();
                     }
-                    //Win32_CheckApplicationLink();
                 }
                 // Check renderer reload
-                g_checkRenderReloadTick -= g_gameTime.deltaTime;
-                if (g_checkRenderReloadTick <= 0)
+                g_rendererLink.checkTick -= g_gameTime.deltaTime;
+                if (g_rendererLink.checkTick <= 0)
                 {
-                    g_checkRenderReloadTick = 0.1f;
-                    if (Win32_CheckFileModified(renderModulePath, &g_renderModuleTimestamp))
+                    g_rendererLink.checkTick = 0.1f;
+                    if (Win32_CheckFileModified(g_rendererLink.path, &g_rendererLink.timestamp))
                     {
                         //DebugBreak();
-                        if (Win32_LinkToRenderer() && app.isvalid)
+                        if (Win32_LinkToRenderer() && g_app.isvalid)
                         {
-                            app.AppRendererReloaded();
+                            g_app.AppRendererReloaded();
                         }
                     }
-                    //Win32_CheckApplicationLink();
+                }
+                // Check sound reload
+                g_soundLink.checkTick -= g_gameTime.deltaTime;
+                if (g_soundLink.checkTick <= 0)
+                {
+                    g_soundLink.checkTick = 0.1f;
+                    if (Win32_CheckFileModified(g_soundLink.path, &g_soundLink.timestamp))
+                    {
+                        //DebugBreak();
+                        // if (Win32_LinkToSound() && g_app.isvalid)
+                        // {
+                        //     g_app.AppSoundReloaded();
+                        // }
+                    }
                 }
 
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
@@ -563,9 +583,9 @@ int CALLBACK WinMain(
 
                 // Called before app update as app update will call the renderer
                 // this should be buffered up so the two can be desynced!
-                if (renderModuleState == 1)
+                if (g_rendererLink.moduleState == 1)
                 {
-                    renderer.R_SetupFrame(appWindow);  
+                    g_renderer.R_SetupFrame(appWindow);  
                 }
 
                 //////////////////////////////////////////////////////////////////
@@ -596,14 +616,14 @@ int CALLBACK WinMain(
                 }
 
                 //Win32_R_SetupFrame(appWindow);
-                if (app.isvalid)
+                if (g_app.isvalid)
                 {
-                    app.AppUpdate(&g_gameTime, frameCommands);
+                    g_app.AppUpdate(&g_gameTime, frameCommands);
                 }
                 
-                if (renderModuleState == 1)
+                if (g_rendererLink.moduleState == 1)
                 {
-                    renderer.R_FinishFrame(appWindow);
+                    g_renderer.R_FinishFrame(appWindow);
                 }
                 //Win32_R_FinishFrame(appWindow);
             }

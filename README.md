@@ -1,6 +1,10 @@
 # Exercise 90
 A simple fps as a learning exercise in C, opengl and games/engines generally.
 
+## Assets Dropbox
+
+* https://www.dropbox.com/sh/65xmjtpvtnng3hm/AAD5mSgHuvS0DlsAj46U9XuGa?dl=0
+
 ## Intended Features:
 
 ### High Concept

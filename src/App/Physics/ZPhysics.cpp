@@ -59,7 +59,6 @@ PhysBodyHandle* Phys_GetHandleById(PhysBodyList* list, i32 queryId)
 // Delete all objects on this handle
 void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle)
 {
-    ILLEGAL_CODE_PATH
     // TODO: This is almost certainly NOT how to free stuff in bullet
     // !find proper example!
     // Assuming that on shutdown we will be removing freeing

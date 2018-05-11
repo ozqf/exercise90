@@ -45,9 +45,9 @@ void Win32_PrintDebug(char *str)
  *********************************************************************/
 void Platform_R_DrawScene(RenderScene* scene)
 {
-    if (renderModuleState == 1)
+    if (g_rendererLink.moduleState == 1)
     {
-        renderer.R_RenderScene(scene, &g_gameTime);
+        g_renderer.R_RenderScene(scene, &g_gameTime);
     }
     //Win32_RenderFrame(scene);
 }
@@ -74,9 +74,9 @@ void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 
 void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
 {
-    if (renderModuleState == 1)
+    if (g_rendererLink.moduleState == 1)
     {
-        renderer.R_BindTexture(rgbaPixels, width, height, textureIndex);
+        g_renderer.R_BindTexture(rgbaPixels, width, height, textureIndex);
     }
     //Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
 }
@@ -101,9 +101,9 @@ void Win32_InitPlatformInterface()
 
 void Win32_CloseAppLink()
 {
-    app.AppShutdown();
-    FreeLibrary(gameModule);
-    app.isvalid = false;
+    g_app.AppShutdown();
+    FreeLibrary(g_appLink.moduleHandle);
+    g_app.isvalid = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -111,19 +111,19 @@ void Win32_CloseAppLink()
 ///////////////////////////////////////////////////////////
 u8 Win32_LinkToApplication()
 {
-    if (app.isvalid == 1)
+    if (g_app.isvalid == 1)
     {
         Win32_CloseAppLink();
     }
-    Win32_CopyFile(appModulePath, appModulePathCopy);
-    gameModule = LoadLibraryA(appModulePathCopy);
-    if (gameModule != NULL)
+    Win32_CopyFile(g_appLink.path, g_appLink.pathForCopy);
+    g_appLink.moduleHandle = LoadLibraryA(g_appLink.pathForCopy);
+    if (g_appLink.moduleHandle != NULL)
     {
-        Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(gameModule, "LinkToApp");
+        Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(g_appLink.moduleHandle, "LinkToApp");
         if (linkToApp != NULL)
         {
-            app = linkToApp(platInterface);
-            if (!app.AppInit())
+            g_app = linkToApp(platInterface);
+            if (!g_app.AppInit())
             {
                 Win32_Error("Init App failed", "Error");
                 return 1;
@@ -213,7 +213,7 @@ void Win32_CheckApplicationLink()
 
 u8 Win32_LinkToAppStub()
 {
-    app = GetAppInterfaceStub(platInterface);
+    g_app = GetAppInterfaceStub(platInterface);
     return 1;
 }
 
@@ -223,46 +223,96 @@ u8 Win32_LinkToAppStub()
 
 void Win32_CloseRendererLink()
 {
-    renderModuleState = 0;
-    renderer.R_Shutdown();
-    FreeLibrary(renderModule);
-    renderer = {};
+    g_rendererLink.moduleState = 0;
+    g_renderer.R_Shutdown();
+    FreeLibrary(g_rendererLink.moduleHandle);
+    g_renderer = {};
 }
 
 u8 Win32_LinkToRenderer()
 {
-    if (renderModuleState == 1)
+    if (g_rendererLink.moduleState == 1)
     {
         Win32_CloseRendererLink();
     }
-    Win32_CopyFile(renderModulePath, renderModulePathCopy);
-    renderModule = LoadLibraryA(renderModulePathCopy);
-    if (renderModule != NULL)
+    Win32_CopyFile(g_rendererLink.path, g_rendererLink.pathForCopy);
+    g_rendererLink.moduleHandle = LoadLibraryA(g_rendererLink.pathForCopy);
+    if (g_rendererLink.moduleHandle != NULL)
     {
-        Func_LinkToRenderer *link = (Func_LinkToRenderer *)GetProcAddress(renderModule, "LinkToRenderer");
+        Func_LinkToRenderer *link = (Func_LinkToRenderer *)GetProcAddress(g_rendererLink.moduleHandle, "LinkToRenderer");
         if (link != NULL)
         {
-            renderer = link();
-            if (!renderer.R_Init(appWindow))
+            g_renderer = link();
+            if (!g_renderer.R_Init(appWindow))
             {
                 Win32_Error("Init Renderer failed", "Error");
-                renderModuleState = 0;
+                g_rendererLink.moduleState = 0;
                 return 0;
             }
-            renderModuleState = 1;
+            g_rendererLink.moduleState = 1;
             return 1;
         }
         else
         {
             Win32_Error("Failed to find renderer dll link function", "Error");
-            renderModuleState = 0;
+            g_rendererLink.moduleState = 0;
             return 0;
         }
     }
     else
     {
         Win32_Error("Failed to find renderer dll", "Error");
-        renderModuleState = 0;
+        g_rendererLink.moduleState = 0;
         return 0;
     }
+}
+
+///////////////////////////////////////////////////////////
+// Link to Sound
+///////////////////////////////////////////////////////////
+
+void Win32_CloseSoundLink()
+{
+	g_soundLink.moduleState = 0;
+	g_sound.Snd_Shutdown();
+	FreeLibrary(g_soundLink.moduleHandle);
+	g_sound = {};
+}
+
+u8 Win32_LinkToSound()
+{
+	if (g_soundLink.moduleState == 1)
+	{
+		Win32_CloseRendererLink();
+	}
+	Win32_CopyFile(g_soundLink.path, g_soundLink.pathForCopy);
+	g_soundLink.moduleHandle = LoadLibraryA(g_soundLink.pathForCopy);
+	if (g_soundLink.moduleHandle != NULL)
+	{
+		Func_LinkToSound *link = (Func_LinkToSound *)GetProcAddress(g_soundLink.moduleHandle, "LinkToSound");
+		if (link != NULL)
+		{
+			g_sound = link();
+			if (!g_sound.Snd_Init())
+			{
+				Win32_Error("Init Sound failed", "Error");
+				g_soundLink.moduleState = 0;
+				return 0;
+			}
+			g_soundLink.moduleState = 1;
+			return 1;
+		}
+		else
+		{
+			Win32_Error("Failed to find sound dll link function", "Error");
+			g_soundLink.moduleState = 0;
+			return 0;
+		}
+	}
+	else
+	{
+		Win32_Error("Failed to find sound dll", "Error");
+		g_soundLink.moduleState = 0;
+		return 0;
+	}
 }

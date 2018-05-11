@@ -5,6 +5,7 @@
 /buildcommon/
 /buildgame/
 /buildrenderer/
+/buildsound/
 /debug/
 /release/
 /lib/common.obj
