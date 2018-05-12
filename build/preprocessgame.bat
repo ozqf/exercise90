@@ -3,6 +3,7 @@
 @echo -----------------------------
 @echo Preprocess Exercise 90 Game dll
 
+cd..
 if not exist bin mkdir bin
 cd bin
 if not exist base mkdir base
@@ -22,4 +23,5 @@ set compilerFlags=
 set compilerDefines=
 
 cd..
+cd build
 @echo on

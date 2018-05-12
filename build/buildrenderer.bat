@@ -3,6 +3,7 @@
 @echo --------------------------------------------------------
 @echo Build Exercise 90 Renderer dll
 
+cd..
 if not exist bin mkdir bin
 cd bin
 if not exist base mkdir base
@@ -29,4 +30,5 @@ set compilerInput=
 set outputDLL=
 
 cd..
+cd build
 @echo on

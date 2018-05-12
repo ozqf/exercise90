@@ -1,14 +1,15 @@
 @echo off
+cls
 
-@echo --------------------------------------------------------
-@echo Build Exercise 90 Win32 Platform Layer
+@echo Build SDL Platform
 
+cd..
 if not exist bin mkdir bin
 if not exist build mkdir build
 cd build
 del *.* /Q
 @rem === COMPILER SETTINGS ===
-set outputExe=/Fe../bin/exercise90.exe
+set outputExe=/Fe../bin/test90.exe
 @rem main compile flags, elevating warnings
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 @rem No elevated warnings
@@ -17,18 +18,18 @@ set compilerDefines=/DPARANOID=1
 @rem /DVERBOSE=1
 
 @rem === Compile Win32 Window application
-set compilerInput=../src/Platform/win32_main.cpp
+@rem set compilerInput=../src/Platform/win32_main.cpp
 
 @rem === Compile Testing Win32 Console application
-@rem set compilerInput=../src/Platform/win32_consoleApp.cpp
-@rem set linkStr=/link /SUBSYSTEM:CONSOLE
+set compilerInput=../src/Platform/win32_consoleApp.cpp
+set linkStr=/link /SUBSYSTEM:CONSOLE
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
-set linkStr=/link
-set linkInputB=user32.lib opengl32.lib
-set linkInputC=Gdi32.lib ../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
+@rem set linkStr=/link
+@rem set linkInputB=user32.lib opengl32.lib
+@rem set linkInputC=Gdi32.lib
 @echo on
-@cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
+cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
 set outputExe=
 set compilerFlags=
@@ -41,6 +42,7 @@ set linkInputB=
 set linkInputC=
 
 @cd..
+cd build
 @echo on
 
 @rem Project defines

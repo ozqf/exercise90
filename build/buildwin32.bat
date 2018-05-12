@@ -1,25 +1,35 @@
 @echo off
-cls
 
-@echo Build SDL Platform
+@echo --------------------------------------------------------
+@echo Build Exercise 90 Win32 Platform Layer
 
+cd..
 if not exist bin mkdir bin
-if not exist build mkdir build
-cd build
+if not exist buildwin32 mkdir buildwin32
+cd buildwin32
 del *.* /Q
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/exercise90.exe
+@rem main compile flags, elevating warnings
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
+@rem No elevated warnings
+@rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
-set compilerInput=../src/Platform/PlatformSDL/sdl_main.cpp 
+@rem /DVERBOSE=1
 
-@rem === LINK SETTINGS ===
-set linkStr=/link /SUBSYSTEM:CONSOLE
-set linkInputA=../lib/SDL2-2.0.7/lib/x86/SDL2main.lib
-set linkInputB=../lib/SDL2-2.0.7/lib/x86/SDL2.lib
-set linkInputC=../lib/glew-2.1.0/lib/Release/Win32/glew32.lib ../lib/OpenGL32.lib
+@rem === Compile Win32 Window application
+set compilerInput=../src/Platform/win32_main.cpp
+
+@rem === Compile Testing Win32 Console application
+@rem set compilerInput=../src/Platform/win32_consoleApp.cpp
+@rem set linkStr=/link /SUBSYSTEM:CONSOLE
+
+@rem === LINK SETTINGS === (disable if running win32 console application test)
+set linkStr=/link
+set linkInputB=user32.lib opengl32.lib
+set linkInputC=Gdi32.lib ../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
 @echo on
-cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
+@cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
 set outputExe=
 set compilerFlags=
@@ -32,6 +42,7 @@ set linkInputB=
 set linkInputC=
 
 @cd..
+@cd build
 @echo on
 
 @rem Project defines

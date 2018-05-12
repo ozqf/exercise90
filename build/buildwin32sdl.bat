@@ -1,36 +1,39 @@
 @echo off
+cls
 
-@echo --------------------------------------------------------
-@echo Build Exercise 90 Common Library
+@echo Build SDL Platform
 
+cd..
 if not exist bin mkdir bin
-if not exist buildcommon mkdir buildcommon
-cd buildcommon
+if not exist build mkdir build
+cd build
 del *.* /Q
 @rem === COMPILER SETTINGS ===
-@set output=/Fo../lib/common.obj
-@rem main compile flags, elevating warnings
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /c
-@rem No elevated warnings
-@rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
+set outputExe=/Fe../bin/exercise90.exe
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
-@rem /DVERBOSE=1
+set compilerInput=../src/Platform/PlatformSDL/sdl_main.cpp 
 
-@rem === Compile Common module
-set compilerInput=../src/common/com_module.cpp
-
+@rem === LINK SETTINGS ===
+set linkStr=/link /SUBSYSTEM:CONSOLE
+set linkInputA=../lib/SDL2-2.0.7/lib/x86/SDL2main.lib
+set linkInputB=../lib/SDL2-2.0.7/lib/x86/SDL2.lib
+set linkInputC=../lib/glew-2.1.0/lib/Release/Win32/glew32.lib ../lib/OpenGL32.lib
 @echo on
-@cl %compilerFlags% %compilerDefines% %compilerInput% %output%
-
-@rem --
-@rem lib.exe /OUT:common.lib com_module.obj
+cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off
 set outputExe=
 set compilerFlags=
 set compilerDefines=
 set compilerInput=
 
+set linkStr=
+set linkInputA=
+set linkInputB=
+set linkInputC=
+
 @cd..
+@cd build
 @echo on
 
 @rem Project defines
@@ -54,5 +57,3 @@ set compilerInput=
 @rem -Fm Create map file (contains addresses of all variables/functions)
 @rem -opt:ref -> make compiler aggressive in removal of unused code
 @rem /LD -> compile to DLL
-@rem /c -> No link
-@rem /FoPathNameHere -> output object file

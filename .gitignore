@@ -1,18 +1,22 @@
+# IDEs/Debuggers
 /.vs/
 /.vscode/
 
-/build/
+# Temp directories for compile
 /buildcommon/
 /buildgame/
 /buildrenderer/
 /buildsound/
+/buildwin32/
 /debug/
 /release/
 
+# For 3rd party DLLs
 /bin/*
 !/bin/fmod.dll
 !/bin/fmodstudio.dll
 
+# most libs are 3rd party but common.obj is compiled
 /lib/common.obj
 *.db
 /xercise.VC.VC.opendb

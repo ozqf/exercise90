@@ -1,11 +1,12 @@
 @echo off
 
-@rem echo Setup vs
-@rem @call vsvars2015
+@echo Setup vs
+@call vsvars2015
 
-@echo --------------------------------------------------------
+@echo -----------------------------
 @echo Build Exercise 90 Game dll
 
+cd..
 if not exist bin mkdir bin
 cd bin
 if not exist base mkdir base
@@ -27,7 +28,7 @@ set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /EHsc
 set compilerDefines=/DPARANOID=1
 set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @echo on
-@cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
+cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
 
 @if %ERRORLEVEL% == 0 goto :FINISHED
 
@@ -41,5 +42,6 @@ set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @set compilerDefines=
 
 @cd..
+@cd build
 
 @echo on
