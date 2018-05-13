@@ -26,8 +26,9 @@ set compilerInput=../src/Platform/win32_main.cpp
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 set linkStr=/link
-set linkInputB=user32.lib opengl32.lib
-set linkInputC=Gdi32.lib ../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
+set linkInputA=user32.lib opengl32.lib Gdi32.lib
+set linkInputB=../lib/zlib/zlibstatic.lib
+set linkInputC=../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
 @echo on
 @cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @echo off

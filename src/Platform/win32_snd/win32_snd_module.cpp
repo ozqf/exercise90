@@ -56,8 +56,8 @@ u8 Snd_Init()
     }
 
     // test example, commented out until I've made a decision on asset storage/version control
-    result = system->createSound("Frenzy_Beam_Loop.wav", FMOD_DEFAULT, NULL, &gsnd_soundHandle);
-    result = system->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
+    //result = system->createSound("Frenzy_Beam_Loop.wav", FMOD_DEFAULT, NULL, &gsnd_soundHandle);
+    //result = system->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
 
     return 1;
 }
