@@ -1,12 +1,15 @@
 @echo off
 cls
 
-@echo Build SDL Platform
+@echo --------------------------------------------------------
+@echo Build Exercise 90 win32 tests
+
+set BUILD_WIN32_TESTS_DIR=buildwin32tests
 
 cd..
 if not exist bin mkdir bin
-if not exist build mkdir build
-cd build
+if not exist %BUILD_WIN32_TESTS_DIR% mkdir %BUILD_WIN32_TESTS_DIR%
+cd %BUILD_WIN32_TESTS_DIR%
 del *.* /Q
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/test90.exe
@@ -22,15 +25,23 @@ set compilerDefines=/DPARANOID=1
 
 @rem === Compile Testing Win32 Console application
 set compilerInput=../src/Platform/win32_consoleApp.cpp
-set linkStr=/link /SUBSYSTEM:CONSOLE
+set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 @rem set linkStr=/link
 @rem set linkInputB=user32.lib opengl32.lib
 @rem set linkInputC=Gdi32.lib
-@echo on
+
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
+@if not %ERRORLEVEL% == 0 goto :FINISHED
+
+call ../build/rtests.bat
 @echo off
+
+:FINISHED
+@cd..
+@cd build
+
 set outputExe=
 set compilerFlags=
 set compilerDefines=
@@ -41,8 +52,9 @@ set linkInputA=
 set linkInputB=
 set linkInputC=
 
-@cd..
-cd build
+@rem @cd..
+@rem cd build
+
 @echo on
 
 @rem Project defines

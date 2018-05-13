@@ -8,7 +8,9 @@
 #include <stdio.h>
 #include "win32_system_include.h"
 
-#include "../tests/test_shared_utils.h"
+#include "../tests/test_common_module.h"
+
+#include "../tests/test_zlib.h"
 
 void HeapTest()
 {
@@ -16,10 +18,10 @@ void HeapTest()
     Heap heap;
 
     printf("\n** HEAP TESTS **\n");
-    u32 alignedSize = Com_AlignSize(52, 32);
+    u32 alignedSize = COM_AlignSize(52, 32);
     printf("32 Aligned size of 52 is %d\n", alignedSize);
 
-    alignedSize = Com_AlignSize(673, 32);
+    alignedSize = COM_AlignSize(673, 32);
     printf("32 Aligned size of 673 is %d\n", alignedSize);
 
     u32 sizeOfBlock = sizeof(HeapBlock);
@@ -41,7 +43,7 @@ void HeapTest()
 
     BlockRef ref2 = {};
     u32 stringBlockId = Heap_Allocate(&heap, &ref2, 128, "B2 128");
-	Com_CopyString("The quick brown fox jumped over the lazy dogs.", (char*)ref2.ptrMemory);
+	COM_CopyString("The quick brown fox jumped over the lazy dogs.", (char*)ref2.ptrMemory);
 
     BlockRef stringRef = {};
     Heap_InitBlockRef(&heap, &stringRef, stringBlockId);
@@ -58,20 +60,20 @@ void HeapTest()
     u32 val = (u32)(*ptr);
     //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, val);
 
-    Heap_DebugPrintAllocations(&heap);
+    //Heap_DebugPrintAllocations(&heap);
 
     printf("Test block remove\n");
     Heap_RemoveBlockById(&heap, 2);
     Heap_RemoveBlockById(&heap, 1);
-    Heap_DebugPrintAllocations(&heap);
+    //Heap_DebugPrintAllocations(&heap);
     BlockRef ref5 = {};
     Heap_Allocate(&heap, &ref5, 500, "Test 5");
 
-    Heap_DebugPrintAllocations(&heap);
+    //Heap_DebugPrintAllocations(&heap);
 
     printf("\nPURGE HEAP\n");
     Heap_Purge(&heap);
-    Heap_DebugPrintAllocations(&heap);
+    //Heap_DebugPrintAllocations(&heap);
 
     VirtualFree(ptrSystemMemory, 0, MEM_RELEASE);
     //printf("Mem at %d: %d\n", (u32)ref4.ptrMemory, (u32)(*ptr));
@@ -85,12 +87,23 @@ void HeapTest2()
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
+    printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
     
     //HeapTest();
-    Test_Com_Run();
+    //Test_Com_Run();
+
+    FILE* source;
+    FILE* dest;
+    fopen_s(&source, "ReadTest2.txt", "rb");
+    fopen_s(&dest, "ReadTest2Compressed.dat", "wb");
+
+    if (Test_zlib(source, dest, 9))
+    {
+        printf("FAILED: zlib tests\n");
+    }
     
-    printf("End - Success");
+    printf("End of Tests - Success\n");
     return 0;
 }
 

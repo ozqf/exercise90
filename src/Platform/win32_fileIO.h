@@ -6,6 +6,12 @@
 #include "../common/com_defines.h"
 #include "../common/com_memory_utils.h"
 
+//#include "../../lib/minizip/mz.h"
+//#include "../../lib/minizip/mz_zip.h"
+//#include "../../lib/minizip/mz_strm.h"
+//#include "../../lib/minizip/mz_strm_mem.h"
+
+
 // inline u32 SafeTruncateUInt64(u64 value)
 // {
 // 	// TODO: Defines for max value
@@ -20,6 +26,54 @@
 void Win32_FreeFileMemory(void *mem)
 {
     VirtualFree(mem, 0, MEM_RELEASE);
+}
+
+#include "../../lib/zlib/zlib.h"
+
+#define CHUNK 16384
+
+i32 Win32_UnzipTest()
+{
+#if 1
+    //OutputDebugStringA(zlibVersion);
+    //int z_result = compress(NULL, NULL, NULL, 0);
+
+    i32 ret, flush;
+    // unsigned have;
+    z_stream strm;
+    // u8 in[CHUNK];
+    // u8 out[CHUNK];
+
+    // int (faster) -1 to 9 (better)
+    i8 defaultCompressionLevel = -1;
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, defaultCompressionLevel);
+    if (ret != Z_OK)
+    {
+        return ret;
+    }
+    flush = 0;
+    return NULL;
+#endif
+
+#if 0 // minizip
+    u8* zip_buffer = NULL;
+    u32 zip_buffer_size = 64;
+    void *mem_stream = NULL;
+
+    // fill zip_buffer with zip contents
+    mz_stream_mem_create(&mem_stream);
+    mz_stream_mem_set_buffer(mem_stream, zip_buffer, zip_buffer_size);
+    mz_stream_open(mem_stream, NULL, MZ_OPEN_MODE_READ);
+
+    void *zip_handle = mz_zip_open(mem_stream, MZ_OPEN_MODE_READ);
+    // do unzip operations
+
+    mz_stream_mem_delete(&mem_stream);
+#endif
 }
 
 void *Win32_ReadEntireFile(char *fileName)

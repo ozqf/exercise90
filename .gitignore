@@ -8,6 +8,7 @@
 /buildrenderer/
 /buildsound/
 /buildwin32/
+/buildwin32tests/
 /debug/
 /release/
 

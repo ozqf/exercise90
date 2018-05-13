@@ -5,16 +5,34 @@ A simple fps as a learning exercise in C, opengl and games/engines generally.
 
 * https://www.dropbox.com/sh/65xmjtpvtnng3hm/AAD5mSgHuvS0DlsAj46U9XuGa?dl=0
 
+## Libraries
+
+### Bullet Physics
+
+[https://pybullet.org]
+Link to the game DLL via the 'physics wrapper' which abstracts access to the physics engine
+
+### FMOD
+
+[https://www.fmod.com/]
+Sound library. Linked to win32sound.dll.
+
+### zlib
+[https://zlib.net/]
+Linked as a .lib to the platform layer for compressing/decompressing files in .dat files
+
 ## Intended Features:
 
 ### High Concept
 * Basic Doom/Quake level 3D engine capable of prototyping 3D games.
-* Written from scratch and avoiding the use of external libraries/plugins where possible for maximum education and fun...yay.
+* All external libraries are abstracted to keep the core game code clean of anything third party.
 
 ### Basic Architecture
-* Platform/Engine layer is the exe that handles basic input, update loop, rendering, file/network IO etc.
+* Platform/Engine layer is the exe that handles basic input, update loop, rendering, file/network IO etc and runs DLLs.
 * Game is separated into a DLL which is sealed from the outside world. All platform specific functionality goes through the platform layer.
-* Renderer is simple (hey I'm learning) and uses opengl.
+* Renderer and Sound are also DLLs but also contain platform specific code - should do something about this eventually.
+* All DLLs are automatically 'hot reloaded' if the platform detects the file has been modified.
+* Assets will be stored together in ZIP files.
 
 ### Future thoughts:
 * Rewrite platform/engine layer for linux once engine is developed enough.

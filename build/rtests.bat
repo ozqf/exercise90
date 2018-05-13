@@ -1,5 +1,8 @@
 @echo off
+cd..
 cd bin
-@echo *** Run Tests ***
+@echo --------------------------------------------------------
 test90.exe
 cd..
+cd build
+@echo on
