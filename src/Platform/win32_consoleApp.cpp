@@ -98,9 +98,26 @@ int main(i32 argc, char* argv[])
     fopen_s(&source, "ReadTest2.txt", "rb");
     fopen_s(&dest, "ReadTest2Compressed.dat", "wb");
 
-    if (Test_zlib(source, dest, 9))
+    printf("Zlib compression test\n");
+    if (Test_zlib_compress(source, dest, 9))
     {
-        printf("FAILED: zlib tests\n");
+        printf("FAILED: zlib compress test\n");
+    }
+    else
+    {
+        printf("Zlib decompression test\n");
+        fclose(source);
+        fclose(dest);
+        fopen_s(&source, "ReadTest2Compressed.dat", "rb");
+        fopen_s(&dest, "ReadTest2_Clone.txt", "wb");
+        if (Test_zlib_decompress(source, dest))
+        {
+            printf("FAILED: zlib decompress test\n");
+        }
+        else
+        {
+            printf("Zlib tests completed\n");
+        }
     }
     
     printf("End of Tests - Success\n");
