@@ -163,6 +163,16 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 }
 #endif
 
+void Win32_LoadBMP()
+{
+    /* From .dat file:
+    > Retrieve handle to .dat file and relevant file entry
+    > Calculate size of bitmap
+    > Alloc space on heap
+    > Read over file in heap block
+    */
+}
+
 #if 1
 void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 {

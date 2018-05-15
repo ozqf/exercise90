@@ -11,6 +11,8 @@
 #include "../tests/test_common_module.h"
 
 #include "../tests/test_zlib.h"
+#include "../tests/test_pak.h"
+#include "../tests/test_data.h"
 
 void HeapTest()
 {
@@ -84,14 +86,8 @@ void HeapTest2()
     
 }
 
-// main function for everywhere except windows
-int main(i32 argc, char* argv[])
+void RunZlibTests()
 {
-    printf("*** Exercise 90 win32 tests ***\n");
-    printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
-    
-    //HeapTest();
-    //Test_Com_Run();
 
     FILE* source;
     FILE* dest;
@@ -120,6 +116,20 @@ int main(i32 argc, char* argv[])
         }
     }
     
+}
+
+// main function for everywhere except windows
+int main(i32 argc, char* argv[])
+{
+    printf("*** Exercise 90 win32 tests ***\n");
+    printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
+    
+    //HeapTest();
+    //Test_Com_Run();
+
+    //Test_pak();
+    Test_Pack();
+
     printf("End of Tests - Success\n");
     return 0;
 }

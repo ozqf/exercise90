@@ -34,8 +34,8 @@ set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib
 
 cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
 @if not %ERRORLEVEL% == 0 goto :FINISHED
-
-call ../build/rtests.bat
+@rem Auto run if you like
+@call ../build/rtests.bat
 @echo off
 
 :FINISHED
