@@ -108,6 +108,17 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
     return NULL;
 }
 
+inline static MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
+{
+    HeapBlock* block = Heap_FindBlock(heap, id);
+    Assert(block != NULL);
+
+    MemoryBlock result = {};
+    result.ptrMemory = block->mem.ptrMemory;
+    result.size = block->mem.objectSize;
+    return result;
+}
+
 // Find the data pointer for this BlockRef for use. Update if dirty
 inline static void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 {

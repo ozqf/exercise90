@@ -24,6 +24,7 @@ struct Heap;
 static inline void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
 static inline HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);
 static inline HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label);
+static inline MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id);
 static inline void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef);
 static inline u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block);
 static inline void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous);
