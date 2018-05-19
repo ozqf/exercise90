@@ -13,6 +13,7 @@
 #include "../tests/test_zlib.h"
 #include "../tests/test_pak.h"
 #include "../tests/test_data.h"
+#include "../tests/test_multithreading.h"
 
 void HeapTest()
 {
@@ -129,6 +130,7 @@ int main(i32 argc, char* argv[])
 
     //Test_pak();
     Test_Pack();
+    //Test_MultiThreading();
 
     printf("End of Tests - Success\n");
     return 0;
