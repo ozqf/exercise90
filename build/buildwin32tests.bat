@@ -24,7 +24,7 @@ set compilerDefines=/DPARANOID=1
 @rem set compilerInput=../src/Platform/win32_main.cpp
 
 @rem === Compile Testing Win32 Console application
-set compilerInput=../src/Platform/win32_consoleApp.cpp
+set compilerInput=../src/tests/win32_consoleApp.cpp
 set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)

@@ -6,14 +6,14 @@
 #pragma once
 
 #include <stdio.h>
-#include "win32_system_include.h"
+#include "../Platform/win32_system_include.h"
 
-#include "../tests/test_common_module.h"
+#include "test_common_module.h"
 
-#include "../tests/test_zlib.h"
-#include "../tests/test_pak.h"
-#include "../tests/test_data.h"
-#include "../tests/test_multithreading.h"
+#include "test_zlib.h"
+#include "test_pak.h"
+#include "test_data.h"
+#include "test_multithreading.h"
 
 void HeapTest()
 {

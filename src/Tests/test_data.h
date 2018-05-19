@@ -121,8 +121,13 @@ struct DataFileItem
     u32 sizeInHeap;             // decompressed size in RAM
 };
 
+////////////////////////////////////////////////////
+// VARS
+////////////////////////////////////////////////////
 DataFileHandle g_dataHandles[16];
 internal u32 g_nextDataHandle = 0;
+
+Heap g_heap = {};
 
 DataFileHandle* Test_ReadPackManifest(Heap* h, BlockRef* manifestRef, char* filePath)
 {
@@ -235,12 +240,135 @@ void Test_FindFileTest(Heap* h, char* fileName)
     }
 }
 
-Heap g_heap = {};
+u8 Test_DetectFileExtension(char* fileName, char* extension)
+{
+    // Calc length of filename so it can be read backwards
+    i32 fileNameLength = 0;
+    while (fileName[fileNameLength] != 0) { fileNameLength++; }
+
+    i32 extensionLength = 0;
+    while (extension[extensionLength] != 0) { extensionLength++; }
+
+    if (fileNameLength <= extensionLength)
+    {
+        //printf("File name %s is too short to have extension %s\n", fileName, extension);
+        return 0;
+    }
+    
+    // step both back to last char
+    i32 fNamePos = fileNameLength - 1;
+    i32 exPos = extensionLength - 1;
+
+    while (exPos >= 0)
+    {
+        if (fileName[fNamePos] != extension[exPos])
+        {
+            return 0;
+        }
+        --fNamePos;
+        --exPos;
+    }
+    return 1;
+}
+
+void Test_SearchDirectories()
+{
+    char dir[256];
+    // grab current dir, apparently not suitable for multithreaded stuff
+    // but not like we care right now
+    u32 dirStrSize = GetCurrentDirectory(256, dir);
+    // eg y:\bin if in shell mode.
+    if (dirStrSize == 0)
+    {
+        printf("Failed to retrieve current dir, aborting\n");
+        return;
+    }
+    else
+    {
+        printf("Current dir: %s\n", dir);
+    }
+
+    char buf[256];
+    sprintf_s(buf, 256, "%s\\*", dir);
+
+    //char* path = "C:\\temp\\*";
+    char* path = buf;
+    //char* path = dir;
+    LARGE_INTEGER fileSize;
+    WIN32_FIND_DATA findData;
+    
+    HANDLE handle = INVALID_HANDLE_VALUE;
+    handle = FindFirstFile(path, &findData);
+    if (handle == INVALID_HANDLE_VALUE)
+    {
+        printf("Found no files at %s\n ", path);
+        return;
+    }
+
+    //u64_union fileSize;
+    fileSize.HighPart = findData.nFileSizeHigh;
+    fileSize.LowPart = findData.nFileSizeLow;
+
+    printf("Found in %s:\n\n", path);
+    
+    // Find the rest of the files in this dir:
+    i32 count = 0;
+
+    u8 running = 1;
+
+    while (running)
+    {
+        count++;
+        //printf("%d: ", count);
+        u32 isDir = findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        //printf("Dir? %d\n", isDir);
+        if (!isDir)
+        {
+            // is a file... is it a .dat though?
+            fileSize.HighPart = findData.nFileSizeHigh;
+            fileSize.LowPart = findData.nFileSizeLow;
+            if (Test_DetectFileExtension(findData.cFileName, ".dat"))
+            {
+                //printf("Data file! ");
+                printf("Data File %s. Size: %lld KB\n", findData.cFileName, (fileSize.QuadPart / 1024));
+            }
+            
+        }
+        else
+        {
+            // Is directory
+            //printf("Directory %s\n", findData.cFileName);
+        }
+        //printf("Is directory: %d\n", );
+        //printf("Is encrypted: %d\n", (findData.dwFileAttributes & FILE_ATTRIBUTE_ENCRYPTED));
+        //printf("File name: %s\n", findData.cFileName);
+        //printf("Alt File name: %s\n", findData.cAlternateFileName);
+        //printf("File chunks: high %d, low %d\n", findData.nFileSizeHigh, findData.nFileSizeLow);
+        //printf("File size: %lld\n", fileSize.QuadPart);
+
+        BOOL success = FindNextFile(handle, &findData);
+        //printf("Find next result: %d\n", success);
+        //printf("File name: %s\n", findData.cFileName);
+        if (success == 0) { running = 0; }
+    }
+    printf("\nFound %d files/folders\n", count);
+    //while (FindNextFile(handle, &findData) != 0);
+
+    FindClose(handle);
+}
 
 void Test_Pack()
 {
+#if 0
+    // Library based directory scan
     //TestDirectoryScan();
+#endif
+#if 1
+    // Win32 directory scan
+    Test_SearchDirectories();
+#endif
 
+#if 0
     // Create main heap
     Heap_Init(&g_heap, malloc(MegaBytes(16)), MegaBytes(16));
     // Load file manifest into references
@@ -252,4 +380,5 @@ void Test_Pack()
     printf("\n** Search tests **\n");
     Test_FindFileTest(&g_heap, "\\BAL1A0.bmp");
     Test_FindFileTest(&g_heap, "\\brbrick2.bmp");
+#endif
 }

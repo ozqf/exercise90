@@ -41,6 +41,13 @@ union u32_union
     u8 bytes[sizeof(u32)];
 };
 
+union u64_union
+{
+    u64 value;
+    u32 u32Values[2];
+    u8 bytes[sizeof(u64)];
+};
+
 enum ZMouseMode { Free = 0, Captured = 1 };
 
 struct Vec3
