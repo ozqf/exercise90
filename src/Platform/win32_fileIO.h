@@ -119,51 +119,8 @@ void BlockRefTest()
 {
     //BlockRef ref = {};
 }
-#if 1
-void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
-{
-    AssertAlways(destRef != NULL);
-    /*
-    > Open file, find size
-    > Prepare block on heap
-    > read file contents into heap block
-    > close
-    */
-    
-    FILE* f;
-    fopen_s(&f, fileName, "rb");
 
-    if (f == NULL)
-    {
-        Win32_Error(fileName, "Cannot open to read");
-    }
-
-    i32 end;
-
-    // Scan for file size
-    // pos = ftell(f); // assuming start at 0 anyway
-    fseek(f, 0, SEEK_END);
-    end = ftell(f);
-    fseek(f, 0, SEEK_SET);
-
-    // Alloc on Heap
-    Heap_Allocate(heap, destRef, end, fileName);
-
-    // Get position on heap
-    void* memory = Heap_GetBlockMemoryAddress(heap, destRef);
-
-    // Read!
-    // heap has made a space the size of the file, so buffer size and read size
-    // are the same
-    fread_s(memory, end, 1, end, f);
-
-    // Close file stream
-    fclose(f);
-    return;
-}
-#endif
-
-void Win32_LoadBMP()
+void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePath)
 {
     /* From .dat file:
     > Retrieve handle to .dat file and relevant file entry
@@ -171,9 +128,79 @@ void Win32_LoadBMP()
     > Alloc space on heap
     > Read over file in heap block
     */
+
+	u8* fileOrigin = (u8*)mem.ptrMemory;
+	u8* reader = fileOrigin;
+
+	// Read file header
+	WINBMPFILEHEADER fileHeader;
+	i32 fileHeaderSize = sizeof(fileHeader);
+	reader += COM_CopyMemory(reader, (u8*)&fileHeader, sizeof(WINBMPFILEHEADER));
+	//fread_s((void*)&fileHeader, fileHeaderSize, 1, fileHeaderSize, f);
+	AssertAlways(fileHeader.FileType == BMP_FILE_TYPE);
+
+
+	// Read bitmap header
+	WINNTBITMAPHEADER bmpHeader;
+	i32 bmpHeaderSize = sizeof(bmpHeader);
+
+	//reader = fileOrigin + fileHeader.
+
+	//fseek(f, fileHeaderSize, SEEK_SET);
+	//fread_s((void*)&bmpHeader, bmpHeaderSize, 1, bmpHeaderSize, f);
+	COM_CopyMemory(reader, (u8*)&bmpHeader, sizeof(WINNTBITMAPHEADER));
+
+	i32 w = bmpHeader.Width;
+	i32 h = bmpHeader.Height;
+	u32 numPixels = w * h;
+
+	char buf[128];
+	sprintf_s(buf, 128,
+		"Read BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
+		filePath, fileHeader.FileType, fileHeader.FileSize,
+		w, h);
+	OutputDebugString(buf);
+
+	u32 targetImageBytes = sizeof(u32) * numPixels;
+	u32 targetSize = sizeof(Texture2DHeader) + targetImageBytes;
+
+	u32* sourcePixels = (u32*)(fileOrigin + fileHeader.BitmapOffset);
+
+	// Allocate space for results on Heap
+	Heap_Allocate(heap, destRef, targetSize, filePath);
+	Texture2DHeader* tex = (Texture2DHeader*)destRef->ptrMemory;
+	u32* pixels = (u32*)((u8*)destRef->ptrMemory + sizeof(Texture2DHeader));
+	tex->ptrMemory = pixels;
+	tex->width = w;
+	tex->height = h;
+
+	// set to sentinel value
+	COM_SetMemory((u8*)pixels, targetImageBytes, 0xAB);
+
+	u32* destPixel = pixels;
+	u32* sourcePixel = sourcePixels;
+
+	// Convert colours to correct format
+	for (u32 i = 0; i < numPixels; ++i)
+	{
+		u8 alpha = (u8)(*sourcePixel);
+		u8 blue = (u8)(*sourcePixel >> 8);
+		u8 green = (u8)(*sourcePixel >> 16);
+		u8 red = (u8)(*sourcePixel >> 24);
+		u32_union u32Bytes;
+		u32Bytes.bytes[0] = red;
+		u32Bytes.bytes[1] = green;
+		u32Bytes.bytes[2] = blue;
+		u32Bytes.bytes[3] = alpha;
+		*destPixel = u32Bytes.value;
+
+		++destPixel;
+		++sourcePixel;
+	}
+
 }
 
-#if 1
+#if 0
 void Win32_ReadBMPToHeap(Heap* heap, BlockRef* destRef, char* filePath)
 {
     AssertAlways(destRef != NULL);
@@ -383,3 +410,95 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     fclose(target);
     #endif
 }
+
+#if 0
+void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
+{
+	AssertAlways(destRef != NULL);
+	/*
+	> Open file, find size
+	> Prepare block on heap
+	> read file contents into heap block
+	> close
+	*/
+
+	FILE* f;
+	fopen_s(&f, fileName, "rb");
+
+	if (f == NULL)
+	{
+		Win32_Error(fileName, "Cannot open to read");
+	}
+
+	i32 end;
+
+	// Scan for file size
+	// pos = ftell(f); // assuming start at 0 anyway
+	fseek(f, 0, SEEK_END);
+	end = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	// Alloc on Heap
+	Heap_Allocate(heap, destRef, end, fileName);
+
+	// Get position on heap
+	void* memory = Heap_GetBlockMemoryAddress(heap, destRef);
+
+	// Read!
+	// heap has made a space the size of the file, so buffer size and read size
+	// are the same
+	fread_s(memory, end, 1, end, f);
+
+	// Close file stream
+	fclose(f);
+	return;
+}
+#endif
+
+#if 1
+void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
+{
+	AssertAlways(destRef != NULL);
+	/*
+	> Find file in .dat, find size
+	> Prepare block on heap
+	> read file contents into heap block
+	> close
+	*/
+
+	DataFileEntryReader r = {};
+	if (Win32_FindDataFileEntry(fileName, &r) == 0)
+	{
+		OutputDebugStringA("Failed to find file\n");
+		return;
+	}
+	else
+	{
+		// Decide how to handle it based on file extension and flags
+		OutputDebugStringA("Found file\n");
+		if (COM_CheckForFileExtension((char*)r.entry.fileName, ".bmp"))
+		{
+			// Read file into staging area then load into heap
+			MemoryBlock mem = {};
+			mem.size = r.entry.size;
+			void* ptr = malloc(mem.size);
+			mem.ptrMemory = ptr;
+			// mem.ptrMemory = malloc(mem.size);
+			fseek(r.handle, r.entry.offset, SEEK_SET);
+			fread(mem.ptrMemory, mem.size, 1, r.handle);
+			OutputDebugStringA("Read bitmap\n");
+
+			Win32_LoadBMP(heap, destRef, mem, fileName);
+
+			free(mem.ptrMemory);
+		}
+		else
+		{
+			// Just read directly to heap
+
+
+		}
+	}
+
+}
+#endif

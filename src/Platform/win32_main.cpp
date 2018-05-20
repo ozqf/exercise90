@@ -11,6 +11,7 @@
 #include "win32_input.cpp"
 #include "win32_draw.cpp"
 #include "win32_debug.cpp"
+#include "win32_data.cpp"
 #include "win32_fileIO.h"
 #include "win32_gl/win32_gl_interface.h"
 

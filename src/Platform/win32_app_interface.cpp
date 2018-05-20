@@ -69,7 +69,8 @@ i32 Platform_LoadDebugTextures(Heap* heap)
 #endif
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
-    Win32_ReadBMPToHeap(heap, result, path);
+    //Win32_ReadBMPToHeap(heap, result, path);
+	Platform_LoadFileIntoHeap(heap, result, path);
 }
 
 void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
@@ -102,6 +103,7 @@ void Win32_InitPlatformInterface()
 void Win32_CloseAppLink()
 {
     g_app.AppShutdown();
+	Win32_CloseDataFiles();
     FreeLibrary(g_appLink.moduleHandle);
     g_app.isvalid = false;
 }
@@ -122,12 +124,15 @@ u8 Win32_LinkToApplication()
         Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(g_appLink.moduleHandle, "LinkToApp");
         if (linkToApp != NULL)
         {
+			// Attaching data files must happen BEFORE app init dummy
+			Win32_LoadDataFiles();
             g_app = linkToApp(platInterface);
             if (!g_app.AppInit())
             {
                 Win32_Error("Init App failed", "Error");
                 return 1;
             }
+			// Open data file links
             return 1;
         }
         else

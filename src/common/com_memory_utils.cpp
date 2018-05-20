@@ -314,3 +314,39 @@ static inline i32 ZSTR_WriteChars(ZStringHeader* str, char* sourceChars, i32 num
     }
     return index;
 }
+
+/**
+ * Tests that the end of the given filePath matches the given extension
+ */
+static inline u8 COM_CheckForFileExtension(const char* filePath, const char* extension)
+{
+    Assert(filePath != NULL);
+    Assert(extension != NULL);
+
+    // Calc length of filename so it can be read backwards
+    i32 fileNameLength = 0;
+    while (filePath[fileNameLength] != 0) { fileNameLength++; }
+
+    i32 extensionLength = 0;
+    while (extension[extensionLength] != 0) { extensionLength++; }
+
+    if (fileNameLength <= extensionLength)
+    {
+        return 0;
+    }
+    
+    // step both back to last char
+    i32 fNamePos = fileNameLength - 1;
+    i32 exPos = extensionLength - 1;
+
+    while (exPos >= 0)
+    {
+        if (filePath[fNamePos] != extension[exPos])
+        {
+            return 0;
+        }
+        --fNamePos;
+        --exPos;
+    }
+    return 1;
+}

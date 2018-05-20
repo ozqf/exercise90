@@ -240,37 +240,6 @@ void Test_FindFileTest(Heap* h, char* fileName)
     }
 }
 
-u8 Test_DetectFileExtension(char* fileName, char* extension)
-{
-    // Calc length of filename so it can be read backwards
-    i32 fileNameLength = 0;
-    while (fileName[fileNameLength] != 0) { fileNameLength++; }
-
-    i32 extensionLength = 0;
-    while (extension[extensionLength] != 0) { extensionLength++; }
-
-    if (fileNameLength <= extensionLength)
-    {
-        //printf("File name %s is too short to have extension %s\n", fileName, extension);
-        return 0;
-    }
-    
-    // step both back to last char
-    i32 fNamePos = fileNameLength - 1;
-    i32 exPos = extensionLength - 1;
-
-    while (exPos >= 0)
-    {
-        if (fileName[fNamePos] != extension[exPos])
-        {
-            return 0;
-        }
-        --fNamePos;
-        --exPos;
-    }
-    return 1;
-}
-
 void Test_SearchDirectories()
 {
     char dir[256];
@@ -327,7 +296,7 @@ void Test_SearchDirectories()
             // is a file... is it a .dat though?
             fileSize.HighPart = findData.nFileSizeHigh;
             fileSize.LowPart = findData.nFileSizeLow;
-            if (Test_DetectFileExtension(findData.cFileName, ".dat"))
+            if (COM_CheckForFileExtension(findData.cFileName, ".dat"))
             {
                 //printf("Data file! ");
                 printf("Data File %s. Size: %lld KB\n", findData.cFileName, (fileSize.QuadPart / 1024));

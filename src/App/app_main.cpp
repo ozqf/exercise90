@@ -156,22 +156,22 @@ void AppLoadTestTextures()
     
     AppRegisterTexture(&testBuffer3, NULL);
     
-    ref = AppLoadTexture("base/Bitmaptest.bmp");
+    ref = AppLoadTexture("BitmapTest.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
     
-    ref = AppLoadTexture("base/charset.bmp");
+    ref = AppLoadTexture("charset.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
     
-    ref = AppLoadTexture("base/brbrick2.bmp");
+    ref = AppLoadTexture("brbrick2.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
     
-    ref = AppLoadTexture("base/BKEYA0.bmp");
+    ref = AppLoadTexture("BKEYA0.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader*)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
