@@ -15,6 +15,7 @@
 #include "test_pak.h"
 #include "test_data.h"
 #include "test_multithreading.h"
+#include "test_read_mesh.h"
 
 void RunZlibTests()
 {
@@ -58,7 +59,8 @@ int main(i32 argc, char* argv[])
     //Test_Com_Run();
 
     //Test_pak();
-    Test_Pack();
+    //Test_Pack();
+    Test_ReadMesh();
     //Test_MultiThreading();
 
     printf("End of Tests - Success\n");
