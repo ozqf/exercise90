@@ -39,7 +39,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     
     EC_Renderer* rend = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 2);
+    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 0);
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
 
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
@@ -131,6 +131,11 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         }
 
         Transform* t = &e->transform;
+
+        Vec3 newPos = { prj->move.x, prj->move.y, prj->move.z};
+
+        Phys_RayTest(t->pos.x, t->pos.y, t->pos.z, newPos.x, newPos.y, newPos.z);
+
         t->pos.x += prj->move.x * time->deltaTime;
         t->pos.y += prj->move.y * time->deltaTime;
         t->pos.z += prj->move.z * time->deltaTime;

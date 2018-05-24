@@ -42,6 +42,10 @@ i32 Phys_RemoveShape();
 
 void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ);
 
+void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ);
+
+i32 Phys_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2);
+
 i32 Phys_QueryHitscan();
 
 i32 Phys_QueryVolume();

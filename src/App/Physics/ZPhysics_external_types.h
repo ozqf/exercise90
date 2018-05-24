@@ -133,10 +133,11 @@ struct PhysCmd_Teleport
 	f32 pos[3];
 };
 
-struct PhysCmd_SetVelocity
+struct PhysCmd_VelocityChange
 {
 	// u8 type
 	i32 shapeId;
+	i32 mode = 0;
 	f32 vel[3];
 };
 #endif

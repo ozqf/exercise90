@@ -611,6 +611,10 @@ void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuff
         i32 shapeId = 10;
         Transform t = gs->cameraTransform;
         Phys_TeleportShape(10, t.pos.x, t.pos.y, t.pos.z);
+
+		Vec3 forward = gs->cameraTransform.rotation.zAxis;
+		f32 speed = 20;
+		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
     }
 
     g_debugTransform = gs->cameraTransform;
