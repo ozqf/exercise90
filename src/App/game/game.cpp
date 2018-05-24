@@ -207,7 +207,7 @@ void Game_BuildTestScene(GameState *gs)
 /////////////////////////////////////////////////////////////
 // Player
 /////////////////////////////////////////////////////////////
-#if 0
+#if 1
     ent = Ent_GetFreeEntity(&gs->entList);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
@@ -219,6 +219,9 @@ void Game_BuildTestScene(GameState *gs)
         COLLISION_LAYER_WORLD,
         COL_MASK_ACTOR,
         ent->entId.index, ent->entId.iteration);
+
+    renderer = EC_AddRenderer(ent, gs);
+    RendObj_SetAsBillboard(&renderer->rendObj, 1, 0, 0, 5);
 
     // motor = EC_AddActorMotor(ent, gs);
     // motor->speed = 5;
@@ -427,7 +430,7 @@ void Game_Shutdown()
     Phys_Shutdown();
 }
 
-inline void Game_HandleEntityUpdate(GameState *gs, ZTransformUpdateEvent *ev)
+inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 {
     EntId entId = {};
     entId.index = ev->ownerId;
@@ -595,15 +598,30 @@ Rotation:\n\
     return h;
 }
 
+#define MAX_ALLOWED_PHYSICS_STEP 0.0334f
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
 void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
+
+    if (input->attack2)
+    {
+        i32 shapeId = 10;
+        Transform t = gs->cameraTransform;
+        Phys_TeleportShape(10, t.pos.x, t.pos.y, t.pos.z);
+    }
+
     g_debugTransform = gs->cameraTransform;
     //Phys_ReadCommands(commandBuffer);
-    Phys_Step(eventBuffer, time->deltaTime);
+    // Force physics step to always 
+    f32 dt = time->deltaTime;
+    if (dt > MAX_ALLOWED_PHYSICS_STEP)
+    {
+        dt = MAX_ALLOWED_PHYSICS_STEP;
+    }
+    Phys_Step(eventBuffer, dt);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
     i32 ptrOffset = 0;
     u8 reading = 1;
@@ -615,9 +633,9 @@ void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuff
         {
         case 1:
         {
-            ZTransformUpdateEvent tUpdate = {};
-            COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(ZTransformUpdateEvent));
-            ptrOffset += sizeof(ZTransformUpdateEvent);
+            PhysEV_TransformUpdate tUpdate = {};
+            COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
+            ptrOffset += sizeof(PhysEV_TransformUpdate);
             Game_HandleEntityUpdate(gs, &tUpdate);
         }
         break;

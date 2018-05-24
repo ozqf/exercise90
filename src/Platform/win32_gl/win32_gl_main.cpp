@@ -540,6 +540,29 @@ void R_SetModelViewMatrix_Billboard(RenderSceneSettings* settings, Transform *vi
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
+	Vec3 camPos = view->pos;
+	Vec3 camRot = Transform_GetEulerAnglesDegrees(view);
+
+	glRotatef(-camRot.z, 0, 0, 1);
+	glRotatef(-camRot.x, 1, 0, 0);
+	glRotatef(-camRot.y, 0, 1, 0);
+	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+
+	// *slightly* improvement on horrible jitter from physics transforms.
+	// Yeah... also breaks projectile rotations so no ta.
+	//wd(model->rotation.cells, 0.0001f);
+	Vec3 modelRot = Transform_GetEulerAnglesDegrees(model);
+	
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(camRot.y, 0, 1, 0);
+	// glRotatef(modelRot.y, 0, 1, 0);
+	// glRotatef(modelRot.x, 1, 0, 0);
+	// glRotatef(modelRot.z, 0, 0, 1);
+	glScalef(model->scale.x, model->scale.y, model->scale.z);
+#if 0
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	// http://www.songho.ca/opengl/gl_transform.html
 	// First, transform the camera (viewing matrix) from world space to eye space
@@ -564,6 +587,7 @@ void R_SetModelViewMatrix_Billboard(RenderSceneSettings* settings, Transform *vi
 	//glRotatef(view->rot.z, 0, 0, 1);
 	//glRotatef(view->rot.x, 1, 0, 0);
 	//glRotatef(view->rot.y, 0, 1, 0);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////

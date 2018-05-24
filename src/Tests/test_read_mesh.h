@@ -48,6 +48,7 @@ struct ObjFileProperties
 {
     u32 fileSize;
     u32 numVertices;
+    u32 numTriangles;
     u32 numFaces;
 };
 
@@ -92,8 +93,31 @@ ObjFileProperties Test_ReadObjProperties(FileReadInfo* f)
             }
             else if (c == 'f')
             {
-                props.numFaces++;
-                Test_SkipLine(f);
+                i32 numVerts = 0;
+                while (c != '\n')
+                {
+                    fread(&c, 1, 1, f->f);
+                    pos++;
+                    if (IsCharAnIntString(c))
+                    {
+                        numVerts++;
+                    }
+                }
+                if (numVerts == 3)
+                {
+                    props.numTriangles++;
+                }
+                else if (numVerts == 4)
+                {
+                    props.numFaces++;
+                }
+                else
+                {
+                    printf("Error, incompatible vert count in face/triangle: %d\n", numVerts);
+                    break;
+                }
+                
+                //Test_SkipLine(f);
                 //mode = READ_MODE_SKIP_LINE;
                 continue;
             }
@@ -203,7 +227,7 @@ void Test_ReadMesh()
     fopen_s(&info.f, path, "r");
     if (info.f == NULL)
     {
-        printf("Failed to open %s...Aboring\n", path);
+        printf("Failed to open %s...Aborting\n", path);
         return;
     }
     fseek(info.f, 0, SEEK_END);
@@ -227,7 +251,10 @@ void Test_ReadMesh()
 
     ObjFileProperties props = Test_ReadObjProperties(&info);
 
-	printf("Properties: %d vertices and %d faces\n\n", props.numVertices, props.numFaces);
+	printf("Properties: %d vertices, %d triangles and %d faces\n", props.numVertices, props.numTriangles, props.numFaces);
+    i32 numMeshTriangles = props.numTriangles + (props.numFaces * 2);
+    i32 numGeometryVerts = numMeshTriangles * 3;
+    printf("Num Mesh Verts total: %d\n\n", numGeometryVerts);
 
     MeshStats mesh = {};
     mesh.maxVertices = props.numVertices;

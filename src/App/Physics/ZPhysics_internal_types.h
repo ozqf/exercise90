@@ -19,7 +19,7 @@ struct PhysBodyHandle
     // external id
     u16 ownerId;
     u16 ownerIteration;
-
+    
     ZShapeDef def;
     
     // pointers to bullet physics objects

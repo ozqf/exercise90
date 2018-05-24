@@ -176,6 +176,25 @@ void Phys_NeverCall()
     Phys_ReadCommands(NULL);
 }
 
+void PhysCmd_TeleportShape(ZBulletWorld* world, PhysCmd_Teleport* cmd)
+{
+    PhysBodyHandle* handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
+    if (handle == NULL)
+    {
+        return;
+    }
+	handle->rigidBody->activate(true);
+	btTransform t;
+	handle->rigidBody->getMotionState()->getWorldTransform(t);
+	btVector3 newPosition = t.getOrigin();
+	newPosition.setX(-newPosition.getX() + cmd->pos[0]);
+	newPosition.setY(-newPosition.getY() + cmd->pos[1]);
+	newPosition.setZ(-newPosition.getZ() + cmd->pos[2]);
+    /*handle->rigidBody->translate(btVector3(cmd->pos[0], cmd->pos[1], cmd->pos[2]));*/
+	handle->rigidBody->translate(newPosition);
+    //btMotionState state = handle->rigidBody->getMotionState();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +214,13 @@ void Phys_ReadCommands(ZBulletWorld* world)
         u8 cmdType = COM_ReadByte(&ptrRead);
          switch (cmdType)
         {
+            case Teleport:
+            {
+                PhysCmd_Teleport cmd = {};
+                ptrRead += COM_COPY(ptrRead, &cmd, PhysCmd_Teleport);
+                PhysCmd_TeleportShape(world, &cmd);
+            } break;
+
             case Create:
             {
                 ZShapeDef def = {};
@@ -211,6 +237,8 @@ void Phys_ReadCommands(ZBulletWorld* world)
     // Clear
     buffer->ptrEnd = buffer->ptrStart;
     COM_WriteByte(0, buffer->ptrStart);
+	// reset buffer write position
+	buffer->ptrWrite = buffer->ptrStart;
 }
 
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime)
@@ -234,7 +262,7 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
         h->rigidBody->getMotionState()->getWorldTransform(t);
         
         // write transform update
-        ZTransformUpdateEvent tUpdate = {};
+        PhysEV_TransformUpdate tUpdate = {};
         tUpdate.type = 1;
         tUpdate.ownerId = h->ownerId;
 		tUpdate.ownerIteration = h->ownerIteration;
@@ -290,7 +318,7 @@ internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 
 		tUpdate.matrix[9] = zAxis.y();
 		tUpdate.matrix[10] = zAxis.z();
 #endif        
-        COM_COPY_STEP(&tUpdate, writePosition, ZTransformUpdateEvent);
+        COM_COPY_STEP(&tUpdate, writePosition, PhysEV_TransformUpdate);
     }
     
     // Mark end of buffer

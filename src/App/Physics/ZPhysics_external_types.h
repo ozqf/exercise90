@@ -125,11 +125,19 @@ struct ZTouchPair
 //////////////////////////////////////////////////////////////////
 // Commands -> incoming instructions to the physics engine
 //////////////////////////////////////////////////////////////////
-#if 0
-struct ZTeleport
+#if 1
+struct PhysCmd_Teleport
 {
-	i32 type;
+	// u8 type
+	i32 shapeId;
 	f32 pos[3];
+};
+
+struct PhysCmd_SetVelocity
+{
+	// u8 type
+	i32 shapeId;
+	f32 vel[3];
 };
 #endif
 
@@ -137,7 +145,7 @@ struct ZTeleport
 // Events -> out going data from physics engine step
 //////////////////////////////////////////////////////////////////
 #if 1
-struct ZTransformUpdateEvent
+struct PhysEV_TransformUpdate
 {
 	i32 type;
 	u16 ownerId;

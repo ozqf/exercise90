@@ -40,6 +40,8 @@ i32 Phys_CreateBox(
 
 i32 Phys_RemoveShape();
 
+void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ);
+
 i32 Phys_QueryHitscan();
 
 i32 Phys_QueryVolume();
