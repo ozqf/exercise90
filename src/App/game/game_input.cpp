@@ -98,13 +98,14 @@ void Game_ApplyInputFullFreedom(ClientTick* input, Transform* t, GameTime* time)
 // - rotates via incrementing input->degrees
 // - DOES NOT WORK WITH ROLL!
 ////////////////////////////////////////////////////////////////////////////
-void Game_ApplyInputOnFootMode(ClientTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform* t, f32 dt, u32 frame)
 {
-	g_debugInput = *input;
-	if (input->reset)
+	//g_debugInput = *input;
+	//if (input->reset)
+	if (Input_CheckActionToggledOn(actions, "Reset", frame))
 	{
 		Transform_SetToIdentity(t);
-		input->degrees = {};
+		*degrees = {};
 		return;
 	}
 
@@ -115,70 +116,72 @@ void Game_ApplyInputOnFootMode(ClientTick* input, Transform* t, GameTime* time)
 	i8 inverted = -1;
 
 	f32 turnRate = 90;
-	f32 turnStep = turnRate * time->deltaTime;
-
-	// if (input->yawLeft) { input->degrees.y += turnStep; }
-	// if (input->yawRight) { input->degrees.y += -turnStep; }
-	// input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
-
-	input->degrees.y -= (((f32)input->mouseMovement[0] * sensitivity));
+	f32 turnStep = turnRate * dt;
+	// if (input->yawLeft) { degrees->y += turnStep; }
+	// if (input->yawRight) { degrees->y += -turnStep; }
+	// degrees->y = COM_CapAngleDegrees(degrees->y);
+	
+	degrees->y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * sensitivity));
 
 	//rotation.x = COM_CapAngleDegrees(t->rot.x);
 	
-	//if (input->pitchUp) { input->degrees.x += -turnStep; }
-	//if (input->pitchDown) { input->degrees.x += turnStep; }
+	//if (input->pitchUp) { degrees->x += -turnStep; }
+	//if (input->pitchDown) { degrees->x += turnStep; }
 
-	input->degrees.x -= (((f32)input->mouseMovement[1] * sensitivity)) * inverted;
+	degrees->x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y") * sensitivity)) * inverted;
 
-	if (input->degrees.x < -89)
+#if 1
+	if (degrees->x < -89)
 	{
-		input->degrees.x = -89;
+		degrees->x = -89;
 	}
-	if (input->degrees.x > 89)
+	if (degrees->x > 89)
 	{
-		input->degrees.x = 89;
+		degrees->x = 89;
 	}
+#endif
 	
 	// Roll doesn't work and shouldn't be used with this input setting
-	if (input->rollLeft) { input->degrees.z += turnStep; }
-	if (input->rollRight) { input->degrees.z += -turnStep; }
-	input->degrees.z = COM_CapAngleDegrees(input->degrees.z);
+	//if (input->rollLeft) { degrees->z += turnStep; }
+	//if (input->rollRight) { degrees->z += -turnStep; }
+	degrees->z = COM_CapAngleDegrees(degrees->z);
 
+
+	////////////////////////////////////////////////////////////////////////
 	// Reset rotation and apply based on new absolute angles
 	// This is order sensitivity! roll -> yaw -> pitch
-	// NOTE: roll is unusable in this system
+	// NOTE AGAIN...: roll is unusable in this system
 	Transform_ClearRotation(t);
-	Transform_RotateZ(t, input->degrees.z * DEG2RAD);
-	Transform_RotateY(t, input->degrees.y * DEG2RAD);
-	Transform_RotateX(t, input->degrees.x * DEG2RAD);
-
+	Transform_RotateZ(t, degrees->z * DEG2RAD);
+	Transform_RotateY(t, degrees->y * DEG2RAD);
+	Transform_RotateX(t, degrees->x * DEG2RAD);
 
 	////////////////////////////////////////////////////////////////////////
 	// Movement
 	////////////////////////////////////////////////////////////////////////
 	Vec4 movement = {};
-	if (input->moveLeft)
+	if (Input_GetActionValue(actions, "Move Left"))
 	{
 		movement.x += -1;
 	}
-	if (input->moveRight)
+	if (Input_GetActionValue(actions, "Move Right"))
 	{
 		movement.x += 1;
 	}
-	if (input->moveForward)
+	if (Input_GetActionValue(actions, "Move Forward"))
 	{
 		movement.z += -1;
 	}
-	if (input->moveBackward)
+	if (Input_GetActionValue(actions, "Move Backward"))
 	{
 		movement.z += 1;
 	}
 
-	if (input->moveDown)
+	if (Input_GetActionValue(actions, "Move Down"))
 	{
 		movement.y += -1;
 	}
-	if (input->moveUp)
+	if (Input_GetActionValue(actions, "Move Up"))
 	{
 		movement.y += 1;
 	}
@@ -189,17 +192,17 @@ void Game_ApplyInputOnFootMode(ClientTick* input, Transform* t, GameTime* time)
 	Vec4 left;
 	Vec4 up;
 	Vec4 forward;
-	left.x = (t->rotation.xAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.y = (t->rotation.xAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
-	left.z = (t->rotation.xAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.x;
+	left.x = (t->rotation.xAxisX * PLAYER_MOVE_SPEED * dt) * movement.x;
+	left.y = (t->rotation.xAxisY * PLAYER_MOVE_SPEED * dt) * movement.x;
+	left.z = (t->rotation.xAxisZ * PLAYER_MOVE_SPEED * dt) * movement.x;
 
-	up.x = (t->rotation.yAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.y = (t->rotation.yAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
-	up.z = (t->rotation.yAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.y;
+	up.x = (t->rotation.yAxisX * PLAYER_MOVE_SPEED * dt) * movement.y;
+	up.y = (t->rotation.yAxisY * PLAYER_MOVE_SPEED * dt) * movement.y;
+	up.z = (t->rotation.yAxisZ * PLAYER_MOVE_SPEED * dt) * movement.y;
 
-	forward.x = (t->rotation.zAxisX * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.y = (t->rotation.zAxisY * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
-	forward.z = (t->rotation.zAxisZ * PLAYER_MOVE_SPEED * time->deltaTime) * movement.z;
+	forward.x = (t->rotation.zAxisX * PLAYER_MOVE_SPEED * dt) * movement.z;
+	forward.y = (t->rotation.zAxisY * PLAYER_MOVE_SPEED * dt) * movement.z;
+	forward.z = (t->rotation.zAxisZ * PLAYER_MOVE_SPEED * dt) * movement.z;
 
 	t->pos.x += (forward.x + left.x + up.x);
 	t->pos.y += (forward.y + left.y + up.y);
@@ -207,11 +210,11 @@ void Game_ApplyInputOnFootMode(ClientTick* input, Transform* t, GameTime* time)
 
 
 }
-void Game_ApplyInputToTransform(ClientTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputToTransform(InputActionSet* actions, ClientTick* input, Transform* t, GameTime* time)
 {
 	if (GAME_INPUT_MODE == GAME_INPUT_ON_FOOT)
 	{
-		Game_ApplyInputOnFootMode(input, t, time);
+		Game_ApplyInputOnFootMode(actions, &input->degrees, t, time->deltaTime, time->frameNumber);
 	}
 	else
 	{

@@ -32,8 +32,14 @@ struct TextureHandles
 //global_variable ClientTick g_ClientTick = {};
 
 #define MAX_INPUT_ITEMS 32
-global_variable InputAction g_inputActions[MAX_INPUT_ITEMS];
-global_variable u32 g_numInputActions = 0;
+global_variable InputAction g_inputActionItems[MAX_INPUT_ITEMS];
+//global_variable i32 g_numInputActions = 0;
+
+global_variable InputActionSet g_inputActions = {
+    g_inputActionItems,
+    0
+};
+
 
 // Interface to the external world
 PlatformInterface platform;

@@ -241,10 +241,23 @@ i32 App_Init()
         8
     );
     
-    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Cycle Debug");
-    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Reset");
-    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_ESCAPE, "Menu");
-    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_MOUSE_2, "Attack 2");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_V, "Cycle Debug");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_R, "Reset");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_ESCAPE, "Menu");
+
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_A, "Move Left");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_D, "Move Right");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_W, "Move Forward");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_S, "Move Backward");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_SPACE, "Move Up");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_CONTROL, "Move Down");
+
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_POS_X, "Mouse Pos X");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_POS_Y, "Mouse Pos Y");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_MOVE_X, "Mouse Move X");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_MOVE_Y, "Mouse Move Y");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_1, "Attack 1");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_2, "Attack 2");
     return 1;
 }
 
@@ -320,7 +333,7 @@ void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
 
 void App_ReadInput(GameTime* time, InputEvent ev)
 {
-    InputAction* action = Input_TestForAction(g_inputActions, g_numInputActions, ev.value, ev.inputID, time->frameNumber);
+    InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, time->frameNumber);
     // Input_CheckActionToggledOn(g_inputAction, g_numInputActions, "Cycle Debug", time->frameNumber);
     // if (action != NULL)
     // {
@@ -452,11 +465,11 @@ void App_Frame(GameTime* time, ByteBuffer commands)
         }
     }
 
-    if (Input_CheckActionToggledOn(g_inputActions, g_numInputActions, "Cycle Debug", time->frameNumber))
+    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
     {
         g_worldScene.settings.viewModelMode++;
     }
-    if (Input_CheckActionToggledOn(g_inputActions, g_numInputActions, "Menu", time->frameNumber))
+    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
     {
         Input_ToggleMouseMode();
     }
@@ -498,16 +511,16 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
-    InputActionSet actions = {};
-    actions.actions = g_inputActions;
-    actions.count = g_numInputActions;
+    // InputActionSet actions = {};
+    // actions.actions = g_inputActions;
+    // actions.count = g_numInputActions;
 
     // Game state update
     Game_Tick(gs,
         Heap_RefToMemoryBlock(&g_heap, &g_gameInputBuffer),
         Heap_RefToMemoryBlock(&g_heap, &g_gameOutputBuffer),
         time,
-        &actions);
+        &g_inputActions);
     
     ///////////////////////////////////////
     // Render

@@ -600,7 +600,7 @@ Rotation:\n\
 
 void Game_UpdateClientTick(InputActionSet* actions, ClientTick* tick)
 {
-
+    
 }
 
 #define MAX_ALLOWED_PHYSICS_STEP 0.0334f
@@ -614,10 +614,10 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
-    Game_ApplyInputToTransform(&g_clientTick, &gs->cameraTransform, time);
+    Game_ApplyInputToTransform(actions, &g_clientTick, &gs->cameraTransform, time);
 
     //if (input->attack2)
-    if (Input_CheckActionToggledOn(actions->actions, actions->count, "Attack 2", time->frameNumber))
+    if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
     {
         i32 shapeId = 10;
         Transform t = gs->cameraTransform;

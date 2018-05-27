@@ -2,6 +2,22 @@
 
 #include "../common/com_module.h"
 
+struct ClientTick
+{
+    i32 mouse[2];
+    i32 mouseMovement[2];
+    char attack1, attack2;
+    char moveLeft, moveRight, moveUp, moveDown, moveForward, moveBackward;
+    char yawLeft, yawRight, pitchUp, pitchDown;
+    char rollLeft, rollRight;
+    char escape;
+    char reset;
+    InputItem debug_cycle;
+    char debug_break_game;
+
+    Vec3 degrees = {};
+};
+
 /*
 Entity system:
 Entities are a combination of components grouped via an ent id
