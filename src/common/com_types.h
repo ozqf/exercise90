@@ -307,6 +307,12 @@ struct RenderScene
     u32 maxObjects;
 };
 
+struct InputItem
+{
+    char on = 0;
+    u32 lastChangeFrame = 0;
+};
+
 struct InputTick
 {
     i32 mouse[2];
@@ -317,7 +323,7 @@ struct InputTick
     char rollLeft, rollRight;
     char escape;
     char reset;
-    char debug_cycle;
+    InputItem debug_cycle;
     char debug_break_game;
 
     Vec3 degrees = {};

@@ -230,6 +230,17 @@ i32 App_Init()
         8
     );
     
+    // InputAction* a = g_inputActions[g_numInputActions++];
+    // a.keyCode = Z_INPUT_CODE_V;
+    // a.value = 0;
+    // a.label = "Cycle Debug";
+    // a.lastFrame = 0;
+
+    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Cycle Debug");
+    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Reset");
+    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_MOUSE_2, "Attack 2");
+    //Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Cycle Debug");
+
     return 1;
 }
 
@@ -294,9 +305,22 @@ void CycleTestAsciChar()
     #endif
 }
 
-void App_ReadInput(InputEvent ev)
+void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
 {
+   if (item->on != value)
+   {
+       item->on = (u8)value;
+       item->lastChangeFrame = frameNumber;
+   }
+}
 
+void App_ReadInput(GameTime* time, InputEvent ev)
+{
+    InputAction* action = Input_TestForAction(g_inputActions, g_numInputActions, ev.value, ev.inputID, time->frameNumber);
+    if (action != NULL && !COM_CompareStrings("Cycle Debug", action->label))
+    {
+        g_worldScene.settings.viewModelMode++;
+    }
     switch (ev.inputID)
     {
         case Z_INPUT_CODE_W: { g_inputTick.moveForward = ev.value ? 1 : 0; } break;
@@ -314,7 +338,7 @@ void App_ReadInput(InputEvent ev)
         case Z_INPUT_CODE_ESCAPE: { g_inputTick.escape = ev.value ? 1 : 0; } break;
 
         case Z_INPUT_CODE_MOUSE_1: { g_inputTick.attack1 = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_MOUSE_2: { g_inputTick.attack2 = ev.value ? 1 : 0; } break;
+        //case Z_INPUT_CODE_MOUSE_2: { g_inputTick.attack2 = ev.value ? 1 : 0; } break;
 
         case Z_INPUT_CODE_MOUSE_MOVE_X:
         {
@@ -324,7 +348,22 @@ void App_ReadInput(InputEvent ev)
         {
             g_inputTick.mouseMovement[1] = ev.value;
         } break;
-
+#if 0
+        case Z_INPUT_CODE_V:
+        {
+            App_ReadInputItem(&g_inputTick.debug_cycle, ev.value, time->frameNumber);
+            if (g_inputTick.debug_cycle.on == 1
+            && g_inputTick.debug_cycle.lastChangeFrame == time->frameNumber)
+            {
+                g_worldScene.settings.viewModelMode++;
+                // if (g_worldScene.settings.viewModelMode > 1)
+                // {
+                //     g_worldScene.settings.viewModelMode = 0;
+                // }
+            }
+        } break;
+#endif
+#if 0
         case Z_INPUT_CODE_V:
         {
             if (ev.value == 1 && g_inputTick.debug_cycle == 0)
@@ -343,6 +382,7 @@ void App_ReadInput(InputEvent ev)
             }
             
         } break;
+        #endif
     }
 }
 
@@ -380,7 +420,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
                 InputEvent ev = {};
                 ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
 
-                App_ReadInput(ev);
+                App_ReadInput(time, ev);
                 // if (ev.inputID == Z_INPUT_CODE_R)
                 // {
                 //     input->reset = ev.value ? 1 : 0;
@@ -426,8 +466,12 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
+    InputActionSet actions = {};
+    actions.actions = g_inputActions;
+    actions.count = g_numInputActions;
+
     // Game state update
-    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, &g_inputTick);
+    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, &actions, &g_inputTick);
     
     ///////////////////////////////////////
     // Render

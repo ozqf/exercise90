@@ -602,11 +602,12 @@ Rotation:\n\
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
-void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuffer, GameTime *time, InputTick *input)
+void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuffer, GameTime *time, InputActionSet* actions, InputTick *input)
 {
     Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
 
-    if (input->attack2)
+    //if (input->attack2)
+    if (Input_CheckActionToggledOn(actions->actions, actions->count, "Attack 2", time->frameNumber))
     {
         i32 shapeId = 10;
         Transform t = gs->cameraTransform;

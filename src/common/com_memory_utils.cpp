@@ -199,6 +199,28 @@ static inline void COM_CopyStringLimited(const char *source, char *target, i32 l
 }
 
 /**
+ * Copy a string without exceeding the specified limit
+ * Limit will patch in a null terminator
+ */
+static inline void COM_CopyStringLimited_Safe(const char *source, char *target, i32 limit)
+{
+    Assert(limit > 1);
+    while (*source)
+    {
+        // Null terminate
+        if (limit == 1)
+        {
+            *target = NULL;
+            break;
+        }
+        *target++ = *source++;
+        --limit;
+        //if (limit == 0) { break; }
+    }
+    *target = 0;
+}
+
+/**
  * No checking whether source/target will clash
  * No checking that target has enough room!
  */
