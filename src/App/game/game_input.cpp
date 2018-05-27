@@ -12,7 +12,7 @@ internal u8 GAME_INPUT_MODE = 1;
 // - rotates via direct manipulation of the camera matrix
 // - gives full freedom
 ////////////////////////////////////////////////////////////////////////////
-void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputFullFreedom(ClientTick* input, Transform* t, GameTime* time)
 {
 	if (input->reset)
 	{
@@ -98,7 +98,7 @@ void Game_ApplyInputFullFreedom(InputTick* input, Transform* t, GameTime* time)
 // - rotates via incrementing input->degrees
 // - DOES NOT WORK WITH ROLL!
 ////////////////////////////////////////////////////////////////////////////
-void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputOnFootMode(ClientTick* input, Transform* t, GameTime* time)
 {
 	g_debugInput = *input;
 	if (input->reset)
@@ -207,7 +207,7 @@ void Game_ApplyInputOnFootMode(InputTick* input, Transform* t, GameTime* time)
 
 
 }
-void Game_ApplyInputToTransform(InputTick* input, Transform* t, GameTime* time)
+void Game_ApplyInputToTransform(ClientTick* input, Transform* t, GameTime* time)
 {
 	if (GAME_INPUT_MODE == GAME_INPUT_ON_FOOT)
 	{

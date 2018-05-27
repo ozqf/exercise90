@@ -143,20 +143,33 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 /////////////////////////////////////////////////////////////
 
 // If the provided command buffer is NULL or the size is zero, fail
-void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize)
+void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize)
 {
-    if (commandBufferSize == 0 || ptrCommandBuffer == NULL)
+    if (
+        commandBufferSize == 0
+        || ptrCommandBuffer == NULL
+        || eventBufferSize == 0
+        || ptrEventBuffer == NULL
+        )
     {
         Assert(false);
     }
 
     COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
+    COM_ZeroMemory((u8*)ptrEventBuffer, eventBufferSize);
 
     g_cmdBuf = {};
     g_cmdBuf.ptrStart = (u8*)ptrCommandBuffer;
     g_cmdBuf.ptrEnd = g_cmdBuf.ptrStart;
     g_cmdBuf.ptrWrite = g_cmdBuf.ptrStart;
     g_cmdBuf.size = commandBufferSize;
+
+    g_eventBuf = {};
+    g_eventBuf.ptrStart = (u8*)ptrEventBuffer;
+    g_eventBuf.ptrEnd = g_eventBuf.ptrStart;
+    g_eventBuf.ptrWrite = g_eventBuf.ptrStart;
+    g_eventBuf.size = eventBufferSize;
+    
 
     //g_physTest = {};
     g_world = {};
@@ -196,12 +209,20 @@ void Phys_Shutdown()
     delete g_world.broadphase;
 }
 
-void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime)
+MemoryBlock Phys_Step(f32 deltaTime)
 {
+    // TODO: Lot of ickyness here
+    // Internal functions should not reference global buffers, but receive buffers via
+    // params, so that locations of 'current' buffers can be changed in this function
     Phys_LockCommandBuffer(&g_cmdBuf);
     Phys_ReadCommands(&g_world);
-    Phys_StepWorld(&g_world, eventBuffer, deltaTime);
+
+    MemoryBlock eventBuffer = {};
+    eventBuffer.ptrMemory = g_eventBuf.ptrStart;
+    eventBuffer.size = g_eventBuf.size;
+    Phys_StepWorld(&g_world, &eventBuffer, deltaTime);
     Phys_WriteDebugOutput(&g_world);
+    return eventBuffer;
 }
 
 

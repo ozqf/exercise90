@@ -63,7 +63,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputTick* input)
+void Game_UpdateActorMotors(GameState* gs, GameTime* time, ClientTick* input)
 {
     static float fireTick = 0;
     Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
@@ -214,7 +214,7 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
     }
 }
 
-void Game_UpdateUI(GameState* gs, GameTime* time, InputTick* input)
+void Game_UpdateUI(GameState* gs, GameTime* time)
 {
     #if 0
     f32 speed = 8.0f;

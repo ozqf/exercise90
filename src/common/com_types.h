@@ -5,7 +5,7 @@
 
 //enum ZMouseMode;
 
-struct InputTick;
+struct ClientTick;
 struct GL_Test_Input;
 /****************************************************************
 Graphics
@@ -313,7 +313,7 @@ struct InputItem
     u32 lastChangeFrame = 0;
 };
 
-struct InputTick
+struct ClientTick
 {
     i32 mouse[2];
     i32 mouseMovement[2];

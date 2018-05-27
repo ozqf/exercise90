@@ -598,13 +598,23 @@ Rotation:\n\
     return h;
 }
 
+void Game_UpdateClientTick(InputActionSet* actions, ClientTick* tick)
+{
+
+}
+
 #define MAX_ALLOWED_PHYSICS_STEP 0.0334f
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
-void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuffer, GameTime *time, InputActionSet* actions, InputTick *input)
+void Game_Tick(
+    GameState *gs,
+    MemoryBlock input,
+    MemoryBlock output,
+    GameTime *time,
+    InputActionSet* actions)
 {
-    Game_ApplyInputToTransform(input, &gs->cameraTransform, time);
+    Game_ApplyInputToTransform(&g_clientTick, &gs->cameraTransform, time);
 
     //if (input->attack2)
     if (Input_CheckActionToggledOn(actions->actions, actions->count, "Attack 2", time->frameNumber))
@@ -619,20 +629,21 @@ void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuff
     }
 
     g_debugTransform = gs->cameraTransform;
-    //Phys_ReadCommands(commandBuffer);
-    // Force physics step to always 
+    
+    // Force physics step to always be no lower than 30fps
     f32 dt = time->deltaTime;
     if (dt > MAX_ALLOWED_PHYSICS_STEP)
     {
         dt = MAX_ALLOWED_PHYSICS_STEP;
     }
-    Phys_Step(eventBuffer, dt);
+
+    MemoryBlock eventBuffer = Phys_Step(dt);
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
     i32 ptrOffset = 0;
     u8 reading = 1;
-    while (reading && ptrOffset < eventBuffer->size)
+    while (reading && ptrOffset < eventBuffer.size)
     {
-        u8 *mem = (u8 *)((u8 *)eventBuffer->ptrMemory + ptrOffset);
+        u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
         i32 type = *(i32 *)mem;
         switch (type)
         {
@@ -664,7 +675,7 @@ void Game_Tick(GameState *gs, MemoryBlock* commandBuffer, MemoryBlock *eventBuff
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(gs, time, input);
+    Game_UpdateActorMotors(gs, time, &g_clientTick);
     Ent_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);

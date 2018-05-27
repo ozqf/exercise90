@@ -148,28 +148,28 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
         g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //inputTick.attack1 = 1;
+        //clientTick.attack1 = 1;
     } break;
 
     case WM_LBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
         g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //inputTick.attack1 = 0;
+        //clientTick.attack1 = 0;
     } break;
 
     case WM_RBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
         g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //inputTick.attack2 = 1;
+        //clientTick.attack2 = 1;
     } break;
 
     case WM_RBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
         g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //inputTick.attack2 = 0;
+        //clientTick.attack2 = 0;
     } break;
 
     case WM_CLOSE:
@@ -246,7 +246,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
 #if 0        
         if (VKCode == 'R')
         {
-            //inputTick.reset = isDown;
+            //clientTick.reset = isDown;
 
             InputEvent ev;
             ev.inputID = Z_INPUT_CODE_R;
@@ -271,7 +271,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         // }
         else if (VKCode == 'T')
         {
-            inputTick.debug_cycleTexture = isDown;
+            clientTick.debug_cycleTexture = isDown;
             // //global_timePassed = 0;
             // //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
             // if (wasDown && !isDown)
@@ -291,64 +291,64 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
         else if (VKCode == 'W')
         {
-            inputTick.moveForward = isDown;
+            clientTick.moveForward = isDown;
             //OutputDebugStringA("W\n");
             //printf("Up\n");
             //toneHz += 10;
         }
         else if (VKCode == 'A')
         {
-            inputTick.moveLeft = isDown;
+            clientTick.moveLeft = isDown;
             //xOffset++;
             //printf("Left\n");
         }
         else if (VKCode == 'S')
         {
-            inputTick.moveBackward = isDown;
+            clientTick.moveBackward = isDown;
             //toneHz -= 10;
             //printf("Down\n");
         }
         else if (VKCode == 'D')
         {
-            inputTick.moveRight = isDown;
+            clientTick.moveRight = isDown;
             //xOffset--;
             //printf("Right\n");
         }
         else if (VKCode == 'Q')
         {
-            inputTick.rollLeft = isDown;
+            clientTick.rollLeft = isDown;
         }
         else if (VKCode == 'E')
         {
-            inputTick.rollRight = isDown;
+            clientTick.rollRight = isDown;
         }
         else if (VKCode == VK_UP)
         {
-            inputTick.pitchUp = isDown;
+            clientTick.pitchUp = isDown;
         }
         else if (VKCode == VK_DOWN)
         {
-            inputTick.pitchDown = isDown;
+            clientTick.pitchDown = isDown;
         }
         else if (VKCode == VK_LEFT)
         {
-            inputTick.yawLeft = isDown;
+            clientTick.yawLeft = isDown;
         }
         else if (VKCode == VK_RIGHT)
         {
-            inputTick.yawRight = isDown;
+            clientTick.yawRight = isDown;
         }
         else if (VKCode == VK_SPACE)
         {
-            inputTick.moveUp = isDown;
+            clientTick.moveUp = isDown;
         }
         else if (VKCode == VK_CONTROL)
         {
-            inputTick.moveDown = isDown;
+            clientTick.moveDown = isDown;
         }
         else if (VKCode == VK_ESCAPE)
         {
-            inputTick.escape = isDown;
+            clientTick.escape = isDown;
         }
 #endif
     }

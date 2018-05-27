@@ -145,7 +145,16 @@ inline static void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
     return newAddress;
 }
 
-u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
+inline MemoryBlock Heap_RefToMemoryBlock(Heap* heap, BlockRef* ref)
+{
+    MemoryBlock mem = {};
+    Heap_GetBlockMemoryAddress(heap, ref);
+    mem.ptrMemory = ref->ptrMemory;
+    mem.size = ref->objectSize;
+    return mem;
+}
+
+static u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
 {
     u32 result;
     HeapBlock *next = block->mem.next;

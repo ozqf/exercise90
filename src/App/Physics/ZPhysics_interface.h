@@ -52,10 +52,13 @@ i32 Phys_QueryVolume();
 
 Vec3 Phys_DebugGetPosition();
 
-void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize);
+// Must pass two blocks of memory for the physics to use for I/O
+// Size... to be determined
+void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize);
 
 //void Phys_ReadCommands(MemoryBlock* commandBuffer);
 
-void Phys_Step(MemoryBlock* eventBuffer, f32 deltaTime);
+// Returns memory block of the event buffer assigned at init
+MemoryBlock Phys_Step(f32 deltaTime);
 
 void Phys_Shutdown();

@@ -1065,7 +1065,7 @@ void Win32_RenderFrame(RenderScene* scene, GameTime* time)
 	if (g_openglRC == NULL) { return; }
     //Win32_R_SetupFrame(appWindow);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	//Win32_ProcessTestInput(inputTick, time);
+	//Win32_ProcessTestInput(ClientTick, time);
     R_RenderScene(scene);
 
 }

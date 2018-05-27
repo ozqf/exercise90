@@ -24,7 +24,7 @@ i32 AppShutdown_Stub() { printf("Shutdown App Stub\n"); return 1; }
 void AppUpdate_Stub(GameTime* time, ByteBuffer commands) { }
 
 // TODO: This doesn't work... lawl
-//void AppFixedUpdate_Stub(GameTime* time, InputTick* tick) { }
+//void AppFixedUpdate_Stub(GameTime* time, ClientTick* tick) { }
 
 // Fill out an app stub
 AppInterface GetAppInterfaceStub(PlatformInterface platInterface)

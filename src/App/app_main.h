@@ -29,10 +29,10 @@ struct TextureHandles
 // DLL GLOBALS
 ///////////////////////////////////////////////////////////////////////////////
 
-global_variable InputTick g_inputTick = {};
+//global_variable ClientTick g_ClientTick = {};
 
-#define MAX_INOUT_ITEMS 32
-global_variable InputAction g_inputActions[MAX_INOUT_ITEMS];
+#define MAX_INPUT_ITEMS 32
+global_variable InputAction g_inputActions[MAX_INPUT_ITEMS];
 global_variable u32 g_numInputActions = 0;
 
 // Interface to the external world
@@ -40,8 +40,6 @@ PlatformInterface platform;
 
 // Heap + Preallocated lists
 global_variable Heap g_heap;
-
-//global_variable GameState g_world;
 
 // Input
 global_variable ZMouseMode g_mouseMode;

@@ -7,6 +7,48 @@
 //#include "game_physics.h"
 #include "../Physics/ZPhysics_interface.h"
 
+// MODE      | ID        SERVER      CLIENT      CONNECTION
+//--------------------------------------------------------------
+// SP        |  0          1           1           0
+// Client    |  1          0           1           1
+// Listen    |  2          1           1           1
+// Dedicated |  3          1           0           1
+// Replay    |  4          0           1           0
+#define NET_MODE_SINGLE_PLAYER 0
+#define NET_MODE_CLIENT 1
+#define NET_MODE_LISTEN_SERVER 2
+#define NET_MODE_DEDICATED_SERVER 3
+#define NET_MODE_REPLAY 4
+
+inline u8 IsRunningClient(u8 netMode)
+{
+    return (
+           netMode == NET_MODE_SINGLE_PLAYER
+        || netMode == NET_MODE_LISTEN_SERVER
+        || netMode == NET_MODE_CLIENT
+        || netMode == NET_MODE_REPLAY
+    );
+}
+
+inline u8 IsRunningServer(u8 netMode)
+{
+    return (
+           netMode == NET_MODE_SINGLE_PLAYER
+        || netMode == NET_MODE_LISTEN_SERVER
+        || netMode == NET_MODE_DEDICATED_SERVER
+    );
+}
+
+inline u8 IsConnectionOpen(u8 netMode)
+{
+    return (
+        netMode == NET_MODE_CLIENT
+        || netMode == NET_MODE_LISTEN_SERVER
+        || netMode == NET_MODE_DEDICATED_SERVER
+    );
+}
+
+
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
 
@@ -63,9 +105,16 @@ global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
-// Collision
+// Game Command I/O buffer handles
+global_variable BlockRef g_gameInputBuffer;
+global_variable BlockRef g_gameOutputBuffer;
+
+// Physics engine buffer handles
 global_variable BlockRef g_collisionCommandBuffer;
 global_variable BlockRef g_collisionEventBuffer;
+
+// Client input
+global_variable ClientTick g_clientTick;
 
 
 /////////////////////////////////////////////////////////////
@@ -87,7 +136,7 @@ global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 /////////////////////////////////////////////////////////////
 //M4x4 g_debugMatrix = {};
 Transform g_debugTransform = {};
-InputTick g_debugInput = {};
+ClientTick g_debugInput = {};
 
 #include "game_entities.h"
 #include "comp_rendObj.h"

@@ -92,7 +92,7 @@ f32 PlatformGetViewPortMaxY() { return SCREEN_HEIGHT / metre2pix; }
 /**
 Input
 */
-InputTick inputTick = {};
+ClientTick ClientTick = {};
 
 void HandleInput(SDL_Event *e)
 {
@@ -101,19 +101,19 @@ void HandleInput(SDL_Event *e)
         switch (e->key.keysym.sym)
         {
         case SDLK_w:
-            inputTick.up = 1;
+            clientTick.up = 1;
             break;
 
         case SDLK_s:
-            inputTick.down = 1;
+            clientTick.down = 1;
             break;
 
         case SDLK_a:
-            inputTick.left = 1;
+            clientTick.left = 1;
             break;
 
         case SDLK_d:
-            inputTick.right = 1;
+            clientTick.right = 1;
             break;
         }
     }
@@ -122,19 +122,19 @@ void HandleInput(SDL_Event *e)
         switch (e->key.keysym.sym)
         {
         case SDLK_w:
-            inputTick.up = 0;
+            clientTick.up = 0;
             break;
 
         case SDLK_s:
-            inputTick.down = 0;
+            clientTick.down = 0;
             break;
 
         case SDLK_a:
-            inputTick.left = 0;
+            clientTick.left = 0;
             break;
 
         case SDLK_d:
-            inputTick.right = 0;
+            clientTick.right = 0;
             break;
 
         case SDLK_ESCAPE:
@@ -318,7 +318,7 @@ int main2(int argc, char *args[])
 
             while (running)
             {
-                u32 mButtonFlags = SDL_GetMouseState(&inputTick.mouse[0], &inputTick.mouse[1]);
+                u32 mButtonFlags = SDL_GetMouseState(&clientTick.mouse[0], &clientTick.mouse[1]);
                 time.ticks = SDL_GetTicks();
 
                 last = now;
@@ -332,7 +332,7 @@ int main2(int argc, char *args[])
                 {
                     fixedFrameAccumulator = 0;
                     // Fixed game tick
-                    app.AppFixedUpdate(&time, &inputTick);
+                    app.AppFixedUpdate(&time, &ClientTick);
                     time.fixedFrameNumber++;
                 }
 
@@ -348,8 +348,8 @@ int main2(int argc, char *args[])
                         HandleInput(&e);
                     }
                 }
-                app.AppUpdate(&time, &inputTick);
-                PlatformFillRect(inputTick.mouse[0] - 4, inputTick.mouse[1] - 4, 8, 8, 0xFF, 0x00, 0x00);
+                app.AppUpdate(&time, &ClientTick);
+                PlatformFillRect(clientTick.mouse[0] - 4, clientTick.mouse[1] - 4, 8, 8, 0xFF, 0x00, 0x00);
                 SDL_UpdateWindowSurface(window);
 
                 time.frameNumber++;

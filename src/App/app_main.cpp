@@ -207,7 +207,10 @@ i32 App_Init()
 
 	AllocateDebugStrings(&g_heap);
 	//AllocateTestStrings(&g_heap);
-    //g_collisionEventBuffer
+
+    Heap_Allocate(&g_heap, &g_gameInputBuffer, 2048, "Game Input");
+    Heap_Allocate(&g_heap, &g_gameOutputBuffer, 2048, "Game Output");
+
     Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2048, "Collision EV");
     Heap_Allocate(&g_heap, &g_collisionCommandBuffer, 2048, "Collision CMD");
 
@@ -219,9 +222,17 @@ i32 App_Init()
     //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
     g_textureHandles.numTextures = 0;
     AppLoadTestTextures();
-    Phys_Init(g_collisionCommandBuffer.ptrMemory, g_collisionCommandBuffer.objectSize);
+
+    Phys_Init(
+        g_collisionCommandBuffer.ptrMemory,
+        g_collisionCommandBuffer.objectSize,
+        g_collisionEventBuffer.ptrMemory,
+        g_collisionEventBuffer.objectSize
+        );
+    
     Game_Init(&g_heap);
     Game_InitDebugStr();
+
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
         90,
@@ -230,17 +241,10 @@ i32 App_Init()
         8
     );
     
-    // InputAction* a = g_inputActions[g_numInputActions++];
-    // a.keyCode = Z_INPUT_CODE_V;
-    // a.value = 0;
-    // a.label = "Cycle Debug";
-    // a.lastFrame = 0;
-
     Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Cycle Debug");
     Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Reset");
+    Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_ESCAPE, "Menu");
     Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_MOUSE_2, "Attack 2");
-    //Input_InitAction(&g_inputActions[g_numInputActions++], Z_INPUT_CODE_V, "Cycle Debug");
-
     return 1;
 }
 
@@ -317,43 +321,57 @@ void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
 void App_ReadInput(GameTime* time, InputEvent ev)
 {
     InputAction* action = Input_TestForAction(g_inputActions, g_numInputActions, ev.value, ev.inputID, time->frameNumber);
-    if (action != NULL && !COM_CompareStrings("Cycle Debug", action->label))
-    {
-        g_worldScene.settings.viewModelMode++;
-    }
+    // Input_CheckActionToggledOn(g_inputAction, g_numInputActions, "Cycle Debug", time->frameNumber);
+    // if (action != NULL)
+    // {
+    //     if (!COM_CompareStrings("Cycle Debug", action->label))
+    //     {
+    //         g_worldScene.settings.viewModelMode++;
+    //     }
+    //     else if (!COM_CompareStrings("Menu", action->label))
+    //     {
+
+    //     }
+    //     else if (!COM_CompareStrings("Cycle Debug", action->label))
+    //     {
+            
+    //     }
+    // }
+    
+    #if 0
     switch (ev.inputID)
     {
-        case Z_INPUT_CODE_W: { g_inputTick.moveForward = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_S: { g_inputTick.moveBackward = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_A: { g_inputTick.moveLeft = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_D: { g_inputTick.moveRight = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_W: { g_ClientTick.moveForward = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_S: { g_ClientTick.moveBackward = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_A: { g_ClientTick.moveLeft = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_D: { g_ClientTick.moveRight = ev.value ? 1 : 0; } break;
 
-        case Z_INPUT_CODE_SPACE: { g_inputTick.moveUp = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_CONTROL: { g_inputTick.moveDown = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_SPACE: { g_ClientTick.moveUp = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_CONTROL: { g_ClientTick.moveDown = ev.value ? 1 : 0; } break;
 
-        case Z_INPUT_CODE_Q: { g_inputTick.rollLeft = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_E: { g_inputTick.rollRight = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_R: { g_inputTick.reset = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_Q: { g_ClientTick.rollLeft = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_E: { g_ClientTick.rollRight = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_R: { g_ClientTick.reset = ev.value ? 1 : 0; } break;
 
-        case Z_INPUT_CODE_ESCAPE: { g_inputTick.escape = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_ESCAPE: { g_ClientTick.escape = ev.value ? 1 : 0; } break;
 
-        case Z_INPUT_CODE_MOUSE_1: { g_inputTick.attack1 = ev.value ? 1 : 0; } break;
-        //case Z_INPUT_CODE_MOUSE_2: { g_inputTick.attack2 = ev.value ? 1 : 0; } break;
+        case Z_INPUT_CODE_MOUSE_1: { g_ClientTick.attack1 = ev.value ? 1 : 0; } break;
+        //case Z_INPUT_CODE_MOUSE_2: { g_ClientTick.attack2 = ev.value ? 1 : 0; } break;
 
         case Z_INPUT_CODE_MOUSE_MOVE_X:
         {
-            g_inputTick.mouseMovement[0] = ev.value;
+            g_ClientTick.mouseMovement[0] = ev.value;
         } break;
         case Z_INPUT_CODE_MOUSE_MOVE_Y:
         {
-            g_inputTick.mouseMovement[1] = ev.value;
+            g_ClientTick.mouseMovement[1] = ev.value;
         } break;
 #if 0
         case Z_INPUT_CODE_V:
         {
-            App_ReadInputItem(&g_inputTick.debug_cycle, ev.value, time->frameNumber);
-            if (g_inputTick.debug_cycle.on == 1
-            && g_inputTick.debug_cycle.lastChangeFrame == time->frameNumber)
+            App_ReadInputItem(&g_ClientTick.debug_cycle, ev.value, time->frameNumber);
+            if (g_ClientTick.debug_cycle.on == 1
+            && g_ClientTick.debug_cycle.lastChangeFrame == time->frameNumber)
             {
                 g_worldScene.settings.viewModelMode++;
                 // if (g_worldScene.settings.viewModelMode > 1)
@@ -366,14 +384,14 @@ void App_ReadInput(GameTime* time, InputEvent ev)
 #if 0
         case Z_INPUT_CODE_V:
         {
-            if (ev.value == 1 && g_inputTick.debug_cycle == 0)
+            if (ev.value == 1 && g_ClientTick.debug_cycle == 0)
             {
-                g_inputTick.debug_cycle = 1;
+                g_ClientTick.debug_cycle = 1;
             }
-            else if (ev.value == 0 && g_inputTick.debug_cycle == 1)
+            else if (ev.value == 0 && g_ClientTick.debug_cycle == 1)
             {
                 
-                g_inputTick.debug_cycle = 0;
+                g_ClientTick.debug_cycle = 0;
                 g_worldScene.settings.viewModelMode++;
                 // if (g_worldScene.settings.viewModelMode > 1)
                 // {
@@ -384,6 +402,7 @@ void App_ReadInput(GameTime* time, InputEvent ev)
         } break;
         #endif
     }
+    #endif
 }
 
 void App_Frame(GameTime* time, ByteBuffer commands)
@@ -432,10 +451,19 @@ void App_Frame(GameTime* time, ByteBuffer commands)
             } break;
         }
     }
-    
+
+    if (Input_CheckActionToggledOn(g_inputActions, g_numInputActions, "Cycle Debug", time->frameNumber))
+    {
+        g_worldScene.settings.viewModelMode++;
+    }
+    if (Input_CheckActionToggledOn(g_inputActions, g_numInputActions, "Menu", time->frameNumber))
+    {
+        Input_ToggleMouseMode();
+    }
+    #if 0
     // TODO: Move this to a better location
     // ...requires better button handling though!
-    if (g_inputTick.escape)
+    if (g_ClientTick.escape)
     {
         if (g_input_escapePressed == 0)
         {
@@ -444,7 +472,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
         }
     }
     else if (g_input_escapePressed == 1) { g_input_escapePressed = 0; }
-    
+    #endif
     ///////////////////////////////////////
     // Process gamestate
     ///////////////////////////////////////
@@ -455,8 +483,12 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     GameState* gs = &g_gameState;
     GameState* ui = &g_uiState;
 
+    // MemoryBlock commandBuffer = {};
+    // Heap_GetBlockMemoryAddress(&g_heap, &g_collisionCommandBuffer);
+    // commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
+    // commandBuffer.size = g_collisionCommandBuffer.objectSize;
+
     MemoryBlock collisionBuffer = {};
-    
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
     collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
     collisionBuffer.size = g_collisionEventBuffer.objectSize;
@@ -471,7 +503,11 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     actions.count = g_numInputActions;
 
     // Game state update
-    Game_Tick(gs, &commandBuffer, &collisionBuffer, time, &actions, &g_inputTick);
+    Game_Tick(gs,
+        Heap_RefToMemoryBlock(&g_heap, &g_gameInputBuffer),
+        Heap_RefToMemoryBlock(&g_heap, &g_gameOutputBuffer),
+        time,
+        &actions);
     
     ///////////////////////////////////////
     // Render
@@ -488,7 +524,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     platform.Platform_RenderScene(&g_worldScene);
     
     #if 1
-    Game_UpdateUI(ui, time, &g_inputTick);
+    Game_UpdateUI(ui, time);
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
