@@ -5,6 +5,7 @@
 #include "com_maths.h"
 #include "com_transform.h"
 #include "com_memory_utils.h"
+#include "com_byte_buffer.h"
 #include "com_render_types.h"
 #include "com_collision.h"
 #include "com_heap/com_heap.h"

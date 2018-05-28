@@ -252,6 +252,8 @@ i32 App_Init()
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_SPACE, "Move Up");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_CONTROL, "Move Down");
 
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_G, "Spawn Test");
+
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_POS_X, "Mouse Pos X");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_POS_Y, "Mouse Pos Y");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_MOVE_X, "Mouse Move X");
@@ -334,117 +336,20 @@ void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
 void App_ReadInput(GameTime* time, InputEvent ev)
 {
     InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, time->frameNumber);
-    // Input_CheckActionToggledOn(g_inputAction, g_numInputActions, "Cycle Debug", time->frameNumber);
-    // if (action != NULL)
-    // {
-    //     if (!COM_CompareStrings("Cycle Debug", action->label))
-    //     {
-    //         g_worldScene.settings.viewModelMode++;
-    //     }
-    //     else if (!COM_CompareStrings("Menu", action->label))
-    //     {
-
-    //     }
-    //     else if (!COM_CompareStrings("Cycle Debug", action->label))
-    //     {
-            
-    //     }
-    // }
     
-    #if 0
-    switch (ev.inputID)
-    {
-        case Z_INPUT_CODE_W: { g_ClientTick.moveForward = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_S: { g_ClientTick.moveBackward = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_A: { g_ClientTick.moveLeft = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_D: { g_ClientTick.moveRight = ev.value ? 1 : 0; } break;
-
-        case Z_INPUT_CODE_SPACE: { g_ClientTick.moveUp = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_CONTROL: { g_ClientTick.moveDown = ev.value ? 1 : 0; } break;
-
-        case Z_INPUT_CODE_Q: { g_ClientTick.rollLeft = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_E: { g_ClientTick.rollRight = ev.value ? 1 : 0; } break;
-        case Z_INPUT_CODE_R: { g_ClientTick.reset = ev.value ? 1 : 0; } break;
-
-        case Z_INPUT_CODE_ESCAPE: { g_ClientTick.escape = ev.value ? 1 : 0; } break;
-
-        case Z_INPUT_CODE_MOUSE_1: { g_ClientTick.attack1 = ev.value ? 1 : 0; } break;
-        //case Z_INPUT_CODE_MOUSE_2: { g_ClientTick.attack2 = ev.value ? 1 : 0; } break;
-
-        case Z_INPUT_CODE_MOUSE_MOVE_X:
-        {
-            g_ClientTick.mouseMovement[0] = ev.value;
-        } break;
-        case Z_INPUT_CODE_MOUSE_MOVE_Y:
-        {
-            g_ClientTick.mouseMovement[1] = ev.value;
-        } break;
-#if 0
-        case Z_INPUT_CODE_V:
-        {
-            App_ReadInputItem(&g_ClientTick.debug_cycle, ev.value, time->frameNumber);
-            if (g_ClientTick.debug_cycle.on == 1
-            && g_ClientTick.debug_cycle.lastChangeFrame == time->frameNumber)
-            {
-                g_worldScene.settings.viewModelMode++;
-                // if (g_worldScene.settings.viewModelMode > 1)
-                // {
-                //     g_worldScene.settings.viewModelMode = 0;
-                // }
-            }
-        } break;
-#endif
-#if 0
-        case Z_INPUT_CODE_V:
-        {
-            if (ev.value == 1 && g_ClientTick.debug_cycle == 0)
-            {
-                g_ClientTick.debug_cycle = 1;
-            }
-            else if (ev.value == 0 && g_ClientTick.debug_cycle == 1)
-            {
-                
-                g_ClientTick.debug_cycle = 0;
-                g_worldScene.settings.viewModelMode++;
-                // if (g_worldScene.settings.viewModelMode > 1)
-                // {
-                //     g_worldScene.settings.viewModelMode = 0;
-                // }
-            }
-            
-        } break;
-        #endif
-    }
-    #endif
 }
 
 void App_Frame(GameTime* time, ByteBuffer commands)
 {
-    #if 0
-    // Trap to do single presses of this key
-    if (input->debug_cycleTexture)
-    {
-        if (cycleTexturePressed == 0)
-        {
-            cycleTexturePressed = 1;
-            CycleTestAsciChar();
-            //CycleTestTexture();
-        }
-        
-    }
-    else if (cycleTexturePressed == 1)
-    {
-        cycleTexturePressed = 0;
-    }
-    #endif
-
 	/////////////////////////////////////////////////////
 	// Read Command buffer
 	/////////////////////////////////////////////////////
     u8* ptrRead = commands.ptrStart;
+    u8* ptrEventStart = ptrRead;
     while (ptrRead < commands.ptrEnd)
     {
         u32 type = *(u32*)ptrRead;
+        ptrEventStart = ptrRead;
         switch (type)
         {
             case EV_CODE_INPUT:
@@ -453,15 +358,24 @@ void App_Frame(GameTime* time, ByteBuffer commands)
                 ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
 
                 App_ReadInput(time, ev);
-                // if (ev.inputID == Z_INPUT_CODE_R)
-                // {
-                //     input->reset = ev.value ? 1 : 0;
-                // }
-				// if (ev.inputID == Z_INPUT_CODE_M)
-				// {
-				// 	input->reset = ev.value ? 1 : 0;
-				// }
+
+                InputAction* action = Input_TestForAction(
+                    &g_inputActions,
+                    ev.value,
+                    ev.inputID,
+                    time->frameNumber);
+                /*EV_Skip skip = {};
+                skip.type = EV_CODE_SKIP;
+                skip.bytes = sizeof(InputEvent);
+                COM_COPY(ptrEventStart, &skip, sizeof(EV_Skip));*/
             } break;
+
+			default:
+			{
+				// drop immidately on reading an unknown type.
+				// God knows what this is
+				ptrRead = commands.ptrEnd;
+			} break;
         }
     }
 
@@ -473,19 +387,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     {
         Input_ToggleMouseMode();
     }
-    #if 0
-    // TODO: Move this to a better location
-    // ...requires better button handling though!
-    if (g_ClientTick.escape)
-    {
-        if (g_input_escapePressed == 0)
-        {
-            g_input_escapePressed = 1;
-            Input_ToggleMouseMode();
-        }
-    }
-    else if (g_input_escapePressed == 1) { g_input_escapePressed = 0; }
-    #endif
+    
     ///////////////////////////////////////
     // Process gamestate
     ///////////////////////////////////////
@@ -495,11 +397,6 @@ void App_Frame(GameTime* time, ByteBuffer commands)
 
     GameState* gs = &g_gameState;
     GameState* ui = &g_uiState;
-
-    // MemoryBlock commandBuffer = {};
-    // Heap_GetBlockMemoryAddress(&g_heap, &g_collisionCommandBuffer);
-    // commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
-    // commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
@@ -511,20 +408,26 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
-    // InputActionSet actions = {};
-    // actions.actions = g_inputActions;
-    // actions.count = g_numInputActions;
+    // Clear output buffer ready for game to write to
+    ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBuffer);
+    COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
+    outBuf.count = 0;
 
     // Game state update
     Game_Tick(gs,
-        Heap_RefToMemoryBlock(&g_heap, &g_gameInputBuffer),
-        Heap_RefToMemoryBlock(&g_heap, &g_gameOutputBuffer),
+        Heap_RefToByteBuffer(&g_heap, &g_gameInputBuffer),
+        &outBuf,
         time,
         &g_inputActions);
+    
+    // How much output was written?
+    u32 outputSize = outBuf.ptrWrite - outBuf.ptrEnd;
+    u32 numItemsWritten = outBuf.count;
     
     ///////////////////////////////////////
     // Render
     ///////////////////////////////////////
+
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
     g_uiScene.numObjects = 0;

@@ -154,6 +154,17 @@ inline MemoryBlock Heap_RefToMemoryBlock(Heap* heap, BlockRef* ref)
     return mem;
 }
 
+inline ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
+{
+    ByteBuffer buf = {};
+    Heap_GetBlockMemoryAddress(heap, ref);
+    buf.ptrStart = (u8*)ref->ptrMemory;
+    buf.ptrWrite = (u8*)ref->ptrMemory;
+    buf.ptrEnd = (u8*)ref->ptrMemory;
+    buf.capacity = ref->objectSize;
+    return buf;
+}
+
 static u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
 {
     u32 result;

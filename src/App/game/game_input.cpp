@@ -210,6 +210,7 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 
 
 }
+
 void Game_ApplyInputToTransform(InputActionSet* actions, ClientTick* input, Transform* t, GameTime* time)
 {
 	if (GAME_INPUT_MODE == GAME_INPUT_ON_FOOT)

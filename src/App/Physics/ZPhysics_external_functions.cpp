@@ -162,13 +162,13 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuff
     g_cmdBuf.ptrStart = (u8*)ptrCommandBuffer;
     g_cmdBuf.ptrEnd = g_cmdBuf.ptrStart;
     g_cmdBuf.ptrWrite = g_cmdBuf.ptrStart;
-    g_cmdBuf.size = commandBufferSize;
+    g_cmdBuf.capacity = commandBufferSize;
 
     g_eventBuf = {};
     g_eventBuf.ptrStart = (u8*)ptrEventBuffer;
     g_eventBuf.ptrEnd = g_eventBuf.ptrStart;
     g_eventBuf.ptrWrite = g_eventBuf.ptrStart;
-    g_eventBuf.size = eventBufferSize;
+    g_eventBuf.capacity = eventBufferSize;
     
 
     //g_physTest = {};
@@ -219,7 +219,7 @@ MemoryBlock Phys_Step(f32 deltaTime)
 
     MemoryBlock eventBuffer = {};
     eventBuffer.ptrMemory = g_eventBuf.ptrStart;
-    eventBuffer.size = g_eventBuf.size;
+    eventBuffer.size = g_eventBuf.capacity;
     Phys_StepWorld(&g_world, &eventBuffer, deltaTime);
     Phys_WriteDebugOutput(&g_world);
     return eventBuffer;

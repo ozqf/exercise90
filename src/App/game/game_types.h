@@ -114,10 +114,21 @@ struct EC_Renderer
     RendObj rendObj;
 };
 
+#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
+#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
+#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
+#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
+struct ActorInput
+{
+    u32 inputs;
+    Vec3 degrees;
+};
+
 struct EC_ActorMotor
 {
     EntId entId;
     u8 inUse;
+    ActorInput input;
     Vec3 move;
     f32 speed;
 };
@@ -151,6 +162,13 @@ DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
 
+struct Player
+{
+    i32 id;
+    i32 state;
+    ActorInput input;
+};
+
 struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
@@ -158,6 +176,10 @@ struct GameState
     i32 nextEntityID;
     EntList entList;
     //i32 lastEntityIndex;
+
+    Player players[4];
+    i32 numPlayers = 0;
+    i32 maxPlayers = 4;
 
     // Components
     EC_AIControllerList aiControllerList;
@@ -191,9 +213,13 @@ DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
 
-// void World_Init(GameState* gs, i32 maxEntities)
-// {
-//     *gs = {};
-//     gs->entities = entityList;
-//     gs->maxEntities = maxEntities;
-// }
+//////////////////////////////////////////////////
+// Game Commands
+//////////////////////////////////////////////////
+
+#define CMD_SPAWN 100
+
+struct GCmd_SpawnTest
+{
+    i32 data;
+};

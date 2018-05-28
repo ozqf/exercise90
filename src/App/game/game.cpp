@@ -609,8 +609,8 @@ void Game_UpdateClientTick(InputActionSet* actions, ClientTick* tick)
 /////////////////////////////////////////////////////////////////////////////
 void Game_Tick(
     GameState *gs,
-    MemoryBlock input,
-    MemoryBlock output,
+    ByteBuffer input,
+    ByteBuffer* output,
     GameTime *time,
     InputActionSet* actions)
 {
@@ -627,7 +627,7 @@ void Game_Tick(
 		f32 speed = 20;
 		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
     }
-
+    
     g_debugTransform = gs->cameraTransform;
     
     // Force physics step to always be no lower than 30fps
@@ -680,4 +680,17 @@ void Game_Tick(
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
     //Game_UpdateAI(time);
+
+    if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
+    {
+        BufferItemHeader header = {};
+        header.type = CMD_SPAWN;
+        header.size = sizeof(GCmd_SpawnTest);
+        GCmd_SpawnTest cmd = {};
+        cmd.data = 5;
+
+        output->ptrWrite += COM_COPY(&header, output->ptrWrite, BufferItemHeader);
+        output->ptrWrite += COM_COPY(&cmd, output->ptrWrite, GCmd_SpawnTest);
+        output->count++;
+    }
 }
