@@ -38,10 +38,27 @@ static inline void Buf_Start(ByteBuffer* b, u32 headerSizeBytes, u8 zeroOut)
     b->ptrEnd = b->ptrWrite;
 }
 
-// inline u32 Buf_WriteObject()
-// {
+/**
+ * Write an object to the byte buffer preceeded by the specified header
+ * Automatically: Asserts capacity, advances the buffers count, and ptrWrite pointer
+ */
+inline void Buf_WriteObject(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
+{
+    u32 used = b->ptrWrite - b->ptrStart;
+    u32 space = b->capacity - used;
+    Assert((space - used) > itemSize + sizeof(BufferItemHeader));
 
-// }
+    BufferItemHeader header = {};
+    header.type = itemType;
+    header.size = itemSize;
 
-// #define BUF_WRITE_ITEM(objType, objSize, ptrSource, ptrDestination)
+	u32 numHeaderBytes = sizeof(BufferItemHeader);
 
+    b->ptrWrite += COM_COPY(&header, b->ptrWrite, numHeaderBytes);
+    b->ptrWrite += COM_COPY(source, b->ptrWrite, itemSize);
+    b->count++;
+
+	// Trap to catch specific items being written
+	Assert(itemType != 2);
+
+}

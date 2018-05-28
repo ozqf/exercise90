@@ -51,8 +51,15 @@ MACROS
 // Buffer macros
 ///////////////////////////////////////////////////////////////////////
 
+// I hate writing casts all the time okay?
 #ifndef COM_COPY
-#define COM_COPY(ptrSource, ptrDestination, structType) \
+#define COM_COPY(ptrSource, ptrDestination, numBytes) \
+COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, numBytes##)
+#endif
+
+// copy but automatically do a size of
+#ifndef COM_COPY_STRUCT
+#define COM_COPY_STRUCT(ptrSource, ptrDestination, structType) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
 #endif
 

@@ -4,15 +4,15 @@ holding game/menu state and calling game update when required
 */
 #pragma once
 
+// TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
+#include "../Platform/win32_system_include.h"
+
 #include "app_main.h"
 #include "../common/com_module.h"
 
 #include "app_testTextures.h"
 
 #include <stdio.h>
-
-// TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
-#include "../Platform/win32_system_include.h"
 
 void App_ErrorStop()
 {
@@ -354,7 +354,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     while (ptrRead < commands.ptrEnd && (numRead + numSkipped) < commands.count)
     {
         BufferItemHeader header = {};
-        ptrRead += COM_COPY(ptrRead, &header, BufferItemHeader);
+        ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
         
         //u32 type = *(u32*)ptrRead;
         //ptrEventStart = ptrRead;
@@ -364,15 +364,9 @@ void App_Frame(GameTime* time, ByteBuffer commands)
             {
                 numRead++;
                 InputEvent ev = {};
-                ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
+                ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
 
                 App_ReadInput(time, ev);
-
-                // InputAction* action = Input_TestForAction(
-                //     &g_inputActions,
-                //     ev.value,
-                //     ev.inputID,
-                //     time->frameNumber);
             } break;
 
 			case NULL:
@@ -383,8 +377,20 @@ void App_Frame(GameTime* time, ByteBuffer commands)
 
 			default:
 			{
-                // Item type is unknown. Just size the size the header specifies
-                numSkipped++;
+				// Pass event down, if event is not handled
+                if (Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size))
+                {
+                    ptrRead += header.size;
+                    numSkipped++;
+                }
+                else
+                {
+					// buffer may be corrupted. All stop
+                    char buf[512];
+                    sprintf_s(buf, 512, "Unrecognised command type: %d aborting\n", header.type);
+                    OutputDebugStringA(buf);
+                    Assert(false);
+                }
 			} break;
         }
     }

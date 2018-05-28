@@ -603,6 +603,24 @@ void Game_UpdateClientTick(InputActionSet* actions, ClientTick* tick)
     
 }
 
+u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
+{
+    switch (type)
+    {
+        case CMD_SPAWN:
+        {
+            GCmd_SpawnTest cmd = {};
+            COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnTest);
+            if (cmd.data == 5)
+            {
+                Game_SpawnTestBlock(gs, 0);
+            }
+            return 1;
+        } break;
+    }
+    return 0;
+}
+
 #define MAX_ALLOWED_PHYSICS_STEP 0.0334f
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
@@ -689,8 +707,8 @@ void Game_Tick(
         GCmd_SpawnTest cmd = {};
         cmd.data = 5;
 
-        output->ptrWrite += COM_COPY(&header, output->ptrWrite, BufferItemHeader);
-        output->ptrWrite += COM_COPY(&cmd, output->ptrWrite, GCmd_SpawnTest);
+        output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
+        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_SpawnTest);
         output->count++;
     }
 }

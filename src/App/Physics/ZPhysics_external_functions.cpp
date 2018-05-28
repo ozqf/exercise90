@@ -16,7 +16,7 @@ i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
 	h->ownerId = ownerId;
 	h->ownerIteration = ownerIteration;
     g_cmdBuf.ptrWrite += COM_WriteByte(Create, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY(def, g_cmdBuf.ptrWrite, ZShapeDef);
+    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(def, g_cmdBuf.ptrWrite, ZShapeDef);
     return h->id;
 }
 
@@ -62,7 +62,7 @@ void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
     cmd.pos[2] = posZ;
 	
     g_cmdBuf.ptrWrite += COM_WriteByte(1, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY(&cmd, g_cmdBuf.ptrWrite, PhysCmd_Teleport);
+    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_Teleport);
 }
 
 void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
@@ -74,7 +74,7 @@ void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 	cmd.vel[2] = velZ;
 
 	g_cmdBuf.ptrWrite += COM_WriteByte(SetVelocity, g_cmdBuf.ptrWrite);
-	g_cmdBuf.ptrWrite += COM_COPY(&cmd, g_cmdBuf.ptrWrite, PhysCmd_VelocityChange);
+	g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_VelocityChange);
 }
 
 /////////////////////////////////////////////////////////////

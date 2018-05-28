@@ -178,15 +178,26 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         mouseMoveY = 0;
     }
 
+	if (mouseMoveX != 0 || mouseMoveY != 0)
+	{
+		OutputDebugStringA("Mouse moved\n");
+	}
+
+    BufferItemHeader header = {};
+    header.type = PLATFORM_EVENT_CODE_INPUT;
+    header.size = sizeof(InputEvent);
+
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
-    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
-    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-    cmdBuffer->ptrWrite += COM_COPY(&ev, cmdBuffer->ptrWrite, InputEvent);
+    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
 }
 
 u32 Win32_KeyCode_To_Input_Code(u32 vkCode)

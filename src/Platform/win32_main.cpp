@@ -127,49 +127,28 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     break;
 #endif
 
-#if 0
-    case WM_MOUSEMOVE:
-    {
-        POINT mouseP;
-        if (GetCursorPos(&mouseP))
-        {
-            if (ScreenToClient(appWindow, &mouseP))
-            {
-                char buf[64];
-                sprintf_s(buf, 64, "Mouse pos: %d, %d\n", mouseP.x, mouseP.y);
-                OutputDebugString(buf);
-            }
-        }
-    }
-    break;
-#endif
-
     case WM_LBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
-        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //clientTick.attack1 = 1;
+        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     } break;
 
     case WM_LBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
-        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //clientTick.attack1 = 0;
+        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     } break;
 
     case WM_RBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
-        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //clientTick.attack2 = 1;
+        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     } break;
 
     case WM_RBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
-        g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        //clientTick.attack2 = 0;
+        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     } break;
 
     case WM_CLOSE:
@@ -238,126 +217,10 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         u32 inputCode = Win32_KeyCode_To_Input_Code(VKCode);
         if (inputCode != 0)
         {
-            BufferItemHeader header = {};
-            header.type = PLATFORM_EVENT_CODE_INPUT;
-            header.size = sizeof(InputEvent);
-            g_cmdBuf.ptrWrite += COM_COPY(&header, g_cmdBuf.ptrWrite, BufferItemHeader);
 
-            InputEvent ev;
-            ev.inputID = inputCode;
-            ev.value = (i32)isDown;
-            g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-			g_cmdBuf.count++;
-            break;
+            InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
+            Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
         }
-#if 0        
-        if (VKCode == 'R')
-        {
-            //clientTick.reset = isDown;
-
-            InputEvent ev;
-            ev.inputID = Z_INPUT_CODE_R;
-            ev.value = (i32)isDown;
-            g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
-        }
-        // This might cause issues now that hot reloading is working:
-        // else if (VKCode == 'Z' && isDown)
-        // {
-        //     //Win32_R_Shutdown();
-        //     Win32_CloseRendererLink();
-        // }
-        // else if (VKCode == 'X' && isDown)
-        // {
-        //     //Win32_InitOpenGL(appWindow);
-        //     //app.AppRendererReloaded();
-        //     Win32_LinkToRenderer();
-        //     if (app.isvalid)
-        //     {
-        //         app.AppRendererReloaded();
-        //     }
-        // }
-        else if (VKCode == 'T')
-        {
-            clientTick.debug_cycleTexture = isDown;
-            // //global_timePassed = 0;
-            // //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
-            // if (wasDown && !isDown)
-            // {
-            //     //global_timePassed = 0;
-            //     //MessageBox(0, "You hit the space bar!!.", "Test", MB_OK | MB_ICONINFORMATION);
-
-            //     ++g_gl_primitive_mode;
-            //     if (g_gl_primitive_mode >= NUM_GL_PRIMITIVE_MODES)
-            //     {
-            //         g_gl_primitive_mode = 0;
-            //     }
-            //     char output[256];
-            //     sprintf_s(output, "g_gl_primitive_mode: %d\n", g_gl_primitive_mode);
-            //     OutputDebugStringA(output);
-            // }
-        }
-        else if (VKCode == 'W')
-        {
-            clientTick.moveForward = isDown;
-            //OutputDebugStringA("W\n");
-            //printf("Up\n");
-            //toneHz += 10;
-        }
-        else if (VKCode == 'A')
-        {
-            clientTick.moveLeft = isDown;
-            //xOffset++;
-            //printf("Left\n");
-        }
-        else if (VKCode == 'S')
-        {
-            clientTick.moveBackward = isDown;
-            //toneHz -= 10;
-            //printf("Down\n");
-        }
-        else if (VKCode == 'D')
-        {
-            clientTick.moveRight = isDown;
-            //xOffset--;
-            //printf("Right\n");
-        }
-        else if (VKCode == 'Q')
-        {
-            clientTick.rollLeft = isDown;
-        }
-        else if (VKCode == 'E')
-        {
-            clientTick.rollRight = isDown;
-        }
-        else if (VKCode == VK_UP)
-        {
-            clientTick.pitchUp = isDown;
-        }
-        else if (VKCode == VK_DOWN)
-        {
-            clientTick.pitchDown = isDown;
-        }
-        else if (VKCode == VK_LEFT)
-        {
-            clientTick.yawLeft = isDown;
-        }
-        else if (VKCode == VK_RIGHT)
-        {
-            clientTick.yawRight = isDown;
-        }
-        else if (VKCode == VK_SPACE)
-        {
-            clientTick.moveUp = isDown;
-        }
-        else if (VKCode == VK_CONTROL)
-        {
-            clientTick.moveDown = isDown;
-        }
-        else if (VKCode == VK_ESCAPE)
-        {
-            clientTick.escape = isDown;
-        }
-#endif
     }
     break;
 
@@ -606,6 +469,7 @@ int CALLBACK WinMain(
                 //*(u8*)g_cmdBuf.ptrWrite = 0;
                 g_cmdBuf.ptrEnd = g_cmdBuf.ptrWrite;
                 ByteBuffer frameCommands = g_cmdBuf;
+				//OutputDebugStringA("Swap platform buffers\n");
                 if (g_cmdBuf.ptrStart == g_commandBufferA)
                 {
                     g_cmdBuf.ptrStart = g_commandBufferB;
@@ -630,6 +494,8 @@ int CALLBACK WinMain(
                 {
                     g_app.AppUpdate(&g_gameTime, frameCommands);
                 }
+				//OutputDebugStringA("Zero platform buffer\n");
+				COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
                 
                 if (g_rendererLink.moduleState == 1)
                 {

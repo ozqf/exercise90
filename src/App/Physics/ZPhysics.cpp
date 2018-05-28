@@ -269,7 +269,7 @@ void Phys_ReadCommands(ZBulletWorld *world)
         case Teleport:
         {
             PhysCmd_Teleport cmd = {};
-            ptrRead += COM_COPY(ptrRead, &cmd, PhysCmd_Teleport);
+            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Teleport);
             PhysCmd_TeleportShape(world, &cmd);
         }
         break;
@@ -277,7 +277,7 @@ void Phys_ReadCommands(ZBulletWorld *world)
         case SetVelocity:
         {
             PhysCmd_VelocityChange cmd = {};
-            ptrRead += COM_COPY(ptrRead, &cmd, PhysCmd_VelocityChange);
+            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_VelocityChange);
             PhysCmd_ChangeVelocity(world, &cmd);
         }
         break;
@@ -285,7 +285,7 @@ void Phys_ReadCommands(ZBulletWorld *world)
         case Create:
         {
             ZShapeDef def = {};
-            ptrRead += COM_COPY(ptrRead, &def, ZShapeDef);
+            ptrRead += COM_COPY_STRUCT(ptrRead, &def, ZShapeDef);
             Phys_CmdCreateShape(world, &def);
         }
         break;

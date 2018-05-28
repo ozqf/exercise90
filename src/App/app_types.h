@@ -78,7 +78,7 @@ u8 Input_CheckActionToggledOff(InputActionSet* actions, char* actionName, u32 fr
 // Test an input event vs actions array. Return an input if it has changed, NULL if nothing changed
 InputAction* Input_TestForAction(InputActionSet* actions, i32 inputValue, u32 inputKeyCode, u32 frameNumber)
 {
-    for (i32 i = 0; i < actions->count; ++i)
+	for (i32 i = 0; i < actions->count; ++i)
     {
         InputAction* action = &actions->actions[i];
         if (action->keyCode == inputKeyCode && action->value != inputValue)
