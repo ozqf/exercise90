@@ -72,10 +72,8 @@
 //////////////////////////////////////////////////////////////////////
 // System event types
 //////////////////////////////////////////////////////////////////////
-#define EV_CODE_NULL                        0
-#define EV_CODE_END                         1
-#define EV_CODE_SKIP                        2
-#define EV_CODE_INPUT                       3
+#define PLATFORM_EVENT_CODE_NULL                        0
+#define PLATFORM_EVENT_CODE_INPUT                       1
 
 //////////////////////////////////////////////////////////////////////
 // Game Event types
@@ -84,7 +82,7 @@
 
 struct InputEvent
 {
-    u32 type = EV_CODE_INPUT;
+    //u32 type = EV_CODE_INPUT;
     u32 inputID = 0;
     i32 value = 0;
 };
@@ -96,12 +94,6 @@ inline InputEvent NewInputEvent(u32 inputID, i32 value)
     ev.value = value;
     return ev;
 }
-
-struct EV_Skip
-{
-    u32 type;
-    u32 bytes;
-};
 
 // struct EventHeader
 // {

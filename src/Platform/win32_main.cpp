@@ -234,13 +234,20 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         }
 
         // Write to command buffer
+        // TODO: Not thread safe or anything!
         u32 inputCode = Win32_KeyCode_To_Input_Code(VKCode);
         if (inputCode != 0)
         {
+            BufferItemHeader header = {};
+            header.type = PLATFORM_EVENT_CODE_INPUT;
+            header.size = sizeof(InputEvent);
+            g_cmdBuf.ptrWrite += COM_COPY(&header, g_cmdBuf.ptrWrite, BufferItemHeader);
+
             InputEvent ev;
             ev.inputID = inputCode;
             ev.value = (i32)isDown;
             g_cmdBuf.ptrWrite += COM_COPY(&ev, g_cmdBuf.ptrWrite, InputEvent);
+			g_cmdBuf.count++;
             break;
         }
 #if 0        
@@ -603,13 +610,15 @@ int CALLBACK WinMain(
                 {
                     g_cmdBuf.ptrStart = g_commandBufferB;
                     g_cmdBuf.ptrWrite = g_commandBufferB;
-                    g_cmdBuf.ptrEnd= g_commandBufferB;
+                    g_cmdBuf.ptrEnd = g_commandBufferB;
+					g_cmdBuf.count = 0;
                 }
                 else if (g_cmdBuf.ptrStart == g_commandBufferB)
                 {
                     g_cmdBuf.ptrStart = g_commandBufferA;
                     g_cmdBuf.ptrWrite = g_commandBufferA;
                     g_cmdBuf.ptrEnd = g_commandBufferA;
+					g_cmdBuf.count = 0;
                 }
                 else
                 {

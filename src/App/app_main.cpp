@@ -344,37 +344,47 @@ void App_Frame(GameTime* time, ByteBuffer commands)
 	/////////////////////////////////////////////////////
 	// Read Command buffer
 	/////////////////////////////////////////////////////
+    i32 numRead = 0;
+    i32 numSkipped = 0;
     u8* ptrRead = commands.ptrStart;
-    u8* ptrEventStart = ptrRead;
-    while (ptrRead < commands.ptrEnd)
+	u32 headerSize = sizeof(BufferItemHeader);
+	u32 evSize = sizeof(InputEvent);
+
+    //u8* ptrEventStart = ptrRead;
+    while (ptrRead < commands.ptrEnd && (numRead + numSkipped) < commands.count)
     {
-        u32 type = *(u32*)ptrRead;
-        ptrEventStart = ptrRead;
-        switch (type)
+        BufferItemHeader header = {};
+        ptrRead += COM_COPY(ptrRead, &header, BufferItemHeader);
+        
+        //u32 type = *(u32*)ptrRead;
+        //ptrEventStart = ptrRead;
+        switch (header.type)
         {
-            case EV_CODE_INPUT:
+            case PLATFORM_EVENT_CODE_INPUT:
             {
+                numRead++;
                 InputEvent ev = {};
                 ptrRead += COM_COPY(ptrRead, &ev, InputEvent);
 
                 App_ReadInput(time, ev);
 
-                InputAction* action = Input_TestForAction(
-                    &g_inputActions,
-                    ev.value,
-                    ev.inputID,
-                    time->frameNumber);
-                /*EV_Skip skip = {};
-                skip.type = EV_CODE_SKIP;
-                skip.bytes = sizeof(InputEvent);
-                COM_COPY(ptrEventStart, &skip, sizeof(EV_Skip));*/
+                // InputAction* action = Input_TestForAction(
+                //     &g_inputActions,
+                //     ev.value,
+                //     ev.inputID,
+                //     time->frameNumber);
             } break;
+
+			case NULL:
+			{
+				// 0 == end here now
+				ptrRead = commands.ptrEnd;
+			} break;
 
 			default:
 			{
-				// drop immidately on reading an unknown type.
-				// God knows what this is
-				ptrRead = commands.ptrEnd;
+                // Item type is unknown. Just size the size the header specifies
+                numSkipped++;
 			} break;
         }
     }
