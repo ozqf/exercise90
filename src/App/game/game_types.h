@@ -221,5 +221,6 @@ DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
 
 struct GCmd_SpawnTest
 {
-    i32 data;
+    i32 entityType;
+    Vec3 pos;
 };

@@ -12,10 +12,28 @@ internal u16 COL_MASK_DEFAULT = COLLISION_LAYER_WORLD;
 internal u16 COL_MASK_ACTOR = COLLISION_LAYER_WORLD | COLLISION_LAYER_ACTOR;
 internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 
-void Game_SpawnTestBlock(GameState* gs, u8 invisible)
+inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
+{
+    Vec3 v;
+    v.x = COM_Randf32() * (rangeX - -rangeX) + -rangeX;
+    v.y = COM_Randf32() * (rangeY - -rangeY) + -rangeY;
+    v.z = COM_Randf32() * (rangeZ - -rangeZ) + -rangeZ;
+    return v;
+
+}
+
+void Game_SpawnTestBlock(GameState* gs, u8 invisible, Vec3* pos)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    Transform_SetPosition(&ent->transform, -COM_Randf32() * 3, (COM_Randf32() * 5) + 5, COM_Randf32() * 3);
+    if (pos != NULL)
+    {
+        Transform_SetPosition(&ent->transform, pos->x, pos->y, pos->z);
+    }
+    else
+    {
+        Transform_SetPosition(&ent->transform, -COM_Randf32() * 3, (COM_Randf32() * 5) + 5, COM_Randf32() * 3);
+    }
+    
     Transform_SetScale(&ent->transform, 1, 1, 1);
     Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
     
@@ -251,7 +269,7 @@ void Game_BuildTestScene(GameState *gs)
 #if 1
     for (int i = 0; i < 20; ++i)
     {
-        Game_SpawnTestBlock(gs, (i == 1));
+        Game_SpawnTestBlock(gs, (i == 1), NULL);
     }
 #endif
     /////////////////////////////////////////////////////////////
@@ -611,9 +629,9 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         {
             GCmd_SpawnTest cmd = {};
             COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnTest);
-            if (cmd.data == 5)
+            if (cmd.entityType == 1)
             {
-                Game_SpawnTestBlock(gs, 0);
+                Game_SpawnTestBlock(gs, 0, &cmd.pos);
             }
             return 1;
         } break;
@@ -707,7 +725,9 @@ void Game_Tick(
         header.type = CMD_SPAWN;
         header.size = sizeof(GCmd_SpawnTest);
         GCmd_SpawnTest cmd = {};
-        cmd.data = 5;
+        cmd.entityType = 1;
+        cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
+        cmd.pos.y += 10;
 
         output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_SpawnTest);

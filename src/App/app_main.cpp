@@ -452,10 +452,6 @@ void App_Frame(GameTime* time, ByteBuffer commands)
         time,
         &g_inputActions);
     
-    // How much output was written?
-    /*u32 outputSize = outBuf.ptrWrite - outBuf.ptrEnd;
-    u32 numItemsWritten = outBuf.count;*/
-    
     ///////////////////////////////////////
     // Render
     ///////////////////////////////////////
