@@ -12,17 +12,26 @@ struct ByteBuffer
     i32 count;
 };
 
-struct BufferHeader
-{
-    u32 size;           // total size of buffer including headers!
-    u32 itemCount;      // total number of individual item buffers to be expected
-};
+// is this necessary?
+//struct BufferHeader
+//{
+//    u32 size;           // total size of buffer including headers!
+//    u32 itemCount;      // total number of individual item buffers to be expected
+//};
 
 struct BufferItemHeader
 {
     u32 type;
     u32 size;
 };
+
+static inline void Buf_Clear(ByteBuffer* b)
+{
+	COM_ZeroMemory(b->ptrStart, b->capacity);
+	b->ptrEnd = b->ptrStart;
+	b->ptrWrite = b->ptrStart;
+	b->count = 0;
+}
 
 /**
  * Prepare a byte buffer for writing. HeaderSizeBytes assumes a header

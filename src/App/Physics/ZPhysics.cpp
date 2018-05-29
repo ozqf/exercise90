@@ -310,7 +310,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
     u8 *writePosition = (u8 *)eventBuffer->ptrMemory;
+	u8 *endPosition = writePosition + eventBuffer->size;
     i32 len = world->bodies.capacity;
+	i32 updatesWritten = 0;
+	i32 unusedSkipped = 0;
+	i32 inactiveSkipped = 0;
     for (int i = 0; i < len; ++i)
     {
         PhysBodyHandle *h = &world->bodies.items[i];
@@ -318,13 +322,19 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
         // Otherwise it might be a rigidbody await recylcing
         if (h->inUse == FALSE || h->rigidBody == NULL)
         {
+			unusedSkipped++;
             continue;
         }
         if (!h->rigidBody->getActivationState())
         {
+			inactiveSkipped++;
             continue;
         }
         Assert(h->motionState != NULL);
+
+		Assert((writePosition + sizeof(PhysEV_TransformUpdate) < endPosition));
+
+		updatesWritten++;
 
         // Get position
         btTransform t;

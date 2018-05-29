@@ -208,11 +208,15 @@ i32 App_Init()
 	AllocateDebugStrings(&g_heap);
 	//AllocateTestStrings(&g_heap);
 
-    Heap_Allocate(&g_heap, &g_gameInputBuffer, 2048, "Game Input");
-    Heap_Allocate(&g_heap, &g_gameOutputBuffer, 2048, "Game Output");
+	// Buffers, enlarge if necessary
+    Heap_Allocate(&g_heap, &g_gameInputBufferRef, KiloBytes(64), "Game Input");
+	g_gameInputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
+    Heap_Allocate(&g_heap, &g_gameOutputBufferRef, KiloBytes(64), "Game Output");
+	g_gameOutputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
 
-    Heap_Allocate(&g_heap, &g_collisionEventBuffer, 2048, "Collision EV");
-    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, 2048, "Collision CMD");
+	// 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV");
+    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD");
 
     SharedAssets_Init();
 
@@ -336,28 +340,21 @@ void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
 void App_ReadInput(GameTime* time, InputEvent ev)
 {
     InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, time->frameNumber);
-    
 }
 
-void App_Frame(GameTime* time, ByteBuffer commands)
+void App_ReadCommandBuffer(GameTime* time, ByteBuffer commands)
 {
-	/////////////////////////////////////////////////////
-	// Read Command buffer
-	/////////////////////////////////////////////////////
-    i32 numRead = 0;
+i32 numRead = 0;
     i32 numSkipped = 0;
     u8* ptrRead = commands.ptrStart;
-	u32 headerSize = sizeof(BufferItemHeader);
-	u32 evSize = sizeof(InputEvent);
+	//u32 headerSize = sizeof(BufferItemHeader);
+	//u32 evSize = sizeof(InputEvent);
 
-    //u8* ptrEventStart = ptrRead;
-    while (ptrRead < commands.ptrEnd && (numRead + numSkipped) < commands.count)
+    while (ptrRead < commands.ptrWrite && (numRead + numSkipped) < commands.count)
     {
         BufferItemHeader header = {};
         ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
         
-        //u32 type = *(u32*)ptrRead;
-        //ptrEventStart = ptrRead;
         switch (header.type)
         {
             case PLATFORM_EVENT_CODE_INPUT:
@@ -394,6 +391,27 @@ void App_Frame(GameTime* time, ByteBuffer commands)
 			} break;
         }
     }
+}
+
+void App_Frame(GameTime* time, ByteBuffer commands)
+{
+	/////////////////////////////////////////////////////
+	// Read Command buffers
+	/////////////////////////////////////////////////////
+
+
+	// Read Platform commands
+    App_ReadCommandBuffer(time, commands);
+	// Read game output from last frame
+	//ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
+	//App_ReadCommandBuffer(time, outBuf);
+	App_ReadCommandBuffer(time, g_gameOutputByteBuffer);
+	Buf_Clear(&g_gameOutputByteBuffer);
+
+	// Clear output buffer ready for game to write to this frame
+	/*COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
+	outBuf.count = 0;*/
+
 
     if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
     {
@@ -424,21 +442,19 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
-    // Clear output buffer ready for game to write to
-    ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBuffer);
-    COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
-    outBuf.count = 0;
+	// Prepare input buffer
+	ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
 
     // Game state update
     Game_Tick(gs,
-        Heap_RefToByteBuffer(&g_heap, &g_gameInputBuffer),
-        &outBuf,
+        inBuf,
+        &g_gameOutputByteBuffer,
         time,
         &g_inputActions);
     
     // How much output was written?
-    u32 outputSize = outBuf.ptrWrite - outBuf.ptrEnd;
-    u32 numItemsWritten = outBuf.count;
+    /*u32 outputSize = outBuf.ptrWrite - outBuf.ptrEnd;
+    u32 numItemsWritten = outBuf.count;*/
     
     ///////////////////////////////////////
     // Render

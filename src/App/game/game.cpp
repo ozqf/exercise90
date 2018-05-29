@@ -659,6 +659,7 @@ void Game_Tick(
     //u8* ptr = (u8*)eventBuffer->ptrMemory;
     i32 ptrOffset = 0;
     u8 reading = 1;
+	i32 eventsProcessed = 0;
     while (reading && ptrOffset < eventBuffer.size)
     {
         u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
@@ -671,6 +672,7 @@ void Game_Tick(
             COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
             ptrOffset += sizeof(PhysEV_TransformUpdate);
             Game_HandleEntityUpdate(gs, &tUpdate);
+			eventsProcessed++;
         }
         break;
 

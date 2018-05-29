@@ -106,8 +106,10 @@ global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
 // Game Command I/O buffer handles
-global_variable BlockRef g_gameInputBuffer;
-global_variable BlockRef g_gameOutputBuffer;
+global_variable BlockRef g_gameInputBufferRef;
+global_variable ByteBuffer g_gameInputByteBuffer;
+global_variable BlockRef g_gameOutputBufferRef;
+global_variable ByteBuffer g_gameOutputByteBuffer;
 
 // Physics engine buffer handles
 global_variable BlockRef g_collisionCommandBuffer;
