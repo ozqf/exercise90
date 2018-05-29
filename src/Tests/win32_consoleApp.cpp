@@ -16,6 +16,7 @@
 #include "test_data.h"
 #include "test_multithreading.h"
 #include "test_read_mesh.h"
+#include "test_state_file.h"
 
 void RunZlibTests()
 {
@@ -60,8 +61,9 @@ int main(i32 argc, char* argv[])
 
     //Test_pak();
     //Test_Pack();
-    Test_ReadMesh();
+    //Test_ReadMesh();
     //Test_MultiThreading();
+    Test_StateSaving();
 
     printf("End of Tests - Success\n");
     return 0;
