@@ -347,7 +347,6 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             Vec3 scale = {};
             if (ent == NULL)
             {
-                //h.length = sprintf_s(gs->debugString, gs->debugStringCapacity, "No Debug Entity found\n");
                 rotation = gs->cameraTransform.rotation;
                 inputRot = g_debugInput.degrees;
                 scale = gs->cameraTransform.scale;
@@ -356,11 +355,6 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             }
             else
             {
-                // rotation = g_debugTransform.rotation;
-                // inputRot = g_debugInput.degrees;
-                // scale = g_debugTransform.scale;
-                // pos = g_debugTransform.pos;
-                // rot = Transform_GetEulerAnglesDegrees(&g_debugTransform);
                 rotation = ent->transform.rotation;
                 inputRot = g_debugInput.degrees;
                 scale = ent->transform.scale;
@@ -425,12 +419,21 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
     {
-        case CMD_SPAWN:
+        case CMD_TYPE_SPAWN:
         {
             GCmd_Spawn cmd = {};
+            Assert(sizeof(GCmd_Spawn) == bytes);
             COM_COPY_STRUCT(ptr, &cmd, GCmd_Spawn);
             Cmd_Spawn(gs, &cmd);
             return 1;
+        } break;
+
+        case CMD_TYPE_SPAWN_WORLD_CUBE:
+        {
+            GCmd_SpawnWorldCube cmd = {};
+            Assert(sizeof(GCmd_SpawnWorldCube) == bytes);
+            COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnWorldCube);
+            Spawn_WorldCube(gs, &cmd);
         } break;
     }
     return 0;
@@ -471,7 +474,7 @@ void Game_Tick(
     }
 
     MemoryBlock eventBuffer = Phys_Step(dt);
-    //u8* ptr = (u8*)eventBuffer->ptrMemory;
+    
     i32 ptrOffset = 0;
     u8 reading = 1;
 	i32 eventsProcessed = 0;
@@ -499,15 +502,6 @@ void Game_Tick(
         }
     }
 
-    /*Ent* ent = Ent_GetEntityByTag(&gs->entList, 1);
-    if (ent != NULL)
-    {
-        Vec3 p = Phys_DebugGetPosition();
-        ent->transform.pos.x = p.x;
-        ent->transform.pos.y = p.y;
-        ent->transform.pos.z = p.z;
-    }*/
-
     // Game state update
     // Update all inputs, entity components and colliders/physics
     Game_UpdateActorMotors(gs, time, &g_clientTick);
@@ -519,7 +513,7 @@ void Game_Tick(
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
     {
         BufferItemHeader header = {};
-        header.type = CMD_SPAWN;
+        header.type = CMD_TYPE_SPAWN;
         header.size = sizeof(GCmd_Spawn);
         GCmd_Spawn cmd = {};
         cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;

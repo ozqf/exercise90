@@ -56,15 +56,27 @@ inline void DebugStateHeader(StateSaveHeader* h)
 	FileSeg_PrintDebug("Frames", &h->frames);
 }
 
-#define STATE_CMD_NONE 0
-#define STATE_CMD_SPAWN 1
-#define STATE_CMD_SPAWN_STATIC 2
+#define CMD_TYPE_SPAWN 100
+#define CMD_TYPE_SPAWN_WORLD_CUBE 101
+
+#define ENTITY_TYPE_WORLD_NULL 0
+#define ENTITY_TYPE_WORLD_CUBE 1
+#define ENTITY_TYPE_RIGIDBODY_CUBE 2
+
+struct GCmd_SpawnWorldCube
+{
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 size;
+    u32 flags;
+};
 
 struct CmdSpawn
 {
     i32 entityType;
     f32 pos[3];
 	f32 rot[3];
+    u32 flags;
 };
 
 void Test_WriteStateFile(char* fileName, char* baseFileName)
@@ -96,35 +108,38 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	/////////////////////////////////////////////////////////////
 	header.staticEntities.offset = ftell(f);
 	
-	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(CmdSpawn);
+	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(GCmd_SpawnWorldCube);
 	
-    CmdSpawn spawn;
+    GCmd_SpawnWorldCube spawn;
     spawn = {};
-    spawn.entityType = 1;
-    spawn.pos[0] = 1;
-    spawn.pos[1] = 2;
-    spawn.pos[2] = 3;
-	WriteCommandHeader(f, 1, sizeof(CmdSpawn));
-    fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+    //spawn.entityType = 1;
+    spawn.pos.e[0] = 1;
+    spawn.pos.e[1] = 2;
+    spawn.pos.e[2] = 3;
+    spawn.size = { 48, 1, 48 };
+	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+    fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
     spawn = {};
-    spawn.entityType = 1;
-    spawn.pos[0] = 4;
-    spawn.pos[1] = 5;
-    spawn.pos[2] = 6;
-    WriteCommandHeader(f, 1, sizeof(CmdSpawn));
-    fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+    //spawn.entityType = 1;
+    spawn.pos.e[0] = 4;
+    spawn.pos.e[1] = 5;
+    spawn.pos.e[2] = 6;
+    spawn.size = { 1, 16, 48 };
+    WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+    fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
     spawn = {};
-    spawn.entityType = 1;
-    spawn.pos[0] = 7;
-    spawn.pos[1] = 8;
-    spawn.pos[2] = 9;
-	spawn.rot[1] = 2.34654546f;
-    WriteCommandHeader(f, 1, sizeof(CmdSpawn));
-    fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+    //spawn.entityType = 1;
+    spawn.pos.e[0] = 7;
+    spawn.pos.e[1] = 8;
+    spawn.pos.e[2] = 9;
+	spawn.rot.e[1] = 2.34654546f;
+    spawn.size = { 1, 16, 48 };
+    WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+    fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	/////////////////////////////////////////////////////////////
@@ -217,7 +232,7 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 		fread(&cheader, sizeof(CmdHeader), 1, f);
 		switch (cheader.type)
 		{
-			case 1:
+			case CMD_TYPE_SPAWN:
 			{
 				CmdSpawn s = {};
 				fread(&s, sizeof(CmdSpawn), 1, f);
@@ -227,10 +242,21 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 					s.rot[0], s.rot[1], s.rot[2]
 					);
 			} break;
+
+            case CMD_TYPE_SPAWN_WORLD_CUBE:
+            {
+                GCmd_SpawnWorldCube s = {};
+                fread(&s, sizeof(GCmd_SpawnWorldCube), 1, f);
+                printf("World Cube at %.2f, %.2f, %.2f\nSize: %.2f, %.2f, %.2f\n",
+					s.pos.x, s.pos.y, s.pos.z,
+					s.size.x, s.size.y, s.size.z
+					);
+            } break;
 			
 			default:
 			{
 				printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.type, cheader.size);
+                Assert(cheader.size > 0);
 				fseek(f, ftell(f) + cheader.size, SEEK_SET);
 			}
 		}
@@ -243,7 +269,8 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 void Test_StateSaving()
 {
     Test_WriteStateFile("map1.lvl", NULL);
-    Test_WriteStateFile("map2.lvl", "map1.lvl");
+    //Test_WriteStateFile("map2.lvl", "map1.lvl");
 	printf("---------------------------------------\nWrite completed. Reading...\n\n");
-    Test_ReadState("map2.lvl", 0);
+    Test_ReadState("map1.lvl", 0);
+    //Test_ReadState("map2.lvl", 0);
 }

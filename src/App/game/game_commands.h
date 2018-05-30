@@ -14,7 +14,8 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 // Game Commands
 //////////////////////////////////////////////////
 
-#define CMD_SPAWN 100
+#define CMD_TYPE_SPAWN 100
+#define CMD_TYPE_SPAWN_WORLD_CUBE 101
 
 #define ENTITY_TYPE_WORLD_NULL 0
 #define ENTITY_TYPE_WORLD_CUBE 1
