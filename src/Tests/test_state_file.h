@@ -2,24 +2,72 @@
 
 #include "../common/com_module.h"
 
+struct FileSegment
+{
+	u32 offset = 0;
+	u32 count = 0;
+	u32 size = 0;
+};
+
+struct CmdHeader
+{
+	u32 type;
+	u32 size;
+};
+
+inline void FileSeg_Add(FileSegment* f, u32 fileSize)
+{
+	f->count++;
+	f->size += fileSize;
+};
+
+inline void WriteCommandHeader(FILE* f, u32 type, u32 size)
+{
+	CmdHeader h;
+	h.type = type;
+	h.size = size;
+	fwrite(&h, sizeof(CmdHeader), 1, f);
+}
+
+inline void FileSeg_PrintDebug(char* label, FileSegment* f)
+{
+	printf("%s - Count: %d, Offset: %d, Size: %d\n",
+		label,
+		f->count,
+		f->offset,
+		f->size
+	);
+}
+
 struct StateSaveHeader
 {
     char magic[4] = { 'S', 'A', 'V', 'E' };
     char baseFile[32];
-    u32 numStaticEntities = 0;
-    u32 numDynamicEntities = 0;
-    u32 numFrames = 0;
+	
+    FileSegment staticEntities;
+	FileSegment dynamicEntities;
+	FileSegment frames;
 };
+
+inline void DebugStateHeader(StateSaveHeader* h)
+{
+	FileSeg_PrintDebug("Static Entities", &h->staticEntities);
+	FileSeg_PrintDebug("Dynamic Entities", &h->dynamicEntities);
+	FileSeg_PrintDebug("Frames", &h->frames);
+}
+
 
 struct CmdSpawn
 {
     i32 entityType;
     f32 pos[3];
+	f32 rot[3];
 };
 
 void Test_WriteStateFile(char* fileName, char* baseFileName)
 {
     printf("Write savestate\n");
+	printf("Size of State header: %d\n", sizeof(StateSaveHeader));
     FILE* f;
     fopen_s(&f, fileName, "wb");
     if (f == NULL)
@@ -40,32 +88,60 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
         COM_ZeroMemory((u8*)header.baseFile, 32);
     }
     
-
+	/////////////////////////////////////////////////////////////
+	// Write static entities
+	/////////////////////////////////////////////////////////////
+	header.staticEntities.offset = ftell(f);
+	
+	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(CmdSpawn);
+	
     CmdSpawn spawn;
     spawn = {};
     spawn.entityType = 1;
     spawn.pos[0] = 1;
     spawn.pos[1] = 2;
     spawn.pos[2] = 3;
-    header.numDynamicEntities++;
+	WriteCommandHeader(f, 1, sizeof(CmdSpawn));
     fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
     spawn = {};
     spawn.entityType = 1;
     spawn.pos[0] = 4;
     spawn.pos[1] = 5;
     spawn.pos[2] = 6;
-    header.numDynamicEntities++;
+    WriteCommandHeader(f, 1, sizeof(CmdSpawn));
     fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
     spawn = {};
     spawn.entityType = 1;
     spawn.pos[0] = 7;
     spawn.pos[1] = 8;
     spawn.pos[2] = 9;
-    header.numDynamicEntities++;
+	spawn.rot[1] = 2.34654546f;
+    WriteCommandHeader(f, 1, sizeof(CmdSpawn));
     fwrite(&spawn, sizeof(CmdSpawn), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
+	/////////////////////////////////////////////////////////////
+	// Write dynamic entities
+	/////////////////////////////////////////////////////////////
+	header.dynamicEntities.offset = ftell(f);
+	header.dynamicEntities.count = 0;
+	header.dynamicEntities.size = 0;
+	
+	/////////////////////////////////////////////////////////////
+	// Frames
+	/////////////////////////////////////////////////////////////
+	header.frames.offset = ftell(f);
+	header.frames.count = 0;
+	header.frames.size = 0;
+	
+	/////////////////////////////////////////////////////////////
+	// Finish
+	/////////////////////////////////////////////////////////////
+	
     // step back, write header
     fseek(f, 0, SEEK_SET);
     
@@ -73,10 +149,15 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
     fseek(f, 0, SEEK_END);
     u32 end = ftell(f);
-    printf("Wrote %d bytes (%d entities) to \"%s\"\n\n", end, header.numDynamicEntities, fileName);
+    printf("Wrote %d bytes to \"%s\"\n\n", end, fileName);
+	DebugStateHeader(&header);
+	// FileSeg_PrintDebug("Static Entities", &header.staticEntities);
+	// FileSeg_PrintDebug("Dynamic Entities", &header.dynamicEntities);
+	// FileSeg_PrintDebug("Frames", &header.frames);
+	
     fclose(f);
 }
-
+#if 1
 u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 {
     FILE* f;
@@ -105,7 +186,9 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
         fclose(f);
         return 2;
     }
-    printf("Has %d entities\n", h.numDynamicEntities);
+	
+	
+    
     if (h.baseFile[0] != NULL)
     {
         printf("Reading base file \"%s\"\n", h.baseFile);
@@ -116,26 +199,51 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
             fclose(f);
             return 3;
         }
-        printf("Read base file\n");
+        printf("Read base file, continuing...\n\n");
     }
     else
     {
         printf("No base file\n");
     }
-    for(u32 i = 0; i < h.numDynamicEntities; ++i)
+	
+	DebugStateHeader(&h);
+	
+	fseek(f, h.staticEntities.offset, SEEK_SET);
+	u32 sectionEnd = h.staticEntities.offset + h.staticEntities.size;
+    //for(u32 i = 0; i < h.staticEntities.count; ++i)
+	while (ftell(f) < (i32)sectionEnd)
     {
-        CmdSpawn s = {};
-        fread(&s, sizeof(CmdSpawn), 1, f);
-        printf("Spawn %d at %.2f, %.2f, %.2f\n", s.entityType, s.pos[0], s.pos[1], s.pos[2]);
+		CmdHeader cheader = {};
+		fread(&cheader, sizeof(CmdHeader), 1, f);
+		switch (cheader.type)
+		{
+			case 1:
+			{
+				CmdSpawn s = {};
+				fread(&s, sizeof(CmdSpawn), 1, f);
+				printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
+					s.entityType,
+					s.pos[0], s.pos[1], s.pos[2],
+					s.rot[0], s.rot[1], s.rot[2]
+					);
+			} break;
+			
+			default:
+			{
+				printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.type, cheader.size);
+				fseek(f, ftell(f) + cheader.size, SEEK_SET);
+			}
+		}
     }
 
     fclose(f);
     return 0;
 }
-
+#endif
 void Test_StateSaving()
 {
     Test_WriteStateFile("map1.lvl", NULL);
     Test_WriteStateFile("map2.lvl", "map1.lvl");
+	printf("---------------------------------------\nWrite completed. Reading...\n\n");
     Test_ReadState("map2.lvl", 0);
 }
