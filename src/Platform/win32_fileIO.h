@@ -469,7 +469,11 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 	DataFileEntryReader r = {};
 	if (Win32_FindDataFileEntry(fileName, &r) == 0)
 	{
+		char buf[256];
+		sprintf_s(buf, 128, "Failed to find file \"%s\"\n", fileName);
+		Win32_Error(buf, "File Not Found");
 		OutputDebugStringA("Failed to find file\n");
+		Assert(false);
 		return;
 	}
 	else

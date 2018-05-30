@@ -56,6 +56,9 @@ inline void DebugStateHeader(StateSaveHeader* h)
 	FileSeg_PrintDebug("Frames", &h->frames);
 }
 
+#define STATE_CMD_NONE 0
+#define STATE_CMD_SPAWN 1
+#define STATE_CMD_SPAWN_STATIC 2
 
 struct CmdSpawn
 {
@@ -151,9 +154,6 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
     u32 end = ftell(f);
     printf("Wrote %d bytes to \"%s\"\n\n", end, fileName);
 	DebugStateHeader(&header);
-	// FileSeg_PrintDebug("Static Entities", &header.staticEntities);
-	// FileSeg_PrintDebug("Dynamic Entities", &header.dynamicEntities);
-	// FileSeg_PrintDebug("Frames", &header.frames);
 	
     fclose(f);
 }
@@ -210,7 +210,7 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 	
 	fseek(f, h.staticEntities.offset, SEEK_SET);
 	u32 sectionEnd = h.staticEntities.offset + h.staticEntities.size;
-    //for(u32 i = 0; i < h.staticEntities.count; ++i)
+    
 	while (ftell(f) < (i32)sectionEnd)
     {
 		CmdHeader cheader = {};

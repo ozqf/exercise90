@@ -212,15 +212,3 @@ DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
-
-//////////////////////////////////////////////////
-// Game Commands
-//////////////////////////////////////////////////
-
-#define CMD_SPAWN 100
-
-struct GCmd_SpawnTest
-{
-    i32 entityType;
-    Vec3 pos;
-};

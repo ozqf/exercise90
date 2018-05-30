@@ -4,14 +4,6 @@
 
 #include "game_intersection_test.cpp"
 
-#define COLLISION_LAYER_WORLD (1 << 0)
-#define COLLISION_LAYER_ACTOR (1 << 1)
-#define COLLISION_LAYER_DEBRIS (1 << 2)
-
-internal u16 COL_MASK_DEFAULT = COLLISION_LAYER_WORLD;
-internal u16 COL_MASK_ACTOR = COLLISION_LAYER_WORLD | COLLISION_LAYER_ACTOR;
-internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
-
 inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 {
     Vec3 v;
@@ -20,50 +12,6 @@ inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
     v.z = COM_Randf32() * (rangeZ - -rangeZ) + -rangeZ;
     return v;
 
-}
-
-void Game_SpawnTestBlock(GameState* gs, u8 invisible, Vec3* pos)
-{
-    Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    if (pos != NULL)
-    {
-        Transform_SetPosition(&ent->transform, pos->x, pos->y, pos->z);
-    }
-    else
-    {
-        Transform_SetPosition(&ent->transform, -COM_Randf32() * 3, (COM_Randf32() * 5) + 5, COM_Randf32() * 3);
-    }
-    
-    Transform_SetScale(&ent->transform, 1, 1, 1);
-    Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
-    
-    //controller = EC_AddAIController(ent, gs);
-    //Ent_InitAIController(controller, 1, 0, 0, 5);
-
-	if (!invisible)
-	{
-		EC_Renderer* renderer = EC_AddRenderer(ent, gs);
-		// g_meshSpike
-		RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
-	}
-    else
-    {
-        ent->tag = 1;
-    }
-    
-    f32 size = 1.0f;
-    EC_Collider* collider = EC_AddCollider(ent, gs);
-    collider->size = { size, size, size };
-    collider->shapeId = Phys_CreateBox(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
-        size / 2, size / 2, size / 2,
-        0,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS,
-        ent->entId.index,
-        ent->entId.iteration);
 }
 
 void Game_BuildTestScene(GameState *gs)
@@ -151,76 +99,23 @@ void Game_BuildTestScene(GameState *gs)
     collider->shapeId = Phys_CreateInfinitePlane(-2, ent->entId.index, ent->entId.iteration);
 #endif
 
+    GCmd_SpawnWorldCube cube;
+
     // Floor
-#if 1
-    ent = Ent_GetFreeEntity(&gs->entList);
-    p = {};
-    p.y = -((testArenaHeight / 2) + 0.5);
-    ent->transform.pos.y = p.y;
-
-    renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
-    Transform_SetScale(&ent->transform, 48, 1, 48);
-
-    collider = EC_AddCollider(ent, gs);
-	collider->size = { 48, 1, 48 };
-    collider->shapeId = Phys_CreateBox(
-        p.x, p.y, p.z,
-        48 / 2, 0.5, 48 / 2,
-        ZCOLLIDER_FLAG_STATIC,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT,
-        ent->entId.index, ent->entId.iteration);
-#endif
-    // walls
-
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.x = ((testArenaWidth / 2) + 0.5f);
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {1, testArenaHeight, testArenaWidth};
-    collider->shapeId = Phys_CreateBox(
-        ent->transform.pos.x, 0, 0,
-        0.5f, testArenaHeight / 2, testArenaWidth,
-        ZCOLLIDER_FLAG_STATIC,
-        ent->entId.index, ent->entId.iteration);
-
-
-    ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos.x = -((testArenaWidth / 2) + 0.5f);
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {1, testArenaHeight, testArenaWidth};
-    collider->shapeId = Phys_CreateBox(
-        ent->transform.pos.x, 0, 0,
-        0.5f, testArenaHeight / 2, testArenaWidth,
-        ZCOLLIDER_FLAG_STATIC,
-        ent->entId.index, ent->entId.iteration);
-
     
-    ent = Ent_GetFreeEntity(&gs->entList);
-    p = { 0, 0, ((testArenaWidth / 2) + 0.5f) };
-    ent->transform.pos = p;
-    //ent->transform.pos.z = -((testArenaWidth / 2) + 0.5f);
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {testArenaWidth, testArenaHeight, 1};
-    collider->shapeId = Phys_CreateBox(
-        p.x, p.y, p.z,
-        testArenaWidth, testArenaHeight / 2, 0.5f,
-        ZCOLLIDER_FLAG_STATIC,
-        ent->entId.index, ent->entId.iteration);
 
-    ent = Ent_GetFreeEntity(&gs->entList);
-    p = { 0, 0, -((testArenaWidth / 2) + 0.5f) };
-    ent->transform.pos = p;
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {testArenaWidth, testArenaHeight, 1};
-    collider->shapeId = Phys_CreateBox(
-        p.x, p.y, p.z,
-        testArenaWidth, testArenaHeight / 2, 0.5f,
-        ZCOLLIDER_FLAG_STATIC,
-        ent->entId.index, ent->entId.iteration);
+#if 1
+    cube = {};
+    cube.pos.y = -2;
+    cube.size = { 48, 1, 48 };
+    Spawn_WorldCube(gs, &cube);
 #endif
-// end room
+
+    // Ceiling
+    cube = {};
+    cube.pos.y = 12;
+    cube.size = { 48, 1, 48 };
+    Spawn_WorldCube(gs, &cube);
 
 /////////////////////////////////////////////////////////////
 // Player
@@ -247,113 +142,17 @@ void Game_BuildTestScene(GameState *gs)
     gs->playerEntityIndex = ent->entId.index;
 #endif
     /////////////////////////////////////////////////////////////
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    Transform_SetPosition(&ent->transform, 4, 0, 0);
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {1, 2, 1};
-    collider->shapeId = Phys_CreateBox(
-        4, 2, 0,
-        0.5, 1, 0.5,
-        ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_ACTOR,
-        ent->entId.index, ent->entId.iteration);
-
-    // motor = EC_AddActorMotor(ent, gs);
-    // motor->speed = 5;
-
-    gs->playerEntityIndex = ent->entId.index;
-#endif
 
 #if 1
     for (int i = 0; i < 20; ++i)
     {
-        Game_SpawnTestBlock(gs, (i == 1), NULL);
+        GCmd_Spawn cmd = {};
+        cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;
+        cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
+        cmd.pos.y += 10;
+
+        Cmd_Spawn(gs, &cmd);
     }
-#endif
-    /////////////////////////////////////////////////////////////
-    // Octahedron object
-    /////////////////////////////////////////////////////////////
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    ent->tag = 1;
-    Transform_SetPosition(&ent->transform, 0, 5, -3);
-    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45.0f);
-    
-    //controller = EC_AddAIController(ent, gs);
-    //Ent_InitAIController(controller, 1, 0, 0, 5);
-
-    // renderer = EC_AddRenderer(ent, gs);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-    
-    size = 0.1f;
-    collider = EC_AddCollider(ent, gs);
-    collider->size = { size, size, size };
-    collider->shapeId = Phys_CreateSphere(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
-        size,
-        0,
-        ent->entId.index,
-        ent->entId.iteration);
-#endif
-    //////////////////////////////////////////////////////////////////////////////
-    // and again
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    ent->tag = 2;
-    Transform_SetPosition(&ent->transform, 5.9f, 6, 3);
-    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
-    
-    //controller = EC_AddAIController(ent, gs);
-    //Ent_InitAIController(controller, 1, 0, 0, 5);
-
-    // renderer = EC_AddRenderer(ent, gs);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-    
-    size = 0.5f;
-    collider = EC_AddCollider(ent, gs);
-    collider->size = { size, size, size };
-    collider->shapeId = Phys_CreateBox(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
-        size / 2.0f, size / 2.0f, size / 2.0f,
-        0,
-        ent->entId.index,
-        ent->entId.iteration);
-#endif
-
-    //////////////////////////////////////////////////////////////////////////////
-    // and again
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    ent->tag = 3;
-    Transform_SetPosition(&ent->transform, 5, 7, 5);
-    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    Transform_SetRotationDegrees(&ent->transform, 0, 22.5f, 45);
-
-    //controller = EC_AddAIController(ent, gs);
-    //Ent_InitAIController(controller, 1, 0, 0, 5);
-
-    // renderer = EC_AddRenderer(ent, gs);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshSpike, 1, 1, 1, 2);
-    
-    size = 1;
-    collider = EC_AddCollider(ent, gs);
-    collider->size = { size, size, size };
-    collider->shapeId = Phys_CreateSphere(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
-        size / 2,
-        0,
-        ent->entId.index,
-        ent->entId.iteration);
 #endif
 }
 
@@ -431,6 +230,7 @@ void Game_BuildTestHud(GameState *state)
 
 void Game_BuildTestMenu()
 {
+    
 }
 
 void Game_Init(Heap* globalHeap)
@@ -627,12 +427,9 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
     {
         case CMD_SPAWN:
         {
-            GCmd_SpawnTest cmd = {};
-            COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnTest);
-            if (cmd.entityType == 1)
-            {
-                Game_SpawnTestBlock(gs, 0, &cmd.pos);
-            }
+            GCmd_Spawn cmd = {};
+            COM_COPY_STRUCT(ptr, &cmd, GCmd_Spawn);
+            Cmd_Spawn(gs, &cmd);
             return 1;
         } break;
     }
@@ -723,14 +520,14 @@ void Game_Tick(
     {
         BufferItemHeader header = {};
         header.type = CMD_SPAWN;
-        header.size = sizeof(GCmd_SpawnTest);
-        GCmd_SpawnTest cmd = {};
-        cmd.entityType = 1;
+        header.size = sizeof(GCmd_Spawn);
+        GCmd_Spawn cmd = {};
+        cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         cmd.pos.y += 10;
 
         output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
-        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_SpawnTest);
+        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_Spawn);
         output->count++;
     }
 }
