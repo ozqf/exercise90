@@ -33,7 +33,7 @@ int main(i32 argc, char* argv[])
     //Test_MultiThreading();
     Test_StateSaving();
 
-    printf("End of Tests - Success\n");
+    printf("\nEnd of Tests\n");
     return 0;
 }
 
