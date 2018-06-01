@@ -160,7 +160,7 @@ inline ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
     Heap_GetBlockMemoryAddress(heap, ref);
     buf.ptrStart = (u8*)ref->ptrMemory;
     buf.ptrWrite = (u8*)ref->ptrMemory;
-    buf.ptrEnd = (u8*)ref->ptrMemory;
+    buf.ptrEnd = (u8*)ref->ptrMemory + ref->objectSize;
     buf.capacity = ref->objectSize;
     return buf;
 }
@@ -340,7 +340,7 @@ inline static void Heap_Free(Heap *heap, u32 id)
  * > Label will be clapped to maximum space in a block label
  * > Will crash if no space of suffient size is available
  */
-u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
+u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, u8 clearToZero)
 {
     Assert(heap != NULL);
 // #if VERBOSE
@@ -433,10 +433,11 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label)
     COM_CopyStringLimited(label, newBlock->mem.debugLabel, BLOCK_LABEL_SIZE);
 
     heap->nextID += 1;
-    #if PARANOID
-    COM_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0XCC);
-    #endif
-
+	if (clearToZero)
+	{
+		COM_SetMemory((u8*)newBlock->mem.ptrMemory, volumeSize, 0X00);
+	}
+    
 // #if VERBOSE
 //     printf("    NEW BLOCK %d - BLOCK ADDRESS: %d, MEM ADDRESS: %d, OBJECT SIZE: %d VOLUME SIZE: %d\n",
 //            heap->nextID, (i32)newBlock, (u32)newBlock->mem.ptrMemory, objectSize, newBlock->mem.volumeSize);
@@ -558,5 +559,5 @@ inline static i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapac
 {
     // length of string + 1 for null terminator
     u32 totalSize = maxStringCapacity + 1;
-    return Heap_Allocate(heap, ref, totalSize, "ZString");
+    return Heap_Allocate(heap, ref, totalSize, "ZString", 1);
 }

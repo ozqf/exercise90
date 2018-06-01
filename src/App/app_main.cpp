@@ -14,6 +14,8 @@ holding game/menu state and calling game update when required
 
 #include <stdio.h>
 
+void App_ReadCommandBuffer(GameTime* time, ByteBuffer commands);
+
 void App_ErrorStop()
 {
     DebugBreak();
@@ -186,6 +188,46 @@ i32 AppRendererReloaded()
 }
 
 ////////////////////////////////////////////////////////////////////////////
+// Loading
+////////////////////////////////////////////////////////////////////////////
+
+void App_ReadStateBuffer(GameState* gs, ByteBuffer* buf)
+{
+	//App_ReadCommandBuffer(&g_time, buf);
+	u8* read = buf->ptrStart;
+	StateSaveHeader h = {};
+	read += COM_COPY_STRUCT(read, &h, StateSaveHeader);
+	if (
+		h.magic[0] != 'S'
+		|| h.magic[1] != 'A'
+		|| h.magic[2] != 'V'
+		|| h.magic[3] != 'E'
+		)
+	{
+		ILLEGAL_CODE_PATH
+	}
+
+    // Read static
+    ByteBuffer sub = {};
+	sub.ptrStart = buf->ptrStart + h.staticEntities.offset;
+	sub.capacity = h.staticEntities.size;
+	sub.count = h.staticEntities.count;
+	sub.ptrEnd = buf->ptrStart + buf->capacity;
+    App_ReadCommandBuffer(&g_time, sub);
+}
+
+void App_LoadStateFromFile(GameState* gs, char* fileName)
+{
+	BlockRef ref = {};
+	platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "testbox.lvl");
+	ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
+
+	App_ReadStateBuffer(gs, &bytes);
+
+	Heap_Free(&g_heap, ref.id);
+}
+
+////////////////////////////////////////////////////////////////////////////
 // App Interface
 ////////////////////////////////////////////////////////////////////////////
 i32 App_Init()
@@ -209,14 +251,14 @@ i32 App_Init()
 	//AllocateTestStrings(&g_heap);
 
 	// Buffers, enlarge if necessary
-    Heap_Allocate(&g_heap, &g_gameInputBufferRef, KiloBytes(64), "Game Input");
+    Heap_Allocate(&g_heap, &g_gameInputBufferRef, KiloBytes(64), "Game Input", 1);
 	g_gameInputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
-    Heap_Allocate(&g_heap, &g_gameOutputBufferRef, KiloBytes(64), "Game Output");
+    Heap_Allocate(&g_heap, &g_gameOutputBufferRef, KiloBytes(64), "Game Output", 1);
 	g_gameOutputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
 
 	// 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
-    Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV");
-    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD");
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV", 1);
+    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD", 1);
 
     SharedAssets_Init();
 
@@ -236,6 +278,9 @@ i32 App_Init()
     
     Game_Init(&g_heap);
     Game_InitDebugStr();
+
+	App_LoadStateFromFile(&g_gameState, "map1.lvl");
+    //platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "map1.lvl");
 
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
@@ -337,9 +382,9 @@ void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
    }
 }
 
-void App_ReadInput(GameTime* time, InputEvent ev)
+void App_ReadInput(u32 frameNumber, InputEvent ev)
 {
-    InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, time->frameNumber);
+    InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, frameNumber);
 }
 
 void App_ReadCommandBuffer(GameTime* time, ByteBuffer commands)
@@ -350,7 +395,7 @@ i32 numRead = 0;
 	//u32 headerSize = sizeof(BufferItemHeader);
 	//u32 evSize = sizeof(InputEvent);
 
-    while (ptrRead < commands.ptrWrite && (numRead + numSkipped) < commands.count)
+    while (ptrRead < commands.ptrEnd)// && (numRead + numSkipped) < commands.count)
     {
         BufferItemHeader header = {};
         ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
@@ -363,7 +408,7 @@ i32 numRead = 0;
                 InputEvent ev = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
 
-                App_ReadInput(time, ev);
+                App_ReadInput(time->frameNumber, ev);
             } break;
 
 			case NULL:
@@ -399,9 +444,9 @@ void App_Frame(GameTime* time, ByteBuffer commands)
 	// Read Command buffers
 	/////////////////////////////////////////////////////
 
-
+	g_time = *time;
 	// Read Platform commands
-    App_ReadCommandBuffer(time, commands);
+    App_ReadCommandBuffer(&g_time, commands);
 	// Read game output from last frame
 	//ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
 	//App_ReadCommandBuffer(time, outBuf);
@@ -451,6 +496,8 @@ void App_Frame(GameTime* time, ByteBuffer commands)
         &g_gameOutputByteBuffer,
         time,
         &g_inputActions);
+
+	g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
     
     ///////////////////////////////////////
     // Render

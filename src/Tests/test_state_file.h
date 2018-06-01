@@ -113,9 +113,9 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	GCmd_SpawnWorldCube spawn;
 	spawn = {};
 	//spawn.entityType = 1;
-	spawn.pos.e[0] = 1;
-	spawn.pos.e[1] = 2;
-	spawn.pos.e[2] = 3;
+	spawn.pos.e[0] = 0;
+	spawn.pos.e[1] = -8;
+	spawn.pos.e[2] = 0;
 	spawn.size = { 48, 1, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
 	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
@@ -123,21 +123,21 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	//spawn.entityType = 1;
-	spawn.pos.e[0] = 4;
-	spawn.pos.e[1] = 5;
-	spawn.pos.e[2] = 6;
-	spawn.size = { 1, 16, 48 };
+	spawn.pos.e[0] = 0;
+	spawn.pos.e[1] = 8;
+	spawn.pos.e[2] = 0;
+	spawn.size = { 48, 1, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
 	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
 	//spawn.entityType = 1;
-	spawn.pos.e[0] = 7;
-	spawn.pos.e[1] = 8;
-	spawn.pos.e[2] = 9;
+	spawn.pos.e[0] = 0;
+	spawn.pos.e[1] = 0;
+	spawn.pos.e[2] = -24;
 	spawn.rot.e[1] = 2.34654546f;
-	spawn.size = { 1, 16, 48 };
+	spawn.size = { 48, 16, 1 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
 	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
@@ -403,11 +403,11 @@ u8 Test_LoadAndRun(char* filePath)
 
 void Test_StateSaving()
 {
-	Test_WriteStateFile("map1.lvl", NULL);
-	Test_WriteStateFile("map2.lvl", "map1.lvl");
+	Test_WriteStateFile("base\\testbox.lvl", NULL);
+	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	printf("\nLOAD %s\n\n", "map2.lvl");
-	Test_LoadAndRun("map2.lvl");
+	//printf("\nLOAD %s\n\n", "map2.lvl");
+	//Test_LoadAndRun("map2.lvl");
 
 	//printf("---------------------------------------\nWrite completed. Reading...\n\n");
 	//Test_ReadState("map1.lvl", 0);

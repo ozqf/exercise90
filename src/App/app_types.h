@@ -2,6 +2,29 @@
 
 #include "../common/com_module.h"
 
+struct FileSegment
+{
+	u32 offset = 0;
+	u32 count = 0;
+	u32 size = 0;
+};
+
+struct StateSaveHeader
+{
+	char magic[4] = { 'S', 'A', 'V', 'E' };
+	char baseFile[32];
+
+	FileSegment staticEntities;
+	FileSegment dynamicEntities;
+	FileSegment frames;
+};
+
+struct CmdHeader
+{
+	u32 type;
+	u32 size;
+};
+
 struct InputAction
 {
     u32 keyCode;

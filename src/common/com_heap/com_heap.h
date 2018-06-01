@@ -31,7 +31,7 @@ static inline void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *pre
 static inline void Heap_RemoveBlock(Heap *heap, const HeapBlock *block);
 static inline bool Heap_RemoveBlockById(Heap *heap, i32 id);
 static inline void Heap_Free(Heap *heap, u32 id);
-static inline u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label);
+static inline u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, u8 clearToZero);
 static inline void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId);
 static inline void Heap_Purge(Heap* heap);
 static inline i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize);

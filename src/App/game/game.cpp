@@ -16,13 +16,13 @@ inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 
 void Game_BuildTestScene(GameState *gs)
 {
-    Ent *ent;
-    EC_Renderer *renderer;
+    //Ent *ent;
+    //EC_Renderer *renderer;
     //EC_AIController *controller;
-    EC_Collider *collider;
+    //EC_Collider *collider;
     //EC_ActorMotor *motor;
-    f32 size = 1;
-    Vec3 p = {};
+    //f32 size = 1;
+    //Vec3 p = {};
 
     // Init gs and component lists
     *gs = {};
@@ -65,9 +65,9 @@ void Game_BuildTestScene(GameState *gs)
     gs->labelList.count = GAME_MAX_ENTITIES;
     gs->labelList.max = GAME_MAX_ENTITIES;
     
-    const f32 testArenaWidth = 12;
-    const f32 testArenaHeight = 4;
-    const f32 wallHalfWidth = 0.5f;
+    //const f32 testArenaWidth = 12;
+    //const f32 testArenaHeight = 4;
+    //const f32 wallHalfWidth = 0.5f;
 
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
@@ -78,9 +78,9 @@ void Game_BuildTestScene(GameState *gs)
     /////////////////////////////////////////////////////////////
     // Walls mesh
     /////////////////////////////////////////////////////////////
-    ent = Ent_GetFreeEntity(&gs->entList);
-    Transform_SetPosition(&ent->transform, 0, 0, 0);
-    Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
+    //ent = Ent_GetFreeEntity(&gs->entList);
+    //Transform_SetPosition(&ent->transform, 0, 0, 0);
+    //Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
     
     // renderer = EC_AddRenderer(ent, gs);
     // RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
@@ -99,28 +99,28 @@ void Game_BuildTestScene(GameState *gs)
     collider->shapeId = Phys_CreateInfinitePlane(-2, ent->entId.index, ent->entId.iteration);
 #endif
 
-    GCmd_SpawnWorldCube cube;
+    //GCmd_SpawnWorldCube cube;
 
     // Floor
     
 
-#if 1
+#if 0
     cube = {};
     cube.pos.y = -2;
     cube.size = { 48, 1, 48 };
     Spawn_WorldCube(gs, &cube);
-#endif
 
     // Ceiling
     cube = {};
     cube.pos.y = 12;
     cube.size = { 48, 1, 48 };
     Spawn_WorldCube(gs, &cube);
+#endif
 
 /////////////////////////////////////////////////////////////
 // Player
 /////////////////////////////////////////////////////////////
-#if 1
+#if 0
     ent = Ent_GetFreeEntity(&gs->entList);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
@@ -143,7 +143,7 @@ void Game_BuildTestScene(GameState *gs)
 #endif
     /////////////////////////////////////////////////////////////
 
-#if 1
+#if 0
     for (int i = 0; i < 20; ++i)
     {
         GCmd_Spawn cmd = {};
@@ -434,6 +434,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Assert(sizeof(GCmd_SpawnWorldCube) == bytes);
             COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnWorldCube);
             Spawn_WorldCube(gs, &cmd);
+			return 1;
         } break;
     }
     return 0;
