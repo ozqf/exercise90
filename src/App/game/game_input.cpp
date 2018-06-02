@@ -307,7 +307,6 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 
 	// Apply movement
 
-	// Create a 2D vector for movement input on the X/Z plane
 	f32 radiansForward = degrees->y * DEG2RAD;
 	f32 radiansLeft = (degrees->y + 90) * DEG2RAD;
 	
@@ -322,6 +321,8 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 	left.x = (sinf(radiansLeft) * PLAYER_MOVE_SPEED) * dt * movement.x;
 	left.y = 0;
 	left.z = (cosf(radiansLeft) * PLAYER_MOVE_SPEED) * dt * movement.x;
+
+	up.y = PLAYER_MOVE_SPEED * dt * movement.y;
 
 	t->pos.x += (forward.x + left.x + up.x);
 	t->pos.y += (forward.y + left.y + up.y);
