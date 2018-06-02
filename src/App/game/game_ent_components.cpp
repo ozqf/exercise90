@@ -63,14 +63,14 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameState* gs, GameTime* time, ClientTick* input)
+void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputActionSet* actions)
 {
     static float fireTick = 0;
     Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
 
     if (fireTick <= 0)
     {
-        if (input->attack1)
+        if (Input_GetActionValue(actions, "Attack 1"))
         {
             fireTick = 0.1f;
             Transform* t = &g_worldScene.cameraTransform;
@@ -82,29 +82,6 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, ClientTick* input)
     {
         fireTick -= time->deltaTime;
     }
-
-    #if 0
-    EC_ActorMotor* aMotor = EC_FindActorMotor(ent, gs);
-    EC_Collider* collider = EC_FindCollider(ent, gs);
-    if (aMotor == 0) { return; }
-
-    aMotor->move = { 0, 0, 0 };
-    
-    collider->velocity = {};
-
-    if (input->rollLeft)
-    {
-        collider->velocity.x = -aMotor->speed;
-        //aMotor->move.x = -speed;
-        //ent->transform.pos.x -= 1 * time->deltaTime;
-    }
-    if (input->rollRight)
-    {
-        collider->velocity.x = aMotor->speed;
-        //aMotor->move.x = speed;
-        //ent->transform.pos.x += 1 * time->deltaTime;
-    }
-    #endif
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -146,6 +123,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 // Colliders
 ///////////////////////////////////////////////////////////////////
 
+// Handled in physics engine now
 void Game_UpdateColliders(GameState* gs, GameTime* time)
 {
     #if 0

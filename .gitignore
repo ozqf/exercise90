@@ -19,6 +19,10 @@
 
 # most libs are 3rd party but common.obj is compiled
 /lib/common.obj
+
+# IDEs
 *.db
 /xercise.VC.VC.opendb
 *.i
+*.sln
+*.vcxproj*

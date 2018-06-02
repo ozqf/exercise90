@@ -410,11 +410,6 @@ Rotation:\n\
     return h;
 }
 
-void Game_UpdateClientTick(InputActionSet* actions, ClientTick* tick)
-{
-    
-}
-
 u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
@@ -505,7 +500,7 @@ void Game_Tick(
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(gs, time, &g_clientTick);
+    Game_UpdateActorMotors(gs, time, actions);
     Ent_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);

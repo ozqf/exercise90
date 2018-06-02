@@ -29,8 +29,6 @@ struct TextureHandles
 // DLL GLOBALS
 ///////////////////////////////////////////////////////////////////////////////
 
-//global_variable ClientTick g_ClientTick = {};
-
 #define MAX_INPUT_ITEMS 32
 global_variable InputAction g_inputActionItems[MAX_INPUT_ITEMS];
 //global_variable i32 g_numInputActions = 0;

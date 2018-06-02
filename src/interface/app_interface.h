@@ -109,7 +109,6 @@ struct AppInterface
     i32 (*AppShutdown)();
     i32 (*AppRendererReloaded)();
     void (*AppUpdate)(GameTime* time, ByteBuffer commands);
-    //void (*AppFixedUpdate)(GameTime* time, ClientTick* tick);
 };
 
 /*****************************************************
