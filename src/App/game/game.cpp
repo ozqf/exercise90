@@ -519,7 +519,7 @@ void Game_Tick(
         GCmd_Spawn cmd = {};
         cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
-        cmd.pos.y += 10;
+        //cmd.pos.y += 10;
 
         output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_Spawn);

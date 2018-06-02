@@ -136,8 +136,41 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.e[0] = 0;
 	spawn.pos.e[1] = 0;
 	spawn.pos.e[2] = -24;
-	spawn.rot.e[1] = 2.34654546f;
+	spawn.rot.e[1] = 0;
 	spawn.size = { 48, 16, 1 };
+	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+
+	spawn = {};
+	//spawn.entityType = 1;
+	spawn.pos.e[0] = 0;
+	spawn.pos.e[1] = 0;
+	spawn.pos.e[2] = 24;
+	spawn.rot.e[1] = 0;
+	spawn.size = { 48, 16, 1 };
+	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+
+	spawn = {};
+	//spawn.entityType = 1;
+	spawn.pos.e[0] = -24;
+	spawn.pos.e[1] = 0;
+	spawn.pos.e[2] = 0;
+	spawn.rot.e[1] = 0;
+	spawn.size = { 1, 16, 48 };
+	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
+	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+
+	spawn = {};
+	//spawn.entityType = 1;
+	spawn.pos.e[0] = 24;
+	spawn.pos.e[1] = 0;
+	spawn.pos.e[2] = 0;
+	spawn.rot.e[1] = 0;
+	spawn.size = { 1, 16, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
 	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);

@@ -110,15 +110,15 @@ inline void Transform_ToM4x4(Transform* t, M4x4* result)
     Vec4_SetMagnitude(&result->zAxis, t->scale.z);
 }
 
+/*
+DOES NOT AFFECT SCALE!
+*/
 inline void Transform_FromM4x4(Transform* t, M4x4* source)
 {
     t->pos.x = source->w0;
     t->pos.y = source->w1;
     t->pos.z = source->w2;
     M3x3_CopyFromM4x4(t->rotation.cells, source->cells);
-    t->scale.x = 1;
-    t->scale.y = 1;
-    t->scale.z = 1;
 }
 
 inline Vec3 Transform_GetEulerAnglesDegrees(Transform* t)

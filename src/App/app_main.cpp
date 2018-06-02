@@ -300,6 +300,8 @@ i32 App_Init()
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_S, "Move Backward");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_SPACE, "Move Up");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_CONTROL, "Move Down");
+	Input_InitAction(&g_inputActions, Z_INPUT_CODE_Q, "Roll Left");
+	Input_InitAction(&g_inputActions, Z_INPUT_CODE_E, "Roll Right");
 
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_G, "Spawn Test");
 

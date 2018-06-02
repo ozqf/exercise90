@@ -6,7 +6,7 @@ void Spawn_WorldCube(GameState* gs, GCmd_SpawnWorldCube* cmd)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
     ent->transform.pos = cmd->pos;
-
+    
     EC_Renderer* renderer = EC_AddRenderer(ent, gs);
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
     Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
