@@ -2,27 +2,7 @@
 
 #include "../../common/com_module.h"
 
-void Spawn_WorldCube(GameState* gs, GCmd_SpawnWorldCube* cmd)
-{
-    Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    ent->transform.pos = cmd->pos;
-    
-    EC_Renderer* renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
-    Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
-
-    EC_Collider* collider = EC_AddCollider(ent, gs);
-	collider->size = { cmd->size.x, cmd->size.y, cmd->size.z };
-    collider->shapeId = Phys_CreateBox(
-        cmd->pos.x, cmd->pos.y, cmd->pos.z,
-        cmd->size.x / 2.0f, cmd->size.y / 2.0f, cmd->size.z / 2.0f,
-        ZCOLLIDER_FLAG_STATIC,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT,
-        ent->entId.index, ent->entId.iteration
-    );
-}
-
+#if 0
 void Spawn_RigidbodyCube(GameState* gs, GCmd_Spawn* cmd)
 {
     Ent* ent = Ent_GetFreeEntity(&gs->entList);
@@ -52,24 +32,25 @@ void Spawn_RigidbodyCube(GameState* gs, GCmd_Spawn* cmd)
         ent->entId.index,
         ent->entId.iteration);
 }
+#endif
 
-void Cmd_Spawn(GameState* gs, GCmd_Spawn* cmd)
-{
-    switch (cmd->entityType)
-    {
-        case ENTITY_TYPE_WORLD_CUBE:
-        {
+// void Cmd_Spawn(GameState* gs, GCmd_Spawn* cmd)
+// {
+//     switch (cmd->entityType)
+//     {
+//         case ENTITY_TYPE_WORLD_CUBE:
+//         {
 
-        } break;
+//         } break;
     
-        case ENTITY_TYPE_RIGIDBODY_CUBE:
-        {
-            Spawn_RigidbodyCube(gs, cmd);
-        } break;
+//         case ENTITY_TYPE_RIGIDBODY_CUBE:
+//         {
+//             Spawn_RigidbodyCube(gs, cmd);
+//         } break;
 
-        default:
-        {
-            ILLEGAL_CODE_PATH
-        } break;
-    }
-}
+//         default:
+//         {
+//             ILLEGAL_CODE_PATH
+//         } break;
+//     }
+// }

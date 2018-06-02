@@ -233,6 +233,7 @@ i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
         btVector3 dir(x1 - x0, y1 - y0, z1 - z0);
         dir.normalize();
         const btCollisionObject* obj = rayCallback.m_collisionObject;
+        #if 0
         if (!obj->isStaticOrKinematicObject())
         {
             //const btRigidBody *body = btRigidBody::upcast(obj);
@@ -242,6 +243,7 @@ i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
                 Phys_SetBodyVelocity(foo, dir.getX() * 5, dir.getY() * 5, dir.getZ() * 5);
             }
         }
+        #endif
     }
 
     return world->nextQueryId++;

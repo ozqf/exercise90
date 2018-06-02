@@ -57,26 +57,19 @@ inline void DebugStateHeader(StateSaveHeader* h)
 }
 
 #define CMD_TYPE_SPAWN 100
-#define CMD_TYPE_SPAWN_WORLD_CUBE 101
+//#define CMD_TYPE_SPAWN_WORLD_CUBE 101
 
 #define ENTITY_TYPE_WORLD_NULL 0
 #define ENTITY_TYPE_WORLD_CUBE 1
 #define ENTITY_TYPE_RIGIDBODY_CUBE 2
 
-struct GCmd_SpawnWorldCube
+struct GCmd_Spawn
 {
-	Vec3 pos;
-	Vec3 rot;
-	Vec3 size;
-	u32 flags;
-};
-
-struct CmdSpawn
-{
-	i32 entityType;
-	f32 pos[3];
-	f32 rot[3];
-	u32 flags;
+    i32 factoryType;
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 size;
+    u32 flags;
 };
 
 void Test_WriteStateFile(char* fileName, char* baseFileName)
@@ -108,71 +101,67 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	/////////////////////////////////////////////////////////////
 	header.staticEntities.offset = ftell(f);
 
-	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(GCmd_SpawnWorldCube);
+	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(GCmd_Spawn);
 
-	GCmd_SpawnWorldCube spawn;
+	GCmd_Spawn spawn;
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = 0;
-	spawn.pos.e[1] = -8;
-	spawn.pos.e[2] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = 0;
+	spawn.pos.y = -8;
+	spawn.pos.z = 0;
 	spawn.size = { 48, 1, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = 0;
-	spawn.pos.e[1] = 8;
-	spawn.pos.e[2] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = 0;
+	spawn.pos.y = 8;
+	spawn.pos.z = 0;
 	spawn.size = { 48, 1, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = 0;
-	spawn.pos.e[1] = 0;
-	spawn.pos.e[2] = -24;
-	spawn.rot.e[1] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = 0;
+	spawn.pos.y = 0;
+	spawn.pos.z = -24;
 	spawn.size = { 48, 16, 1 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = 0;
-	spawn.pos.e[1] = 0;
-	spawn.pos.e[2] = 24;
-	spawn.rot.e[1] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = 0;
+	spawn.pos.y = 0;
+	spawn.pos.z = 24;
 	spawn.size = { 48, 16, 1 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = -24;
-	spawn.pos.e[1] = 0;
-	spawn.pos.e[2] = 0;
-	spawn.rot.e[1] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = -24;
+	spawn.pos.y = 0;
+	spawn.pos.z = 0;
 	spawn.size = { 1, 16, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
-	//spawn.entityType = 1;
-	spawn.pos.e[0] = 24;
-	spawn.pos.e[1] = 0;
-	spawn.pos.e[2] = 0;
-	spawn.rot.e[1] = 0;
+	spawn.factoryType = 1;
+	spawn.pos.x = 24;
+	spawn.pos.y = 0;
+	spawn.pos.z = 0;
 	spawn.size = { 1, 16, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN_WORLD_CUBE, sizeof(GCmd_SpawnWorldCube));
-	fwrite(&spawn, sizeof(GCmd_SpawnWorldCube), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
+	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	/////////////////////////////////////////////////////////////
@@ -267,22 +256,12 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 		{
 		case CMD_TYPE_SPAWN:
 		{
-			CmdSpawn s = {};
-			fread(&s, sizeof(CmdSpawn), 1, f);
+			GCmd_Spawn s = {};
+			fread(&s, sizeof(GCmd_Spawn), 1, f);
 			printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
-				s.entityType,
-				s.pos[0], s.pos[1], s.pos[2],
-				s.rot[0], s.rot[1], s.rot[2]
-			);
-		} break;
-
-		case CMD_TYPE_SPAWN_WORLD_CUBE:
-		{
-			GCmd_SpawnWorldCube s = {};
-			fread(&s, sizeof(GCmd_SpawnWorldCube), 1, f);
-			printf("World Cube at %.2f, %.2f, %.2f\nSize: %.2f, %.2f, %.2f\n",
+				s.factoryType,
 				s.pos.x, s.pos.y, s.pos.z,
-				s.size.x, s.size.y, s.size.z
+				s.rot.e[0], s.rot.e[1], s.rot.e[2]
 			);
 		} break;
 
@@ -312,24 +291,13 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 		{
 			case CMD_TYPE_SPAWN:
 			{
-				CmdSpawn s = {};
-				//fread(&s, sizeof(CmdSpawn), 1, f);
-				read += COM_COPY_STRUCT(read, &s, CmdSpawn);
+				GCmd_Spawn s = {};
+				//fread(&s, sizeof(GCmd_Spawn), 1, f);rt
+				read += COM_COPY_STRUCT(read, &s, GCmd_Spawn);
 				printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
-					s.entityType,
-					s.pos[0], s.pos[1], s.pos[2],
-					s.rot[0], s.rot[1], s.rot[2]
-				);
-			} break;
-
-			case CMD_TYPE_SPAWN_WORLD_CUBE:
-			{
-				GCmd_SpawnWorldCube s = {};
-				//fread(&s, sizeof(GCmd_SpawnWorldCube), 1, f);
-				read += COM_COPY_STRUCT(read, &s, GCmd_SpawnWorldCube);
-				printf("World Cube at %.2f, %.2f, %.2f\nSize: %.2f, %.2f, %.2f\n",
-					s.pos.x, s.pos.y, s.pos.z,
-					s.size.x, s.size.y, s.size.z
+					s.factoryType,
+					s.pos.e[0], s.pos.e[1], s.pos.e[2],
+					s.rot.e[0], s.rot.e[1], s.rot.e[2]
 				);
 			} break;
 

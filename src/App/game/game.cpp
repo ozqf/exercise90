@@ -11,26 +11,14 @@ inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
     v.y = COM_Randf32() * (rangeY - -rangeY) + -rangeY;
     v.z = COM_Randf32() * (rangeZ - -rangeZ) + -rangeZ;
     return v;
-
 }
 
-void Game_BuildTestScene(GameState *gs)
+void Game_InitGameState(GameState *gs)
 {
-    //Ent *ent;
-    //EC_Renderer *renderer;
-    //EC_AIController *controller;
-    //EC_Collider *collider;
-    //EC_ActorMotor *motor;
-    //f32 size = 1;
-    //Vec3 p = {};
-
-    // Init gs and component lists
     *gs = {};
     Transform_SetToIdentity(&gs->cameraTransform);
-    //Transform_SetPosition(&gs->cameraTransform, 0, 5, 18);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
-    //Transform_SetPosition(&gs->cameraTransform, 0, 1, 0);
-
+    
     // TODO: Rotation of camera in 'walk' mode is taken from
     // the input tick, each frame, so doing manual rotations of the
     // camera transform here will be useless.
@@ -65,6 +53,18 @@ void Game_BuildTestScene(GameState *gs)
     gs->labelList.count = GAME_MAX_ENTITIES;
     gs->labelList.max = GAME_MAX_ENTITIES;
     
+}
+
+void Game_BuildTestScene(GameState *gs)
+{
+    Ent *ent;
+    EC_Renderer *renderer;
+    //EC_AIController *controller;
+    EC_Collider *collider;
+    //EC_ActorMotor *motor;
+    //f32 size = 1;
+    //Vec3 p = {};
+
     //const f32 testArenaWidth = 12;
     //const f32 testArenaHeight = 4;
     //const f32 wallHalfWidth = 0.5f;
@@ -120,7 +120,7 @@ void Game_BuildTestScene(GameState *gs)
 /////////////////////////////////////////////////////////////
 // Player
 /////////////////////////////////////////////////////////////
-#if 0
+#if 1
     ent = Ent_GetFreeEntity(&gs->entList);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
@@ -237,7 +237,7 @@ void Game_Init(Heap* globalHeap)
 {
     // BlockRef ref = {};
     // Heap_Allocate(globalHeap, &ref, MegaBytes(1), "PHYS CMD");
-    
+    Game_InitGameState(&g_gameState);
     Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
@@ -422,7 +422,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Cmd_Spawn(gs, &cmd);
             return 1;
         } break;
-
+#if 0
         case CMD_TYPE_SPAWN_WORLD_CUBE:
         {
             GCmd_SpawnWorldCube cmd = {};
@@ -431,6 +431,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Spawn_WorldCube(gs, &cmd);
 			return 1;
         } break;
+#endif
     }
     return 0;
 }
@@ -463,6 +464,9 @@ void Game_Tick(
     g_debugTransform = gs->cameraTransform;
     
     // Force physics step to always be no lower than 30fps
+
+    /////////////////////////////////////////////////////////////////////////////
+    // STEP PHYSICS
     f32 dt = time->deltaTime;
     if (dt > MAX_ALLOWED_PHYSICS_STEP)
     {
@@ -497,6 +501,7 @@ void Game_Tick(
         break;
         }
     }
+    /////////////////////////////////////////////////////////////////////////////
 
     // Game state update
     // Update all inputs, entity components and colliders/physics
@@ -512,7 +517,7 @@ void Game_Tick(
         header.type = CMD_TYPE_SPAWN;
         header.size = sizeof(GCmd_Spawn);
         GCmd_Spawn cmd = {};
-        cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;
+        cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
 

@@ -56,10 +56,11 @@ inline u8 EntId_Equals(EntId* a, EntId* b)
 struct Ent
 {
     EntId entId;
-    u8 inUse;               // if 0 this entity is free to be recycled
     Transform transform;
+    u32 factoryType;         // Spawn/Save/Sync function index used to generate this entity
     u32 componentFlags;
     i32 tag;
+    u8 inUse;               // if 0 this entity is free to be recycled
 };
 
 struct EntList
@@ -118,6 +119,9 @@ struct EC_Renderer
 #define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
 #define ACTOR_INPUT_MOVE_LEFT (1 << 2)
 #define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
+#define ACTOR_INPUT_MOVE_UP (1 << 4)
+#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
+#define ACTOR_INPUT_MOVE_ATTACK (1 << 6)
 struct ActorInput
 {
     u32 inputs;
@@ -130,7 +134,7 @@ struct EC_ActorMotor
     u8 inUse;
     ActorInput input;
     Vec3 move;
-    f32 speed;
+    f32 runSpeed;
 };
 
 struct EC_Projectile
