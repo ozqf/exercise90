@@ -45,7 +45,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
     EC_Projectile* prj = EC_AddProjectile(ent, gs);
-    prj->tock = 2.0f;
+    prj->tock = 4.0f;
     prj->tick = prj->tock;
     
     prj->move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;

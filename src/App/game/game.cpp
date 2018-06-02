@@ -53,6 +53,7 @@ void Game_InitGameState(GameState *gs)
     gs->labelList.count = GAME_MAX_ENTITIES;
     gs->labelList.max = GAME_MAX_ENTITIES;
     
+    Game_InitEntityFactory();
 }
 
 void Game_BuildTestScene(GameState *gs)

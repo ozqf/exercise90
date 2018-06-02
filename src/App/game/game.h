@@ -59,7 +59,7 @@ inline u8 IsConnectionOpen(u8 netMode)
 #define PLAYER_MOVE_SPEED 6.5f
 #define PLAYER_ROTATION_SPEED 135.0f
 
-#define TEST_PROJECTILE_SPEED 20.0f
+#define TEST_PROJECTILE_SPEED 40.0f
 
 // TODO: Remove this stuff sometime
 global_variable u8 g_testAsciChar = '+';

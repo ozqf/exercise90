@@ -2,11 +2,13 @@
 
 #include "game.h"
 
-#if 0
-typedef Game_SpawnFunction Ent* (*Game_SpawnEntity)(GameState* gs, GCmd_Spawn* cmd);
+#if 1
+// typedeffing a function of signature: i32* Foo(i32* param1);
+//typedef i32* (Foo)(i32* param1);
+typedef Ent* (Game_SpawnFunction)(GameState* gs, GCmd_Spawn* cmd);
 
 Game_SpawnFunction* g_spawnFunctions[12];
-i32 g_numSpawnFunctions 0;
+i32 g_numSpawnFunctions = 0;
 #endif
 
 
@@ -63,13 +65,30 @@ Ent* Spawn_RigidbodyCube(GameState* gs, GCmd_Spawn* cmd)
     return ent;
 }
 
+Ent* Spawn_Null(GameState* gs, GCmd_Spawn* cmd)
+{
+    ILLEGAL_CODE_PATH
+    return NULL;
+}
+
 void Game_InitEntityFactory()
 {
-    //g_spawnFunctions[g_numSpawnFunctions] = Spawn_WorldCube;
+    g_spawnFunctions[g_numSpawnFunctions] = Spawn_Null;
+    g_numSpawnFunctions++;
+    g_spawnFunctions[g_numSpawnFunctions] = Spawn_WorldCube;
+    g_numSpawnFunctions++;
+    g_spawnFunctions[g_numSpawnFunctions] = Spawn_RigidbodyCube;
+    g_numSpawnFunctions++;
 }
 
 Ent* Cmd_Spawn(GameState* gs, GCmd_Spawn* cmd)
 {
+    if (cmd->factoryType >= g_numSpawnFunctions || cmd->factoryType < 0)
+    {
+        ILLEGAL_CODE_PATH
+    }
+    return g_spawnFunctions[cmd->factoryType](gs, cmd);
+#if 0
     switch (cmd->factoryType)
     {
         case ENTITY_TYPE_NULL:
@@ -98,4 +117,5 @@ Ent* Cmd_Spawn(GameState* gs, GCmd_Spawn* cmd)
         } break;
     }
     return NULL;
+#endif
 }
