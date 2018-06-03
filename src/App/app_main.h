@@ -38,6 +38,13 @@ global_variable InputActionSet g_inputActions = {
     0
 };
 
+global_variable Client g_clients[GAME_MAX_CLIENTS];
+global_variable ClientList g_clientList =
+{
+    g_clients,
+    0,
+    GAME_MAX_CLIENTS
+};
 
 // Interface to the external world
 PlatformInterface platform;

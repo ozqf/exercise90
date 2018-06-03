@@ -25,6 +25,10 @@ void Game_InitGameState(GameState *gs)
     //Transform_SetRotationDegrees(&gs->cameraTransform, -45, 0, 0);
     //Transform_RotateX(&gs->cameraTransform, 45);
 
+    gs->playerList.items = g_players;
+    gs->playerList.count = GAME_MAX_CLIENTS;
+    gs->playerList.max = GAME_MAX_CLIENTS;
+
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
     gs->entList.max = GAME_MAX_ENTITIES;
@@ -54,107 +58,6 @@ void Game_InitGameState(GameState *gs)
     gs->labelList.max = GAME_MAX_ENTITIES;
     
     Game_InitEntityFactory();
-}
-
-void Game_BuildTestScene(GameState *gs)
-{
-    Ent *ent;
-    EC_Renderer *renderer;
-    //EC_AIController *controller;
-    EC_Collider *collider;
-    //EC_ActorMotor *motor;
-    //f32 size = 1;
-    //Vec3 p = {};
-
-    //const f32 testArenaWidth = 12;
-    //const f32 testArenaHeight = 4;
-    //const f32 wallHalfWidth = 0.5f;
-
-    /////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////
-    // Build Entities
-    /////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////
-    // Walls mesh
-    /////////////////////////////////////////////////////////////
-    //ent = Ent_GetFreeEntity(&gs->entList);
-    //Transform_SetPosition(&ent->transform, 0, 0, 0);
-    //Transform_SetScale(&ent->transform, testArenaWidth, testArenaHeight, testArenaWidth);
-    
-    // renderer = EC_AddRenderer(ent, gs);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
-
-    /////////////////////////////////////////////////////////////
-    // Room
-    /////////////////////////////////////////////////////////////
-    // Infinite plane
-#if 0
-    ent = Ent_GetFreeEntity(&gs->entList);
-    p = {};
-    p.y = -2;
-    ent->transform.pos.y = p.y;
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {testArenaWidth, 0.01f, testArenaWidth};
-    collider->shapeId = Phys_CreateInfinitePlane(-2, ent->entId.index, ent->entId.iteration);
-#endif
-
-    //GCmd_SpawnWorldCube cube;
-
-    // Floor
-    
-
-#if 0
-    cube = {};
-    cube.pos.y = -2;
-    cube.size = { 48, 1, 48 };
-    Spawn_WorldCube(gs, &cube);
-
-    // Ceiling
-    cube = {};
-    cube.pos.y = 12;
-    cube.size = { 48, 1, 48 };
-    Spawn_WorldCube(gs, &cube);
-#endif
-
-/////////////////////////////////////////////////////////////
-// Player
-/////////////////////////////////////////////////////////////
-#if 1
-    ent = Ent_GetFreeEntity(&gs->entList);
-    Transform_SetPosition(&ent->transform, 0, 0, 0);
-    collider = EC_AddCollider(ent, gs);
-    collider->size = {1, 2, 1};
-    collider->shapeId = Phys_CreateBox(
-        0, 0, 0,
-        0.5, 1, 0.5,
-        ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_ACTOR,
-        ent->entId.index, ent->entId.iteration);
-
-    renderer = EC_AddRenderer(ent, gs);
-    RendObj_SetAsBillboard(&renderer->rendObj, 1, 0, 0, 5);
-
-    // motor = EC_AddActorMotor(ent, gs);
-    // motor->speed = 5;
-
-    gs->playerEntityIndex = ent->entId.index;
-#endif
-    /////////////////////////////////////////////////////////////
-
-#if 0
-    for (int i = 0; i < 20; ++i)
-    {
-        GCmd_Spawn cmd = {};
-        cmd.entityType = ENTITY_TYPE_RIGIDBODY_CUBE;
-        cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
-        cmd.pos.y += 10;
-
-        Cmd_Spawn(gs, &cmd);
-    }
-#endif
 }
 
 void Game_BuildTestHud(GameState *state)
@@ -239,7 +142,7 @@ void Game_Init(Heap* globalHeap)
     // BlockRef ref = {};
     // Heap_Allocate(globalHeap, &ref, MegaBytes(1), "PHYS CMD");
     Game_InitGameState(&g_gameState);
-    Game_BuildTestScene(&g_gameState);
+    //Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
 }
@@ -417,52 +320,22 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
     {
         case CMD_TYPE_SPAWN:
         {
-            GCmd_Spawn cmd = {};
-            Assert(sizeof(GCmd_Spawn) == bytes);
-            COM_COPY_STRUCT(ptr, &cmd, GCmd_Spawn);
-            Cmd_Spawn(gs, &cmd);
+            Cmd_Spawn cmd = {};
+            Assert(sizeof(Cmd_Spawn) == bytes);
+            COM_COPY_STRUCT(ptr, &cmd, Cmd_Spawn);
+            Exec_Spawn(gs, &cmd);
             return 1;
         } break;
-#if 0
-        case CMD_TYPE_SPAWN_WORLD_CUBE:
-        {
-            GCmd_SpawnWorldCube cmd = {};
-            Assert(sizeof(GCmd_SpawnWorldCube) == bytes);
-            COM_COPY_STRUCT(ptr, &cmd, GCmd_SpawnWorldCube);
-            Spawn_WorldCube(gs, &cmd);
-			return 1;
-        } break;
-#endif
     }
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// STEP PHYSICS
+/////////////////////////////////////////////////////////////////////////////
 #define MAX_ALLOWED_PHYSICS_STEP 0.0334f
-/////////////////////////////////////////////////////////////////////////////
-// Game Tick
-/////////////////////////////////////////////////////////////////////////////
-void Game_Tick(
-    GameState *gs,
-    ByteBuffer input,
-    ByteBuffer* output,
-    GameTime *time,
-    InputActionSet* actions)
+void Game_StepPhysics(GameState* gs, GameTime* time)
 {
-    Game_ApplyInputToTransform(actions, &g_clientTick, &gs->cameraTransform, time);
-
-    //if (input->attack2)
-    if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
-    {
-        i32 shapeId = 10;
-        Transform t = gs->cameraTransform;
-        Phys_TeleportShape(10, t.pos.x, t.pos.y, t.pos.z);
-
-		Vec3 forward = gs->cameraTransform.rotation.zAxis;
-		f32 speed = 20;
-		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
-    }
-    
-    g_debugTransform = gs->cameraTransform;
     
     // Force physics step to always be no lower than 30fps
 
@@ -502,28 +375,71 @@ void Game_Tick(
         break;
         }
     }
-    /////////////////////////////////////////////////////////////////////////////
+}
 
-    // Game state update
-    // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(gs, time, actions);
-    Ent_UpdateAIControllers(gs, time);
-    Game_UpdateColliders(gs, time);
-    Game_UpdateProjectiles(gs, time);
-    //Game_UpdateAI(time);
+/////////////////////////////////////////////////////////////////////////////
+// Update Clients
+/////////////////////////////////////////////////////////////////////////////
+void Game_UpdateClients(GameState* gs, GameTime* time)
+{
+    
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Game Tick
+/////////////////////////////////////////////////////////////////////////////
+void Game_Tick(
+    GameState *gs,
+    ByteBuffer input,
+    ByteBuffer* output,
+    GameTime *time,
+    InputActionSet* actions)
+{
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // CLIENT
+    // > apply local client inputs here
+    // > remote inputs will have already been applied via commands processed
+    // before this step
+    Game_ApplyInputToTransform(actions, &g_localClientTick, &gs->cameraTransform, time);
 
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
     {
         BufferItemHeader header = {};
         header.type = CMD_TYPE_SPAWN;
-        header.size = sizeof(GCmd_Spawn);
-        GCmd_Spawn cmd = {};
+        header.size = sizeof(Cmd_Spawn);
+        Cmd_Spawn cmd = {};
         cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
 
         output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
-        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, GCmd_Spawn);
+        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
         output->count++;
     }
+    
+    //if (input->attack2)
+    if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
+    {
+        i32 shapeId = 10;
+        Transform t = gs->cameraTransform;
+        Phys_TeleportShape(10, t.pos.x, t.pos.y, t.pos.z);
+
+		Vec3 forward = gs->cameraTransform.rotation.zAxis;
+		f32 speed = 20;
+		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    
+    g_debugTransform = gs->cameraTransform;
+    
+    // Game state update
+    // Update all inputs, entity components and colliders/physics
+    Game_UpdateActorMotors(gs, time, actions);
+    Game_UpdateAIControllers(gs, time);
+    Game_UpdateColliders(gs, time);
+    Game_UpdateProjectiles(gs, time);
+
+    // step forward
+    Game_StepPhysics(gs, time);
 }

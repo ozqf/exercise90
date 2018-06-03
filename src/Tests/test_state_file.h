@@ -63,7 +63,7 @@ inline void DebugStateHeader(StateSaveHeader* h)
 #define ENTITY_TYPE_WORLD_CUBE 1
 #define ENTITY_TYPE_RIGIDBODY_CUBE 2
 
-struct GCmd_Spawn
+struct Cmd_Spawn
 {
     i32 factoryType;
     Vec3 pos;
@@ -101,17 +101,17 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	/////////////////////////////////////////////////////////////
 	header.staticEntities.offset = ftell(f);
 
-	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(GCmd_Spawn);
+	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(Cmd_Spawn);
 
-	GCmd_Spawn spawn;
+	Cmd_Spawn spawn;
 	spawn = {};
 	spawn.factoryType = 1;
 	spawn.pos.x = 0;
 	spawn.pos.y = -8;
 	spawn.pos.z = 0;
 	spawn.size = { 48, 1, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
@@ -120,8 +120,8 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.y = 8;
 	spawn.pos.z = 0;
 	spawn.size = { 48, 1, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
@@ -130,8 +130,8 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.y = 0;
 	spawn.pos.z = -24;
 	spawn.size = { 48, 16, 1 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
@@ -140,8 +140,8 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.y = 0;
 	spawn.pos.z = 24;
 	spawn.size = { 48, 16, 1 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
@@ -150,8 +150,8 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.y = 0;
 	spawn.pos.z = 0;
 	spawn.size = { 1, 16, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	spawn = {};
@@ -160,8 +160,8 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.pos.y = 0;
 	spawn.pos.z = 0;
 	spawn.size = { 1, 16, 48 };
-	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(GCmd_Spawn));
-	fwrite(&spawn, sizeof(GCmd_Spawn), 1, f);
+	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
 	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
 
 	/////////////////////////////////////////////////////////////
@@ -256,8 +256,8 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 		{
 		case CMD_TYPE_SPAWN:
 		{
-			GCmd_Spawn s = {};
-			fread(&s, sizeof(GCmd_Spawn), 1, f);
+			Cmd_Spawn s = {};
+			fread(&s, sizeof(Cmd_Spawn), 1, f);
 			printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
 				s.factoryType,
 				s.pos.x, s.pos.y, s.pos.z,
@@ -291,9 +291,9 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 		{
 			case CMD_TYPE_SPAWN:
 			{
-				GCmd_Spawn s = {};
-				//fread(&s, sizeof(GCmd_Spawn), 1, f);rt
-				read += COM_COPY_STRUCT(read, &s, GCmd_Spawn);
+				Cmd_Spawn s = {};
+				//fread(&s, sizeof(Cmd_Spawn), 1, f);rt
+				read += COM_COPY_STRUCT(read, &s, Cmd_Spawn);
 				printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
 					s.factoryType,
 					s.pos.e[0], s.pos.e[1], s.pos.e[2],

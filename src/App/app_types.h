@@ -39,6 +39,20 @@ struct InputActionSet
     i32 count;
 };
 
+struct Client
+{
+    i32 clientId;
+    i32 state;
+    i32 isLocal;
+};
+
+struct ClientList
+{
+    Client* items;
+    i32 count;
+    i32 max;
+};
+
 // void Input_InitAction(InputAction* action, u32 keyCode, char* label)
 // {
 //     action->keyCode = keyCode;

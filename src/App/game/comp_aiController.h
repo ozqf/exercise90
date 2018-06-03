@@ -39,7 +39,7 @@ void Ent_InitAIController(EC_AIController* controller, f32 dirX, f32 dirY, f32 d
 
 f32 moveDistance = 12;
 
-void Ent_UpdateAIControllers(GameState* gs, GameTime* time)
+void Game_UpdateAIControllers(GameState* gs, GameTime* time)
 {
     
     #if 0

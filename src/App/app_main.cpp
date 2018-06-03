@@ -14,15 +14,15 @@ holding game/menu state and calling game update when required
 
 #include <stdio.h>
 
-void App_ReadCommandBuffer(GameTime* time, ByteBuffer commands);
+void App_ReadCommandBuffer(ByteBuffer commands);
 
 void App_ErrorStop()
 {
     DebugBreak();
 }
 
-void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects,
-    i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
+void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
+                  i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {
     *scene = {};
     Transform_SetToIdentity(&scene->cameraTransform);
@@ -34,7 +34,7 @@ void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObject
     scene->settings.orthographicHalfHeight = orthographicHalfHeight;
 }
 
-void R_Scene_Init(RenderScene* scene, RenderListItem* objectArray, u32 maxObjects)
+void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects)
 {
     R_Scene_Init(scene, objectArray, maxObjects, 90, RENDER_PROJECTION_MODE_3D, 8);
 }
@@ -57,27 +57,27 @@ void Input_ToggleMouseMode()
     }
 }
 
-void AllocateDebugStrings(Heap* heap)
+void AllocateDebugStrings(Heap *heap)
 {
-	// Buffer used for live stat output
-	Heap_AllocString(&g_heap, &g_debugBuffer, 1024);
-	char* writeStart = (char*)g_debugBuffer.ptrMemory;
-	i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
-	sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
-	OutputDebugStringA("Allocated debug string\n");
+    // Buffer used for live stat output
+    Heap_AllocString(&g_heap, &g_debugBuffer, 1024);
+    char *writeStart = (char *)g_debugBuffer.ptrMemory;
+    i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
+    sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
+    OutputDebugStringA("Allocated debug string\n");
 }
 
-i32 AllocateTestStrings(Heap* heap)
+i32 AllocateTestStrings(Heap *heap)
 {
-	BlockRef ref = {};
+    BlockRef ref = {};
     Heap_AllocString(&g_heap, &ref, 128);
-    char* testStr1 = "This is a test string. It should get copied onto the heap";
-	COM_CopyStringLimited(testStr1, (char*)ref.ptrMemory, ref.objectSize);
+    char *testStr1 = "This is a test string. It should get copied onto the heap";
+    COM_CopyStringLimited(testStr1, (char *)ref.ptrMemory, ref.objectSize);
 
-	ref = {};
-	Heap_AllocString(&g_heap, &ref, 256);
-	char* testStr2 = "Welcome to another test string. This one goes on and on and on and on and on and blooooody on. At most 256 though, no more, but possible less. Enough to require 256 bytes of capacity certainly. I mean, with more than that it would just break right? It'll go right off the end and just...";
-	COM_CopyStringLimited(testStr2, (char*)ref.ptrMemory, ref.objectSize);
+    ref = {};
+    Heap_AllocString(&g_heap, &ref, 256);
+    char *testStr2 = "Welcome to another test string. This one goes on and on and on and on and on and blooooody on. At most 256 though, no more, but possible less. Enough to require 256 bytes of capacity certainly. I mean, with more than that it would just break right? It'll go right off the end and just...";
+    COM_CopyStringLimited(testStr2, (char *)ref.ptrMemory, ref.objectSize);
     return 1;
 }
 
@@ -86,7 +86,7 @@ i32 AllocateTestStrings(Heap* heap)
  * > header information will be copied and updated
  * > BlockRef should be a Heap block for a Texture2DHeader!
  */
-void AppRegisterTexture(Texture2DHeader* header, BlockRef* ref)
+void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
 {
     i32 index = g_textureHandles.numTextures;
     header->index = index;
@@ -105,7 +105,7 @@ void AppRegisterTexture(Texture2DHeader* header, BlockRef* ref)
 /**
  * Upload a texture to the GPU
  */
-void AppBindTexture(Texture2DHeader* header)
+void AppBindTexture(Texture2DHeader *header)
 {
     platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, header->index);
 }
@@ -113,7 +113,7 @@ void AppBindTexture(Texture2DHeader* header)
 /**
  * Read a texture onto the Global Heap
  */
-BlockRef AppLoadTexture(char* filePath)
+BlockRef AppLoadTexture(char *filePath)
 {
     BlockRef ref = {};
     platform.Platform_LoadTexture(&g_heap, &ref, filePath);
@@ -123,12 +123,12 @@ BlockRef AppLoadTexture(char* filePath)
 /**
  * Read a texture onto the global heap and then immediately bind it
  */
-void AppLoadAndRegisterTexture(char* filePath)
+void AppLoadAndRegisterTexture(char *filePath)
 {
     BlockRef ref = AppLoadTexture(filePath);
-    
+
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    Texture2DHeader* header = (Texture2DHeader*)ref.ptrMemory;
+    Texture2DHeader *header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
     //AppBindTexture((Texture2DHeader*)ref.ptrMemory, &ref);
 }
@@ -148,36 +148,36 @@ void AppBindAllTextures()
 void AppLoadTestTextures()
 {
     BlockRef ref;
-    Texture2DHeader* header;
+    Texture2DHeader *header;
 
     AppInitTestTextures();
 
     AppRegisterTexture(&testBuffer, NULL);
-    
+
     AppRegisterTexture(&testBuffer2, NULL);
-    
+
     AppRegisterTexture(&testBuffer3, NULL);
-    
+
     ref = AppLoadTexture("BitmapTest.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    header = (Texture2DHeader*)ref.ptrMemory;
+    header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    
+
     ref = AppLoadTexture("charset.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    header = (Texture2DHeader*)ref.ptrMemory;
+    header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    
+
     ref = AppLoadTexture("brbrick2.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    header = (Texture2DHeader*)ref.ptrMemory;
+    header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    
+
     ref = AppLoadTexture("BKEYA0.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
-    header = (Texture2DHeader*)ref.ptrMemory;
+    header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    
+
     AppBindAllTextures();
 }
 
@@ -191,40 +191,36 @@ i32 AppRendererReloaded()
 // Loading
 ////////////////////////////////////////////////////////////////////////////
 
-void App_ReadStateBuffer(GameState* gs, ByteBuffer* buf)
+void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
 {
-	//App_ReadCommandBuffer(&g_time, buf);
-	u8* read = buf->ptrStart;
-	StateSaveHeader h = {};
-	read += COM_COPY_STRUCT(read, &h, StateSaveHeader);
-	if (
-		h.magic[0] != 'S'
-		|| h.magic[1] != 'A'
-		|| h.magic[2] != 'V'
-		|| h.magic[3] != 'E'
-		)
-	{
-		ILLEGAL_CODE_PATH
-	}
+    //App_ReadCommandBuffer(&g_time, buf);
+    u8 *read = buf->ptrStart;
+    StateSaveHeader h = {};
+    read += COM_COPY_STRUCT(read, &h, StateSaveHeader);
+    if (
+        h.magic[0] != 'S' || h.magic[1] != 'A' || h.magic[2] != 'V' || h.magic[3] != 'E')
+    {
+        ILLEGAL_CODE_PATH
+    }
 
     // Read static
     ByteBuffer sub = {};
-	sub.ptrStart = buf->ptrStart + h.staticEntities.offset;
-	sub.capacity = h.staticEntities.size;
-	sub.count = h.staticEntities.count;
-	sub.ptrEnd = buf->ptrStart + buf->capacity;
-    App_ReadCommandBuffer(&g_time, sub);
+    sub.ptrStart = buf->ptrStart + h.staticEntities.offset;
+    sub.capacity = h.staticEntities.size;
+    sub.count = h.staticEntities.count;
+    sub.ptrEnd = buf->ptrStart + buf->capacity;
+    App_ReadCommandBuffer(sub);
 }
 
-void App_LoadStateFromFile(GameState* gs, char* fileName)
+void App_LoadStateFromFile(GameState *gs, char *fileName)
 {
-	BlockRef ref = {};
-	platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "testbox.lvl");
-	ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
+    BlockRef ref = {};
+    platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "testbox.lvl");
+    ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
 
-	App_ReadStateBuffer(gs, &bytes);
+    App_ReadStateBuffer(gs, &bytes);
 
-	Heap_Free(&g_heap, ref.id);
+    Heap_Free(&g_heap, ref.id);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -247,23 +243,22 @@ i32 App_Init()
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
 
-	AllocateDebugStrings(&g_heap);
-	//AllocateTestStrings(&g_heap);
+    AllocateDebugStrings(&g_heap);
+    //AllocateTestStrings(&g_heap);
 
-	// Buffers, enlarge if necessary
+    // Buffers, enlarge if necessary
     Heap_Allocate(&g_heap, &g_gameInputBufferRef, KiloBytes(64), "Game Input", 1);
-	g_gameInputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
+    g_gameInputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
     Heap_Allocate(&g_heap, &g_gameOutputBufferRef, KiloBytes(64), "Game Output", 1);
-	g_gameOutputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
+    g_gameOutputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
 
-	// 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
+    // 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
     Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV", 1);
     Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD", 1);
 
     SharedAssets_Init();
 
     BlockRef ref = {};
-
 
     //g_numDebugTextures = platform.Platform_LoadDebugTextures(&g_heap);
     g_textureHandles.numTextures = 0;
@@ -273,23 +268,20 @@ i32 App_Init()
         g_collisionCommandBuffer.ptrMemory,
         g_collisionCommandBuffer.objectSize,
         g_collisionEventBuffer.ptrMemory,
-        g_collisionEventBuffer.objectSize
-        );
-    
+        g_collisionEventBuffer.objectSize);
+
     Game_Init(&g_heap);
     Game_InitDebugStr();
 
-	App_LoadStateFromFile(&g_gameState, "map1.lvl");
-    //platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "map1.lvl");
+    App_LoadStateFromFile(&g_gameState, "map1.lvl");
 
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
-        90,
-        RENDER_PROJECTION_MODE_IDENTITY,
-        //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
-        8
-    );
-    
+                 90,
+                 RENDER_PROJECTION_MODE_IDENTITY,
+                 //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
+                 8);
+
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_V, "Cycle Debug");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_R, "Reset");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_ESCAPE, "Menu");
@@ -300,8 +292,8 @@ i32 App_Init()
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_S, "Move Backward");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_SPACE, "Move Up");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_CONTROL, "Move Down");
-	Input_InitAction(&g_inputActions, Z_INPUT_CODE_Q, "Roll Left");
-	Input_InitAction(&g_inputActions, Z_INPUT_CODE_E, "Roll Right");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_Q, "Roll Left");
+    Input_InitAction(&g_inputActions, Z_INPUT_CODE_E, "Roll Right");
 
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_G, "Spawn Test");
 
@@ -333,9 +325,9 @@ i32 App_Shutdown()
 // UPDATE
 ////////////////////////////////////////////////////////////////////////////
 
-void R_Scene_Tick(GameTime* time, RenderScene* scene)
+void R_Scene_Tick(GameTime *time, RenderScene *scene)
 {
-    #if 0
+#if 0
 	RendObj* obj;
 	i32 rotatingEntity = 5;
 
@@ -345,12 +337,12 @@ void R_Scene_Tick(GameTime* time, RenderScene* scene)
     
 	obj = &scene->rendObjects[3];
 	obj->transform.rot.y += 90 * time->deltaTime;
-    #endif
+#endif
 }
 
 void CycleTestTexture()
 {
-    #if 0
+#if 0
     RendObj* obj = g_game_rendObjects + 0;
     RendObj_ColouredMesh* rMesh = &obj->data.mesh;
 	//DebugBreak();
@@ -362,46 +354,98 @@ void CycleTestTexture()
     char buf[128];
         sprintf_s(buf, 128, "Cycled test texture to: %d\n", rMesh->textureIndex);
         OutputDebugString(buf);
-    #endif
+#endif
 }
 
 void CycleTestAsciChar()
 {
-    #if 0
+#if 0
     RendObj* obj = g_ui_rendObjects + 0;
     RendObj_Sprite* sprite = &obj->data.sprite;
     g_testAsciChar++;
     RendObj_CalculateSpriteAsciUVs(sprite, g_testAsciChar);
-    #endif
+#endif
 }
 
-void App_ReadInputItem(InputItem* item, i32 value, u32 frameNumber)
+void App_UpdateClient(Cmd_ClientUpdate client)
 {
-   if (item->on != value)
-   {
-       item->on = (u8)value;
-       item->lastChangeFrame = frameNumber;
-   }
+
+}
+
+void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
+{
+    if (item->on != value)
+    {
+        item->on = (u8)value;
+        item->lastChangeFrame = frameNumber;
+    }
 }
 
 void App_ReadInput(u32 frameNumber, InputEvent ev)
 {
-    InputAction* action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, frameNumber);
+    InputAction *action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, frameNumber);
 }
 
-void App_ReadCommandBuffer(GameTime* time, ByteBuffer commands)
+void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
 {
-i32 numRead = 0;
-    i32 numSkipped = 0;
-    u8* ptrRead = commands.ptrStart;
-	//u32 headerSize = sizeof(BufferItemHeader);
-	//u32 evSize = sizeof(InputEvent);
+    switch (type)
+    {
+        case PLATFORM_EVENT_CODE_INPUT:
+        {
+            InputEvent ev = {};
+            ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
+            App_ReadInput(g_time.frameNumber, ev);
+        }
+        break;
 
-    while (ptrRead < commands.ptrEnd)// && (numRead + numSkipped) < commands.count)
+        case CMD_TYPE_CLIENT_UPDATE:
+        {
+            Cmd_ClientUpdate cmd = {};
+            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
+
+        } break;
+
+        default:
+        {
+            // Pass event down, if event is not handled
+            if (Game_ReadCmd(&g_gameState, type, ptrRead, size))
+            {
+                ptrRead += size;
+            }
+            else
+            {
+                // buffer may be corrupted. All stop
+                char buf[512];
+                sprintf_s(buf, 512, "Unrecognised command type: %d aborting\n", type);
+                OutputDebugStringA(buf);
+                Assert(false);
+            }
+        }
+        break;
+    }
+}
+
+void App_ReadCommandBuffer(ByteBuffer commands)
+{
+    u8 *ptrRead = commands.ptrStart;
+    
+    while (ptrRead < commands.ptrEnd) // && (numRead + numSkipped) < commands.count)
     {
         BufferItemHeader header = {};
         ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
-        
+
+        if (header.type == NULL)
+        {
+            // 0 == end here now
+            ptrRead = commands.ptrEnd;
+        }
+        else
+        {
+            App_ReadCommand(header.type, header.size, ptrRead);
+            ptrRead += header.size;
+        }
+
+#if 0
         switch (header.type)
         {
             case PLATFORM_EVENT_CODE_INPUT:
@@ -410,7 +454,7 @@ i32 numRead = 0;
                 InputEvent ev = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
 
-                App_ReadInput(time->frameNumber, ev);
+                App_ReadInput(g_time.frameNumber, ev);
             } break;
 
 			case NULL:
@@ -437,28 +481,28 @@ i32 numRead = 0;
                 }
 			} break;
         }
+#endif
     }
 }
 
-void App_Frame(GameTime* time, ByteBuffer commands)
+void App_Frame(GameTime *time, ByteBuffer commands)
 {
-	/////////////////////////////////////////////////////
-	// Read Command buffers
-	/////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    // Read Command buffers
+    /////////////////////////////////////////////////////
 
-	g_time = *time;
-	// Read Platform commands
-    App_ReadCommandBuffer(&g_time, commands);
-	// Read game output from last frame
-	//ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
-	//App_ReadCommandBuffer(time, outBuf);
-	App_ReadCommandBuffer(time, g_gameOutputByteBuffer);
-	Buf_Clear(&g_gameOutputByteBuffer);
+    g_time = *time;
+    // Read Platform commands
+    App_ReadCommandBuffer(commands);
+    // Read game output from last frame
+    //ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
+    //App_ReadCommandBuffer(time, outBuf);
+    App_ReadCommandBuffer(g_gameOutputByteBuffer);
+    Buf_Clear(&g_gameOutputByteBuffer);
 
-	// Clear output buffer ready for game to write to this frame
-	/*COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
+    // Clear output buffer ready for game to write to this frame
+    /*COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
 	outBuf.count = 0;*/
-
 
     if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
     {
@@ -468,7 +512,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     {
         Input_ToggleMouseMode();
     }
-    
+
     ///////////////////////////////////////
     // Process gamestate
     ///////////////////////////////////////
@@ -476,8 +520,8 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     // clear debug buffer
     g_debugStr.length = 0;
 
-    GameState* gs = &g_gameState;
-    GameState* ui = &g_uiState;
+    GameState *gs = &g_gameState;
+    GameState *ui = &g_uiState;
 
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
@@ -489,18 +533,18 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
-	// Prepare input buffer
-	ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
+    // Prepare input buffer
+    ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
 
     // Game state update
     Game_Tick(gs,
-        inBuf,
-        &g_gameOutputByteBuffer,
-        time,
-        &g_inputActions);
+              inBuf,
+              &g_gameOutputByteBuffer,
+              time,
+              &g_inputActions);
 
-	g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
-    
+    g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
+
     ///////////////////////////////////////
     // Render
     ///////////////////////////////////////
@@ -508,15 +552,15 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
     g_uiScene.numObjects = 0;
-    
+
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
-    
+
     Game_IntersectionTest(gs, &g_worldScene);
 
     platform.Platform_RenderScene(&g_worldScene);
-    
-    #if 1
+
+#if 1
     Game_UpdateUI(ui, time);
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string
@@ -533,8 +577,7 @@ void App_Frame(GameTime* time, ByteBuffer commands)
     // t.pos.y = 1;
     RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     platform.Platform_RenderScene(&g_uiScene);
-    #endif
-    
+#endif
 }
 
 /***************************************

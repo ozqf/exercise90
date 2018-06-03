@@ -51,6 +51,7 @@ inline u8 IsConnectionOpen(u8 netMode)
 
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
+#define GAME_MAX_CLIENTS 8
 
 #define UI_MAX_ENTITIES 512
 
@@ -101,6 +102,8 @@ global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
 global_variable GameState g_gameState;
 global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 
+global_variable Player g_players[GAME_MAX_CLIENTS];
+
 // UI
 global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
@@ -116,7 +119,7 @@ global_variable BlockRef g_collisionCommandBuffer;
 global_variable BlockRef g_collisionEventBuffer;
 
 // Client input
-global_variable ClientTick g_clientTick;
+global_variable ClientTick g_localClientTick;
 
 
 /////////////////////////////////////////////////////////////

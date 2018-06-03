@@ -87,15 +87,6 @@ struct EntList
 #define COMP_FLAG_PROJECTILE (1 << 4)
 #define COMP_FLAG_LABEL (1 << 5)
 
-// A quick test component
-struct EC_AIController
-{
-    EntId entId;
-    u8 inUse;
-    Vec3 dir;
-    f32 speed;
-};
-
 struct EC_Collider
 {
     EntId entId;
@@ -124,7 +115,7 @@ struct EC_Renderer
 #define ACTOR_INPUT_MOVE_ATTACK (1 << 6)
 struct ActorInput
 {
-    u32 inputs;
+    u32 buttons;
     Vec3 degrees;
 };
 
@@ -135,6 +126,15 @@ struct EC_ActorMotor
     ActorInput input;
     Vec3 move;
     f32 runSpeed;
+};
+
+// A quick test component
+struct EC_AIController
+{
+    EntId entId;
+    u8 inUse;
+    Vec3 dir;
+    f32 speed;
 };
 
 struct EC_Projectile
@@ -168,9 +168,16 @@ DEFINE_ENT_COMPONENT_LIST(Label)
 
 struct Player
 {
-    i32 id;
+    i32 playerId;
     i32 state;
-    ActorInput input;
+    EntId avatarId;
+};
+
+struct PlayerList
+{
+    Player* items;
+    i32 count;
+    i32 max;
 };
 
 struct GameState
@@ -180,10 +187,8 @@ struct GameState
     i32 nextEntityID;
     EntList entList;
     //i32 lastEntityIndex;
-
-    Player players[4];
-    i32 numPlayers = 0;
-    i32 maxPlayers = 4;
+    
+    PlayerList playerList;
 
     // Components
     EC_AIControllerList aiControllerList;

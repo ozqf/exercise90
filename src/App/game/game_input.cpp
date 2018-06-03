@@ -329,6 +329,43 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 	t->pos.z += (forward.z + left.z + up.z);
 }
 
+void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
+{
+	// Clear buttons and rebuild
+	input->buttons = 0;
+	// Movement
+	//i32 val;
+	//val = Input_GetActionValue(actions, "Move Left");
+	if (Input_GetActionValue(actions, "Move Left"))
+	{
+		input->buttons = input->buttons & ACTOR_INPUT_MOVE_LEFT;
+	}
+	if (Input_GetActionValue(actions, "Move Right"))
+	{
+		input->buttons = input->buttons & ACTOR_INPUT_MOVE_RIGHT;
+	}
+
+	// Orientation
+	f32 sensitivity = 0.1f;
+	i8 inverted = -1;
+
+	
+	input->degrees.y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * sensitivity));
+
+	input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
+
+	input->degrees.x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y") * sensitivity)) * inverted;
+
+	if (input->degrees.x < -89)
+	{
+		input->degrees.x = -89;
+	}
+	if (input->degrees.x > 89)
+	{
+		input->degrees.x = 89;
+	}
+}
+
 void Game_ApplyInputToTransform(InputActionSet* actions, ClientTick* input, Transform* t, GameTime* time)
 {
 	switch (GAME_INPUT_MODE)

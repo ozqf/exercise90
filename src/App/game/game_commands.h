@@ -15,22 +15,17 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 //////////////////////////////////////////////////
 
 #define CMD_TYPE_SPAWN 100
-//#define CMD_TYPE_SPAWN_WORLD_CUBE 101
+#define CMD_TYPE_CLIENT_UPDATE 101
 
+//////////////////////////////////////////////////
+// Spawning
 #define ENTITY_TYPE_NULL 0
 #define ENTITY_TYPE_WORLD_CUBE 1
 #define ENTITY_TYPE_RIGIDBODY_CUBE 2
 #define ENTITY_TYPE_ACTOR_GROUND 3
+#define ENTITY_TYPES_COUNT 4
 
-// struct GCmd_SpawnWorldCube
-// {
-//     Vec3 pos;
-//     Vec3 rot;
-//     Vec3 size;
-//     u32 flags;
-// };
-
-struct GCmd_Spawn
+struct Cmd_Spawn
 {
     i32 factoryType;
     Vec3 pos;
@@ -39,5 +34,18 @@ struct GCmd_Spawn
     u32 flags;
 };
 
-Ent* Cmd_Spawn(GameState* gs, GCmd_Spawn* cmd);
-//void Spawn_WorldCube(GameState* gs, GCmd_SpawnWorldCube* cmd);
+//////////////////////////////////////////////////
+// Player management
+
+//////////////////////////////////////////////////
+// Client management
+#define CLIENT_STATE_FREE 0
+#define CLIENT_STATE_OBSERVER 1
+#define CLIENT_STATE_PLAYING 2
+struct Cmd_ClientUpdate
+{
+    i32 clientId;
+    i32 state;
+};
+
+Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
