@@ -88,6 +88,8 @@ void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIn
 
 void Win32_InitPlatformInterface()
 {
+    platInterface.Platform_Error = Win32_Error;
+
     platInterface.Platform_Malloc = Platform_Alloc;
     platInterface.Platform_Free = Platform_Free;
     platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;

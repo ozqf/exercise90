@@ -30,6 +30,9 @@ Maintaining rendering Scene graph options:
 
 struct PlatformInterface
 {
+    // Oops
+    void (*Platform_Error)(char* msg, char* title);
+
     // Memory Allocation
     u8 (*Platform_Malloc)(MemoryBlock* mem, u32 bytesToAllocate);
     void (*Platform_Free)(MemoryBlock *mem);

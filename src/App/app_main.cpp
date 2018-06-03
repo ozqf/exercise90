@@ -21,6 +21,15 @@ void App_ErrorStop()
     DebugBreak();
 }
 
+void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
+{
+    CmdHeader h = { type, size };
+    u32 remaining = g_gameOutputByteBuffer.capacity - ((u32)g_gameOutputByteBuffer.ptrWrite - (u32)g_gameOutputByteBuffer.ptrStart);
+    Assert(remaining >= (sizeof(CmdHeader) + size));
+    g_gameOutputByteBuffer.ptrWrite += COM_COPY_STRUCT(&h, g_gameOutputByteBuffer.ptrWrite, CmdHeader);
+    g_gameOutputByteBuffer.ptrWrite += COM_COPY(ptr, g_gameOutputByteBuffer.ptrWrite, size);
+}
+
 void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
                   i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {
@@ -200,6 +209,7 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     if (
         h.magic[0] != 'S' || h.magic[1] != 'A' || h.magic[2] != 'V' || h.magic[3] != 'E')
     {
+		platform.Platform_Error("Buffer is not a SAVE file", "APP");
         ILLEGAL_CODE_PATH
     }
 
@@ -274,6 +284,10 @@ i32 App_Init()
     Game_InitDebugStr();
 
     App_LoadStateFromFile(&g_gameState, "map1.lvl");
+    Cmd_ClientUpdate spawnClient = {};
+    spawnClient.clientId = 1;
+    spawnClient.state = CLIENT_STATE_OBSERVER;
+    App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
@@ -367,9 +381,11 @@ void CycleTestAsciChar()
 #endif
 }
 
-void App_UpdateClient(Cmd_ClientUpdate client)
+void App_UpdateClient(Cmd_ClientUpdate* client)
 {
-
+    char buf[256];
+    sprintf_s(buf, 256, "APP: Add Client %d\n", client->clientId);
+    OutputDebugStringA(buf);
 }
 
 void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
@@ -402,7 +418,7 @@ void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
         {
             Cmd_ClientUpdate cmd = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
-
+            App_UpdateClient(&cmd);
         } break;
 
         default:
@@ -416,8 +432,9 @@ void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
             {
                 // buffer may be corrupted. All stop
                 char buf[512];
-                sprintf_s(buf, 512, "Unrecognised command type: %d aborting\n", type);
+                sprintf_s(buf, 512, "App: Unrecognised command type: %d\n", type);
                 OutputDebugStringA(buf);
+                platform.Platform_Error(buf, "APP");
                 Assert(false);
             }
         }
