@@ -32,6 +32,7 @@ void Game_InitGameState(GameState *gs)
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
     gs->entList.max = GAME_MAX_ENTITIES;
+	Ent_SetIndices(&gs->entList);
 
     gs->rendererList.items = g_renderers;
     gs->rendererList.count = GAME_MAX_ENTITIES;
@@ -314,6 +315,34 @@ Rotation:\n\
     return h;
 }
 
+u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
+{
+	switch (cmd->impulse)
+	{
+		case IMPULSE_JOIN_GAME:
+		{
+			if (!IsRunningServer(gs->netMode))
+			{
+				OutputDebugStringA("Cannot impulse if not hosting the server!\n");
+				return 1;
+			}
+			OutputDebugStringA("SV Spawn player");
+			// How to assign player Id at this point
+			Cmd_Spawn spawn = {};
+			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
+			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
+			Exec_Spawn(gs, &spawn);
+			return 1;
+		} break;
+
+		default:
+		{
+			ILLEGAL_CODE_PATH
+			return 0;
+		} break;
+	}
+}
+
 u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
@@ -321,7 +350,11 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         case CMD_TYPE_SPAWN:
         {
             Cmd_Spawn cmd = {};
-            Assert(sizeof(Cmd_Spawn) == bytes);
+			// If size doesn't match, something is terrible wrong.
+			// > Possibly reading an old command file that has out-of-sync struct layouts
+			// > Or read pointer got mangled
+			u32 size = sizeof(Cmd_Spawn);
+            Assert(size == bytes);
             COM_COPY_STRUCT(ptr, &cmd, Cmd_Spawn);
             Exec_Spawn(gs, &cmd);
             return 1;
@@ -329,10 +362,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 
         case CMD_TYPE_IMPULSE:
         {
-            Cmd_Spawn cmd = {};
-            cmd.factoryType = ENTITY_TYPE_ACTOR_GROUND;
-            Exec_Spawn(gs, &cmd);
-            return 1;
+			return Game_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
         } break;
     }
     return 0;
@@ -411,6 +441,7 @@ void Game_Tick(
         header.type = CMD_TYPE_SPAWN;
         header.size = sizeof(Cmd_Spawn);
         Cmd_Spawn cmd = {};
+		cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
         cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
@@ -420,7 +451,6 @@ void Game_Tick(
         output->count++;
     }
     
-    //if (input->attack2)
     if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
     {
         i32 shapeId = 10;

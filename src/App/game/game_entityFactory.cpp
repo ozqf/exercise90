@@ -13,7 +13,8 @@ i32 g_numSpawnFunctions = 0;
 
 Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
 {
-    Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &cmd->entityId);
     ent->transform.pos = cmd->pos;
     
     EC_Renderer* renderer = EC_AddRenderer(ent, gs);
@@ -35,7 +36,8 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
 
 Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
 {
-    Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &cmd->entityId);
 
     Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
     
@@ -66,12 +68,13 @@ Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
 
 Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
 {
-    Ent *ent;
+    //Ent *ent;
     EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
 
-    ent = Ent_GetFreeEntity(&gs->entList);
+    //ent = Ent_GetFreeEntity(&gs->entList);
+    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &cmd->entityId);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(ent, gs);
     collider->size = {1, 2, 1};

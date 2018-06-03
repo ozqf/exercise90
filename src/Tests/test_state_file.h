@@ -63,9 +63,21 @@ inline void DebugStateHeader(StateSaveHeader* h)
 #define ENTITY_TYPE_WORLD_CUBE 1
 #define ENTITY_TYPE_RIGIDBODY_CUBE 2
 
+union EntId
+{
+    struct
+    {
+        u16 iteration;
+        u16 index;
+    };
+    u16 arr[2];
+};
+
+
 struct Cmd_Spawn
 {
     i32 factoryType;
+	EntId entityId;
     Vec3 pos;
     Vec3 rot;
     Vec3 size;
@@ -103,9 +115,12 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(Cmd_Spawn);
 
+	u16 id = 0;
+
 	Cmd_Spawn spawn;
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = 0;
 	spawn.pos.y = -8;
 	spawn.pos.z = 0;
@@ -116,6 +131,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = 0;
 	spawn.pos.y = 8;
 	spawn.pos.z = 0;
@@ -126,6 +142,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = 0;
 	spawn.pos.y = 0;
 	spawn.pos.z = -24;
@@ -136,6 +153,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = 0;
 	spawn.pos.y = 0;
 	spawn.pos.z = 24;
@@ -146,6 +164,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = -24;
 	spawn.pos.y = 0;
 	spawn.pos.z = 0;
@@ -156,6 +175,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 
 	spawn = {};
 	spawn.factoryType = 1;
+	spawn.entityId = { 0, id++ };
 	spawn.pos.x = 24;
 	spawn.pos.y = 0;
 	spawn.pos.z = 0;

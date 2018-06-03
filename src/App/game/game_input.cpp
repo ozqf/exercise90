@@ -329,6 +329,10 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 	t->pos.z += (forward.z + left.z + up.z);
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+// Local input actions -> Actor Input Struct
+////////////////////////////////////////////////////////////////////////////
 void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 {
 	// Clear buttons and rebuild

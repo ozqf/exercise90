@@ -29,7 +29,9 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
 
 void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 {
-    Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    EntId id = Ent_ReserveFreeEntity(&gs->entList);
+    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &id);
     
     //M4x4_SetToIdentity(ent->transform.matrix.cells);
     //ent->transform.matrix.wAxis = originT->matrix.wAxis;

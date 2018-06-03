@@ -177,11 +177,12 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         mouseMoveX = 0;
         mouseMoveY = 0;
     }
-
+#if 0
 	if (mouseMoveX != 0 || mouseMoveY != 0)
 	{
 		OutputDebugStringA("Mouse moved\n");
 	}
+#endif
 
     BufferItemHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;

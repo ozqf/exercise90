@@ -527,16 +527,19 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             if (Input_CheckActionToggledOn(actions, "Attack 1", frameNumber))
             {
                 OutputDebugStringA("Client wishes to spawn!\n");
-                Cmd_Impulse cmd = {};
+                Cmd_ServerImpulse cmd = {};
                 cmd.clientId = cl->clientId;
                 cmd.impulse = IMPULSE_JOIN_GAME;
-                App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_Impulse));
+                App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
         } break;
 
         case CLIENT_STATE_PLAYING:
         {
-
+			Cmd_PlayerInput cmd = {};
+			cmd.clientId = cl->clientId;
+			Game_CreateClientInput(&g_inputActions, &cmd.input);
+			App_EnqueueCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 
         default:
