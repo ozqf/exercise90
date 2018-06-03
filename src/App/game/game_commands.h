@@ -16,6 +16,7 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 
 #define CMD_TYPE_SPAWN 100
 #define CMD_TYPE_CLIENT_UPDATE 101
+#define CMD_TYPE_IMPULSE 102
 
 //////////////////////////////////////////////////
 // Spawning
@@ -37,6 +38,16 @@ struct Cmd_Spawn
 //////////////////////////////////////////////////
 // Player management
 
+#define PLAYER_STATE_FREE 0
+#define PLAYER_STATE_ACTOR 1
+#define PLAYER_STATE_DEAD 2
+struct Cmd_PlayerUpdate
+{
+    i32 playerId;
+    i32 state;
+    ActorInput input;
+};
+
 //////////////////////////////////////////////////
 // Client management
 #define CLIENT_STATE_FREE 0
@@ -46,6 +57,17 @@ struct Cmd_ClientUpdate
 {
     i32 clientId;
     i32 state;
+    i32 playerId;
+};
+
+//////////////////////////////////////////////////
+// Super simple one-off commands
+#define IMPULSE_NULL 0
+#define IMPULSE_JOIN_GAME 1
+struct Cmd_Impulse
+{
+    i32 clientId;
+    i32 impulse;
 };
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);

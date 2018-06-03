@@ -326,6 +326,14 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Exec_Spawn(gs, &cmd);
             return 1;
         } break;
+
+        case CMD_TYPE_IMPULSE:
+        {
+            Cmd_Spawn cmd = {};
+            cmd.factoryType = ENTITY_TYPE_ACTOR_GROUND;
+            Exec_Spawn(gs, &cmd);
+            return 1;
+        } break;
     }
     return 0;
 }
@@ -380,9 +388,9 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
 /////////////////////////////////////////////////////////////////////////////
 // Update Clients
 /////////////////////////////////////////////////////////////////////////////
-void Game_UpdateClients(GameState* gs, GameTime* time)
+void Game_UpdatePlayers(ByteBuffer* output, Client* cl, InputActionSet* actions)
 {
-    
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -395,11 +403,6 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // CLIENT
-    // > apply local client inputs here
-    // > remote inputs will have already been applied via commands processed
-    // before this step
     Game_ApplyInputToTransform(actions, &g_localClientTick, &gs->cameraTransform, time);
 
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))

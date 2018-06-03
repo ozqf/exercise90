@@ -109,8 +109,11 @@ global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
 // Game Command I/O buffer handles
+// TODO: Input buffer is not used!
 global_variable BlockRef g_gameInputBufferRef;
 global_variable ByteBuffer g_gameInputByteBuffer;
+
+// TODO: Should this be 'g_appInternalBuffer' really?
 global_variable BlockRef g_gameOutputBufferRef;
 global_variable ByteBuffer g_gameOutputByteBuffer;
 

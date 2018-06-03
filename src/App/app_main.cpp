@@ -28,6 +28,7 @@ void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
     Assert(remaining >= (sizeof(CmdHeader) + size));
     g_gameOutputByteBuffer.ptrWrite += COM_COPY_STRUCT(&h, g_gameOutputByteBuffer.ptrWrite, CmdHeader);
     g_gameOutputByteBuffer.ptrWrite += COM_COPY(ptr, g_gameOutputByteBuffer.ptrWrite, size);
+	g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
 }
 
 void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
@@ -284,8 +285,11 @@ i32 App_Init()
     Game_InitDebugStr();
 
     App_LoadStateFromFile(&g_gameState, "map1.lvl");
+
+	// Spawn local client
+	// Assign local client id.
     Cmd_ClientUpdate spawnClient = {};
-    spawnClient.clientId = 1;
+    spawnClient.clientId = -1;
     spawnClient.state = CLIENT_STATE_OBSERVER;
     App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 
@@ -381,11 +385,55 @@ void CycleTestAsciChar()
 #endif
 }
 
-void App_UpdateClient(Cmd_ClientUpdate* client)
+/////////////////////////////////////////////////////
+// EXEC APP LEVEL COMMANDS
+/////////////////////////////////////////////////////
+Client* App_FindOrCreateClient(i32 id)
 {
+    Client* free = NULL;
+    Client* result = NULL;
+    for (i32 i = 0; i < g_clientList.max; ++i)
+    {
+        Client* query = &g_clientList.items[i];
+        if (query->clientId == id)
+        {
+            result = query;
+            break;
+        }
+        else if (free == NULL && query->clientId == 0)
+        {
+            free = query;
+        }
+    }
+    if (result == NULL)
+    {
+        if (free == NULL)
+        {
+            platform.Platform_Error("No free clients", "APP");
+            ILLEGAL_CODE_PATH
+        }
+        else
+        {
+            result = free;
+        }
+    }
+    result->clientId = id;
+	if (id == -1)
+	{
+		result->isLocal = 1;
+	}
+    return result;
+}
+
+void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
+{
+    Client* cl = App_FindOrCreateClient(cmd->clientId);
+    cl->state = cmd->state;
+
     char buf[256];
-    sprintf_s(buf, 256, "APP: Add Client %d\n", client->clientId);
+    sprintf_s(buf, 256, "APP: Client %d State: %d\n", cl->clientId, cl->state);
     OutputDebugStringA(buf);
+
 }
 
 void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
@@ -397,11 +445,14 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
     }
 }
 
-void App_ReadInput(u32 frameNumber, InputEvent ev)
+void Exec_ReadInput(u32 frameNumber, InputEvent ev)
 {
     InputAction *action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, frameNumber);
 }
 
+/////////////////////////////////////////////////////
+// READ COMMANDS
+/////////////////////////////////////////////////////
 void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
 {
     switch (type)
@@ -410,7 +461,7 @@ void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
         {
             InputEvent ev = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
-            App_ReadInput(g_time.frameNumber, ev);
+            Exec_ReadInput(g_time.frameNumber, ev);
         }
         break;
 
@@ -418,7 +469,7 @@ void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
         {
             Cmd_ClientUpdate cmd = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
-            App_UpdateClient(&cmd);
+            Exec_UpdateClient(&cmd);
         } break;
 
         default:
@@ -461,68 +512,82 @@ void App_ReadCommandBuffer(ByteBuffer commands)
             App_ReadCommand(header.type, header.size, ptrRead);
             ptrRead += header.size;
         }
+    }
+}
 
-#if 0
-        switch (header.type)
+/////////////////////////////////////////////////////
+// UPDATE CLIENTS
+/////////////////////////////////////////////////////
+void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
+{
+    switch (cl->state)
+    {
+        case CLIENT_STATE_OBSERVER:
         {
-            case PLATFORM_EVENT_CODE_INPUT:
+            if (Input_CheckActionToggledOn(actions, "Attack 1", frameNumber))
             {
-                numRead++;
-                InputEvent ev = {};
-                ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
+                OutputDebugStringA("Client wishes to spawn!\n");
+                Cmd_Impulse cmd = {};
+                cmd.clientId = cl->clientId;
+                cmd.impulse = IMPULSE_JOIN_GAME;
+                App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_Impulse));
+            }
+        } break;
 
-                App_ReadInput(g_time.frameNumber, ev);
-            } break;
+        case CLIENT_STATE_PLAYING:
+        {
 
-			case NULL:
-			{
-				// 0 == end here now
-				ptrRead = commands.ptrEnd;
-			} break;
+        } break;
 
-			default:
-			{
-				// Pass event down, if event is not handled
-                if (Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size))
-                {
-                    ptrRead += header.size;
-                    numSkipped++;
-                }
-                else
-                {
-					// buffer may be corrupted. All stop
-                    char buf[512];
-                    sprintf_s(buf, 512, "Unrecognised command type: %d aborting\n", header.type);
-                    OutputDebugStringA(buf);
-                    Assert(false);
-                }
-			} break;
+        default:
+        {
+            char buf[256];
+            sprintf_s(buf, 256, "Unknown client state %d\n", cl->state);
+            platform.Platform_Error(buf, "APP");
+            ILLEGAL_CODE_PATH
+        } break;
+    }
+}
+
+void App_UpdateLocalClients(GameTime* time)
+{
+    i32 l = g_clientList.max;
+    for (i32 i = 0; i < l; ++i)
+    {
+        Client* cl = &g_clientList.items[i];
+        if (cl->clientId == 0) { continue; }
+        if (cl->clientId == -1)
+        {
+            // Process input
+            App_UpdateLocalClient(cl, &g_inputActions, time->frameNumber);
         }
-#endif
     }
 }
 
 void App_Frame(GameTime *time, ByteBuffer commands)
 {
+    g_time = *time;
+
     /////////////////////////////////////////////////////
     // Read Command buffers
     /////////////////////////////////////////////////////
 
-    g_time = *time;
-    // Read Platform commands
+    // Read Platform commands (input + network?)
     App_ReadCommandBuffer(commands);
-    // Read game output from last frame
-    //ByteBuffer outBuf = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
-    //App_ReadCommandBuffer(time, outBuf);
+        
+    // Update local client input
+    App_UpdateLocalClients(time);
+    
+    // Read game output from last frame + internally issued commands
     App_ReadCommandBuffer(g_gameOutputByteBuffer);
+	// Clear output buffer ready for write to this frame
     Buf_Clear(&g_gameOutputByteBuffer);
 
-    // Clear output buffer ready for game to write to this frame
-    /*COM_ZeroMemory(outBuf.ptrStart, outBuf.capacity);
-	outBuf.count = 0;*/
 
+    // Local debugging. Not command related
     if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
     {
+        // Ye gads will he every figure out matrix maths...?
         g_worldScene.settings.viewModelMode++;
     }
     if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
