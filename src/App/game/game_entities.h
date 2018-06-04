@@ -17,6 +17,7 @@ inline void Ent_Reset(Ent* ent)
 /**
  * Find a free Entity slot and set it to 'reserved'.
  * Actual config will occur later.
+ * NOTE: This function is for the server ONLY.
  */
 EntId Ent_ReserveFreeEntity(EntList* ents)
 {
@@ -126,6 +127,17 @@ inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
 {
     Assert(index < ents->max)
     return &ents->items[index];
+}
+
+inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
+{
+    Assert(id->index < ents->max)
+    Ent* ent = &ents->items[id->index];
+    if (ent->inUse == 0 || ent->entId.iteration != id->iteration)
+    {
+        return NULL;
+    }
+    return ent;
 }
 
 inline Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)

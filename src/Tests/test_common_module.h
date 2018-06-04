@@ -89,9 +89,9 @@ void Test_COM_PrintVector3(Vec3 v)
 
 void Test_Com_Run()
 {
-    // Test_Com_StringCompareTests();
-    // Test_Com_StringCopyTests();
-    // Test_Com_AsciToInt32_Series();
-    // Test_Com_StringLength();
+    Test_Com_StringCompareTests();
+    Test_Com_StringCopyTests();
+    Test_Com_AsciToInt32_Series();
+    Test_Com_StringLength();
     //Test_COM_Maths();
 }

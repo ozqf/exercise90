@@ -188,7 +188,7 @@ struct GameState
     EntList entList;
     //i32 lastEntityIndex;
     
-    PlayerList playerList;
+    //PlayerList playerList;
 
     // Components
     EC_AIControllerList aiControllerList;

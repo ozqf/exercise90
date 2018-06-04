@@ -25,9 +25,9 @@ void Game_InitGameState(GameState *gs)
     //Transform_SetRotationDegrees(&gs->cameraTransform, -45, 0, 0);
     //Transform_RotateX(&gs->cameraTransform, 45);
 
-    gs->playerList.items = g_players;
-    gs->playerList.count = GAME_MAX_CLIENTS;
-    gs->playerList.max = GAME_MAX_CLIENTS;
+    // gs->playerList.items = g_players;
+    // gs->playerList.count = GAME_MAX_CLIENTS;
+    // gs->playerList.max = GAME_MAX_CLIENTS;
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
@@ -328,10 +328,24 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 			}
 			OutputDebugStringA("SV Spawn player");
 			// How to assign player Id at this point
+            Client* cl = App_FindClientById(cmd->clientId);
+            if (cl->state != CLIENT_STATE_OBSERVER)
+            {
+                OutputDebugStringA("Cannot spawn - client is free or playing arleady\n");
+                return 1;
+            }
+
 			Cmd_Spawn spawn = {};
 			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
 			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
-			Exec_Spawn(gs, &spawn);
+			
+            Cmd_ClientUpdate clUpdate = {};
+            clUpdate.clientId = cmd->clientId;
+            clUpdate.state = CLIENT_STATE_PLAYING;
+            clUpdate.entId = spawn.entityId;
+
+            Exec_Spawn(gs, &spawn);
+            Exec_UpdateClient(&clUpdate);
 			return 1;
 		} break;
 
@@ -353,15 +367,29 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 			// If size doesn't match, something is terrible wrong.
 			// > Possibly reading an old command file that has out-of-sync struct layouts
 			// > Or read pointer got mangled
-			u32 size = sizeof(Cmd_Spawn);
-            Assert(size == bytes);
+            Assert(bytes == sizeof(Cmd_Spawn));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_Spawn);
             Exec_Spawn(gs, &cmd);
             return 1;
         } break;
 
+		case CMD_TYPE_PLAYER_INPUT:
+		{
+			Assert(bytes == sizeof(Cmd_PlayerInput));
+            Cmd_PlayerInput cmd;
+            COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerInput);
+            Client* cl = App_FindClientById(cmd.clientId);
+            Assert(cl != NULL);
+            //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
+            EC_ActorMotor* motor = EC_FindActorMotor((EntId*)&cl->entIdArr, gs);
+            Assert(motor != NULL);
+            motor->input = cmd.input;
+			return 1;
+		} break;
+
         case CMD_TYPE_IMPULSE:
         {
+            Assert(bytes == sizeof(Cmd_ServerImpulse));
 			return Game_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
         } break;
     }

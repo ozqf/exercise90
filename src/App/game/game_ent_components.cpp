@@ -67,6 +67,33 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 ///////////////////////////////////////////////////////////////////
 void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputActionSet* actions)
 {
+    for (u32 i = 0; i < gs->actorMotorList.max; ++i)
+    {
+        EC_ActorMotor* motor = &gs->actorMotorList.items[i];
+        if (motor->inUse == 0) { continue; }
+        EC_Collider* col = EC_FindCollider(&motor->entId, gs);
+        Assert(col != NULL);
+        Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
+        Assert(ent != NULL);
+
+        if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
+        {
+            //
+            // Vec3 forward;
+		    // Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
+            Phys_ChangeVelocity(col->shapeId, -motor->runSpeed, 0, 0);
+        }
+        else if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+        {
+            //
+            Phys_ChangeVelocity(col->shapeId, motor->runSpeed, 0, 0);
+        }
+        else
+        {
+            Phys_ChangeVelocity(col->shapeId, 0, 0, 0);
+        }
+    }
+    #if 0
     static float fireTick = 0;
     Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
 
@@ -84,6 +111,7 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputActionSet* actio
     {
         fireTick -= time->deltaTime;
     }
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////

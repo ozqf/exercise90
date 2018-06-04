@@ -72,6 +72,7 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
     EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
+    EC_ActorMotor* motor;
 
     //ent = Ent_GetFreeEntity(&gs->entList);
     Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &cmd->entityId);
@@ -89,8 +90,8 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
     renderer = EC_AddRenderer(ent, gs);
     RendObj_SetAsBillboard(&renderer->rendObj, 1, 0, 0, 5);
 
-    // motor = EC_AddActorMotor(ent, gs);
-    // motor->speed = 5;
+    motor = EC_AddActorMotor(ent, gs);
+    motor->runSpeed = 10;
 
     gs->playerEntityIndex = ent->entId.index;
     return ent;

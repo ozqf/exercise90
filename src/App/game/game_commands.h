@@ -40,9 +40,9 @@ struct Cmd_Spawn
 //////////////////////////////////////////////////
 // Player management
 
-#define PLAYER_STATE_FREE 0
-#define PLAYER_STATE_ACTOR 1
-#define PLAYER_STATE_DEAD 2
+// #define PLAYER_STATE_FREE 0
+// #define PLAYER_STATE_ACTOR 1
+// #define PLAYER_STATE_DEAD 2
 struct Cmd_PlayerInput
 {
 	i32 clientId;
@@ -66,7 +66,8 @@ struct Cmd_ClientUpdate
 {
     i32 clientId;
     i32 state;
-    i32 playerId;
+    EntId entId;
+    //i32 playerId;
 };
 
 //////////////////////////////////////////////////

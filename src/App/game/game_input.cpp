@@ -342,11 +342,11 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	//val = Input_GetActionValue(actions, "Move Left");
 	if (Input_GetActionValue(actions, "Move Left"))
 	{
-		input->buttons = input->buttons & ACTOR_INPUT_MOVE_LEFT;
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_LEFT;
 	}
 	if (Input_GetActionValue(actions, "Move Right"))
 	{
-		input->buttons = input->buttons & ACTOR_INPUT_MOVE_RIGHT;
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_RIGHT;
 	}
 
 	// Orientation

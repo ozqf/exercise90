@@ -68,6 +68,20 @@ static inline EC_##type* EC_Find##type##(Ent* ent, GameState* gs) \
     } \
     return 0; \
 } \
+static inline EC_##type* EC_Find##type##(EntId* id, GameState* gs) \
+{ \
+    EC_##type* comp; \
+    for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
+    { \
+        comp = &gs->##typeCamelCase##List.items[i]; \
+        if (comp->inUse == 1 && EntId_Equals(id, &comp->entId)) \
+        { \
+            return comp; \
+        } \
+    } \
+    return 0; \
+} \
+\
 \
 static inline void EC_Remove##type##(Ent* ent, GameState* gs) \
 { \

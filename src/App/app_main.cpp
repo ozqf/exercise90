@@ -425,13 +425,28 @@ Client* App_FindOrCreateClient(i32 id)
     return result;
 }
 
+Client* App_FindClientById(i32 id)
+{
+    for (i32 i = 0; i < g_clientList.max; ++i)
+    {
+        Client* query = &g_clientList.items[i];
+        if (query->clientId == id)
+        {
+            return query;
+        }
+    }
+    return NULL;
+}
+
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
 {
     Client* cl = App_FindOrCreateClient(cmd->clientId);
     cl->state = cmd->state;
+    cl->entIdArr[0] = cmd->entId.arr[0];
+    cl->entIdArr[1] = cmd->entId.arr[1];
 
     char buf[256];
-    sprintf_s(buf, 256, "APP: Client %d State: %d\n", cl->clientId, cl->state);
+    sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
     OutputDebugStringA(buf);
 
 }
@@ -453,12 +468,13 @@ void Exec_ReadInput(u32 frameNumber, InputEvent ev)
 /////////////////////////////////////////////////////
 // READ COMMANDS
 /////////////////////////////////////////////////////
-void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
+void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
 {
     switch (type)
     {
         case PLATFORM_EVENT_CODE_INPUT:
         {
+            Assert(bytes == sizeof(InputEvent));
             InputEvent ev = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
             Exec_ReadInput(g_time.frameNumber, ev);
@@ -467,17 +483,18 @@ void App_ReadCommand(u32 type, u32 size, u8 *ptrRead)
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
+            Assert(bytes == sizeof(Cmd_ClientUpdate));
             Cmd_ClientUpdate cmd = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
             Exec_UpdateClient(&cmd);
         } break;
 
         default:
-        {
-            // Pass event down, if event is not handled
-            if (Game_ReadCmd(&g_gameState, type, ptrRead, size))
+		{
+			// Pass event down, if event is not handled
+            if (Game_ReadCmd(&g_gameState, type, ptrRead, bytes))
             {
-                ptrRead += size;
+                ptrRead += bytes;
             }
             else
             {

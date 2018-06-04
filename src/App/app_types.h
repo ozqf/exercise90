@@ -39,10 +39,13 @@ struct InputActionSet
     i32 count;
 };
 
+union EntId; // HACK
+
 struct Client
 {
     i32 clientId;
     i32 state;
+    u16 entIdArr[2];
     i32 isLocal;
 };
 
