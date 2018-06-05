@@ -116,6 +116,7 @@ void Game_InitEntityFactory()
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd)
 {
+    printf("GAME SPAWN id %d/%d type %d\n", cmd->entityId.iteration, cmd->entityId.index, cmd->factoryType);
     if (cmd->factoryType >= g_numSpawnFunctions || cmd->factoryType < ENTITY_TYPE_NULL)
     {
         ILLEGAL_CODE_PATH

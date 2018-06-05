@@ -37,7 +37,7 @@ void Platform_Free(MemoryBlock *mem)
 
 void Win32_PrintDebug(char *str)
 {
-    OutputDebugStringA(str);
+    printf(str);
 }
 
 /**********************************************************************
@@ -115,6 +115,7 @@ void Win32_CloseAppLink()
 ///////////////////////////////////////////////////////////
 u8 Win32_LinkToApplication()
 {
+    printf("PLATFORM Link to App\n");
     if (g_app.isvalid == 1)
     {
         Win32_CloseAppLink();
@@ -126,9 +127,9 @@ u8 Win32_LinkToApplication()
         Func_LinkToApp *linkToApp = (Func_LinkToApp *)GetProcAddress(g_appLink.moduleHandle, "LinkToApp");
         if (linkToApp != NULL)
         {
-			// Attaching data files must happen BEFORE app init dummy
-			Win32_LoadDataFiles();
             g_app = linkToApp(platInterface);
+            // Attaching data files must happen BEFORE app init dummy
+            Win32_LoadDataFiles();
             if (!g_app.AppInit())
             {
                 Win32_Error("Init App failed", "Error");
@@ -238,6 +239,7 @@ void Win32_CloseRendererLink()
 
 u8 Win32_LinkToRenderer()
 {
+    printf("PLATFORM Link to Renderer\n");
     if (g_rendererLink.moduleState == 1)
     {
         Win32_CloseRendererLink();
@@ -288,6 +290,7 @@ void Win32_CloseSoundLink()
 
 u8 Win32_LinkToSound()
 {
+    printf("PLATFORM Link to Sound\n");
 	if (g_soundLink.moduleState == 1)
 	{
 		Win32_CloseRendererLink();

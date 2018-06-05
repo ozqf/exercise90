@@ -153,13 +153,10 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	i32 w = bmpHeader.Width;
 	i32 h = bmpHeader.Height;
 	u32 numPixels = w * h;
-
-	char buf[128];
-	sprintf_s(buf, 128,
-		"Read BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
+	
+	printf("PLATFORM Reading BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
 		filePath, fileHeader.FileType, fileHeader.FileSize,
 		w, h);
-	OutputDebugString(buf);
 
 	u32 targetImageBytes = sizeof(u32) * numPixels;
 	u32 targetSize = sizeof(Texture2DHeader) + targetImageBytes;
@@ -239,7 +236,7 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 
 		if (f == NULL)
 		{
-			sprintf_s(buf, 256, "Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+			sprintf_s(buf, 256, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
 			Win32_Error(buf, "File Not Found");
 			Assert(false);
 		}
@@ -254,7 +251,7 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 	else
 	{
 		// Decide how to handle it based on file extension and flags
-		OutputDebugStringA("Found file\n");
+		//printf("Found file\n");
 		if (COM_CheckForFileExtension((char*)r.entry.fileName, ".bmp"))
 		{
 			// Read file into staging area then load into heap
@@ -265,7 +262,6 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 			// mem.ptrMemory = malloc(mem.size);
 			fseek(r.handle, r.entry.offset, SEEK_SET);
 			fread(mem.ptrMemory, mem.size, 1, r.handle);
-			OutputDebugStringA("Read bitmap\n");
 
 			Win32_LoadBMP(heap, destRef, mem, fileName);
 
@@ -282,7 +278,7 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 			// mem.ptrMemory = malloc(mem.size);
 			fseek(r.handle, r.entry.offset, SEEK_SET);
 			fread(mem.ptrMemory, mem.size, 1, r.handle);
-			OutputDebugStringA("Read Generic File\n");
+			printf("PLATFORM Reading Generic File %s (%d bytes)\n", fileName, mem.size);
 
 			Heap_Allocate(heap, destRef, mem.size, fileName, 1);
 			COM_CopyMemory((u8*)mem.ptrMemory, (u8*)destRef->ptrMemory, destRef->objectSize);

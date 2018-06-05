@@ -6,6 +6,7 @@
 extern "C"
 RenderInterface __declspec(dllexport) LinkToRenderer()
 {
+    printf("RENDERER: Built on %s at %s\n", __DATE__, __TIME__);
     RenderInterface r;
     
     r.R_Init = Win32_InitOpenGL;

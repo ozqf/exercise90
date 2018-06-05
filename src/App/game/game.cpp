@@ -15,6 +15,7 @@ inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 
 void Game_InitGameState(GameState *gs)
 {
+    printf("GAME Init State\n");
     *gs = {};
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
@@ -317,24 +318,24 @@ Rotation:\n\
 
 u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 {
+    if (!IsRunningServer(gs->netMode))
+	{
+		printf("GAME Cannot impulse if not hosting the server!\n");
+		return 1;
+	}
 	switch (cmd->impulse)
 	{
 		case IMPULSE_JOIN_GAME:
 		{
-			if (!IsRunningServer(gs->netMode))
-			{
-				OutputDebugStringA("Cannot impulse if not hosting the server!\n");
-				return 1;
-			}
-			OutputDebugStringA("SV Spawn player");
+			printf("SV Client %d impulse %d: Spawn player\n", cmd->clientId, cmd->impulse);
 			// How to assign player Id at this point
             Client* cl = App_FindClientById(cmd->clientId);
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
-                OutputDebugStringA("Cannot spawn - client is free or playing arleady\n");
+                printf("GAME Cannot spawn - client is free or playing arleady\n");
                 return 1;
             }
-
+            
 			Cmd_Spawn spawn = {};
 			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
 			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
@@ -343,7 +344,6 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             clUpdate.clientId = cmd->clientId;
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = spawn.entityId;
-
             Exec_Spawn(gs, &spawn);
             Exec_UpdateClient(&clUpdate);
 			return 1;
@@ -351,6 +351,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 
 		default:
 		{
+            printf("UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
 			ILLEGAL_CODE_PATH
 			return 0;
 		} break;

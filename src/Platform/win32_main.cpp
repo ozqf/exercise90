@@ -156,7 +156,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         //PostQuitMessage(0);
         // TODO: Handle this with a message to the user?
         Win32_Shutdown();
-        OutputDebugStringA("WM_CLOSE\n");
+        printf("WM_CLOSE\n");
     }
     break;
 
@@ -164,7 +164,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     {
         // Handle this as an error - recreate window?
         Win32_Shutdown();
-        OutputDebugStringA("WM_DESTROY\n");
+        printf("WM_DESTROY\n");
     }
     break;
 
@@ -182,7 +182,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
 
     case WM_ACTIVATEAPP:
     {
-        OutputDebugStringA("WM_ACTIVATEAPP\n");
+        //printf("WM_ACTIVATEAPP\n");
     }
     break;
 
@@ -252,6 +252,8 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     return result;
 }
 
+HWND consoleHandle;
+
 /**********************************************************************
  * WIN32 ENTRY POINT
  *********************************************************************/
@@ -261,6 +263,19 @@ int CALLBACK WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
+    // Spawn debugging windows cmd
+    FILE* stream;
+    AllocConsole();
+    freopen_s(&stream, "conin$","r",stdin);
+    freopen_s(&stream, "conout$","w",stdout);
+    freopen_s(&stream, "conout$","w",stderr);
+    consoleHandle = GetConsoleWindow();
+    MoveWindow(consoleHandle,1,1,680,480,1);
+    printf("[%s] Console initialized.\n", __FILE__);
+
+
+
+
     //MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
     //DebugBreak();
 
@@ -282,8 +297,7 @@ int CALLBACK WinMain(
 
 
     InitDebug();
-    printf("Debug init\n");
-    printf("File %s, line: %d\n", __FILE__, __LINE__);
+    //printf("File %s, line: %d\n", __FILE__, __LINE__);
 
     // Created basic window
     WNDCLASS WindowClass = {}; // {} initialises all variables to 0 (cpp only)

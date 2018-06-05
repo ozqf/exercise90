@@ -103,6 +103,7 @@ i32 Win32_InitOpenGL(HWND window)
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glGenTextures(NUM_TEST_TEXTURES, g_textureHandles);
 
+	printf("RENDERER Initialised\n");
 
     return 1;
 }

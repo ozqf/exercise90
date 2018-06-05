@@ -11,7 +11,7 @@
 extern "C"
 AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
 {
-    printf("LinkToApp Library Built on %s at %s\n", __DATE__, __TIME__);
+    printf("APP: Library Built on %s at %s\n", __DATE__, __TIME__);
     platform = platInterface;
 
     AppInterface app;
@@ -28,6 +28,6 @@ AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
 extern "C"
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-    printf("DLL Main\n");
+    printf("APP DLL Main\n");
 	return 1;
 }

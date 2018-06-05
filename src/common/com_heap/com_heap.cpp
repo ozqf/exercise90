@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 #include "../com_module.h"
 
 #include "com_heap_types.h"
@@ -192,11 +194,12 @@ static u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
     }
     return result;
 }
-#if 0
-inline static void Heap_DebugPrintAllocations2(Heap *heap)
+
+#if 1
+static void Heap_DebugPrintAllocations2(Heap *heap)
 {
 
-    printf_s("\n** HEAP PRINT **\n");
+    printf("\n** HEAP PRINT **\n");
     u32 startAddress = (u32)heap->ptrMemory;
     u32 fragments[Z_HEAP_FRAGMENT_TALLY_MAX];
     fragments[0] = 0;
@@ -225,7 +228,7 @@ inline static void Heap_DebugPrintAllocations2(Heap *heap)
         }
         u32 address = (u32)heapBlock - startAddress;
 
-        printf("%d: Block %d '%s'. Data size: %d. Total block volume: %d. Space after: %d\n",
+        printf("%d: Block %d '%s'. Data: %d. Volume: %d. Space after: %d\n",
                address,
                heapBlock->mem.id,
                heapBlock->mem.debugLabel,
@@ -236,14 +239,15 @@ inline static void Heap_DebugPrintAllocations2(Heap *heap)
         heapBlock = heapBlock->mem.next;
 
     }
-    //printf("Fragments: ");
+    printf("Fragments: ");
     for (u32 i = 0; i < fragmentIndex; ++i)
     {
-        //printf("%d, ", fragments[i]);
+        printf("%d, ", fragments[i]);
     }
 
-    //printf("\nUsed: %d of %d\n", totalSpace, heap->size);
+    f32 percent = ((f32)totalSpace / (f32)heap->size) * 100.0f;
 
+    printf("\nUsing: %dKB of %dKB (%.2f%%)\n", (u32)(totalSpace / 1024), (u32)(heap->size / 1024), percent);
 }
 #endif
 
@@ -560,4 +564,10 @@ inline static i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapac
     // length of string + 1 for null terminator
     u32 totalSize = maxStringCapacity + 1;
     return Heap_Allocate(heap, ref, totalSize, "ZString", 1);
+}
+
+inline void Heap_NeverCall()
+{
+    ILLEGAL_CODE_PATH
+    Heap_DebugPrintAllocations2(NULL);
 }

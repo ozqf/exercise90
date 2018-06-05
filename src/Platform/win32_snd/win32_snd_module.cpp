@@ -6,6 +6,8 @@
 #include "../../../lib/fmod/fmod_studio.hpp"
 #include "../../../lib/fmod/fmod.hpp"
 
+#include <stdio.h>
+
 internal FMOD::Sound* gsnd_soundHandle;
 internal FMOD::Channel* gsnd_channel;
 
@@ -38,6 +40,7 @@ u8 Snd_Init()
 #if 1 // Low level API only
 u8 Snd_Init()
 {
+    printf("SOUND Init\n");
     FMOD_RESULT result;
     FMOD::System* system = NULL;
 

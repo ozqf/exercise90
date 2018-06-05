@@ -6,6 +6,7 @@ holding game/menu state and calling game update when required
 
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
 #include "../Platform/win32_system_include.h"
+#include <stdio.h>
 
 #include "app_main.h"
 #include "../common/com_module.h"
@@ -74,7 +75,7 @@ void AllocateDebugStrings(Heap *heap)
     char *writeStart = (char *)g_debugBuffer.ptrMemory;
     i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
     sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
-    OutputDebugStringA("Allocated debug string\n");
+    printf("APP Allocated debug string\n");
 }
 
 i32 AllocateTestStrings(Heap *heap)
@@ -220,13 +221,15 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.capacity = h.staticEntities.size;
     sub.count = h.staticEntities.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
+    printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
     App_ReadCommandBuffer(sub);
 }
 
 void App_LoadStateFromFile(GameState *gs, char *fileName)
 {
+    printf("APP Load state from %s\n", fileName);
     BlockRef ref = {};
-    platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "testbox.lvl");
+    platform.Platform_LoadFileIntoHeap(&g_heap, &ref, fileName);
     ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
 
     App_ReadStateBuffer(gs, &bytes);
@@ -239,14 +242,17 @@ void App_LoadStateFromFile(GameState *gs, char *fileName)
 ////////////////////////////////////////////////////////////////////////////
 i32 App_Init()
 {
-    printf("DLL Init\n");
     //DebugBreak();
-
-    u32 mainMemorySize = MegaBytes(64);
+    u32 heapMB = 64;
+    u32 mainMemorySize = MegaBytes(heapMB);
     MemoryBlock mem = {};
+
+    printf("APP Requested %d MB for Heap\n", heapMB);
 
     if (!platform.Platform_Malloc(&mem, mainMemorySize))
     {
+        printf("APP Platform malloc failed\n");
+        Assert(false);
         return 0;
     }
     else
@@ -284,7 +290,7 @@ i32 App_Init()
     Game_Init(&g_heap);
     Game_InitDebugStr();
 
-    App_LoadStateFromFile(&g_gameState, "map1.lvl");
+    App_LoadStateFromFile(&g_gameState, "testbox.lvl");
 
 	// Spawn local client
 	// Assign local client id.
@@ -321,12 +327,15 @@ i32 App_Init()
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_MOVE_Y, "Mouse Move Y");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_1, "Attack 1");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_2, "Attack 2");
+
+    printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n", g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);
+    Heap_DebugPrintAllocations2(&g_heap);
     return 1;
 }
 
 i32 App_Shutdown()
 {
-    printf("DLL Shutdown\n");
+    printf("APP DLL Shutdown\n");
 
     Game_Shutdown();
 
@@ -445,9 +454,9 @@ void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
     cl->entIdArr[0] = cmd->entId.arr[0];
     cl->entIdArr[1] = cmd->entId.arr[1];
 
-    char buf[256];
-    sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
-    OutputDebugStringA(buf);
+    // char buf[256];
+    // sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
+    printf("APP EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
 
 }
 
@@ -501,7 +510,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
                 // buffer may be corrupted. All stop
                 char buf[512];
                 sprintf_s(buf, 512, "App: Unrecognised command type: %d\n", type);
-                OutputDebugStringA(buf);
+                printf("%s\n", buf);
                 platform.Platform_Error(buf, "APP");
                 Assert(false);
             }
@@ -543,10 +552,11 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
         {
             if (Input_CheckActionToggledOn(actions, "Attack 1", frameNumber))
             {
-                OutputDebugStringA("Client wishes to spawn!\n");
                 Cmd_ServerImpulse cmd = {};
                 cmd.clientId = cl->clientId;
                 cmd.impulse = IMPULSE_JOIN_GAME;
+
+                printf("APP: Client %d wishes to spawn\n", cl->clientId);
                 App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
         } break;
@@ -562,7 +572,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
         default:
         {
             char buf[256];
-            sprintf_s(buf, 256, "Unknown client state %d\n", cl->state);
+            sprintf_s(buf, 256, "APP Unknown client state %d\n", cl->state);
             platform.Platform_Error(buf, "APP");
             ILLEGAL_CODE_PATH
         } break;

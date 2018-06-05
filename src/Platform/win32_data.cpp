@@ -71,7 +71,6 @@ u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)
 
 			if (COM_CompareStrings(path, fileName) == 0)
 			{
-				OutputDebugStringA("Match!");
 				reader->handle = file.handle;
 				reader->entry = entry;
 				return 1;
@@ -104,14 +103,14 @@ void Win32_AddDataFileHandle(char* filePath)
 		|| dFile.header.magic[3] != 'K'
 		)
 	{
-		OutputDebugStringA("Magic number of .dat not recognised\n");
+		printf("PLATFORM Magic number of .dat not recognised\n");
 		fclose(dFile.handle);
 		return;
 	}
 
 	char buf[512];
-	sprintf_s(buf, 512, "Loaded handle to %s. Size: %dkb, num files: %d, manifest offset: %d\n", filePath, (dFile.fileSize / 1024), dFile.header.numFiles, dFile.header.fileListOffset);
-	OutputDebugStringA(buf);
+	sprintf_s(buf, 512, "PLATFORM Loaded handle to %s. Size: %dkb, num files: %d\n", filePath, (dFile.fileSize / 1024), dFile.header.numFiles);
+	printf("%s", buf);
 	//dFile->header = 
 
 
@@ -135,11 +134,12 @@ i32 Win32_ScanForDataFiles(Heap* heap, DataFile* results, i32 maxResults, char* 
 	sprintf_s(searchPath, 256, "%s\\%s\\*", currentDir, path);
 
 
-	OutputDebugStringA("Current Dir/base dir:\n");
-	OutputDebugStringA(currentDir);
-	OutputDebugStringA("\n");
-	OutputDebugStringA(searchPath);
-	OutputDebugStringA("\n");
+	// printf("Current Dir/base dir:\n");
+	// printf(currentDir);
+	// printf("\n");
+	// printf(searchPath);
+	// printf("\n");
+	printf("PLATFORM Data path \"%s\"\n", searchPath);
 
 	// concat of search dir and file name
 	char fileLoadPath[256];
@@ -158,9 +158,7 @@ i32 Win32_ScanForDataFiles(Heap* heap, DataFile* results, i32 maxResults, char* 
 	{
 		if (COM_CheckForFileExtension(findData.cFileName, ".dat"))
 		{
-			OutputDebugStringA("Found data file:\n");
-			OutputDebugStringA(findData.cFileName);
-			OutputDebugStringA("\n");
+			//printf("Found data file %s:\n", findData.cFileName);
 			// rebuild from exe path not game path as we don't want the '*' in the path
 			sprintf_s(fileLoadPath, 256, "%s\\%s\\%s", currentDir, path, findData.cFileName);
 			Win32_AddDataFileHandle(fileLoadPath);
@@ -184,6 +182,7 @@ void Win32_CloseDataFiles()
 void Win32_LoadDataFiles()
 {
 	// Possibly reloading. close any datafiles currently open
+	printf("PLATFORM: Recreate Data File Handles\n");
 	Win32_CloseDataFiles();
 	Win32_ScanForDataFiles(NULL, g_dataFiles, PLATFORM_MAX_DATA_FILES, g_baseDirectoryName);
 
