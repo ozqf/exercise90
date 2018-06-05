@@ -13,15 +13,6 @@
 #include "win32_gl/win32_gl_interface.h"
 
 /****************************************************************
-When something goes wrong
-****************************************************************/
-void Win32_Error(char *msg, char *title)
-{
-    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
-    AssertAlways(false);
-}
-
-/****************************************************************
 STRUCTS
 ****************************************************************/
 
@@ -70,6 +61,8 @@ struct win32_module_link
 //////////////////////////////////////////////////////////////////
 
 global_variable GameTime g_gameTime;
+
+global_variable HWND consoleHandle;
 
 // Interfaces
 global_variable PlatformInterface platInterface;
@@ -135,3 +128,18 @@ global_variable LARGE_INTEGER tick, tock;
 #define MAX_LAUNCH_PARAMS 50
 global_variable char *launchParams[MAX_LAUNCH_PARAMS];
 global_variable i32 numLaunchParams = 0;
+
+#define TEXT_COMMAND_BUFFER_SIZE 256
+global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
+global_variable i32 g_textCommandLength = 0;
+
+/****************************************************************
+When something goes wrong
+****************************************************************/
+void Win32_Error(char *msg, char *title)
+{
+    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
+    AssertAlways(false);
+}
+
+void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length);

@@ -88,7 +88,8 @@ win32_window_dimension Win32_GetWindowDimension(HWND window)
 /*********************************************************************
 Windows message callback
 *********************************************************************/
-internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARAM wParam, LPARAM lParam)
+internal LRESULT CALLBACK Win32_MainWindowCallback(
+    HWND window, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT result = 0;
 
@@ -195,17 +196,36 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         bool wasDown = ((lParam & (1 << 30)) != 0);
         bool isDown = ((lParam & (1 << 31)) == 0);
 
+
+
         // Debugging keys!
-        if (VKCode == 'P' && isDown)
+        // tilde == 223
+        if (VKCode == 223 && wasDown)
         {
-            MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
-            DebugBreak();
+            Win32_ToggleDebugInput();
+            break;
+        }
+        if (g_debugInputActive && isDown)
+        {
+            Win32_DebugReadKey(VKCode, lParam);
+            break;
         }
 
-        if (VKCode == 'T' && isDown)
+        // if (VKCode == 'P' && isDown)
+        // {
+        //     MessageBox(0, "Dead stop!", "Stop!", MB_OK | MB_ICONINFORMATION);
+        //     DebugBreak();
+        // }
+
+        if (VKCode == '`' && isDown)
         {
             Assert(Win32_LinkToApplication());
         }
+
+        // if (VKCode == 'T' && isDown)
+        // {
+        //     Assert(Win32_LinkToApplication());
+        // }
         
         if (VKCode == VK_F4 && (lParam & (1 << 29)))
         {
@@ -217,9 +237,13 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
         u32 inputCode = Win32_KeyCode_To_Input_Code(VKCode);
         if (inputCode != 0)
         {
-
             InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
             Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+            break;
+        }
+        else
+        {
+            printf("PLATFORM Unknown VK_CODE %d\n", VKCode);
         }
     }
     break;
@@ -252,7 +276,27 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(HWND window, UINT uMsg, WPARA
     return result;
 }
 
-HWND consoleHandle;
+/**********************************************************************
+ * EXECUTE TEXT COMMAND
+ *********************************************************************/
+void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length)
+{
+    if (length <= 1)
+    {
+        return;
+    }
+    COM_ZeroMemory((u8*)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
+    COM_COPY(str, g_textCommandBuffer, length);
+    printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
+    if (COM_CompareStrings(g_textCommandBuffer, "QUIT") == 0)
+    {
+        Win32_Shutdown();
+    }
+    else if (COM_CompareStrings(g_textCommandBuffer, "EXIT") == 0)
+    {
+        Win32_Shutdown();
+    }
+}
 
 /**********************************************************************
  * WIN32 ENTRY POINT
@@ -314,13 +358,13 @@ int CALLBACK WinMain(
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
 
-    i32 windowWidth = 1280;
-    i32 windowHeight = 720;
+    i32 windowWidth = 640;//1280;
+    i32 windowHeight = 480;//720;
 
     RECT r;
     r.top = r.left = 0;
-    r.right = 1280;
-    r.bottom = 720;
+    r.right = windowWidth;
+    r.bottom = windowHeight;
 
     // Adjust desired rect to include area of window including border.
     // top or left may well now be negative
@@ -510,6 +554,11 @@ int CALLBACK WinMain(
                 }
 				//OutputDebugStringA("Zero platform buffer\n");
 				COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
+                
+                if (g_debugInputActive)
+                {
+                    Platform_R_DrawScene(&g_debugScene);
+                }
                 
                 if (g_rendererLink.moduleState == 1)
                 {
