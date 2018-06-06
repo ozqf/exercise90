@@ -47,7 +47,7 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
         // execute
         // start at 1 to avoid including the '>' prompt
         // position is also the null terminator
-        Win32_ExecTextCommand(g_inputText.ptr + 1, 0, g_inputText.position);
+        Win32_ParseTextCommand(g_inputText.ptr + 1, 0, g_inputText.position);
         Win32_ResetDebugInput();
         return;
     }
@@ -78,7 +78,7 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     i32 result = ToAscii(VKCode, 0, 0, &word, 0);
     
     char c = (char)word;
-    printf("VKCode: %d. Result: %d. Try Key: %c vs %d\n", VKCode, result, c, word);
+    //printf("VKCode: %d. Result: %d. Try Key: %c vs %d\n", VKCode, result, c, word);
     //if (c == g_lastDebugChar) { return; }
     g_lastDebugChar = c;
     //printf("> %c\n", c);

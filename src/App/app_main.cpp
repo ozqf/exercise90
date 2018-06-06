@@ -22,6 +22,19 @@ void App_ErrorStop()
     DebugBreak();
 }
 
+u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
+{
+    printf("App Parse %s\n", str);
+    if (!COM_CompareStrings(tokens[0], "IMPULSE"))
+    {
+        if (IsRunningServer(g_gameState.netMode))
+        {
+            printf("No impulse, not server\n");
+        }
+    }
+    return 1;
+}
+
 void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
 {
     CmdHeader h = { type, size };

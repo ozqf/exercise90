@@ -142,4 +142,4 @@ void Win32_Error(char *msg, char *title)
     AssertAlways(false);
 }
 
-void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length);
+void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);

@@ -21,7 +21,7 @@ AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
     app.AppRendererReloaded = AppRendererReloaded;
     //app.AppFixedUpdate = App_FixedFrame;
     app.AppUpdate = App_Frame;
-
+    app.AppParseCommandString = App_ParseCommandString;
     return app;
 }
 

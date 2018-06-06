@@ -2,7 +2,7 @@
 
 #include "com_module.h"
 
-inline i32 COM_ReadTokens(char* source, char* destination, i32* tokens)
+inline i32 COM_ReadTokens(char* source, char* destination, char** tokens)
 {
     i32 len = COM_StrLen(source);
     i32 tokensCount = 0;
@@ -51,7 +51,7 @@ inline i32 COM_ReadTokens(char* source, char* destination, i32* tokens)
                 readingToken = 1;
                 *(destination + writePos) = c;
 
-                tokens[tokensCount++] = writePos;
+                tokens[tokensCount++] = (destination + writePos);
 
                 readPos++;
                 writePos++;

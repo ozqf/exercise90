@@ -279,7 +279,22 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
 /**********************************************************************
  * EXECUTE TEXT COMMAND
  *********************************************************************/
-void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length)
+u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
+{
+    if (COM_CompareStrings(tokens[0], "QUIT") == 0)
+    {
+        Win32_Shutdown();
+        return 1;
+    }
+    else if (COM_CompareStrings(tokens[0], "EXIT") == 0)
+    {
+        Win32_Shutdown();
+        return 1;
+    }
+    return 0;
+}
+
+void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
 {
     if (length <= 1)
     {
@@ -287,27 +302,30 @@ void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length)
     }
     COM_ZeroMemory((u8*)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
     COM_COPY(str, g_textCommandBuffer, length);
-    printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
+    //printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
 
     char copy[128];
-    i32 tokens[32];
+    char* tokens[32];
 
-    i32 tokensCount = COM_ReadTokens(str, copy, tokens);
-
+    i32 tokensCount = COM_ReadTokens(g_textCommandBuffer, copy, tokens);
+    if (tokensCount == 0)
+    {
+        return;
+    }
+#if 0
     printf("PRINT TOKENS (%d)\n", tokensCount);
     for (int i = 0; i < tokensCount; ++i)
     {
-        char* str2 = (char*)(copy + tokens[i]);
-        printf("%s\n", str2);
+        //char* str2 = (char*)(copy + tokens[i]);
+        printf("%s\n", tokens[i]);
     }
-
-    if (COM_CompareStrings(g_textCommandBuffer, "QUIT") == 0)
+#endif
+    if (!Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount))
     {
-        Win32_Shutdown();
-    }
-    else if (COM_CompareStrings(g_textCommandBuffer, "EXIT") == 0)
-    {
-        Win32_Shutdown();
+        if (!g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount))
+        {
+            printf(" Unknown command %s\n", g_textCommandBuffer);
+        }
     }
 }
 
