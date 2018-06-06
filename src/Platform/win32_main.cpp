@@ -291,6 +291,33 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
         Win32_Shutdown();
         return 1;
     }
+    else if (COM_CompareStrings(tokens[0], "RESTART") == 0)
+    {
+        if (numTokens != 2)
+        {
+            printf("  Must specify: APP, RENDERER or SOUND");
+            return 1;
+        }
+
+        if (COM_CompareStrings(tokens[1], "APP") == 0)
+        {
+            printf("  Restarting app");
+            g_appLink.timestamp = {};
+            return 1;
+        }
+        else if (COM_CompareStrings(tokens[1], "RENDERER") == 0)
+        {
+            printf("  Restarting renderer");
+            g_rendererLink.timestamp = {};
+            return 1;
+        }
+        else if (COM_CompareStrings(tokens[1], "SOUND") == 0)
+        {
+            printf("  Restarting sound");
+            g_soundLink.timestamp = {};
+            return 1;
+        }
+    }
     return 0;
 }
 

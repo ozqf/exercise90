@@ -55,6 +55,9 @@ global_variable ClientList g_clientList =
     GAME_MAX_CLIENTS
 };
 
+// id of the client this exe represents
+global_variable i32 g_localClientId = 0;
+
 // Interface to the external world
 PlatformInterface platform;
 

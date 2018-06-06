@@ -16,6 +16,12 @@ holding game/menu state and calling game update when required
 #include <stdio.h>
 
 void App_ReadCommandBuffer(ByteBuffer commands);
+void App_EnqueueCmd(u8* ptr, u32 type, u32 size);
+
+void App_SendToServer(u8* ptr, u32 type, u32 size)
+{
+    App_EnqueueCmd(ptr, type, size);
+}
 
 void App_ErrorStop()
 {
@@ -27,10 +33,16 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     printf("App Parse %s\n", str);
     if (!COM_CompareStrings(tokens[0], "IMPULSE"))
     {
-        if (IsRunningServer(g_gameState.netMode))
+        if (numTokens != 2)
         {
-            printf("No impulse, not server\n");
+            printf("Wrong number of tokens for impulse\n");
+            return 1;
         }
+        Cmd_ServerImpulse cmd = {};
+        cmd.clientId = g_localClientId;
+        cmd.impulse = COM_AsciToInt32(tokens[1]);
+        printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
+        App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
     }
     return 1;
 }
@@ -308,7 +320,10 @@ i32 App_Init()
 	// Spawn local client
 	// Assign local client id.
     Cmd_ClientUpdate spawnClient = {};
-    spawnClient.clientId = -1;
+    // assign local id directly...
+    // TODO: Do local client Id assignment via network command
+    g_localClientId = -1;
+    spawnClient.clientId = g_localClientId;
     spawnClient.state = CLIENT_STATE_OBSERVER;
     App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 

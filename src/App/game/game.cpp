@@ -352,8 +352,8 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 		default:
 		{
             printf("UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
-			ILLEGAL_CODE_PATH
-			return 0;
+			//ILLEGAL_CODE_PATH
+			return 1;
 		} break;
 	}
 }

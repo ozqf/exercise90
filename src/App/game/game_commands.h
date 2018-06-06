@@ -18,6 +18,7 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define CMD_TYPE_IMPULSE 101
 #define CMD_TYPE_PLAYER_INPUT 102
 #define CMD_TYPE_CLIENT_UPDATE 103
+#define CMD_TYPE_TEXT 104
 
 //////////////////////////////////////////////////
 // Spawning
@@ -27,6 +28,7 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define ENTITY_TYPE_ACTOR_GROUND 3
 #define ENTITY_TYPES_COUNT 4
 
+// 100
 struct Cmd_Spawn
 {
     i32 factoryType;
@@ -38,11 +40,24 @@ struct Cmd_Spawn
 };
 
 //////////////////////////////////////////////////
+// 101
+// Super simple one-off commands
+// Always exec on the server!
+#define IMPULSE_NULL 0
+#define IMPULSE_JOIN_GAME 1
+struct Cmd_ServerImpulse
+{
+    i32 clientId;
+    i32 impulse;
+};
+
+//////////////////////////////////////////////////
 // Player management
 
 // #define PLAYER_STATE_FREE 0
 // #define PLAYER_STATE_ACTOR 1
 // #define PLAYER_STATE_DEAD 2
+// 102
 struct Cmd_PlayerInput
 {
 	i32 clientId;
@@ -51,13 +66,8 @@ struct Cmd_PlayerInput
     ActorInput input;
 };
 
-//struct Cmd_SpawnPlayer
-//{
-//	i32 playerId;
-//	Cmd_Spawn spawnCmd;
-//};
-
 //////////////////////////////////////////////////
+// 103
 // Client management
 #define CLIENT_STATE_FREE 0
 #define CLIENT_STATE_OBSERVER 1
@@ -70,15 +80,19 @@ struct Cmd_ClientUpdate
     //i32 playerId;
 };
 
-//////////////////////////////////////////////////
-// Super simple one-off commands
-// Always exec on the server!
-#define IMPULSE_NULL 0
-#define IMPULSE_JOIN_GAME 1
-struct Cmd_ServerImpulse
+// 104
+// Bytes is all bytes given to string including any padding
+// or null terminator
+struct Cmd_Text
 {
-    i32 clientId;
-    i32 impulse;
+    char* text;
+    i32 bytes;
 };
+
+//struct Cmd_SpawnPlayer
+//{
+//	i32 playerId;
+//	Cmd_Spawn spawnCmd;
+//};
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
