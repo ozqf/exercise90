@@ -288,6 +288,19 @@ void Win32_ExecTextCommand(char* str, i32 firstChar, i32 length)
     COM_ZeroMemory((u8*)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
     COM_COPY(str, g_textCommandBuffer, length);
     printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
+
+    char copy[128];
+    i32 tokens[32];
+
+    i32 tokensCount = COM_ReadTokens(str, copy, tokens);
+
+    printf("PRINT TOKENS (%d)\n", tokensCount);
+    for (int i = 0; i < tokensCount; ++i)
+    {
+        char* str2 = (char*)(copy + tokens[i]);
+        printf("%s\n", str2);
+    }
+
     if (COM_CompareStrings(g_textCommandBuffer, "QUIT") == 0)
     {
         Win32_Shutdown();

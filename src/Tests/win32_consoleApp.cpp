@@ -21,17 +21,28 @@
 // #include "test_read_mesh.h"
 #include "test_state_file.h"
 #include "test_base64.h"
-
+#include "test_tokenise.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
 
-    printf("\nChoose Action\n");
+#if 1
+	//HeapTest();
+	//Test_pak();
+	//Test_Pack();
+	//Test_ReadMesh();
+	//Test_MultiThreading();
+	Test_Tokenise();
+#endif
+
+#if 0
+    printf("\n--- Options ---\n");
     printf("1. Test Common Library\n");
-    printf("2. Read/Write state file \"testbox.lvl\"\n");
-    printf("3. Test Base 64\n");
+    printf("2. Test Common Library\n");
+    printf("3. Read/Write state file \"testbox.lvl\"\n");
+    printf("4. Test Base 64\n");
     printf("Choose...\n");
 
     char input = (char)getchar();
@@ -44,12 +55,18 @@ int main(i32 argc, char* argv[])
         {
             Test_Com_Run();
         } break;
+
         case '2':
+        {
+            Test_Tokenise();
+        } break;
+
+        case '3':
         {
             Test_StateSaving();
         } break;
     
-        case '3':
+        case '4':
         {
             Test_Base64();
             printf("\nEnd of Tests\n");
@@ -60,12 +77,7 @@ int main(i32 argc, char* argv[])
             printf("That means jack to me...\n");
         } break;
     }
-    
-    //HeapTest();
-    //Test_pak();
-    //Test_Pack();
-    //Test_ReadMesh();
-    //Test_MultiThreading();
+#endif
     
     return 0;
 }

@@ -9,8 +9,9 @@
 #include "com_maths.cpp"
 #include "com_transform.cpp"
 #include "com_memory_utils.cpp"
+#include "com_parse.h"
+
 #include "com_render_types.cpp"
 #include "com_collision.cpp"
 #include "com_heap/com_heap.cpp"
 #include "com_assets.cpp"
-
