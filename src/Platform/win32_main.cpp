@@ -295,25 +295,25 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
     {
         if (numTokens != 2)
         {
-            printf("  Must specify: APP, RENDERER or SOUND");
+            printf("  Must specify: APP, RENDERER or SOUND\n");
             return 1;
         }
 
         if (COM_CompareStrings(tokens[1], "APP") == 0)
         {
-            printf("  Restarting app");
+            printf("  Restarting app\n");
             g_appLink.timestamp = {};
             return 1;
         }
         else if (COM_CompareStrings(tokens[1], "RENDERER") == 0)
         {
-            printf("  Restarting renderer");
+            printf("  Restarting renderer\n");
             g_rendererLink.timestamp = {};
             return 1;
         }
         else if (COM_CompareStrings(tokens[1], "SOUND") == 0)
         {
-            printf("  Restarting sound");
+            printf("  Restarting sound\n");
             g_soundLink.timestamp = {};
             return 1;
         }
@@ -416,13 +416,16 @@ int CALLBACK WinMain(
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
 
-    i32 windowWidth = 640;//1280;
-    i32 windowHeight = 480;//720;
+    i32 windowWidth = 1280;
+    i32 windowHeight = 720;
 
     RECT r;
     r.top = r.left = 0;
     r.right = windowWidth;
     r.bottom = windowHeight;
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     // Adjust desired rect to include area of window including border.
     // top or left may well now be negative

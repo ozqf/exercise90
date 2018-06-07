@@ -76,4 +76,4 @@ global_variable TextureHandles g_textureHandles;
 // Debugging
 global_variable BlockRef g_debugBuffer;
 // Ignore local player control input and activate debug fly-around camera
-global_variable u8 g_debugCamera = 0;
+global_variable u8 g_debugCameraOn = 0;

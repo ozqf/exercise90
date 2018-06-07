@@ -14,37 +14,42 @@
 // Listen    |  2          1           1           1
 // Dedicated |  3          1           0           1
 // Replay    |  4          0           1           0
-#define NET_MODE_SINGLE_PLAYER 0
-#define NET_MODE_CLIENT 1
-#define NET_MODE_LISTEN_SERVER 2
-#define NET_MODE_DEDICATED_SERVER 3
-#define NET_MODE_REPLAY 4
+
+#define NETMODE_NONE 0
+#define NETMODE_SINGLE_PLAYER 1
+#define NETMODE_CLIENT 2
+#define NETMODE_LISTEN_SERVER 3
+#define NETMODE_DEDICATED_SERVER 4
+#define NETMODE_REPLAY 5
 
 inline u8 IsRunningClient(u8 netMode)
 {
+    if (netMode == NETMODE_NONE) { return 0; }
     return (
-           netMode == NET_MODE_SINGLE_PLAYER
-        || netMode == NET_MODE_LISTEN_SERVER
-        || netMode == NET_MODE_CLIENT
-        || netMode == NET_MODE_REPLAY
+           netMode == NETMODE_SINGLE_PLAYER
+        || netMode == NETMODE_LISTEN_SERVER
+        || netMode == NETMODE_CLIENT
+        || netMode == NETMODE_REPLAY
     );
 }
 
 inline u8 IsRunningServer(u8 netMode)
 {
+    if (netMode == NETMODE_NONE) { return 0; }
     return (
-           netMode == NET_MODE_SINGLE_PLAYER
-        || netMode == NET_MODE_LISTEN_SERVER
-        || netMode == NET_MODE_DEDICATED_SERVER
+           netMode == NETMODE_SINGLE_PLAYER
+        || netMode == NETMODE_LISTEN_SERVER
+        || netMode == NETMODE_DEDICATED_SERVER
     );
 }
 
 inline u8 IsConnectionOpen(u8 netMode)
 {
+    if (netMode == NETMODE_NONE) { return 0; }
     return (
-        netMode == NET_MODE_CLIENT
-        || netMode == NET_MODE_LISTEN_SERVER
-        || netMode == NET_MODE_DEDICATED_SERVER
+        netMode == NETMODE_CLIENT
+        || netMode == NETMODE_LISTEN_SERVER
+        || netMode == NETMODE_DEDICATED_SERVER
     );
 }
 

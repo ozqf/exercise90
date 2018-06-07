@@ -215,7 +215,7 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     CopyFileEx(sourcePath, targetPath, NULL, NULL, &cancel, 0);
 }
 
-void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
+u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure)
 {
 	AssertAlways(destRef != NULL);
 	/*
@@ -236,9 +236,18 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 
 		if (f == NULL)
 		{
-			sprintf_s(buf, 256, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
-			Win32_Error(buf, "File Not Found");
-			Assert(false);
+			if (assertOnFailure)
+			{
+				sprintf_s(buf, 256, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+				Win32_Error(buf, "File Not Found");
+				Assert(false);
+			}
+			else
+			{
+				printf("PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+				return 0;
+			}
+			
 		}
 
 		fseek(f, 0, SEEK_END);
@@ -247,6 +256,7 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 		Heap_Allocate(heap, destRef, end, fileName, 1);
 		fread(destRef->ptrMemory, end, 1, f);
 		fclose(f);
+		return 1;
 	}
 	else
 	{
@@ -285,6 +295,7 @@ void Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName)
 			
 			free(mem.ptrMemory);
 		}
+		return 1;
 	}
 
 }

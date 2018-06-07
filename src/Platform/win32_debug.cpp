@@ -64,11 +64,17 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     }
     else
     {
-        *(g_inputText.ptr + g_inputText.position) = (char)VKCode;
+        char c = (char)VKCode;
+        if (VKCode == 190)
+        {
+            c = '.';
+        }
+        *(g_inputText.ptr + g_inputText.position) = c;
         g_inputText.position++;
         *(g_inputText.ptr + g_inputText.position) = 0;
     }
 
+#if 0
     // conversion cack not working yet. Just rip it straight out.
     //if (VKCode == 0) { return; }
     // Backspace: 8
@@ -81,7 +87,9 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     //printf("VKCode: %d. Result: %d. Try Key: %c vs %d\n", VKCode, result, c, word);
     //if (c == g_lastDebugChar) { return; }
     g_lastDebugChar = c;
+#endif
     //printf("> %c\n", c);
+
     RendObj_SetAsAsciCharArray(&g_rendDebugItem.obj, g_inputText.ptr, g_inputText.position, 0.05f, 1, 1, 1);
 }
 

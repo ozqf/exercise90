@@ -720,7 +720,8 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, 
 
 	glLineWidth(5.0);
 	glBegin(GL_LINES);
-	glColor3f(red, green, blue);
+	//glColor3f(red, green, blue);
+	glColor3f(1, 0, 0);
 	// front face
 	glVertex3f(a.x, a.y, a.z);
 	glVertex3f(b.x, a.y, a.z);

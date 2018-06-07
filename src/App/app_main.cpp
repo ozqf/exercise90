@@ -17,6 +17,7 @@ holding game/menu state and calling game update when required
 
 void App_ReadCommandBuffer(ByteBuffer commands);
 void App_EnqueueCmd(u8* ptr, u32 type, u32 size);
+i32 App_StartSession(u8 netMode, char* path);
 
 void App_SendToServer(u8* ptr, u32 type, u32 size)
 {
@@ -26,6 +27,12 @@ void App_SendToServer(u8* ptr, u32 type, u32 size)
 void App_ErrorStop()
 {
     DebugBreak();
+}
+
+void App_DumpHeap()
+{
+    printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n", g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);
+    Heap_DebugPrintAllocations2(&g_heap);
 }
 
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
@@ -43,8 +50,35 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
+        return 1;
     }
-    return 1;
+    if (!COM_CompareStrings(tokens[0], "GHOST"))
+    {
+        g_debugCameraOn = !g_debugCameraOn;
+        printf(" Ghost mode: %d\n", g_debugCameraOn);
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "DUMPHEAP"))
+    {
+        App_DumpHeap();
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "LOAD"))
+    {
+        if (numTokens == 2)
+        {
+            if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
+            {
+                printf("Failed to load game\n");
+            }
+        }
+        else
+        {
+            printf(" LOAD: load single player game. eg LOAD testbox.lvl\n");
+        }
+        return 1;
+    }
+    return 0;
 }
 
 void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
@@ -250,21 +284,66 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     App_ReadCommandBuffer(sub);
 }
 
-void App_LoadStateFromFile(GameState *gs, char *fileName)
+u8 App_LoadStateFromFile(GameState *gs, char *fileName)
 {
     printf("APP Load state from %s\n", fileName);
     BlockRef ref = {};
-    platform.Platform_LoadFileIntoHeap(&g_heap, &ref, fileName);
+    platform.Platform_LoadFileIntoHeap(&g_heap, &ref, fileName, 0);
     ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
 
     App_ReadStateBuffer(gs, &bytes);
 
     Heap_Free(&g_heap, ref.id);
+    return 1;
+}
+
+u8 App_StartSinglePlayer(char* path)
+{
+    Game_Shutdown(&g_gameState);
+
+    if (!App_LoadStateFromFile(&g_gameState, path))
+    {
+        return 0;
+    }
+
+	// Spawn local client
+	// Assign local client id.
+    Cmd_ClientUpdate spawnClient = {};
+    // assign local id directly...
+    // TODO: Do local client Id assignment via network command
+    g_localClientId = -1;
+    spawnClient.clientId = g_localClientId;
+    spawnClient.state = CLIENT_STATE_OBSERVER;
+    App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+    return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 ////////////////////////////////////////////////////////////////////////////
+i32 App_StartSession(u8 netMode, char* path)
+{
+    switch (netMode)
+    {
+        case NETMODE_SINGLE_PLAYER:
+        {
+            if (App_StartSinglePlayer(path))
+            {
+                g_gameState.netMode = NETMODE_SINGLE_PLAYER;
+                return 1;
+            }
+
+        } break;
+
+        default:
+        {
+            printf("APP Cannot start unknown netMode %d\n", netMode);
+        } break;
+    }
+
+    return 0;
+}
+
 i32 App_Init()
 {
     //DebugBreak();
@@ -311,21 +390,10 @@ i32 App_Init()
         g_collisionCommandBuffer.objectSize,
         g_collisionEventBuffer.ptrMemory,
         g_collisionEventBuffer.objectSize);
-
+    
+    
     Game_Init(&g_heap);
     Game_InitDebugStr();
-
-    App_LoadStateFromFile(&g_gameState, "testbox.lvl");
-
-	// Spawn local client
-	// Assign local client id.
-    Cmd_ClientUpdate spawnClient = {};
-    // assign local id directly...
-    // TODO: Do local client Id assignment via network command
-    g_localClientId = -1;
-    spawnClient.clientId = g_localClientId;
-    spawnClient.state = CLIENT_STATE_OBSERVER;
-    App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 
     R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
     R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
@@ -356,8 +424,7 @@ i32 App_Init()
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_1, "Attack 1");
     Input_InitAction(&g_inputActions, Z_INPUT_CODE_MOUSE_2, "Attack 2");
 
-    printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n", g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);
-    Heap_DebugPrintAllocations2(&g_heap);
+    //App_DumpHeap();
     return 1;
 }
 
@@ -365,7 +432,8 @@ i32 App_Shutdown()
 {
     printf("APP DLL Shutdown\n");
 
-    Game_Shutdown();
+    Game_Shutdown(&g_gameState);
+    Phys_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};
@@ -578,7 +646,8 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
     {
         case CLIENT_STATE_OBSERVER:
         {
-            if (Input_CheckActionToggledOn(actions, "Attack 1", frameNumber))
+            #if 0
+            if (Input_CheckActionToggledOn(actions, "Move Up", frameNumber))
             {
                 Cmd_ServerImpulse cmd = {};
                 cmd.clientId = cl->clientId;
@@ -587,6 +656,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
                 printf("APP: Client %d wishes to spawn\n", cl->clientId);
                 App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
+            #endif
         } break;
 
         case CLIENT_STATE_PLAYING:

@@ -62,6 +62,17 @@ void Game_InitGameState(GameState *gs)
     Game_InitEntityFactory();
 }
 
+void Game_Shutdown(GameState* gs)
+{
+    // Reset all entities and game state here
+	for (u32 i = 0; i < gs->entList.max; ++i)
+	{
+		gs->entList.items[i].inUse = 0;
+	}
+    //COM_ZeroMemory((u8*)gs->entList.items, sizeof(Ent) * gs->entList.max);
+    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(Ent) * gs->entList.max);
+}
+
 void Game_BuildTestHud(GameState *state)
 {
 #if 0
@@ -147,11 +158,6 @@ void Game_Init(Heap* globalHeap)
     //Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
-}
-
-void Game_Shutdown()
-{
-    Phys_Shutdown();
 }
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)

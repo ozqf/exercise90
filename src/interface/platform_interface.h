@@ -39,7 +39,7 @@ struct PlatformInterface
     
     // Loading assets
     //i32 (*Platform_LoadDebugTextures)(Heap* heap);
-    void (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName);
+    u8 (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure);
     void (*Platform_LoadTexture)(Heap* heap, BlockRef* destRef, char* path);
     void (*Platform_BindTexture)(void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
 

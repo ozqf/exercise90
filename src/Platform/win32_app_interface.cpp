@@ -70,7 +70,7 @@ i32 Platform_LoadDebugTextures(Heap* heap)
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
     //Win32_ReadBMPToHeap(heap, result, path);
-	Platform_LoadFileIntoHeap(heap, result, path);
+	Platform_LoadFileIntoHeap(heap, result, path, true);
 }
 
 void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
