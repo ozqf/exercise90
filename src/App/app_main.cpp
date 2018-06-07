@@ -37,7 +37,7 @@ void App_DumpHeap()
 
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
-    printf("App Parse %s\n", str);
+    //printf("App Parse %s\n", str);
     if (!COM_CompareStrings(tokens[0], "IMPULSE"))
     {
         if (numTokens != 2)
@@ -299,7 +299,9 @@ u8 App_LoadStateFromFile(GameState *gs, char *fileName)
 
 u8 App_StartSinglePlayer(char* path)
 {
+	printf("APP Start single player session\n");
     Game_Shutdown(&g_gameState);
+	Phys_ClearWorld();
 
     if (!App_LoadStateFromFile(&g_gameState, path))
     {

@@ -64,13 +64,26 @@ void Game_InitGameState(GameState *gs)
 
 void Game_Shutdown(GameState* gs)
 {
+	printf("GAME Shutdown\n");
     // Reset all entities and game state here
 	for (u32 i = 0; i < gs->entList.max; ++i)
 	{
 		gs->entList.items[i].inUse = 0;
 	}
-    //COM_ZeroMemory((u8*)gs->entList.items, sizeof(Ent) * gs->entList.max);
-    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(Ent) * gs->entList.max);
+	// Components
+	/*
+	EC_AIControllerList aiControllerList;
+	EC_RendererList rendererList;
+	EC_ColliderList colliderList;
+	EC_ActorMotorList actorMotorList;
+	EC_ProjectileList projectileList;
+	EC_LabelList labelList;
+	*/
+    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
+	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
+	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
+	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
+	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
 }
 
 void Game_BuildTestHud(GameState *state)

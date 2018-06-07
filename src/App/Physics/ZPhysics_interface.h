@@ -61,4 +61,8 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuff
 // Returns memory block of the event buffer assigned at init
 MemoryBlock Phys_Step(f32 deltaTime);
 
+// Remove all objects from simulation, resetting it
+void Phys_ClearWorld();
+
+// Shut down library. destroy all objects.
 void Phys_Shutdown();

@@ -21,6 +21,7 @@ struct Win32_TextInput
 };
 
 Win32_TextInput g_inputText;
+u8 g_textBufferAwaitingProcessing = 0;
 u8 g_debugInputActive = 0;
 RenderListItem g_rendDebugItem;
 RenderScene g_debugScene;
@@ -40,15 +41,26 @@ void Win32_ResetDebugInput()
     g_inputText.position = 1;
 }
 
-void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
+void Win32_CheckTextBuffer()
 {
-    if (VKCode == 13)
+    if (g_textBufferAwaitingProcessing)
     {
+        g_textBufferAwaitingProcessing = 0;
         // execute
         // start at 1 to avoid including the '>' prompt
         // position is also the null terminator
         Win32_ParseTextCommand(g_inputText.ptr + 1, 0, g_inputText.position);
         Win32_ResetDebugInput();
+    }
+}
+
+void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
+{
+    if (g_textBufferAwaitingProcessing) { return; }
+    if (VKCode == 13)
+    {
+        // Flag buffer as locked and awaiting reading
+        g_textBufferAwaitingProcessing = 1;
         return;
     }
     // skip unwanted keys
@@ -80,6 +92,7 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     // Backspace: 8
     // Enter: 13
     // Shift: 16
+    // ,: 190
     WORD word;
     i32 result = ToAscii(VKCode, 0, 0, &word, 0);
     

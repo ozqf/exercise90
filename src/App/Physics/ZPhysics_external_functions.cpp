@@ -195,12 +195,17 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuff
     Phys_CreateTestScene(&g_world);
 }
 
-void Phys_Shutdown()
+void Phys_ClearWorld()
 {
     for (int i = 0; i < g_world.bodies.capacity; ++i)
     {
         Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);
     }
+}
+
+void Phys_Shutdown()
+{
+    Phys_ClearWorld();
     // Get order right or it will cause an access violation
 	delete g_world.dynamicsWorld;
 	delete g_world.solver;

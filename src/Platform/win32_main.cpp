@@ -291,6 +291,11 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
         Win32_Shutdown();
         return 1;
     }
+	else if (COM_CompareStrings(tokens[0], "BUILD") == 0)
+	{
+		printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
+		return 1;
+	}
     else if (COM_CompareStrings(tokens[0], "RESTART") == 0)
     {
         if (numTokens != 2)
@@ -625,6 +630,8 @@ int CALLBACK WinMain(
                 {
                     g_renderer.R_FinishFrame(appWindow);
                 }
+
+                Win32_CheckTextBuffer();
                 //Win32_R_FinishFrame(appWindow);
             }
         }
