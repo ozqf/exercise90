@@ -6,11 +6,6 @@ holding game/menu state and calling game update when required
 
 #include "app_module.cpp"
 
-void App_ErrorStop()
-{
-    DebugBreak();
-}
-
 void App_EndSession()
 {
 	printf("APP Ending session\n");
@@ -135,7 +130,7 @@ i32 App_Init()
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
 
-    AllocateDebugStrings(&g_heap);
+    //AllocateDebugStrings(&g_heap);
     //AllocateTestStrings(&g_heap);
 
     // Buffers, enlarge if necessary

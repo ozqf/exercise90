@@ -56,7 +56,7 @@ inline u8 IsConnectionOpen(u8 netMode)
 
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
-#define GAME_MAX_CLIENTS 8
+//#define GAME_MAX_CLIENTS 8
 
 #define UI_MAX_ENTITIES 512
 

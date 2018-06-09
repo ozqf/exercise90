@@ -1,5 +1,5 @@
 #pragma once
-
+#if 1
 #include "../common/com_module.h"
 
 #define TEST_BUFFER_WIDTH 32
@@ -64,3 +64,4 @@ void AppInitTestTextures()
 	colour[3] = 255;
     COM_SetMemoryPattern((u8*)testBufferPixels3, TEST_BUFFER_MEM_SIZE, colour, 4);
 }
+#endif

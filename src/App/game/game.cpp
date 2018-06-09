@@ -351,7 +351,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             Client* cl = App_FindClientById(cmd->clientId);
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
-                printf("GAME Cannot spawn - client is free or playing arleady\n");
+                printf("GAME Cannot spawn - client is free or playing already\n");
                 return 1;
             }
             

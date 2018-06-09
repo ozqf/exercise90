@@ -2,6 +2,16 @@
 
 #include "../common/com_module.h"
 
+#define MAX_TEXTURES 128
+
+struct TextureHandles
+{
+    Texture2DHeader textureHeaders[MAX_TEXTURES];
+    BlockRef blockRefs[MAX_TEXTURES]; // IF allocated on the heap, find the reference here
+    u32 numTextures = 0;
+    u32 maxTextures = MAX_TEXTURES;
+};
+
 struct FileSegment
 {
 	u32 offset = 0;
