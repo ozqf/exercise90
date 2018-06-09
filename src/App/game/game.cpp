@@ -481,7 +481,7 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
-    Game_ApplyInputToTransform(actions, &g_localClientTick, &gs->cameraTransform, time);
+    //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
 
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
     {

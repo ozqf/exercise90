@@ -44,3 +44,5 @@ global_variable TextureHandles g_textureHandles;
 global_variable BlockRef g_debugBuffer;
 // Ignore local player control input and activate debug fly-around camera
 global_variable u8 g_debugCameraOn = 0;
+global_variable Transform g_debugCameraTransform = {};
+global_variable Vec3 g_debugCameraDegrees = {};

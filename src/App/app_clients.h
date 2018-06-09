@@ -56,7 +56,10 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
         {
 			Cmd_PlayerInput cmd = {};
 			cmd.clientId = cl->clientId;
-			Game_CreateClientInput(&g_inputActions, &cmd.input);
+            if (!g_debugCameraOn)
+            {
+                Game_CreateClientInput(&g_inputActions, &cmd.input);
+            }
 			App_EnqueueCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 

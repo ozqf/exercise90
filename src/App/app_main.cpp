@@ -316,6 +316,23 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     g_worldScene.numObjects = 0;
     g_uiScene.numObjects = 0;
 
+    // Camera selection
+    if (g_debugCameraOn)
+    {
+        Game_ApplyInputFlyMode(
+            &g_inputActions,
+            &g_debugCameraDegrees,
+            &g_debugCameraTransform,
+            time->deltaTime,
+            time->frameNumber
+            );
+        g_worldScene.cameraTransform = g_debugCameraTransform;
+    }
+    else
+    {
+        g_worldScene.cameraTransform = gs->cameraTransform;
+    }
+    
     Game_BuildRenderList(gs, &g_worldScene);
     Game_DrawColliderAABBs(gs, time, &g_worldScene);
 
