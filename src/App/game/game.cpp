@@ -17,7 +17,7 @@ void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     *gs = {};
-    gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
+    gs->debugMode = GAME_DEBUG_MODE_NONE;// GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
@@ -72,6 +72,7 @@ void Game_Shutdown(GameState* gs)
 	{
 		gs->entList.items[i].inUse = 0;
 	}
+    gs->localPlayerHasEnt = 0;
 	// Components
 	/*
 	EC_AIControllerList aiControllerList;
@@ -540,7 +541,8 @@ void Game_Tick(
         Assert(ent != NULL);
         EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
         Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->input.degrees);
-        gs->cameraTransform.pos.y += 0.75f;
+		// raise camera to eye height
+        gs->cameraTransform.pos.y += (1.85f / 2) * 0.9f;
 
     }
     // Ent* ent = Ent_GetEntityById(&gs->entList, )

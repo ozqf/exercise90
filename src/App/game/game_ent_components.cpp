@@ -67,24 +67,30 @@ inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col, f32 del
     Vec3 move = col->velocity;
 
     Vec3 input = {};
+    Vec3 moveForce = {};
 
+    u8 applyingInput = 0;
     if (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
     {
+        applyingInput = 1;
         input.z -= 1;
     }
     if (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
     {
+        applyingInput = 1;
         input.z += 1;
     }
     if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
     {
+        applyingInput = 1;
         input.x -= 1;
     }
     if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
     {
+        applyingInput = 1;
         input.x += 1;
     }
-
+    
 	f32 radiansForward = motor->input.degrees.y * DEG2RAD;
 	f32 radiansLeft = (motor->input.degrees.y + 90) * DEG2RAD;
 
@@ -93,19 +99,32 @@ inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col, f32 del
 	Vec4 up = {};
 	Vec4 forward = {};
 
-	forward.x = (sinf(radiansForward) * motor->runSpeed) * deltaTime * input.z;
+	forward.x = (sinf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
 	forward.y = 0;
-	forward.z = (cosf(radiansForward) * motor->runSpeed) * deltaTime * input.z;
+	forward.z = (cosf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
 
-	left.x = (sinf(radiansLeft) * motor->runSpeed) * deltaTime * input.x;
+	left.x = (sinf(radiansLeft) * motor->runAcceleration) * deltaTime * input.x;
 	left.y = 0;
-	left.z = (cosf(radiansLeft) * motor->runSpeed) * deltaTime * input.x;
+	left.z = (cosf(radiansLeft) * motor->runAcceleration) * deltaTime * input.x;
 
 	up.y = motor->runSpeed * deltaTime * input.y;
 
-    move.x += (forward.x + left.x + up.x);
-	move.y += (forward.y + left.y + up.y);
-	move.z += (forward.z + left.z + up.z);
+    moveForce.x = (forward.x + left.x + up.x);
+	moveForce.y = (forward.y + left.y + up.y);
+	moveForce.z = (forward.z + left.z + up.z);
+
+    // Cap horizontal speed increases
+    f32 mag = (f32)sqrt((move.x * move.x) + (move.z * move.z));
+    if (mag > motor->runSpeed)
+    {
+        moveForce.x = 0;
+        moveForce.z = 0;
+    }
+
+
+    move.x += moveForce.x;
+    move.y += moveForce.y;
+    move.z += moveForce.z;
 
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 }

@@ -112,6 +112,7 @@ struct EC_ActorMotor
     u8 inUse;
     ActorInput input;
     Vec3 move;
+    f32 runAcceleration;
     f32 runSpeed;
 };
 

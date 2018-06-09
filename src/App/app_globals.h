@@ -46,3 +46,5 @@ global_variable BlockRef g_debugBuffer;
 global_variable u8 g_debugCameraOn = 0;
 global_variable Transform g_debugCameraTransform = {};
 global_variable Vec3 g_debugCameraDegrees = {};
+// 0 = never, 1 = in debug camera mode, 2 = always
+global_variable u8 g_debugColliders = 1;

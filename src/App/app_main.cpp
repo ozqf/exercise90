@@ -335,10 +335,10 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     }
     
     Game_BuildRenderList(gs, &g_worldScene);
-    //if (g_debugCameraOn)
-    //{
+    if (g_debugColliders == 2 || (g_debugColliders == 1 && g_debugCameraOn))
+    {
         Game_DrawColliderAABBs(gs, time, &g_worldScene);
-    //}
+    }
 
     Game_IntersectionTest(gs, &g_worldScene);
 

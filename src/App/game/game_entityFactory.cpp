@@ -78,10 +78,12 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
     Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &cmd->entityId);
     Transform_SetPosition(&ent->transform, 0, 0, 0);
     collider = EC_AddCollider(gs, ent);
-    collider->size = {1, 2, 1};
+	f32 playerHeight = 1.85f; // average male height in metres
+	f32 playerWidth = 0.46f; // reasonable shoulder width?
+    collider->size = { playerWidth, playerHeight, playerWidth };
     collider->shapeId = Phys_CreateBox(
         0, 0, 0,
-        0.5, 1, 0.5,
+        playerWidth / 2, playerHeight / 2, playerWidth / 2,
         ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
         COL_MASK_ACTOR,
@@ -92,6 +94,7 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
 
     motor = EC_AddActorMotor(gs, ent);
     motor->runSpeed = 10;
+    motor->runAcceleration = 50;
 
     gs->localPlayerHasEnt = 1;
     gs->localPlayerEntId = ent->entId;

@@ -36,6 +36,41 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf(" Ghost mode: %d\n", g_debugCameraOn);
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "DEBUG"))
+    {
+        if (numTokens != 3)
+        {
+            printf("SET DEBUG MODES EG: \"DEBUG COLLISION 1/2/3\n");
+            return 1;
+        }
+        if (!COM_CompareStrings(tokens[1], "COLLISION"))
+        {
+            i32 val = COM_AsciToInt32(tokens[2]);
+            switch (val)
+            {
+                case 0:
+                {
+                    printf("No collision debug\n");
+                    g_debugColliders = 0;
+                } break;
+                case 1:
+                {
+                    printf("Show colliders in ghost mode\n");
+                    g_debugColliders = 1;
+                } break;
+                case 2:
+                {
+                    printf("Show colliders always\n");
+                    g_debugColliders = 2;
+                } break;
+                default:
+                {
+                    printf("Debug collision can be 0, 1 or 2\n");
+                } break;
+            }
+        }
+        return 1;
+    }
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
