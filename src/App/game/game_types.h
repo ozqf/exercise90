@@ -106,19 +106,6 @@ struct EC_Renderer
     RendObj rendObj;
 };
 
-#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
-#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
-#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
-#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
-#define ACTOR_INPUT_MOVE_UP (1 << 4)
-#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
-#define ACTOR_INPUT_MOVE_ATTACK (1 << 6)
-struct ActorInput
-{
-    u32 buttons;
-    Vec3 degrees;
-};
-
 struct EC_ActorMotor
 {
     EntId entId;

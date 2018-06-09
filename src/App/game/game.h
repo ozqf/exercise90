@@ -7,6 +7,12 @@
 //#include "game_physics.h"
 #include "../Physics/ZPhysics_interface.h"
 
+#define GAME_DEBUG_MODE_NONE 0
+#define GAME_DEBUG_MODE_CAMERA 1
+#define GAME_DEBUG_MODE_TRANSFORM 2
+#define GAME_DEBUG_MODE_PHYSICS 3
+#define GAME_DEBUG_MODE_ACTOR_INPUT 4
+
 // MODE      | ID        SERVER      CLIENT      CONNECTION
 //--------------------------------------------------------------
 // SP        |  0          1           1           0

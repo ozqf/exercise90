@@ -169,7 +169,8 @@ i32 App_Init()
                  8);
     //
     App_InitInput(&g_inputActions);
-    
+
+    App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
     //App_DumpHeap();
     return 1;
 }
@@ -334,7 +335,10 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     }
     
     Game_BuildRenderList(gs, &g_worldScene);
-    Game_DrawColliderAABBs(gs, time, &g_worldScene);
+    if (g_debugCameraOn)
+    {
+        Game_DrawColliderAABBs(gs, time, &g_worldScene);
+    }
 
     Game_IntersectionTest(gs, &g_worldScene);
 

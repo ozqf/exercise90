@@ -58,9 +58,13 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 			cmd.clientId = cl->clientId;
             if (!g_debugCameraOn)
             {
-                Game_CreateClientInput(&g_inputActions, &cmd.input);
+                Game_CreateClientInput(&g_inputActions, &cl->input);
+                
             }
-			App_EnqueueCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
+            // Always copy input even if it hasn't been affected or
+            // the players orientation will be reset!
+            cmd.input = cl->input;
+            App_EnqueueCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 
         default:

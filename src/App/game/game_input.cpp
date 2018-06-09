@@ -340,6 +340,15 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	// Movement
 	//i32 val;
 	//val = Input_GetActionValue(actions, "Move Left");
+	if (Input_GetActionValue(actions, "Move Forward"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_FORWARD;
+	}
+	if (Input_GetActionValue(actions, "Move Backward"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_BACKWARD;
+	}
+
 	if (Input_GetActionValue(actions, "Move Left"))
 	{
 		input->buttons = input->buttons | ACTOR_INPUT_MOVE_LEFT;

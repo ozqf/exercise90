@@ -62,10 +62,60 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     prj->tock = 1.0f;
 }
 
+inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col)
+{
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
+    {
+        // Vec3 forward;
+	    // Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
+        Phys_ChangeVelocity(col->shapeId, -motor->runSpeed, 0, 0);
+    }
+    else if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+    {
+        //
+        Phys_ChangeVelocity(col->shapeId, motor->runSpeed, 0, 0);
+    }
+    else
+    {
+        Phys_ChangeVelocity(col->shapeId, 0, 0, 0);
+    }
+}
+
+// returns num chars written
+i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
+{
+    i32 written = 0;
+    for (u32 i = 0; i < gs->actorMotorList.max; ++i)
+    {
+        EC_ActorMotor* motor = &gs->actorMotorList.items[i];
+        if (motor->inUse == 0) { continue; }
+
+        written += sprintf_s(buf, maxChars, "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d\n",
+            motor->entId.iteration,
+            motor->entId.index,
+            motor->input.degrees.x,
+            motor->input.degrees.y,
+            motor->input.degrees.z,
+            (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD),
+            (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD),
+            (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT),
+            (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+        );
+
+        //EC_Collider* col = EC_FindCollider(&motor->entId, gs);
+        //Assert(col != NULL);
+        //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
+        //Assert(ent != NULL);
+        
+
+    }
+    return written;
+}
+
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputActionSet* actions)
+void Game_UpdateActorMotors(GameState* gs, GameTime* time)
 {
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
@@ -73,25 +123,10 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time, InputActionSet* actio
         if (motor->inUse == 0) { continue; }
         EC_Collider* col = EC_FindCollider(&motor->entId, gs);
         Assert(col != NULL);
-        Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
-        Assert(ent != NULL);
+        //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
+        //Assert(ent != NULL);
+        ApplyActorMotorInput(motor, col);
 
-        if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
-        {
-            //
-            // Vec3 forward;
-		    // Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
-            Phys_ChangeVelocity(col->shapeId, -motor->runSpeed, 0, 0);
-        }
-        else if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
-        {
-            //
-            Phys_ChangeVelocity(col->shapeId, motor->runSpeed, 0, 0);
-        }
-        else
-        {
-            Phys_ChangeVelocity(col->shapeId, 0, 0, 0);
-        }
     }
     #if 0
     static float fireTick = 0;

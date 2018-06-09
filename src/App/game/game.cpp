@@ -17,6 +17,7 @@ void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     *gs = {};
+    gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
@@ -220,10 +221,6 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 /////////////////////////////////////////////////////////////////////////////
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////
-#define GAME_DEBUG_MODE_NONE 0
-#define GAME_DEBUG_MODE_CAMERA 1
-#define GAME_DEBUG_MODE_TRANSFORM 2
-#define GAME_DEBUG_MODE_PHYSICS 3
 
 ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
 {
@@ -260,6 +257,11 @@ ZStringHeader Game_WriteDebugString(GameState *gs, GameTime *time)
             // u32 numChars;
             Phys_GetDebugString(&h.chars, &h.length);
             
+        } break;
+
+        case GAME_DEBUG_MODE_ACTOR_INPUT:
+        {
+            h.length = Game_DebugWriteActiveActorInput(gs, gs->debugString, gs->debugStringCapacity);
         } break;
 
         case GAME_DEBUG_MODE_TRANSFORM:
@@ -516,7 +518,7 @@ void Game_Tick(
     
     // Game state update
     // Update all inputs, entity components and colliders/physics
-    Game_UpdateActorMotors(gs, time, actions);
+    Game_UpdateActorMotors(gs, time);
     Game_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);

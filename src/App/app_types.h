@@ -51,12 +51,26 @@ struct InputActionSet
 
 union EntId; // HACK
 
+#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
+#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
+#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
+#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
+#define ACTOR_INPUT_MOVE_UP (1 << 4)
+#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
+#define ACTOR_INPUT_MOVE_ATTACK (1 << 6)
+struct ActorInput
+{
+    u32 buttons;
+    Vec3 degrees;
+};
+
 struct Client
 {
     i32 clientId;
     i32 state;
     u16 entIdArr[2];
     i32 isLocal;
+    ActorInput input;
 };
 
 struct ClientList
