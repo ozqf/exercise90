@@ -356,6 +356,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
             tUpdate.matrix[j] = openglM[j];
         }
 
+        btVector3 vel = h->rigidBody->getLinearVelocity();
+        tUpdate.vel[0] = vel.getX();
+        tUpdate.vel[1] = vel.getY();
+        tUpdate.vel[2] = vel.getZ();
+
             /*btVector3 pos = t.getOrigin();
 		tUpdate.matrix[12] = pos.x();
 		tUpdate.matrix[13] = pos.y();

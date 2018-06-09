@@ -34,7 +34,8 @@ void Game_InitGameState(GameState *gs)
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
     gs->entList.max = GAME_MAX_ENTITIES;
-	Ent_SetIndices(&gs->entList);
+    // MUST do this before using entity list
+	Ent_ResetEntityIds(&gs->entList);
 
     gs->rendererList.items = g_renderers;
     gs->rendererList.count = GAME_MAX_ENTITIES;
@@ -188,18 +189,25 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 	f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
 	f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
 	f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
-	if (ZABS(magX) > 1.1f)
-	{
-		int foo = 1;
-	}
-	if (ZABS(magY) > 1.1f)
-	{
-		int foo = 1;
-	}
-	if (ZABS(magZ) > 1.1f)
-	{
-		int foo = 1;
-	}
+    // Debugging trap
+	// if (ZABS(magX) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+	// if (ZABS(magY) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+	// if (ZABS(magZ) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+
+    EC_Collider* col = EC_FindCollider(gs, &entId);
+    Assert(col != NULL);
+    col->velocity.x = ev->vel[0]; 
+    col->velocity.y = ev->vel[1];
+    col->velocity.z = ev->vel[2];
 #if 0
 	//ent->transform.scale = { 1, 1, 1 };
 	ent->transform.pos.x = updateM->posX;
@@ -403,7 +411,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Client* cl = App_FindClientById(cmd.clientId);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
-            EC_ActorMotor* motor = EC_FindActorMotor((EntId*)&cl->entIdArr, gs);
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, (EntId*)&cl->entIdArr);
             Assert(motor != NULL);
             motor->input = cmd.input;
 			return 1;
@@ -525,4 +533,15 @@ void Game_Tick(
 
     // step forward
     Game_StepPhysics(gs, time);
+
+    if (gs->localPlayerHasEnt)
+    {
+        Ent* ent = Ent_GetEntityById(&gs->entList, &gs->localPlayerEntId);
+        Assert(ent != NULL);
+        EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
+        Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->input.degrees);
+        gs->cameraTransform.pos.y += 0.75f;
+
+    }
+    // Ent* ent = Ent_GetEntityById(&gs->entList, )
 }

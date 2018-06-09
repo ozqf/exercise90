@@ -34,7 +34,7 @@ EC_RemoveFoo        -       Find component of specific type and if the entity ha
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
 \
-static inline EC_##type* EC_Add##type##(Ent* ent, GameState* gs) \
+static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -54,7 +54,7 @@ static inline EC_##type* EC_Add##type##(Ent* ent, GameState* gs) \
 \
 static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
 \
-static inline EC_##type* EC_Find##type##(Ent* ent, GameState* gs) \
+static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
 { \
     if (!Ent_Has##type##(ent)) { return 0; } \
     EC_##type* comp; \
@@ -68,7 +68,7 @@ static inline EC_##type* EC_Find##type##(Ent* ent, GameState* gs) \
     } \
     return 0; \
 } \
-static inline EC_##type* EC_Find##type##(EntId* id, GameState* gs) \
+static inline EC_##type* EC_Find##type##(GameState* gs, EntId* id) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -83,9 +83,9 @@ static inline EC_##type* EC_Find##type##(EntId* id, GameState* gs) \
 } \
 \
 \
-static inline void EC_Remove##type##(Ent* ent, GameState* gs) \
+static inline void EC_Remove##type##(GameState* gs, Ent* ent) \
 { \
-    EC_##type* comp = EC_Find##type##(ent, gs); \
+    EC_##type* comp = EC_Find##type##(gs, ent); \
     if (comp == 0) { return; } \
     ent->componentFlags &= ~typeFlagDefine; \
     comp->inUse = 0; \

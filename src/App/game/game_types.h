@@ -190,7 +190,8 @@ struct GameState
     //AngleVectors cameraAngleVectors;
 
     // specifics
-    u16 playerEntityIndex;
+    u8 localPlayerHasEnt = 0;
+    EntId localPlayerEntId;
 
     u16 debugMode = 0;
     char debugString[2048];

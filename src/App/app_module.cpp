@@ -97,4 +97,9 @@ i32 AppRendererReloaded();
 #include "app_textures.h"
 #include "app_main.cpp"
 
+/***************************************
+* Export DLL functions
+***************************************/
+#include "app_dll_export.cpp"
+
 #endif

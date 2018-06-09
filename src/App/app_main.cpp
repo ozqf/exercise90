@@ -335,10 +335,10 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     }
     
     Game_BuildRenderList(gs, &g_worldScene);
-    if (g_debugCameraOn)
-    {
+    //if (g_debugCameraOn)
+    //{
         Game_DrawColliderAABBs(gs, time, &g_worldScene);
-    }
+    //}
 
     Game_IntersectionTest(gs, &g_worldScene);
 
@@ -363,8 +363,3 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     platform.Platform_RenderScene(&g_uiScene);
 #endif
 }
-
-/***************************************
-* Export DLL functions
-***************************************/
-#include "app_dll_export.cpp"

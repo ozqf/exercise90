@@ -153,5 +153,7 @@ struct PhysEV_TransformUpdate
 	u16 ownerIteration;
 	f32 matrix[16];
 	f32 rot[3];
+	f32 vel[3];
+	f32 angularVel[3];
 };
 #endif

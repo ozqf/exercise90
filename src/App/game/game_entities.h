@@ -38,11 +38,16 @@ EntId Ent_ReserveFreeEntity(EntList* ents)
     return { 0, 0 };
 }
 
-void Ent_SetIndices(EntList* ents)
+/**
+ * Clear ids and set all iterations back to 0
+ * Must be run before starting!
+ */
+void Ent_ResetEntityIds(EntList* ents)
 {
 	for (u16 i = 0; i < ents->max; ++i)
 	{
-		ents->items[i].entId.index = i;
+		ents->items[i].entId.iteration = 0;
+        ents->items[i].entId.index = i;
 	}
 }
 
@@ -76,11 +81,11 @@ Ent* Ent_GetFreeEntity(EntList* ents)
 
 void Ent_ClearComponents(GameState* gs, Ent* ent)
 {
-    EC_RemoveAIController(ent, gs);
-    EC_RemoveCollider(ent, gs);
-    EC_RemoveRenderer(ent, gs);
-    EC_RemoveActorMotor(ent, gs);
-    EC_RemoveProjectile(ent, gs);
+    EC_RemoveAIController(gs, ent);
+    EC_RemoveCollider(gs, ent);
+    EC_RemoveRenderer(gs, ent);
+    EC_RemoveActorMotor(gs, ent);
+    EC_RemoveProjectile(gs, ent);
 }
 
 inline void Ent_Free(GameState* gs, Ent* ent)

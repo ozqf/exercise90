@@ -40,13 +40,13 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     ent->transform = *originT;
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     
-    EC_Renderer* rend = EC_AddRenderer(ent, gs);
+    EC_Renderer* rend = EC_AddRenderer(gs, ent);
     RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 0);
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
 
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
-    EC_Projectile* prj = EC_AddProjectile(ent, gs);
+    EC_Projectile* prj = EC_AddProjectile(gs, ent);
     prj->tock = 4.0f;
     prj->tick = prj->tock;
     
@@ -62,23 +62,52 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     prj->tock = 1.0f;
 }
 
-inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col)
+inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
 {
+    Vec3 move = col->velocity;
+
+    Vec3 input = {};
+
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
+    {
+        input.z -= 1;
+    }
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
+    {
+        input.z += 1;
+    }
     if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
     {
-        // Vec3 forward;
-	    // Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
-        Phys_ChangeVelocity(col->shapeId, -motor->runSpeed, 0, 0);
+        input.x -= 1;
     }
-    else if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
     {
-        //
-        Phys_ChangeVelocity(col->shapeId, motor->runSpeed, 0, 0);
+        input.x += 1;
     }
-    else
-    {
-        Phys_ChangeVelocity(col->shapeId, 0, 0, 0);
-    }
+
+	f32 radiansForward = motor->input.degrees.y * DEG2RAD;
+	f32 radiansLeft = (motor->input.degrees.y + 90) * DEG2RAD;
+
+    
+	Vec4 left = {};
+	Vec4 up = {};
+	Vec4 forward = {};
+
+	forward.x = (sinf(radiansForward) * motor->runSpeed) * deltaTime * input.z;
+	forward.y = 0;
+	forward.z = (cosf(radiansForward) * motor->runSpeed) * deltaTime * input.z;
+
+	left.x = (sinf(radiansLeft) * motor->runSpeed) * deltaTime * input.x;
+	left.y = 0;
+	left.z = (cosf(radiansLeft) * motor->runSpeed) * deltaTime * input.x;
+
+	up.y = motor->runSpeed * deltaTime * input.y;
+
+    move.x += (forward.x + left.x + up.x);
+	move.y += (forward.y + left.y + up.y);
+	move.z += (forward.z + left.z + up.z);
+
+    Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 }
 
 // returns num chars written
@@ -90,7 +119,10 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
         EC_ActorMotor* motor = &gs->actorMotorList.items[i];
         if (motor->inUse == 0) { continue; }
 
-        written += sprintf_s(buf, maxChars, "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d\n",
+        written += sprintf_s(
+            buf,
+            maxChars,
+            "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d\n",
             motor->entId.iteration,
             motor->entId.index,
             motor->input.degrees.x,
@@ -121,11 +153,11 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
     {
         EC_ActorMotor* motor = &gs->actorMotorList.items[i];
         if (motor->inUse == 0) { continue; }
-        EC_Collider* col = EC_FindCollider(&motor->entId, gs);
+        EC_Collider* col = EC_FindCollider(gs, &motor->entId);
         Assert(col != NULL);
         //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
         //Assert(ent != NULL);
-        ApplyActorMotorInput(motor, col);
+        ApplyActorMotorInput(motor, col, time->deltaTime);
 
     }
     #if 0

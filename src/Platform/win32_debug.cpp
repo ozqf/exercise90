@@ -61,6 +61,7 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     {
         // Flag buffer as locked and awaiting reading
         g_textBufferAwaitingProcessing = 1;
+        Win32_ToggleDebugInput();
         return;
     }
     // skip unwanted keys

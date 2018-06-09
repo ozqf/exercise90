@@ -130,3 +130,12 @@ inline Vec3 Transform_GetEulerAngles(Transform* t)
 {
     return M3x3_GetEulerAnglesRadians(t->rotation.cells);
 }
+
+inline void Transform_SetByPosAndDegrees(Transform* t, Vec3* pos, Vec3* degrees)
+{
+    Transform_ClearRotation(t);
+	Transform_RotateZ(t, degrees->z * DEG2RAD);
+	Transform_RotateY(t, degrees->y * DEG2RAD);
+	Transform_RotateX(t, degrees->x * DEG2RAD);
+    Transform_SetPosition(t, pos->x, pos->y, pos->z);
+}
