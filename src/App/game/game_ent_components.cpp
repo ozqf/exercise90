@@ -62,7 +62,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     prj->tock = 1.0f;
 }
 
-inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
+inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
 {
     Vec3 move = col->velocity;
 
@@ -127,6 +127,21 @@ inline void ApplyActorMotorInput(EC_ActorMotor* motor, EC_Collider* col, f32 del
     move.z += moveForce.z;
 
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
+
+    // Attack
+    if (motor->tick <= 0)
+    {
+        if (motor->input.buttons & ACTOR_INPUT_ATTACK)
+        {
+            motor->tick = 0.1f;
+            Transform* t = &g_worldScene.cameraTransform;
+            Game_SpawnTestBullet(gs, t);
+        }
+    }
+    else
+    {
+        motor->tick -= deltaTime;
+    }
 }
 
 // returns num chars written
@@ -141,7 +156,7 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
         written += sprintf_s(
             buf,
             maxChars,
-            "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d\n",
+            "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d ATK: %d TICK: %.2f\n",
             motor->entId.iteration,
             motor->entId.index,
             motor->input.degrees.x,
@@ -150,7 +165,9 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
             (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD),
             (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD),
             (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+            (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT),
+            (motor->input.buttons & ACTOR_INPUT_ATTACK),
+            motor->tick
         );
 
         //EC_Collider* col = EC_FindCollider(&motor->entId, gs);
@@ -176,7 +193,7 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
         Assert(col != NULL);
         //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
         //Assert(ent != NULL);
-        ApplyActorMotorInput(motor, col, time->deltaTime);
+        ApplyActorMotorInput(gs, motor, col, time->deltaTime);
 
     }
     #if 0

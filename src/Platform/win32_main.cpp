@@ -217,10 +217,10 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         //     DebugBreak();
         // }
 
-        if (VKCode == '`' && isDown)
-        {
-            Assert(Win32_LinkToApplication());
-        }
+        // if (VKCode == '`' && isDown)
+        // {
+        //     Assert(Win32_LinkToApplication());
+        // }
 
         // if (VKCode == 'T' && isDown)
         // {
@@ -243,7 +243,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         }
         else
         {
-            printf("PLATFORM Unknown VK_CODE %d\n", VKCode);
+            //printf("PLATFORM Unknown VK_CODE %d\n", VKCode);
         }
     }
     break;
@@ -281,17 +281,20 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
  *********************************************************************/
 u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
 {
-    if (COM_CompareStrings(tokens[0], "QUIT") == 0)
+    if (COM_CompareStrings(tokens[0], "QUIT") == 0 || COM_CompareStrings(tokens[0], "EXIT") == 0)
     {
         Win32_Shutdown();
         return 1;
     }
-    else if (COM_CompareStrings(tokens[0], "EXIT") == 0)
+    else if (COM_CompareStrings(tokens[0], "HELP") == 0)
     {
-        Win32_Shutdown();
-        return 1;
+        printf("--- Command List ---\n");
+        printf("  QUIT or EXIT - shutdown\n");
+        printf("  VERSION - show version info\n");
+        printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
+        return 0;
     }
-	else if (COM_CompareStrings(tokens[0], "BUILD") == 0)
+	else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
 	{
 		printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
 		return 1;

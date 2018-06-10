@@ -29,7 +29,7 @@ RenderScene g_debugScene;
 void Win32_ToggleDebugInput()
 {
     g_debugInputActive = !g_debugInputActive;
-    printf("PLATFORM Debug input active %d\n", g_debugInputActive);
+    //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
 char g_lastDebugChar = 0;

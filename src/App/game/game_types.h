@@ -114,6 +114,7 @@ struct EC_ActorMotor
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
+    f32 tick;
 };
 
 // A quick test component

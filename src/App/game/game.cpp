@@ -17,7 +17,8 @@ void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     *gs = {};
-    gs->debugMode = GAME_DEBUG_MODE_NONE;// GAME_DEBUG_MODE_ACTOR_INPUT;
+    //gs->debugMode = GAME_DEBUG_MODE_NONE;
+    gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     

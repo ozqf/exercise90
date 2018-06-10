@@ -16,7 +16,6 @@ void App_EndSession()
 	// Break client links
 	App_ClearClientGameLinks();
 	COM_ZeroMemory((u8*)g_gameOutputByteBuffer.ptrStart, g_gameOutputByteBuffer.capacity);
-
 }
 
 void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
@@ -344,7 +343,7 @@ void App_Frame(GameTime *time, ByteBuffer commands)
 
     platform.Platform_RenderScene(&g_worldScene);
 
-#if 1
+    #if 1
     Game_UpdateUI(ui, time);
     Game_BuildRenderList(ui, &g_uiScene);
     // Render debug string

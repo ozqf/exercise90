@@ -16,6 +16,17 @@ void App_DumpHeap()
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
     //printf("App Parse %s\n", str);
+    if (!COM_CompareStrings(tokens[0], "HELP"))
+    {
+        printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
+        printf("  IMPULSE <number> - Execute simple server commands\n");
+        printf("  IMPULSE LIST - List impulse commands\n");
+        printf("  GHOST - Toggle debug camera on/off\n");
+        printf("  CLIENTS - List current client states\n");
+        printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
+        printf("  DUMPHEAP - List Heap memory allocations\n");
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "IMPULSE"))
     {
         if (numTokens != 2)
@@ -38,12 +49,22 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "DEBUG"))
     {
-        if (numTokens != 3)
+        if (numTokens == 1)
         {
-            printf("SET DEBUG MODES EG: \"DEBUG COLLISION 1/2/3\n");
+            printf("DEBUG requires additional parameters\n");
             return 1;
         }
-        if (!COM_CompareStrings(tokens[1], "COLLISION"))
+        // else if (numTokens == 2)
+        // {
+        //     if (!COM_CompareStrings(tokens[1], "COLLISION"))
+        //     {
+
+        //     }
+        //     return 1;
+        // }
+        else if (numTokens == 3)
+        {
+            if (!COM_CompareStrings(tokens[1], "COLLISION"))
         {
             i32 val = COM_AsciToInt32(tokens[2]);
             switch (val)
@@ -68,6 +89,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
                     printf("Debug collision can be 0, 1 or 2\n");
                 } break;
             }
+        }
         }
         return 1;
     }

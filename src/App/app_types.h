@@ -57,7 +57,7 @@ union EntId; // HACK
 #define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
 #define ACTOR_INPUT_MOVE_UP (1 << 4)
 #define ACTOR_INPUT_MOVE_DOWN (1 << 5)
-#define ACTOR_INPUT_MOVE_ATTACK (1 << 6)
+#define ACTOR_INPUT_ATTACK (1 << 6)
 struct ActorInput
 {
     u32 buttons;

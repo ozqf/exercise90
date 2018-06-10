@@ -358,6 +358,12 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 		input->buttons = input->buttons | ACTOR_INPUT_MOVE_RIGHT;
 	}
 
+	if (Input_GetActionValue(actions, "Attack 1"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_ATTACK;
+	}
+
+
 	// Orientation
 	f32 sensitivity = 0.1f;
 	i8 inverted = -1;
