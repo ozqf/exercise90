@@ -62,6 +62,75 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     prj->tock = 1.0f;
 }
 
+// public float friction = 8f;
+// public float air_accelerate = 100f;
+// public float ground_accelerate = 50f;
+// public float max_velocity_ground = 8f;
+// public float max_velocity_air = 2f;
+
+f32 friction = 5;
+f32 accelerate = 100;
+
+Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, f32 acceleration, f32 maxVelocity, f32  deltaTime)
+{
+    //printf("-------- Move ground frame DT: %.6f --------\n", deltaTime);
+    f32 speed = Vec3_Magnitude(prevVelocity);
+    // Apply friction
+#if 1
+    if (speed != 0) // avoid divide by zero ninny
+    {
+        float drop = speed * friction * deltaTime;
+        f32 frictionScalar = ZMAX(speed - drop, 0) / speed;
+        //printf("Friction scalar: %.2f\n", frictionScalar);
+        // scale velocity based on friction
+        prevVelocity->x *= frictionScalar;
+        //prevVelocity->y *= frictionScalar;
+        prevVelocity->z *= frictionScalar;
+    }
+#endif
+
+
+    // Accelerate
+    float projectionVelocity = Vec3_DotProduct(prevVelocity, accelDir);
+    float accelVel = acceleration * deltaTime;
+
+    // If necessary truncate the velocity so the vector projection does not exceed maxVelocity
+    if (projectionVelocity + accelVel > maxVelocity)
+    {
+        accelVel = maxVelocity - projectionVelocity;
+    }
+
+    // Avoid actively reducing speed
+    if (accelVel < 0)
+    {
+        accelVel = 0;
+    }
+
+    // printf("Speed %.1f, AccelDir: %.1f, %.1f, prevVel: %.1f, %.1f, %.1f\n",
+    //     speed,
+    //     accelDir->x,
+    //     accelDir->z,
+    //     prevVelocity->x,
+    //     prevVelocity->y,
+    //     prevVelocity->z
+    // );
+
+    // printf("ProjVel: %.1f, AccelVel: %.1f, Acceleration: %.1f, max: %.1f\n",
+    //     projectionVelocity,
+    //     accelVel,
+    //     acceleration,
+    //     maxVelocity
+    // );
+
+
+    Vec3 result = {};
+    result.x = prevVelocity->x + accelDir->x * accelVel;
+    //result.y = prevVelocity->y + accelDir->y * accelVel;
+    result.z = prevVelocity->z + accelDir->z * accelVel;
+    //printf(" Result: %.1f, %.1f, %.1f\n", result.x, result.y, result.z);
+    return result;
+}
+
 inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
 {
     Vec3 move = col->velocity;
@@ -90,6 +159,12 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
         applyingInput = 1;
         input.x += 1;
     }
+
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_UP)
+    {
+        move.y += 50 * deltaTime;
+        printf("Apply up force: %.2f\n", move.y);
+    }
     
 	f32 radiansForward = motor->input.degrees.y * DEG2RAD;
 	f32 radiansLeft = (motor->input.degrees.y + 90) * DEG2RAD;
@@ -98,7 +173,28 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 	Vec4 left = {};
 	Vec4 up = {};
 	Vec4 forward = {};
+#if 1
+    forward.x = sinf(radiansForward);
+	forward.y = 0;
+	forward.z = cosf(radiansForward);
 
+	left.x = sinf(radiansLeft);
+	left.y = 0;
+	left.z = cosf(radiansLeft);
+
+    moveForce.x = (forward.x * input.z) + (left.x * input.x);
+    moveForce.z = (forward.z * input.z) + (left.z * input.x);
+
+    Vec3 moveResult = MoveGround(&moveForce, &move, 100, 12, deltaTime);
+    move.x = moveResult.x;
+    move.z = moveResult.z;
+    motor->debugCurrentSpeed = Vec3_Magnitude(&move);
+
+    //move = moveForce;
+#endif
+
+
+#if 0 // horrible previous approach
 	forward.x = (sinf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
 	forward.y = 0;
 	forward.z = (cosf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
@@ -125,7 +221,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     move.x += moveForce.x;
     move.y += moveForce.y;
     move.z += moveForce.z;
-
+#endif
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 
     // Attack
@@ -156,7 +252,8 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
         written += sprintf_s(
             buf,
             maxChars,
-            "Motor Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R: %d/%d/%d/%d ATK: %d TICK: %.2f\n",
+"Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R/U/D: %d/%d/%d/%d/%d/%d\n\
+ATK: %d TICK: %.2f SPEED: %.2f\n",
             motor->entId.iteration,
             motor->entId.index,
             motor->input.degrees.x,
@@ -166,8 +263,11 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
             (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD),
             (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT),
             (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT),
+            (motor->input.buttons & ACTOR_INPUT_MOVE_UP),
+            (motor->input.buttons & ACTOR_INPUT_MOVE_DOWN),
             (motor->input.buttons & ACTOR_INPUT_ATTACK),
-            motor->tick
+            motor->tick,
+            motor->debugCurrentSpeed
         );
 
         //EC_Collider* col = EC_FindCollider(&motor->entId, gs);

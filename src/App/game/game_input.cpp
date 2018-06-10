@@ -358,6 +358,16 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 		input->buttons = input->buttons | ACTOR_INPUT_MOVE_RIGHT;
 	}
 
+	if (Input_GetActionValue(actions, "Move Up"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_UP;
+	}
+	if (Input_GetActionValue(actions, "Move Down"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_MOVE_DOWN;
+	}
+	
+
 	if (Input_GetActionValue(actions, "Attack 1"))
 	{
 		input->buttons = input->buttons | ACTOR_INPUT_ATTACK;

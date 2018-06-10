@@ -494,7 +494,7 @@ void Game_Tick(
     InputActionSet* actions)
 {
     //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
-
+#if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
     {
         BufferItemHeader header = {};
@@ -510,7 +510,8 @@ void Game_Tick(
         output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
         output->count++;
     }
-    
+#endif
+#if 0
     if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
     {
         i32 shapeId = 10;
@@ -521,6 +522,7 @@ void Game_Tick(
 		f32 speed = 20;
 		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
     }
+#endif
     
     ///////////////////////////////////////////////////////////////////////////////////////////
     

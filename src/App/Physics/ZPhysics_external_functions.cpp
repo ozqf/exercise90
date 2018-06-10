@@ -187,7 +187,7 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuff
 
     g_world.dynamicsWorld = new btDiscreteDynamicsWorld(g_world.dispatcher, g_world.broadphase, g_world.solver, g_world.collisionConfiguration);
 
-    g_world.dynamicsWorld->setGravity(btVector3(0, -15, 0));
+    g_world.dynamicsWorld->setGravity(btVector3(0, -20, 0));
 
 	g_world.dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
     g_world.dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);

@@ -115,6 +115,7 @@ struct EC_ActorMotor
     f32 runAcceleration;
     f32 runSpeed;
     f32 tick;
+    f32 debugCurrentSpeed;
 };
 
 // A quick test component
