@@ -8,6 +8,7 @@
  * > header information will be copied and updated
  * > BlockRef should be a Heap block for a Texture2DHeader!
  */
+#if 1
 void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
 {
     i32 index = g_textureHandles.numTextures;
@@ -23,13 +24,14 @@ void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
     }
     g_textureHandles.numTextures++;
 }
-
+#endif
 /**
  * Upload a texture to the GPU
  */
 void AppBindTexture(Texture2DHeader *header)
 {
     platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, header->index);
+    printf("APP tex %s bound to index %d\n", header->name, header->index);
 }
 
 /**
@@ -45,6 +47,7 @@ BlockRef AppLoadTexture(char *filePath)
 /**
  * Read a texture onto the global heap and then immediately bind it
  */
+#if 0
 void AppLoadAndRegisterTexture(char *filePath)
 {
     BlockRef ref = AppLoadTexture(filePath);
@@ -54,7 +57,7 @@ void AppLoadAndRegisterTexture(char *filePath)
     AppRegisterTexture(header, &ref);
     //AppBindTexture((Texture2DHeader*)ref.ptrMemory, &ref);
 }
-
+#endif
 /**
  * Upload all registered textures
  */
@@ -103,6 +106,12 @@ void AppLoadTestTextures()
 
     // 6 - right?
     ref = AppLoadTexture("W33_5.bmp");
+    Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    header = (Texture2DHeader *)ref.ptrMemory;
+    AppRegisterTexture(header, &ref);
+
+    // 7 - plunging on
+    ref = AppLoadTexture("COMP03_1.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);

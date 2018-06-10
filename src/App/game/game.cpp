@@ -17,8 +17,8 @@ void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     *gs = {};
-    //gs->debugMode = GAME_DEBUG_MODE_NONE;
-    gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
+    gs->debugMode = GAME_DEBUG_MODE_NONE;
+    //gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
@@ -122,7 +122,7 @@ void Game_BuildTestHud(GameState *state)
     renderer = EC_AddRenderer(ent, state);
     // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
 
-    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, 4, 1, 1);
+RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, 4, 1, 1);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
     RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '.');
 #endif

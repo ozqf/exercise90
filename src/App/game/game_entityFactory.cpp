@@ -18,7 +18,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     ent->transform.pos = cmd->pos;
     
     EC_Renderer* renderer = EC_AddRenderer(gs, ent);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
     Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
 
     EC_Collider* collider = EC_AddCollider(gs, ent);
