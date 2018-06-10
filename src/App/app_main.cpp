@@ -245,17 +245,12 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
     }
 }
 
-void App_Frame(GameTime *time, ByteBuffer commands)
+void App_UpdateGameState(GameTime* time)
 {
-    g_time = *time;
+    ///////////////////////////////////////
+    // Process messages before game update
+    ///////////////////////////////////////
 
-    /////////////////////////////////////////////////////
-    // Read Command buffers
-    /////////////////////////////////////////////////////
-
-    // Read Platform commands (input + network?)
-    App_ReadCommandBuffer(commands);
-        
     // Update local client input
     App_UpdateLocalClients(time);
     
@@ -263,18 +258,6 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     App_ReadCommandBuffer(g_gameOutputByteBuffer);
 	// Clear output buffer ready for write to this frame
     Buf_Clear(&g_gameOutputByteBuffer);
-
-
-    // Local debugging. Not command related
-    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
-    {
-        // Ye gads will he every figure out matrix maths...?
-        g_worldScene.settings.viewModelMode++;
-    }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
-    {
-        Input_ToggleMouseMode();
-    }
 
     ///////////////////////////////////////
     // Process gamestate
@@ -307,10 +290,47 @@ void App_Frame(GameTime *time, ByteBuffer commands)
               &g_inputActions);
 
     g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
+}
 
+void App_Frame(GameTime *time, ByteBuffer commands)
+{
+    g_time = *time;
+
+    /////////////////////////////////////////////////////
+    // Read Command buffers
+    /////////////////////////////////////////////////////
+    
+    // Read Platform commands (input + network?)
+    App_ReadCommandBuffer(commands);
+    
+    // Local debugging. Not command related
+    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
+    {
+        // Ye gads will he every figure out matrix maths...?
+        g_worldScene.settings.viewModelMode++;
+    }
+    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
+    {
+        Input_ToggleMouseMode();
+    }
+    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->frameNumber))
+    {
+        g_paused = !g_paused;
+        printf("PAUSED: %d\n", g_paused);
+    }
+
+    //if (!g_paused)
+    //{
+        App_UpdateGameState(time);
+        //time->frameNumber++;
+    //}
+    
     ///////////////////////////////////////
     // Render
     ///////////////////////////////////////
+
+    GameState *gs = &g_gameState;
+    GameState *ui = &g_uiState;
 
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;

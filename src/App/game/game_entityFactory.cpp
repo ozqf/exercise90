@@ -48,7 +48,7 @@ Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
     //Ent_InitAIController(controller, 1, 0, 0, 5);
 
     EC_Renderer* renderer = EC_AddRenderer(gs, ent);
-	RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 5);
+	RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
 
     f32 size = 1.0f;
     EC_Collider* collider = EC_AddCollider(gs, ent);

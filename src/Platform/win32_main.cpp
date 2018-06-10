@@ -291,6 +291,7 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
         printf("--- Command List ---\n");
         printf("  QUIT or EXIT - shutdown\n");
         printf("  VERSION - show version info\n");
+        printf("  MANIFEST - List data files entries\n");
         printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
         return 0;
     }
@@ -299,6 +300,10 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
 		printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
 		return 1;
 	}
+    else if (COM_CompareStrings(tokens[0], "MANIFEST") == 0)
+    {
+        Win32_DebugPrintDataManifest();
+    }
     else if (COM_CompareStrings(tokens[0], "RESTART") == 0)
     {
         if (numTokens != 2)

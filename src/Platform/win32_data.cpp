@@ -39,7 +39,27 @@ static DataFile g_dataFiles[PLATFORM_MAX_DATA_FILES];
 static i32 g_nextDataFileIndex = 0;
 static char* g_baseDirectoryName = "base";
 
+void Win32_DebugPrintDataManifest()
+{
+	for (i32 i = g_nextDataFileIndex - 1; i >= 0; --i)
+	{
+		DataFile file = g_dataFiles[i];
+		Assert(file.handle);
 
+		printf("--- data file %d ---\n", i);
+
+		u32 offset = file.header.fileListOffset;
+		fseek(file.handle, file.header.fileListOffset, SEEK_SET);
+		DataFileDiskEntry entry = {};
+
+		for (u32 j = 0; j < file.header.numFiles; ++j)
+		{
+			fread(&entry, sizeof(DataFileDiskEntry), 1, file.handle);
+
+			printf("%s\n  Size %d bytes, FileType: %d\n", entry.fileName, entry.size, entry.info[0]);
+		}
+	}
+}
 
 // File path should be something like textures/tex.bmp
 u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)

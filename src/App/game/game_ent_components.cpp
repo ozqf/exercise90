@@ -68,7 +68,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 // public float max_velocity_ground = 8f;
 // public float max_velocity_air = 2f;
 
-f32 friction = 5;
+f32 friction = 7;
 f32 accelerate = 100;
 
 Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, f32 acceleration, f32 maxVelocity, f32  deltaTime)
@@ -160,10 +160,12 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
         input.x += 1;
     }
 
+    Vec3_Normalise(&input);
+
     if (motor->input.buttons & ACTOR_INPUT_MOVE_UP)
     {
         move.y += 50 * deltaTime;
-        printf("Apply up force: %.2f\n", move.y);
+        //printf("Apply up force: %.2f\n", move.y);
     }
     
 	f32 radiansForward = motor->input.degrees.y * DEG2RAD;

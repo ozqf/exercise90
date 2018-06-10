@@ -74,31 +74,43 @@ void AppLoadTestTextures()
 
     AppInitTestTextures();
 
+    // 0
     AppRegisterTexture(&testBuffer, NULL);
 
+    // 1
     AppRegisterTexture(&testBuffer2, NULL);
 
+    // 2 - you get the picture
     AppRegisterTexture(&testBuffer3, NULL);
 
+    // 3 - Kinda icky this
     ref = AppLoadTexture("BitmapTest.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
+    // 4 - so, texture management sometime?
     ref = AppLoadTexture("charset.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
+    // 5 - can't be too hard...
     ref = AppLoadTexture("brbrick2.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
-    ref = AppLoadTexture("BKEYA0.bmp");
+    // 6 - right?
+    ref = AppLoadTexture("W33_5.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
+
+    // ref = AppLoadTexture("BKEYA0.bmp");
+    // Heap_GetBlockMemoryAddress(&g_heap, &ref);
+    // header = (Texture2DHeader *)ref.ptrMemory;
+    // AppRegisterTexture(header, &ref);
 
     AppBindAllTextures();
 }

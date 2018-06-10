@@ -53,6 +53,7 @@ inline f32 Vec3_Magnitudef(f32 x, f32 y, f32 z)
 inline void Vec3_Normalise(Vec3* v)
 {
     f32 vectorMagnitude = Vec3_Magnitude(v);
+    if (vectorMagnitude == 0) { return; }
     v->x /= vectorMagnitude;
     v->y /= vectorMagnitude;
     v->z /= vectorMagnitude;

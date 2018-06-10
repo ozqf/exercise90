@@ -365,6 +365,7 @@ struct GameTime
 {
     f32 deltaTime;
     u32 frameNumber;
+    //u32 frameNumber;
     u32 fixedFrameNumber;
     f32 fixedDeltaTime;
     u32 ticks;
