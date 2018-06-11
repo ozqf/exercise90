@@ -56,7 +56,7 @@ void Win32_DebugPrintDataManifest()
 		{
 			fread(&entry, sizeof(DataFileDiskEntry), 1, file.handle);
 
-			printf("%s\n  Size %d bytes, FileType: %d\n", entry.fileName, entry.size, entry.info[0]);
+			printf("%s - Size %d bytes, FileType: %d\n", entry.fileName, entry.size, entry.info[0]);
 		}
 	}
 }

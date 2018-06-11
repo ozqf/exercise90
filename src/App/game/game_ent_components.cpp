@@ -41,7 +41,7 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
     Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     
     EC_Renderer* rend = EC_AddRenderer(gs, ent);
-    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, 0);
+    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
 
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);

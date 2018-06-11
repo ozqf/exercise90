@@ -60,8 +60,9 @@ Move the engine and game to using commands.
 * **Game requires asset files to launch (added 2018/4/2)** - Some very basic assets should be baked into the code for such early development work. Only thing that cannot be procedurally generated is the console char sheet. So that first.
 
 ### Game
-* Done 2018/3/16 **Player movement** - Current player movement is messed up - rebuild.
-* **Basic Arena Level** - Something to stand on and contain the player!
+* Done 2018/3/16 *Player movement* - Current player movement is messed up - rebuild.
+    * Done 2018/6/10 *Improved movement* - Movement code uses adapted version of Quake's movement code.
+* Done 2018/5 *Basic Arena Level* - Something to stand on and contain the player!
 * **Entities**
     * Done 2018/3/30 *How will entities be stored? - Exact structure of entity system. Big structs for now with separate list of render objects built each frame?*
     * Done 2018/3/30 *Entity List - Until a better idea comes up, alloc a big array (4096 odd) of entity structs and use that.*
@@ -71,8 +72,8 @@ Move the engine and game to using commands.
 * ~Collision Detection~ - Deferred to physics engine
     * **Ray vs plane** - For hitscan vs world.
     * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.
-    * **Actor vs World** - AABB vs plane or perhaps ray vs expanded plane
-    * **Actor vs Actor** - For now just AABB vs AABB?
+    * Defunct *Actor vs World* - AABB vs plane or perhaps ray vs expanded plane
+    * Defunct *Actor vs Actor* - For now just AABB vs AABB?
     * Done 2018/3/30 *Binary AABB vs AABB collision detection*
 
 ### Physics Wrapper
@@ -90,24 +91,23 @@ Move the engine and game to using commands.
 * Done 2018/5/5 *Lock Rotation* - Create shapes that only move and cannot rotate.
 * Done 2018/4/5 *Bullet Physics Library* - Attach the bullet physics library via a wrapper
 
-
-
 ### Engine
-* **Command Buffer** - Change nature of inputs to processing of frame specific command buffers
+* Done 2018/5/4 *Command Buffer* - Change nature of inputs to processing of frame specific command buffers
     * **Record Command input** - Allow for playback of game commands.
-* **Debug Console** - Console for viewing debug output and entering commands.
-    * **Basic Text log** - A scrolling block of text.
-    * **Frame-updated status text** - Displays live debugging information (eg framerate).
-    * **Input box** - Type in and execute commands.
-* **Split Renderer to DLL** - Allow live reloading of a renderer DLL for easier renderer development
+* *Debug Console* - Console for viewing debug output and entering commands.
+    * Done 2018/6 *Windows console* - Use printf via a windows command prompt for debugging output. 
+    * Defunct *Basic Text log* - A scrolling block of text.
+    * Defunct *Frame-updated status text* - Displays live debugging information (eg framerate).
+    * Done 2018/6 *Input box* - Type in and execute commands.
+* Done 2018/4/9 *Split Renderer to DLL* - Allow live reloading of a renderer DLL for easier renderer development
     * Done 2018/4/8 *Texture load calls are now initiated by the game layer not the platform layer.*
-    * **Texture Database** - App must keep track of textures it has loaded so they can be found by entities or rebound to the GPU.
-    * **Rebindable Textures** - Allow platform to rebind loaded textures at any time, allowing a reloaded renderer
+    * Done 2018/6/11*Texture Database* - App must keep track of textures it has loaded so they can be found by entities or rebound to the GPU.
+    * Done 2018/4/8 *Rebindable Textures* - Allow platform to rebind loaded textures at any time, allowing a reloaded renderer
 
 ### Rendering
 * Done 2018/3/18 *ZBuffer - Currently no hidden surface removal.*
-* **Basic Text** - Just some means of rendering text for debug output and placeholder UI.
-    * **Render from Char sheet** - Can double for sprite sheet rendering too.
+* Done *Basic Text* - Just some means of rendering text for debug output and placeholder UI.
+    * Done *Render from Char sheet* - Can double for sprite sheet rendering too.
         * **Basic UI System** - System in App to lay out basic UI elements on screen and modify them.
         * **String Struct** - Internal structure for storing fixed sized char arrays in a Heap.
         * Done 2018/3/18 *Render an asci char*
@@ -131,7 +131,7 @@ Move the engine and game to using commands.
     * Done 2018/3/24 *Confine Cursor  - Mouse cursor is not confined to the game window*
     * Done 2018/3/24 *Hide cursor -  cursor is currently always shown. Require a game state switch to allow the cursor to be toggled on/off*
     for UI stuff.
-* **Input binding is Engine-side** - Engine should pass input events to game and let game handle it to make input more modable/less platform specific.
+* Done 2018/5 *Input binding is Engine-side* - Engine should pass input events to game and let game handle it to make input more modable/less platform specific.
     See command buffer stuff.
 * Done 2018/3/15 *Test File Loading*
 * Done 2018/3/14 *Alloc memory for game*

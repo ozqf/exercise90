@@ -2,7 +2,6 @@
 
 #include "app_module.cpp"
 
-
 void AppListTextures()
 {
     i32 l = g_textureHandles.numTextures;
@@ -14,7 +13,6 @@ void AppListTextures()
     }
 }
 
-// returns -1 if index not found
 i32 AppGetTextureIndexByName(char* textureName)
 {
     i32 l = g_textureHandles.numTextures;
@@ -25,7 +23,9 @@ i32 AppGetTextureIndexByName(char* textureName)
             return i;
         }
     }
-    return -1;
+    printf("APP tex %s not found, loading\n", textureName);
+    return AppLoadAndBindTexture(textureName);
+    //return -1;
 }
 
 /**
@@ -71,16 +71,17 @@ BlockRef AppLoadTexture(char *filePath)
 
 /**
  * Read a texture onto the global heap and then immediately bind it
+ * Returns the texture's index
  */
-#if 0
-void AppLoadAndRegisterTexture(char *filePath)
+#if 1
+i32 AppLoadAndBindTexture(char *filePath)
 {
     BlockRef ref = AppLoadTexture(filePath);
-
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     Texture2DHeader *header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
-    //AppBindTexture((Texture2DHeader*)ref.ptrMemory, &ref);
+    AppBindTexture(header);
+    return header->index;
 }
 #endif
 /**
