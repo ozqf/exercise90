@@ -3,6 +3,31 @@
 #include "app_module.cpp"
 
 
+void AppListTextures()
+{
+    i32 l = g_textureHandles.numTextures;
+    printf("--- APP TEXTURES (%d) ---\n", l);
+    for (i32 i = 0; i < l; ++i)
+    {
+        Texture2DHeader* h = &g_textureHandles.textureHeaders[i];
+        printf("%d: \"%s\" %dx%d\n", i, h->name, h->width, h->height);
+    }
+}
+
+// returns -1 if index not found
+i32 AppGetTextureIndexByName(char* textureName)
+{
+    i32 l = g_textureHandles.numTextures;
+    for (i32 i = 0; i < l; ++i)
+    {
+        if (COM_CompareStrings(g_textureHandles.textureHeaders[i].name, textureName) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /**
  * Record that a texture has been loaded
  * > header information will be copied and updated
@@ -75,16 +100,16 @@ void AppLoadTestTextures()
     BlockRef ref;
     Texture2DHeader *header;
 
-    AppInitTestTextures();
+    //AppInitTestTextures();
 
     // 0
-    AppRegisterTexture(&testBuffer, NULL);
+    //AppRegisterTexture(&testBuffer, NULL);
 
     // 1
-    AppRegisterTexture(&testBuffer2, NULL);
+    //AppRegisterTexture(&testBuffer2, NULL);
 
     // 2 - you get the picture
-    AppRegisterTexture(&testBuffer3, NULL);
+    //AppRegisterTexture(&testBuffer3, NULL);
 
     // 3 - Kinda icky this
     ref = AppLoadTexture("BitmapTest.bmp");
@@ -122,6 +147,9 @@ void AppLoadTestTextures()
     // AppRegisterTexture(header, &ref);
 
     AppBindAllTextures();
+
+    
+    platform.Platform_SetDebugInputTextureIndex(AppGetTextureIndexByName("charset.bmp"));
 }
 
 i32 AppRendererReloaded()

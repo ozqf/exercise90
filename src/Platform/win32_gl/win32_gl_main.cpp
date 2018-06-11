@@ -843,7 +843,7 @@ void R_RenderAsciChar(RendObj* obj)
 	glLoadIdentity();
 
 	RendObj_AsciChar* c = &obj->data.asciChar;
-	R_SetupTestTexture(4);
+	R_SetupTestTexture(c->textureIndex);
 	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }
 
@@ -861,7 +861,7 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 
 	RendObj_AsciCharArray* c = &obj->data.charArray;
 	glColor3f(c->r, c->g, c->b);
-	R_SetupTestTexture(4);
+	R_SetupTestTexture(c->textureIndex);
 	Vec3 pos = objTransform->pos;
 	R_LoadAsciCharArrayGeometry(
 		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,

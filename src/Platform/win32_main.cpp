@@ -303,6 +303,7 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
     else if (COM_CompareStrings(tokens[0], "MANIFEST") == 0)
     {
         Win32_DebugPrintDataManifest();
+        return 1;
     }
     else if (COM_CompareStrings(tokens[0], "RESTART") == 0)
     {

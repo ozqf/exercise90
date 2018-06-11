@@ -21,6 +21,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
         printf("  IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
+        printf("  TEXTURES - List App textures handles\n");
         printf("  GHOST - Toggle debug camera on/off\n");
         printf("  CLIENTS - List current client states\n");
         printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
@@ -39,6 +40,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "TEXTURES"))
+    {
+        AppListTextures();
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "GHOST"))
@@ -65,31 +71,31 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         else if (numTokens == 3)
         {
             if (!COM_CompareStrings(tokens[1], "COLLISION"))
-        {
-            i32 val = COM_AsciToInt32(tokens[2]);
-            switch (val)
             {
-                case 0:
+                i32 val = COM_AsciToInt32(tokens[2]);
+                switch (val)
                 {
-                    printf("No collision debug\n");
-                    g_debugColliders = 0;
-                } break;
-                case 1:
-                {
-                    printf("Show colliders in ghost mode\n");
-                    g_debugColliders = 1;
-                } break;
-                case 2:
-                {
-                    printf("Show colliders always\n");
-                    g_debugColliders = 2;
-                } break;
-                default:
-                {
-                    printf("Debug collision can be 0, 1 or 2\n");
-                } break;
+                    case 0:
+                    {
+                        printf("No collision debug\n");
+                        g_debugColliders = 0;
+                    } break;
+                    case 1:
+                    {
+                        printf("Show colliders in ghost mode\n");
+                        g_debugColliders = 1;
+                    } break;
+                    case 2:
+                    {
+                        printf("Show colliders always\n");
+                        g_debugColliders = 2;
+                    } break;
+                    default:
+                    {
+                        printf("Debug collision can be 0, 1 or 2\n");
+                    } break;
+                }
             }
-        }
         }
         return 1;
     }

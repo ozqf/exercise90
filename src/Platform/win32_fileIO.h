@@ -166,6 +166,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	// Allocate space for results on Heap
 	Heap_Allocate(heap, destRef, targetSize, filePath, 1);
 	Texture2DHeader* tex = (Texture2DHeader*)destRef->ptrMemory;
+	COM_CopyStringLimited(filePath, tex->name, 32);
 	u32* pixels = (u32*)((u8*)destRef->ptrMemory + sizeof(Texture2DHeader));
 	tex->ptrMemory = pixels;
 	tex->width = w;

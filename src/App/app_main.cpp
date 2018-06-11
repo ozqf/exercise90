@@ -170,6 +170,7 @@ i32 App_Init()
     App_InitInput(&g_inputActions);
 
     App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+
     //App_DumpHeap();
     return 1;
 }

@@ -32,6 +32,13 @@ void Win32_ToggleDebugInput()
     //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
+void Win32_SetDebugInputTextureIndex(i32 index)
+{
+    RendObj_AsciCharArray* c = &g_rendDebugItem.obj.data.charArray;
+    c->textureIndex = index;
+    printf("PLATFORM Set Console texture index %d\n", index);
+}
+
 char g_lastDebugChar = 0;
 
 void Win32_ResetDebugInput()

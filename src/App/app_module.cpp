@@ -26,6 +26,7 @@ struct Cmd_ClientUpdate;
 // App functions that game can access
 Client* App_FindClientById(i32 id);
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
+i32 AppGetTextureIndexByName(char* textureName);
 
 /////////////////////////////////////////////////////////
 // Game Layer
@@ -86,6 +87,7 @@ void AppLoadAndRegisterTexture(char *filePath);
 void AppBindAllTextures();
 void AppLoadTestTextures();
 i32 AppRendererReloaded();
+void AppListTextures();
 
 /////////////////////////////////////////////////////////
 // Implementations

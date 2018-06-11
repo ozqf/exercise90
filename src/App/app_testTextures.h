@@ -20,6 +20,7 @@ void AppInitTestTextures()
 {
     // TODO: Remove texture test
 	testBuffer = {};
+	COM_CopyStringLimited("Test Texture 1", testBuffer.name, 32);
 	testBuffer.ptrMemory = testBufferPixels;
 	//testBuffer.memSize = sizeof(testBufferPixels);
 	testBuffer.width = TEST_BUFFER_WIDTH;
@@ -28,6 +29,7 @@ void AppInitTestTextures()
 	//testBuffer.pitch = TEST_BUFFER_WIDTH;
 
     testBuffer2 = {};
+	COM_CopyStringLimited("Test Texture 2", testBuffer2.name, 32);
 	testBuffer2.ptrMemory = testBufferPixels2;
 	//testBuffer2.memSize = sizeof(testBufferPixels2);
 	testBuffer2.width = TEST_BUFFER_WIDTH;
@@ -36,6 +38,7 @@ void AppInitTestTextures()
 	//testBuffer2.pitch = TEST_BUFFER_WIDTH;
 
     testBuffer3 = {};
+	COM_CopyStringLimited("Test Texture 3", testBuffer3.name, 32);
 	testBuffer3.ptrMemory = testBufferPixels3;
 	//testBuffer3.memSize = sizeof(testBufferPixels3);
 	testBuffer3.width = TEST_BUFFER_WIDTH;

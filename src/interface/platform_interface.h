@@ -48,6 +48,8 @@ struct PlatformInterface
 
     // Rendering
     void (*Platform_RenderScene)(RenderScene* scene);
+    // Set the texture the texture the platform should use when renderering
+    void (*Platform_SetDebugInputTextureIndex)(i32 index);
 };
 
 // struct PlatformInterface2

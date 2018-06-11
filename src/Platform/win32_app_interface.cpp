@@ -82,6 +82,11 @@ void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIn
     //Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
 }
 
+void Platform_SetDebugInputTextureIndex(i32 i)
+{
+    Win32_SetDebugInputTextureIndex(i);
+}
+
 /**********************************************************************
  * Attach to application DLL
  *********************************************************************/
@@ -100,6 +105,8 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_SetMouseMode = Win32_SetMouseMode;
 
     platInterface.Platform_RenderScene = Platform_R_DrawScene;
+
+    platInterface.Platform_SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
 }
 
 void Win32_CloseAppLink()

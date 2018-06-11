@@ -236,6 +236,7 @@ struct RendObj_Line
 struct RendObj_AsciChar
 {
     u8 asciChar;
+    i32 textureIndex;
 };
 
 struct RendObj_AsciCharArray
@@ -246,6 +247,7 @@ struct RendObj_AsciCharArray
     f32 r;
     f32 g;
     f32 b;
+    i32 textureIndex;
 };
 
 struct RendObj_ColouredMesh
