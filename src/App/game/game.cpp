@@ -545,7 +545,7 @@ void Game_Tick(
         EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
         Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->input.degrees);
 		// raise camera to eye height
-        gs->cameraTransform.pos.y += (1.85f / 2) * 0.9f;
+        gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
 
     }
     // Ent* ent = Ent_GetEntityById(&gs->entList, )

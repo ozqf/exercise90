@@ -161,10 +161,10 @@ void R_Setup3DProjectionB(i32 fov)
 	M4x4_SetToIdentity(prj);
 	f32 prjNear = 0.1f;
 	f32 prjFar = 1000;
-	f32 prjLeft = -0.075f * win32_aspectRatio;
-	f32 prjRight = 0.075f * win32_aspectRatio;
-	f32 prjTop = 0.075f;
-	f32 prjBottom = -0.075f;
+	f32 prjLeft = -0.07f * win32_aspectRatio;
+	f32 prjRight = 0.07f * win32_aspectRatio;
+	f32 prjTop = 0.07f;
+	f32 prjBottom = -0.07f;
 
 	M4x4_SetProjection(prj, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
 

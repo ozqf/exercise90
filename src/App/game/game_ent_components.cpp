@@ -27,7 +27,48 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
     return NULL;
 }
 
-void Game_SpawnTestBullet(GameState* gs, Transform* originT)
+void Game_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
+{
+    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    EntId id = Ent_ReserveFreeEntity(&gs->entList);
+    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &id);
+    
+    //M4x4_SetToIdentity(ent->transform.matrix.cells);
+    //ent->transform.matrix.wAxis = originT->matrix.wAxis;
+
+    // Copy position and rotation
+    ent->transform.pos.x = x;
+    ent->transform.pos.y = y;
+    ent->transform.pos.z = z;
+    //Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
+    Transform_RotateY(&ent->transform, yawDegrees * DEG2RAD);
+    Transform_RotateX(&ent->transform, pitchDegrees * DEG2RAD);
+    
+    EC_Renderer* rend = EC_AddRenderer(gs, ent);
+    //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
+    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
+    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
+
+    //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
+
+    EC_Projectile* prj = EC_AddProjectile(gs, ent);
+    prj->tock = 4.0f;
+    prj->tick = prj->tock;
+    
+    prj->move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
+    prj->move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
+    prj->move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
+    // move projectile forward a little
+    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
+    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
+    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
+    
+    prj->tick = 1.0f;
+    prj->tock = 1.0f;
+}
+
+void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
 {
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
@@ -38,10 +79,12 @@ void Game_SpawnTestBullet(GameState* gs, Transform* originT)
 
     // Copy position and rotation
     ent->transform = *originT;
-    Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
+    //Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
+    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
     
     EC_Renderer* rend = EC_AddRenderer(gs, ent);
-    RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
+    //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
+    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
 
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
@@ -232,8 +275,22 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
         if (motor->input.buttons & ACTOR_INPUT_ATTACK)
         {
             motor->tick = 0.1f;
-            Transform* t = &g_worldScene.cameraTransform;
-            Game_SpawnTestBullet(gs, t);
+            Ent* ent = Ent_GetEntityById(&gs->entList, &motor->entId);
+            //Transform* t = &g_worldScene.cameraTransform;
+            Transform* t = &ent->transform;
+
+            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x, motor->input.degrees.y);
+            f32 spread = 2;
+            f32 pitchOffset;
+            f32 yawOffset;
+            pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
+            yawOffset = COM_Randf32() * (spread - -spread) + -spread;
+            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);
+
+            pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
+            yawOffset = COM_Randf32() * (spread - -spread) + -spread;
+            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);
+            //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
         }
     }
     else
