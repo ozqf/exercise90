@@ -51,12 +51,15 @@ u8 Snd_Init()
 
 u8 Snd_LoadSound(u8* data, i32 numBytes)
 {
-    printf("SOUND Creating sound, %d bytes\n", numBytes);
+    printf("SOUND Creating sound, %d bytes from %d\n", numBytes, (u32)data);
     // test example, commented out until I've made a decision on asset storage/version control
     FMOD_CREATESOUNDEXINFO info = {};
-    info.filebuffersize = numBytes;
+    info.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
+    info.length = numBytes;
     FMOD_RESULT result = sys->createSound((const char*)data, FMOD_OPENMEMORY, &info, &gsnd_soundHandle);
+    printf(" create result: %d\n", result);
     result = sys->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
+    printf("  play result: %d\n", result);
     return 1;
 }
 
@@ -82,9 +85,7 @@ u8 Snd_Init()
     }
 #if 0
     // test example, commented out until I've made a decision on asset storage/version control
-    FMOD_CREATESOUNDEXINFO info = {};
-    info.fileBufferSize = 
-    result = sys->createSound("Frenzy_Beam_Loop.wav", FMOD_OPENMEMORY, NULL, &gsnd_soundHandle);
+    result = sys->createSound("Frenzy_Beam_Loop.wav", 0, NULL, &gsnd_soundHandle);
     result = sys->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
 #endif
     return 1;
