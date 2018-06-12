@@ -47,7 +47,7 @@ void Game_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, 
     
     EC_Renderer* rend = EC_AddRenderer(gs, ent);
     //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
-    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
+    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\BAL1A0.bmp"));
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
 
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
@@ -238,35 +238,6 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     //move = moveForce;
 #endif
 
-
-#if 0 // horrible previous approach
-	forward.x = (sinf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
-	forward.y = 0;
-	forward.z = (cosf(radiansForward) * motor->runAcceleration) * deltaTime * input.z;
-
-	left.x = (sinf(radiansLeft) * motor->runAcceleration) * deltaTime * input.x;
-	left.y = 0;
-	left.z = (cosf(radiansLeft) * motor->runAcceleration) * deltaTime * input.x;
-
-	up.y = motor->runSpeed * deltaTime * input.y;
-
-    moveForce.x = (forward.x + left.x + up.x);
-	moveForce.y = (forward.y + left.y + up.y);
-	moveForce.z = (forward.z + left.z + up.z);
-
-    // Cap horizontal speed increases
-    f32 mag = (f32)sqrt((move.x * move.x) + (move.z * move.z));
-    if (mag > motor->runSpeed)
-    {
-        moveForce.x = 0;
-        moveForce.z = 0;
-    }
-
-
-    move.x += moveForce.x;
-    move.y += moveForce.y;
-    move.z += moveForce.z;
-#endif
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 
     // Attack
@@ -286,7 +257,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
             Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);
-
+ 
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
             Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);

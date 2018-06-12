@@ -10,6 +10,7 @@ SoundInterface __declspec(dllexport) LinkToSound()
     SoundInterface snd;
     snd.Snd_Init = Snd_Init;
     snd.Snd_Shutdown = Snd_Shutdown;
+    snd.Snd_LoadSound = Snd_LoadSound;
 
     return snd;
 }

@@ -87,6 +87,14 @@ void Platform_SetDebugInputTextureIndex(i32 i)
     Win32_SetDebugInputTextureIndex(i);
 }
 
+void Platform_LoadSound(u8* data, i32 numBytes)
+{
+    if (g_soundLink.moduleState == 1)
+    {
+        g_sound.Snd_LoadSound(data, numBytes);
+    }
+}
+
 /**********************************************************************
  * Attach to application DLL
  *********************************************************************/
@@ -107,6 +115,8 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_RenderScene = Platform_R_DrawScene;
 
     platInterface.Platform_SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
+
+    platInterface.Platform_LoadSound = Platform_LoadSound;
 }
 
 void Win32_CloseAppLink()

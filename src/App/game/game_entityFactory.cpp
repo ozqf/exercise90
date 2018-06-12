@@ -19,7 +19,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     
     EC_Renderer* renderer = EC_AddRenderer(gs, ent);
     //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("COMP03_1.bmp"));
+    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\COMP03_1.bmp"));
     Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
 
     EC_Collider* collider = EC_AddCollider(gs, ent);
@@ -50,7 +50,7 @@ Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
 
     EC_Renderer* renderer = EC_AddRenderer(gs, ent);
 	//RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
-	RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("W33_5.bmp"));
+	RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
 
     f32 size = 1.0f;
     EC_Collider* collider = EC_AddCollider(gs, ent);
@@ -92,7 +92,7 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
         ent->entId.index, ent->entId.iteration);
 
     renderer = EC_AddRenderer(gs, ent);
-    RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("brbrick2.bmp"));
+    RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\brbrick2.bmp"));
 
     motor = EC_AddActorMotor(gs, ent);
     motor->runSpeed = 10;

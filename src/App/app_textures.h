@@ -113,31 +113,31 @@ void AppLoadTestTextures()
     //AppRegisterTexture(&testBuffer3, NULL);
 
     // 3 - Kinda icky this
-    ref = AppLoadTexture("BitmapTest.bmp");
+    ref = AppLoadTexture("textures\\BitmapTest.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
     // 4 - so, texture management sometime?
-    ref = AppLoadTexture("charset.bmp");
+    ref = AppLoadTexture("textures\\charset.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
     // 5 - can't be too hard...
-    ref = AppLoadTexture("brbrick2.bmp");
+    ref = AppLoadTexture("textures\\brbrick2.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
     // 6 - right?
-    ref = AppLoadTexture("W33_5.bmp");
+    ref = AppLoadTexture("textures\\W33_5.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
 
     // 7 - plunging on
-    ref = AppLoadTexture("COMP03_1.bmp");
+    ref = AppLoadTexture("textures\\COMP03_1.bmp");
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
     header = (Texture2DHeader *)ref.ptrMemory;
     AppRegisterTexture(header, &ref);
@@ -150,7 +150,7 @@ void AppLoadTestTextures()
     AppBindAllTextures();
 
     
-    platform.Platform_SetDebugInputTextureIndex(AppGetTextureIndexByName("charset.bmp"));
+    platform.Platform_SetDebugInputTextureIndex(AppGetTextureIndexByName("textures\\charset.bmp"));
 }
 
 i32 AppRendererReloaded()

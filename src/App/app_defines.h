@@ -4,4 +4,4 @@
 
 #define GAME_MAX_CLIENTS 8
 
-#define APP_FIRST_MAP "testbox.lvl"
+#define APP_FIRST_MAP "maps\\testbox.lvl"

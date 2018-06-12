@@ -97,6 +97,7 @@ u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)
 			}
 		}
 	}
+	printf("  %s not found in data files\n", filePath);
 	return 0;
 }
 

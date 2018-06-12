@@ -53,6 +53,13 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf(" Ghost mode: %d\n", g_debugCameraOn);
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "S"))
+    {
+        BlockRef ref = {};
+        platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "sounds\\Weapon_Pickup.wav", 0);
+        platform.Platform_LoadSound((u8*)ref.ptrMemory, ref.objectSize);
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "DEBUG"))
     {
         if (numTokens == 1)
