@@ -1,4 +1,21 @@
 #pragma once
+#ifndef WIN32_GL_MODULE_CPP
+#define WIN32_GL_MODULE_CPP
+
+/*
+Reading material
+
+// Tutorials
+http://www.songho.ca/opengl/
+http://www.opengl-tutorial.org/beginners-tutorials/tutorial-4-a-colored-cube/
+https://www.wikihow.com/Make-a-Cube-in-OpenGL
+
+// API Reference
+https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glFrustum.xml
+http://docs.gl/
+https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
+
+*/
 
 #include <windows.h>
 #include <stdio.h>
@@ -23,4 +40,10 @@ GLuint g_textureHandles[NUM_TEST_TEXTURES];
 #include "win32_gl_loading.h"
 #include "win32_gl_primitives.h"
 #include "win32_gl_text.h"
+#include "win32_gl_matrix.h"
+#include "win32_gl_draw.h"
 #include "win32_gl_main.cpp"
+#include "win32_gl_interface.h"
+#include "win32_gl_dll_export.h"
+
+#endif

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../common/com_defines.h"
-#include "win32_gl_main.h"
 
 extern "C"
 RenderInterface __declspec(dllexport) LinkToRenderer()

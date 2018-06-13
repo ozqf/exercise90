@@ -17,7 +17,7 @@ set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /LD
 set compilerDefines=/DPARANOID=1
 set linkInputA=
 set linkInputB=user32.lib opengl32.lib Gdi32.lib
-set compilerInput=../src/Platform/win32_gl/win32_gl.cpp
+set compilerInput=../src/Platform/win32_gl/win32_gl_module.cpp
 set outputDLL=/Fe../bin/win32gl.dll
 @echo on
 @cl %compilerFlags% %compilerDefines% %compilerInput% %outputDLL% %linkInputB%
