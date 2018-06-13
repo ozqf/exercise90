@@ -9,6 +9,7 @@
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
 
+#include "../interface/sound_interface.h"
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
 

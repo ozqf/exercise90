@@ -1,12 +1,55 @@
 #pragma once
 
-#include "../../../src/common/com_defines.h"
-#include "win32_snd_interface.h"
-
 #include "../../../lib/fmod/fmod_studio.hpp"
 #include "../../../lib/fmod/fmod.hpp"
 
 #include <stdio.h>
+
+#include "../../../src/common/com_defines.h"
+#include "../../interface/sound_interface.h"
+#include "win32_snd_interface.h"
+#include "win32_snd_internal.h"
+
+/*
+Sound notes:
+
+-- Types of sounds --
+> Spatial sounds: Anything in the 'world' that has a position and direction
+    eg Gunfire, enemies, explosions.
+> Ambient: Sounds which don't necessarily have direction but still vary
+    by volume depending on position. eg wind, flowing water etc.
+> Non-spatial one-off:
+    eg UI, own character sounds, item pickups etc.
+> Non-spatial, looping, constant volume:
+    eg Music
+
+*/
+
+/////////////////////////////////////////////////////////////////////
+// External functions
+/////////////////////////////////////////////////////////////////////
+i32 Snd_LoadSound(char* name64, u8* data, i32 numBytes);
+u8 Snd_Play2(ZSoundEvent* ev);
+u8 Snd_Init();
+u8 Snd_ParseCommandString(char* str, char** tokens, i32 numTokens);
+
+/////////////////////////////////////////////////////////////////////
+// Internal functions
+u8 Snd_Shutdown();
+/////////////////////////////////////////////////////////////////////
+u8 SndClearWorldScene();
+u8 SndClearUIScene();
+u8 SndClearBGM();
+
+/////////////////////////////////////////////////////////////////////
+// Globals
+/////////////////////////////////////////////////////////////////////
+ZSound g_sounds[128];
+i32 g_nextSoundId = 0;
+ZSoundSource g_sources[128];
+
+FMOD::Channel* g_channels[32];
+
 
 // https://www.fmod.com/docs/api/content/generated/FMOD_MODE.html
 // flag to tell fmod to read name_or_data params as data, not file names
@@ -22,6 +65,8 @@ internal FMOD::Sound* gsnd_soundHandle;
 internal FMOD::Channel* gsnd_channel;
 
 FMOD::System* sys = NULL;
+
+internal u8 g_testSoundLoaded = 0;
 
 #if 0 // FMOD Studio - broken atm
 u8 Snd_Init()
@@ -49,7 +94,8 @@ u8 Snd_Init()
 }
 #endif
 
-u8 Snd_LoadSound(u8* data, i32 numBytes)
+// Returns id of new sound
+i32 Snd_LoadSound(char* name64, u8* data, i32 numBytes)
 {
     printf("SOUND Creating sound, %d bytes from %d\n", numBytes, (u32)data);
     // test example, commented out until I've made a decision on asset storage/version control
@@ -58,8 +104,15 @@ u8 Snd_LoadSound(u8* data, i32 numBytes)
     info.length = numBytes;
     FMOD_RESULT result = sys->createSound((const char*)data, FMOD_OPENMEMORY, &info, &gsnd_soundHandle);
     printf(" create result: %d\n", result);
-    result = sys->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
-    printf("  play result: %d\n", result);
+    if (result == FMOD_OK)
+    {
+        g_testSoundLoaded = 1;
+    }
+    return 1;
+}
+
+u8 Snd_Play2(ZSoundEvent* ev)
+{
     return 1;
 }
 
@@ -94,7 +147,34 @@ u8 Snd_Init()
 
 u8 Snd_Shutdown()
 {
+    printf("SOUND Shutting down\n");
+    FMOD_RESULT result;
+    if (g_testSoundLoaded == 1)
+    {
+        result = gsnd_soundHandle->release();
+        printf("SND release result: %d\n", result);
+    }
     return 1;
+}
+
+u8 Snd_ParseCommandString(char* str, char** tokens, i32 numTokens)
+{
+    printf("Sound parsing %s - num tokens: %d\n", str, numTokens);
+    if (COM_CompareStrings(tokens[0], "SND") == 0)
+    {
+        if (numTokens == 2 && COM_CompareStrings(tokens[1],"TEST") == 0)
+        {
+            if (g_testSoundLoaded == 0)
+            {
+                printf("Cannot play sound test - no sounds loaded");
+                return 1;
+            }
+            FMOD_RESULT result = sys->playSound(gsnd_soundHandle, NULL, false, &gsnd_channel);
+            printf("  play result: %d\n", result);
+        }
+        return 1;
+    }
+    return 0;
 }
 
 #include "win32_snd_dll_Export.h"

@@ -104,7 +104,7 @@ inline InputEvent NewInputEvent(u32 inputID, i32 value)
 // Contains pointers to App functions
 struct AppInterface
 {
-    i32 isvalid;
+    i32 isValid;
     i32 (*AppInit)();
     i32 (*AppShutdown)();
     i32 (*AppRendererReloaded)();

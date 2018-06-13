@@ -15,7 +15,7 @@ AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
     platform = platInterface;
 
     AppInterface app;
-    app.isvalid = true;
+    app.isValid = true;
     app.AppInit = App_Init;
     app.AppShutdown = App_Shutdown;
     app.AppRendererReloaded = AppRendererReloaded;

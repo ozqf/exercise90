@@ -6,6 +6,8 @@ Anything with platform_ is a function to export
 
 #include "win32_system_include.h"
 #include "win32_fileIO.h"
+
+#include "../interface/sound_interface.h"
 //#include "win32_gl_loading.h"
 
 /****************************************************************
@@ -87,12 +89,26 @@ void Platform_SetDebugInputTextureIndex(i32 i)
     Win32_SetDebugInputTextureIndex(i);
 }
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Sound
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 void Platform_LoadSound(u8* data, i32 numBytes)
 {
     if (g_soundLink.moduleState == 1)
     {
-        g_sound.Snd_LoadSound(data, numBytes);
+        g_sound.Snd_LoadSound("foo", data, numBytes);
     }
+}
+
+u8 Snd_Play(ZSoundEvent* ev)
+{
+    if (g_soundLink.moduleState == 1)
+    {
+        return g_sound.Snd_Play2(ev);
+    }
+    return 0;
 }
 
 /**********************************************************************
@@ -124,7 +140,7 @@ void Win32_CloseAppLink()
     g_app.AppShutdown();
 	Win32_CloseDataFiles();
     FreeLibrary(g_appLink.moduleHandle);
-    g_app.isvalid = false;
+    g_app.isValid = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,7 +149,7 @@ void Win32_CloseAppLink()
 u8 Win32_LinkToApplication()
 {
     printf("PLATFORM Link to App\n");
-    if (g_app.isvalid == 1)
+    if (g_app.isValid == 1)
     {
         Win32_CloseAppLink();
     }

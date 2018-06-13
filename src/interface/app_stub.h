@@ -30,7 +30,7 @@ AppInterface GetAppInterfaceStub(PlatformInterface platInterface)
     platformStub = platInterface;
 
     AppInterface app = { };
-    app.isvalid = true;
+    app.isValid = true;
     app.AppInit = AppInit_Stub;
     app.AppShutdown = AppShutdown_Stub;
     app.AppUpdate = AppUpdate_Stub;

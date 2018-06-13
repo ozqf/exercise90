@@ -228,7 +228,7 @@ static void Heap_DebugPrintAllocations2(Heap *heap)
         }
         u32 address = (u32)heapBlock - startAddress;
 
-        printf("%d: Block %d '%s'. Data: %d. Volume: %d. Space after: %d\n",
+        printf("%d: BLK %d '%s' Size: %d VolSize: %d. Gap %d\n",
                address,
                heapBlock->mem.id,
                heapBlock->mem.debugLabel,

@@ -361,13 +361,18 @@ void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
         printf("%s\n", tokens[i]);
     }
 #endif
-    if (!Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount))
-    {
-        if (!g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount))
-        {
-            printf(" Unknown command %s\n", g_textCommandBuffer);
-        }
-    }
+
+    u8 handled;
+    handled = Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount);
+    if (handled) { return; }
+
+    if (g_app.isValid) { handled = g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount); }
+    if (handled) { return; }
+
+    handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
+    if (handled) { return; }
+
+    printf(" Unknown command %s\n", g_textCommandBuffer);
 }
 
 /**********************************************************************
@@ -551,7 +556,7 @@ int CALLBACK WinMain(
                     if (Win32_CheckFileModified(g_rendererLink.path, &g_rendererLink.timestamp))
                     {
                         //DebugBreak();
-                        if (Win32_LinkToRenderer() && g_app.isvalid)
+                        if (Win32_LinkToRenderer() && g_app.isValid)
                         {
                             g_app.AppRendererReloaded();
                         }
@@ -565,7 +570,7 @@ int CALLBACK WinMain(
                     if (Win32_CheckFileModified(g_soundLink.path, &g_soundLink.timestamp))
                     {
                         //DebugBreak();
-                        // if (Win32_LinkToSound() && g_app.isvalid)
+                        // if (Win32_LinkToSound() && g_app.isValid)
                         // {
                         //     g_app.AppSoundReloaded();
                         // }
@@ -623,7 +628,7 @@ int CALLBACK WinMain(
                 }
 
                 //Win32_R_SetupFrame(appWindow);
-                if (g_app.isvalid)
+                if (g_app.isValid)
                 {
                     g_app.AppUpdate(&g_gameTime, frameCommands);
                 }
