@@ -97,6 +97,7 @@ struct EC_Collider
     Vec3 size;
     Vec3 velocity;
     i32 isOverlapping;
+    u8 isGrounded;
 };
 
 struct EC_Renderer

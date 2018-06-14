@@ -44,12 +44,6 @@ u8 SndClearBGM();
 /////////////////////////////////////////////////////////////////////
 // Globals
 /////////////////////////////////////////////////////////////////////
-ZSound g_sounds[128];
-i32 g_nextSoundId = 0;
-ZSoundSource g_sources[128];
-
-FMOD::Channel* g_channels[32];
-
 
 // https://www.fmod.com/docs/api/content/generated/FMOD_MODE.html
 // flag to tell fmod to read name_or_data params as data, not file names
@@ -60,13 +54,26 @@ FMOD::Channel* g_channels[32];
 // so data must be manually handled. requires Sound::release to free
 // bit field FMOD_OPENMEMORY_POINT
 
-
 internal FMOD::Sound* gsnd_soundHandle;
 internal FMOD::Channel* gsnd_channel;
+
+ZSound g_sounds[128];
+i32 g_nextSoundId = 0;
+ZSoundSource g_sources[128];
+
+FMOD::Channel* g_channels[32];
 
 FMOD::System* sys = NULL;
 
 internal u8 g_testSoundLoaded = 0;
+
+//internal ZSound g_sounds[128];
+
+u8 Snd_Play2(ZSoundEvent* ev)
+{
+    //gsnd_channel.set3DAttributes()
+    return 1;
+}
 
 #if 0 // FMOD Studio - broken atm
 u8 Snd_Init()
@@ -108,11 +115,6 @@ i32 Snd_LoadSound(char* name64, u8* data, i32 numBytes)
     {
         g_testSoundLoaded = 1;
     }
-    return 1;
-}
-
-u8 Snd_Play2(ZSoundEvent* ev)
-{
     return 1;
 }
 

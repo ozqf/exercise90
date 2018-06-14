@@ -210,6 +210,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
     col->velocity.x = ev->vel[0]; 
     col->velocity.y = ev->vel[1];
     col->velocity.z = ev->vel[2];
+    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
 #if 0
 	//ent->transform.scale = { 1, 1, 1 };
 	ent->transform.pos.x = updateM->posX;
@@ -456,21 +457,19 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
         i32 type = *(i32 *)mem;
         switch (type)
         {
-        case 1:
-        {
-            PhysEV_TransformUpdate tUpdate = {};
-            COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
-            ptrOffset += sizeof(PhysEV_TransformUpdate);
-            Game_HandleEntityUpdate(gs, &tUpdate);
-			eventsProcessed++;
-        }
-        break;
+            case 1:
+            {
+                PhysEV_TransformUpdate tUpdate = {};
+                COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
+                ptrOffset += sizeof(PhysEV_TransformUpdate);
+                Game_HandleEntityUpdate(gs, &tUpdate);
+		    	eventsProcessed++;
+            } break;
 
-        default:
-        {
-            reading = 0;
-        }
-        break;
+            default:
+            {
+                reading = 0;
+            } break;
         }
     }
 }

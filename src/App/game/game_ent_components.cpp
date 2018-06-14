@@ -205,9 +205,9 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 
     Vec3_Normalise(&input);
 
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_UP)
+    if (motor->input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
     {
-        move.y += 50 * deltaTime;
+        move.y = 10;// * deltaTime;
         //printf("Apply up force: %.2f\n", move.y);
     }
     
@@ -250,17 +250,38 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             //Transform* t = &g_worldScene.cameraTransform;
             Transform* t = &ent->transform;
 
-            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x, motor->input.degrees.y);
+            Game_SpawnTestBullet(
+                gs,
+                t->pos.x,
+                t->pos.y,
+                t->pos.z,
+                motor->input.degrees.x,
+                motor->input.degrees.y
+            );
             f32 spread = 2;
             f32 pitchOffset;
             f32 yawOffset;
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);
+            Game_SpawnTestBullet(
+                gs,
+                t->pos.x,
+                t->pos.y,
+                t->pos.z,
+                motor->input.degrees.x + pitchOffset,
+                motor->input.degrees.y + yawOffset
+            );
  
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            Game_SpawnTestBullet(gs, t->pos.x, t->pos.y, t->pos.z, motor->input.degrees.x + pitchOffset, motor->input.degrees.y + yawOffset);
+            Game_SpawnTestBullet(
+                gs,
+                t->pos.x,
+                t->pos.y,
+                t->pos.z,
+                motor->input.degrees.x + pitchOffset,
+                motor->input.degrees.y + yawOffset
+            );
             //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
         }
     }

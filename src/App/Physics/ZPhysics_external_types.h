@@ -145,6 +145,7 @@ struct PhysCmd_VelocityChange
 //////////////////////////////////////////////////////////////////
 // Events -> out going data from physics engine step
 //////////////////////////////////////////////////////////////////
+#define PHYS_EV_FLAG_GROUNDED (1 << 0)
 #if 1
 struct PhysEV_TransformUpdate
 {
@@ -155,5 +156,6 @@ struct PhysEV_TransformUpdate
 	f32 rot[3];
 	f32 vel[3];
 	f32 angularVel[3];
+	u32 flags;
 };
 #endif

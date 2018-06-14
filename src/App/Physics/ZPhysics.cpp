@@ -250,6 +250,26 @@ i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
     return world->nextQueryId++;
 }
 
+u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0)
+{
+    btVector3 start(x0, y0, z0);
+    btVector3 end(x0, y0 - 6, z0);
+    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
+
+    world->dynamicsWorld->rayTest(start, end, rayCallback);
+
+    if (rayCallback.hasHit())
+    {
+        return 1; 
+        #if 0
+        btVector3 dir(x1 - x0, y1 - y0, z1 - z0);
+        dir.normalize();
+        const btCollisionObject* obj = rayCallback.m_collisionObject;
+        #endif
+    }
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,24 +364,32 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
         h->rigidBody->getMotionState()->getWorldTransform(t);
 
         // write transform update
-        PhysEV_TransformUpdate tUpdate = {};
-        tUpdate.type = 1;
-        tUpdate.ownerId = h->ownerId;
-        tUpdate.ownerIteration = h->ownerIteration;
+        PhysEV_TransformUpdate ev = {};
+        ev.type = 1;
+        ev.ownerId = h->ownerId;
+        ev.ownerIteration = h->ownerIteration;
 
         btScalar openglM[16];
         t.getOpenGLMatrix(openglM);
         for (i32 j = 0; j < 16; ++j)
         {
-            tUpdate.matrix[j] = openglM[j];
+            ev.matrix[j] = openglM[j];
         }
 
         btVector3 vel = h->rigidBody->getLinearVelocity();
-        tUpdate.vel[0] = vel.getX();
-        tUpdate.vel[1] = vel.getY();
-        tUpdate.vel[2] = vel.getZ();
+        ev.vel[0] = vel.getX();
+        ev.vel[1] = vel.getY();
+        ev.vel[2] = vel.getZ();
 
-            /*btVector3 pos = t.getOrigin();
+        u8 val = PhysCmd_GroundTest(world, ev.vel[0], ev.vel[1], ev.vel[2]);
+        if (val)
+        {
+            ev.flags = ev.flags | PHYS_EV_FLAG_GROUNDED;
+        }
+
+        //PHYS_EV_FLAG_GROUNDED
+
+        /*btVector3 pos = t.getOrigin();
 		tUpdate.matrix[12] = pos.x();
 		tUpdate.matrix[13] = pos.y();
 		tUpdate.matrix[14] = pos.z();*/
@@ -404,7 +432,7 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
 		tUpdate.matrix[9] = zAxis.y();
 		tUpdate.matrix[10] = zAxis.z();
 #endif
-        COM_COPY_STEP(&tUpdate, writePosition, PhysEV_TransformUpdate);
+        COM_COPY_STEP(&ev, writePosition, PhysEV_TransformUpdate);
     }
 
     // Mark end of buffer
