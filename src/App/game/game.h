@@ -102,6 +102,8 @@ void Game_SetDebugStringRender()
 global_variable RenderScene g_worldScene;
 global_variable RenderListItem g_scene_renderList[GAME_MAX_ENTITIES];
 
+global_variable RendObj g_debugLine = {};
+
 // UI
 global_variable RenderScene g_uiScene;
 global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];

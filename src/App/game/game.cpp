@@ -457,13 +457,32 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
         i32 type = *(i32 *)mem;
         switch (type)
         {
-            case 1:
+            case PHYS_EVENT_TRANSFORM:
             {
                 PhysEV_TransformUpdate tUpdate = {};
                 COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
                 ptrOffset += sizeof(PhysEV_TransformUpdate);
                 Game_HandleEntityUpdate(gs, &tUpdate);
 		    	eventsProcessed++;
+            } break;
+
+            case PHYS_EVENT_RAYCAST:
+            {
+                PhysEv_RayCast ray = {};
+                ptrOffset += COM_COPY_STRUCT(mem, (u8*)&ray, PhysEv_RayCast);
+                RendObj_SetAsLine(
+                    &g_debugLine,
+                    ray.a[0], ray.a[1], ray.a[2],
+                    ray.b[0], ray.b[1], ray.b[2],
+                    ray.colour[0], ray.colour[1], ray.colour[2],
+                    ray.colour[0], ray.colour[1], ray.colour[2]
+                
+                );
+                // printf("Draw Raycast %.2f %.2f %.2f to %.2f %.2f %.2f\n",
+                //     ray.a[0], ray.a[1], ray.a[2],
+                //     ray.b[0], ray.b[1], ray.b[2]
+                // );
+                eventsProcessed++;
             } break;
 
             default:
@@ -545,7 +564,6 @@ void Game_Tick(
         Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->input.degrees);
 		// raise camera to eye height
         gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
-
     }
     // Ent* ent = Ent_GetEntityById(&gs->entList, )
 }

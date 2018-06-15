@@ -250,16 +250,34 @@ i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
     return world->nextQueryId++;
 }
 
-u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0)
+u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, PhysEv_RayCast* ev)
 {
+    f32 halfHeight = (1.85f / 2.0f);
+    f32 y1 = y0 -  halfHeight - 0.2f;
     btVector3 start(x0, y0, z0);
-    btVector3 end(x0, y0 - 6, z0);
+    btVector3 end(x0, y1, z0);
+    if (ev != NULL)
+    {
+        ev->a[0] = x0;
+        ev->a[1] = y0;
+        ev->a[2] = z0;
+
+        ev->b[0] = x0;
+        ev->b[1] = y1;
+        ev->b[2] = z0;
+    }
     btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
 
     world->dynamicsWorld->rayTest(start, end, rayCallback);
 
     if (rayCallback.hasHit())
     {
+        if (ev != NULL)
+        {
+            ev->colour[0] = 1;
+            ev->colour[1] = 0;
+            ev->colour[2] = 0;
+        }
         return 1; 
         #if 0
         btVector3 dir(x1 - x0, y1 - y0, z1 - z0);
@@ -267,6 +285,12 @@ u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0)
         const btCollisionObject* obj = rayCallback.m_collisionObject;
         #endif
     }
+    if (ev != NULL)
+        {
+            ev->colour[0] = 0;
+            ev->colour[1] = 1;
+            ev->colour[2] = 0;
+        }
     return 0;
 }
 
@@ -365,7 +389,7 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
 
         // write transform update
         PhysEV_TransformUpdate ev = {};
-        ev.type = 1;
+        ev.type = PHYS_EVENT_TRANSFORM;
         ev.ownerId = h->ownerId;
         ev.ownerIteration = h->ownerIteration;
 
@@ -380,12 +404,22 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
         ev.vel[0] = vel.getX();
         ev.vel[1] = vel.getY();
         ev.vel[2] = vel.getZ();
-
-        u8 val = PhysCmd_GroundTest(world, ev.vel[0], ev.vel[1], ev.vel[2]);
-        if (val)
+        
+        if (h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION)
         {
-            ev.flags = ev.flags | PHYS_EV_FLAG_GROUNDED;
+            PhysEv_RayCast rayEv = {};
+
+            u8 val = PhysCmd_GroundTest(world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2], &rayEv);
+            if (val)
+            {
+                ev.flags |= PHYS_EV_FLAG_GROUNDED;
+            }
+
+            rayEv.type = PHYS_EVENT_RAYCAST;
+            writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RayCast);
         }
+
+        
 
         //PHYS_EV_FLAG_GROUNDED
 

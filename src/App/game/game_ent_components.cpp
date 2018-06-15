@@ -463,7 +463,8 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             scene->numObjects++;
             item->transform = ent->transform;
             Transform_SetScale(&item->transform, 1, 1, 1);
-            if (collider->lastFrameOverlapping == time->frameNumber)
+            //if (collider->lastFrameOverlapping == time->frameNumber)
+            if (collider->isGrounded)
             {
                 RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 1, 0, 0);
             }

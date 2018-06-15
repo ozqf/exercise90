@@ -145,8 +145,13 @@ struct PhysCmd_VelocityChange
 //////////////////////////////////////////////////////////////////
 // Events -> out going data from physics engine step
 //////////////////////////////////////////////////////////////////
+
+#define PHYS_UPDATE_NULL 0
+#define PHYS_EVENT_TRANSFORM 1
+#define PHYS_EVENT_RAYCAST 2
+
 #define PHYS_EV_FLAG_GROUNDED (1 << 0)
-#if 1
+
 struct PhysEV_TransformUpdate
 {
 	i32 type;
@@ -158,4 +163,11 @@ struct PhysEV_TransformUpdate
 	f32 angularVel[3];
 	u32 flags;
 };
-#endif
+
+struct PhysEv_RayCast
+{
+	i32 type;
+	f32 a[3];
+	f32 b[3];
+	f32 colour[3];
+};

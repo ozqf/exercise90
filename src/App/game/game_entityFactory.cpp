@@ -71,7 +71,7 @@ Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
 Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
 {
     //Ent *ent;
-    EC_Renderer *renderer;
+    //EC_Renderer *renderer;
     //EC_AIController *controller;
     EC_Collider *collider;
     EC_ActorMotor* motor;
@@ -91,8 +91,8 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
         COL_MASK_ACTOR,
         ent->entId.index, ent->entId.iteration);
 
-    renderer = EC_AddRenderer(gs, ent);
-    RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\brbrick2.bmp"));
+    //renderer = EC_AddRenderer(gs, ent);
+    //RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\brbrick2.bmp"));
 
     motor = EC_AddActorMotor(gs, ent);
     motor->runSpeed = 10;
