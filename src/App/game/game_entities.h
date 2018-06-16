@@ -96,7 +96,7 @@ inline void Ent_Free(GameState* gs, Ent* ent)
     ent->componentFlags = 0;
 }
 
-inline Ent* Ent_GetEntityAndAssign(EntList* ents, EntId* entId)
+inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
 {
 	for (u32 i = 0; i < ents->max; ++i)
 	{

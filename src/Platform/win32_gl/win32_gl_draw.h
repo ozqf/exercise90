@@ -276,7 +276,8 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
+	//glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
+	//glTranslatef(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
 	
 
 	RendObj_AsciCharArray* c = &obj->data.charArray;
@@ -325,6 +326,7 @@ void R_RenderSprite(RenderSceneSettings* settings, Transform* camera, Transform*
 
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
+			glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
 			
 			R_SetupTestTexture(sprite->textureIndex);
 			//R_RenderTestGeometry_RainbowQuad();

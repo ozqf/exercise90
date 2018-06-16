@@ -375,7 +375,7 @@ void App_Frame(GameTime *time, ByteBuffer commands)
 
     Game_SetDebugStringRender();
     Transform t = {};
-    t.pos.x = -1;
+    t.pos.x = (-1 - 0.05f);
     t.pos.y = 1;
     // t.pos.x = -1;
     // t.pos.y = 1;

@@ -142,13 +142,18 @@ static inline void RendObj_SetAsAsciCharArray(
     RendObj* obj,
     char* asciCharArray,
     i32 numChars,
-    f32 size, f32 red, f32 green, f32 blue)
+    f32 size, 
+    i32 textureIndex,
+    f32 red, f32 green, f32 blue
+    )
 {
     obj->type = RENDOBJ_TYPE_ASCI_CHAR_ARRAY;
     RendObj_AsciCharArray* c = &obj->data.charArray;
+    
     c->chars = asciCharArray;
     c->numChars = numChars;
     c->size = size;
+    c->textureIndex = textureIndex;
     c->r = red;
     c->g = green;
     c->b = blue;

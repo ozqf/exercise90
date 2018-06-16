@@ -111,7 +111,7 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
 #endif
     //printf("> %c\n", c);
 
-    RendObj_SetAsAsciCharArray(&g_rendDebugItem.obj, g_inputText.ptr, g_inputText.position, 0.05f, 1, 1, 1);
+    RendObj_SetAsAsciCharArray(&g_rendDebugItem.obj, g_inputText.ptr, g_inputText.position, 0.05f, 1, 1, 1, 1);
 }
 
 void InitDebug()
@@ -136,7 +136,7 @@ void InitDebug()
     g_rendDebugItem = {};
     g_rendDebugItem.transform.pos.x = -1;
     g_rendDebugItem.transform.pos.y = 1;
-    RendObj_SetAsAsciCharArray(&g_rendDebugItem.obj, g_inputText.ptr, 256, 0.05f, 1, 1, 1);
+    RendObj_SetAsAsciCharArray(&g_rendDebugItem.obj, g_inputText.ptr, 256, 0.05f, 1, 1, 1, 1);
 
     g_debugScene.settings.projectionMode = RENDER_PROJECTION_MODE_IDENTITY;
     g_debugScene.settings.fov = 90;

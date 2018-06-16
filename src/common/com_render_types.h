@@ -63,5 +63,5 @@ static inline void RendObj_SetAsLine(RendObj* obj, f32 x0, f32 y0, f32 z0, f32 x
 static inline void RendObj_SetSpriteUVs(RendObj_Sprite* sprite, f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop);
 static inline void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex);
 static inline void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter);
-static inline void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size, f32 red, f32 green, f32 blue);
+static inline void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size, i32 textureIndex, f32 red, f32 green, f32 blue);
 static inline void RendObj_CalculateSpriteAsciUVs(RendObj_Sprite* sprite, u8 asciChar);

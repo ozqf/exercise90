@@ -92,9 +92,12 @@ void Game_Shutdown(GameState* gs)
 
 void Game_BuildTestHud(GameState *state)
 {
-#if 0
+#if 1
+    EntId entId;
     Ent* ent;
     EC_Renderer* renderer;
+    EntList* ents = &state->entList;
+
     
     // Init gs and component lists
     *state = {};
@@ -106,39 +109,90 @@ void Game_BuildTestHud(GameState *state)
     state->rendererList.items = g_ui_renderers;
     state->rendererList.count = UI_MAX_ENTITIES;
     state->rendererList.max = UI_MAX_ENTITIES;
+
+	Ent_ResetEntityIds(ents);
 #endif
 
 /////////////////////////////////////////////////////////////
 // A test HUD
 /////////////////////////////////////////////////////////////
-#if 0
-    // UI
-    ent = Ent_GetFreeEntity(&state->entList);
+#if 1
+    // Crosshair (sprite rendering a single char from a character sheet)
+    entId = Ent_ReserveFreeEntity(ents);
+    ent = Ent_GetAndAssign(ents, &entId);
     ent->transform.pos.z = 0;
     ent->transform.scale.x = 0.1f;
     ent->transform.scale.y = 0.1f;
     ent->transform.scale.z = 0.1f;
 
-    renderer = EC_AddRenderer(ent, state);
+    renderer = EC_AddRenderer(state, ent);
     // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
 
-RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, 4, 1, 1);
+    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
-    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '.');
+    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '+');
 #endif
 
 #if 0
-    // Sentence
-    ent = Ent_GetFreeEntity(&state->entList);
-    ent->transform.pos.x = -1;
-    ent->transform.pos.y = 1;
-    renderer = EC_AddRenderer(ent, state);
+    // Crosshair - position test (sprite rendering a single char from a character sheet)
+    entId = Ent_ReserveFreeEntity(ents);
+    ent = Ent_GetAndAssign(ents, &entId);
+    ent->transform.pos.x = 2;
+    ent->transform.scale.x = 0.5f;
+    ent->transform.scale.y = 0.5f;
+    ent->transform.scale.z = 0.5f;
 
-    char* chars = g_debugStr->chars;
-    i32 numChars = COM_StrLen(chars);
+    renderer = EC_AddRenderer(state, ent);
+    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
+
+    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
+    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
+    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, 'X');
+#endif
+
+    i32 numChars;
+#if 1
+    // Game Messages
+    entId = Ent_ReserveFreeEntity(ents);
+    ent = Ent_GetAndAssign(ents, &entId);
+    ent->transform.pos.x = -1;
+    //ent->transform.pos.y -= -1 - (0.05f * 3);
+    ent->transform.pos.y += 1;
+    // ent->transform.scale.x = 1f;
+    // ent->transform.scale.y = 1f;
+    // ent->transform.scale.z = 1f;
+    renderer = EC_AddRenderer(state, ent);
+
+    //char* chars = g_debugStr.chars;
+	char* chars = "Message Line 1\nMessage Line 2\nMessage Line 3\nMessage Line 4\n";
+    numChars = COM_StrLen(chars);
 	//i32 numChars = g_testString;
 
-    RendObj_SetAsAsciCharArray(&renderer->rendObj, chars, numChars, 0.05f);
+    RendObj_SetAsAsciCharArray(&renderer->rendObj, chars, numChars, 0.05f, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1, 1);
+    printf("Draw asci array:\n%s\n", chars);
+    //obj->transform.pos.x = -1;//-0.75f;
+    //obj->transform.pos.y = 1;//0.75f;
+#endif
+
+#if 1
+    // Player Status
+    entId = Ent_ReserveFreeEntity(ents);
+    ent = Ent_GetAndAssign(ents, &entId);
+    ent->transform.pos.x = -1;
+    //ent->transform.pos.y -= -1 - (0.05f * 3);
+    ent->transform.pos.y -= (1 - (0.075f * 3));
+    // ent->transform.scale.x = 1f;
+    // ent->transform.scale.y = 1f;
+    // ent->transform.scale.z = 1f;
+    renderer = EC_AddRenderer(state, ent);
+
+    //char* chars = g_debugStr.chars;
+	char* placeholderChars2 = "LINE 1 FOO\nLINE 2 BAR\nLINE 3 BUF\n";
+    numChars = COM_StrLen(placeholderChars2);
+	//i32 numChars = g_testString;
+
+    RendObj_SetAsAsciCharArray(&renderer->rendObj, placeholderChars2, numChars, 0.075f, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1, 1);
+    printf("Draw asci array:\n%s\n", chars);
     //obj->transform.pos.x = -1;//-0.75f;
     //obj->transform.pos.y = 1;//0.75f;
 #endif

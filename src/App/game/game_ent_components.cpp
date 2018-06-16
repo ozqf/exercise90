@@ -31,7 +31,7 @@ void Game_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, 
 {
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &id);
+    Ent* ent = Ent_GetAndAssign(&gs->entList, &id);
     
     //M4x4_SetToIdentity(ent->transform.matrix.cells);
     //ent->transform.matrix.wAxis = originT->matrix.wAxis;
@@ -72,7 +72,7 @@ void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
 {
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetEntityAndAssign(&gs->entList, &id);
+    Ent* ent = Ent_GetAndAssign(&gs->entList, &id);
     
     //M4x4_SetToIdentity(ent->transform.matrix.cells);
     //ent->transform.matrix.wAxis = originT->matrix.wAxis;
