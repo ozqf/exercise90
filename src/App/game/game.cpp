@@ -502,28 +502,34 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
 
     MemoryBlock eventBuffer = Phys_Step(dt);
     
-    i32 ptrOffset = 0;
+    //i32 ptrOffset = 0;
     u8 reading = 1;
 	i32 eventsProcessed = 0;
-    while (reading && ptrOffset < eventBuffer.size)
+
+    u8* readPos = (u8*)eventBuffer.ptrMemory;
+    u8* end = (u8*)((u8*)eventBuffer.ptrMemory + eventBuffer.size);
+    while (readPos < end)
     {
-        u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
-        i32 type = *(i32 *)mem;
-        switch (type)
+        //u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
+        //i32 type = *(i32 *)mem;
+        PhysDataItemHeader h;
+        readPos += COM_COPY_STRUCT(readPos, &h, PhysDataItemHeader);
+        switch (h.type)
         {
-            case PHYS_EVENT_TRANSFORM:
+            case TransformUpdate:
             {
                 PhysEV_TransformUpdate tUpdate = {};
-                COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
-                ptrOffset += sizeof(PhysEV_TransformUpdate);
+                readPos += COM_COPY_STRUCT(readPos, &tUpdate, PhysEV_TransformUpdate);
+                //COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
+                //ptrOffset += sizeof(PhysEV_TransformUpdate);
                 Game_HandleEntityUpdate(gs, &tUpdate);
 		    	eventsProcessed++;
             } break;
 
-            case PHYS_EVENT_RAYCAST:
+            case RaycastDebug:
             {
-                PhysEv_RayCast ray = {};
-                ptrOffset += COM_COPY_STRUCT(mem, (u8*)&ray, PhysEv_RayCast);
+                PhysEv_RaycastDebug ray = {};
+                readPos += COM_COPY_STRUCT(readPos, (u8*)&ray, PhysEv_RaycastDebug);
                 RendObj_SetAsLine(
                     &g_debugLine,
                     ray.a[0], ray.a[1], ray.a[2],
@@ -541,7 +547,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
 
             default:
             {
-                reading = 0;
+                readPos = end;
             } break;
         }
     }

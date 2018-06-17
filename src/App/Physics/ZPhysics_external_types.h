@@ -122,6 +122,7 @@ struct ZTouchPair
 	ZCollider* b;
 };
 #endif
+
 //////////////////////////////////////////////////////////////////
 // Commands -> incoming instructions to the physics engine
 //////////////////////////////////////////////////////////////////
@@ -140,12 +141,28 @@ struct PhysCmd_VelocityChange
 	i32 mode = 0;
 	f32 vel[3];
 };
+
+struct PhysCmd_Raycast
+{
+	i32 id;
+	f32 origin[3];
+	f32 dest[3];
+
+};
+
 #endif
 
 //////////////////////////////////////////////////////////////////
 // Events -> out going data from physics engine step
 //////////////////////////////////////////////////////////////////
 
+enum PhysEventType
+{
+	None = 0,
+	TransformUpdate = 1,
+	RaycastResult = 2,
+	RaycastDebug = 3
+};
 #define PHYS_UPDATE_NULL 0
 #define PHYS_EVENT_TRANSFORM 1
 #define PHYS_EVENT_RAYCAST 2
@@ -154,7 +171,7 @@ struct PhysCmd_VelocityChange
 
 struct PhysEV_TransformUpdate
 {
-	i32 type;
+	//i32 type;
 	u16 ownerId;
 	u16 ownerIteration;
 	f32 matrix[16];
@@ -164,10 +181,30 @@ struct PhysEV_TransformUpdate
 	u32 flags;
 };
 
-struct PhysEv_RayCast
+struct PhysEv_RaycastResult
 {
-	i32 type;
+	//i32 type;
 	f32 a[3];
 	f32 b[3];
 	f32 colour[3];
+};
+
+struct PhysEv_RaycastDebug
+{
+	//i32 type;
+	f32 a[3];
+	f32 b[3];
+	f32 colour[3];
+};
+
+
+
+
+//////////////////////////////////////////////////////////////////
+// Header for all items in event or command buffers
+//////////////////////////////////////////////////////////////////
+struct PhysDataItemHeader
+{
+	PhysEventType type;
+    i32 size;
 };

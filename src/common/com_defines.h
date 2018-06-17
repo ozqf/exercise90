@@ -62,10 +62,3 @@ COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, numBytes##)
 #define COM_COPY_STRUCT(ptrSource, ptrDestination, structType) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
 #endif
-
-// Copy to buffer and step destiniation pointer forward by the 
-#ifndef COM_COPY_STEP
-#define COM_COPY_STEP(ptrSource, ptrDestination, structType) \
-COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##)); \
-ptrDestination = (u8*)((u32)ptrDestination + (u32)sizeof(##structType##))
-#endif

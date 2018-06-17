@@ -250,7 +250,7 @@ i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
     return world->nextQueryId++;
 }
 
-u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, PhysEv_RayCast* ev)
+u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, PhysEv_RaycastDebug* ev)
 {
     f32 halfHeight = (1.85f / 2.0f);
     f32 y1 = y0 -  halfHeight - 0.2f;
@@ -378,20 +378,26 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
             continue;
         }
         Assert(h->motionState != NULL);
-
-		Assert((writePosition + sizeof(PhysEV_TransformUpdate) < endPosition));
+        i32 requiredSize = sizeof(PhysDataItemHeader) + sizeof(PhysEV_TransformUpdate);
+		Assert((writePosition +  requiredSize < endPosition));
 
 		updatesWritten++;
 
-        // Get position
-        btTransform t;
-        h->rigidBody->getMotionState()->getWorldTransform(t);
+        
+        PhysDataItemHeader dataHeader = {};
+        dataHeader.type = TransformUpdate;
+        // TODO: If updates vary in size in the future (and they are big,
+        // what with containing an entire matrix and all) this will have to be set
+        // AFTER the update is written to the buffer
+        dataHeader.size = sizeof(TransformUpdate);
+        writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
 
-        // write transform update
         PhysEV_TransformUpdate ev = {};
-        ev.type = PHYS_EVENT_TRANSFORM;
         ev.ownerId = h->ownerId;
         ev.ownerIteration = h->ownerIteration;
+        
+        btTransform t;
+        h->rigidBody->getMotionState()->getWorldTransform(t);
 
         btScalar openglM[16];
         t.getOpenGLMatrix(openglM);
@@ -404,24 +410,38 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
         ev.vel[0] = vel.getX();
         ev.vel[1] = vel.getY();
         ev.vel[2] = vel.getZ();
+
+        PhysEv_RaycastDebug rayEv = {};
         
         if (h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION)
         {
-            PhysEv_RayCast rayEv = {};
-
             u8 val = PhysCmd_GroundTest(world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2], &rayEv);
             if (val)
             {
                 ev.flags |= PHYS_EV_FLAG_GROUNDED;
             }
-
-            rayEv.type = PHYS_EVENT_RAYCAST;
-            writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RayCast);
         }
 
-        
+        writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
 
-        //PHYS_EV_FLAG_GROUNDED
+        // Write ground check debug
+        dataHeader.type = RaycastDebug;
+        dataHeader.size = sizeof(PhysEv_RaycastDebug);
+        writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
+
+        writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RaycastDebug);
+    }
+
+    // Mark end of buffer
+    *writePosition = 0;
+
+    /*char buf[128];
+        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
+        OutputDebugString(buf);*/
+}
+
+void OldDefunctWriteUpdateCode()
+{
 
         /*btVector3 pos = t.getOrigin();
 		tUpdate.matrix[12] = pos.x();
@@ -466,15 +486,6 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
 		tUpdate.matrix[9] = zAxis.y();
 		tUpdate.matrix[10] = zAxis.z();
 #endif
-        COM_COPY_STEP(&ev, writePosition, PhysEV_TransformUpdate);
-    }
-
-    // Mark end of buffer
-    *writePosition = 0;
-
-    /*char buf[128];
-        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
-        OutputDebugString(buf);*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
