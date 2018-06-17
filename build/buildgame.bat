@@ -30,14 +30,6 @@ set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @echo on
 @cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
 
-@if %ERRORLEVEL% == 0 goto :FINISHED
-
-@echo Error: %ERRORLEVEL%
-
-@PAUSE
-
-:FINISHED
-
 @set compilerFlags=
 @set compilerDefines=
 

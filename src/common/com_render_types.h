@@ -49,6 +49,9 @@ struct RenderScene;
 ///////////////////////////////////////////////////////////////////
 
 static inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj);
+static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
+                  i32 fov, i32 projectionMode, f32 orthographicHalfHeight);
+static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects);
 
 ///////////////////////////////////////////////////////////////////
 // Init Render Objects

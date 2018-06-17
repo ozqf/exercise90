@@ -18,24 +18,6 @@ void App_EndSession()
 	COM_ZeroMemory((u8*)g_gameOutputByteBuffer.ptrStart, g_gameOutputByteBuffer.capacity);
 }
 
-void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
-                  i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
-{
-    *scene = {};
-    Transform_SetToIdentity(&scene->cameraTransform);
-    scene->numObjects = 0;
-    scene->maxObjects = maxObjects;
-    scene->sceneItems = objectArray;
-    scene->settings.fov = fov;
-    scene->settings.projectionMode = projectionMode;
-    scene->settings.orthographicHalfHeight = orthographicHalfHeight;
-}
-
-void R_Scene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects)
-{
-    R_Scene_Init(scene, objectArray, maxObjects, 90, RENDER_PROJECTION_MODE_3D, 8);
-}
-
 void AllocateDebugStrings(Heap *heap)
 {
     // Buffer used for live stat output
@@ -160,8 +142,10 @@ i32 App_Init()
     Game_Init(&g_heap);
     Game_InitDebugStr();
 
-    R_Scene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
-    R_Scene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
+    // Render Scenes
+    RScene_Init(&g_worldScene, g_scene_renderList, GAME_MAX_ENTITIES);
+    RScene_Init(&g_weaponModelScene, g_weaponModel_renderList, GAME_MAX_ENTITIES);
+    RScene_Init(&g_uiScene, g_ui_renderList, UI_MAX_ENTITIES,
                  90,
                  RENDER_PROJECTION_MODE_IDENTITY,
                  //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
@@ -335,6 +319,7 @@ void App_Frame(GameTime *time, ByteBuffer commands)
 
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
+    g_weaponModelScene.numObjects = 0;
     g_uiScene.numObjects = 0;
 
     // Camera selection
@@ -363,6 +348,10 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     Game_IntersectionTest(gs, &g_worldScene);
 
     platform.Platform_RenderScene(&g_worldScene);
+
+
+    Game_BuildWeaponModelScene(&g_weaponModelScene);
+    platform.Platform_RenderScene(&g_weaponModelScene);
 
     #if 1
     Game_UpdateUI(ui, time);

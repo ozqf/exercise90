@@ -141,6 +141,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (COM_CompareStrings(tokens[0], "VERSION") == 0)
+	{
+		printf("APP Built %s: %s\n", __DATE__, __TIME__);
+		return 0;
+	}
     return 0;
 }
 

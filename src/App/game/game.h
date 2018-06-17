@@ -98,11 +98,16 @@ void Game_SetDebugStringRender()
 /////////////////////////////////////////////////////////////
 // Render Objects Memory
 /////////////////////////////////////////////////////////////
+// TODO: This stuff should probably be in the app, not the game area.
 // Game
 global_variable RenderScene g_worldScene;
 global_variable RenderListItem g_scene_renderList[GAME_MAX_ENTITIES];
 
 global_variable RendObj g_debugLine = {};
+
+// Weapon Model
+global_variable RenderScene g_weaponModelScene;
+global_variable RenderListItem g_weaponModel_renderList[UI_MAX_ENTITIES];
 
 // UI
 global_variable RenderScene g_uiScene;
@@ -141,6 +146,8 @@ global_variable ClientTick g_localClientTick;
 /////////////////////////////////////////////////////////////
 // Entity Components Memory
 /////////////////////////////////////////////////////////////
+// TODO: This stuff should be allocated on the heap so it can be scaled
+
 // Game
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
@@ -167,5 +174,4 @@ ClientTick g_debugInput = {};
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"
 #include "game_input.cpp"
-#include "game_commands.cpp"
 #include "game.cpp"

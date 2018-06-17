@@ -17,6 +17,26 @@ static inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendOb
 }
 
 
+static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
+                  i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
+{
+    *scene = {};
+    Transform_SetToIdentity(&scene->cameraTransform);
+    scene->numObjects = 0;
+    scene->maxObjects = maxObjects;
+    scene->sceneItems = objectArray;
+    scene->settings.fov = fov;
+    scene->settings.projectionMode = projectionMode;
+    scene->settings.orthographicHalfHeight = orthographicHalfHeight;
+}
+
+// Default init
+static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects)
+{
+    RScene_Init(scene, objectArray, maxObjects, 90, RENDER_PROJECTION_MODE_3D, 8);
+}
+
+
 ///////////////////////////////////////////////////////////////////
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////

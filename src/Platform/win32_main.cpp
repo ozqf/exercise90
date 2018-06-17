@@ -297,8 +297,9 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
     }
 	else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
 	{
+        printf("--- VERSIONS ---\n");
 		printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
-		return 1;
+		return 0;
 	}
     else if (COM_CompareStrings(tokens[0], "MANIFEST") == 0)
     {
@@ -331,6 +332,19 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
             g_soundLink.timestamp = {};
             return 1;
         }
+    }
+    else if (COM_CompareStrings(tokens[0], "TIME") == 0)
+    {
+        //printf("HI.");
+        SYSTEMTIME t;
+        GetSystemTime(&t);
+        printf("  TIME: %d/%d/%d - %d:%d:%d\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+        return 1;
+    }
+    else if (COM_CompareStrings(tokens[0], "HELLO") == 0)
+    {
+        printf("HI.\n");
+        return 1;
     }
     return 0;
 }
@@ -371,6 +385,12 @@ void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
 
     handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
     if (handled) { return; }
+
+    // Version is allowed to cascade down so each subsystem prints it's version
+    if (COM_CompareStrings(tokens[0], "VERSION") == 0)
+    {
+        return;
+    }
 
     printf(" Unknown command %s\n", g_textCommandBuffer);
 }

@@ -52,6 +52,8 @@ MACROS
 ///////////////////////////////////////////////////////////////////////
 
 // I hate writing casts all the time okay?
+// returns amount of bytes copied. so you can do
+// readPosition += COM_COPY(readPosition, writePosition, sizeof(SomeStruct));
 #ifndef COM_COPY
 #define COM_COPY(ptrSource, ptrDestination, numBytes) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, numBytes##)

@@ -161,7 +161,6 @@ u8 Snd_Shutdown()
 
 u8 Snd_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
-    printf("Sound parsing %s - num tokens: %d\n", str, numTokens);
     if (COM_CompareStrings(tokens[0], "SND") == 0)
     {
         if (numTokens == 2 && COM_CompareStrings(tokens[1],"TEST") == 0)
@@ -176,6 +175,11 @@ u8 Snd_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (COM_CompareStrings(tokens[0], "VERSION") == 0)
+	{
+		printf("SOUND Built %s: %s\n", __DATE__, __TIME__);
+		return 0;
+	}
     return 0;
 }
 
