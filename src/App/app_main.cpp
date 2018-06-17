@@ -65,6 +65,23 @@ u8 App_StartSinglePlayer(char* path)
     return 1;
 }
 
+void App_InitMenus()
+{
+    Transform t = {};
+    Transform_SetToIdentity(&t);
+    t.pos.y = 0.5;
+    t.pos.z = -1;
+    t.scale.x = 0.5;
+    t.scale.y = 0.5;
+    t.scale.x = 0.5;
+    RendObj obj;
+    RendObj_SetAsBillboard(&obj, 1, 1, 1, AppGetTextureIndexByName("textures\\ui_text_menu_title.bmp"));
+
+    RScene_Init(&g_menuScene, g_menuRenderList, APP_MAX_MENU_ITEMS);
+    RScene_AddRenderItem(&g_menuScene, &t, &obj);
+    
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 ////////////////////////////////////////////////////////////////////////////
@@ -153,6 +170,8 @@ i32 App_Init()
     //
     App_InitInput(&g_inputActions);
 
+    App_InitMenus();
+    
     App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
 
     //App_DumpHeap();
@@ -297,6 +316,7 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
     {
         Input_ToggleMouseMode();
+        g_menuOn = !g_menuOn;
     }
     if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->frameNumber))
     {
@@ -349,10 +369,20 @@ void App_Frame(GameTime *time, ByteBuffer commands)
 
     platform.Platform_RenderScene(&g_worldScene);
 
-
-    Game_BuildWeaponModelScene(&g_weaponModelScene);
-    platform.Platform_RenderScene(&g_weaponModelScene);
-
+    if (gs->localPlayerHasEnt)
+    {
+        Game_BuildWeaponModelScene(&g_weaponModelScene);
+        platform.Platform_RenderScene(&g_weaponModelScene);
+    }
+    
+    // TODO: Not actually building the menu scene yet.
+    // Paused message and actual menus are different items
+    // displayed at different times, but always over the game and HUD
+    if (g_menuOn)
+    {
+        platform.Platform_RenderScene(&g_menuScene);
+    }
+    
     #if 1
     Game_UpdateUI(ui, time);
     Game_BuildRenderList(ui, &g_uiScene);

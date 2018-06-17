@@ -114,20 +114,19 @@ void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
 f32 friction = 7;
 f32 accelerate = 100;
 
-Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, f32 acceleration, f32 maxVelocity, f32  deltaTime)
+Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleration, f32 maxVelocity, f32  deltaTime)
 {
-    //printf("-------- Move ground frame DT: %.6f --------\n", deltaTime);
     f32 speed = Vec3_Magnitude(prevVelocity);
     // Apply friction
+    // TODO: Forcing onGround to true for now as bunny hop acceleration requires tweaking
+    onGround = 1;
 #if 1
-    if (speed != 0) // avoid divide by zero ninny
+    if (onGround && speed != 0) // avoid divide by zero ninny
     {
         float drop = speed * friction * deltaTime;
         f32 frictionScalar = ZMAX(speed - drop, 0) / speed;
-        //printf("Friction scalar: %.2f\n", frictionScalar);
         // scale velocity based on friction
         prevVelocity->x *= frictionScalar;
-        //prevVelocity->y *= frictionScalar;
         prevVelocity->z *= frictionScalar;
     }
 #endif
@@ -230,7 +229,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     moveForce.x = (forward.x * input.z) + (left.x * input.x);
     moveForce.z = (forward.z * input.z) + (left.z * input.x);
 
-    Vec3 moveResult = MoveGround(&moveForce, &move, 100, 12, deltaTime);
+    Vec3 moveResult = MoveGround(&moveForce, &move, col->isGrounded, 100, 12, deltaTime);
     move.x = moveResult.x;
     move.z = moveResult.z;
     motor->debugCurrentSpeed = Vec3_Magnitude(&move);

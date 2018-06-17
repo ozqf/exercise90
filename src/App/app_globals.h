@@ -40,6 +40,10 @@ global_variable GameTime g_time = {};
 global_variable TextureHandles g_textureHandles;
 //global_variable TextureHandles g_textures;
 
+// Menu Rendering
+global_variable RenderScene g_menuScene;
+global_variable RenderListItem g_menuRenderList[APP_MAX_MENU_ITEMS];
+
 // Debugging
 global_variable BlockRef g_debugBuffer;
 // Ignore local player control input and activate debug fly-around camera
@@ -50,3 +54,4 @@ global_variable Vec3 g_debugCameraDegrees = {};
 global_variable u8 g_debugColliders = 1;
 
 global_variable u8 g_paused = 0;
+global_variable u8 g_menuOn = 1;

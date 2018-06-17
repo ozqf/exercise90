@@ -168,8 +168,15 @@ void Game_BuildTestHud(GameState *state)
     numChars = COM_StrLen(chars);
 	//i32 numChars = g_testString;
 
-    RendObj_SetAsAsciCharArray(&renderer->rendObj, chars, numChars, 0.05f, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1, 1);
-    printf("Draw asci array:\n%s\n", chars);
+    RendObj_SetAsAsciCharArray(
+        &renderer->rendObj,
+        chars,
+        numChars,
+        0.05f,
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        1, 1, 1
+    );
+    //printf("Draw asci array:\n%s\n", chars);
     //obj->transform.pos.x = -1;//-0.75f;
     //obj->transform.pos.y = 1;//0.75f;
 #endif
@@ -191,8 +198,14 @@ void Game_BuildTestHud(GameState *state)
     numChars = COM_StrLen(placeholderChars2);
 	//i32 numChars = g_testString;
 
-    RendObj_SetAsAsciCharArray(&renderer->rendObj, placeholderChars2, numChars, 0.075f, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1, 1);
-    printf("Draw asci array:\n%s\n", chars);
+    RendObj_SetAsAsciCharArray(
+        &renderer->rendObj, 
+        placeholderChars2, 
+        numChars, 
+        0.075f, 
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        1, 1, 1
+    );
     //obj->transform.pos.x = -1;//-0.75f;
     //obj->transform.pos.y = 1;//0.75f;
 #endif
