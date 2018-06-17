@@ -1,9 +1,33 @@
 # Exercise 90
 A simple fps as a learning exercise in C, opengl and games/engines generally.
 
-## Assets Dropbox
+## Build instructions
 
-* https://www.dropbox.com/sh/65xmjtpvtnng3hm/AAD5mSgHuvS0DlsAj46U9XuGa?dl=0
+Builds as several different projects via Unity builds:
+* **Platform (EXE):** win32_main.cpp
+    * Links to user32.lib opengl32.lib Gdi32.lib
+* **Renderer (DLL):** win32_gl_module.cpp
+    * Links to user32.lib opengl32.lib Gdi32.lib
+* **Sound (DLL):** win32_snd_module.cpp
+    * Links to fmod_vc.lib fmodstudio_vc.lib
+* **Applcation (DLL):** app_module.cpp and ZPhysics.cpp
+    * Links to ZBulletPhysicsWrapper.lib
+
+Requires Visual C++ command line Build Tools for Visual Studio (2015 or 2017 used).
+* Open cmd.exe in exercise90\build
+* Initialise Visual Studio tools with either vsvars2015.bat or vsvars2017.bat
+* Run buildall.bat to build everything or buildwin32, buildrenderer, buildsound and buildgame to build individually.
+* Download the asset files from here: https://www.dropbox.com/sh/65xmjtpvtnng3hm/AAD5mSgHuvS0DlsAj46U9XuGa?dl=0
+* Extract the assets into the directory with the executable.
+
+Final structure:
+* exercise90.exe
+* fmod.dll
+* fmodstudio.dll
+* win32gl.dll
+* win32sound.dll
+* base\gamex86.dll
+* base\data01.dat
 
 ## Libraries
 

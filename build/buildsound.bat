@@ -15,12 +15,11 @@ del *.* /q
 
 set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /LD
 set compilerDefines=/DPARANOID=1
-set linkInputA=
-set linkInputB=user32.lib Gdi32.lib ../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
+set linkInputA=../lib/fmod/fmod_vc.lib ../lib/fmod/fmodstudio_vc.lib
 set compilerInput=../src/Platform/win32_snd/win32_snd_module.cpp
 set outputDLL=/Fe../bin/win32sound.dll
 @echo on
-@cl %compilerFlags% %compilerDefines% %compilerInput% %outputDLL% %linkInputB%
+@cl %compilerFlags% %compilerDefines% %compilerInput% %outputDLL% %linkInputA%
 @echo off
 set compilerFlags=
 set compilerDefines=
