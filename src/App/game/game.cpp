@@ -473,6 +473,15 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             return 1;
         } break;
 
+        case CMD_TYPE_SPAWN_PROJECTILE:
+        {
+            Cmd_SpawnProjectile cmd = {};
+            Assert(bytes == sizeof(Cmd_SpawnProjectile));
+            COM_COPY_STRUCT(ptr, &cmd, Cmd_SpawnProjectile);
+            Exec_SpawnProjectile(gs, &cmd);
+			return 1;
+        } break;
+
 		case CMD_TYPE_PLAYER_INPUT:
 		{
 			Assert(bytes == sizeof(Cmd_PlayerInput));
@@ -494,6 +503,17 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         } break;
     }
     return 0;
+}
+
+// Set at the start of a frame and released at the end
+ByteBuffer* g_currentOutput = NULL;
+
+void Game_WriteCmd(u32 type, u32 size, void* ptr)
+{
+    BufferItemHeader h = { type, size };
+    g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, BufferItemHeader);
+    g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
+    printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -584,6 +604,7 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
+    g_currentOutput = output;
     //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
 #if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
@@ -638,5 +659,7 @@ void Game_Tick(
 		// raise camera to eye height
         gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
     }
+    // Clear output buffer to NULL. This frame has finished as far as the game is concerned
+    g_currentOutput = NULL;
     // Ent* ent = Ent_GetEntityById(&gs->entList, )
 }

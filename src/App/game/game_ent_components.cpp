@@ -27,8 +27,23 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
     return NULL;
 }
 
-void Game_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
+void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
 {
+    Cmd_SpawnProjectile cmd = {};
+    cmd.spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
+    cmd.spawn.factoryType = 9999;   // Not used yet.
+    cmd.spawn.pos.x = x;
+    cmd.spawn.pos.y = y;
+    cmd.spawn.pos.z = z;
+    cmd.spawn.rot.y = yawDegrees;
+    cmd.spawn.rot.x = pitchDegrees;
+    cmd.speed = TEST_PROJECTILE_SPEED;
+    printf("SV Creating prj command, entID: %d/%d\n",
+        cmd.spawn.entityId.iteration,
+        cmd.spawn.entityId.index
+    );
+    Game_WriteCmd(CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile), (void*)&cmd);
+#if 0
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
     Ent* ent = Ent_GetAndAssign(&gs->entList, &id);
@@ -66,6 +81,7 @@ void Game_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, 
     
     prj->tick = 1.0f;
     prj->tock = 1.0f;
+#endif
 }
 
 void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
@@ -249,7 +265,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             //Transform* t = &g_worldScene.cameraTransform;
             Transform* t = &ent->transform;
 
-            Game_SpawnTestBullet(
+            SV_SpawnTestBullet(
                 gs,
                 t->pos.x,
                 t->pos.y,
@@ -262,7 +278,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             f32 yawOffset;
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            Game_SpawnTestBullet(
+            SV_SpawnTestBullet(
                 gs,
                 t->pos.x,
                 t->pos.y,
@@ -273,7 +289,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
  
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            Game_SpawnTestBullet(
+            SV_SpawnTestBullet(
                 gs,
                 t->pos.x,
                 t->pos.y,

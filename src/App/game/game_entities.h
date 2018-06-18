@@ -28,6 +28,7 @@ EntId Ent_ReserveFreeEntity(EntList* ents)
         if (e->inUse == ENTITY_STATUS_FREE)
         {
             e->inUse = ENTITY_STATUS_RESERVED;
+            printf("SV Reserving Ent %d/%d\n", e->entId.iteration, e->entId.index);
             Ent_Reset(e);
             // Iteration remains same. Is iterated on free, not on reserve
 			return e->entId;
@@ -105,13 +106,21 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
 		{
 			// If server, entity should have been Reserved.
             // If client, entity should be free.
-			Assert(result->inUse != ENTITY_STATUS_IN_USE);
-
-            result->inUse = ENTITY_STATUS_IN_USE;
-			result->entId = *entId;
+            if (result->inUse != ENTITY_STATUS_IN_USE)
+            {
+                result->inUse = ENTITY_STATUS_IN_USE;
+			    result->entId = *entId;
+            }
+            else
+            {
+                printf("GAME: Ent is marked in use! Aborting\n");
+                ILLEGAL_CODE_PATH
+            }
 			return &ents->items[i];
 		}
 	}
+	printf("GAME: No entity found matching Id %d/%d! Aborting\n", entId->iteration, entId->index);
+    ILLEGAL_CODE_PATH
 	return NULL;
 }
 

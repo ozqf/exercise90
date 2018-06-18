@@ -142,3 +142,41 @@ Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd)
     }
     return ent;
 }
+
+Ent* Exec_SpawnProjectile(GameState* gs, Cmd_SpawnProjectile* cmd)
+{
+    // TODO: Projectile spawn function should use factory type to specify
+    // the Projectile template to copy settings from!
+
+    Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->spawn.entityId);
+    ent->transform.pos.x = cmd->spawn.pos.x;
+    ent->transform.pos.y = cmd->spawn.pos.y;
+    ent->transform.pos.z = cmd->spawn.pos.z;
+
+    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
+    Transform_RotateY(&ent->transform, cmd->spawn.rot.y * DEG2RAD);
+    Transform_RotateX(&ent->transform, cmd->spawn.rot.x * DEG2RAD);
+    
+    
+    EC_Renderer* rend = EC_AddRenderer(gs, ent);
+    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\BAL1A0.bmp"));
+    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
+
+
+    EC_Projectile* prj = EC_AddProjectile(gs, ent);
+    prj->tock = 4.0f;
+    prj->tick = prj->tock;
+    
+    prj->move.x = -ent->transform.rotation.zAxis.x * cmd->speed;
+    prj->move.y = -ent->transform.rotation.zAxis.y * cmd->speed;
+    prj->move.z = -ent->transform.rotation.zAxis.z * cmd->speed;
+    // move projectile forward a little
+    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
+    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
+    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
+    
+    prj->tick = 1.0f;
+    prj->tock = 1.0f;
+
+    return ent;
+}
