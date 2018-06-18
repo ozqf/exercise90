@@ -24,11 +24,15 @@ void App_ClearClientGameLinks()
 	}
 }
 
-void App_AddLocalClient()
+void App_BuildClientUpdate(GameState* gs, Client* cl)
 {
 
 }
 
+void App_AddLocalClient()
+{
+
+}
 
 /////////////////////////////////////////////////////
 // UPDATE CLIENTS

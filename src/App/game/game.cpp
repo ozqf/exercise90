@@ -482,6 +482,18 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 			return 1;
         } break;
 
+        case CMD_TYPE_REMOVE_ENT:
+        {
+            Cmd_RemoveEntity cmd = {};
+            Assert(bytes == sizeof(Cmd_RemoveEntity));
+            COM_COPY_STRUCT(ptr, &cmd, Cmd_RemoveEntity);
+            printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
+            Ent* ent = Ent_GetEntityById(&gs->entList, &cmd.entId);
+            Assert(ent != NULL);
+            Ent_Free(gs, ent);
+            return 1;
+        } break;
+
 		case CMD_TYPE_PLAYER_INPUT:
 		{
 			Assert(bytes == sizeof(Cmd_PlayerInput));
@@ -513,7 +525,7 @@ void Game_WriteCmd(u32 type, u32 size, void* ptr)
     BufferItemHeader h = { type, size };
     g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, BufferItemHeader);
     g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
-    printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
+    //printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -609,18 +621,20 @@ void Game_Tick(
 #if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->frameNumber))
     {
-        BufferItemHeader header = {};
-        header.type = CMD_TYPE_SPAWN;
-        header.size = sizeof(Cmd_Spawn);
+        // BufferItemHeader header = {};
+        // header.type = CMD_TYPE_SPAWN;
+        // header.size = sizeof(Cmd_Spawn);
         Cmd_Spawn cmd = {};
 		cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
         cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
 
-        output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
-        output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
-        output->count++;
+        Game_WriteCmd(CMD_TYPE_SPAWN, sizeof(Cmd_Spawn), (void*)&cmd);
+
+        //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
+        //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
+        //output->count++;
     }
 #endif
 #if 0

@@ -398,8 +398,11 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (prj->tick <= 0.0f)
         {
             // Delete
-            
-            Ent_Free(gs, e);
+            Ent_MarkForFree(e);
+            Cmd_RemoveEntity cmd = {};
+            cmd.entId = e->entId;
+            Game_WriteCmd(CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity), (void*)&cmd);
+            //Ent_Free(gs, e);
         }
         else
         {

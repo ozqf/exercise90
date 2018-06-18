@@ -70,6 +70,14 @@ struct EntList
     u32 max;
 };
 
+struct EntityLink
+{
+    EntId entId;
+    i32 importance;
+    u8 priority;
+    u8 relevant;
+};
+
 //////////////////////////////////////////////////
 // Define Components
 // All components required:

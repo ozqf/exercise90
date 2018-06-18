@@ -20,6 +20,8 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define CMD_TYPE_CLIENT_UPDATE 103
 #define CMD_TYPE_TEXT 104
 #define CMD_TYPE_SPAWN_PROJECTILE 105
+#define CMD_TYPE_REMOVE_ENT 106
+#define CMD_TYPE_ENTITY_UPDATE 107
 
 //////////////////////////////////////////////////
 // Spawning
@@ -103,6 +105,19 @@ struct Cmd_SpawnProjectile
     // What to spawn
     Cmd_Spawn spawn;
     f32 speed;
+};
+
+// 106
+struct Cmd_RemoveEntity
+{
+    EntId entId;
+};
+
+// 107
+struct Cmd_EntityUpdate
+{
+    EntId entId;
+    Vec3 pos;
 };
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);

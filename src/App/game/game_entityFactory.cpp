@@ -175,8 +175,8 @@ Ent* Exec_SpawnProjectile(GameState* gs, Cmd_SpawnProjectile* cmd)
     ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
     ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
     
-    prj->tick = 1.0f;
-    prj->tock = 1.0f;
+    prj->tick = 0.5f;// 1.0f;
+    prj->tock = 0.5f;// 1.0f;
 
     return ent;
 }

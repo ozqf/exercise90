@@ -13,6 +13,7 @@ inline void Ent_Reset(Ent* ent)
 #define ENTITY_STATUS_FREE 0
 #define ENTITY_STATUS_RESERVED 1
 #define ENTITY_STATUS_IN_USE 2
+#define ENTITY_STATUS_DEAD 3
 
 /**
  * Find a free Entity slot and set it to 'reserved'.
@@ -87,6 +88,11 @@ void Ent_ClearComponents(GameState* gs, Ent* ent)
     EC_RemoveRenderer(gs, ent);
     EC_RemoveActorMotor(gs, ent);
     EC_RemoveProjectile(gs, ent);
+}
+
+inline void Ent_MarkForFree(Ent* ent)
+{
+    ent->inUse = ENTITY_STATUS_DEAD;
 }
 
 inline void Ent_Free(GameState* gs, Ent* ent)
