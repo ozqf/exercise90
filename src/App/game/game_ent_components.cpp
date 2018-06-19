@@ -42,7 +42,7 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
         cmd.spawn.entityId.iteration,
         cmd.spawn.entityId.index
     );
-    Game_WriteCmd(CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile), (void*)&cmd);
+    App_EnqueueCmd((u8*)&cmd, CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile));
 #if 0
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
@@ -401,7 +401,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             Ent_MarkForFree(e);
             Cmd_RemoveEntity cmd = {};
             cmd.entId = e->entId;
-            Game_WriteCmd(CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity), (void*)&cmd);
+            App_EnqueueCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
             //Ent_Free(gs, e);
         }
         else

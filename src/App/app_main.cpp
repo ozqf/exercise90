@@ -15,7 +15,7 @@ void App_EndSession()
 	//App_ClearClients();
 	// Break client links
 	App_ClearClientGameLinks();
-	COM_ZeroMemory((u8*)g_gameOutputByteBuffer.ptrStart, g_gameOutputByteBuffer.capacity);
+	COM_ZeroMemory((u8*)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }
 
 void AllocateDebugStrings(Heap *heap)
@@ -132,10 +132,13 @@ i32 App_Init()
     //AllocateTestStrings(&g_heap);
 
     // Buffers, enlarge if necessary
-    Heap_Allocate(&g_heap, &g_gameInputBufferRef, KiloBytes(64), "Game Input", 1);
-    g_gameInputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
-    Heap_Allocate(&g_heap, &g_gameOutputBufferRef, KiloBytes(64), "Game Output", 1);
-    g_gameOutputByteBuffer = Heap_RefToByteBuffer(&g_heap, &g_gameOutputBufferRef);
+    Heap_Allocate(&g_heap, &g_appBufferA_Ref, KiloBytes(1024), "App Buffer A", 1);
+    g_appBufferA = Heap_RefToByteBuffer(&g_heap, &g_appBufferA_Ref);
+    Heap_Allocate(&g_heap, &g_appBufferB_Ref, KiloBytes(1024), "App Buffer B", 1);
+    g_appBufferB = Heap_RefToByteBuffer(&g_heap, &g_appBufferB_Ref);
+
+    g_appWriteBuffer = &g_appBufferA;
+    g_appReadBuffer = &g_appBufferB;
 
     // 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
     Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV", 1);
@@ -259,9 +262,7 @@ void App_UpdateGameState(GameTime* time)
     App_UpdateLocalClients(time);
     
     // Read game output from last frame + internally issued commands
-    App_ReadCommandBuffer(g_gameOutputByteBuffer);
-	// Clear output buffer ready for write to this frame
-    Buf_Clear(&g_gameOutputByteBuffer);
+    //App_ReadCommandBuffer(g_appReadBuffer);
 
     ///////////////////////////////////////
     // Process gamestate
@@ -284,19 +285,19 @@ void App_UpdateGameState(GameTime* time)
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     // Prepare input buffer
-    ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
+    //ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
 
     // Game state update
     Game_Tick(gs,
-              inBuf,
-              &g_gameOutputByteBuffer,
+              g_appReadBuffer,
+              g_appWriteBuffer,
               time,
               &g_inputActions);
 
-    g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
+    g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
 }
 
-void App_Frame(GameTime *time, ByteBuffer commands)
+void App_Frame(GameTime *time, ByteBuffer platformCommands)
 {
     g_time = *time;
 
@@ -305,7 +306,7 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     /////////////////////////////////////////////////////
     
     // Read Platform commands (input + network?)
-    App_ReadCommandBuffer(commands);
+    App_ReadCommandBuffer(&platformCommands);
     
     // Local debugging. Not command related
     if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
@@ -401,4 +402,14 @@ void App_Frame(GameTime *time, ByteBuffer commands)
     RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     platform.Platform_RenderScene(&g_uiScene);
 #endif
+
+    // End of Frame. Swap Command Buffers.
+    ByteBuffer* temp = g_appReadBuffer;
+    g_appReadBuffer = g_appWriteBuffer;
+    g_appWriteBuffer = temp;
+    g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
+    g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
+    // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
+    //COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
+    *g_appWriteBuffer->ptrWrite = NULL;
 }

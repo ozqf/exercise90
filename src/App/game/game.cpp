@@ -16,6 +16,7 @@ inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
+    printf("GAME sizeof(Ent): %d\n", sizeof(Ent));
     *gs = {};
     gs->debugMode = GAME_DEBUG_MODE_NONE;
     //gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
@@ -493,7 +494,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Ent_Free(gs, ent);
             return 1;
         } break;
-
+        
 		case CMD_TYPE_PLAYER_INPUT:
 		{
 			Assert(bytes == sizeof(Cmd_PlayerInput));
@@ -507,12 +508,22 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             motor->input = cmd.input;
 			return 1;
 		} break;
-
+        
         case CMD_TYPE_IMPULSE:
         {
             Assert(bytes == sizeof(Cmd_ServerImpulse));
 			return Game_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
         } break;
+
+        case CMD_TYPE_CLIENT_UPDATE:
+        {
+            Assert(bytes == sizeof(Cmd_ClientUpdate));
+            Cmd_ClientUpdate cmd = {};
+            ptr += COM_COPY_STRUCT(ptr, &cmd, Cmd_ClientUpdate);
+            Exec_UpdateClient(&cmd);
+            return 1;
+        } break;
+
     }
     return 0;
 }
@@ -520,13 +531,13 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 // Set at the start of a frame and released at the end
 ByteBuffer* g_currentOutput = NULL;
 
-void Game_WriteCmd(u32 type, u32 size, void* ptr)
-{
-    BufferItemHeader h = { type, size };
-    g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, BufferItemHeader);
-    g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
-    //printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
-}
+// void Game_WriteCmd(u32 type, u32 size, void* ptr)
+// {
+//     BufferItemHeader h = { type, size };
+//     g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, BufferItemHeader);
+//     g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
+//     //printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
+// }
 
 /////////////////////////////////////////////////////////////////////////////
 // STEP PHYSICS
@@ -611,7 +622,7 @@ void Game_UpdatePlayers(ByteBuffer* output, Client* cl, InputActionSet* actions)
 /////////////////////////////////////////////////////////////////////////////
 void Game_Tick(
     GameState *gs,
-    ByteBuffer input,
+    ByteBuffer* input,
     ByteBuffer* output,
     GameTime *time,
     InputActionSet* actions)
@@ -630,7 +641,7 @@ void Game_Tick(
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
 
-        Game_WriteCmd(CMD_TYPE_SPAWN, sizeof(Cmd_Spawn), (void*)&cmd);
+        App_EnqueueCmd((u8*)&cmd, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
@@ -649,8 +660,19 @@ void Game_Tick(
 		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
     }
 #endif
+
+    //////////////////////////////////////////////////////////////////
+    // Read Commands
+    //////////////////////////////////////////////////////////////////
+    u8* ptrRead = input->ptrStart;
+    while (ptrRead < input->ptrEnd)
+    {
+        BufferItemHeader header = {};
+        ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
+        Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size);
+    }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
     
     g_debugTransform = gs->cameraTransform;
     

@@ -2,6 +2,16 @@
 
 #include "app_module.cpp"
 
+void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
+{
+    CmdHeader h = { type, size };
+    u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
+    Assert(remaining >= (sizeof(CmdHeader) + size));
+    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);
+    g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
+	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
+}
+
 void App_SendToServer(u8* ptr, u32 type, u32 size)
 {
     App_EnqueueCmd(ptr, type, size);
@@ -149,16 +159,6 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     return 0;
 }
 
-void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
-{
-    CmdHeader h = { type, size };
-    u32 remaining = g_gameOutputByteBuffer.capacity - ((u32)g_gameOutputByteBuffer.ptrWrite - (u32)g_gameOutputByteBuffer.ptrStart);
-    Assert(remaining >= (sizeof(CmdHeader) + size));
-    g_gameOutputByteBuffer.ptrWrite += COM_COPY_STRUCT(&h, g_gameOutputByteBuffer.ptrWrite, CmdHeader);
-    g_gameOutputByteBuffer.ptrWrite += COM_COPY(ptr, g_gameOutputByteBuffer.ptrWrite, size);
-	g_gameOutputByteBuffer.ptrEnd = g_gameOutputByteBuffer.ptrWrite;
-}
-
 ////////////////////////////////////////////////////////////////////////////
 // Loading
 ////////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.count = h.staticEntities.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
-    App_ReadCommandBuffer(sub);
+    App_ReadCommandBuffer(&sub);
 }
 
 u8 App_LoadStateFromFile(GameState *gs, char *fileName)
@@ -235,7 +235,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
             Exec_ReadInput(g_time.frameNumber, ev);
         }
         break;
-
+#if 0
         case CMD_TYPE_CLIENT_UPDATE:
         {
             Assert(bytes == sizeof(Cmd_ClientUpdate));
@@ -243,7 +243,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
             ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
             Exec_UpdateClient(&cmd);
         } break;
-
+#endif
         default:
 		{
 			// Pass event down, if event is not handled
@@ -265,11 +265,11 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
     }
 }
 
-void App_ReadCommandBuffer(ByteBuffer commands)
+void App_ReadCommandBuffer(ByteBuffer* commands)
 {
-    u8 *ptrRead = commands.ptrStart;
+    u8 *ptrRead = commands->ptrStart;
     
-    while (ptrRead < commands.ptrEnd) // && (numRead + numSkipped) < commands.count)
+    while (ptrRead < commands->ptrEnd) // && (numRead + numSkipped) < commands.count)
     {
         BufferItemHeader header = {};
         ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
@@ -277,7 +277,7 @@ void App_ReadCommandBuffer(ByteBuffer commands)
         if (header.type == NULL)
         {
             // 0 == end here now
-            ptrRead = commands.ptrEnd;
+            ptrRead = commands->ptrEnd;
         }
         else
         {

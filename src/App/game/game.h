@@ -95,8 +95,6 @@ void Game_SetDebugStringRender()
     RendObj_SetAsAsciCharArray(&g_debugStrRenderer, g_debugStr.chars, g_debugStr.length, 0.05f,  AppGetTextureIndexByName("textures\\charset.bmp"), 0, 1, 1);
 }
 
-void Game_WriteCmd(u32 type, u32 size, void* ptr);
-
 /////////////////////////////////////////////////////////////
 // Render Objects Memory
 /////////////////////////////////////////////////////////////
@@ -129,13 +127,17 @@ global_variable GameState g_uiState;
 global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
 // Game Command I/O buffer handles
-// TODO: Input buffer is not used!
-global_variable BlockRef g_gameInputBufferRef;
-global_variable ByteBuffer g_gameInputByteBuffer;
 
-// TODO: Should this be 'g_appInternalBuffer' really?
-global_variable BlockRef g_gameOutputBufferRef;
-global_variable ByteBuffer g_gameOutputByteBuffer;
+// pointers used for I/O
+global_variable ByteBuffer* g_appReadBuffer = NULL;
+global_variable ByteBuffer* g_appWriteBuffer = NULL;
+
+// Double buffers, swapped at the end of each app frame.
+global_variable ByteBuffer g_appBufferA;
+global_variable BlockRef g_appBufferA_Ref;
+
+global_variable ByteBuffer g_appBufferB;
+global_variable BlockRef g_appBufferB_Ref;
 
 // Physics engine buffer handles
 global_variable BlockRef g_collisionCommandBuffer;
@@ -176,4 +178,5 @@ ClientTick g_debugInput = {};
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"
 #include "game_input.cpp"
+#include "game_server.h"
 #include "game.cpp"

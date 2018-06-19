@@ -61,6 +61,7 @@ struct Ent
     u32 componentFlags;
     i32 tag;
     u8 inUse;               // if 0 this entity is free to be recycled
+    u8 priority;
 };
 
 struct EntList

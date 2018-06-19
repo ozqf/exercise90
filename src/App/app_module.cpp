@@ -24,8 +24,9 @@ struct Cmd_ClientUpdate;
 
 /////////////////////////////////////////////////////
 // App functions that game can access
-Client* App_FindClientById(i32 id);
+void App_EnqueueCmd(u8* ptr, u32 type, u32 size);
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
+Client* App_FindClientById(i32 id);
 i32 AppGetTextureIndexByName(char* textureName);
 
 /////////////////////////////////////////////////////////
@@ -58,7 +59,6 @@ void App_UpdateLocalClients(GameTime* time);
 // Buffers
 void App_SendToServer(u8* ptr, u32 type, u32 size);
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens);
-void App_EnqueueCmd(u8* ptr, u32 type, u32 size);
 void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf);
 u8 App_LoadStateFromFile(GameState *gs, char *fileName);
 
@@ -66,7 +66,7 @@ u8 App_LoadStateFromFile(GameState *gs, char *fileName);
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 void Exec_ReadInput(u32 frameNumber, InputEvent ev);
 void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead);
-void App_ReadCommandBuffer(ByteBuffer commands);
+void App_ReadCommandBuffer(ByteBuffer* commands);
 i32 App_StartSession(u8 netMode, char* path);
 
 // Debug
