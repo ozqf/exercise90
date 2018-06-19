@@ -147,6 +147,7 @@ Ent* Exec_SpawnProjectile(GameState* gs, Cmd_SpawnProjectile* cmd)
 {
     // TODO: Projectile spawn function should use factory type to specify
     // the Projectile template to copy settings from!
+    printf("Spawning prj %d/%d\n", cmd->spawn.entityId.iteration, cmd->spawn.entityId.index);
 
     Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->spawn.entityId);
     ent->transform.pos.x = cmd->spawn.pos.x;

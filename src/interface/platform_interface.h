@@ -42,6 +42,11 @@ struct PlatformInterface
     u8 (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure);
     void (*Platform_LoadTexture)(Heap* heap, BlockRef* destRef, char* path);
     void (*Platform_BindTexture)(void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
+	
+	// Writing Files
+	i32 (*Platform_OpenFileForWriting)(char* fileName);
+    i32 (*Platform_WriteToFile)(i32 fileId, u8* ptr, u32 numBytes);
+    i32 (*Platform_CloseFileForWriting)(i32 fileId);
 
     // Input
     void (*Platform_SetMouseMode)(enum ZMouseMode mode);

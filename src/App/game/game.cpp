@@ -524,6 +524,10 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             return 1;
         } break;
 
+		default:
+		{
+			//ILLEGAL_CODE_PATH
+		} break;
     }
     return 0;
 }
@@ -665,6 +669,8 @@ void Game_Tick(
     // Read Commands
     //////////////////////////////////////////////////////////////////
     u8* ptrRead = input->ptrStart;
+    u32 bytes = input->ptrEnd - input->ptrStart;
+    //printf("Game reading %d bytes of commands\n", bytes);
     while (ptrRead < input->ptrEnd)
     {
         BufferItemHeader header = {};

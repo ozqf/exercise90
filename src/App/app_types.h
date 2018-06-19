@@ -29,6 +29,13 @@ struct StateSaveHeader
 	FileSegment frames;
 };
 
+enum ReplayMode
+{
+	NoReplayMode,
+	RecordingReplay,
+	PlayingReplay
+};
+
 struct CmdHeader
 {
 	u32 type;
@@ -47,6 +54,12 @@ struct InputActionSet
 {
     InputAction* actions;
     i32 count;
+};
+
+struct ReplayFrameHeader
+{
+    u32 frameNumber;
+    u32 numBytes;
 };
 
 union EntId; // HACK

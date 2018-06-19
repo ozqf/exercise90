@@ -133,6 +133,10 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
 
     platInterface.Platform_LoadSound = Platform_LoadSound;
+
+    platInterface.Platform_OpenFileForWriting = Platform_OpenFileForWriting;
+    platInterface.Platform_WriteToFile = Platform_WriteToFile;
+    platInterface.Platform_CloseFileForWriting = Platform_CloseFileForWriting;
 }
 
 void Win32_CloseAppLink()

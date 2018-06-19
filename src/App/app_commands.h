@@ -5,6 +5,10 @@
 void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
 {
     CmdHeader h = { type, size };
+	if (type != 102 && type != 101)
+	{
+		int i = 7;
+	}
     u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
     Assert(remaining >= (sizeof(CmdHeader) + size));
     g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);

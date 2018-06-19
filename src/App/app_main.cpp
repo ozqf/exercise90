@@ -6,9 +6,22 @@ holding game/menu state and calling game update when required
 
 #include "app_module.cpp"
 
+void App_StopRecording()
+{
+    if (g_replayFileId != -1)
+    {
+        platform.Platform_CloseFileForWriting(g_replayFileId);
+        g_replayMode = NoReplayMode;
+        g_replayFileId = -1;
+    }
+}
+
 void App_EndSession()
 {
 	printf("APP Ending session\n");
+    
+    App_StopRecording();
+
 	Game_Shutdown(&g_gameState);
 	Phys_ClearWorld();
 	// Clear command buffer
@@ -48,10 +61,16 @@ u8 App_StartSinglePlayer(char* path)
     
 	App_EndSession();
 
+    
+
     if (!App_LoadStateFromFile(&g_gameState, path))
     {
         return 0;
     }
+
+    // Start recording
+    g_replayMode = RecordingReplay;
+    g_replayFileId = platform.Platform_OpenFileForWriting("demo.dem");
 
 	// Spawn local client
 	// Assign local client id.
@@ -185,6 +204,8 @@ i32 App_Shutdown()
 {
     printf("APP DLL Shutdown\n");
 
+    App_StopRecording();
+
     Game_Shutdown(&g_gameState);
     Phys_Shutdown();
 
@@ -285,7 +306,22 @@ void App_UpdateGameState(GameTime* time)
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     // Prepare input buffer
-    //ByteBuffer inBuf = Heap_RefToByteBuffer(&g_heap, &g_gameInputBufferRef);
+    //ByteBuffer* input = g_appReadBuffer;
+#if 0
+    if (g_replayMode == RecordingReplay)
+    {
+        // > Write frame header
+        // > Write contents of read buffer into demo file
+        u32 bytesToWrite = (u32)input->ptrEnd - (u32)input->ptrStart;
+        platform.Platform_WriteToFile(g_replayFileId, bytesToWrite);
+    }
+    else if (g_replayMode == PlayingReplay)
+    {
+        // ignore g_appReadBuffer and instead read a frame from
+        // the demo file
+        ReplayFrameHeader h = {};
+    }
+#endif
 
     // Game state update
     Game_Tick(gs,
@@ -294,7 +330,7 @@ void App_UpdateGameState(GameTime* time)
               time,
               &g_inputActions);
 
-    g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
+    //g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
 }
 
 void App_Frame(GameTime *time, ByteBuffer platformCommands)
@@ -410,6 +446,6 @@ void App_Frame(GameTime *time, ByteBuffer platformCommands)
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
-    //COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
-    *g_appWriteBuffer->ptrWrite = NULL;
+    COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
+    //*g_appWriteBuffer->ptrWrite = NULL;
 }

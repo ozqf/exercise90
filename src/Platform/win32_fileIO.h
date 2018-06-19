@@ -300,3 +300,29 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 	}
 
 }
+
+FILE* g_appReadFiles[1];
+
+i32 Platform_OpenFileForWriting(char* fileName)
+{
+	Assert(g_appReadFiles[0] == NULL);
+	
+	i32 index = 0;
+	fopen_s(&g_appReadFiles[index], fileName, "wb");
+	if (g_appReadFiles[index] == NULL)
+	{
+		return -1;
+	}
+	return index;
+}
+i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
+{
+	fwrite(ptr, numBytes, 1, g_appReadFiles[fileId]);
+	return 1;
+}
+i32 Platform_CloseFileForWriting(i32 fileId)
+{
+	fclose(g_appReadFiles[fileId]);
+	g_appReadFiles[fileId] = NULL;
+	return 1;
+}
