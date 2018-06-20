@@ -24,7 +24,7 @@ struct Cmd_ClientUpdate;
 
 /////////////////////////////////////////////////////
 // App functions that game can access
-void App_EnqueueCmd(u8* ptr, u32 type, u32 size);
+void App_WriteGameCmd(u8* ptr, u32 type, u32 size);
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 Client* App_FindClientById(i32 id);
 i32 AppGetTextureIndexByName(char* textureName);

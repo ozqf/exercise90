@@ -21,7 +21,7 @@ PlatformInterface platformStub;
 
 i32 AppInit_Stub() { return 1; }
 i32 AppShutdown_Stub() { printf("PLATFORM Shutdown App Stub\n"); return 1; }
-void AppUpdate_Stub(GameTime* time, ByteBuffer commands) { }
+void AppUpdate_Stub(GameTime* time) { }
 
 // Fill out an app stub
 AppInterface GetAppInterfaceStub(PlatformInterface platInterface)

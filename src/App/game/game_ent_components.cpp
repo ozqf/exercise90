@@ -38,11 +38,14 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
     cmd.spawn.rot.y = yawDegrees;
     cmd.spawn.rot.x = pitchDegrees;
     cmd.speed = TEST_PROJECTILE_SPEED;
-    printf("SV Creating prj command, entID: %d/%d\n",
-        cmd.spawn.entityId.iteration,
-        cmd.spawn.entityId.index
-    );
-    App_EnqueueCmd((u8*)&cmd, CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile));
+    if (g_verbose)
+    {
+        printf("SV Creating prj command, entID: %d/%d\n",
+            cmd.spawn.entityId.iteration,
+            cmd.spawn.entityId.index
+        );
+    }
+    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile));
 #if 0
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);
@@ -405,7 +408,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 				cmd.entId.iteration,
 				cmd.entId.index);
 			}
-            App_EnqueueCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
+            App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
             //Ent_Free(gs, e);
         }
         else

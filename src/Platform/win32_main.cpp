@@ -428,18 +428,9 @@ void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
     printf(" Unknown command %s\n", g_textCommandBuffer);
 }
 
-void Win32_RunAppFrame()
+void Win32_SendAppInput()
 {
-
     Win32_TickInput(&g_cmdBuf);
-
-    // Called before app update as app update will call the renderer
-    // this should be buffered up so the two can be desynced!
-    if (g_rendererLink.moduleState == 1)
-    {
-        g_renderer.R_SetupFrame(appWindow);
-    }
-
     //////////////////////////////////////////////////////////////////
     // Command handling:
     // > Mark buffer as ended
@@ -469,13 +460,16 @@ void Win32_RunAppFrame()
     {
         ILLEGAL_CODE_PATH
     }
+    g_app.AppInput(&g_gameTime, frameCommands);
+    COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
+}
 
-    //Win32_R_SetupFrame(appWindow);
+void Win32_RunAppFrame()
+{
     if (g_app.isValid)
     {
-        g_app.AppUpdate(&g_gameTime, frameCommands);
+        g_app.AppUpdate(&g_gameTime);
     }
-    COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
 }
 
 /**********************************************************************
@@ -633,13 +627,18 @@ int CALLBACK WinMain(
                 Sleep(2);
 #endif
 
+                //////////////////////////////////////////////
+                // TIMING
+                //////////////////////////////////////////////
                 float newTime = Win32_FloatTime();
                 g_gameTime.deltaTime = newTime - previousTime;
                 previousTime = newTime;
 
                 g_gameTime.frameNumber++;
-
-                // Check App reload
+                
+                //////////////////////////////////////////////
+                // CHECK HOT DLL RELOAD
+                //////////////////////////////////////////////
                 g_appLink.checkTick -= g_gameTime.deltaTime;
                 if (g_appLink.checkTick <= 0)
                 {
@@ -649,34 +648,32 @@ int CALLBACK WinMain(
                         Win32_LinkToApplication();
                     }
                 }
-                // Check renderer reload
+                
                 g_rendererLink.checkTick -= g_gameTime.deltaTime;
                 if (g_rendererLink.checkTick <= 0)
                 {
                     g_rendererLink.checkTick = 0.1f;
                     if (Win32_CheckFileModified(g_rendererLink.path, &g_rendererLink.timestamp))
                     {
-                        //DebugBreak();
                         if (Win32_LinkToRenderer() && g_app.isValid)
                         {
                             g_app.AppRendererReloaded();
                         }
                     }
                 }
-                // Check sound reload
-                g_soundLink.checkTick -= g_gameTime.deltaTime;
-                if (g_soundLink.checkTick <= 0)
-                {
-                    g_soundLink.checkTick = 0.1f;
-                    if (Win32_CheckFileModified(g_soundLink.path, &g_soundLink.timestamp))
-                    {
-                        //DebugBreak();
-                        // if (Win32_LinkToSound() && g_app.isValid)
-                        // {
-                        //     g_app.AppSoundReloaded();
-                        // }
-                    }
-                }
+                
+                // g_soundLink.checkTick -= g_gameTime.deltaTime;
+                // if (g_soundLink.checkTick <= 0)
+                // {
+                //     g_soundLink.checkTick = 0.1f;
+                //     if (Win32_CheckFileModified(g_soundLink.path, &g_soundLink.timestamp))
+                //     {
+                //         if (Win32_LinkToSound() && g_app.isValid)
+                //         {
+                //             g_app.AppSoundReloaded();
+                //         }
+                //     }
+                // }
 
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
                 if (g_gameTime.deltaTime < 0)
@@ -685,9 +682,10 @@ int CALLBACK WinMain(
                     return 1;
                 }
 
-                // char buf[64];
-                // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
-                // OutputDebugString(buf);
+                
+                Win32_CheckTextBuffer();
+
+                Win32_SendAppInput();
 
                 if (g_singleFrameStepMode == 1)
                 {
@@ -707,7 +705,12 @@ int CALLBACK WinMain(
                     Win32_RunAppFrame();
                 }
 				
-				// // App always renderss
+                // Render
+                if (g_rendererLink.moduleState == 1)
+                {
+                    g_renderer.R_SetupFrame(appWindow);
+                }
+
 				g_app.AppRender(&g_gameTime);
 
                 if (g_debugInputActive)
@@ -719,9 +722,6 @@ int CALLBACK WinMain(
                 {
                     g_renderer.R_FinishFrame(appWindow);
                 }
-
-                Win32_CheckTextBuffer();
-                //Win32_R_FinishFrame(appWindow);
             }
         }
         else

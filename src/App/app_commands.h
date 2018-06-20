@@ -2,7 +2,7 @@
 
 #include "app_module.cpp"
 
-void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
+void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
 {
     BufferItemHeader h = { type, size };
     u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
@@ -26,7 +26,7 @@ void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
 
 void App_SendToServer(u8* ptr, u32 type, u32 size)
 {
-    App_EnqueueCmd(ptr, type, size);
+    App_WriteGameCmd(ptr, type, size);
 }
 
 void App_DumpHeap()
@@ -195,7 +195,7 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.count = h.staticEntities.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
-    App_ReadCommandBuffer(&sub);
+    Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
 }
 
 u8 App_LoadStateFromFile(GameState *gs, char *fileName)
@@ -258,6 +258,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
 #endif
         default:
 		{
+            #if 0
 			// Pass event down, if event is not handled
             if (Game_ReadCmd(&g_gameState, type, ptrRead, bytes))
             {
@@ -272,6 +273,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
                 platform.Platform_Error(buf, "APP");
                 Assert(false);
             }
+            #endif
         }
         break;
     }

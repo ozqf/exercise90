@@ -122,11 +122,14 @@ void Game_InitEntityFactory()
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd)
 {
-    printf("GAME SPAWN id %d/%d type %d\n",
-        cmd->entityId.iteration,
-        cmd->entityId.index,
-        cmd->factoryType
-    );
+    if (g_verbose)
+    {
+        printf("GAME SPAWN id %d/%d type %d\n",
+            cmd->entityId.iteration,
+            cmd->entityId.index,
+            cmd->factoryType
+        );
+    }
     if (cmd->factoryType >= g_numSpawnFunctions || cmd->factoryType < ENTITY_TYPE_NULL)
     {
         ILLEGAL_CODE_PATH
@@ -147,7 +150,10 @@ Ent* Exec_SpawnProjectile(GameState* gs, Cmd_SpawnProjectile* cmd)
 {
     // TODO: Projectile spawn function should use factory type to specify
     // the Projectile template to copy settings from!
-    printf("Spawning prj %d/%d\n", cmd->spawn.entityId.iteration, cmd->spawn.entityId.index);
+    if(g_verbose)
+    {
+        printf("Spawning prj %d/%d\n", cmd->spawn.entityId.iteration, cmd->spawn.entityId.index);
+    }
 
     Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->spawn.entityId);
     ent->transform.pos.x = cmd->spawn.pos.x;

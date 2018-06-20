@@ -95,7 +95,7 @@ u8 App_StartSinglePlayer(char* path)
     g_localClientId = -1;
     spawnClient.clientId = g_localClientId;
     spawnClient.state = CLIENT_STATE_OBSERVER;
-    App_EnqueueCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+    App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
     return 1;
 }
 
@@ -321,14 +321,19 @@ void App_UpdateGameState(GameTime* time)
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     // Prepare input buffer
-    //ByteBuffer* input = g_appReadBuffer;
-#if 0
+#if 1
+    ByteBuffer* input = g_appReadBuffer;
     if (g_replayMode == RecordingReplay)
     {
         // > Write frame header
         // > Write contents of read buffer into demo file
-        u32 bytesToWrite = (u32)input->ptrEnd - (u32)input->ptrStart;
-        platform.Platform_WriteToFile(g_replayFileId, bytesToWrite);
+        u32 bytesInBuffer = (u32)input->ptrEnd - (u32)input->ptrStart;
+        ReplayFrameHeader h = {};
+        h.frameNumber = time->frameNumber;
+        h.size = bytesInBuffer;
+
+        platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
+        platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
     }
     else if (g_replayMode == PlayingReplay)
     {
@@ -420,15 +425,8 @@ void App_Render(GameTime* time)
 
 }
 
-void App_Frame(GameTime *time, ByteBuffer platformCommands)
+void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
 {
-    g_time = *time;
-
-    /////////////////////////////////////////////////////
-    // Read Command buffers
-    /////////////////////////////////////////////////////
-    
-    // Read Platform commands (input + network?)
     App_ReadCommandBuffer(&platformCommands);
     
     // Local debugging. Not command related
@@ -447,25 +445,18 @@ void App_Frame(GameTime *time, ByteBuffer platformCommands)
         g_paused = !g_paused;
         printf("PAUSED: %d\n", g_paused);
     }
-	
-    if (g_time.singleFrame)
-    {
-        printf("APP Read buffer: %d Write buffer: %d\n",
-	    	(u32)g_appReadBuffer->ptrStart,
-	    	(u32)g_appWriteBuffer->ptrStart
-	    );    
-    }
-	
+}
+
+void App_Frame(GameTime *time)
+{
+    g_time = *time;
+
     //if (!g_paused)
     //{
         App_UpdateGameState(time);
         //time->frameNumber++;
     //}
     
-    ///////////////////////////////////////
-    // Render
-    ///////////////////////////////////////
-    //App_Render(time);
     if (time->singleFrame)
 	{
 		u32 bytesRead = g_appReadBuffer->ptrWrite - g_appReadBuffer->ptrStart;

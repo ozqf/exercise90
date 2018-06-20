@@ -59,7 +59,7 @@ struct InputActionSet
 struct ReplayFrameHeader
 {
     u32 frameNumber;
-    u32 numBytes;
+    u32 size;
 };
 
 union EntId; // HACK

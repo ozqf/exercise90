@@ -51,7 +51,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
                 cmd.impulse = IMPULSE_JOIN_GAME;
 
                 printf("APP: Client %d wishes to spawn\n", cl->clientId);
-                App_EnqueueCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
+                App_WriteGameCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
             #endif
         } break;
@@ -68,7 +68,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             // Always copy input even if it hasn't been affected or
             // the players orientation will be reset!
             cmd.input = cl->input;
-            App_EnqueueCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
+            App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 
         default:

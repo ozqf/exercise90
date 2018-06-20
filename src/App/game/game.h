@@ -82,6 +82,7 @@ global_variable u8 cycleTexturePressed = 0;
 global_variable ZStringHeader g_debugStr;
 global_variable char g_debugStrBuffer[GAME_DEBUG_BUFFER_LENGTH];
 global_variable RendObj g_debugStrRenderer;
+global_variable u8 g_verbose = 0;
 
 void Game_InitDebugStr()
 {

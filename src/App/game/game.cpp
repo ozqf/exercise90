@@ -488,7 +488,10 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Cmd_RemoveEntity cmd = {};
             Assert(bytes == sizeof(Cmd_RemoveEntity));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_RemoveEntity);
-            printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
+            if (g_verbose)
+            {
+                printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
+            }
             Ent* ent = Ent_GetEntityById(&gs->entList, &cmd.entId);
             Assert(ent != NULL);
             Ent_Free(gs, ent);
@@ -677,7 +680,7 @@ void Game_Tick(
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
         //cmd.pos.y += 10;
 
-        App_EnqueueCmd((u8*)&cmd, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);

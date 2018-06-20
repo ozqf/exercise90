@@ -29,7 +29,10 @@ EntId Ent_ReserveFreeEntity(EntList* ents)
         if (e->inUse == ENTITY_STATUS_FREE)
         {
             e->inUse = ENTITY_STATUS_RESERVED;
-            printf("SV Reserving Ent %d/%d\n", e->entId.iteration, e->entId.index);
+            if (g_verbose)
+            {
+                printf("SV Reserving Ent %d/%d\n", e->entId.iteration, e->entId.index);
+            }
             Ent_Reset(e);
             // Iteration remains same. Is iterated on free, not on reserve
 			return e->entId;
