@@ -124,6 +124,9 @@ global_variable double global_secondsPerTick = 0;
 global_variable __int64 global_timeCount = 0;
 global_variable LARGE_INTEGER tick, tock;
 
+global_variable u8 g_singleFrameStepMode = 0;
+global_variable u8 g_singleFrameRun = 0;
+
 // Command Line
 // Nice array of pointers to the start of each token in the launch param string
 #define MAX_LAUNCH_PARAMS 50

@@ -273,7 +273,6 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 motor->input.degrees.x,
                 motor->input.degrees.y
             );
-#if 0
             f32 spread = 2;
             f32 pitchOffset;
             f32 yawOffset;
@@ -298,7 +297,6 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 motor->input.degrees.x + pitchOffset,
                 motor->input.degrees.y + yawOffset
             );
-#endif
             //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
         }
     }
@@ -403,6 +401,10 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             Ent_MarkForFree(e);
             Cmd_RemoveEntity cmd = {};
             cmd.entId = e->entId;
+			if (time->singleFrame) { printf("GAME Delete prj %d/%d\n",
+				cmd.entId.iteration,
+				cmd.entId.index);
+			}
             App_EnqueueCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
             //Ent_Free(gs, e);
         }

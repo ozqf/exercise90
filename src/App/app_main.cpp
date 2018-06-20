@@ -19,7 +19,7 @@ void App_StopRecording()
 void App_EndSession()
 {
 	printf("APP Ending session\n");
-    
+	
     App_StopRecording();
 
 	Game_Shutdown(&g_gameState);
@@ -29,6 +29,23 @@ void App_EndSession()
 	// Break client links
 	App_ClearClientGameLinks();
 	COM_ZeroMemory((u8*)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
+}
+
+char* g_bufferA_Name = "a";
+char* g_bufferB_Name = "b";
+char* g_unknown = "Unknown";
+
+char* App_GetBufferName(u8* bufferStartAddr)
+{
+    if (bufferStartAddr == g_appBufferA.ptrStart)
+    {
+        return g_bufferA_Name;
+    }
+    if (bufferStartAddr == g_appBufferB.ptrStart)
+    {
+        return g_bufferB_Name;
+    }
+    return g_unknown;
 }
 
 void AllocateDebugStrings(Heap *heap)
@@ -61,14 +78,12 @@ u8 App_StartSinglePlayer(char* path)
     
 	App_EndSession();
 
-    
-
     if (!App_LoadStateFromFile(&g_gameState, path))
     {
         return 0;
     }
-
-    // Start recording
+	
+	// Start recording
     g_replayMode = RecordingReplay;
     g_replayFileId = platform.Platform_OpenFileForWriting("demo.dem");
 
@@ -205,7 +220,7 @@ i32 App_Shutdown()
     printf("APP DLL Shutdown\n");
 
     App_StopRecording();
-
+	
     Game_Shutdown(&g_gameState);
     Phys_Shutdown();
 
@@ -330,47 +345,11 @@ void App_UpdateGameState(GameTime* time)
               time,
               &g_inputActions);
 
-    //g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
+    g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
 }
 
-void App_Frame(GameTime *time, ByteBuffer platformCommands)
+void App_Render(GameTime* time)
 {
-    g_time = *time;
-
-    /////////////////////////////////////////////////////
-    // Read Command buffers
-    /////////////////////////////////////////////////////
-    
-    // Read Platform commands (input + network?)
-    App_ReadCommandBuffer(&platformCommands);
-    
-    // Local debugging. Not command related
-    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
-    {
-        // Ye gads will he every figure out matrix maths...?
-        g_worldScene.settings.viewModelMode++;
-    }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
-    {
-        Input_ToggleMouseMode();
-        g_menuOn = !g_menuOn;
-    }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->frameNumber))
-    {
-        g_paused = !g_paused;
-        printf("PAUSED: %d\n", g_paused);
-    }
-
-    //if (!g_paused)
-    //{
-        App_UpdateGameState(time);
-        //time->frameNumber++;
-    //}
-    
-    ///////////////////////////////////////
-    // Render
-    ///////////////////////////////////////
-
     GameState *gs = &g_gameState;
     GameState *ui = &g_uiState;
 
@@ -439,6 +418,60 @@ void App_Frame(GameTime *time, ByteBuffer platformCommands)
     platform.Platform_RenderScene(&g_uiScene);
 #endif
 
+}
+
+void App_Frame(GameTime *time, ByteBuffer platformCommands)
+{
+    g_time = *time;
+
+    /////////////////////////////////////////////////////
+    // Read Command buffers
+    /////////////////////////////////////////////////////
+    
+    // Read Platform commands (input + network?)
+    App_ReadCommandBuffer(&platformCommands);
+    
+    // Local debugging. Not command related
+    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
+    {
+        // Ye gads will he every figure out matrix maths...?
+        g_worldScene.settings.viewModelMode++;
+    }
+    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
+    {
+        Input_ToggleMouseMode();
+        g_menuOn = !g_menuOn;
+    }
+    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->frameNumber))
+    {
+        g_paused = !g_paused;
+        printf("PAUSED: %d\n", g_paused);
+    }
+	
+    if (g_time.singleFrame)
+    {
+        printf("APP Read buffer: %d Write buffer: %d\n",
+	    	(u32)g_appReadBuffer->ptrStart,
+	    	(u32)g_appWriteBuffer->ptrStart
+	    );    
+    }
+	
+    //if (!g_paused)
+    //{
+        App_UpdateGameState(time);
+        //time->frameNumber++;
+    //}
+    
+    ///////////////////////////////////////
+    // Render
+    ///////////////////////////////////////
+    //App_Render(time);
+    if (time->singleFrame)
+	{
+		u32 bytesRead = g_appReadBuffer->ptrWrite - g_appReadBuffer->ptrStart;
+		u32 bytesWritten = g_appWriteBuffer->ptrWrite - g_appWriteBuffer->ptrStart;
+		printf("APP frame end. Read %d bytes, wrote %d bytes\n", bytesRead, bytesWritten);
+	}
     // End of Frame. Swap Command Buffers.
     ByteBuffer* temp = g_appReadBuffer;
     g_appReadBuffer = g_appWriteBuffer;
@@ -446,6 +479,6 @@ void App_Frame(GameTime *time, ByteBuffer platformCommands)
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
-    COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
-    //*g_appWriteBuffer->ptrWrite = NULL;
+    //COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
+    *g_appWriteBuffer->ptrWrite = NULL;
 }

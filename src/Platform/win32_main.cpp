@@ -131,26 +131,30 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
     case WM_LBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
-        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
-    } break;
+        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    }
+    break;
 
     case WM_LBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
-        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
-    } break;
+        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    }
+    break;
 
     case WM_RBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
-        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
-    } break;
+        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    }
+    break;
 
     case WM_RBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
-        Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
-    } break;
+        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    }
+    break;
 
     case WM_CLOSE:
     {
@@ -173,13 +177,15 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
     {
         g_windowActive = 1;
         Win32_CheckMouseState();
-    } break;
+    }
+    break;
 
     case WM_KILLFOCUS:
     {
         g_windowActive = 0;
         Win32_CheckMouseState();
-    } break;
+    }
+    break;
 
     case WM_ACTIVATEAPP:
     {
@@ -195,8 +201,6 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         u32 VKCode = wParam;
         bool wasDown = ((lParam & (1 << 30)) != 0);
         bool isDown = ((lParam & (1 << 31)) == 0);
-
-
 
         // Debugging keys!
         // tilde == 223
@@ -226,10 +230,15 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         // {
         //     Assert(Win32_LinkToApplication());
         // }
-        
+
         if (VKCode == VK_F4 && (lParam & (1 << 29)))
         {
             globalRunning = false;
+        }
+
+        if (g_singleFrameStepMode == 1 && VKCode == VK_SHIFT && isDown)
+        {
+            g_singleFrameRun = 1;
         }
 
         // Write to command buffer
@@ -238,7 +247,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         if (inputCode != 0)
         {
             InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
-            Buf_WriteObject(&g_cmdBuf, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+            Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
             break;
         }
         else
@@ -279,7 +288,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
 /**********************************************************************
  * EXECUTE TEXT COMMAND
  *********************************************************************/
-u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
+u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
 {
     if (COM_CompareStrings(tokens[0], "QUIT") == 0 || COM_CompareStrings(tokens[0], "EXIT") == 0)
     {
@@ -295,12 +304,12 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
         printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
         return 0;
     }
-	else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
-	{
+    else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
+    {
         printf("--- VERSIONS ---\n");
-		printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+        printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
+        return 0;
+    }
     else if (COM_CompareStrings(tokens[0], "MANIFEST") == 0)
     {
         Win32_DebugPrintDataManifest();
@@ -346,21 +355,33 @@ u8 Win32_ExecTestCommand(char* str, char** tokens, i32 numTokens)
         printf("HI.\n");
         return 1;
     }
+    else if (COM_CompareStrings(tokens[0], "STEPMODE") == 0)
+    {
+        g_singleFrameStepMode = !g_singleFrameStepMode;
+        printf("PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);
+        return 1;
+    }
+    else if (COM_CompareStrings(tokens[0], "STEP") == 0)
+    {
+        g_singleFrameRun = 1;
+        printf("PLATFORM Step frame\n");
+        return 1;
+    }
     return 0;
 }
 
-void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
+void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
 {
     if (length <= 1)
     {
         return;
     }
-    COM_ZeroMemory((u8*)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
+    COM_ZeroMemory((u8 *)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
     COM_COPY(str, g_textCommandBuffer, length);
     //printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
 
     char copy[128];
-    char* tokens[32];
+    char *tokens[32];
 
     i32 tokensCount = COM_ReadTokens(g_textCommandBuffer, copy, tokens);
     if (tokensCount == 0)
@@ -378,13 +399,25 @@ void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
 
     u8 handled;
     handled = Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount);
-    if (handled) { return; }
+    if (handled)
+    {
+        return;
+    }
 
-    if (g_app.isValid) { handled = g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount); }
-    if (handled) { return; }
+    if (g_app.isValid)
+    {
+        handled = g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount);
+    }
+    if (handled)
+    {
+        return;
+    }
 
     handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
-    if (handled) { return; }
+    if (handled)
+    {
+        return;
+    }
 
     // Version is allowed to cascade down so each subsystem prints it's version
     if (COM_CompareStrings(tokens[0], "VERSION") == 0)
@@ -393,6 +426,56 @@ void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length)
     }
 
     printf(" Unknown command %s\n", g_textCommandBuffer);
+}
+
+void Win32_RunAppFrame()
+{
+
+    Win32_TickInput(&g_cmdBuf);
+
+    // Called before app update as app update will call the renderer
+    // this should be buffered up so the two can be desynced!
+    if (g_rendererLink.moduleState == 1)
+    {
+        g_renderer.R_SetupFrame(appWindow);
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // Command handling:
+    // > Mark buffer as ended
+    // > copy current state of command buffer
+    // > Swap platform buffer between A and B
+    // > Send copy to app
+    //////////////////////////////////////////////////////////////////
+    //*(u8*)g_cmdBuf.ptrWrite = 0;
+    g_cmdBuf.ptrEnd = g_cmdBuf.ptrWrite;
+    ByteBuffer frameCommands = g_cmdBuf;
+    //OutputDebugStringA("Swap platform buffers\n");
+    if (g_cmdBuf.ptrStart == g_commandBufferA)
+    {
+        g_cmdBuf.ptrStart = g_commandBufferB;
+        g_cmdBuf.ptrWrite = g_commandBufferB;
+        g_cmdBuf.ptrEnd = g_commandBufferB;
+        g_cmdBuf.count = 0;
+    }
+    else if (g_cmdBuf.ptrStart == g_commandBufferB)
+    {
+        g_cmdBuf.ptrStart = g_commandBufferA;
+        g_cmdBuf.ptrWrite = g_commandBufferA;
+        g_cmdBuf.ptrEnd = g_commandBufferA;
+        g_cmdBuf.count = 0;
+    }
+    else
+    {
+        ILLEGAL_CODE_PATH
+    }
+
+    //Win32_R_SetupFrame(appWindow);
+    if (g_app.isValid)
+    {
+        g_app.AppUpdate(&g_gameTime, frameCommands);
+    }
+    COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
 }
 
 /**********************************************************************
@@ -405,37 +488,33 @@ int CALLBACK WinMain(
     int nCmdShow)
 {
     // Spawn debugging windows cmd
-    FILE* stream;
+    FILE *stream;
     AllocConsole();
-    freopen_s(&stream, "conin$","r",stdin);
-    freopen_s(&stream, "conout$","w",stdout);
-    freopen_s(&stream, "conout$","w",stderr);
+    freopen_s(&stream, "conin$", "r", stdin);
+    freopen_s(&stream, "conout$", "w", stdout);
+    freopen_s(&stream, "conout$", "w", stderr);
     consoleHandle = GetConsoleWindow();
-    MoveWindow(consoleHandle,1,1,680,480,1);
+    MoveWindow(consoleHandle, 1, 1, 680, 480, 1);
     printf("[%s] Console initialized.\n", __FILE__);
-
-
-
 
     //MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
     //DebugBreak();
 
     Win32_ReadCommandLine(lpCmdLine);
     //Assert(false);
-    
+
     // self info for game dll
     Win32_InitPlatformInterface();
 
     // Prepare module link paths before trying to
     // link to any of them
-    
+
     g_appLink.path = "base/gamex86.dll";
-    g_appLink.pathForCopy = "base/gamex86copy.dll";         
+    g_appLink.pathForCopy = "base/gamex86copy.dll";
     g_rendererLink.path = "win32gl.dll";
     g_rendererLink.pathForCopy = "win32glcopy.dll";
     g_soundLink.path = "win32sound.dll";
     g_soundLink.pathForCopy = "win32soundcopy.dll";
-
 
     InitDebug();
     //printf("File %s, line: %d\n", __FILE__, __LINE__);
@@ -462,7 +541,6 @@ int CALLBACK WinMain(
     r.top = r.left = 0;
     r.right = windowWidth;
     r.bottom = windowHeight;
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -550,7 +628,7 @@ int CALLBACK WinMain(
                 {
                     Sleep(2);
                 }
-#endif          
+#endif
 #if 1 // I'm on my laptop, just give up CPU time
                 Sleep(2);
 #endif
@@ -606,63 +684,37 @@ int CALLBACK WinMain(
                     MessageBox(0, "Error: Negative timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
                     return 1;
                 }
-                
+
                 // char buf[64];
                 // sprintf_s(buf, 64, "Total time: %3.7f. DeltaTime: %3.7f\n", newTime, time.deltaTime);
                 // OutputDebugString(buf);
 
-                Win32_TickInput(&g_cmdBuf);
-
-                // Called before app update as app update will call the renderer
-                // this should be buffered up so the two can be desynced!
-                if (g_rendererLink.moduleState == 1)
+                if (g_singleFrameStepMode == 1)
                 {
-                    g_renderer.R_SetupFrame(appWindow);  
-                }
-
-                //////////////////////////////////////////////////////////////////
-                // Command handling:
-                // > Mark buffer as ended
-                // > copy current state of command buffer
-                // > Swap platform buffer between A and B
-                // > Send copy to app
-                //////////////////////////////////////////////////////////////////
-                //*(u8*)g_cmdBuf.ptrWrite = 0;
-                g_cmdBuf.ptrEnd = g_cmdBuf.ptrWrite;
-                ByteBuffer frameCommands = g_cmdBuf;
-				//OutputDebugStringA("Swap platform buffers\n");
-                if (g_cmdBuf.ptrStart == g_commandBufferA)
-                {
-                    g_cmdBuf.ptrStart = g_commandBufferB;
-                    g_cmdBuf.ptrWrite = g_commandBufferB;
-                    g_cmdBuf.ptrEnd = g_commandBufferB;
-					g_cmdBuf.count = 0;
-                }
-                else if (g_cmdBuf.ptrStart == g_commandBufferB)
-                {
-                    g_cmdBuf.ptrStart = g_commandBufferA;
-                    g_cmdBuf.ptrWrite = g_commandBufferA;
-                    g_cmdBuf.ptrEnd = g_commandBufferA;
-					g_cmdBuf.count = 0;
+                    if (g_singleFrameRun == 1)
+                    {
+                        g_singleFrameRun = 0;
+                        // Force delta time or the game will get very confused
+                        g_gameTime.deltaTime = 1.0f / 30.0f;
+                        printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.frameNumber);
+						g_gameTime.singleFrame = 1;
+                        Win32_RunAppFrame();
+                    }
                 }
                 else
                 {
-                    ILLEGAL_CODE_PATH
+					g_gameTime.singleFrame = 0;
+                    Win32_RunAppFrame();
                 }
+				
+				// // App always renderss
+				g_app.AppRender(&g_gameTime);
 
-                //Win32_R_SetupFrame(appWindow);
-                if (g_app.isValid)
-                {
-                    g_app.AppUpdate(&g_gameTime, frameCommands);
-                }
-				//OutputDebugStringA("Zero platform buffer\n");
-				COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
-                
                 if (g_debugInputActive)
                 {
                     Platform_R_DrawScene(&g_debugScene);
                 }
-                
+
                 if (g_rendererLink.moduleState == 1)
                 {
                     g_renderer.R_FinishFrame(appWindow);
