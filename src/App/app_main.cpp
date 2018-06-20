@@ -479,6 +479,6 @@ void App_Frame(GameTime *time, ByteBuffer platformCommands)
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
-    //COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
-    *g_appWriteBuffer->ptrWrite = NULL;
+    COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
+    //*g_appWriteBuffer->ptrWrite = NULL;
 }

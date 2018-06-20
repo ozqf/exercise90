@@ -4,16 +4,24 @@
 
 void App_EnqueueCmd(u8* ptr, u32 type, u32 size)
 {
-    CmdHeader h = { type, size };
+    BufferItemHeader h = { type, size };
     u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
-    Assert(remaining >= (sizeof(CmdHeader) + size));
-	if (g_time.singleFrame)
-	{
-		printf("APP Writing type %d (%d bytes) to buffer %s\n", type, size, App_GetBufferName(g_appWriteBuffer->ptrStart));
-	}
-    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);
+    Assert(remaining >= (sizeof(BufferItemHeader) + size));
+    u8* start = g_appWriteBuffer->ptrWrite;
+	
+    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, BufferItemHeader);
     g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
+
+    if (g_time.singleFrame)
+	{
+		printf("APP Wrote type %d (%d size, %d actual) to buffer %s\n",
+            type,
+            size,
+            ((u32)g_appWriteBuffer->ptrWrite - (u32)start),
+            App_GetBufferName(g_appWriteBuffer->ptrStart)
+        );
+	}
 }
 
 void App_SendToServer(u8* ptr, u32 type, u32 size)

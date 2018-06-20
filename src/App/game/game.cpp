@@ -528,6 +528,42 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
     return 0;
 }
 
+void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
+{
+    u8* ptrRead = commands->ptrStart;
+    if (verbose)
+    {
+        u32 size = commands->ptrEnd - commands->ptrStart;
+        printf("GAME Reading %d bytes from %s\n", size, App_GetBufferName(commands->ptrStart));
+    }
+    u32 totalRead = 0;
+    while(ptrRead < commands->ptrEnd)
+    {
+        BufferItemHeader h = {};
+        ptrRead += COM_COPY_STRUCT(ptrRead, &h, BufferItemHeader);
+        totalRead += (sizeof(BufferItemHeader) + h.size);
+        if (verbose)
+        {
+            printf("  GAME EXEC %d (%d bytes) Total read: %d. Remaining: %d\n",
+                h.type,
+                h.size,
+                totalRead,
+                (u32)(commands->ptrEnd - (ptrRead + h.size))
+            );
+        }
+        
+        if (h.type == NULL)
+        {
+            ptrRead = commands->ptrEnd;
+        }
+        else
+        {
+            Game_ReadCmd(gs, h.type, ptrRead, h.size);
+        }
+        ptrRead += h.size;
+    }
+}
+
 // Set at the start of a frame and released at the end
 ByteBuffer* g_currentOutput = NULL;
 
@@ -670,12 +706,13 @@ void Game_Tick(
 		printf("GAME Reading commands from Buffer %s\n", App_GetBufferName(ptrRead));
         printf("GAME Writing commands to Buffer %s\n", App_GetBufferName(output->ptrStart));
 	}
-    while (ptrRead < input->ptrEnd)
-    {
-        BufferItemHeader header = {};
-        ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
-        Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size);
-    }
+    Game_ReadCommandBuffer(gs, input, (time->singleFrame != 0));
+    // while (ptrRead < input->ptrEnd)
+    // {
+    //     BufferItemHeader header = {};
+    //     ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
+    //     Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size);
+    // }
     
     //////////////////////////////////////////////////////////////////
     
