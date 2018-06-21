@@ -16,6 +16,24 @@ void App_StopRecording()
     }
 }
 
+void App_StartRecording()
+{
+	if (g_replayMode != None)
+	{
+		printf("APP already recording...\n");
+		return;
+	}
+	g_replayMode = RecordingReplay;
+	g_replayFileId = platform.Platform_OpenFileForWriting("demo.dem");
+	StateSaveHeader h = {};
+	h.magic[0] = 'S';
+	h.magic[1] = 'A';
+	h.magic[2] = 'V';
+	h.magic[3] = 'E';
+	COM_CopyStringLimited(g_currentSceneName, h.baseFile, 32);
+	platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(StateSaveHeader));
+}
+
 void App_EndSession()
 {
 	printf("APP Ending session\n");
@@ -82,10 +100,9 @@ u8 App_StartSinglePlayer(char* path)
     {
         return 0;
     }
+	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
-	// Start recording
-    g_replayMode = RecordingReplay;
-    g_replayFileId = platform.Platform_OpenFileForWriting("demo.dem");
+	App_StartRecording();
 
 	// Spawn local client
 	// Assign local client id.
@@ -331,7 +348,10 @@ void App_UpdateGameState(GameTime* time)
         ReplayFrameHeader h = {};
         h.frameNumber = time->gameFrameNumber;
         h.size = bytesInBuffer;
-
+        if (time->singleFrame)
+        {
+            printf("APP writing demo frame %d to file (%d bytes)\n", h.frameNumber, h.size);
+        }
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
         platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
     }

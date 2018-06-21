@@ -313,11 +313,21 @@ i32 Platform_OpenFileForWriting(char* fileName)
 	{
 		return -1;
 	}
+	fseek(g_appReadFiles[index], 0, SEEK_END);
+	i32 end = ftell(g_appReadFiles[index]);
+	printf("PLATFORM Writing to file %s (current has %d bytes!)\n", fileName, end);
+
+	fseek(g_appReadFiles[index], 0, SEEK_SET);
 	return index;
 }
 i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 {
 	fwrite(ptr, numBytes, 1, g_appReadFiles[fileId]);
+	i32 pos = ftell(g_appReadFiles[fileId]);
+	if (g_gameTime.singleFrame)
+	{
+		printf("PLATFORM Wrote %d bytes to file %d. Total: %d\n", numBytes, fileId, pos);
+	}
 	return 1;
 }
 i32 Platform_CloseFileForWriting(i32 fileId)

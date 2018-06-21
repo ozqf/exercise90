@@ -119,6 +119,8 @@ global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
 // Entity Memory
 /////////////////////////////////////////////////////////////
 // Game
+#define MAX_SCENE_NAME_CHARS 64
+global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
 global_variable GameState g_gameState;
 global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 

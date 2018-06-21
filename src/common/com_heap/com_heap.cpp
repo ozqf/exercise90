@@ -162,7 +162,7 @@ inline ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
     Heap_GetBlockMemoryAddress(heap, ref);
     buf.ptrStart = (u8*)ref->ptrMemory;
     buf.ptrWrite = (u8*)ref->ptrMemory;
-    buf.ptrEnd = (u8*)ref->ptrMemory + ref->objectSize;
+	buf.ptrEnd = buf.ptrStart;// (u8*)ref->ptrMemory + ref->objectSize;
     buf.capacity = ref->objectSize;
     return buf;
 }
