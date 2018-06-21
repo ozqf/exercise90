@@ -312,15 +312,17 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 // returns num chars written
 i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
 {
+    i32 wroteSomething = 0;
     i32 written = 0;
+    char* ptrWrite = buf;
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
         EC_ActorMotor* motor = &gs->actorMotorList.items[i];
         if (motor->inUse == 0) { continue; }
-
+        wroteSomething = 1;
         written += sprintf_s(
-            buf,
-            maxChars,
+            ptrWrite,
+            (maxChars - written),
 "Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R/U/D: %d/%d/%d/%d/%d/%d\n\
 ATK: %d TICK: %.2f SPEED: %.2f\n",
             motor->entId.iteration,
@@ -338,7 +340,7 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
             motor->tick,
             motor->debugCurrentSpeed
         );
-
+        ptrWrite = buf + written;
         //EC_Collider* col = EC_FindCollider(&motor->entId, gs);
         //Assert(col != NULL);
         //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
@@ -346,6 +348,12 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
         
 
     }
+
+    if (!wroteSomething)
+    {
+        sprintf_s(ptrWrite, maxChars, "No actor motor found\n");
+    }
+
     return written;
 }
 

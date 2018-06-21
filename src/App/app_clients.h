@@ -141,7 +141,7 @@ void App_UpdateLocalClients(GameTime* time)
         if (cl->clientId == -1)
         {
             // Process input
-            App_UpdateLocalClient(cl, &g_inputActions, time->frameNumber);
+            App_UpdateLocalClient(cl, &g_inputActions, time->gameFrameNumber);
         }
     }
 }

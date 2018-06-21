@@ -395,23 +395,23 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	}
 }
 
-void Game_ApplyInputToTransform(InputActionSet* actions, Vec3* lookDegrees, Transform* t, GameTime* time)
+void Game_ApplyInputToTransform(InputActionSet* actions, Vec3* lookDegrees, Transform* t, f32 deltaTime, u32 frameNumber)
 {
 	switch (GAME_INPUT_MODE)
 	{
 		case GAME_INPUT_FULL_FREEDOM:
 		{
-			Game_ApplyInputFullFreedom(actions, lookDegrees, t, time->deltaTime, time->frameNumber);
+			Game_ApplyInputFullFreedom(actions, lookDegrees, t, deltaTime, frameNumber);
 		} break;
 
 		case GAME_INPUT_ON_FOOT:
 		{
-			Game_ApplyInputOnFootMode(actions, lookDegrees, t, time->deltaTime, time->frameNumber);
+			Game_ApplyInputOnFootMode(actions, lookDegrees, t, deltaTime, frameNumber);
 		} break;
 
 		default:
 		{
-			Game_ApplyInputFlyMode(actions, lookDegrees, t, time->deltaTime, time->frameNumber);
+			Game_ApplyInputFlyMode(actions, lookDegrees, t, deltaTime, frameNumber);
 		} break;
 	}
 }

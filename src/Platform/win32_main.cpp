@@ -633,9 +633,8 @@ int CALLBACK WinMain(
                 float newTime = Win32_FloatTime();
                 g_gameTime.deltaTime = newTime - previousTime;
                 previousTime = newTime;
+				g_gameTime.platformFrameNumber++;
 
-                g_gameTime.frameNumber++;
-                
                 //////////////////////////////////////////////
                 // CHECK HOT DLL RELOAD
                 //////////////////////////////////////////////
@@ -694,7 +693,7 @@ int CALLBACK WinMain(
                         g_singleFrameRun = 0;
                         // Force delta time or the game will get very confused
                         g_gameTime.deltaTime = 1.0f / 30.0f;
-                        printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.frameNumber);
+                        printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.platformFrameNumber);
 						g_gameTime.singleFrame = 1;
                         Win32_RunAppFrame();
                     }

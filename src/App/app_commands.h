@@ -43,10 +43,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
         printf("  IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
+        printf("  DEBUG - Cycle debug print outs\n");
+        printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
         printf("  TEXTURES - List App textures handles\n");
         printf("  GHOST - Toggle debug camera on/off\n");
         printf("  CLIENTS - List current client states\n");
-        printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
         printf("  DUMPHEAP - List Heap memory allocations\n");
         return 1;
     }
@@ -88,6 +89,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         {
             printf("DEBUG requires additional parameters\n");
             return 1;
+        }
+        else if (numTokens == 2)
+        {
+            i32 val = COM_AsciToInt32(tokens[1]);
+            g_gameState.debugMode = (u16)val;
+            printf("APP Debug text mode %d\n", g_gameState.debugMode);
         }
         // else if (numTokens == 2)
         // {
@@ -244,7 +251,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
             Assert(bytes == sizeof(InputEvent));
             InputEvent ev = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
-            Exec_ReadInput(g_time.frameNumber, ev);
+            Exec_ReadInput(g_time.platformFrameNumber, ev);
         }
         break;
 #if 0

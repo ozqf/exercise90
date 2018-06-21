@@ -329,7 +329,7 @@ void App_UpdateGameState(GameTime* time)
         // > Write contents of read buffer into demo file
         u32 bytesInBuffer = (u32)input->ptrEnd - (u32)input->ptrStart;
         ReplayFrameHeader h = {};
-        h.frameNumber = time->frameNumber;
+        h.frameNumber = time->gameFrameNumber;
         h.size = bytesInBuffer;
 
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
@@ -371,7 +371,7 @@ void App_Render(GameTime* time)
             &g_debugCameraDegrees,
             &g_debugCameraTransform,
             time->deltaTime,
-            time->frameNumber
+            time->platformFrameNumber
             );
         g_worldScene.cameraTransform = g_debugCameraTransform;
     }
@@ -411,11 +411,11 @@ void App_Render(GameTime* time)
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
     //App_WriteCameraDebug(time);
 
-    g_debugStr = Game_WriteDebugString(gs, time);
+    g_debugStr = App_WriteDebugString(gs, time);
 
     Game_SetDebugStringRender();
     Transform t = {};
-    t.pos.x = (-1 - 0.05f);
+    t.pos.x = -1;// (-1 - 0.05f);
     t.pos.y = 1;
     // t.pos.x = -1;
     // t.pos.y = 1;
@@ -427,20 +427,23 @@ void App_Render(GameTime* time)
 
 void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
 {
+	// Increment internal platform frame number here!
+	g_time.platformFrameNumber = time->platformFrameNumber;
+    
     App_ReadCommandBuffer(&platformCommands);
     
     // Local debugging. Not command related
-    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->frameNumber))
+    if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->platformFrameNumber))
     {
         // Ye gads will he every figure out matrix maths...?
         g_worldScene.settings.viewModelMode++;
     }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->frameNumber))
+    if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->platformFrameNumber))
     {
         Input_ToggleMouseMode();
         g_menuOn = !g_menuOn;
     }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->frameNumber))
+    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->platformFrameNumber))
     {
         g_paused = !g_paused;
         printf("PAUSED: %d\n", g_paused);
@@ -472,4 +475,6 @@ void App_Frame(GameTime *time)
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
     COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
     //*g_appWriteBuffer->ptrWrite = NULL;
+
+    time->gameFrameNumber++;
 }

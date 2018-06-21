@@ -366,9 +366,10 @@ struct ZStringHeader
 struct GameTime
 {
     f32 deltaTime;
-    u32 frameNumber;
-    u32 fixedFrameNumber;
-    f32 fixedDeltaTime;
+    u32 platformFrameNumber;
+	u32 gameFrameNumber;
+    /*u32 fixedFrameNumber;
+    f32 fixedDeltaTime;*/
     u32 ticks;
     u32 singleFrame;   // If true then print extra debug info
 };
