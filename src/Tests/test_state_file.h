@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/com_module.h"
+#include "../app/game/game_command_types.h"
 
 struct FileSegment
 {
@@ -74,15 +75,15 @@ union EntId
 };
 
 
-struct Cmd_Spawn
-{
-    i32 factoryType;
-	EntId entityId;
-    Vec3 pos;
-    Vec3 rot;
-    Vec3 size;
-    u32 flags;
-};
+// struct Cmd_Spawn
+// {
+//     i32 factoryType;
+// 	EntId entityId;
+//     Vec3 pos;
+//     Vec3 rot;
+//     Vec3 size;
+//     u32 flags;
+// };
 
 void Test_WriteStateFile(char* fileName, char* baseFileName)
 {

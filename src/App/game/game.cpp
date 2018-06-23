@@ -318,7 +318,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
                 return 1;
             }
             
-			Cmd_Spawn spawn = {};
+			Cmd_EntityState spawn = {};
 			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
 			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
 			
@@ -326,8 +326,12 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             clUpdate.clientId = cmd->clientId;
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = spawn.entityId;
-            Exec_Spawn(gs, &spawn);
-            Exec_UpdateClient(&clUpdate);
+
+            App_WriteGameCmd((u8*)&spawn, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
+            App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+
+            // Exec_Spawn(gs, &spawn);
+            // Exec_UpdateClient(&clUpdate);
 			return 1;
 		} break;
 
@@ -344,7 +348,16 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
     {
-        case CMD_TYPE_SPAWN:
+        case CMD_TYPE_DYNAMIC_STATE:
+        {
+            Cmd_EntityState cmd = {};
+            Assert(bytes == sizeof(Cmd_EntityState));
+            COM_COPY_STRUCT(ptr, &cmd, Cmd_EntityState);
+            Exec_DynamicEntityState(gs, &cmd);
+			return 1;
+        } break;
+
+        case CMD_TYPE_STATIC_STATE:
         {
             Cmd_Spawn cmd = {};
 			// If size doesn't match, something is terrible wrong.
@@ -352,17 +365,8 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 			// > Or read pointer got mangled
             Assert(bytes == sizeof(Cmd_Spawn));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_Spawn);
-            Exec_Spawn(gs, &cmd);
+            Exec_StaticEntityState(gs, &cmd);
             return 1;
-        } break;
-
-        case CMD_TYPE_SPAWN_PROJECTILE:
-        {
-            Cmd_SpawnProjectile cmd = {};
-            Assert(bytes == sizeof(Cmd_SpawnProjectile));
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_SpawnProjectile);
-            Exec_SpawnProjectile(gs, &cmd);
-			return 1;
         } break;
 
         case CMD_TYPE_REMOVE_ENT:
@@ -374,7 +378,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             {
                 printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
             }
-            Ent* ent = Ent_GetEntityById(&gs->entList, &cmd.entId);
+            Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd.entId);
             Assert(ent != NULL);
             Ent_Free(gs, ent);
             return 1;
@@ -550,19 +554,25 @@ void Game_Tick(
 {
     g_currentOutput = output;
     //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
+    gs->verbose = (u8)time->singleFrame;
+    if (time->singleFrame)
+    {
+        printf("GAME Frame %d\n", time->gameFrameNumber);
+    }
 #if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
     {
         // BufferItemHeader header = {};
         // header.type = CMD_TYPE_SPAWN;
         // header.size = sizeof(Cmd_Spawn);
-        Cmd_Spawn cmd = {};
+        Cmd_EntityState cmd = {};
 		cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
         cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
         cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
+        printf("Spawn test: %d/%d\n", cmd.entityId.iteration, cmd.entityId.index);
         //cmd.pos.y += 10;
 
-        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
+        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
 
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);

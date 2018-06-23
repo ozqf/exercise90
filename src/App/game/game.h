@@ -176,7 +176,7 @@ ClientTick g_debugInput = {};
 
 #include "game_entities.h"
 #include "comp_rendObj.h"
-#include "game_commands.h"
+#include "game_command_types.h"
 #include "comp_aiController.h"
 
 #include "game_entityFactory.cpp"

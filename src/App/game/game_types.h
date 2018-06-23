@@ -210,6 +210,8 @@ struct GameState
     char debugString[2048];
     u32 debugStringLength = 0;
     u32 debugStringCapacity = 2048;
+
+    u8 verbose;
 };
 
 //////////////////////////////////////////////////

@@ -29,23 +29,36 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
 
 void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
 {
-    Cmd_SpawnProjectile cmd = {};
-    cmd.spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
-    cmd.spawn.factoryType = 9999;   // Not used yet.
-    cmd.spawn.pos.x = x;
-    cmd.spawn.pos.y = y;
-    cmd.spawn.pos.z = z;
-    cmd.spawn.rot.y = yawDegrees;
-    cmd.spawn.rot.x = pitchDegrees;
-    cmd.speed = TEST_PROJECTILE_SPEED;
+    Cmd_EntityState cmd = {};
+    cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
+    cmd.factoryType = ENTITY_TYPE_PROJECTILE;
+    cmd.pos.x = x;
+    cmd.pos.y = y;
+    cmd.pos.z = z;
+    cmd.rot.y = yawDegrees;
+    cmd.rot.x = pitchDegrees;
+    cmd.moveSpeed = TEST_PROJECTILE_SPEED;
+
+    // Calculate velocity via a transform
+    Transform t;
+    Transform_SetToIdentity(&t);
+    Transform_RotateY(&t, yawDegrees * DEG2RAD);
+    Transform_RotateX(&t, pitchDegrees * DEG2RAD);
+    cmd.vel.x = -t.rotation.zAxis.x * cmd.moveSpeed;
+    cmd.vel.y = -t.rotation.zAxis.y * cmd.moveSpeed;
+    cmd.vel.z = -t.rotation.zAxis.z * cmd.moveSpeed;
+
+    cmd.tock = 0.5f;
+    cmd.tick = 0.5f;
+
     if (g_verbose)
     {
         printf("SV Creating prj command, entID: %d/%d\n",
-            cmd.spawn.entityId.iteration,
-            cmd.spawn.entityId.index
+            cmd.entityId.iteration,
+            cmd.entityId.index
         );
     }
-    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_SPAWN_PROJECTILE, sizeof(Cmd_SpawnProjectile));
+    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
 #if 0
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);

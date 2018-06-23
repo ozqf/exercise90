@@ -152,11 +152,27 @@ inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
     return &ents->items[index];
 }
 
+// Will not return entities that are free or merely reserved. Only ones that are active
 inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)
     Ent* ent = &ents->items[id->index];
-    if (ent->inUse == 0 || ent->entId.iteration != id->iteration)
+    if (
+        ent->inUse != ENTITY_STATUS_IN_USE
+        || ent->entId.iteration != id->iteration)
+    {
+        return NULL;
+    }
+    return ent;
+}
+
+inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
+{
+    Assert(id->index < ents->max)
+    Ent* ent = &ents->items[id->index];
+    if (
+        ent->inUse != ENTITY_STATUS_DEAD
+        || ent->entId.iteration != id->iteration)
     {
         return NULL;
     }

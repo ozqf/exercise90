@@ -14,14 +14,14 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 // Game Commands
 //////////////////////////////////////////////////
 
-#define CMD_TYPE_SPAWN 100
+#define CMD_TYPE_STATIC_STATE 100
 #define CMD_TYPE_IMPULSE 101
 #define CMD_TYPE_PLAYER_INPUT 102
 #define CMD_TYPE_CLIENT_UPDATE 103
 #define CMD_TYPE_TEXT 104
-#define CMD_TYPE_SPAWN_PROJECTILE 105
+#define CMD_TYPE_DYNAMIC_STATE 105
 #define CMD_TYPE_REMOVE_ENT 106
-#define CMD_TYPE_ENTITY_UPDATE 107
+#define CMD_TYPE_ENTITY_STATE 107
 
 //////////////////////////////////////////////////
 // Spawning
@@ -100,11 +100,42 @@ struct Cmd_Text
 //};
 
 // 105
-struct Cmd_SpawnProjectile
+// struct Cmd_SpawnProjectile
+// {
+//     // What to spawn
+//     Cmd_Spawn spawn;
+//     f32 speed;
+// };
+
+// State save/load
+// 105 - Complete entity restore
+struct Cmd_EntityState
 {
-    // What to spawn
-    Cmd_Spawn spawn;
-    f32 speed;
+    // Identification
+    i32 factoryType;
+    EntId entityId;
+    // total 8b
+    
+    // Linking
+    EntId target;            // 4b
+    EntId source;            // 4b
+    // total 16b
+    
+    // Physical state
+    Vec3 pos;                // 12b
+    Vec3 rot;                // 12b
+    Vec3 vel;                // 12b
+    Vec3 size;               // 12b
+    // total 48b
+    
+    // Settings
+    u32 flags;
+    f32 moveSpeed;
+    f32 tick;                
+    f32 tock;
+    // total 12b
+    // -- 84b so far --
+    // packet of 1000b = 11 updates per packet
 };
 
 // 106
@@ -113,11 +144,16 @@ struct Cmd_RemoveEntity
     EntId entId;
 };
 
-// 107
-struct Cmd_EntityUpdate
+// 107 - Entity delta contains a list of fields to update
+// each bit in 'fields' relates to a field on the state to set.
+// total size of this struct + the data after it should be encoded
+// in the command header
+struct Cmd_EntityDelta
 {
     EntId entId;
-    Vec3 pos;
+    u32 size;
+    u32 fields;
 };
+
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);

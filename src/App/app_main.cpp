@@ -410,7 +410,7 @@ void App_Render(GameTime* time)
 
     platform.Platform_RenderScene(&g_worldScene);
 
-    if (gs->localPlayerHasEnt)
+    if (gs->localPlayerHasEnt && !g_debugCameraOn)
     {
         Game_BuildWeaponModelScene(&g_weaponModelScene);
         platform.Platform_RenderScene(&g_weaponModelScene);
