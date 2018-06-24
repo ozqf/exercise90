@@ -197,9 +197,6 @@ struct PhysEv_RaycastDebug
 	f32 colour[3];
 };
 
-
-
-
 //////////////////////////////////////////////////////////////////
 // Header for all items in event or command buffers
 //////////////////////////////////////////////////////////////////
@@ -207,4 +204,12 @@ struct PhysDataItemHeader
 {
 	PhysEventType type;
     i32 size;
+};
+
+struct PhysCmd_State
+{
+	i32 shapeId;
+	f32 pos[3];
+	f32 rot[3];
+	f32 vel[3];
 };

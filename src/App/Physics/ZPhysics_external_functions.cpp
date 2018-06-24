@@ -53,6 +53,12 @@ i32 Phys_RemoveShape()
     return 0;
 }
 
+void Phys_SetState(PhysCmd_State* state)
+{
+    g_cmdBuf.ptrWrite += COM_WriteByte(SetState, g_cmdBuf.ptrWrite);
+    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(state, g_cmdBuf.ptrWrite, PhysCmd_State);
+}
+
 void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
 {
     PhysCmd_Teleport cmd = {};
@@ -61,7 +67,7 @@ void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
     cmd.pos[1] = posY;
     cmd.pos[2] = posZ;
 	
-    g_cmdBuf.ptrWrite += COM_WriteByte(1, g_cmdBuf.ptrWrite);
+    g_cmdBuf.ptrWrite += COM_WriteByte(Teleport, g_cmdBuf.ptrWrite);
     g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_Teleport);
 }
 

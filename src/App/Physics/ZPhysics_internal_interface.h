@@ -49,7 +49,8 @@ enum ZCommandType
 	Teleport = 1,
 	Create = 2,
 	Remove = 3,
-	SetVelocity = 4
+	SetVelocity = 4,
+	SetState = 5
 };
 
 internal PhysBodyHandle* Phys_GetFreeBodyHandle(PhysBodyList* list);

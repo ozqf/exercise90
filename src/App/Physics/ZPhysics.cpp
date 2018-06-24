@@ -176,6 +176,27 @@ void Phys_NeverCall()
     Phys_ReadCommands(NULL);
 }
 
+inline void Phys_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
+{
+    btTransform t;
+    body->getMotionState()->getWorldTransform(t);
+    btVector3 newPosition = t.getOrigin();
+    newPosition.setX(-newPosition.getX() + x);
+    newPosition.setY(-newPosition.getY() + y);
+    newPosition.setZ(-newPosition.getZ() + z);
+    body->translate(newPosition);
+}
+
+inline void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
+{
+    body->activate(true);
+    btVector3 newVelocity;
+    newVelocity.setX(vx);
+    newVelocity.setY(vy);
+    newVelocity.setZ(vz);
+    body->setLinearVelocity(newVelocity);
+}
+
 void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
@@ -184,6 +205,13 @@ void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
         return;
     }
     handle->rigidBody->activate(true);
+    Phys_SetBodyPosition(
+        handle->rigidBody,
+        cmd->pos[0],
+        cmd->pos[1],
+        cmd->pos[2]
+    );
+#if 0
     btTransform t;
     handle->rigidBody->getMotionState()->getWorldTransform(t);
     btVector3 newPosition = t.getOrigin();
@@ -193,16 +221,7 @@ void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
     /*handle->rigidBody->translate(btVector3(cmd->pos[0], cmd->pos[1], cmd->pos[2]));*/
     handle->rigidBody->translate(newPosition);
     //btMotionState state = handle->rigidBody->getMotionState();
-}
-
-void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
-{
-    body->activate(true);
-    btVector3 newVelocity;
-    newVelocity.setX(vx);
-    newVelocity.setY(vy);
-    newVelocity.setZ(vz);
-    body->setLinearVelocity(newVelocity);
+#endif
 }
 
 void PhysCmd_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
@@ -219,6 +238,17 @@ void PhysCmd_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
 	newVelocity.setY(cmd->vel[1]);
 	newVelocity.setZ(cmd->vel[2]);
 	handle->rigidBody->setLinearVelocity(newVelocity);*/
+}
+
+void PhysCmd_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
+{
+    PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
+    if (handle == NULL)
+    {
+        return;
+    }
+    handle->rigidBody->activate(true);
+    btTransform t;
 }
 
 i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1)
@@ -328,6 +358,13 @@ void Phys_ReadCommands(ZBulletWorld *world)
             PhysCmd_ChangeVelocity(world, &cmd);
         }
         break;
+
+        case SetState:
+        {
+            PhysCmd_State cmd = {};
+            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_State);
+            PhysCmd_SetState(world, &cmd);
+        } break;
 
         case Create:
         {

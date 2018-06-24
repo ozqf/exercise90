@@ -327,7 +327,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = spawn.entityId;
 
-            App_WriteGameCmd((u8*)&spawn, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
+            App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
             App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 
             // Exec_Spawn(gs, &spawn);
@@ -348,7 +348,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
     {
-        case CMD_TYPE_DYNAMIC_STATE:
+        case CMD_TYPE_ENTITY_STATE:
         {
             Cmd_EntityState cmd = {};
             Assert(bytes == sizeof(Cmd_EntityState));
@@ -572,7 +572,7 @@ void Game_Tick(
         printf("Spawn test: %d/%d\n", cmd.entityId.iteration, cmd.entityId.index);
         //cmd.pos.y += 10;
 
-        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
+        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
 
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);

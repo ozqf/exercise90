@@ -58,7 +58,7 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
             cmd.entityId.index
         );
     }
-    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_DYNAMIC_STATE, sizeof(Cmd_EntityState));
+    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
 #if 0
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
     EntId id = Ent_ReserveFreeEntity(&gs->entList);

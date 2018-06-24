@@ -23,9 +23,18 @@ struct StateSaveHeader
 {
 	char magic[4] = { 'S', 'A', 'V', 'E' };
 	char baseFile[32];
+    
+    /* File Sections:
+    > static entities are skipped if a baseFile was specified
+    > Dynamic entities are skipped if this file is a 'base' file
+    > Frames are written into replay demo files.
+    */
 
+    
 	FileSegment staticEntities;
+    
 	FileSegment dynamicEntities;
+    
 	FileSegment frames;
 };
 

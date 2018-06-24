@@ -320,6 +320,7 @@ i32 Platform_OpenFileForWriting(char* fileName)
 	fseek(g_appReadFiles[index], 0, SEEK_SET);
 	return index;
 }
+
 i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 {
 	fwrite(ptr, numBytes, 1, g_appReadFiles[fileId]);
@@ -330,9 +331,20 @@ i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 	}
 	return 1;
 }
+
 i32 Platform_CloseFileForWriting(i32 fileId)
 {
 	fclose(g_appReadFiles[fileId]);
 	g_appReadFiles[fileId] = NULL;
 	return 1;
+}
+
+void Platform_SeekInFile(i32 fileId, i32 position)
+{
+	fseek(g_appReadFiles[fileId], position, SEEK_SET);
+}
+
+i32 Platform_GetPositionInFile(i32 fileId)
+{
+	return ftell(g_appReadFiles[fileId]);
 }

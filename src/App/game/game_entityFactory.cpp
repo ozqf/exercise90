@@ -36,6 +36,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     return ent;
 }
 
+#if 0
 Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
 {
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
@@ -68,7 +69,8 @@ Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
         ent->entId.iteration);
     return ent;
 }
-
+#endif
+#if 0
 Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
 {
     //Ent *ent;
@@ -103,7 +105,7 @@ Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
     gs->localPlayerEntId = ent->entId;
     return ent;
 }
-
+#endif
 Ent* Spawn_Null(GameState* gs, Cmd_Spawn* cmd)
 {
     ILLEGAL_CODE_PATH
@@ -171,9 +173,14 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
     if (ent != NULL)
     {
         // restore state
-        Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
-        Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
+        //Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
+        //Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
+
+        EC_Collider *collider = EC_FindCollider(gs, ent);
+        PhysCmd_State s = {};
+        s.shapeId = collider->shapeId;
         
+        Phys_SetState(&s);
     }
     else
     {
@@ -294,6 +301,11 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
     return ent;
 }
 
+void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
+{
+
+}
+
 Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
 {
     if (cmd->factoryType == ENTITY_TYPE_WORLD_CUBE)
@@ -333,44 +345,4 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
         }
     }
     return NULL;
-#if 0
-    // TODO: Projectile spawn function should use factory type to specify
-    // the Projectile template to copy settings from!
-    if(g_verbose)
-    {
-        printf("Spawning prj %d/%d\n", cmd->spawn.entityId.iteration, cmd->spawn.entityId.index);
-    }
-
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->spawn.entityId);
-    ent->transform.pos.x = cmd->spawn.pos.x;
-    ent->transform.pos.y = cmd->spawn.pos.y;
-    ent->transform.pos.z = cmd->spawn.pos.z;
-
-    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
-    Transform_RotateY(&ent->transform, cmd->spawn.rot.y * DEG2RAD);
-    Transform_RotateX(&ent->transform, cmd->spawn.rot.x * DEG2RAD);
-    
-    
-    EC_Renderer* rend = EC_AddRenderer(gs, ent);
-    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\BAL1A0.bmp"));
-    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
-
-
-    EC_Projectile* prj = EC_AddProjectile(gs, ent);
-    prj->tock = 4.0f;
-    prj->tick = prj->tock;
-    
-    prj->move.x = -ent->transform.rotation.zAxis.x * cmd->speed;
-    prj->move.y = -ent->transform.rotation.zAxis.y * cmd->speed;
-    prj->move.z = -ent->transform.rotation.zAxis.z * cmd->speed;
-    // move projectile forward a little
-    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
-    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
-    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
-    
-    prj->tick = 0.5f;// 1.0f;
-    prj->tock = 0.5f;// 1.0f;
-
-    return ent;
-#endif
 }

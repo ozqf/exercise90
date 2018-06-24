@@ -40,6 +40,8 @@ i32 Phys_CreateBox(
 
 i32 Phys_RemoveShape();
 
+void Phys_SetState(PhysCmd_State* state);
+
 void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ);
 
 void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ);

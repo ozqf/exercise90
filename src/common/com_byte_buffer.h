@@ -25,6 +25,16 @@ struct BufferItemHeader
     u32 size;
 };
 
+static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
+{
+    ByteBuffer b = {};
+    b.ptrStart = (u8*)mem.ptrMemory;
+    b.ptrWrite = b.ptrStart;
+    b.ptrEnd = b.ptrStart;
+    b.capacity = mem.size;
+    return b;
+}
+
 static inline void Buf_Clear(ByteBuffer* b)
 {
 	COM_ZeroMemory(b->ptrStart, b->capacity);

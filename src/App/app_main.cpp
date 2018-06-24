@@ -16,22 +16,84 @@ void App_StopRecording()
     }
 }
 
-void App_StartRecording()
+void App_StartRecording(GameState* gs)
 {
+    #if 1
 	if (g_replayMode != None)
 	{
 		printf("APP already recording...\n");
 		return;
 	}
+
+    // Allocate a temporary chunk to write to, then dump it all out into a file
+    i32 capacity = MegaBytes(10);
+    
+    MemoryBlock mem = {};
+    platform.Platform_Malloc(&mem, MegaBytes(10));
+    ByteBuffer buf = Buf_FromMemoryBlock(mem);
+    
+    char* demoName = "demo.dem";
+
 	g_replayMode = RecordingReplay;
-	g_replayFileId = platform.Platform_OpenFileForWriting("demo.dem");
+	g_replayFileId = platform.Platform_OpenFileForWriting(demoName);
 	StateSaveHeader h = {};
 	h.magic[0] = 'S';
 	h.magic[1] = 'A';
 	h.magic[2] = 'V';
 	h.magic[3] = 'E';
 	COM_CopyStringLimited(g_currentSceneName, h.baseFile, 32);
-	platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(StateSaveHeader));
+
+    // step forward, write header later
+    buf.ptrWrite += sizeof(StateSaveHeader);
+	//platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(StateSaveHeader));
+    
+    printf("APP sizeof(EntityState): %d\n", sizeof(Cmd_EntityState));
+
+    ///////////////////////////////
+    // Write commands
+
+    BufferItemHeader cmdHeader = {};
+    
+    // Record current position to calculate bytes written after loop
+    u8* startOfDynamicCmds = buf.ptrWrite;
+    h.dynamicEntities.offset = (u32)(buf.ptrWrite - buf.ptrStart);
+
+    // ents
+    i32 numEntities = gs->entList.count;
+    for (i32 i = 0; i < numEntities; ++i)
+    {
+        Ent* e = &gs->entList.items[i];
+        if (e->inUse != ENTITY_STATUS_IN_USE) { continue; }
+        Cmd_EntityState s = {};
+        Game_WriteEntityState(gs, e, &s);
+        cmdHeader.type = CMD_TYPE_ENTITY_STATE;
+        cmdHeader.size = sizeof(Cmd_EntityState);
+        buf.ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf.ptrWrite, BufferItemHeader);
+        buf.ptrWrite += COM_COPY_STRUCT(&s, buf.ptrWrite, Cmd_EntityState);
+        h.dynamicEntities.count++;
+    }
+    
+    // write header
+    h.dynamicEntities.size = (u32)(buf.ptrWrite - startOfDynamicCmds);
+    
+    // Demo frames marked as negative means demo frames should be expected
+    // but the count is unknown. If the count is not set it could mean there
+    // was a crash and the demo was never completed
+
+    
+    COM_COPY_STRUCT(&h, buf.ptrStart, sizeof(StateSaveHeader));
+
+    u32 written = (u32)(buf.ptrWrite - buf.ptrStart);
+    printf("APP Wrote %dKB to %s:\n", (written / 1024), demoName);
+    printf("  BASE FILE: %s\n", h.baseFile);
+    printf("  Dynamic Entities: offset %d count %d bytes %d\n", h.dynamicEntities.offset, h.dynamicEntities.count, h.dynamicEntities.size);
+
+
+    // Open file and begin writing demo frames.
+
+
+    platform.Platform_Free(&mem);
+    #endif
 }
 
 void App_EndSession()
@@ -102,7 +164,7 @@ u8 App_StartSinglePlayer(char* path)
     }
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
-	App_StartRecording();
+	App_StartRecording(&g_gameState);
 
 	// Spawn local client
 	// Assign local client id.
