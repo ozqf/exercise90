@@ -2,43 +2,6 @@
 
 #include "../common/com_module.h"
 
-#pragma pack(1)
-struct DataFileDiskHeader
-{
-	u8 magic[4];
-	u32 fileListOffset;
-	u32 numFiles;
-};
-
-// 64 bytes
-#pragma pack(1)
-struct DataFileDiskEntry
-{
-	u8 fileName[52];    // 51 for name one for null terminator
-	u32 offset;         // position offset from start of file
-	u32 size;           // size in bytes
-    u8 info[4];			// file information [0] = file type [1] = compression type
-};
-
-struct DataFile
-{
-    FILE* handle;
-    DataFileDiskHeader header;
-	u32 fileSize;
-};
-
-struct DataFileEntryReader
-{
-	FILE* handle;
-	DataFileDiskEntry entry;
-};
-
-// Data files will be opened and kept open for program duration
-#define PLATFORM_MAX_DATA_FILES 64
-static DataFile g_dataFiles[PLATFORM_MAX_DATA_FILES];
-static i32 g_nextDataFileIndex = 0;
-static char* g_baseDirectoryName = "base";
-
 void Win32_DebugPrintDataManifest()
 {
 	for (i32 i = g_nextDataFileIndex - 1; i >= 0; --i)

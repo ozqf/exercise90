@@ -523,8 +523,8 @@ void Test_StateSaving()
 
 	Test_PrintStateFileScan("demo.dem");
 
-	Test_PrintStateFileScan("foo");
-	Test_PrintStateFileScan("foo2");
+	Test_PrintStateFileScan("base\\foo");
+	//Test_PrintStateFileScan("foo2");
 
 	//printf("\nLOAD %s\n\n", "map2.lvl");
 	//Test_LoadAndRun("map2.lvl");

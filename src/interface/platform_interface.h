@@ -42,6 +42,8 @@ struct PlatformInterface
     u8 (*Platform_LoadFileIntoHeap)(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure);
     void (*Platform_LoadTexture)(Heap* heap, BlockRef* destRef, char* path);
     void (*Platform_BindTexture)(void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
+    // Need to know the base directory for writing files
+    i32 (*Platform_GetBaseDirectoryName)(char* buffer, i32 bufferSize);
 	
 	// Writing Files
 	i32 (*Platform_OpenFileForWriting)(char* fileName);

@@ -14,25 +14,46 @@ i32 g_numSpawnFunctions = 0;
 
 Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
 {
-    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
-    ent->transform.pos = cmd->pos;
-    
-    EC_Renderer* renderer = EC_AddRenderer(gs, ent);
-    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\COMP03_1.bmp"));
-    Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
+    Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
+    if (ent != NULL)
+    {
+        // Restore state
+        Assert(ent->factoryType == cmd->factoryType);
 
-    EC_Collider* collider = EC_AddCollider(gs, ent);
-	collider->size = { cmd->size.x, cmd->size.y, cmd->size.z };
-    collider->shapeId = Phys_CreateBox(
-        cmd->pos.x, cmd->pos.y, cmd->pos.z,
-        cmd->size.x / 2.0f, cmd->size.y / 2.0f, cmd->size.z / 2.0f,
-        ZCOLLIDER_FLAG_STATIC,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT,
-        ent->entId.index, ent->entId.iteration
-    );
+        // do nothing, it is static
+        printf("Restoring static ent %d/%d\n", ent->entId.iteration, ent->entId.index);
+    }
+    else
+    {
+        // Create
+        ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
+
+        printf("Creating static ent %d/%d\n", ent->entId.iteration, ent->entId.index);
+        
+        ent->transform.pos = cmd->pos;
+
+        EC_Renderer* renderer = EC_AddRenderer(gs, ent);
+        //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
+        RendObj_SetAsMesh(
+            &renderer->rendObj,
+            &g_meshCube, 1, 1, 1,
+            AppGetTextureIndexByName("textures\\COMP03_1.bmp")
+        );
+        Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
+
+        EC_Collider* collider = EC_AddCollider(gs, ent);
+	    collider->size = { cmd->size.x, cmd->size.y, cmd->size.z };
+        collider->shapeId = Phys_CreateBox(
+            cmd->pos.x, cmd->pos.y, cmd->pos.z,
+            cmd->size.x / 2.0f, cmd->size.y / 2.0f, cmd->size.z / 2.0f,
+            ZCOLLIDER_FLAG_STATIC,
+            COLLISION_LAYER_WORLD,
+            COL_MASK_DEFAULT,
+            ent->entId.index, ent->entId.iteration
+        );
+    }
+    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
+    
     return ent;
 }
 
@@ -174,6 +195,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
 
     if (ent != NULL)
     {
+        Assert(ent->factoryType == cmd->factoryType);
         // restore state
         //Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
         //Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
@@ -223,6 +245,7 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 
     if (ent != NULL)
     {
+        Assert(ent->factoryType == cmd->factoryType);
         // restore state
         Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
         Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
@@ -270,6 +293,7 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 
     if (ent != NULL)
     {
+        Assert(ent->factoryType == cmd->factoryType);
         // restore state
         Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
         Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
@@ -301,6 +325,21 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
     
     }
     return ent;
+}
+
+void Game_WriteStaticState(GameState* gs, Ent* ent, Cmd_Spawn* s)
+{
+    s->entityId = ent->entId;
+    s->factoryType = ent->factoryType;
+    s->pos.x = ent->transform.pos.x;
+    s->pos.y = ent->transform.pos.y;
+    s->pos.z = ent->transform.pos.z;
+
+    EC_Collider* col = EC_FindCollider(gs, ent);
+    s->size.x = (col->size.x);
+    s->size.y = (col->size.y);
+    s->size.z = (col->size.z);
+    //s->tag = ent->tag;
 }
 
 void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
@@ -344,14 +383,14 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
         printf("Factory type %d cannot be dynamic!\n", cmd->factoryType);
         ILLEGAL_CODE_PATH
     }
-    if (gs->verbose)
-    {
-        printf("GAME Dynamic state for type %d Id %d/%d\n",
-            cmd->factoryType,
-            cmd->entityId.iteration,
-            cmd->entityId.index
-        );
-    }
+    // if (gs->verbose)
+    // {
+    //     printf("GAME Dynamic state for type %d Id %d/%d\n",
+    //         cmd->factoryType,
+    //         cmd->entityId.iteration,
+    //         cmd->entityId.index
+    //     );
+    // }
     Ent* ent = NULL;
     switch (cmd->factoryType)
     {

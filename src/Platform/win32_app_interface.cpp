@@ -17,7 +17,7 @@ Returns true if alloc succeeded
 u8 Platform_Alloc(MemoryBlock *mem, u32 bytesToAllocate)
 {
     mem->size = bytesToAllocate;
-    mem->ptrMemory = VirtualAlloc(0, mem->size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    mem->ptrMemory = VirtualAlloc(0,mem->size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     return (mem->ptrMemory != NULL);
 }
 
@@ -89,6 +89,13 @@ void Platform_SetDebugInputTextureIndex(i32 i)
     Win32_SetDebugInputTextureIndex(i);
 }
 
+// Copy the base name into the given buffer
+i32 Platform_GetBaseDirectoryName(char* buffer, i32 bufferSize)
+{
+    //g_baseDirectoryName
+    return COM_CopyStringLimited(g_baseDirectoryName, buffer, bufferSize);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // Sound
@@ -137,6 +144,7 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_OpenFileForWriting = Platform_OpenFileForWriting;
     platInterface.Platform_WriteToFile = Platform_WriteToFile;
     platInterface.Platform_CloseFileForWriting = Platform_CloseFileForWriting;
+    platInterface.Platform_GetBaseDirectoryName = Platform_GetBaseDirectoryName;
 }
 
 void Win32_CloseAppLink()

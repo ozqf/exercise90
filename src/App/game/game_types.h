@@ -60,7 +60,7 @@ struct Ent
     i32 tag;                // can (and should) be shared between entities for triggering
 
     // 'type' information
-    u32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
+    i32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
     u32 componentFlags;     // What components this Entity has
     u8 inUse;               // if 0 this entity is free to be recycled
     u8 priority;            // This entity's base update importance gained per frame

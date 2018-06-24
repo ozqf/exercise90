@@ -1,7 +1,6 @@
 #pragma once
 
 #include "win32_main.h"
-#include "win32_asset_types.h"
 
 #include "../common/com_defines.h"
 #include "../common/com_memory_utils.h"
@@ -331,7 +330,7 @@ i32 Platform_OpenFileForWriting(char* fileName)
 
 	fseek(g_appReadFiles[index], 0, SEEK_END);
 	i32 end = ftell(g_appReadFiles[index]);
-	printf("PLATFORM Writing to file %s (current has %d bytes!)\n", fileName, end);
+	printf("PLATFORM Opening file %s (current has %d bytes!)\n", fileName, end);
 
 	fseek(g_appReadFiles[index], 0, SEEK_SET);
 	return index;

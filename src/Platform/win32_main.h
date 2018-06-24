@@ -9,6 +9,7 @@
 #include "../interface/app_interface.h"
 #include "../interface/app_stub.h"
 
+#include "win32_types.h"
 #include "../interface/sound_interface.h"
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
@@ -76,24 +77,11 @@ global_variable win32_module_link g_appLink = {};
 global_variable win32_module_link g_rendererLink = {};
 global_variable win32_module_link g_soundLink = {};
 
-// DLLs
-//global_variable char *appModulePath = "base/gamex86.dll";
-//global_variable char *appModulePathCopy = "base/gamex86copy.dll";
-//global_variable char *renderModulePath = "win32gl.dll";
-//global_variable char *renderModulePathCopy = "win32glcopy.dll";
-//global_variable char *soundModulePath = "win32sound.dll";
-//global_variable char *soundModulePathCopy = "win32soundcopy.dll";
-
-//global_variable HMODULE gameModule;
-//global_variable HMODULE renderModule;
-//global_variable u8 renderModuleState = 0;
-//global_variable u8 appModuleState = 0;
-//global_variable ULARGE_INTEGER g_renderModuleTimestamp = {};
-//global_variable ULARGE_INTEGER g_appModuleTimestamp = {};
-//global_variable FILETIME* renderModuleTime;
-//global_variable FILETIME* appModuleTime;
-//global_variable f32 g_checkRenderReloadTick = 1;
-//global_variable f32 g_checkAppReloadTick = 1;
+// Data files will be opened and kept open for program duration
+#define PLATFORM_MAX_DATA_FILES 64
+static DataFile g_dataFiles[PLATFORM_MAX_DATA_FILES];
+static i32 g_nextDataFileIndex = 0;
+static char* g_baseDirectoryName = "base";
 
 // system handles etc
 global_variable HWND appWindow;

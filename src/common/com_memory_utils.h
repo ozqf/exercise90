@@ -42,7 +42,7 @@ static inline void COM_CopyString(const char *source, char *target);
  * Copy a string without exceeding the specified limit
  * Limit does NOT include NULL terminator
  */
-static inline void COM_CopyStringLimited(const char *source, char *target, i32 limit);
+static inline i32 COM_CopyStringLimited(const char *source, char *target, i32 limit);
 /**
  * No checking whether source/target will clash
  * No checking that target has enough room!

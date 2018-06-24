@@ -347,7 +347,14 @@ u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
         //printf("HI.");
         SYSTEMTIME t;
         GetSystemTime(&t);
-        printf("  TIME: %d/%d/%d - %d:%d:%d\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+        printf("  TIME: %d/%d/%d - %d:%d:%d\n",
+            t.wYear,
+            t.wMonth,
+            t.wDay,
+            t.wHour,
+            t.wMinute,
+            t.wSecond
+        );
         return 1;
     }
     else if (COM_CompareStrings(tokens[0], "HELLO") == 0)
@@ -365,6 +372,11 @@ u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
     {
         g_singleFrameRun = 1;
         printf("PLATFORM Step frame\n");
+        return 1;
+    }
+    else if (COM_CompareStrings(tokens[0], "BREAK") == 0)
+    {
+        DebugBreak();
         return 1;
     }
     return 0;

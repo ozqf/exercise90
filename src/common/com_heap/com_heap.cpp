@@ -391,7 +391,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
             u32 count = 1;
             while (iterator != NULL)
             {
-                if (count > 10)
+                if (count > 9999)
                 {
                     //printf("Block scan ran away... aborting");
                     AssertAlways(false);

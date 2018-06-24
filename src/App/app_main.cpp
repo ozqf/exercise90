@@ -20,7 +20,8 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf)
     // step forward, write header later
     buf->ptrWrite += sizeof(StateSaveHeader);
 	//platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(StateSaveHeader));
-    
+
+    printf("APP sizeof(StateSaveHeader): %d\n", sizeof(StateSaveHeader));
     printf("APP sizeof(EntityState): %d\n", sizeof(Cmd_EntityState));
 
     ///////////////////////////////
@@ -38,12 +39,37 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf)
     {
         Ent* e = &gs->entList.items[i];
         if (e->inUse != ENTITY_STATUS_IN_USE) { continue; }
-        Cmd_EntityState s = {};
-        Game_WriteEntityState(gs, e, &s);
-        cmdHeader.type = CMD_TYPE_ENTITY_STATE;
-        cmdHeader.size = sizeof(Cmd_EntityState);
-        buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, BufferItemHeader);
-        buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_EntityState);
+
+        if (e->factoryType == ENTITY_TYPE_WORLD_CUBE)
+        {
+            Cmd_Spawn s = {};
+            Game_WriteStaticState(gs, e, &s);
+            cmdHeader.type = CMD_TYPE_STATIC_STATE;
+            cmdHeader.size = sizeof(Cmd_Spawn);
+            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, BufferItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_Spawn);
+            printf("Writing static Ent %d/%d ent type %d\n",
+                s.entityId.iteration,
+                s.entityId.index,
+                s.factoryType
+            );
+        }
+        else
+        {
+            Cmd_EntityState s = {};
+            Game_WriteEntityState(gs, e, &s);
+            cmdHeader.type = CMD_TYPE_ENTITY_STATE;
+            cmdHeader.size = sizeof(Cmd_EntityState);
+            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, BufferItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_EntityState);
+            printf("Writing dynamic %d/%d ent type %d\n",
+                s.entityId.iteration,
+                s.entityId.index,
+                s.factoryType
+            );
+        }
+
+        
         h.dynamicEntities.count++;
     }
 
@@ -63,6 +89,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf)
 // Returns id of the file opened to
 i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite)
 {
+    printf("APP Writing state to %s\n", fileName);
     // Allocate a temporary chunk to write to, then dump it all out into a file
     i32 capacity = MegaBytes(10);
     
@@ -74,11 +101,16 @@ i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite)
     
     // Write state to buffer
     
+    char basePath[64];
+    platform.Platform_GetBaseDirectoryName(basePath, 64);
+    char path[128];
+    sprintf_s(path, 128, "%s\\%s", basePath, fileName);
 
-	i32 fileId = platform.Platform_OpenFileForWriting(fileName);
+	i32 fileId = platform.Platform_OpenFileForWriting(path);
 	Assert(fileId != -1);
 
     platform.Platform_WriteToFile(fileId, buf.ptrStart, written);
+    printf("  Write %d bytes\n", written);
 
 	// Clean up
     if (closeFileAfterWrite)
