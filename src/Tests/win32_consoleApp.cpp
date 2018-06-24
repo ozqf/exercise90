@@ -34,7 +34,8 @@ int main(i32 argc, char* argv[])
 	//Test_Pack();
 	//Test_ReadMesh();
 	//Test_MultiThreading();
-	Test_Tokenise();
+	//Test_Tokenise();
+    Test_StateSaving();
 #endif
 
 #if 0

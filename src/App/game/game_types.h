@@ -55,13 +55,18 @@ inline u8 EntId_Equals(EntId* a, EntId* b)
 
 struct Ent
 {
-    EntId entId;
-    Transform transform;
-    u32 factoryType;         // Spawn/Save/Sync function index used to generate this entity
-    u32 componentFlags;
-    i32 tag;
+    // Instance identification
+    EntId entId;            // iteration + index of this entity
+    i32 tag;                // can (and should) be shared between entities for triggering
+
+    // 'type' information
+    u32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
+    u32 componentFlags;     // What components this Entity has
     u8 inUse;               // if 0 this entity is free to be recycled
-    u8 priority;
+    u8 priority;            // This entity's base update importance gained per frame
+
+    // State
+    Transform transform;
 };
 
 struct EntList

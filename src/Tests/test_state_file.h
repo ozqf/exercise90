@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../common/com_module.h"
-#include "../app/game/game_command_types.h"
 
 struct FileSegment
 {
@@ -10,10 +9,48 @@ struct FileSegment
 	u32 size = 0;
 };
 
+struct StateSaveHeader
+{
+	char magic[4] = { 'S', 'A', 'V', 'E' };
+	char baseFile[32];
+
+	FileSegment staticEntities;
+	FileSegment dynamicEntities;
+	FileSegment frames;
+};
+
 struct CmdHeader
 {
 	u32 type;
 	u32 size;
+};
+
+#define CMD_TYPE_SPAWN 100
+//#define CMD_TYPE_SPAWN_WORLD_CUBE 101
+
+#define ENTITY_TYPE_WORLD_NULL 0
+#define ENTITY_TYPE_WORLD_CUBE 1
+#define ENTITY_TYPE_RIGIDBODY_CUBE 2
+
+union EntId
+{
+    struct
+    {
+        u16 iteration;
+        u16 index;
+    };
+    u16 arr[2];
+};
+
+// 100
+struct Cmd_Spawn
+{
+    i32 factoryType;
+	EntId entityId;
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 size;
+    u32 flags;
 };
 
 inline void FileSeg_Add(FileSegment* f, u32 fileSize)
@@ -40,50 +77,12 @@ inline void FileSeg_PrintDebug(char* label, FileSegment* f)
 	);
 }
 
-struct StateSaveHeader
-{
-	char magic[4] = { 'S', 'A', 'V', 'E' };
-	char baseFile[32];
-
-	FileSegment staticEntities;
-	FileSegment dynamicEntities;
-	FileSegment frames;
-};
-
 inline void DebugStateHeader(StateSaveHeader* h)
 {
 	FileSeg_PrintDebug("Static Entities", &h->staticEntities);
 	FileSeg_PrintDebug("Dynamic Entities", &h->dynamicEntities);
 	FileSeg_PrintDebug("Frames", &h->frames);
 }
-
-#define CMD_TYPE_SPAWN 100
-//#define CMD_TYPE_SPAWN_WORLD_CUBE 101
-
-#define ENTITY_TYPE_WORLD_NULL 0
-#define ENTITY_TYPE_WORLD_CUBE 1
-#define ENTITY_TYPE_RIGIDBODY_CUBE 2
-
-union EntId
-{
-    struct
-    {
-        u16 iteration;
-        u16 index;
-    };
-    u16 arr[2];
-};
-
-
-// struct Cmd_Spawn
-// {
-//     i32 factoryType;
-// 	EntId entityId;
-//     Vec3 pos;
-//     Vec3 rot;
-//     Vec3 size;
-//     u32 flags;
-// };
 
 void Test_WriteStateFile(char* fileName, char* baseFileName)
 {
@@ -332,12 +331,106 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 	}
 }
 
-u32 GetFileSizeAtSeekToStart(FILE* f)
+u32 GetFileSizeAndSeekToStart(FILE* f)
 {
 	fseek(f, 0, SEEK_END);
 	u32 result = ftell(f);
 	fseek(f, 0, SEEK_SET);
 	return result;
+}
+
+u8 IsHeaderValid(StateSaveHeader* h)
+{
+	
+	if (
+		h->magic[0] != 'S'
+		|| h->magic[1] != 'A'
+		|| h->magic[2] != 'V'
+		|| h->magic[3] != 'E'
+		)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+void Test_PrintStateFileScan(char* filePath)
+{
+	printf("*** State Save File %s ***\n", filePath);
+	FILE* f;
+	fopen_s(&f, filePath, "rb");
+	if (f == NULL)
+	{
+		printf("  File not found\n");
+		return;
+	}
+	StateSaveHeader h = {};
+	u32 fileSize = GetFileSizeAndSeekToStart(f);
+	fread(&h, sizeof(StateSaveHeader), 1, f);
+	if (!IsHeaderValid(&h))
+	{
+		printf("  %s is not a State save file\n", filePath);
+		return;
+	}
+
+	printf("File is %d bytes\n", fileSize);
+
+	// Static Commands
+	if (h.staticEntities.size > 0)
+	{
+		printf("* Scanning static commands\n");
+		u32 origin = h.staticEntities.offset;
+		fseek(f, origin, SEEK_SET);
+		u32 read = 0;
+		i32 cmdCount = 0;
+		while (read < h.staticEntities.size)
+		{
+			CmdHeader cmdH = {};
+			fread(&cmdH, sizeof(CmdHeader), 1, f);
+			read += sizeof(CmdHeader);
+			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.type, cmdH.size);
+			read += cmdH.size;
+			cmdCount++;
+			fseek(f, origin + read, SEEK_SET);
+		}
+	}
+	else
+	{
+		printf("* No static commands found\n");
+	}
+	
+	// Dynamic Commands
+	if (h.dynamicEntities.size > 0)
+	{
+		printf("* Scanning dynamic commands\n");
+		u32 origin = h.dynamicEntities.offset;
+		fseek(f, origin, SEEK_SET);
+		u32 read = 0;
+		u32 cmdCount = 0;
+		while (read < h.dynamicEntities.size)
+		{
+			CmdHeader cmdH = {};
+			fread(&cmdH, sizeof(CmdHeader), 1, f);
+			read += sizeof(CmdHeader);
+			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.type, cmdH.size);
+			read += cmdH.size;
+			cmdCount++;
+			fseek(f, origin + read, SEEK_SET);
+		}
+		if (!(cmdCount == h.dynamicEntities.count))
+		{
+			printf("*** CMD Count mismatch! Claimed: %d Actual: %d", h.dynamicEntities.count, cmdCount);
+		}
+	}
+	else
+	{
+		printf("* No dynamic commands found\n");
+	}
+	
+	
+
+	DebugStateHeader(&h);
+	fclose(f);
 }
 
 ByteBuffer Test_LoadEntireFile(char* filePath)
@@ -350,7 +443,7 @@ ByteBuffer Test_LoadEntireFile(char* filePath)
 		return bytes;
 	}
 
-	bytes.capacity = GetFileSizeAtSeekToStart(f);
+	bytes.capacity = GetFileSizeAndSeekToStart(f);
 	fseek(f, 0, SEEK_SET);
 	void* ptr = malloc(bytes.capacity);
 	bytes.ptrStart = (u8*)ptr;
@@ -425,8 +518,13 @@ u8 Test_LoadAndRun(char* filePath)
 
 void Test_StateSaving()
 {
-	Test_WriteStateFile("base\\testbox.lvl", NULL);
+	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
+
+	Test_PrintStateFileScan("demo.dem");
+
+	Test_PrintStateFileScan("foo");
+	Test_PrintStateFileScan("foo2");
 
 	//printf("\nLOAD %s\n\n", "map2.lvl");
 	//Test_LoadAndRun("map2.lvl");

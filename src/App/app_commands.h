@@ -43,6 +43,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
         printf("  IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
+        printf("  SAVE SOMEFILE - Save Game State\n");
         printf("  DEBUG - Cycle debug print outs\n");
         printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
         printf("  TEXTURES - List App textures handles\n");
@@ -63,6 +64,17 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "SAVE"))
+    {
+        if (numTokens != 2)
+        {
+            printf("  No file name specified for save\n");
+            return 1;
+        }
+        
+        App_WriteStateToFile(tokens[1], true);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TEXTURES"))
@@ -203,6 +215,15 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
     Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+
+	// Read Dynamic
+	sub.ptrStart = buf->ptrStart + h.dynamicEntities.offset;
+	sub.capacity = h.dynamicEntities.size;
+	sub.count = h.dynamicEntities.count;
+	sub.ptrEnd = buf->ptrStart + buf->capacity;
+	printf("APP Reading dynamic Entitites (%d bytes)\n", sub.capacity);
+	Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+
 }
 
 u8 App_LoadStateFromFile(GameState *gs, char *fileName)

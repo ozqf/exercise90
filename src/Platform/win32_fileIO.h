@@ -301,18 +301,34 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 
 }
 
-FILE* g_appReadFiles[1];
+// Limited to 1 atm
+#define WIN32_MAX_OPEN_APP_FILES 4
+FILE* g_appReadFiles[WIN32_MAX_OPEN_APP_FILES];
+
+i32 Win32_GetFreeAppFileHandle()
+{
+	for (i32 i = 0; i < WIN32_MAX_OPEN_APP_FILES; ++i)
+	{
+		if (g_appReadFiles[i] == NULL)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
 
 i32 Platform_OpenFileForWriting(char* fileName)
 {
-	Assert(g_appReadFiles[0] == NULL);
-	
-	i32 index = 0;
+	i32 index = Win32_GetFreeAppFileHandle();
+	Assert(index != -1);
+
 	fopen_s(&g_appReadFiles[index], fileName, "wb");
+
 	if (g_appReadFiles[index] == NULL)
 	{
 		return -1;
 	}
+
 	fseek(g_appReadFiles[index], 0, SEEK_END);
 	i32 end = ftell(g_appReadFiles[index]);
 	printf("PLATFORM Writing to file %s (current has %d bytes!)\n", fileName, end);
@@ -334,6 +350,7 @@ i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 
 i32 Platform_CloseFileForWriting(i32 fileId)
 {
+	Assert(g_appReadFiles[fileId] != NULL);
 	fclose(g_appReadFiles[fileId]);
 	g_appReadFiles[fileId] = NULL;
 	return 1;

@@ -113,6 +113,7 @@ struct Cmd_EntityState
     // Identification
     i32 factoryType;
     EntId entityId;
+    i32 tag;
     // total 8b
     
     // Linking

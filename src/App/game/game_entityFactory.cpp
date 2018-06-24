@@ -139,7 +139,9 @@ Ent* Exec_StaticEntityState(GameState* gs, Cmd_Spawn* cmd)
         ILLEGAL_CODE_PATH
     }
     // Only one type atm
-    return Spawn_WorldCube(gs, cmd);
+	Ent* ent = Spawn_WorldCube(gs, cmd);
+	ent->factoryType = cmd->factoryType;
+	return ent;
 #if 0
     if (g_verbose)
     {
@@ -303,11 +305,40 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 
 void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
 {
+    s->entityId = ent->entId;
+    s->factoryType = ent->factoryType;
+    s->tag = ent->tag;
 
+    //
+    s->pos.x = ent->transform.pos.x;
+    s->pos.y = ent->transform.pos.y;
+    s->pos.z = ent->transform.pos.z;
+
+    s->size.x = ent->transform.scale.x;
+    s->size.y = ent->transform.scale.y;
+    s->size.z = ent->transform.scale.z;
+
+    // Additional, factory specific
+    switch (ent->factoryType)
+    {
+        case ENTITY_TYPE_PROJECTILE:
+        {
+            EC_Projectile* prj = EC_FindProjectile(gs, ent);
+            Assert(prj);
+            s->tick = prj->tick;
+            s->tock = prj->tock;
+        } break;
+
+        case ENTITY_TYPE_ACTOR_GROUND:
+        {
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, ent);
+            Assert(motor);
+        } break;
+    }
 }
 
 Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
-{
+    {
     if (cmd->factoryType == ENTITY_TYPE_WORLD_CUBE)
     {
         printf("Factory type %d cannot be dynamic!\n", cmd->factoryType);
@@ -321,21 +352,22 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
             cmd->entityId.index
         );
     }
+    Ent* ent = NULL;
     switch (cmd->factoryType)
     {
         case ENTITY_TYPE_PROJECTILE:
         {
-            return Ent_ReadProjectileState(gs, cmd);
+            ent = Ent_ReadProjectileState(gs, cmd);
         } break;
 
         case ENTITY_TYPE_ACTOR_GROUND:
         {
-            return Ent_ReadGroundActorState(gs, cmd);
+            ent = Ent_ReadGroundActorState(gs, cmd);
         } break;
 
         case ENTITY_TYPE_RIGIDBODY_CUBE:
         {
-            return Ent_ReadRigidBodyCubeState(gs, cmd);
+            ent = Ent_ReadRigidBodyCubeState(gs, cmd);
         } break;
 
         default:
@@ -344,5 +376,9 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
             ILLEGAL_CODE_PATH
         }
     }
-    return NULL;
+    if (ent != NULL)
+    {
+        ent->factoryType = cmd->factoryType;
+    }
+    return ent;
 }
