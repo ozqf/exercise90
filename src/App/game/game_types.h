@@ -175,7 +175,7 @@ struct Player
 {
     i32 playerId;
     i32 state;
-    EntId avatarId;
+    EntId entId;
 
     // server only, not relicated
     i32 sv_clientId;

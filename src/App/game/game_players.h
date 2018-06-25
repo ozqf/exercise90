@@ -18,7 +18,6 @@ Player* SV_FindPlayerByClientId(PlayerList* plyrs, i32 clientId)
             return &plyrs->items[i];
         }
     }
-    ILLEGAL_CODE_PATH
     return NULL;
 }
 
@@ -36,15 +35,16 @@ u8 SV_CreateNewPlayer(PlayerList* plyrs, i32 clientId, Cmd_PlayerState* result)
         i32 l = plyrs->max;
         for (i32 i = 0; i < l; ++i)
         {
-            if (plyrs->items[i].state != PLAYER_STATUS_FREE) { continue; }
+			plyr = &plyrs->items[i];
+            if (plyr->state != PLAYER_STATUS_FREE) { continue; }
 
             plyr->playerId = i;
-            plyr = &plyrs->items[i];
             plyr->state = PLAYER_STATUS_ASSIGNED;
             plyr->sv_clientId = clientId;
 
             result->playerId = i;
             result->state = PLAYER_STATUS_ASSIGNED;
+			return 1;
         }
     }
     // erm?
@@ -66,6 +66,6 @@ Player* Game_FindPlayerById(PlayerList* plyrs, i32 id)
 
 void Exec_PlayerState(GameState* gs, Cmd_PlayerState* cmd)
 {
-    printf("GAME Exec player state\n");
+    printf("GAME Exec player %d state %d\n", cmd->playerId, cmd->state);
     
 }

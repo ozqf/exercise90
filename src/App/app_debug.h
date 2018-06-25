@@ -9,7 +9,14 @@ void App_DebugPrintPlayers(GameState* gs)
     for (i32 i = 0; i < l; ++i)
     {
         Player* p = &gs->playerList.items[i];
+        if (p->state == PLAYER_STATUS_FREE) { continue; }
+        count++;
+        printf("Plyr %d client %d state %d avatar %d/%d\n",
+            p->playerId, p->sv_clientId, p->state,
+            p->entId.iteration, p->entId.index
+        );
     }
+    printf(" %d players\n", count);
 }
 
 void App_DebugPrintEntities(GameState* gs)
@@ -21,7 +28,10 @@ void App_DebugPrintEntities(GameState* gs)
         Ent* e = &gs->entList.items[i];
         if (e->inUse == ENTITY_STATUS_FREE) { continue; }
         count++;
-        printf("%d/%d: Type %d status %d\n", e->entId.iteration, e->entId.index, e->factoryType, e->inUse);
+        printf("%d/%d: Type %d status %d\n",
+            e->entId.iteration, e->entId.index,
+            e->factoryType, e->inUse
+        );
     }
     printf(" %d entities\n", count);
 }

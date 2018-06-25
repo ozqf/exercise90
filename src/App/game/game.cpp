@@ -305,6 +305,26 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 		case IMPULSE_JOIN_GAME:
 		{
 			printf("SV Client %d impulse %d: Spawn player\n", cmd->clientId, cmd->impulse);
+
+            Player* plyr = SV_FindPlayerByClientId(&gs->playerList, cmd->clientId);
+            if (plyr != NULL)
+            {
+                printf("  Client already has a player.\n");
+                return 1;
+            }
+
+            Cmd_PlayerState s = {};
+            SV_CreateNewPlayer(&gs->playerList, cmd->clientId, &s);
+
+            printf("  Created player %d for client %d\n", s.playerId, cmd->clientId);
+
+            App_WriteGameCmd((u8*)&s, CMD_TYPE_PLAYER_STATE, sizeof(Cmd_PlayerState));
+
+            return 1;
+
+            // Assign player to client...
+
+            #if 0
 			// How to assign player Id at this point
             Client* cl = App_FindClientById(cmd->clientId);
             if (cl->state != CLIENT_STATE_OBSERVER)
@@ -312,7 +332,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
                 printf("GAME Cannot spawn - client is free or playing already\n");
                 return 1;
             }
-            
+            ++
 			Cmd_EntityState spawn = {};
 			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
 			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
@@ -328,6 +348,7 @@ u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             // Exec_Spawn(gs, &spawn);
             // Exec_UpdateClient(&clUpdate);
 			return 1;
+            #endif
 		} break;
 
 		default:
@@ -401,6 +422,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Assert(bytes == sizeof(Cmd_PlayerState));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerState);
             Exec_PlayerState(gs, &cmd);
+            return 1;
         } break;
 
         case CMD_TYPE_IMPULSE:

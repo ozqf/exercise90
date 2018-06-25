@@ -83,6 +83,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         App_DebugPrintEntities(&g_gameState);
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "PLAYERS"))
+    {
+        App_DebugPrintPlayers(&g_gameState);
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "TEXTURES"))
     {
         AppListTextures();
