@@ -176,6 +176,9 @@ struct Player
     i32 playerId;
     i32 state;
     EntId avatarId;
+
+    // server only, not relicated
+    i32 sv_clientId;
 };
 
 struct PlayerList
@@ -193,7 +196,7 @@ struct GameState
     EntList entList;
     //i32 lastEntityIndex;
     
-    //PlayerList playerList;
+    PlayerList playerList;
 
     // Components
     EC_AIControllerList aiControllerList;
@@ -205,8 +208,7 @@ struct GameState
     
     // view
     Transform cameraTransform;
-    //AngleVectors cameraAngleVectors;
-
+    
     // specifics
     u8 localPlayerHasEnt = 0;
     EntId localPlayerEntId;

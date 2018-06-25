@@ -96,11 +96,11 @@ void AppListTextures();
 // Implementations
 /////////////////////////////////////////////////////////
 
+#include "app_debug.h"
 #include "app_clients.h"
 #include "app_commands.h"
 #include "app_input.h"
 #include "app_textures.h"
-#include "app_debug.h"
 #include "app_main.cpp"
 
 /***************************************

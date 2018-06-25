@@ -63,6 +63,7 @@ inline u8 IsConnectionOpen(u8 netMode)
 
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
+#define GAME_MAX_PLAYERS 64
 //#define GAME_MAX_CLIENTS 8
 
 #define UI_MAX_ENTITIES 512
@@ -116,15 +117,12 @@ global_variable RenderScene g_uiScene;
 global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
 
 /////////////////////////////////////////////////////////////
-// Entity Memory
+// Game State Memory
 /////////////////////////////////////////////////////////////
 // Game
 #define MAX_SCENE_NAME_CHARS 64
 global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
 global_variable GameState g_gameState;
-global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
-
-global_variable Player g_players[GAME_MAX_CLIENTS];
 
 // UI
 global_variable GameState g_uiState;
@@ -152,11 +150,16 @@ global_variable ClientTick g_localClientTick;
 
 
 /////////////////////////////////////////////////////////////
-// Entity Components Memory
+// Entity + Entity Components Memory
 /////////////////////////////////////////////////////////////
 // TODO: This stuff should be allocated on the heap so it can be scaled
+// Bah, to heck with it. Statics for everyone
 
 // Game
+global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
+global_variable Player              g_players[GAME_MAX_PLAYERS];
+
+// Entity Components
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
@@ -178,6 +181,7 @@ ClientTick g_debugInput = {};
 #include "comp_rendObj.h"
 #include "game_command_types.h"
 #include "comp_aiController.h"
+#include "game_players.h"
 
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"

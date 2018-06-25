@@ -41,9 +41,10 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (!COM_CompareStrings(tokens[0], "HELP"))
     {
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
+        printf("  SAVE SOMEFILE - Save Game State\n");
         printf("  IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
-        printf("  SAVE SOMEFILE - Save Game State\n");
+        printf("  ENTS - List entities\n");
         printf("  DEBUG - Cycle debug print outs\n");
         printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
         printf("  TEXTURES - List App textures handles\n");
@@ -75,6 +76,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         
         App_WriteStateToFile(tokens[1], true);
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "ENTS"))
+    {
+        App_DebugPrintEntities(&g_gameState);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TEXTURES"))

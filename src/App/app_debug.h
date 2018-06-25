@@ -2,6 +2,30 @@
 
 #include "app_module.cpp"
 
+void App_DebugPrintPlayers(GameState* gs)
+{
+    i32 l = gs->playerList.max;
+    i32 count = 0;
+    for (i32 i = 0; i < l; ++i)
+    {
+        Player* p = &gs->playerList.items[i];
+    }
+}
+
+void App_DebugPrintEntities(GameState* gs)
+{
+    i32 l = gs->entList.max;
+    i32 count = 0;
+    for (i32 i = 0; i < l; ++i)
+    {
+        Ent* e = &gs->entList.items[i];
+        if (e->inUse == ENTITY_STATUS_FREE) { continue; }
+        count++;
+        printf("%d/%d: Type %d status %d\n", e->entId.iteration, e->entId.index, e->factoryType, e->inUse);
+    }
+    printf(" %d entities\n", count);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////

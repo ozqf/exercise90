@@ -21,6 +21,8 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define CMD_TYPE_TEXT 104
 #define CMD_TYPE_ENTITY_STATE 105
 #define CMD_TYPE_REMOVE_ENT 106
+#define CMD_TYPE_ENTITY_DELTA 107
+#define CMD_TYPE_PLAYER_STATE 108
 
 //////////////////////////////////////////////////
 // Spawning
@@ -155,5 +157,12 @@ struct Cmd_EntityDelta
     u32 fields;
 };
 
+// 108 Player State
+struct Cmd_PlayerState
+{
+    i32 playerId;
+    i32 state;
+    EntId avatarId;
+};
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
