@@ -21,6 +21,9 @@
 // needs this Cmd to be available to the game via Exec_UpdateClient.
 // Messy!
 struct Cmd_ClientUpdate;
+struct Client;
+struct ClientList;
+struct ActorInput;
 
 /////////////////////////////////////////////////////
 // App functions that game can access

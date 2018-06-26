@@ -24,9 +24,9 @@ void Game_InitGameState(GameState *gs)
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
     // Don't wanna forget to assign all these.
-    gs->playerList.items = g_players;
-    gs->playerList.count = GAME_MAX_PLAYERS;
-    gs->playerList.max = GAME_MAX_PLAYERS;
+    // gs->playerList.items = g_players;
+    // gs->playerList.count = GAME_MAX_PLAYERS;
+    // gs->playerList.max = GAME_MAX_PLAYERS;
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
@@ -293,73 +293,6 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 #endif
 }
 
-u8 Game_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
-{
-    if (!IsRunningServer(gs->netMode))
-	{
-		printf("GAME Cannot impulse if not hosting the server!\n");
-		return 1;
-	}
-	switch (cmd->impulse)
-	{
-		case IMPULSE_JOIN_GAME:
-		{
-			printf("SV Client %d impulse %d: Spawn player\n", cmd->clientId, cmd->impulse);
-
-            Player* plyr = SV_FindPlayerByClientId(&gs->playerList, cmd->clientId);
-            if (plyr != NULL)
-            {
-                printf("  Client already has a player.\n");
-                return 1;
-            }
-
-            Cmd_PlayerState s = {};
-            SV_CreateNewPlayer(&gs->playerList, cmd->clientId, &s);
-
-            printf("  Created player %d for client %d\n", s.playerId, cmd->clientId);
-
-            App_WriteGameCmd((u8*)&s, CMD_TYPE_PLAYER_STATE, sizeof(Cmd_PlayerState));
-
-            return 1;
-
-            // Assign player to client...
-
-            #if 0
-			// How to assign player Id at this point
-            Client* cl = App_FindClientById(cmd->clientId);
-            if (cl->state != CLIENT_STATE_OBSERVER)
-            {
-                printf("GAME Cannot spawn - client is free or playing already\n");
-                return 1;
-            }
-            ++
-			Cmd_EntityState spawn = {};
-			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
-			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
-			
-            Cmd_ClientUpdate clUpdate = {};
-            clUpdate.clientId = cmd->clientId;
-            clUpdate.state = CLIENT_STATE_PLAYING;
-            clUpdate.entId = spawn.entityId;
-
-            App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-            App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
-
-            // Exec_Spawn(gs, &spawn);
-            // Exec_UpdateClient(&clUpdate);
-			return 1;
-            #endif
-		} break;
-
-		default:
-		{
-            printf("UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
-			//ILLEGAL_CODE_PATH
-			return 1;
-		} break;
-	}
-}
-
 u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
@@ -376,7 +309,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         case CMD_TYPE_STATIC_STATE:
         {
             Cmd_Spawn cmd = {};
-			// If size doesn't match, something is terrible wrong.
+			// If size doesn't match, something is terribly wrong.
 			// > Possibly reading an old command file that has out-of-sync struct layouts
 			// > Or read pointer got mangled
             Assert(bytes == sizeof(Cmd_Spawn));
@@ -399,7 +332,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Ent_Free(gs, ent);
             return 1;
         } break;
-        
+        #if 1
 		case CMD_TYPE_PLAYER_INPUT:
 		{
 			Assert(bytes == sizeof(Cmd_PlayerInput));
@@ -408,12 +341,13 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Client* cl = App_FindClientById(cmd.clientId);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
-            EC_ActorMotor* motor = EC_FindActorMotor(gs, (EntId*)&cl->entIdArr);
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
             Assert(motor != NULL);
             motor->input = cmd.input;
 			return 1;
 		} break;
-        
+        #endif
+        #if 0
         case CMD_TYPE_PLAYER_STATE:
         {
             //
@@ -424,11 +358,11 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Exec_PlayerState(gs, &cmd);
             return 1;
         } break;
-
+        #endif
         case CMD_TYPE_IMPULSE:
         {
             Assert(bytes == sizeof(Cmd_ServerImpulse));
-			return Game_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
+			return SV_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:

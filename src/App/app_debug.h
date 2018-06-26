@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app_module.cpp"
-
+#if 0
 void App_DebugPrintPlayers(GameState* gs)
 {
     i32 l = gs->playerList.max;
@@ -35,7 +35,7 @@ void App_DebugPrintEntities(GameState* gs)
     }
     printf(" %d entities\n", count);
 }
-
+#endif
 /////////////////////////////////////////////////////////////////////////////
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////

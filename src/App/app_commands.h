@@ -80,12 +80,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))
     {
-        App_DebugPrintEntities(&g_gameState);
+        //App_DebugPrintEntities(&g_gameState);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "PLAYERS"))
     {
-        App_DebugPrintPlayers(&g_gameState);
+        //App_DebugPrintPlayers(&g_gameState);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TEXTURES"))
@@ -167,7 +167,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			Client* cl = &g_clientList.items[i];
 			printf("%d: IsLocal %d, State %d, Avatar: %d/%d\n",
 				cl->clientId,
-				cl->isLocal, cl->state, cl->entIdArr[0], cl->entIdArr[1]
+				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
 			);
 
 		}
@@ -257,12 +257,11 @@ void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
 {
     Client* cl = App_FindOrCreateClient(cmd->clientId);
     cl->state = cmd->state;
-    cl->entIdArr[0] = cmd->entId.arr[0];
-    cl->entIdArr[1] = cmd->entId.arr[1];
+    cl->entId = cmd->entId;
 
     // char buf[256];
     // sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
-    printf("APP EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
+    printf("APP EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
 
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include "game.h"
 
 #define PLAYER_STATUS_FREE 0
@@ -69,3 +69,4 @@ void Exec_PlayerState(GameState* gs, Cmd_PlayerState* cmd)
     printf("GAME Exec player %d state %d\n", cmd->playerId, cmd->state);
     
 }
+#endif

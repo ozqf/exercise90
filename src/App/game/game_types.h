@@ -18,6 +18,25 @@ struct ClientTick
     Vec3 degrees = {};
 };
 
+union EntId;
+struct Actor;
+
+//////////////////////////////////////////////////
+// Game Input
+//////////////////////////////////////////////////
+#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
+#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
+#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
+#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
+#define ACTOR_INPUT_MOVE_UP (1 << 4)
+#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
+#define ACTOR_INPUT_ATTACK (1 << 6)
+struct ActorInput
+{
+    u32 buttons;
+    Vec3 degrees;
+};
+
 /*
 Entity system:
 Entities are a combination of components grouped via an ent id
@@ -171,23 +190,47 @@ DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
 
-struct Player
+//////////////////////////////////////////////////
+// Clients and players
+//////////////////////////////////////////////////
+struct Client
 {
-    i32 playerId;
+    i32 clientId;
     i32 state;
     EntId entId;
-
-    // server only, not relicated
-    i32 sv_clientId;
+    i32 isLocal;
+    ActorInput input;
 };
 
-struct PlayerList
+struct ClientList
 {
-    Player* items;
+    Client* items;
     i32 count;
     i32 max;
 };
 
+// struct Player
+// {
+//     i32 playerId;
+//     i32 state;
+//     EntId entId;
+
+//     // server only, not relicated
+//     i32 sv_clientId;
+// };
+
+// struct PlayerList
+// {
+//     Player* items;
+//     i32 count;
+//     i32 max;
+// };
+
+//////////////////////////////////////////////////
+// GameState God Object
+// This is a very carefully implemented god object and you should all piss off
+// Phil Bonneau (team Chef) 2018/6/26
+//////////////////////////////////////////////////
 struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
@@ -196,7 +239,7 @@ struct GameState
     EntList entList;
     //i32 lastEntityIndex;
     
-    PlayerList playerList;
+    //PlayerList playerList;
 
     // Components
     EC_AIControllerList aiControllerList;

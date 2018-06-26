@@ -157,7 +157,7 @@ global_variable ClientTick g_localClientTick;
 
 // Game
 global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
-global_variable Player              g_players[GAME_MAX_PLAYERS];
+//global_variable Player              g_players[GAME_MAX_PLAYERS];
 
 // Entity Components
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];

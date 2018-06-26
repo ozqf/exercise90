@@ -17,8 +17,7 @@ void App_ClearClientGameLinks()
 	for (i32 i = 0; i < g_clientList.max; ++i)
 	{
 		Client* cl = &g_clientList.items[i];
-		cl->entIdArr[0] = 0;
-		cl->entIdArr[1] = 0;
+        cl->entId = {};
 		cl->state = CLIENT_STATE_OBSERVER;
 
 	}
@@ -58,15 +57,16 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 
         case CLIENT_STATE_PLAYING:
         {
-			Cmd_PlayerInput cmd = {};
-			cmd.clientId = cl->clientId;
             if (!g_debugCameraOn)
             {
                 Game_CreateClientInput(&g_inputActions, &cl->input);
                 
             }
-            // Always copy input even if it hasn't been affected or
-            // the players orientation will be reset!
+            // Always copy input (and other vars) even if it hasn't been affected or
+            // the players orientation will be reset! (and everything else, including state)
+            Cmd_PlayerInput cmd = {};
+            cmd.state = CLIENT_STATE_PLAYING;
+			cmd.clientId = cl->clientId;
             cmd.input = cl->input;
             App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;

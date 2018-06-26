@@ -58,7 +58,7 @@ struct Cmd_ServerImpulse
 
 //////////////////////////////////////////////////
 // Player management
-
+#if 1
 // #define PLAYER_STATE_FREE 0
 // #define PLAYER_STATE_ACTOR 1
 // #define PLAYER_STATE_DEAD 2
@@ -70,7 +70,7 @@ struct Cmd_PlayerInput
     i32 state;
     ActorInput input;
 };
-
+#endif
 //////////////////////////////////////////////////
 // 103
 // Client management
@@ -82,6 +82,7 @@ struct Cmd_ClientUpdate
     i32 clientId;
     i32 state;
     EntId entId;
+    ActorInput input;
     //i32 playerId;
 };
 
