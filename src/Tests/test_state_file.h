@@ -437,24 +437,66 @@ void Test_PrintStateFileScan(char* filePath)
 	i32 sizeOfReplayHeader = sizeof(ReplayFrameHeader);
 	i32 framesOffset = h.dynamicEntities.offset + h.dynamicEntities.size;
 	i32 totalFramesData = fileSize - framesOffset;
-	u32 position = framesOffset;
+	u32 filePosition = framesOffset;
+	u32 numFrames = 0;
+	u32 numInterestingFrames = 0;
+
 	printf("%d bytes of frame data\n", totalFramesData);
 	fseek(f, framesOffset, SEEK_SET);
-
-
-	while (position < fileSize)
+	while (filePosition < fileSize)
 	{
 		ReplayFrameHeader replay = {};
 		fread(&replay, sizeOfReplayHeader, 1, f);
-		position += sizeOfReplayHeader;
-		position += replay.size;
-		fseek(f, position, SEEK_SET);
+
+		// Check file position isn't mangled
+		Assert(COM_CompareStrings(replay.label, "FRAME") == 0);
+
+		filePosition += sizeOfReplayHeader;
+		numFrames++;
 		if (replay.size > 0)
 		{
+			numInterestingFrames++;
 			printf("Demo header %s: frameNumber %d size %d\n", replay.label, replay.frameNumber, replay.size);
+			CmdHeader cmd = {};
+			// Define start and end of frame data.
+			// Step file position forward
+			u32 frameStart = filePosition;
+			u32 framePosition = frameStart;
+			u32 endPosition = filePosition + replay.size;
+			filePosition = endPosition;
+
+			i32 overFlow = 0;
+			while (framePosition < endPosition)
+			{
+				fread(&cmd, sizeof(CmdHeader), 1, f);
+				framePosition += sizeof(CmdHeader);
+				printf(" Positions: %d (%d - %d)\n", (framePosition - frameStart), framePosition, frameStart);
+				printf(" framePosition += %d\n", sizeof(CmdHeader));
+
+				printf("    CMD type %d size %d\n", cmd.type, cmd.size);
+				if (cmd.size > 0){
+					//position += cmd.size;
+					fseek(f, framePosition, SEEK_SET);
+					framePosition += cmd.size;
+					printf(" framePosition += %d\n", cmd.size);
+				}
+				overFlow++;
+				if (overFlow > 50)
+				{
+					printf("Overflowed!\n");
+					break;
+				}
+			}
+			fseek(f, endPosition, SEEK_SET);
+			filePosition = endPosition;
+		}
+		else
+		{
+			filePosition += replay.size;
+			fseek(f, filePosition, SEEK_SET);
 		}
 	}
-	
+	printf("  %d frames in demo, of which %d are interesting\n", numFrames, numInterestingFrames);
 
 	DebugStateHeader(&h);
 	fclose(f);
