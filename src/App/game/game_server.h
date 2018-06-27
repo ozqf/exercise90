@@ -16,6 +16,7 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 		printf("GAME Cannot impulse if not hosting the server!\n");
 		return 1;
 	}
+    printf("SV EXEC impulse %d from client %d\n", cmd->impulse, cmd->clientId);
 	switch (cmd->impulse)
 	{
 		case IMPULSE_JOIN_GAME:
@@ -58,6 +59,9 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = spawn.entityId;
 
+            printf("SV Write CMD %d\n", CMD_TYPE_ENTITY_STATE);
+            printf("SV Write CMD %d\n", CMD_TYPE_CLIENT_UPDATE);
+
             App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
             App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
 
@@ -69,7 +73,7 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 
 		default:
 		{
-            printf("UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
+            printf("SV UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
 			//ILLEGAL_CODE_PATH
 			return 1;
 		} break;

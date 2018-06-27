@@ -69,6 +69,7 @@ struct ReplayFrameHeader
 {
     u32 frameNumber;
     u32 size;
+	char label[16];
 };
 
 //union EntId; // HACK

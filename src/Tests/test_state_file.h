@@ -9,6 +9,13 @@ struct FileSegment
 	u32 size = 0;
 };
 
+struct ReplayFrameHeader
+{
+    u32 frameNumber;
+    u32 size;
+	char label[16];
+};
+
 struct StateSaveHeader
 {
 	char magic[4] = { 'S', 'A', 'V', 'E' };
@@ -427,6 +434,26 @@ void Test_PrintStateFileScan(char* filePath)
 		printf("* No dynamic commands found\n");
 	}
 	
+	i32 sizeOfReplayHeader = sizeof(ReplayFrameHeader);
+	i32 framesOffset = h.dynamicEntities.offset + h.dynamicEntities.size;
+	i32 totalFramesData = fileSize - framesOffset;
+	u32 position = framesOffset;
+	printf("%d bytes of frame data\n", totalFramesData);
+	fseek(f, framesOffset, SEEK_SET);
+
+
+	while (position < fileSize)
+	{
+		ReplayFrameHeader replay = {};
+		fread(&replay, sizeOfReplayHeader, 1, f);
+		position += sizeOfReplayHeader;
+		position += replay.size;
+		fseek(f, position, SEEK_SET);
+		if (replay.size > 0)
+		{
+			printf("Demo header %s: frameNumber %d size %d\n", replay.label, replay.frameNumber, replay.size);
+		}
+	}
 	
 
 	DebugStateHeader(&h);
@@ -521,9 +548,9 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("demo.dem");
+	Test_PrintStateFileScan("base\\demo.dem");
 
-	Test_PrintStateFileScan("base\\foo3");
+	//Test_PrintStateFileScan("base\\foo3");
 	//Test_PrintStateFileScan("foo2");
 
 	//printf("\nLOAD %s\n\n", "map2.lvl");

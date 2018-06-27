@@ -117,6 +117,10 @@ i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite)
     {
 		platform.Platform_CloseFileForWriting(fileId);
     }
+    else
+    {
+        printf("Recording frames to \"%s\"\n", fileName);
+    }
 
 	platform.Platform_Free(&mem);
     
@@ -135,19 +139,24 @@ void App_StopRecording()
 
 void App_StartRecording(GameState* gs)
 {
+	char* fileName = "demo.dem";
     #if 1
 	if (g_replayMode != None)
 	{
 		printf("APP already recording...\n");
 		return;
 	}
+	else
+	{
+		printf("APP recording to %s\n", fileName);
+	}
 
 	g_replayMode = RecordingReplay;
     // Write state and keep file open for writing frames
-    g_replayFileId = App_WriteStateToFile("demo.dem", false);
+    g_replayFileId = App_WriteStateToFile(fileName, false);
 
     #if 0
-u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
+	u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
     printf("APP Wrote %d bytes (%.2fKB) to %s:\n", written, ((f32)written / (f32)1024), demoName);
     printf("  BASE FILE: %s\n", h.baseFile);
     printf("  Dynamic Entities: offset %d count %d bytes %d\n",
@@ -228,7 +237,7 @@ u8 App_StartSinglePlayer(char* path)
     }
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
-	//App_StartRecording(&g_gameState);
+	App_StartRecording(&g_gameState);
 
 	// Spawn local client
 	// Assign local client id.
@@ -431,12 +440,11 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// GAME TICK
+ //////////////////////////////////////////////////////////////////////////////
 void App_UpdateGameState(GameTime* time)
 {
-    ///////////////////////////////////////
-    // Process messages before game update
-    ///////////////////////////////////////
-
     // Update local client input
     App_UpdateLocalClients(time);
     
@@ -468,6 +476,7 @@ void App_UpdateGameState(GameTime* time)
         // > Write contents of read buffer into demo file
         u32 bytesInBuffer = (u32)input->ptrEnd - (u32)input->ptrStart;
         ReplayFrameHeader h = {};
+		COM_CopyStringLimited("FRAME", h.label, 16);
         h.frameNumber = time->gameFrameNumber;
         h.size = bytesInBuffer;
         if (time->singleFrame)

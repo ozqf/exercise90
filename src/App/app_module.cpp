@@ -27,11 +27,19 @@ struct ActorInput;
 
 /////////////////////////////////////////////////////
 // App functions that game can access
+/////////////////////////////////////////////////////
+// cmd writing
 void App_WriteGameCmd(u8* ptr, u32 type, u32 size);
+char* App_GetBufferName(u8* bufferStartAddr);
+
+// Clients
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 Client* App_FindClientById(i32 id);
+Client* App_FindOrCreateClient(i32 id);
+void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
+
+// assets
 i32 AppGetTextureIndexByName(char* textureName);
-char* App_GetBufferName(u8* bufferStartAddr);
 
 /////////////////////////////////////////////////////////
 // Game Layer

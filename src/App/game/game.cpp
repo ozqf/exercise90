@@ -293,6 +293,18 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 #endif
 }
 
+void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
+{
+    Client* cl = App_FindOrCreateClient(cmd->clientId);
+    cl->state = cmd->state;
+    cl->entId = cmd->entId;
+
+    // char buf[256];
+    // sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
+    printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
+
+}
+
 u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 {
     switch (type)
@@ -302,6 +314,8 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Cmd_EntityState cmd = {};
             Assert(bytes == sizeof(Cmd_EntityState));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_EntityState);
+            printf("GAME EXEC spawn dynamic ent %d/%d type %d\n",
+                cmd.entityId.iteration, cmd.entityId.index, cmd.factoryType);
             Exec_DynamicEntityState(gs, &cmd);
 			return 1;
         } break;

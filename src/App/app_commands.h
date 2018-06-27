@@ -251,26 +251,6 @@ u8 App_LoadStateFromFile(GameState *gs, char *fileName)
 }
 
 /////////////////////////////////////////////////////
-// EXEC APP LEVEL COMMANDS
-/////////////////////////////////////////////////////
-void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
-{
-    Client* cl = App_FindOrCreateClient(cmd->clientId);
-    cl->state = cmd->state;
-    cl->entId = cmd->entId;
-
-    // char buf[256];
-    // sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
-    printf("APP EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
-
-}
-
-void Exec_ReadInput(u32 frameNumber, InputEvent ev)
-{
-    InputAction *action = Input_TestForAction(&g_inputActions, ev.value, ev.inputID, frameNumber);
-}
-
-/////////////////////////////////////////////////////
 // READ COMMANDS
 /////////////////////////////////////////////////////
 void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
@@ -282,7 +262,7 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
             Assert(bytes == sizeof(InputEvent));
             InputEvent ev = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
-            Exec_ReadInput(g_time.platformFrameNumber, ev);
+            Input_TestForAction(&g_inputActions, ev.value, ev.inputID, g_time.platformFrameNumber);
         }
         break;
 #if 0
