@@ -78,6 +78,36 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         App_WriteStateToFile(tokens[1], true, &h);
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "LOAD"))
+    {
+        if (numTokens == 2)
+        {
+            if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
+            {
+                printf("Failed to load game\n");
+            }
+        }
+        else
+        {
+            printf(" LOAD: load single player game. eg LOAD testbox.lvl\n");
+        }
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "PLAY"))
+    {
+        // playback the given replay file
+        if (numTokens != 2)
+        {
+            printf("Incorrect parameter count\n");
+            return 1;
+        }
+        App_StartSession(NETMODE_REPLAY, tokens[1]);
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "STOP"))
+    {
+        // Stop recording, or stop replay playback
+    }
     if (!COM_CompareStrings(tokens[0], "ENTS"))
     {
         //App_DebugPrintEntities(&g_gameState);
@@ -176,21 +206,6 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (!COM_CompareStrings(tokens[0], "DUMPHEAP"))
     {
         App_DumpHeap();
-        return 1;
-    }
-    if (!COM_CompareStrings(tokens[0], "LOAD"))
-    {
-        if (numTokens == 2)
-        {
-            if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
-            {
-                printf("Failed to load game\n");
-            }
-        }
-        else
-        {
-            printf(" LOAD: load single player game. eg LOAD testbox.lvl\n");
-        }
         return 1;
     }
     if (COM_CompareStrings(tokens[0], "VERSION") == 0)

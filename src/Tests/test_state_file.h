@@ -668,6 +668,8 @@ u8 Test_LoadAndRun(char* filePath)
 	else
 	{
 		printf("No base file\n");
+	{
+		printf("No base file\n");
 	}
 
 	printf("*** CONTENTS OF \"%s\"\n", filePath);
@@ -693,7 +695,8 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("base\\demo.dem");
+	Test_PrintStateFileScan("base\\FOO");
+	//Test_PrintStateFileScan("base\\demo.dem");
 
 	//Test_PrintStateFileScan("base\\foo3");
 	//Test_PrintStateFileScan("foo2");

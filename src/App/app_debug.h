@@ -36,6 +36,51 @@ void App_DebugPrintEntities(GameState* gs)
     printf(" %d entities\n", count);
 }
 #endif
+
+
+char* g_bufferA_Name = "a";
+char* g_bufferB_Name = "b";
+char* g_unknown = "Unknown";
+
+char* App_GetBufferName(u8* bufferStartAddr)
+{
+    if (bufferStartAddr == g_appBufferA.ptrStart)
+    {
+        return g_bufferA_Name;
+    }
+    if (bufferStartAddr == g_appBufferB.ptrStart)
+    {
+        return g_bufferB_Name;
+    }
+    return g_unknown;
+}
+
+void AllocateDebugStrings(Heap *heap)
+{
+    // Buffer used for live stat output
+    Heap_AllocString(&g_heap, &g_debugBuffer, 1024);
+    char *writeStart = (char *)g_debugBuffer.ptrMemory;
+    i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
+    sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
+    printf("APP Allocated debug string\n");
+}
+
+i32 AllocateTestStrings(Heap *heap)
+{
+    BlockRef ref = {};
+    Heap_AllocString(&g_heap, &ref, 128);
+    char *testStr1 = "This is a test string. It should get copied onto the heap";
+    COM_CopyStringLimited(testStr1, (char *)ref.ptrMemory, ref.objectSize);
+
+    ref = {};
+    Heap_AllocString(&g_heap, &ref, 256);
+    char *testStr2 = "Welcome to another test string. This one goes on and on and on and on and on and blooooody on. At most 256 though, no more, but possible less. Enough to require 256 bytes of capacity certainly. I mean, with more than that it would just break right? It'll go right off the end and just...";
+    COM_CopyStringLimited(testStr2, (char *)ref.ptrMemory, ref.objectSize);
+    return 1;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////

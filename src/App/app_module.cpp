@@ -103,6 +103,7 @@ void AppListTextures();
 /////////////////////////////////////////////////////////
 
 #include "app_debug.h"
+#include "app_session.h"
 #include "app_clients.h"
 #include "app_commands.h"
 #include "app_input.h"
