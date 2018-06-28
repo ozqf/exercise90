@@ -28,6 +28,10 @@ void Game_InitGameState(GameState *gs)
     // gs->playerList.count = GAME_MAX_PLAYERS;
     // gs->playerList.max = GAME_MAX_PLAYERS;
 
+    gs->clientList.items = g_clients;
+    gs->clientList.count = 0;
+    gs->clientList.max = GAME_MAX_CLIENTS;
+
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;
     gs->entList.max = GAME_MAX_ENTITIES;
@@ -293,9 +297,9 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 #endif
 }
 
-void Exec_UpdateClient(Cmd_ClientUpdate* cmd)
+void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 {
-    Client* cl = App_FindOrCreateClient(cmd->clientId);
+    Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
 
@@ -352,7 +356,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 			Assert(bytes == sizeof(Cmd_PlayerInput));
             Cmd_PlayerInput cmd;
             COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerInput);
-            Client* cl = App_FindClientById(cmd.clientId);
+            Client* cl = App_FindClientById(cmd.clientId, &gs->clientList);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
@@ -384,7 +388,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Assert(bytes == sizeof(Cmd_ClientUpdate));
             Cmd_ClientUpdate cmd = {};
             ptr += COM_COPY_STRUCT(ptr, &cmd, Cmd_ClientUpdate);
-            Exec_UpdateClient(&cmd);
+            Exec_UpdateClient(gs, &cmd);
             return 1;
         } break;
 

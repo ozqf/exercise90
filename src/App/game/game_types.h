@@ -240,6 +240,7 @@ struct GameState
     //i32 lastEntityIndex;
     
     //PlayerList playerList;
+    ClientList clientList;
 
     // Components
     EC_AIControllerList aiControllerList;

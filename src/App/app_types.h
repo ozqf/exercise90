@@ -16,7 +16,10 @@ struct FileSegment
 {
 	u32 offset = 0;
 	u32 count = 0;
-	u32 size = 0;
+    // if size is 0, nothing was written, if size is negative, writing was started
+    // but not completed (ie it crashed), so size of data is unknown
+    // try reading regardless, for debugging!
+	i32 size = 0;
 };
 
 struct StateSaveHeader
@@ -31,9 +34,9 @@ struct StateSaveHeader
     */
 
     
-	FileSegment staticEntities;
+	FileSegment staticCommands;
     
-	FileSegment dynamicEntities;
+	FileSegment dynamicCommands;
     
 	FileSegment frames;
 };

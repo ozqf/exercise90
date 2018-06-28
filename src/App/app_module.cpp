@@ -34,9 +34,13 @@ char* App_GetBufferName(u8* bufferStartAddr);
 
 // Clients
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
-Client* App_FindClientById(i32 id);
-Client* App_FindOrCreateClient(i32 id);
+void App_EndAllClients(ClientList* cls);
+void App_ClearClientGameLinks(ClientList* cls);
+void App_AddLocalClient();
 void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
+Client* App_FindClientById(i32 id, ClientList* cls);
+Client* App_FindOrCreateClient(i32 id, ClientList* cls);
+void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 
 // assets
 i32 AppGetTextureIndexByName(char* textureName);
@@ -55,15 +59,6 @@ i32 AppGetTextureIndexByName(char* textureName);
 #include "app_globals.h"
 
 
-/////////////////////////////////////////////////////////
-// Clients
-void App_EndAllClients();
-void App_ClearClientGameLinks();
-void App_AddLocalClient();
-void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
-Client* App_FindClientById(i32 id);
-Client* App_FindOrCreateClient(i32 id);
-void App_UpdateLocalClients(GameTime* time);
 
 /////////////////////////////////////////////////////////
 // commands

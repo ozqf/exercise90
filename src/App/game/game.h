@@ -155,6 +155,8 @@ global_variable ClientTick g_localClientTick;
 // TODO: This stuff should be allocated on the heap so it can be scaled
 // Bah, to heck with it. Statics for everyone
 
+global_variable Client g_clients[GAME_MAX_CLIENTS];
+
 // Game
 global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 //global_variable Player              g_players[GAME_MAX_PLAYERS];

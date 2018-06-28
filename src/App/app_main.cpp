@@ -31,7 +31,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
     
     // Record current position to calculate bytes written after loop
     u8* startOfDynamicCmds = buf->ptrWrite;
-    h.dynamicEntities.offset = (u32)(buf->ptrWrite - buf->ptrStart);
+    h.dynamicCommands.offset = (u32)(buf->ptrWrite - buf->ptrStart);
 
     // ents
     i32 numEntities = gs->entList.count;
@@ -70,13 +70,13 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         }
 
         
-        h.dynamicEntities.count++;
+        h.dynamicCommands.count++;
     }
 
     u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
     
     // write header
-    h.dynamicEntities.size = (u32)(buf->ptrWrite - startOfDynamicCmds);
+    h.dynamicCommands.size = (u32)(buf->ptrWrite - startOfDynamicCmds);
     
     // Demo frames marked as negative means demo frames should be expected
     // but the count is unknown. If the count is not set it could mean there
@@ -169,9 +169,9 @@ void App_StartRecording(GameState* gs)
     printf("APP Wrote %d bytes (%.2fKB) to %s:\n", written, ((f32)written / (f32)1024), demoName);
     printf("  BASE FILE: %s\n", h.baseFile);
     printf("  Dynamic Entities: offset %d count %d bytes %d\n",
-        h.dynamicEntities.offset,
-        h.dynamicEntities.count,
-        h.dynamicEntities.size
+        h.dynamicCommands.offset,
+        h.dynamicCommands.count,
+        h.dynamicCommands.size
     );
     #endif
 	
@@ -189,7 +189,7 @@ void App_EndSession()
 	// Clear command buffer
 	//App_ClearClients();
 	// Break client links
-	App_ClearClientGameLinks();
+	App_ClearClientGameLinks(&g_gameState.clientList);
 	COM_ZeroMemory((u8*)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }
 
@@ -455,7 +455,7 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
 void App_UpdateGameState(GameTime* time)
 {
     // Update local client input
-    App_UpdateLocalClients(time);
+    App_UpdateLocalClients(time, &g_gameState.clientList);
     
     // Read game output from last frame + internally issued commands
     //App_ReadCommandBuffer(g_appReadBuffer);

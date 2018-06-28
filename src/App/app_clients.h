@@ -2,21 +2,19 @@
 
 #include "app_module.cpp"
 
-void App_EndAllClients()
+void App_EndAllClients(ClientList* cls)
 {
-	i32 len = g_clientList.max;
-	for (i32 i = 0; i < g_clientList.max; ++i)
+	for (i32 i = 0; i < cls->max; ++i)
 	{
-		g_clientList.items[i] = {};
+		cls->items[i] = {};
 	}
 }
 
-void App_ClearClientGameLinks()
+void App_ClearClientGameLinks(ClientList* cls)
 {
-	i32 len = g_clientList.max;
-	for (i32 i = 0; i < g_clientList.max; ++i)
+	for (i32 i = 0; i < cls->max; ++i)
 	{
-		Client* cl = &g_clientList.items[i];
+		Client* cl = &cls->items[i];
         cl->entId = {};
 		cl->state = CLIENT_STATE_OBSERVER;
 
@@ -81,11 +79,11 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
     }
 }
 
-Client* App_FindClientById(i32 id)
+Client* App_FindClientById(i32 id, ClientList* cls)
 {
-    for (i32 i = 0; i < g_clientList.max; ++i)
+    for (i32 i = 0; i < cls->max; ++i)
     {
-        Client* query = &g_clientList.items[i];
+        Client* query = &cls->items[i];
         if (query->clientId == id)
         {
             return query;
@@ -94,13 +92,13 @@ Client* App_FindClientById(i32 id)
     return NULL;
 }
 
-Client* App_FindOrCreateClient(i32 id)
+Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 {
     Client* free = NULL;
     Client* result = NULL;
-    for (i32 i = 0; i < g_clientList.max; ++i)
+    for (i32 i = 0; i < cls->max; ++i)
     {
-        Client* query = &g_clientList.items[i];
+        Client* query = &cls->items[i];
         if (query->clientId == id)
         {
             result = query;
@@ -131,12 +129,11 @@ Client* App_FindOrCreateClient(i32 id)
     return result;
 }
 
-void App_UpdateLocalClients(GameTime* time)
+void App_UpdateLocalClients(GameTime* time, ClientList* cls)
 {
-    i32 l = g_clientList.max;
-    for (i32 i = 0; i < l; ++i)
+    for (i32 i = 0; i < cls->max; ++i)
     {
-        Client* cl = &g_clientList.items[i];
+        Client* cl = &cls->items[i];
         if (cl->clientId == 0) { continue; }
         if (cl->clientId == -1)
         {

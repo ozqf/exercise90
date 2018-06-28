@@ -43,7 +43,7 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             
             #if 1
 			// How to assign player Id at this point
-            Client* cl = App_FindClientById(cmd->clientId);
+            Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
                 printf("GAME Cannot spawn - client is free or playing already\n");

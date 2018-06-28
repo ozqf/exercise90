@@ -21,8 +21,8 @@ struct StateSaveHeader
 	char magic[4] = { 'S', 'A', 'V', 'E' };
 	char baseFile[32];
 
-	FileSegment staticEntities;
-	FileSegment dynamicEntities;
+	FileSegment staticCommands;
+	FileSegment dynamicCommands;
 	FileSegment frames;
 };
 
@@ -138,8 +138,8 @@ inline void FileSeg_PrintDebug(char* label, FileSegment* f)
 
 inline void DebugStateHeader(StateSaveHeader* h)
 {
-	FileSeg_PrintDebug("Static Entities", &h->staticEntities);
-	FileSeg_PrintDebug("Dynamic Entities", &h->dynamicEntities);
+	FileSeg_PrintDebug("Static Entities", &h->staticCommands);
+	FileSeg_PrintDebug("Dynamic Entities", &h->dynamicCommands);
 	FileSeg_PrintDebug("Frames", &h->frames);
 }
 
@@ -170,7 +170,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	/////////////////////////////////////////////////////////////
 	// Write static entities
 	/////////////////////////////////////////////////////////////
-	header.staticEntities.offset = ftell(f);
+	header.staticCommands.offset = ftell(f);
 
 	u32 cmdSpawnSize = sizeof(CmdHeader) + sizeof(Cmd_Spawn);
 
@@ -186,7 +186,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 48, 1, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	spawn = {};
 	spawn.factoryType = 1;
@@ -197,7 +197,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 48, 1, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	spawn = {};
 	spawn.factoryType = 1;
@@ -208,7 +208,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 48, 16, 1 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	spawn = {};
 	spawn.factoryType = 1;
@@ -219,7 +219,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 48, 16, 1 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	spawn = {};
 	spawn.factoryType = 1;
@@ -230,7 +230,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 1, 16, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	spawn = {};
 	spawn.factoryType = 1;
@@ -241,14 +241,14 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	spawn.size = { 1, 16, 48 };
 	WriteCommandHeader(f, CMD_TYPE_SPAWN, sizeof(Cmd_Spawn));
 	fwrite(&spawn, sizeof(Cmd_Spawn), 1, f);
-	FileSeg_Add(&header.staticEntities, cmdSpawnSize);
+	FileSeg_Add(&header.staticCommands, cmdSpawnSize);
 
 	/////////////////////////////////////////////////////////////
 	// Write dynamic entities
 	/////////////////////////////////////////////////////////////
-	header.dynamicEntities.offset = ftell(f);
-	header.dynamicEntities.count = 0;
-	header.dynamicEntities.size = 0;
+	header.dynamicCommands.offset = ftell(f);
+	header.dynamicCommands.count = 0;
+	header.dynamicCommands.size = 0;
 
 	/////////////////////////////////////////////////////////////
 	// Frames
@@ -274,7 +274,7 @@ void Test_WriteStateFile(char* fileName, char* baseFileName)
 	fclose(f);
 }
 #if 1
-u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
+u8 Test_ReadState(char* fileName, u8 staticCommandsOnly)
 {
 	FILE* f;
 	fopen_s(&f, fileName, "rb");
@@ -287,7 +287,7 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 	fseek(f, 0, SEEK_END);
 	u32 end = ftell(f);
 	fseek(f, 0, SEEK_SET);
-	printf("Reading %d bytes from \"%s\". Static only: %d\n", end, fileName, staticEntitiesOnly);
+	printf("Reading %d bytes from \"%s\". Static only: %d\n", end, fileName, staticCommandsOnly);
 
 	StateSaveHeader h = {};
 	fread(&h, sizeof(StateSaveHeader), 1, f);
@@ -324,8 +324,8 @@ u8 Test_ReadState(char* fileName, u8 staticEntitiesOnly)
 
 	DebugStateHeader(&h);
 
-	fseek(f, h.staticEntities.offset, SEEK_SET);
-	u32 sectionEnd = h.staticEntities.offset + h.staticEntities.size;
+	fseek(f, h.staticCommands.offset, SEEK_SET);
+	u32 sectionEnd = h.staticCommands.offset + h.staticCommands.size;
 
 	while (ftell(f) < (i32)sectionEnd)
 	{
@@ -435,14 +435,14 @@ void Test_PrintStateFileScan(char* filePath)
 	printf("File is %d bytes\n", fileSize);
 
 	// Static Commands
-	if (h.staticEntities.size > 0)
+	if (h.staticCommands.size > 0)
 	{
 		printf("* Scanning static commands\n");
-		u32 origin = h.staticEntities.offset;
+		u32 origin = h.staticCommands.offset;
 		fseek(f, origin, SEEK_SET);
 		u32 read = 0;
 		i32 cmdCount = 0;
-		while (read < h.staticEntities.size)
+		while (read < h.staticCommands.size)
 		{
 			CmdHeader cmdH = {};
 			fread(&cmdH, sizeof(CmdHeader), 1, f);
@@ -459,14 +459,14 @@ void Test_PrintStateFileScan(char* filePath)
 	}
 	
 	// Dynamic Commands
-	if (h.dynamicEntities.size > 0)
+	if (h.dynamicCommands.size > 0)
 	{
 		printf("* Scanning dynamic commands\n");
-		u32 origin = h.dynamicEntities.offset;
+		u32 origin = h.dynamicCommands.offset;
 		fseek(f, origin, SEEK_SET);
 		u32 read = 0;
 		u32 cmdCount = 0;
-		while (read < h.dynamicEntities.size)
+		while (read < h.dynamicCommands.size)
 		{
 			CmdHeader cmdH = {};
 			fread(&cmdH, sizeof(CmdHeader), 1, f);
@@ -485,9 +485,9 @@ void Test_PrintStateFileScan(char* filePath)
 			cmdCount++;
 			fseek(f, origin + read, SEEK_SET);
 		}
-		if (!(cmdCount == h.dynamicEntities.count))
+		if (!(cmdCount == h.dynamicCommands.count))
 		{
-			printf("*** CMD Count mismatch! Claimed: %d Actual: %d", h.dynamicEntities.count, cmdCount);
+			printf("*** CMD Count mismatch! Claimed: %d Actual: %d", h.dynamicCommands.count, cmdCount);
 		}
 	}
 	else
@@ -496,7 +496,7 @@ void Test_PrintStateFileScan(char* filePath)
 	}
 	
 	i32 sizeOfReplayHeader = sizeof(ReplayFrameHeader);
-	i32 framesOffset = h.dynamicEntities.offset + h.dynamicEntities.size;
+	i32 framesOffset = h.dynamicCommands.offset + h.dynamicCommands.size;
 	i32 totalFramesData = fileSize - framesOffset;
 	u32 filePosition = framesOffset;
 	u32 numFrames = 0;
@@ -675,9 +675,9 @@ u8 Test_LoadAndRun(char* filePath)
 
 	// Read static entities file section
 	ByteBuffer sub = {};
-	sub.ptrStart = bytes.ptrStart + h.staticEntities.offset;
-	sub.capacity = h.staticEntities.size;
-	sub.count = h.staticEntities.count;
+	sub.ptrStart = bytes.ptrStart + h.staticCommands.offset;
+	sub.capacity = h.staticCommands.size;
+	sub.count = h.staticCommands.count;
 	sub.ptrEnd = bytes.ptrStart + bytes.capacity;
 
 	Test_ReadCommandBuffer(&sub);

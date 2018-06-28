@@ -161,10 +161,10 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
-		i32 len = g_clientList.max;
-		for (i32 i = 0; i < g_clientList.max; ++i)
+		i32 len = g_gameState.clientList.max;
+		for (i32 i = 0; i < g_gameState.clientList.max; ++i)
 		{
-			Client* cl = &g_clientList.items[i];
+			Client* cl = &g_gameState.clientList.items[i];
 			printf("%d: IsLocal %d, State %d, Avatar: %d/%d\n",
 				cl->clientId,
 				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
@@ -220,17 +220,17 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
 
     // Read static
     ByteBuffer sub = {};
-    sub.ptrStart = buf->ptrStart + h.staticEntities.offset;
-    sub.capacity = h.staticEntities.size;
-    sub.count = h.staticEntities.count;
+    sub.ptrStart = buf->ptrStart + h.staticCommands.offset;
+    sub.capacity = h.staticCommands.size;
+    sub.count = h.staticCommands.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
     Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
 
 	// Read Dynamic
-	sub.ptrStart = buf->ptrStart + h.dynamicEntities.offset;
-	sub.capacity = h.dynamicEntities.size;
-	sub.count = h.dynamicEntities.count;
+	sub.ptrStart = buf->ptrStart + h.dynamicCommands.offset;
+	sub.capacity = h.dynamicCommands.size;
+	sub.count = h.dynamicCommands.count;
 	sub.ptrEnd = buf->ptrStart + buf->capacity;
 	printf("APP Reading dynamic Entitites (%d bytes)\n", sub.capacity);
 	Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
