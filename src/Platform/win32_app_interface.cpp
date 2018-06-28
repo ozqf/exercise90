@@ -144,6 +144,7 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_OpenFileForWriting = Platform_OpenFileForWriting;
     platInterface.Platform_WriteToFile = Platform_WriteToFile;
     platInterface.Platform_CloseFileForWriting = Platform_CloseFileForWriting;
+	platInterface.Platform_SeekInFileFromStart = Platform_SeekInFileFromStart;
     platInterface.Platform_GetBaseDirectoryName = Platform_GetBaseDirectoryName;
 }
 

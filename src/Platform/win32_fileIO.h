@@ -300,7 +300,9 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 
 }
 
-// Limited to 1 atm
+/////////////////////////////////////////////////////////
+// App interface to standard fopen/read/write etc
+/////////////////////////////////////////////////////////
 #define WIN32_MAX_OPEN_APP_FILES 4
 FILE* g_appReadFiles[WIN32_MAX_OPEN_APP_FILES];
 
@@ -334,6 +336,11 @@ i32 Platform_OpenFileForWriting(char* fileName)
 
 	fseek(g_appReadFiles[index], 0, SEEK_SET);
 	return index;
+}
+
+void Platform_SeekInFileFromStart(i32 fileId, u32 offset)
+{
+	fseek(g_appReadFiles[fileId], offset, SEEK_SET);
 }
 
 i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)

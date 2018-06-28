@@ -74,8 +74,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("  No file name specified for save\n");
             return 1;
         }
-        
-        App_WriteStateToFile(tokens[1], true);
+        StateSaveHeader h = {};
+        App_WriteStateToFile(tokens[1], true, &h);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))

@@ -60,6 +60,58 @@ struct Cmd_Spawn
     u32 flags;
 };
 
+struct CommandDescription
+{
+	i32 type;
+	i32 size;
+	char label[32];
+};
+#if 0
+CommandDescription g_descriptions[] = {
+	{ 0, { 'f', 'o', '/0' } },
+	{ 1, { 'b', 'a', '/0' } }
+};
+#endif
+#if 1
+CommandDescription g_descriptions[32];
+i32 g_numDescriptions = 0;
+#endif
+
+void Test_InitCmdDescription(CommandDescription* cmd, i32 type, i32 size, char* label)
+{
+	cmd->type = type;
+	cmd->size = size;
+	COM_CopyStringLimited(label, cmd->label, 32);
+}
+
+void Test_InitCmdDescriptions()
+{
+	Test_InitCmdDescription(&g_descriptions[0], 100, 48, "Spawn Static");
+	Test_InitCmdDescription(&g_descriptions[1], 101, 8, "Server Impulse");
+	// 16 bytes for input + 12 for ids etc
+	Test_InitCmdDescription(&g_descriptions[2], 102, 28, "Player Input");
+	Test_InitCmdDescription(&g_descriptions[3], 103, 28, "Client Update");
+
+	Test_InitCmdDescription(&g_descriptions[4], 104, 5, "Text");
+	Test_InitCmdDescription(&g_descriptions[5], 105, 84, "Dynamic Ent State");
+	Test_InitCmdDescription(&g_descriptions[6], 106, 4, "Remove Ent");
+	//Test_InitCmdDescription(&g_descriptions[7], 107, 4, "Ent Delta");
+	Test_InitCmdDescription(&g_descriptions[7], 108, 12, "Player State");
+	g_numDescriptions = 8;
+}
+
+CommandDescription* Test_GetCmdDescription(i32 type)
+{
+	for (i32 i = 0; i < g_numDescriptions; ++i)
+	{
+		if (g_descriptions[i].type == type)
+		{
+			return &g_descriptions[i];
+		}
+	}
+	return NULL;
+}
+
 inline void FileSeg_Add(FileSegment* f, u32 fileSize)
 {
 	f->count++;
@@ -419,7 +471,16 @@ void Test_PrintStateFileScan(char* filePath)
 			CmdHeader cmdH = {};
 			fread(&cmdH, sizeof(CmdHeader), 1, f);
 			read += sizeof(CmdHeader);
-			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.type, cmdH.size);
+			CommandDescription* def = Test_GetCmdDescription(cmdH.type);
+			if (def != NULL)
+			{
+				printf("  %s (%d)\n", def->label, def->size);
+			}
+			else
+			{
+				printf("  CMD %d: type %d (UNKNOWN!) size %d\n", cmdCount, cmdH.type, cmdH.size);
+			}
+			
 			read += cmdH.size;
 			cmdCount++;
 			fseek(f, origin + read, SEEK_SET);
@@ -441,7 +502,7 @@ void Test_PrintStateFileScan(char* filePath)
 	u32 numFrames = 0;
 	u32 numInterestingFrames = 0;
 
-	printf("%d bytes of frame data\n", totalFramesData);
+	printf("\n%d bytes of frame data:\n", totalFramesData);
 	fseek(f, framesOffset, SEEK_SET);
 	while (filePosition < fileSize)
 	{
@@ -455,8 +516,26 @@ void Test_PrintStateFileScan(char* filePath)
 		numFrames++;
 		if (replay.size > 0)
 		{
+			// cmd headers are 8 bytes
+			// ---- 128 bytes can breakdown to ---
+			// 8 byte header
+			// 84 byte entity state
+			// 8 byte header
+			// 28 byte player input
+			// ---- 312 bytes breakdown ---
+			// 8 byte header
+			// 84 byte entity state
+			// 8 byte header
+			// 84 byte entity state
+			// 8 byte header
+			// 84 byte entity state
+			// 				- 276 so far
+			// 8 byte header
+			// 28 byte player input
+			// therefore, stepping process is broken here!
+
 			numInterestingFrames++;
-			printf("Demo header %s: frameNumber %d size %d\n", replay.label, replay.frameNumber, replay.size);
+			printf("%s %d (%d bytes)\n", replay.label, replay.frameNumber, replay.size);
 			CmdHeader cmd = {};
 			// Define start and end of frame data.
 			// Step file position forward
@@ -466,19 +545,38 @@ void Test_PrintStateFileScan(char* filePath)
 			filePosition = endPosition;
 
 			i32 overFlow = 0;
+			i32 numCommands = 0;
 			while (framePosition < endPosition)
 			{
 				fread(&cmd, sizeof(CmdHeader), 1, f);
 				framePosition += sizeof(CmdHeader);
-				printf(" Positions: %d (%d - %d)\n", (framePosition - frameStart), framePosition, frameStart);
-				printf(" framePosition += %d\n", sizeof(CmdHeader));
+				//printf(" Positions: %d (%d - %d)\n", (framePosition - frameStart), framePosition, frameStart);
+				//printf(" framePosition += %d\n", sizeof(CmdHeader));
 
-				printf("    CMD type %d size %d\n", cmd.type, cmd.size);
+				CommandDescription* def = Test_GetCmdDescription(cmd.type);
+				if (def == NULL)
+				{
+					printf("UNKNOWN CMD %d size %d, ", cmd.type, cmd.size);
+				}
+				else
+				{
+					if ((u32) def->size != cmd.size)
+					{
+						printf("  %s. *** SIZE MISMATCH! *** target: %d actual %d\n", def->label, def->size, cmd.size);
+					}
+					else
+					{
+						printf("  %s (%d)\n", def->label, cmd.size);
+					}
+					
+				}
+				numCommands++;
+				//printf("CMD type %d size %d, ", cmd.type, cmd.size);
 				if (cmd.size > 0){
 					//position += cmd.size;
-					fseek(f, framePosition, SEEK_SET);
 					framePosition += cmd.size;
-					printf(" framePosition += %d\n", cmd.size);
+					fseek(f, framePosition, SEEK_SET);
+					//printf(" framePosition += %d\n", cmd.size);
 				}
 				overFlow++;
 				if (overFlow > 50)
@@ -486,17 +584,21 @@ void Test_PrintStateFileScan(char* filePath)
 					printf("Overflowed!\n");
 					break;
 				}
+				
 			}
+			// snapping to end works, stepping does not...?
+			printf("    (%d cmds)\n", numCommands);
 			fseek(f, endPosition, SEEK_SET);
 			filePosition = endPosition;
 		}
 		else
 		{
+			printf("%s %d (Empty)\n", replay.label, replay.frameNumber);
 			filePosition += replay.size;
 			fseek(f, filePosition, SEEK_SET);
 		}
 	}
-	printf("  %d frames in demo, of which %d are interesting\n", numFrames, numInterestingFrames);
+	printf("  %d frames in demo, of which %d are interesting\n\n", numFrames, numInterestingFrames);
 
 	DebugStateHeader(&h);
 	fclose(f);
@@ -587,6 +689,7 @@ u8 Test_LoadAndRun(char* filePath)
 
 void Test_StateSaving()
 {
+	Test_InitCmdDescriptions();
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 

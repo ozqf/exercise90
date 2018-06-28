@@ -748,5 +748,10 @@ int CALLBACK WinMain(
         MessageBox(0, "Failed to register window class", "Error", MB_OK | MB_ICONINFORMATION);
         return 1;
     }
+	
+	if (g_app.isValid)
+	{
+		g_app.AppShutdown();
+	}
     return 0;
 }

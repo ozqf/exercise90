@@ -48,6 +48,7 @@ struct PlatformInterface
 	// Writing Files
 	i32 (*Platform_OpenFileForWriting)(char* fileName);
     i32 (*Platform_WriteToFile)(i32 fileId, u8* ptr, u32 numBytes);
+	void (*Platform_SeekInFileFromStart)(i32 fileId, u32 offset);
     i32 (*Platform_CloseFileForWriting)(i32 fileId);
 
     // Input

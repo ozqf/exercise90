@@ -7,7 +7,7 @@ holding game/menu state and calling game update when required
 #include "app_module.cpp"
 
 // Returns bytes written
-u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf)
+u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
 {   
     StateSaveHeader h = {};
 	h.magic[0] = 'S';
@@ -83,11 +83,18 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf)
     // was a crash and the demo was never completed
 
     COM_COPY_STRUCT(&h, buf->ptrStart, StateSaveHeader);
+	
+	// Copy header details if necessary
+	if (header != NULL)
+	{
+		*header = h;
+	}
+	
     return written;
 }
 
 // Returns id of the file opened to
-i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite)
+i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite, StateSaveHeader* header)
 {
     printf("APP Writing state to %s\n", fileName);
     // Allocate a temporary chunk to write to, then dump it all out into a file
@@ -97,7 +104,7 @@ i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite)
     platform.Platform_Malloc(&mem, capacity);
     ByteBuffer buf = Buf_FromMemoryBlock(mem);
 
-    u32 written = App_WriteSaveState(&g_gameState, &buf);
+    u32 written = App_WriteSaveState(&g_gameState, &buf, header);
     
     // Write state to buffer
     
@@ -131,6 +138,8 @@ void App_StopRecording()
 {
     if (g_replayFileId != -1)
     {
+        platform.Platform_SeekInFileFromStart(g_replayFileId, 0);
+        platform.Platform_WriteToFile(g_replayFileId, (u8*)&g_replayHeader, sizeof(StateSaveHeader));
         platform.Platform_CloseFileForWriting(g_replayFileId);
         g_replayMode = NoReplayMode;
         g_replayFileId = -1;
@@ -153,7 +162,7 @@ void App_StartRecording(GameState* gs)
 
 	g_replayMode = RecordingReplay;
     // Write state and keep file open for writing frames
-    g_replayFileId = App_WriteStateToFile(fileName, false);
+    g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
 
     #if 0
 	u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
@@ -483,6 +492,8 @@ void App_UpdateGameState(GameTime* time)
         {
             printf("APP writing demo frame %d to file (%d bytes)\n", h.frameNumber, h.size);
         }
+        g_replayHeader.frames.count++;
+        g_replayHeader.frames.size += sizeof(ReplayFrameHeader) + bytesInBuffer;
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
         platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
     }
