@@ -40,6 +40,7 @@ void App_DebugPrintEntities(GameState* gs)
 
 char* g_bufferA_Name = "a";
 char* g_bufferB_Name = "b";
+char* g_bufferDemo_Name = "DEMO";
 char* g_unknown = "Unknown";
 
 char* App_GetBufferName(u8* bufferStartAddr)
@@ -51,6 +52,10 @@ char* App_GetBufferName(u8* bufferStartAddr)
     if (bufferStartAddr == g_appBufferB.ptrStart)
     {
         return g_bufferB_Name;
+    }
+    if (bufferStartAddr == g_replayReadBuffer.ptrStart)
+    {
+        return g_bufferDemo_Name;
     }
     return g_unknown;
 }

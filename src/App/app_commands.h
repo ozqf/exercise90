@@ -239,17 +239,30 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.capacity = h.staticCommands.size;
     sub.count = h.staticCommands.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
-    printf("APP Reading static Entitites (%d bytes)\n", sub.capacity);
-    Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
-
+    
+	if (sub.capacity != 0) {
+		printf("APP Reading static command (%d bytes)\n", sub.capacity);
+		Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+	}
+	else
+	{
+		printf("APP Read no static command bytes\n");
+	}
+	
 	// Read Dynamic
 	sub.ptrStart = buf->ptrStart + h.dynamicCommands.offset;
 	sub.capacity = h.dynamicCommands.size;
 	sub.count = h.dynamicCommands.count;
 	sub.ptrEnd = buf->ptrStart + buf->capacity;
-	printf("APP Reading dynamic Entitites (%d bytes)\n", sub.capacity);
-	Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
-
+	if (sub.capacity > 0)
+	{
+		printf("APP Reading dynamic commands (%d bytes)\n", sub.capacity);
+		Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+	}
+	else
+	{
+		printf("APP Read no dynamic commands bytes\n");
+	}
 }
 
 u8 App_LoadStateFromFile(GameState *gs, char *fileName)

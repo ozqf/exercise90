@@ -157,6 +157,12 @@ global_variable ClientTick g_localClientTick;
 
 global_variable Client g_clients[GAME_MAX_CLIENTS];
 
+// client N linksStart = (maxEnts * N) and end at (linksStart + (maxEnts - 1))
+global_variable EntityLink g_clientEntityLinks[GAME_MAX_ENTITIES * GAME_MAX_CLIENTS];
+// eg 2048 ents, 8 clients == 16384
+// link struct is 22 Bytes.
+// total array: 16384 * 22 == 360,448 (352 KB, 0.34375 MB)
+
 // Game
 global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 //global_variable Player              g_players[GAME_MAX_PLAYERS];

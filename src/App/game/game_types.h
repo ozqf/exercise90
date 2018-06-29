@@ -101,6 +101,7 @@ struct EntityLink
     i32 importance;
     u8 priority;
     u8 relevant;
+	// 16B + 4 + 1 + 1 = 22B
 };
 
 //////////////////////////////////////////////////

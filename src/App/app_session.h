@@ -228,21 +228,68 @@ u8 App_StartReplay(char* path)
 
     App_EndSession();
 
-    BlockRef* ref = NULL;
-    if (platform.Platform_LoadFileIntoHeap(&g_heap, ref, path, false) == false)
+    ///////////////////////////////////////////
+    // Prepare replay buffer
+    BlockRef ref = {};
+    if (platform.Platform_LoadFileIntoHeap(&g_heap, &ref, path, false) == false)
     {
         printf("  APP Could not load replay file %s\n", path);
         ILLEGAL_CODE_PATH
         return 0;
     }
-    Assert(ref != NULL);
-    printf("  replay is %d bytes.\n", ref->objectSize);
+    Assert(ref.ptrMemory != NULL);
+    printf("  replay is %d bytes.\n", ref.objectSize);
+
+    g_replayReadBuffer = Heap_RefToByteBuffer(&g_heap, &ref);
+    g_replayPtr = g_replayReadBuffer.ptrStart;
+
+    g_replayMode = PlayingReplay;
+
+    ///////////////////////////////////////////
+    // Read header, load initial data
+    g_replayPtr += COM_COPY_STRUCT(g_replayPtr, &g_replayHeader, StateSaveHeader);
+
+    printf("  replay base: %s. Static cmds: %d Bytes. Dynamic cmds: %d Bytes.\n",
+        g_replayHeader.baseFile,
+        g_replayHeader.staticCommands.size,
+        g_replayHeader.dynamicCommands.size
+    );
+    printf("  replay frames count: %d (%d Bytes)\n",
+        g_replayHeader.frames.count,
+        g_replayHeader.frames.size
+    );
+
+    App_ReadStateBuffer(&g_gameState, &g_replayReadBuffer);
+
+    ///////////////////////////////////////////
+    // Prepare frame reading
+	
+	// Frames array will be after the header + static size + dynamic size
+	
+	g_replayPtr = (u8*)ref.ptrMemory
+		+ sizeof(StateSaveHeader)
+		+ g_replayHeader.staticCommands.size
+		+ g_replayHeader.dynamicCommands.size;
+	
+	ReplayFrameHeader frame = {};
+	// DON'T advance the read pointer, just read the header to check we have a valid
+	// starting point.
+	COM_COPY_STRUCT(g_replayPtr, &frame, ReplayFrameHeader);
+	if (!COM_CompareStrings(frame.label, "FRAME"))
+	{
+		printf("  First frame: %s (%d bytes)\n", frame.label, frame.size);
+	}
+	else
+	{
+		printf("  INVALID FRAME HEADER AT %d\n", (u32)g_replayPtr);
+		ILLEGAL_CODE_PATH
+	}
     return 1;
 }
 
 u8 App_StartSinglePlayer(char* path)
 {
-	printf("APP Start single player session: %s\n", path);
+	printf(">>> APP Start single player session: %s <<<\n", path);
     
 	App_EndSession();
 
@@ -287,7 +334,7 @@ i32 App_StartSession(u8 netMode, char* path)
                 g_gameState.netMode = NETMODE_REPLAY;
                 return 1;
             }
-        }
+        } break;
 
         default:
         {

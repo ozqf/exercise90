@@ -119,7 +119,7 @@ i32 App_Shutdown()
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// UPDATE
+// INPUT
 ////////////////////////////////////////////////////////////////////////////
 
 void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
@@ -130,6 +130,9 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
         item->lastChangeFrame = frameNumber;
     }
 }
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // GAME TICK
@@ -159,8 +162,11 @@ void App_UpdateGameState(GameTime* time)
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
 
     // Prepare input buffer
+	ByteBuffer* input = g_appReadBuffer;
+	
+	// demo buffer
+	ByteBuffer replayBuffer = {};
 #if 1
-    ByteBuffer* input = g_appReadBuffer;
     if (g_replayMode == RecordingReplay)
     {
         // > Write frame header
@@ -184,12 +190,34 @@ void App_UpdateGameState(GameTime* time)
         // ignore g_appReadBuffer and instead read a frame from
         // the demo file
         ReplayFrameHeader h = {};
+		u8* readStart = g_replayPtr;
+		g_replayPtr += COM_COPY_STRUCT(g_replayPtr, &h, ReplayFrameHeader);
+		
+		if (COM_CompareStrings(h.label, "FRAME") == 1)
+		{
+			printf("APP Invalid frame header at %d\n", (u32)readStart);
+		}
+		else if(time->singleFrame)
+		{
+			printf("APP Reading demo frame %d (%d bytes)\n",
+				h.frameNumber,
+				h.size
+			);
+		}
+		
+        // Set input buffer
+		replayBuffer.ptrStart = g_replayPtr;
+		replayBuffer.ptrEnd = g_replayPtr + h.size;
+		input = &replayBuffer;
+
+        // Step read forward
+        g_replayPtr += h.size;
     }
 #endif
 
     // Game state update
     Game_Tick(gs,
-              g_appReadBuffer,
+              input,
               g_appWriteBuffer,
               time,
               &g_inputActions);
@@ -197,6 +225,13 @@ void App_UpdateGameState(GameTime* time)
     g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
 }
 
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// RENDER
+///////////////////////////////////////////////////////////////////////////////
 void App_Render(GameTime* time)
 {
     GameState *gs = &g_gameState;
