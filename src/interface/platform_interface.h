@@ -54,6 +54,9 @@ struct PlatformInterface
     // Input
     void (*Platform_SetMouseMode)(enum ZMouseMode mode);
 
+    // Commands
+    void (*Platform_WriteTextCommand)(char* ptr);
+
     // Rendering
     void (*Platform_RenderScene)(RenderScene* scene);
     // Set the texture the texture the platform should use when renderering

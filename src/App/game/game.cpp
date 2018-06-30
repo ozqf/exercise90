@@ -360,7 +360,11 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
-            Assert(motor != NULL);
+			if (motor == NULL)
+			{
+				printf("!GAME No motor for Entity %d/%d\n", cl->entId.iteration, cl->entId.index);
+				return 1;
+			}
             motor->input = cmd.input;
 			return 1;
 		} break;

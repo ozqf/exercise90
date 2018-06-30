@@ -212,6 +212,11 @@ void App_UpdateGameState(GameTime* time)
 
         // Step read forward
         g_replayPtr += h.size;
+
+        if (g_replayPtr >= g_replayReadBuffer.ptrEnd)
+        {
+            platform.Platform_WriteTextCommand("STOP");
+        }
     }
 #endif
 

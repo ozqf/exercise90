@@ -177,7 +177,9 @@ void App_StopRecording()
 
 void App_StartRecording(GameState* gs)
 {
-	char* fileName = "demo.dem";
+	char fileName[128];
+	sprintf_s(fileName, 128, "DEMO_%s_%s", __DATE__, __TIME__);
+	COM_StrReplace(fileName, ':', '_');
     #if 1
 	if (g_replayMode != None)
 	{
@@ -239,7 +241,7 @@ u8 App_StartReplay(char* path)
     }
     Assert(ref.ptrMemory != NULL);
     printf("  replay is %d bytes.\n", ref.objectSize);
-
+    
     g_replayReadBuffer = Heap_RefToByteBuffer(&g_heap, &ref);
     g_replayPtr = g_replayReadBuffer.ptrStart;
 

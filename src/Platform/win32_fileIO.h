@@ -321,19 +321,23 @@ i32 Win32_GetFreeAppFileHandle()
 i32 Platform_OpenFileForWriting(char* fileName)
 {
 	i32 index = Win32_GetFreeAppFileHandle();
-	Assert(index != -1);
-
+	printf("PLATFORM Opening file %s for writing\n", fileName);
+	if (index == -1)
+	{
+		printf("  PLATFORM no free file handle\n");
+		ILLEGAL_CODE_PATH
+	}
+	
 	fopen_s(&g_appReadFiles[index], fileName, "wb");
 
 	if (g_appReadFiles[index] == NULL)
 	{
+		printf("  PLATFORM failed to open %s for writing\n", fileName);
 		return -1;
 	}
 
-	fseek(g_appReadFiles[index], 0, SEEK_END);
-	i32 end = ftell(g_appReadFiles[index]);
-	printf("PLATFORM Opening file %s (current has %d bytes!)\n", fileName, end);
-
+	//fseek(g_appReadFiles[index], 0, SEEK_END);
+	//i32 end = ftell(g_appReadFiles[index]);
 	fseek(g_appReadFiles[index], 0, SEEK_SET);
 	return index;
 }

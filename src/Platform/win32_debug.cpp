@@ -20,6 +20,8 @@ struct Win32_TextInput
     i32 length;
 };
 
+char g_textCommandInput[2048];
+
 Win32_TextInput g_inputText;
 u8 g_textBufferAwaitingProcessing = 0;
 u8 g_debugInputActive = 0;
@@ -28,6 +30,12 @@ u8 g_debugInputActive = 0;
 // 0 = background, 1 = console text over background
 RenderListItem g_rendDebugItems[WIN32_NUM_DEBUG_ITEMS];
 RenderScene g_debugScene;
+
+void Platform_WriteTextCommand(char* ptr)
+{
+    printf("PLATFORM writing text cmd %s\n", ptr);
+    COM_CopyStringLimited(ptr, g_textCommandInput, 2048);
+}
 
 void Win32_ToggleDebugInput()
 {
@@ -53,6 +61,7 @@ void Win32_ResetDebugInput()
 
 void Win32_CheckTextBuffer()
 {
+    // Check user debug text input
     if (g_textBufferAwaitingProcessing)
     {
         g_textBufferAwaitingProcessing = 0;
@@ -61,6 +70,14 @@ void Win32_CheckTextBuffer()
         // position is also the null terminator
         Win32_ParseTextCommand(g_inputText.ptr + 1, 0, g_inputText.position);
         Win32_ResetDebugInput();
+    }
+
+    // Check internal text command input
+    i32 len = COM_StrLen(g_textCommandInput);
+    if (len > 0)
+    {
+        Win32_ParseTextCommand(g_textCommandInput, 0, len);
+        COM_ZeroMemory((u8*)g_textCommandInput, 2048);
     }
 }
 

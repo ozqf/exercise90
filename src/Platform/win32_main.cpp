@@ -629,13 +629,13 @@ int CALLBACK WinMain(
                     DispatchMessage(&message);
                 }
 
-#if 0 // Force app to give up CPU time if not current focus target
+#if 1 // Force app to give up CPU time if not current focus target
                 if (g_windowActive == 0)
                 {
-                    Sleep(2);
+                    Sleep(4);
                 }
 #endif
-#if 1 // I'm on my laptop, just give up CPU time
+#if 0 // I'm on my laptop, just give up CPU time
                 Sleep(2);
 #endif
 

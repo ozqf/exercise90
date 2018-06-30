@@ -264,6 +264,21 @@ static inline i32 COM_StrLen(const char* str)
     return count;
 }
 
+static inline i32 COM_StrReplace(char* str, char target, char replacement)
+{
+    i32 count = 0;
+    while (*str)
+    {
+        if (*str == target)
+        {
+            *str = replacement;
+            ++count;
+        }
+        str++;
+    }
+    return count;
+}
+
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
