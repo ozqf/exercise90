@@ -35,6 +35,13 @@ struct DataFileEntryReader
 	DataFileDiskEntry entry;
 };
 
+struct KeyConversion
+{
+	u16 VKCode;
+	char baseChar;
+	char shiftChar;
+};
+
 #pragma pack(push, 1)
 typedef struct _WinBMPFileHeader
 {

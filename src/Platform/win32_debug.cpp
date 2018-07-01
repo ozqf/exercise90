@@ -22,6 +22,8 @@ struct Win32_TextInput
 
 char g_textCommandInput[2048];
 
+KeyConversion g_keyConversions[2];
+
 Win32_TextInput g_inputText;
 u8 g_textBufferAwaitingProcessing = 0;
 u8 g_debugInputActive = 0;
@@ -81,10 +83,47 @@ void Win32_CheckTextBuffer()
     }
 }
 
-void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
+#define VK_CODE_BACKSPACE 8
+#define VK_CODE_ENTER 13
+#define VK_CODE_SHIFT 16
+#define VK_CODE_SPACE 32
+
+#define VK_CODE_SQUARE_BRACKET_LEFT 219
+#define VK_CODE_SQUARE_BRACKET_RIGHT 221
+#define VK_CODE_DASH 189
+#define VK_CODE_FULL_STOP 190
+#define VK_CODE_EQUALS 187
+#define VK_CODE_HASH 222
+
+u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
+{
+    KeyConversion* k = &g_keyConversions[0];
+    while (k->VKCode != NULL)
+    {
+        if (k->VKCode == VKCode)
+        {
+            return shift > 1 ? k->shiftChar : k->baseChar;
+        }
+        ++k;
+    }
+    return VKCode;
+}
+
+void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
 {
     if (g_textBufferAwaitingProcessing) { return; }
-    if (VKCode == 13)
+    u16 shift = GetKeyState(VK_CODE_SHIFT);
+    //u16 word;
+    //u8 c = (u8)ToAscii(VKCode, 0, 0, &word, 0);
+    //printf("%d to asci %d\n", VKCode, c);
+
+
+
+    // translate specific keys
+    VKCode = (i32)Win32_ConvertVKCode(VKCode, shift);
+
+    //printf("Shift state: %d\n", shift);
+    if (VKCode == VK_CODE_ENTER)
     {
         // Flag buffer as locked and awaiting reading
         g_textBufferAwaitingProcessing = 1;
@@ -92,11 +131,12 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
         return;
     }
     // skip unwanted keys
-    else if (VKCode == 16)
+    else if (VKCode == VK_CODE_SHIFT)
     {
+        printf(" PLAT Shift pressed\n");
         return;
     }
-    else if (VKCode == 8)
+    else if (VKCode == VK_CODE_BACKSPACE)
     {
         if (g_inputText.position == 1) { return; }
         --g_inputText.position;
@@ -104,11 +144,12 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
     }
     else
     {
-        char c = (char)VKCode;
-        if (VKCode == 190)
-        {
-            c = '.';
-        }
+        u8 c = (u8)VKCode;
+        printf("PLAT read keycode %d wParam: %d\n", c, wParam);
+        // if (VKCode == 190)
+        // {
+        //     c = '.';
+        // }
         *(g_inputText.ptr + g_inputText.position) = c;
         g_inputText.position++;
         *(g_inputText.ptr + g_inputText.position) = 0;
@@ -136,6 +177,16 @@ void Win32_DebugReadKey(u32 VKCode, LPARAM lParam)
 
 void InitDebug()
 {
+    g_keyConversions[0].VKCode = VK_CODE_DASH;
+    g_keyConversions[0].baseChar = '-';
+    g_keyConversions[0].shiftChar = '_';
+
+    g_keyConversions[1].VKCode = VK_CODE_FULL_STOP;
+    g_keyConversions[1].baseChar = '.';
+    g_keyConversions[1].shiftChar = '>';
+
+    g_keyConversions[2].VKCode = NULL;
+    
     g_inputText = {};
     g_inputText.start = 1;
     g_inputText.position = g_inputText.start;
