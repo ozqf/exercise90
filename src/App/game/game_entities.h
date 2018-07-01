@@ -51,6 +51,7 @@ void Ent_ResetEntityIds(EntList* ents)
 {
 	for (u16 i = 0; i < ents->max; ++i)
 	{
+		ents->items[i].inUse = ENTITY_STATUS_FREE;
 		ents->items[i].entId.iteration = 0;
         ents->items[i].entId.index = i;
 	}
@@ -170,9 +171,7 @@ inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)
     Ent* ent = &ents->items[id->index];
-    if (
-        ent->inUse != ENTITY_STATUS_DEAD
-        || ent->entId.iteration != id->iteration)
+    if (ent->entId.iteration != id->iteration)
     {
         return NULL;
     }

@@ -249,8 +249,8 @@ u8 App_StartReplay(char* path)
     printf("  replay is %d bytes.\n", ref.objectSize);
     
     g_replayReadBuffer = Heap_RefToByteBuffer(&g_heap, &ref);
+    g_replayReadBuffer.ptrEnd = g_replayReadBuffer.ptrStart + g_replayReadBuffer.capacity;
     g_replayPtr = g_replayReadBuffer.ptrStart;
-
     g_replayMode = PlayingReplay;
 
     ///////////////////////////////////////////
@@ -323,6 +323,7 @@ u8 App_StartSinglePlayer(char* path)
 
 i32 App_StartSession(u8 netMode, char* path)
 {
+    printf("\n**** APP START SESSION ****\n");
     switch (netMode)
     {
         case NETMODE_SINGLE_PLAYER:

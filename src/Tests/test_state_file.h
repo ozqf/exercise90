@@ -60,6 +60,43 @@ struct Cmd_Spawn
     u32 flags;
 };
 
+// 105
+struct Cmd_EntityState
+{
+    // Identification
+    i32 factoryType;
+    EntId entityId;
+    i32 tag;
+    // total 8b
+    
+    // Linking
+    EntId target;            // 4b
+    EntId source;            // 4b
+    // total 16b
+    
+    // Physical state
+    Vec3 pos;                // 12b
+    Vec3 rot;                // 12b
+    Vec3 vel;                // 12b
+    Vec3 size;               // 12b
+    // total 48b
+    
+    // Settings
+    u32 flags;
+    f32 moveSpeed;
+    f32 tick;                
+    f32 tock;
+    // total 12b
+    // -- 84b so far --
+    // packet of 1000b = 11 updates per packet
+};
+
+// 106
+struct Cmd_RemoveEntity
+{
+    EntId entId;
+};
+
 struct CommandDescription
 {
 	i32 type;
@@ -413,6 +450,56 @@ u8 IsHeaderValid(StateSaveHeader* h)
 	return 1;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Analyse demo file
+/////////////////////////////////////////////////////////////////////////////
+void Test_PrintCommandDetails(i32 type, i32 size, u8* ptr)
+{
+	CommandDescription* def = Test_GetCmdDescription(type);
+	if (def == NULL)
+	{
+		printf("UNKNOWN CMD %d size %d, ", type, size);
+	}
+	else
+	{
+		if (def->size != size)
+		{
+			printf("  %s. *** SIZE MISMATCH! *** target: %d actual %d ", def->label, def->size, size);
+		}
+		else
+		{
+			//Test_PrintCommandDetails
+			switch (type)
+			{
+				// 105 dynamic state, 106 remove ent.
+				case 105:
+				{
+					Cmd_EntityState cmd = {};
+					COM_COPY_STRUCT(ptr, &cmd, Cmd_EntityState);
+					printf("  %s ent %d/%d type %d pos: %.2f, %.2f, %.2f.",
+						def->label, cmd.entityId.iteration, cmd.entityId.index,
+						cmd.factoryType, cmd.pos.x, cmd.pos.y, cmd.pos.z
+					);
+				} break;
+
+				case 106:
+				{
+					Cmd_RemoveEntity cmd = {};
+					COM_COPY_STRUCT(ptr, &cmd, Cmd_RemoveEntity);
+					printf("  %s ent %d/%d.", def->label, cmd.entId.iteration, cmd.entId.index);
+				} break;
+
+				default :
+				{
+					printf("  %s (%d).", def->label, size);
+				} break;
+			}
+		}
+		
+	}
+
+}
+
 void Test_PrintStateFileScan(char* filePath)
 {
 	printf("*** State Save File %s ***\n", filePath);
@@ -495,12 +582,23 @@ void Test_PrintStateFileScan(char* filePath)
 		printf("* No dynamic commands found\n");
 	}
 	
+
+	//////////////////////////////////////////////////////////
+	// Read Replay data
+	//////////////////////////////////////////////////////////
+	i32 batchCount = 0;
+
 	i32 sizeOfReplayHeader = sizeof(ReplayFrameHeader);
 	i32 framesOffset = h.dynamicCommands.offset + h.dynamicCommands.size;
 	i32 totalFramesData = fileSize - framesOffset;
 	u32 filePosition = framesOffset;
 	u32 numFrames = 0;
 	u32 numInterestingFrames = 0;
+
+#define CMD_READ_BUFFER_SIZE 512
+
+	MemoryBlock cmdMem = { NULL, CMD_READ_BUFFER_SIZE };
+	cmdMem.ptrMemory = malloc( cmdMem.size );
 
 	printf("\n%d bytes of frame data:\n", totalFramesData);
 	fseek(f, framesOffset, SEEK_SET);
@@ -510,7 +608,13 @@ void Test_PrintStateFileScan(char* filePath)
 		fread(&replay, sizeOfReplayHeader, 1, f);
 
 		// Check file position isn't mangled
-		Assert(COM_CompareStrings(replay.label, "FRAME") == 0);
+		if (COM_CompareStrings(replay.label, "FRAME") != 0)
+		{
+			printf("Failed to read valid frame header at %d\n", (ftell(f) - sizeOfReplayHeader));
+			free(cmdMem.ptrMemory);
+			fclose(f);
+			return;
+		}
 
 		filePosition += sizeOfReplayHeader;
 		numFrames++;
@@ -535,7 +639,7 @@ void Test_PrintStateFileScan(char* filePath)
 			// therefore, stepping process is broken here!
 
 			numInterestingFrames++;
-			printf("%s %d (%d bytes)\n", replay.label, replay.frameNumber, replay.size);
+			printf("%s %d (%d bytes) ", replay.label, replay.frameNumber, replay.size);
 			CmdHeader cmd = {};
 			// Define start and end of frame data.
 			// Step file position forward
@@ -553,29 +657,14 @@ void Test_PrintStateFileScan(char* filePath)
 				//printf(" Positions: %d (%d - %d)\n", (framePosition - frameStart), framePosition, frameStart);
 				//printf(" framePosition += %d\n", sizeof(CmdHeader));
 
-				CommandDescription* def = Test_GetCmdDescription(cmd.type);
-				if (def == NULL)
-				{
-					printf("UNKNOWN CMD %d size %d, ", cmd.type, cmd.size);
-				}
-				else
-				{
-					if ((u32) def->size != cmd.size)
-					{
-						printf("  %s. *** SIZE MISMATCH! *** target: %d actual %d\n", def->label, def->size, cmd.size);
-					}
-					else
-					{
-						printf("  %s (%d)\n", def->label, cmd.size);
-					}
-					
-				}
 				numCommands++;
 				//printf("CMD type %d size %d, ", cmd.type, cmd.size);
 				if (cmd.size > 0){
+					fread(cmdMem.ptrMemory, cmd.size, 1, f);
+					Test_PrintCommandDetails(cmd.type, cmd.size, (u8*)cmdMem.ptrMemory);
 					//position += cmd.size;
 					framePosition += cmd.size;
-					fseek(f, framePosition, SEEK_SET);
+					//fseek(f, framePosition, SEEK_SET);
 					//printf(" framePosition += %d\n", cmd.size);
 				}
 				overFlow++;
@@ -597,10 +686,24 @@ void Test_PrintStateFileScan(char* filePath)
 			filePosition += replay.size;
 			fseek(f, filePosition, SEEK_SET);
 		}
+
+		batchCount++;
+		if (batchCount == 60)
+		{
+			printf("   END OF SECOND - enter q to stop, anything else to continue...\n");
+			batchCount = 0;
+			char c = (char)getchar();
+			if (c == 'q')
+			{
+				printf("  Ending read\n");
+				break;
+			}
+		}
 	}
-	printf("  %d frames in demo, of which %d are interesting\n\n", numFrames, numInterestingFrames);
+	printf("  %d frames read, of which %d were interesting\n\n", numFrames, numInterestingFrames);
 
 	DebugStateHeader(&h);
+	free(cmdMem.ptrMemory);
 	fclose(f);
 }
 
@@ -668,8 +771,6 @@ u8 Test_LoadAndRun(char* filePath)
 	else
 	{
 		printf("No base file\n");
-	{
-		printf("No base file\n");
 	}
 
 	printf("*** CONTENTS OF \"%s\"\n", filePath);
@@ -695,7 +796,8 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("base\\FOO");
+	Test_PrintStateFileScan("base\\DEMO2.DEM");
+	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 
 	//Test_PrintStateFileScan("base\\foo3");

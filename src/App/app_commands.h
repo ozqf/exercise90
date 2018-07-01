@@ -101,6 +101,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("Incorrect parameter count\n");
             return 1;
         }
+        printf("Replay from %s\n", tokens[1]);
         App_StartSession(NETMODE_REPLAY, tokens[1]);
         return 1;
     }
@@ -109,6 +110,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         // Stop recording, or stop replay playback
         g_replayMode = NoReplayMode;
         App_StartSession(NETMODE_SINGLE_PLAYER, "maps\\testbox.lvl");
+        return 1;
 
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))

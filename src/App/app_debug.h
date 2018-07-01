@@ -119,6 +119,26 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
         break;
         #endif
 
+        case GAME_DEBUG_MODE_RECORDING:
+        {
+            i32 written = 0;
+            if (g_replayMode == RecordingReplay)
+            {
+                written = sprintf_s(gs->debugString, gs->debugStringCapacity,
+"Recorded %dKB\n", (g_replayHeader.frames.size / 1024)
+                );
+                h.length = written;
+            }
+            else if (g_replayMode == PlayingReplay)
+            {
+                written = sprintf_s(gs->debugString, gs->debugStringCapacity, "Playing \n");
+            }
+            else
+            {
+                printf("No debug for replay mode %d\n", g_replayMode);
+            }
+        } break;
+
         case GAME_DEBUG_MODE_TRANSFORM:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 10);

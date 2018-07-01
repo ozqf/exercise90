@@ -13,6 +13,7 @@
 #define GAME_DEBUG_MODE_PHYSICS 3
 #define GAME_DEBUG_MODE_ACTOR_INPUT 4
 #define GAME_DEBUG_MODE_INPUT 5
+#define GAME_DEBUG_MODE_RECORDING 6
 
 // MODE      | ID        SERVER      CLIENT      CONNECTION
 //--------------------------------------------------------------

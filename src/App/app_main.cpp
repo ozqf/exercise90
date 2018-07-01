@@ -78,7 +78,7 @@ i32 App_Init()
         g_collisionEventBuffer.objectSize);
     
     
-    Game_Init(&g_heap);
+    Game_Init();
     Game_InitDebugStr();
 
     // Render Scenes
@@ -185,7 +185,7 @@ void App_UpdateGameState(GameTime* time)
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
         platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
     }
-    else if (g_replayMode == PlayingReplay && g_replayPtr == NULL)
+    else if (g_replayMode == PlayingReplay && g_replayPtr != NULL)
     {
         // ignore g_appReadBuffer and instead read a frame from
         // the demo file
@@ -215,8 +215,11 @@ void App_UpdateGameState(GameTime* time)
 
         if (g_replayPtr >= g_replayReadBuffer.ptrEnd)
         {
+            printf(">> End of replay <<\n");
             g_replayPtr = NULL;
             platform.Platform_WriteTextCommand("STOP");
+            // debug loop this demo
+            //platform.Platform_WriteTextCommand("PLAY DEMO2.DEM");
         }
     }
 #endif

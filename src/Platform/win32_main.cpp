@@ -704,7 +704,7 @@ int CALLBACK WinMain(
                     {
                         g_singleFrameRun = 0;
                         // Force delta time or the game will get very confused
-                        g_gameTime.deltaTime = 1.0f / 30.0f;
+                        g_gameTime.deltaTime = 1.0f / 60.0f;
                         printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.platformFrameNumber);
 						g_gameTime.singleFrame = 1;
                         Win32_RunAppFrame();
@@ -712,6 +712,9 @@ int CALLBACK WinMain(
                 }
                 else
                 {
+                    // TODO: Enforce this!
+                    // Sod it, always run the game frame at 60fps
+                    g_gameTime.deltaTime = 1.0f / 60.0f;
 					g_gameTime.singleFrame = 0;
                     Win32_RunAppFrame();
                 }

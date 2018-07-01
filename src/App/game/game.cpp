@@ -65,31 +65,6 @@ void Game_InitGameState(GameState *gs)
     Game_InitEntityFactory();
 }
 
-void Game_Shutdown(GameState* gs)
-{
-	printf("GAME Shutdown\n");
-    // Reset all entities and game state here
-	for (u32 i = 0; i < gs->entList.max; ++i)
-	{
-		gs->entList.items[i].inUse = 0;
-	}
-    gs->localPlayerHasEnt = 0;
-	// Components
-	/*
-	EC_AIControllerList aiControllerList;
-	EC_RendererList rendererList;
-	EC_ColliderList colliderList;
-	EC_ActorMotorList actorMotorList;
-	EC_ProjectileList projectileList;
-	EC_LabelList labelList;
-	*/
-    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
-	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
-	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
-	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
-	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
-}
-
 void Game_BuildTestHud(GameState *state)
 {
 #if 1
@@ -235,14 +210,43 @@ void Game_BuildTestMenu()
     
 }
 
-void Game_Init(Heap* globalHeap)
+void Game_Init()
 {
-    // BlockRef ref = {};
-    // Heap_Allocate(globalHeap, &ref, MegaBytes(1), "PHYS CMD");
     Game_InitGameState(&g_gameState);
-    //Game_BuildTestScene(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
+}
+
+void Game_Reset()
+{
+    // Need to be different yet?
+    Game_Init();
+}
+
+void Game_Shutdown(GameState* gs)
+{
+	printf("GAME Shutdown\n");
+    // Reset all entities and game state here
+	for (u32 i = 0; i < gs->entList.max; ++i)
+	{
+		gs->entList.items[i].inUse = 0;
+	}
+    gs->localPlayerHasEnt = 0;
+	// Components
+	/*
+	EC_AIControllerList aiControllerList;
+	EC_RendererList rendererList;
+	EC_ColliderList colliderList;
+	EC_ActorMotorList actorMotorList;
+	EC_ProjectileList projectileList;
+	EC_LabelList labelList;
+	*/
+    Game_Reset();
+    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
+	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
+	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
+	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
+	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
 }
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
@@ -318,8 +322,12 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Cmd_EntityState cmd = {};
             Assert(bytes == sizeof(Cmd_EntityState));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_EntityState);
-            printf("GAME EXEC spawn dynamic ent %d/%d type %d\n",
-                cmd.entityId.iteration, cmd.entityId.index, cmd.factoryType);
+            if (gs->verbose)
+            {
+                printf("EXEC spawn dynamic ent %d/%d type %d\n",
+                    cmd.entityId.iteration, cmd.entityId.index, cmd.factoryType
+                );
+            }
             Exec_DynamicEntityState(gs, &cmd);
 			return 1;
         } break;
@@ -346,8 +354,14 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
                 printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
             }
             Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd.entId);
-            Assert(ent != NULL);
-            Ent_Free(gs, ent);
+			if (ent != NULL)
+			{
+				Ent_Free(gs, ent);
+			}
+			else
+			{
+				printf("GAME Ent %d/%d not found to remove!\n", cmd.entId.iteration, cmd.entId.index);
+			}
             return 1;
         } break;
         #if 1
