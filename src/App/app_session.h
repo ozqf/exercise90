@@ -178,8 +178,14 @@ void App_StopRecording()
 void App_StartRecording(GameState* gs)
 {
 	char fileName[128];
-	sprintf_s(fileName, 128, "DEMO_%s_%s", __DATE__, __TIME__);
-	COM_StrReplace(fileName, ':', '_');
+
+    DateTime dt;
+    platform.Platform_GetDateTime(&dt);
+	sprintf_s(fileName, 128, "DEMO_%d-%d-%d_%d-%d-%d.DEM", 
+        dt.year, dt.month, dt.dayOfTheMonth,
+        dt.hour, dt.minute, dt.second
+    );
+	//COM_StrReplace(fileName, ':', '_');
     #if 1
 	if (g_replayMode != None)
 	{

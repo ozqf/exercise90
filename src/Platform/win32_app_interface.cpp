@@ -96,6 +96,20 @@ i32 Platform_GetBaseDirectoryName(char* buffer, i32 bufferSize)
     return COM_CopyStringLimited(g_baseDirectoryName, buffer, bufferSize);
 }
 
+void Platform_GetDateTime(DateTime* data)
+{
+    if (data == NULL) { return; }
+    SYSTEMTIME time = {};
+    GetSystemTime(&time);
+    data->year = time.wYear;
+    data->month = time.wMonth;
+    data->dayOfTheMonth = time.wDay;
+    data->dayOfTheWeek = time.wDayOfWeek;
+    data->hour = time.wHour;
+    data->minute = time.wMinute;
+    data->second = time.wSecond;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // Sound
@@ -146,6 +160,7 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_CloseFileForWriting = Platform_CloseFileForWriting;
 	platInterface.Platform_SeekInFileFromStart = Platform_SeekInFileFromStart;
     platInterface.Platform_GetBaseDirectoryName = Platform_GetBaseDirectoryName;
+    platInterface.Platform_GetDateTime = Platform_GetDateTime;
 
     platInterface.Platform_WriteTextCommand = Platform_WriteTextCommand;
 }

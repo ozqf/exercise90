@@ -50,6 +50,7 @@ struct PlatformInterface
     i32 (*Platform_WriteToFile)(i32 fileId, u8* ptr, u32 numBytes);
 	void (*Platform_SeekInFileFromStart)(i32 fileId, u32 offset);
     i32 (*Platform_CloseFileForWriting)(i32 fileId);
+    void (*Platform_GetDateTime)(DateTime* data);
 
     // Input
     void (*Platform_SetMouseMode)(enum ZMouseMode mode);

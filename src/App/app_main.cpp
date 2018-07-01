@@ -185,7 +185,7 @@ void App_UpdateGameState(GameTime* time)
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
         platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
     }
-    else if (g_replayMode == PlayingReplay)
+    else if (g_replayMode == PlayingReplay && g_replayPtr == NULL)
     {
         // ignore g_appReadBuffer and instead read a frame from
         // the demo file
@@ -215,6 +215,7 @@ void App_UpdateGameState(GameTime* time)
 
         if (g_replayPtr >= g_replayReadBuffer.ptrEnd)
         {
+            g_replayPtr = NULL;
             platform.Platform_WriteTextCommand("STOP");
         }
     }
