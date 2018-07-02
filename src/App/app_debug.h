@@ -131,7 +131,10 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
             }
             else if (g_replayMode == PlayingReplay)
             {
-                written = sprintf_s(gs->debugString, gs->debugStringCapacity, "Playing \n");
+                i32 bytesRead = g_replayPtr - g_replayReadBuffer.ptrStart;
+                f32 percentage = ((f32)bytesRead / (f32)g_replayReadBuffer.capacity) * 100.0f;
+                written = sprintf_s(gs->debugString, gs->debugStringCapacity,
+"Playing %d bytes of %d (%.2f%%)\n", bytesRead, g_replayReadBuffer.capacity, percentage);
             }
             else
             {

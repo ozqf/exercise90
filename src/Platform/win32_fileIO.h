@@ -240,7 +240,6 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 			{
 				sprintf_s(buf, 256, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
 				Win32_Error(buf, "File Not Found");
-				Assert(false);
 			}
 			else
 			{

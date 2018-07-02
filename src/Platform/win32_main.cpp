@@ -370,8 +370,8 @@ int CALLBACK WinMain(
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
 
-    i32 windowWidth = 1280;
-    i32 windowHeight = 720;
+    i32 windowWidth = 640;// 1280;
+    i32 windowHeight = 480;//720;
 
     RECT r;
     r.top = r.left = 0;
@@ -526,15 +526,16 @@ int CALLBACK WinMain(
                 
                 Win32_CheckTextBuffer();
 
-                Win32_SendAppInput();
-
                 if (g_singleFrameStepMode == 1)
                 {
+                    // Keep sending input
+                    Win32_SendAppInput();
+
                     if (g_singleFrameRun == 1)
                     {
                         g_singleFrameRun = 0;
                         // Force delta time or the game will get very confused
-                        g_gameTime.deltaTime = 1.0f / 60.0f;
+                        g_gameTime.deltaTime = g_fixedFrameTime;
                         printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.platformFrameNumber);
 						g_gameTime.singleFrame = 1;
                         Win32_RunAppFrame();
@@ -542,11 +543,15 @@ int CALLBACK WinMain(
                 }
                 else
                 {
-                    // TODO: Enforce this!
-                    // Sod it, always run the game frame at 60fps
-                    g_gameTime.deltaTime = 1.0f / 60.0f;
-					g_gameTime.singleFrame = 0;
-                    Win32_RunAppFrame();
+                    g_fixedFrameAccumulator += g_gameTime.deltaTime;
+                    if (g_fixedFrameAccumulator >= g_fixedFrameTime)
+                    {
+                        g_fixedFrameAccumulator -= g_fixedFrameTime;
+                        g_gameTime.deltaTime = g_fixedFrameTime;
+					    g_gameTime.singleFrame = 0;
+                        Win32_SendAppInput();
+                        Win32_RunAppFrame();
+                    }
                 }
 				
                 // Render

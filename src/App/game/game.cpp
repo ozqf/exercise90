@@ -17,8 +17,10 @@ void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     printf("GAME sizeof(Ent): %d\n", sizeof(Ent));
+    // Nice to preserve the debug mode!
+    u16 debugMode = gs->debugMode;
     *gs = {};
-    gs->debugMode = GAME_DEBUG_MODE_NONE;
+    gs->debugMode = debugMode;
     //gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);

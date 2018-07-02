@@ -242,7 +242,7 @@ u8 App_StartReplay(char* path)
     if (platform.Platform_LoadFileIntoHeap(&g_heap, &ref, path, false) == false)
     {
         printf("  APP Could not load replay file %s\n", path);
-        ILLEGAL_CODE_PATH
+        platform.Platform_WriteTextCommand("STOP");
         return 0;
     }
     Assert(ref.ptrMemory != NULL);

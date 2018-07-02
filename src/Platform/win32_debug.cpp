@@ -22,7 +22,7 @@ struct Win32_TextInput
 
 char g_textCommandInput[2048];
 
-KeyConversion g_keyConversions[2];
+KeyConversion g_keyConversions[3];
 
 Win32_TextInput g_inputText;
 u8 g_textBufferAwaitingProcessing = 0;
@@ -102,7 +102,10 @@ u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
     {
         if (k->VKCode == VKCode)
         {
-            return shift > 1 ? k->shiftChar : k->baseChar;
+			u32 result = shift > 1 ? k->shiftChar : k->baseChar;
+			printf("Converted %d to %d\n", VKCode, result);
+			return result;
+            //return shift > 1 ? k->shiftChar : k->baseChar;
         }
         ++k;
     }
@@ -154,6 +157,7 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
         g_inputText.position++;
         *(g_inputText.ptr + g_inputText.position) = 0;
     }
+	printf("Input pos: %d\n", g_inputText.position);
 
 #if 0
     // conversion cack not working yet. Just rip it straight out.
