@@ -40,7 +40,8 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
     {
         case CLIENT_STATE_OBSERVER:
         {
-            #if 0
+            //platform.Platform_WriteTextCommand("impulse 1");
+            #if 1
             if (Input_CheckActionToggledOn(actions, "Move Up", frameNumber))
             {
                 Cmd_ServerImpulse cmd = {};

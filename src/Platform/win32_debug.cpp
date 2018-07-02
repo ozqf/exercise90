@@ -22,7 +22,52 @@ struct Win32_TextInput
 
 char g_textCommandInput[2048];
 
-KeyConversion g_keyConversions[3];
+KeyConversion g_keyConversions[32];
+
+#define VK_CODE_BACKSPACE 8
+#define VK_CODE_ENTER 13
+#define VK_CODE_SHIFT 16
+#define VK_CODE_SPACE 32
+
+#define VK_CODE_0 48
+#define VK_CODE_1 49
+#define VK_CODE_2 50
+#define VK_CODE_3 51
+#define VK_CODE_4 52
+#define VK_CODE_5 53
+#define VK_CODE_6 54
+#define VK_CODE_7 55
+#define VK_CODE_8 56
+#define VK_CODE_9 57
+
+#define VK_CODE_SEMICOLON 186
+#define VK_CODE_EQUALS 187
+#define VK_CODE_COMMA 188
+#define VK_CODE_DASH 189
+#define VK_CODE_FULL_STOP 190
+#define VK_CODE_SQUARE_FORWARDSLASH 191
+#define VK_CODE_SINGLE_QUOTE 192
+#define VK_CODE_SQUARE_BRACKET_LEFT 219
+#define VK_CODE_SQUARE_BACKSLASH 220
+#define VK_CODE_SQUARE_BRACKET_RIGHT 221
+#define VK_CODE_HASH 222
+
+u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
+{
+    KeyConversion* k = &g_keyConversions[0];
+    while (k->VKCode != NULL)
+    {
+        if (k->VKCode == VKCode)
+        {
+			u32 result = shift > 1 ? k->shiftChar : k->baseChar;
+			//printf("Converted %d to %d\n", VKCode, result);
+			//return result;
+            return shift > 1 ? k->shiftChar : k->baseChar;
+        }
+        ++k;
+    }
+    return VKCode;
+}
 
 Win32_TextInput g_inputText;
 u8 g_textBufferAwaitingProcessing = 0;
@@ -83,35 +128,6 @@ void Win32_CheckTextBuffer()
     }
 }
 
-#define VK_CODE_BACKSPACE 8
-#define VK_CODE_ENTER 13
-#define VK_CODE_SHIFT 16
-#define VK_CODE_SPACE 32
-
-#define VK_CODE_SQUARE_BRACKET_LEFT 219
-#define VK_CODE_SQUARE_BRACKET_RIGHT 221
-#define VK_CODE_DASH 189
-#define VK_CODE_FULL_STOP 190
-#define VK_CODE_EQUALS 187
-#define VK_CODE_HASH 222
-
-u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
-{
-    KeyConversion* k = &g_keyConversions[0];
-    while (k->VKCode != NULL)
-    {
-        if (k->VKCode == VKCode)
-        {
-			u32 result = shift > 1 ? k->shiftChar : k->baseChar;
-			printf("Converted %d to %d\n", VKCode, result);
-			return result;
-            //return shift > 1 ? k->shiftChar : k->baseChar;
-        }
-        ++k;
-    }
-    return VKCode;
-}
-
 void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
 {
     if (g_textBufferAwaitingProcessing) { return; }
@@ -136,7 +152,7 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
     // skip unwanted keys
     else if (VKCode == VK_CODE_SHIFT)
     {
-        printf(" PLAT Shift pressed\n");
+        //printf(" PLAT Shift pressed\n");
         return;
     }
     else if (VKCode == VK_CODE_BACKSPACE)
@@ -148,7 +164,7 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
     else
     {
         u8 c = (u8)VKCode;
-        printf("PLAT read keycode %d wParam: %d\n", c, wParam);
+        //printf("PLAT read keycode %d wParam: %d\n", c, wParam);
         // if (VKCode == 190)
         // {
         //     c = '.';
@@ -157,7 +173,7 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
         g_inputText.position++;
         *(g_inputText.ptr + g_inputText.position) = 0;
     }
-	printf("Input pos: %d\n", g_inputText.position);
+	//printf("Input pos: %d\n", g_inputText.position);
 
 #if 0
     // conversion cack not working yet. Just rip it straight out.
@@ -189,8 +205,91 @@ void InitDebug()
     g_keyConversions[1].baseChar = '.';
     g_keyConversions[1].shiftChar = '>';
 
-    g_keyConversions[2].VKCode = NULL;
-    
+    g_keyConversions[2].VKCode = VK_CODE_COMMA;
+    g_keyConversions[2].baseChar = ',';
+    g_keyConversions[2].shiftChar = '<';
+
+    g_keyConversions[3].VKCode = VK_CODE_SQUARE_BRACKET_LEFT;
+    g_keyConversions[3].baseChar = '[';
+    g_keyConversions[3].shiftChar = '{';
+
+    g_keyConversions[4].VKCode = VK_CODE_SQUARE_BRACKET_RIGHT;
+    g_keyConversions[4].baseChar = ']';
+    g_keyConversions[4].shiftChar = '}';
+
+    g_keyConversions[5].VKCode = VK_CODE_HASH;
+    g_keyConversions[5].baseChar = '#';
+    g_keyConversions[5].shiftChar = '~';
+
+    g_keyConversions[6].VKCode = VK_CODE_SEMICOLON;
+    g_keyConversions[6].baseChar = ';';
+    g_keyConversions[6].shiftChar = ':';
+
+    g_keyConversions[7].VKCode = VK_CODE_SINGLE_QUOTE;
+    g_keyConversions[7].baseChar = '\'';
+    g_keyConversions[7].shiftChar = '@';
+
+    g_keyConversions[8].VKCode = VK_CODE_1;
+    g_keyConversions[8].baseChar = '1';
+    g_keyConversions[8].shiftChar = '!';
+
+    g_keyConversions[9].VKCode = VK_CODE_2;
+    g_keyConversions[9].baseChar = '2';
+    g_keyConversions[9].shiftChar = '"';
+
+    g_keyConversions[10].VKCode = VK_CODE_3;
+    g_keyConversions[10].baseChar = '3';
+    g_keyConversions[10].shiftChar = '3';
+
+    g_keyConversions[11].VKCode = VK_CODE_4;
+    g_keyConversions[11].baseChar = '4';
+    g_keyConversions[11].shiftChar = '$';
+
+    g_keyConversions[12].VKCode = VK_CODE_5;
+    g_keyConversions[12].baseChar = '5';
+    g_keyConversions[12].shiftChar = '%';
+
+    g_keyConversions[13].VKCode = VK_CODE_6;
+    g_keyConversions[13].baseChar = '6';
+    g_keyConversions[13].shiftChar = '^';
+
+    g_keyConversions[14].VKCode = VK_CODE_7;
+    g_keyConversions[14].baseChar = '7';
+    g_keyConversions[14].shiftChar = '&';
+
+    g_keyConversions[15].VKCode = VK_CODE_8;
+    g_keyConversions[15].baseChar = '8';
+    g_keyConversions[15].shiftChar = '*';
+
+    g_keyConversions[16].VKCode = VK_CODE_9;
+    g_keyConversions[16].baseChar = '9';
+    g_keyConversions[16].shiftChar = '(';
+
+    g_keyConversions[17].VKCode = VK_CODE_0;
+    g_keyConversions[17].baseChar = '0';
+    g_keyConversions[17].shiftChar = ')';
+
+    g_keyConversions[18].VKCode = VK_CODE_EQUALS;
+    g_keyConversions[18].baseChar = '=';
+    g_keyConversions[18].shiftChar = '+';
+
+    g_keyConversions[19].VKCode = VK_CODE_SQUARE_FORWARDSLASH;
+    g_keyConversions[19].baseChar = '/';
+    g_keyConversions[19].shiftChar = '?';
+
+    g_keyConversions[20].VKCode = VK_CODE_SQUARE_BACKSLASH;
+    g_keyConversions[20].baseChar = '\\';
+    g_keyConversions[20].shiftChar = '|';
+
+    // Make sure end is null
+    g_keyConversions[21].VKCode = NULL;
+
+
+
+
+
+
+
     g_inputText = {};
     g_inputText.start = 1;
     g_inputText.position = g_inputText.start;
