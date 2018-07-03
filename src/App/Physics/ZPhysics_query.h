@@ -27,8 +27,19 @@ inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, ByteBuffe
 
     btVector3 start(result.start[0], result.start[2], result.start[2]);
     btVector3 end(cmd->end[0], cmd->end[1], cmd->end[2]);
-    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
+    
+    #if 1
+    btCollisionWorld::AllHitsRayResultCallback rayCallback(start, end);
+    world->dynamicsWorld->rayTest(start, end, rayCallback);
+    i32 numHits = rayCallback.m_collisionObjects.size();
+    
+    #endif
 
+    
+
+#if 0
+    // Simple
+    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
     world->dynamicsWorld->rayTest(start, end, rayCallback);
 
     if (rayCallback.hasHit())
@@ -50,7 +61,7 @@ inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, ByteBuffe
         //hit.shapeId = 
         buf->ptrWrite += COM_COPY_STRUCT(&hit, buf->ptrWrite, PhysRayHit);
     }
-
+#endif
     PhysDataItemHeader h = {};
     h.type = RaycastResult;
     h.size = sizeof(PhysEv_RaycastResult) + (sizeof(PhysRayHit) * result.numHits);
