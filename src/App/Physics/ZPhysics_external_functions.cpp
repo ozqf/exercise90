@@ -6,6 +6,16 @@
 // ISSUE COMMAND
 /////////////////////////////////////////////////////////////
 
+i32 Phys_Raycast(PhysCmd_Raycast* ev)
+{
+    // Thread safe...? do you care...?
+    i32 id = g_world.nextQueryId++;
+    ev->id = id;
+    g_cmdBuf.ptrWrite += COM_WriteByte(Raycast, g_cmdBuf.ptrWrite);
+    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(ev, g_cmdBuf.ptrWrite, PhysCmd_Raycast);
+    return id;
+}
+
 i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
 {
     Assert(def != NULL);
@@ -89,7 +99,7 @@ void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 
 i32 Phys_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
 {
-return PhysCmd_RayTest(&g_world, x0, y0, z0, x1, y1, y2);
+    return PhysCmd_RayTest(&g_world, x0, y0, z0, x1, y1, y2);
 }
 
 void Phys_GetDebugString(char** str, i32* length)
@@ -222,15 +232,23 @@ void Phys_Shutdown()
 
 MemoryBlock Phys_Step(f32 deltaTime)
 {
+    MemoryBlock eventBuffer = {};
+
+    ByteBuffer buf = {};
+    buf.ptrStart = g_eventBuf.ptrStart;
+    buf.ptrEnd = g_eventBuf.ptrStart + g_eventBuf.capacity;
+    buf.ptrWrite = g_eventBuf.ptrStart;
+    
+    eventBuffer.ptrMemory = g_eventBuf.ptrStart;
+    eventBuffer.size = g_eventBuf.capacity;
     // TODO: Lot of ickyness here
     // Internal functions should not reference global buffers, but receive buffers via
     // params, so that locations of 'current' buffers can be changed in this function
     Phys_LockCommandBuffer(&g_cmdBuf);
-    Phys_ReadCommands(&g_world);
 
-    MemoryBlock eventBuffer = {};
-    eventBuffer.ptrMemory = g_eventBuf.ptrStart;
-    eventBuffer.size = g_eventBuf.capacity;
+    // So commands both read and write... Is this going to work?
+    Phys_ReadCommands(&g_world, &buf);
+
     Phys_StepWorld(&g_world, &eventBuffer, deltaTime);
     Phys_WriteDebugOutput(&g_world);
     return eventBuffer;

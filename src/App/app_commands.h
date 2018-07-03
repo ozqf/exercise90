@@ -42,7 +42,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
         printf("  SAVE SOMEFILE - Save Game State\n");
-        printf("  IMPULSE <number> - Execute simple server commands\n");
+        printf("  I or IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
         printf("  ENTS - List entities\n");
         printf("  DEBUG - Cycle debug print outs\n");
@@ -53,7 +53,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  DUMPHEAP - List Heap memory allocations\n");
         return 1;
     }
-    if (!COM_CompareStrings(tokens[0], "IMPULSE"))
+    if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
     {
         if (numTokens != 2)
         {

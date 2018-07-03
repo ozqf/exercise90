@@ -145,9 +145,8 @@ struct PhysCmd_VelocityChange
 struct PhysCmd_Raycast
 {
 	i32 id;
-	f32 origin[3];
-	f32 dest[3];
-
+	f32 start[3];
+	f32 end[3];
 };
 
 #endif
@@ -181,12 +180,19 @@ struct PhysEV_TransformUpdate
 	u32 flags;
 };
 
+struct PhysRayHit
+{
+	f32 worldPos[3];
+	f32 normal[3];
+	i32 shapeId;
+};
+
 struct PhysEv_RaycastResult
 {
-	//i32 type;
-	f32 a[3];
-	f32 b[3];
-	f32 colour[3];
+	i32 queryId;
+	f32 start[3];
+	f32 end[3];
+	i32 numHits;
 };
 
 struct PhysEv_RaycastDebug

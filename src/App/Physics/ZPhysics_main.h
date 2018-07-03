@@ -1,33 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-// header, contains data structures and function definitions
-#include "ZPhysics_interface.h"
-/**
- * !NO BULLET PHYSICS LIBRARY ABOVE THIS POINT!
- * 
- */
-#include "../../../lib/bullet/btBulletCollisionCommon.h"
-#include "../../../lib/bullet/btBulletDynamicsCommon.h"
-
-#include "../../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
-
-// For debug output ONLY
-#include <windows.h>
-
-// Internal data structures used to interact with Bullet Physics
-//#include "ZPhysics_internal_types.h"
-#include "ZPhysics_internal_interface.h"
-
-// Global variables used by the rest of the internal system
-#include "ZPhysics_globals.h"
-
-// Implement public interface
-#include "ZPhysics_factory.cpp"
-#include "ZPhysics_external_functions.cpp"
-
-#define PHYS_DEFAULT_FRICTION 1.0
-#define PHYS_DEFAULT_RESTITUTION 0.0
+#include "ZPhysics_module.cpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
@@ -173,7 +146,7 @@ void Phys_NeverCall()
     Phys_CreateBulletBox(NULL, NULL, NULL);
     Phys_CmdCreateShape(NULL, NULL);
     Phys_RecycleHandle(NULL, NULL);
-    Phys_ReadCommands(NULL);
+    Phys_ReadCommands(NULL, NULL);
 }
 
 inline void Phys_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
@@ -212,7 +185,7 @@ void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
         cmd->pos[2]
     );
 #if 0
-    btTransform t;
+    btTansform t;
     handle->rigidBody->getMotionState()->getWorldTransform(t);
     btVector3 newPosition = t.getOrigin();
     newPosition.setX(-newPosition.getX() + cmd->pos[0]);
@@ -251,79 +224,6 @@ void PhysCmd_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
     btTransform t;
 }
 
-i32 PhysCmd_RayTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1)
-{
-    btVector3 start(x0, y0, z0);
-    btVector3 end(x1, y1, z1);
-    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
-
-    world->dynamicsWorld->rayTest(start, end, rayCallback);
-
-    if (rayCallback.hasHit())
-    {
-        btVector3 dir(x1 - x0, y1 - y0, z1 - z0);
-        dir.normalize();
-        const btCollisionObject* obj = rayCallback.m_collisionObject;
-        #if 0
-        if (!obj->isStaticOrKinematicObject())
-        {
-            //const btRigidBody *body = btRigidBody::upcast(obj);
-            btRigidBody *foo = const_cast<btRigidBody *>(btRigidBody::upcast(obj));
-            if (foo != 0)
-            {
-                Phys_SetBodyVelocity(foo, dir.getX() * 5, dir.getY() * 5, dir.getZ() * 5);
-            }
-        }
-        #endif
-    }
-
-    return world->nextQueryId++;
-}
-
-u8 PhysCmd_GroundTest(ZBulletWorld *world, f32 x0, f32 y0, f32 z0, PhysEv_RaycastDebug* ev)
-{
-    f32 halfHeight = (1.85f / 2.0f);
-    f32 y1 = y0 -  halfHeight - 0.2f;
-    btVector3 start(x0, y0, z0);
-    btVector3 end(x0, y1, z0);
-    if (ev != NULL)
-    {
-        ev->a[0] = x0;
-        ev->a[1] = y0;
-        ev->a[2] = z0;
-
-        ev->b[0] = x0;
-        ev->b[1] = y1;
-        ev->b[2] = z0;
-    }
-    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
-
-    world->dynamicsWorld->rayTest(start, end, rayCallback);
-
-    if (rayCallback.hasHit())
-    {
-        if (ev != NULL)
-        {
-            ev->colour[0] = 1;
-            ev->colour[1] = 0;
-            ev->colour[2] = 0;
-        }
-        return 1; 
-        #if 0
-        btVector3 dir(x1 - x0, y1 - y0, z1 - z0);
-        dir.normalize();
-        const btCollisionObject* obj = rayCallback.m_collisionObject;
-        #endif
-    }
-    if (ev != NULL)
-        {
-            ev->colour[0] = 0;
-            ev->colour[1] = 1;
-            ev->colour[2] = 0;
-        }
-    return 0;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +233,7 @@ void Phys_LockCommandBuffer(ByteBuffer *buffer)
     buffer->ptrEnd = buffer->ptrWrite;
 }
 
-void Phys_ReadCommands(ZBulletWorld *world)
+void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 {
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
     ByteBuffer *buffer = &g_cmdBuf;
@@ -371,6 +271,15 @@ void Phys_ReadCommands(ZBulletWorld *world)
             ZShapeDef def = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &def, ZShapeDef);
             Phys_CmdCreateShape(world, &def);
+        }
+        break;
+
+        case Raycast:
+        {
+            PhysCmd_Raycast cmd = {};
+            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Raycast);
+            // needs output buffer for results...
+            Phys_ExecRaycast(world, &cmd, output);
         }
         break;
 

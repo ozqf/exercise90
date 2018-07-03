@@ -50,7 +50,8 @@ enum ZCommandType
 	Create = 2,
 	Remove = 3,
 	SetVelocity = 4,
-	SetState = 5
+	SetState = 5,
+	Raycast = 6
 };
 
 internal PhysBodyHandle* Phys_GetFreeBodyHandle(PhysBodyList* list);
@@ -77,6 +78,6 @@ internal void Phys_WriteDebugOutput(ZBulletWorld* world);
 
 internal void Phys_LockCommandBuffer(ByteBuffer* buffer);
 
-internal void Phys_ReadCommands(ZBulletWorld* world);
+internal void Phys_ReadCommands(ZBulletWorld* world, ByteBuffer* output);
 
 internal void Phys_StepWorld(ZBulletWorld* world, MemoryBlock* eventBuffer, f32 deltaTime);
