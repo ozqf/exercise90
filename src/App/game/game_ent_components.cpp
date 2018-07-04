@@ -412,9 +412,9 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
 ///////////////////////////////////////////////////////////////////
 // Projectiles
 ///////////////////////////////////////////////////////////////////
-inline void Prj_PushRigidBody(Ent* rigidBody)
+inline void Prj_PushRigidBody(EC_Collider* col)
 {
-
+    Phys_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
 inline void Game_RemoveProjectile(Ent* e, EC_Projectile* prj, u8 verbose)
@@ -485,24 +485,29 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
         i32 numHits = Phys_QueryRay(&ray, results, 12);
 
-        if (numHits == 0)
-        {
-            t->pos.x += prj->move.x * time->deltaTime;
-            t->pos.y += prj->move.y * time->deltaTime;
-            t->pos.z += prj->move.z * time->deltaTime;
-        }
-        else
+        if (numHits > 0)
         {
             for (i32 j = 0; j < numHits; ++j)
             {
-                printf("Hit shape %d\n", results[j].shapeId);
-
                 PhysRayHit* hit = &results[j];
                 EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
-                printf("Hit shape %d Ent %d/%d\n", col->shapeId, col->entId.iteration, col->entId.index);
+                Assert(col != NULL);
+                Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->entId);
+                Assert(targetEnt != NULL);
+                if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
+                {
+                    Prj_PushRigidBody(col);
+                    Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+                }
+                else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
+                {
+                    Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+                }
             }
-            Game_RemoveProjectile(e, prj, time->singleFrame == 1);
         }
+        t->pos.x += prj->move.x * time->deltaTime;
+        t->pos.y += prj->move.y * time->deltaTime;
+        t->pos.z += prj->move.z * time->deltaTime;
     }
 }
 

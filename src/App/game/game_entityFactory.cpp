@@ -27,7 +27,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     {
         // Create
         ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
-
+        ent->factoryType = cmd->factoryType;
         printf("Creating static ent %d/%d\n", ent->entId.iteration, ent->entId.index);
         
         ent->transform.pos = cmd->pos;
@@ -213,6 +213,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
 
         //ent = Ent_GetFreeEntity(&gs->entList);
         ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
+        ent->factoryType = cmd->factoryType;
         Transform_SetPosition(&ent->transform, 0, 0, 0);
         collider = EC_AddCollider(gs, ent);
 	    f32 playerHeight = 1.85f; // average male height in metres
