@@ -196,3 +196,10 @@ inline Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)
 //         g_entities[i].entId.index = i;
 //     }
 // }
+
+
+//////////////////////////////////////////////////////
+// Entity Component Utilities
+//////////////////////////////////////////////////////
+
+EC_Collider* EC_ColliderGetByShapeId(EC_ColliderList* list, i32 shapeId);

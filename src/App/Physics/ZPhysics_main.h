@@ -274,6 +274,9 @@ void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
         }
         break;
 
+        // TODO:
+        // So how is this going to work exactly...?
+        #if 0
         case Raycast:
         {
             PhysCmd_Raycast cmd = {};
@@ -281,7 +284,8 @@ void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
             // needs output buffer for results...
             Phys_ExecRaycast(world, &cmd, output);
         }
-        break;
+        break
+        #endif;
 
         default:
         {

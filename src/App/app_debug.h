@@ -150,13 +150,13 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
             Vec3 pos = {};
             Vec3 rot = {};
             Vec3 scale = {};
-            if (ent == NULL)
+            if (ent == NULL || g_debugCameraOn)
             {
-                rotation = gs->cameraTransform.rotation;
-                inputRot = g_debugInput.degrees;
-                scale = gs->cameraTransform.scale;
-                pos = gs->cameraTransform.pos;
-                rot = Transform_GetEulerAnglesDegrees(&gs->cameraTransform);
+                rotation = g_debugCameraTransform.rotation;
+                inputRot = g_debugCameraDegrees;
+                scale = g_debugCameraTransform.scale;
+                pos = g_debugCameraTransform.pos;
+                rot = Transform_GetEulerAnglesDegrees(&g_debugCameraTransform);
             }
             else
             {

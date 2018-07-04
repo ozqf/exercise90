@@ -64,6 +64,10 @@ internal void Phys_RecycleHandle(ZBulletWorld* world, PhysBodyHandle* handle);
 
 internal i32 PhysCmd_RayTest(ZBulletWorld* world, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2);
 
+inline i32 Phys_QuickRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits);
+
+inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, u8* buf, u32 bufferCapacity);
+
 //PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def);
 
 internal PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZCollisionBoxData* box);

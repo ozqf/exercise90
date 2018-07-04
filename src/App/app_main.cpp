@@ -309,7 +309,7 @@ void App_Render(GameTime* time)
     // t.pos.y = 1;
     RScene_AddRenderItem(&g_uiScene, &t, &g_debugStrRenderer);
     platform.Platform_RenderScene(&g_uiScene);
-#endif
+    #endif
 
 }
 

@@ -465,7 +465,7 @@ int CALLBACK WinMain(
                     Sleep(4);
                 }
 #endif
-#if 0 // I'm on my laptop, just give up CPU time
+#if 1 // I'm on my laptop, just give up CPU time
                 Sleep(2);
 #endif
 

@@ -289,6 +289,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 motor->input.degrees.x,
                 motor->input.degrees.y
             );
+            #if 0
             f32 spread = 2;
             f32 pitchOffset;
             f32 yawOffset;
@@ -313,6 +314,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 motor->input.degrees.x + pitchOffset,
                 motor->input.degrees.y + yawOffset
             );
+            #endif
             //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
         }
     }
@@ -410,6 +412,26 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
 ///////////////////////////////////////////////////////////////////
 // Projectiles
 ///////////////////////////////////////////////////////////////////
+inline void Prj_PushRigidBody(Ent* rigidBody)
+{
+
+}
+
+inline void Game_RemoveProjectile(Ent* e, EC_Projectile* prj, u8 verbose)
+{
+    Ent_MarkForFree(e);
+    Cmd_RemoveEntity cmd = {};
+    cmd.entId = e->entId;
+	if (verbose)
+    {
+        printf("GAME Delete prj %d/%d\n",
+		    cmd.entId.iteration,
+		    cmd.entId.index
+        );
+	}
+    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
+}
+
 void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
@@ -422,6 +444,8 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (prj->tick <= 0.0f)
         {
             // Delete
+            Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+            #if 0
             Ent_MarkForFree(e);
             Cmd_RemoveEntity cmd = {};
             cmd.entId = e->entId;
@@ -430,6 +454,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 				cmd.entId.index);
 			}
             App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
+            #endif
             //Ent_Free(gs, e);
         }
         else
@@ -439,19 +464,64 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
         Transform* t = &e->transform;
 
-        Vec3 newPos = { prj->move.x, prj->move.y, prj->move.z};
+        Vec3 newPos =
+        {
+            t->pos.x + prj->move.x * time->deltaTime,
+            t->pos.y + prj->move.y * time->deltaTime,
+            t->pos.z + prj->move.z * time->deltaTime
+        };
 
-        Phys_RayTest(t->pos.x, t->pos.y, t->pos.z, newPos.x, newPos.y, newPos.z);
+        //Phys_RayTest(t->pos.x, t->pos.y, t->pos.z, newPos.x, newPos.y, newPos.z);
+        PhysRayHit results[12];
+        
+        PhysCmd_Raycast ray = {};
+        ray.start[0] = t->pos.x;
+        ray.start[1] = t->pos.y;
+        ray.start[2] = t->pos.z;
 
-        t->pos.x += prj->move.x * time->deltaTime;
-        t->pos.y += prj->move.y * time->deltaTime;
-        t->pos.z += prj->move.z * time->deltaTime;
+        ray.end[0] = newPos.x;
+        ray.end[1] = newPos.y;
+        ray.end[2] = newPos.z;
+
+        i32 numHits = Phys_QueryRay(&ray, results, 12);
+
+        if (numHits == 0)
+        {
+            t->pos.x += prj->move.x * time->deltaTime;
+            t->pos.y += prj->move.y * time->deltaTime;
+            t->pos.z += prj->move.z * time->deltaTime;
+        }
+        else
+        {
+            for (i32 j = 0; j < numHits; ++j)
+            {
+                printf("Hit shape %d\n", results[j].shapeId);
+
+                PhysRayHit* hit = &results[j];
+                EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
+                printf("Hit shape %d Ent %d/%d\n", col->shapeId, col->entId.iteration, col->entId.index);
+            }
+            Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+        }
     }
 }
 
 ///////////////////////////////////////////////////////////////////
 // Colliders
 ///////////////////////////////////////////////////////////////////
+EC_Collider* EC_ColliderGetByShapeId(EC_ColliderList* list, i32 shapeId)
+{
+    for (u32 i = 0; i < list->count; ++i)
+    {
+        EC_Collider* col = &list->items[i];
+        if (col->shapeId == shapeId)
+        {
+            return col;
+        }
+    }
+    printf("GAME No collider with shape Id %d found\n", shapeId);
+    return NULL;
+}
 
 // Handled in physics engine now
 void Game_UpdateColliders(GameState* gs, GameTime* time)

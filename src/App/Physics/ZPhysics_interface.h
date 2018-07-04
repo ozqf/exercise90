@@ -48,6 +48,10 @@ void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ);
 
 i32 Phys_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2);
 
+i32 Phys_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits);
+
+//i32 Phys_QueryRay(PhysCmd_Raycast* cmd, u8* resultsBuffer, u32 bufferCapacity);
+
 i32 Phys_QueryHitscan();
 
 i32 Phys_QueryVolume();

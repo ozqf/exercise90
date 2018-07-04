@@ -2,15 +2,17 @@
 
 #include "ZPhysics_module.cpp"
 
+#if 0
+// Execute a raycast and write a results object + hits array to a byte buffer
 // Return bytes written
-inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, ByteBuffer* buf)
+inline i32 Phys_ExecRaycast_CmdBased(ZBulletWorld *world, PhysCmd_Raycast* cmd, u8* buf, u32 bufferCapacity)
 {
     // prepare buffer header. cannot write it until the end when results are know.
     // record write pos and step, write later
     // record start position to calculate bytes written by the end
-    u8* ptrStart = buf->ptrWrite;
-    u8* ptrHeaderWrite = buf->ptrWrite;
-    buf->ptrWrite += sizeof(PhysDataItemHeader) + sizeof(PhysEv_RaycastResult);
+    u8* ptrStart = buf;
+    u8* ptrHeaderWrite = buf;
+    buf += sizeof(PhysDataItemHeader) + sizeof(PhysEv_RaycastResult);
 
     // Prepare results header
     PhysEv_RaycastResult result = {};
@@ -25,43 +27,32 @@ inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, ByteBuffe
 
     result.numHits = 0;
 
-    btVector3 start(result.start[0], result.start[2], result.start[2]);
-    btVector3 end(cmd->end[0], cmd->end[1], cmd->end[2]);
+    btVector3 start(result.start[0], result.start[1], result.start[2]);
+    btVector3 end(result.end[0], result.end[1], result.end[2]);
     
-    #if 1
     btCollisionWorld::AllHitsRayResultCallback rayCallback(start, end);
     world->dynamicsWorld->rayTest(start, end, rayCallback);
     i32 numHits = rayCallback.m_collisionObjects.size();
     
-    #endif
-
-    
-
-#if 0
-    // Simple
-    btCollisionWorld::ClosestRayResultCallback rayCallback(start, end);
-    world->dynamicsWorld->rayTest(start, end, rayCallback);
-
-    if (rayCallback.hasHit())
+    for (i32 i = 0; i < numHits; ++i)
     {
-        result.numHits++;
-        PhysRayHit hit = {};
-        btVector3 hitPoint = rayCallback.m_hitPointWorld;
-        btVector3 normal = rayCallback.m_hitNormalWorld;
-        hit.worldPos[0] = hitPoint.getX();
-        hit.worldPos[1] = hitPoint.getY();
-        hit.worldPos[2] = hitPoint.getZ();
+        //const btCollisionObject* obj = rayCallback.m_collisionObjects[i];
+        //btVector3 pos = rayCallback.m_hitPointWorld[i];
+        //btVector3 normal = rayCallback.m_hitPointWorld[i];
+        //printf("Hit at %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
 
-        hit.normal[0] = normal.getX();
-        hit.normal[1] = normal.getY();
-        hit.normal[2] = normal.getZ();
-        
-        // Need to figure this out...
-        // kinda important to know
-        //hit.shapeId = 
-        buf->ptrWrite += COM_COPY_STRUCT(&hit, buf->ptrWrite, PhysRayHit);
+        PhysRayHit hit = {};
+        hit.worldPos[0] = rayCallback.m_hitPointWorld[i].getX();
+        hit.worldPos[1] = rayCallback.m_hitPointWorld[i].getY();
+        hit.worldPos[2] = rayCallback.m_hitPointWorld[i].getZ();
+
+        hit.normal[0] = rayCallback.m_hitNormalWorld[i].getX();
+        hit.normal[1] = rayCallback.m_hitNormalWorld[i].getY();
+        hit.normal[2] = rayCallback.m_hitNormalWorld[i].getZ();
+        buf += COM_COPY_STRUCT(&hit, buf, PhysRayHit);
+        result.numHits++;
     }
-#endif
+    
     PhysDataItemHeader h = {};
     h.type = RaycastResult;
     h.size = sizeof(PhysEv_RaycastResult) + (sizeof(PhysRayHit) * result.numHits);
@@ -69,7 +60,39 @@ inline i32 Phys_ExecRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, ByteBuffe
     ptrHeaderWrite += COM_COPY_STRUCT(&h, ptrHeaderWrite, PhysDataItemHeader);
     ptrHeaderWrite += COM_COPY_STRUCT(&result, ptrHeaderWrite, PhysEv_RaycastResult);
 
-    return (buf->ptrWrite - ptrStart);
+    return (buf - ptrStart);
+}
+#endif
+
+// Return number of hits
+inline i32 Phys_QuickRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
+{
+    btVector3 start(cmd->start[0], cmd->start[1], cmd->start[2]);
+    btVector3 end(cmd->end[0], cmd->end[1], cmd->end[2]);
+
+    btCollisionWorld::AllHitsRayResultCallback rayCallback(start, end);
+    world->dynamicsWorld->rayTest(start, end, rayCallback);
+    i32 numHits = rayCallback.m_collisionObjects.size();
+
+    if (hits == NULL && maxHits <= 0) { return numHits; }
+    i32 writtenHits = 0;
+    for (i32 i = 0; i < numHits; ++i)
+    {
+        //btCollisionObject* obj = rayCallback.m_collisionObjects[i];
+        hits->shapeId = rayCallback.m_collisionObjects[i]->getUserIndex();
+
+        hits->worldPos[0] = rayCallback.m_hitPointWorld[i].getX();
+        hits->worldPos[1] = rayCallback.m_hitPointWorld[i].getY();
+        hits->worldPos[2] = rayCallback.m_hitPointWorld[i].getZ();
+
+        hits->normal[0] = rayCallback.m_hitNormalWorld[i].getX();
+        hits->normal[1] = rayCallback.m_hitNormalWorld[i].getY();
+        hits->normal[2] = rayCallback.m_hitNormalWorld[i].getZ();
+        ++hits;
+        ++writtenHits;
+        if (writtenHits == maxHits) { break; }
+    }
+    return numHits;
 }
 
 i32 PhysCmd_RayTest(

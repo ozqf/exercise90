@@ -6,7 +6,8 @@
 // ISSUE COMMAND
 /////////////////////////////////////////////////////////////
 
-i32 Phys_Raycast(PhysCmd_Raycast* ev)
+#if 0
+i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 {
     // Thread safe...? do you care...?
     i32 id = g_world.nextQueryId++;
@@ -15,6 +16,7 @@ i32 Phys_Raycast(PhysCmd_Raycast* ev)
     g_cmdBuf.ptrWrite += COM_COPY_STRUCT(ev, g_cmdBuf.ptrWrite, PhysCmd_Raycast);
     return id;
 }
+#endif
 
 i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
 {
@@ -96,6 +98,18 @@ void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 /////////////////////////////////////////////////////////////
 // Querying
 /////////////////////////////////////////////////////////////
+
+// return number of hits or number of hits written if max is lower
+i32 Phys_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
+{
+    return Phys_QuickRaycast(&g_world, cmd, hits, maxHits);
+}
+
+// Return bytes written
+// i32 Phys_QueryRay(PhysCmd_Raycast* cmd, u8* resultsBuffer, u32 bufferCapacity)
+// {
+//     return Phys_ExecRaycast(&g_world, cmd, resultsBuffer, bufferCapacity);
+// }
 
 i32 Phys_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
 {
