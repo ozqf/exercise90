@@ -92,11 +92,27 @@ void Ent_ClearComponents(GameState* gs, Ent* ent)
     EC_RemoveRenderer(gs, ent);
     EC_RemoveActorMotor(gs, ent);
     EC_RemoveProjectile(gs, ent);
+    EC_RemoveHealth(gs, ent);
 }
 
 inline void Ent_MarkForFree(Ent* ent)
 {
     ent->inUse = ENTITY_STATUS_DEAD;
+}
+
+inline void Ent_WriteRemoveCmd(Ent* ent, u8 verbose)
+{
+    Ent_MarkForFree(ent);
+    Cmd_RemoveEntity cmd = {};
+    cmd.entId = ent->entId;
+    if (verbose)
+    {
+        printf("GAME Delete ent %d/%d\n",
+		    cmd.entId.iteration,
+		    cmd.entId.index
+        );
+	}
+    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
 }
 
 inline void Ent_Free(GameState* gs, Ent* ent)
@@ -158,13 +174,14 @@ inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)
     Ent* ent = &ents->items[id->index];
-    if (
-        ent->inUse != ENTITY_STATUS_IN_USE
-        || ent->entId.iteration != id->iteration)
+    if (ent->inUse == ENTITY_STATUS_IN_USE && ent->entId.iteration == id->iteration)
     {
-        return NULL;
+        return ent;
     }
-    return ent;
+	else
+	{
+		return NULL;
+	}
 }
 
 inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)

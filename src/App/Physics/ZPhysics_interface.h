@@ -38,7 +38,7 @@ i32 Phys_CreateBox(
 
 //i32 Phys_CreateInfinitePlane(f32 y, u16 mask, u16 ownerId, u16 ownerIteration);
 
-i32 Phys_RemoveShape();
+void Phys_RemoveShape(i32 shapeId);
 
 void Phys_SetState(PhysCmd_State* state);
 

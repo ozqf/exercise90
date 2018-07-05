@@ -269,6 +269,16 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 	    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
 	    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
 
+        EC_Health* health = EC_AddHealth(gs, ent);
+        if (health == NULL)
+        {
+            printf("Health not found!\n");
+        }
+        else
+        {
+            health->hp = 100;
+        }
+        
         f32 size = 1.0f;
         EC_Collider* collider = EC_AddCollider(gs, ent);
         collider->size = { size, size, size };

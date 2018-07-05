@@ -111,6 +111,13 @@ struct EntityLink
 //   u8 inUse;
 //////////////////////////////////////////////////
 
+
+struct Damager
+{
+    EntId source;
+    i32 damage;
+};
+
 // Max of 32 components per entity
 
 //struct GameState;
@@ -120,6 +127,7 @@ struct EntityLink
 #define COMP_FLAG_ACTORMOTOR (1 << 3)
 #define COMP_FLAG_PROJECTILE (1 << 4)
 #define COMP_FLAG_LABEL (1 << 5)
+#define COMP_FLAG_HEALTH (1 << 6)
 
 struct EC_Collider
 {
@@ -170,6 +178,7 @@ struct EC_Projectile
     f32 speed;
     f32 tick;
     f32 tock;
+    Damager damage;
 };
 
 struct EC_Label
@@ -177,6 +186,13 @@ struct EC_Label
     EntId entId;
     u8 inUse;
     char label[32];
+};
+
+struct EC_Health
+{
+    EntId entId;
+    u8 inUse;
+    i32 hp;
 };
 
 //////////////////////////////////////////////////
@@ -190,6 +206,7 @@ DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
+DEFINE_ENT_COMPONENT_LIST(Health)
 
 //////////////////////////////////////////////////
 // Clients and players
@@ -250,6 +267,7 @@ struct GameState
     EC_ActorMotorList actorMotorList;
     EC_ProjectileList projectileList;
     EC_LabelList labelList;
+    EC_HealthList healthList;
     
     // view
     Transform cameraTransform;
@@ -276,3 +294,4 @@ DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
+DEFINE_ENT_COMPONENT_BASE(Health, health, COMP_FLAG_HEALTH)

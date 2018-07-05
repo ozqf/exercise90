@@ -21,6 +21,16 @@ static inline u32 COM_WriteByte(u8 value, u8* target)
 }
 
 /**
+ * Returns number of bytes written
+ */
+static inline u32 COM_WriteI32(i32 value, u8* target)
+{
+	Assert(target != NULL);
+    *(i32*)target = value;
+    return sizeof(i32);
+}
+
+/**
  * Read an i32 at the target pointer position AND move the target pointer forward
  */
 static inline u8 COM_ReadByte(u8** target)

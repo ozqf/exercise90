@@ -16,7 +16,7 @@ void App_ClearClientGameLinks(ClientList* cls)
 	{
 		Client* cl = &cls->items[i];
         cl->entId = {};
-		cl->state = CLIENT_STATE_OBSERVER;
+		cl->state = CLIENT_STATE_FREE;// CLIENT_STATE_OBSERVER;
 
 	}
 }
@@ -68,6 +68,11 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 			cmd.clientId = cl->clientId;
             cmd.input = cl->input;
             App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
+        } break;
+
+        case CLIENT_STATE_FREE:
+        {
+            printf("APP Attempting to update a free client. ID: %d\n ", cl->clientId);
         } break;
 
         default:
@@ -136,6 +141,7 @@ void App_UpdateLocalClients(GameTime* time, ClientList* cls)
     {
         Client* cl = &cls->items[i];
         if (cl->clientId == 0) { continue; }
+        if (cl->state == CLIENT_STATE_FREE) { continue; }
         if (cl->clientId == -1)
         {
             // Process input

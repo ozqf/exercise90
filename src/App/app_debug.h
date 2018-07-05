@@ -18,7 +18,9 @@ void App_DebugPrintPlayers(GameState* gs)
     }
     printf(" %d players\n", count);
 }
+#endif
 
+#if 1
 void App_DebugPrintEntities(GameState* gs)
 {
     i32 l = gs->entList.max;
@@ -33,7 +35,7 @@ void App_DebugPrintEntities(GameState* gs)
             e->factoryType, e->inUse
         );
     }
-    printf(" %d entities\n", count);
+    printf(" %d active entities\n", count);
 }
 #endif
 

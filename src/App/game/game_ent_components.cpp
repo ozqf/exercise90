@@ -289,7 +289,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 motor->input.degrees.x,
                 motor->input.degrees.y
             );
-            #if 0
+            #if 1
             f32 spread = 2;
             f32 pitchOffset;
             f32 yawOffset;
@@ -417,21 +417,6 @@ inline void Prj_PushRigidBody(EC_Collider* col)
     Phys_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
-inline void Game_RemoveProjectile(Ent* e, EC_Projectile* prj, u8 verbose)
-{
-    Ent_MarkForFree(e);
-    Cmd_RemoveEntity cmd = {};
-    cmd.entId = e->entId;
-	if (verbose)
-    {
-        printf("GAME Delete prj %d/%d\n",
-		    cmd.entId.iteration,
-		    cmd.entId.index
-        );
-	}
-    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
-}
-
 void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
@@ -444,7 +429,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (prj->tick <= 0.0f)
         {
             // Delete
-            Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+            Ent_WriteRemoveCmd(e, time->singleFrame == 1);
             #if 0
             Ent_MarkForFree(e);
             Cmd_RemoveEntity cmd = {};
@@ -493,15 +478,36 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                 EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
                 Assert(col != NULL);
                 Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->entId);
-                Assert(targetEnt != NULL);
+				if (targetEnt == NULL)
+				{
+					printf("!GAME prj victim %d/%d is NULL!\n", col->entId.iteration, col->entId.index);
+					continue;
+				}
                 if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
                 {
-                    Prj_PushRigidBody(col);
-                    Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+                    EC_Health* health = EC_FindHealth(gs, &col->entId);
+                    if (health != NULL)
+                    {
+                        health->hp -= 10;
+                        if (health->hp <= 0)
+                        {
+                            Ent_WriteRemoveCmd(targetEnt, time->singleFrame == 1);
+                            // is this the time to do this...?
+                            Phys_RemoveShape(col->shapeId);
+                            printf("Killed cube!\n");
+                        }
+                        else
+                        {
+                            printf("Hit cube, hp: %d\n", health->hp);
+                            Prj_PushRigidBody(col);
+                        }
+                    }
+
+                    Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
                 else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
                 {
-                    Game_RemoveProjectile(e, prj, time->singleFrame == 1);
+                    Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
             }
         }

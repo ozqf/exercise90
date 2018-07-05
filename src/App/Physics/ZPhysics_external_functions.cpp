@@ -60,9 +60,11 @@ i32 Phys_CreateBox(
     return Phys_CreateShape(&def, ownerId, ownerIteration);
 }
 
-i32 Phys_RemoveShape()
+void Phys_RemoveShape(i32 shapeId)
 {
-    return 0;
+    PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
+    g_cmdBuf.ptrWrite += COM_WriteByte(Remove, g_cmdBuf.ptrWrite);
+    g_cmdBuf.ptrWrite += COM_WriteI32(shapeId, g_cmdBuf.ptrWrite);
 }
 
 void Phys_SetState(PhysCmd_State* state)

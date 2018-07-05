@@ -175,6 +175,7 @@ global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
 global_variable EC_Projectile       g_prjControllers[GAME_MAX_ENTITIES];
 global_variable EC_Label            g_entLabels[GAME_MAX_ENTITIES];
+global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
 
 // UI
 global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
@@ -186,9 +187,9 @@ global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 Transform g_debugTransform = {};
 ClientTick g_debugInput = {};
 
+#include "game_command_types.h"
 #include "game_entities.h"
 #include "comp_rendObj.h"
-#include "game_command_types.h"
 #include "comp_aiController.h"
 #include "game_players.h"
 

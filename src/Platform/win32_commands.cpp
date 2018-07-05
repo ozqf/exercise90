@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32_system_include.h"
+#include "win32_module.cpp"
 
 
 /**********************************************************************
@@ -80,7 +80,7 @@ u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
         printf("HI.\n");
         return 1;
     }
-    else if (COM_CompareStrings(tokens[0], "STEPMODE") == 0)
+    else if (COM_CompareStrings(tokens[0], "Z") == 0 || COM_CompareStrings(tokens[0], "STEPMODE") == 0)
     {
         g_singleFrameStepMode = !g_singleFrameStepMode;
         printf("PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);

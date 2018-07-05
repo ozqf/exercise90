@@ -64,6 +64,10 @@ void Game_InitGameState(GameState *gs)
     gs->labelList.count = GAME_MAX_ENTITIES;
     gs->labelList.max = GAME_MAX_ENTITIES;
     
+    gs->healthList.items = g_health;
+    gs->healthList.count = GAME_MAX_ENTITIES;
+    gs->healthList.max = GAME_MAX_ENTITIES;
+    
     Game_InitEntityFactory();
 }
 

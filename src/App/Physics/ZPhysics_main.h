@@ -144,12 +144,12 @@ void Phys_NeverCall()
 {
     ILLEGAL_CODE_PATH
     Phys_CreateBulletBox(NULL, NULL, NULL);
-    Phys_CmdCreateShape(NULL, NULL);
+    PhysExec_CreateShape(NULL, NULL);
     Phys_RecycleHandle(NULL, NULL);
     Phys_ReadCommands(NULL, NULL);
 }
 
-inline void Phys_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
+inline void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
 {
     btTransform t;
     body->getMotionState()->getWorldTransform(t);
@@ -170,7 +170,7 @@ inline void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
     body->setLinearVelocity(newVelocity);
 }
 
-void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
+void PhysExec_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -178,7 +178,7 @@ void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
         return;
     }
     handle->rigidBody->activate(true);
-    Phys_SetBodyPosition(
+    PhysExec_SetBodyPosition(
         handle->rigidBody,
         cmd->pos[0],
         cmd->pos[1],
@@ -197,7 +197,7 @@ void PhysCmd_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
 #endif
 }
 
-void PhysCmd_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
+void PhysExec_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -213,7 +213,7 @@ void PhysCmd_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
 	handle->rigidBody->setLinearVelocity(newVelocity);*/
 }
 
-void PhysCmd_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
+void PhysExec_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -243,55 +243,67 @@ void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
         u8 cmdType = COM_ReadByte(&ptrRead);
         switch (cmdType)
         {
-        case Teleport:
-        {
-            PhysCmd_Teleport cmd = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Teleport);
-            PhysCmd_TeleportShape(world, &cmd);
-        }
-        break;
+            case Teleport:
+            {
+                PhysCmd_Teleport cmd = {};
+                ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Teleport);
+                PhysExec_TeleportShape(world, &cmd);
+            } break;
 
-        case SetVelocity:
-        {
-            PhysCmd_VelocityChange cmd = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_VelocityChange);
-            PhysCmd_ChangeVelocity(world, &cmd);
-        }
-        break;
+            case SetVelocity:
+            {
+                PhysCmd_VelocityChange cmd = {};
+                ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_VelocityChange);
+                PhysExec_ChangeVelocity(world, &cmd);
+            } break;
 
-        case SetState:
-        {
-            PhysCmd_State cmd = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_State);
-            PhysCmd_SetState(world, &cmd);
-        } break;
+            case SetState:
+            {
+                PhysCmd_State cmd = {};
+                ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_State);
+                PhysExec_SetState(world, &cmd);
+            } break;
 
-        case Create:
-        {
-            ZShapeDef def = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &def, ZShapeDef);
-            Phys_CmdCreateShape(world, &def);
-        }
-        break;
+            case Create:
+            {
+                ZShapeDef def = {};
+                ptrRead += COM_COPY_STRUCT(ptrRead, &def, ZShapeDef);
+                PhysExec_CreateShape(world, &def);
+            } break;
 
-        // TODO:
-        // So how is this going to work exactly...?
-        #if 0
-        case Raycast:
-        {
-            PhysCmd_Raycast cmd = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Raycast);
-            // needs output buffer for results...
-            Phys_ExecRaycast(world, &cmd, output);
-        }
-        break
-        #endif;
+            case Remove:
+            {
+                i32 shapeId = COM_ReadI32(&ptrRead);
+                PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
+                if (h == NULL)
+                {
+                    printf("PHYS: Not shape %d to remove!\n", shapeId);
+                    break;
+                }
+                else
+                {
+                    printf("PHYS Removed shape %d\n", shapeId);
+                    Phys_FreeHandle(&g_world, h);
+                }
+            } break;
 
-        default:
-        {
-            ILLEGAL_CODE_PATH
-        }
-        break;
+            // TODO:
+            // So how is this going to work exactly...?
+            #if 0
+            case Raycast:
+            {
+                PhysCmd_Raycast cmd = {};
+                ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Raycast);
+                // needs output buffer for results...
+                Phys_ExecRaycast(world, &cmd, output);
+            }
+            break
+            #endif;
+
+            default:
+            {
+                ILLEGAL_CODE_PATH
+            } break;
         }
     }
     // Clear

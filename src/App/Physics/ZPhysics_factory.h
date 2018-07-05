@@ -151,7 +151,7 @@ PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef de
     return handle;
 }
 #endif
-internal void Phys_CmdCreateShape(ZBulletWorld* world, ZShapeDef* def)
+internal void PhysExec_CreateShape(ZBulletWorld* world, ZShapeDef* def)
 {
      switch (def->shapeType)
     {

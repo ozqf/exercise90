@@ -115,7 +115,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))
     {
-        //App_DebugPrintEntities(&g_gameState);
+        App_DebugPrintEntities(&g_gameState);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "PLAYERS"))
