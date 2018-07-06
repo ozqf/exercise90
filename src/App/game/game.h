@@ -65,9 +65,8 @@ inline u8 IsConnectionOpen(u8 netMode)
 // Entity and entity component lists
 #define GAME_MAX_ENTITIES 2048
 #define GAME_MAX_PLAYERS 64
-//#define GAME_MAX_CLIENTS 8
-
 #define UI_MAX_ENTITIES 512
+#define GAME_MAX_LOCAL_ENTITIES 2048
 
 #define GAME_DEBUG_BUFFER_LENGTH 1024
 
@@ -180,6 +179,8 @@ global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
 // UI
 global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 
+global_variable LocalEnt         g_localEntities[GAME_MAX_LOCAL_ENTITIES];
+
 /////////////////////////////////////////////////////////////
 // Debug
 /////////////////////////////////////////////////////////////
@@ -188,6 +189,7 @@ Transform g_debugTransform = {};
 ClientTick g_debugInput = {};
 
 #include "game_command_types.h"
+#include "game_local_entities.h"
 #include "game_entities.h"
 #include "comp_rendObj.h"
 #include "comp_aiController.h"

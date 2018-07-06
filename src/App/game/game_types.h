@@ -2,6 +2,31 @@
 
 #include "../common/com_module.h"
 
+#define LOCAL_ENT_STATUS_FREE 0
+#define LOCAL_ENT_STATUS_IN_USE 1
+
+// Local entities are simple client side objects only and
+// can have NO effect on server Ents whatsoever.
+struct LocalEnt
+{
+    i32 id;
+    i32 status;
+    // movement
+    Vec3 pos;
+    Vec3 scale;
+    Vec3 vel;
+    f32 speed;
+
+    // timing
+    f32 tick;
+    f32 tickMax;
+    i32 tock;
+    i32 tockMax;
+
+    // display
+    RendObj rend;
+};
+
 struct ClientTick
 {
     //i32 mouse[2];

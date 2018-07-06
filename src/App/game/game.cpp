@@ -362,6 +362,8 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd.entId);
 			if (ent != NULL)
 			{
+                Vec3 p = ent->transform.pos;
+                Game_SpawnLocalEntity(p.x, p.y, p.z);
 				Ent_Free(gs, ent);
 			}
 			else
@@ -605,14 +607,6 @@ void Game_Tick(
         printf("GAME Writing commands to Buffer %s\n", App_GetBufferName(output->ptrStart));
 	}
     Game_ReadCommandBuffer(gs, input, (time->singleFrame != 0));
-    // while (ptrRead < input->ptrEnd)
-    // {
-    //     BufferItemHeader header = {};
-    //     ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
-    //     Game_ReadCmd(&g_gameState, header.type, ptrRead, header.size);
-    // }
-    
-    //////////////////////////////////////////////////////////////////
     
     g_debugTransform = gs->cameraTransform;
     
@@ -622,6 +616,8 @@ void Game_Tick(
     Game_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
+
+    Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 
     // step forward
     Game_StepPhysics(gs, time);

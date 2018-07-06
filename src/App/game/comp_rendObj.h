@@ -7,6 +7,7 @@
  */
 inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 {
+    // Draw Ent render components
     for (u32 i = 0; i < gs->rendererList.max; ++i)
     {
         EC_Renderer* rend = &gs->rendererList.items[i];
@@ -16,6 +17,8 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
             RScene_AddRenderItem(scene, &ent->transform, &rend->rendObj);
         }
     }
+    // Draw local entities
+    Game_AddLocalEntitiesToRender(scene);
 }
 
 inline void Game_BuildWeaponModelScene(RenderScene* scene)

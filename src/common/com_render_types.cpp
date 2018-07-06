@@ -7,6 +7,25 @@
 // Build a render scene
 ///////////////////////////////////////////////////////////////////
 
+static inline void RScene_AddRenderItem(
+    RenderScene*    scene,
+    RendObj*        rendObj,
+    f32 x, f32 y, f32 z,
+    f32 scaleX, f32 scaleY, f32 scaleZ)
+{
+    Assert(scene->numObjects < scene->maxObjects);
+    RenderListItem* item = &scene->sceneItems[scene->numObjects];
+    scene->numObjects++;
+    Transform_SetToIdentity(&item->transform);
+    item->transform.pos.x = x;
+    item->transform.pos.y = y;
+    item->transform.pos.z = z;
+    item->transform.scale.x = scaleX;
+    item->transform.scale.y = scaleY;
+    item->transform.scale.z = scaleZ;
+    item->obj = *rendObj;
+}
+
 static inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
 {
     Assert(scene->numObjects < scene->maxObjects);

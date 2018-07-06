@@ -36,9 +36,23 @@ static inline f32 COM_Randf32()
     return (f32)rand() / (f32)RAND_MAX;
 }
 
+inline void Vec3_ArraySet(f32* v, f32 x, f32 y, f32 z)
+{
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 3 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
+
+inline void Vec3_Set(Vec3* v, f32 x, f32 y, f32 z)
+{
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
 
 inline f32 Vec3_Magnitude(Vec3* v)
 {

@@ -489,6 +489,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     if (health != NULL)
                     {
                         health->hp -= 10;
+                        // kill victim
                         if (health->hp <= 0)
                         {
                             Ent_WriteRemoveCmd(targetEnt, time->singleFrame == 1);
@@ -502,11 +503,19 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                             Prj_PushRigidBody(col);
                         }
                     }
-
+                    
+                    // kill prj
+                    t->pos.x = hit->worldPos[0];
+                    t->pos.y = hit->worldPos[1];
+                    t->pos.z = hit->worldPos[2];
                     Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
                 else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
                 {
+                    // kill prj
+                    t->pos.x = hit->worldPos[0];
+                    t->pos.y = hit->worldPos[1];
+                    t->pos.z = hit->worldPos[2];
                     Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
             }
