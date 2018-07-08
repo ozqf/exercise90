@@ -23,6 +23,7 @@
 #include "test_base64.h"
 #include "test_tokenise.h"
 #include "test_bitpacking.h"
+#include "test_syntax.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
@@ -37,6 +38,7 @@ int main(i32 argc, char* argv[])
 	//Test_MultiThreading();
 	//Test_Tokenise();
     //Test_StateSaving();
+    Test_Syntax();
     Test_Bitpacking();
 #endif
 

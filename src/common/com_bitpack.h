@@ -4,6 +4,7 @@
 
 #define TEN_BIT_MASK 1023
 #define SIXTEEN_BIT_MASK 65535
+#define TWENTY_FOUR_BIT_MASK 16777215
 
 // Used to generate the mask constants used above
 inline i32 COM_CreateBitmask(i32 numBits)

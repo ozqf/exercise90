@@ -84,7 +84,7 @@ void Test_COM_PrintVector3(Vec3 v)
 {
 
     printf("x/y/z: %.2f, %.2f, %.2f\n", v.x, v.y, v.z);
-    printf("array:%.2f, %.2f, %.2f\n", v.e[0], v.e[1], v.e[2]);
+    printf("array:%.2f, %.2f, %.2f\n", v.parts[0], v.parts[1], v.parts[2]);
 }
 
 void Test_Com_Run()

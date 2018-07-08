@@ -40,7 +40,7 @@
 32 
 */
 
-union FourBytesU
+union FourBytes_U
 {
 	i32 asI32;
 	u32 asU32;
@@ -48,6 +48,11 @@ union FourBytesU
 	i8 bytes[4];
 	i16 int16s[2];
 	u16 uInt16s[2];
+
+    inline i32 GetI24()
+    {
+        return asI32 & TWENTY_FOUR_BIT_MASK;
+    }
 };
 
 void BitPack1()
@@ -292,6 +297,15 @@ void Test_Bitshift2()
 
 void Test_Bitpacking()
 {
+    FourBytes_U bytes = {};
+    printf("Size of four byte union: %d\n", sizeof(FourBytes_U));
+    bytes.bytes[0] = 127;
+    bytes.bytes[1] = 127;
+    bytes.bytes[2] = 127;
+    bytes.bytes[3] = 127;
+    printf("as I16: %d and %d\n", bytes.int16s[0], bytes.int16s[1]);
+    printf("as I24: %d\n", bytes.GetI24());
+    printf("as I32: %d\n", bytes.asI32);
     // 9 bits for 0-512 degrees rot
     //Test_PrintBits(4096);
     Test_Bitshift2();

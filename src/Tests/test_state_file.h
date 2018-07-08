@@ -377,7 +377,7 @@ u8 Test_ReadState(char* fileName, u8 staticCommandsOnly)
 			printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
 				s.factoryType,
 				s.pos.x, s.pos.y, s.pos.z,
-				s.rot.e[0], s.rot.e[1], s.rot.e[2]
+				s.rot.parts[0], s.rot.parts[1], s.rot.parts[2]
 			);
 		} break;
 
@@ -412,8 +412,8 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 				read += COM_COPY_STRUCT(read, &s, Cmd_Spawn);
 				printf("Spawn %d at %.2f, %.2f, %.2f\nRot: %.2f, %.2f, %.2f\n",
 					s.factoryType,
-					s.pos.e[0], s.pos.e[1], s.pos.e[2],
-					s.rot.e[0], s.rot.e[1], s.rot.e[2]
+					s.pos.parts[0], s.pos.parts[1], s.pos.parts[2],
+					s.rot.parts[0], s.rot.parts[1], s.rot.parts[2]
 				);
 			} break;
 
