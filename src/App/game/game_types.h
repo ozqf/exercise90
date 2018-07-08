@@ -14,6 +14,7 @@ struct LocalEnt
     // movement
     Vec3 pos;
     Vec3 scale;
+    Vec3 originalScale;
     Vec3 vel;
     f32 speed;
 

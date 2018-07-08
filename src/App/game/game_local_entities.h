@@ -36,6 +36,7 @@ void Game_SpawnLocalEntity(f32 x, f32 y, f32 z)
 	if (e == NULL) { return; }
 	Vec3_Set(&e->pos, x, y, z);
 	RendObj_SetAsBillboard(&e->rend, 1, 1, 1, 2);
+    Vec3_Set(&e->scale, 0.2f, 0.2f, 0.2f);
 	e->rend.flags = 0 | RENDOBJ_FLAG_DEBUG;
     e->tick = 1.0f;
 }
@@ -60,9 +61,9 @@ void Game_TickLocalEntities(f32 dt, u8 verbose)
             e->pos.x += e->vel.x * dt;
             e->pos.y += e->vel.y * dt;
             e->pos.z += e->vel.z * dt;
-            e->scale.x = 1 * e->tick;
-            e->scale.y = 1 * e->tick;
-            e->scale.z = 1 * e->tick;
+            //e->scale.x = 1 * e->tick;
+            //e->scale.y = 1 * e->tick;
+            //e->scale.z = 1 * e->tick;
             e->tick -= dt;
             if (verbose)
             {

@@ -470,6 +470,8 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 
         i32 numHits = Phys_QueryRay(&ray, results, 12);
 
+        u8 survived = 1;
+
         if (numHits > 0)
         {
             for (i32 j = 0; j < numHits; ++j)
@@ -508,6 +510,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     t->pos.x = hit->worldPos[0];
                     t->pos.y = hit->worldPos[1];
                     t->pos.z = hit->worldPos[2];
+                    survived = 0;
                     Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
                 else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
@@ -516,13 +519,18 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     t->pos.x = hit->worldPos[0];
                     t->pos.y = hit->worldPos[1];
                     t->pos.z = hit->worldPos[2];
+                    survived = 0;
                     Ent_WriteRemoveCmd(e, time->singleFrame == 1);
                 }
             }
         }
-        t->pos.x += prj->move.x * time->deltaTime;
-        t->pos.y += prj->move.y * time->deltaTime;
-        t->pos.z += prj->move.z * time->deltaTime;
+        if (survived)
+        {
+            // Move
+            t->pos.x += prj->move.x * time->deltaTime;
+            t->pos.y += prj->move.y * time->deltaTime;
+            t->pos.z += prj->move.z * time->deltaTime;
+        }
     }
 }
 

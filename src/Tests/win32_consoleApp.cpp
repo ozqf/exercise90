@@ -22,6 +22,7 @@
 #include "test_state_file.h"
 #include "test_base64.h"
 #include "test_tokenise.h"
+#include "test_bitpacking.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
@@ -35,7 +36,8 @@ int main(i32 argc, char* argv[])
 	//Test_ReadMesh();
 	//Test_MultiThreading();
 	//Test_Tokenise();
-    Test_StateSaving();
+    //Test_StateSaving();
+    Test_Bitpacking();
 #endif
 
 #if 0

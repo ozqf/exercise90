@@ -11,6 +11,10 @@ internal i32 g_z_nan = 0x7F800001;
 inline f32 ZNaN() { return *(float*)&g_z_nan; }
 
 
+static inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
+{
+    return start + lerp * (end - start);
+}
 
 static inline f32 COM_CapAngleDegrees(f32 angle)
 {
