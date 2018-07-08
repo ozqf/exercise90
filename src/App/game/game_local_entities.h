@@ -30,7 +30,12 @@ inline LocalEnt* Game_GetFreeLocalEntitiy()
 	return NULL;
 }
 
-void Game_SpawnLocalEntity(f32 x, f32 y, f32 z)
+// Dir can be null, which will force no launch movement
+void Game_SpawnLocalEntity(
+    f32 x, f32 y, f32 z,
+    Vec3* dir,
+    f32 power
+)
 {
 	LocalEnt* e = Game_GetFreeLocalEntitiy();
 	if (e == NULL) { return; }
@@ -39,6 +44,16 @@ void Game_SpawnLocalEntity(f32 x, f32 y, f32 z)
     Vec3_Set(&e->scale, 0.2f, 0.2f, 0.2f);
 	e->rend.flags = 0 | RENDOBJ_FLAG_DEBUG;
     e->tick = 1.0f;
+
+    // apply launch
+    if (dir != NULL)
+    {
+        // printf("Spawn local dir: %.2f, %.2f, %.2f\n", 
+        //     e->dir.x, e->dir.y, e->dir.z
+        // );
+        e->dir = *dir;
+        e->speed = power;
+    }
 }
 
 void Game_TickLocalEntities(f32 dt, u8 verbose)
@@ -58,9 +73,15 @@ void Game_TickLocalEntities(f32 dt, u8 verbose)
         }
         else
         {
-            e->pos.x += e->vel.x * dt;
-            e->pos.y += e->vel.y * dt;
-            e->pos.z += e->vel.z * dt;
+            Vec3 vel;
+            Vec3_Set(&vel,
+                e->dir.x * e->speed,
+                e->dir.y * e->speed,
+                e->dir.z * e->speed
+            );
+            e->pos.x += vel.x * dt;
+            e->pos.y += vel.y * dt;
+            e->pos.z += vel.z * dt;
             //e->scale.x = 1 * e->tick;
             //e->scale.y = 1 * e->tick;
             //e->scale.z = 1 * e->tick;

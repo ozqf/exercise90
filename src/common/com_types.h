@@ -58,7 +58,7 @@ struct Vec3
         {
             f32 x, y, z;
         };    
-        f32 e[3];
+        f32 parts[3];
     };
     // f32 x, y, z, w;
     // // overload array operator to return a pointer to x + index

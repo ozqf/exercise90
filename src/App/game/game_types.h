@@ -15,7 +15,7 @@ struct LocalEnt
     Vec3 pos;
     Vec3 scale;
     Vec3 originalScale;
-    Vec3 vel;
+    Vec3 dir;
     f32 speed;
 
     // timing

@@ -210,8 +210,29 @@ void Test_Bitshift2()
     }
     #endif
 
-
     #if 1
+    printf("Vec3 input: 0.304, -0.211, 0.929\n");
+    i32 packed = COM_PackVec3NormalToI32(0.304f, -0.211f, 0.929f);
+    Test_PrintVal(packed, "packed v3");
+    Vec3 unpacked = COM_UnpackVec3Normal(packed);
+    printf("Vec3 output: %.4f, %.4f, %.4f\n", unpacked.x, unpacked.y, unpacked.z);
+
+    i32 bitMask16 = COM_CreateBitmask(16);
+    printf("16 bit mask: %d\n", bitMask16);
+
+    // calculate z from x and y knowing mag == 1?
+    #if 0
+    printf("--------------------------------------------------\n");
+    printf("Given X == 0.304 and Y == -0.211 calc Z\n");
+    f32 x = 0.304f;
+    f32 y = -0.21f;
+    f32 magXY = ()
+    #endif
+
+
+    #endif
+
+    #if 0
     i32 a = Test_PrintVal(T_BuildTenBitVec3(0.304f, -0.211f, 0.929f), "a");
     printf("----------------------------------\n");
     f32 b[3];

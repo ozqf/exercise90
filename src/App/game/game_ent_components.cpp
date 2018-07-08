@@ -429,7 +429,8 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (prj->tick <= 0.0f)
         {
             // Delete
-            Ent_WriteRemoveCmd(e, time->singleFrame == 1);
+            Vec3 v = Vec3_CreateUnitVector(&prj->move);
+            Ent_WriteRemoveCmd(e, v.parts, time->singleFrame == 1);
             #if 0
             Ent_MarkForFree(e);
             Cmd_RemoveEntity cmd = {};
@@ -494,14 +495,18 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                         // kill victim
                         if (health->hp <= 0)
                         {
-                            Ent_WriteRemoveCmd(targetEnt, time->singleFrame == 1);
+                            Ent_WriteRemoveCmd(
+                                targetEnt,
+                                hit->normal,
+                                time->singleFrame == 1
+                            );
                             // is this the time to do this...?
                             Phys_RemoveShape(col->shapeId);
-                            printf("Killed cube!\n");
+                            //printf("Killed cube!\n");
                         }
                         else
                         {
-                            printf("Hit cube, hp: %d\n", health->hp);
+                            //printf("Hit cube, hp: %d\n", health->hp);
                             Prj_PushRigidBody(col);
                         }
                     }
@@ -511,7 +516,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     t->pos.y = hit->worldPos[1];
                     t->pos.z = hit->worldPos[2];
                     survived = 0;
-                    Ent_WriteRemoveCmd(e, time->singleFrame == 1);
+                    Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
                 }
                 else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
                 {
@@ -520,7 +525,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     t->pos.y = hit->worldPos[1];
                     t->pos.z = hit->worldPos[2];
                     survived = 0;
-                    Ent_WriteRemoveCmd(e, time->singleFrame == 1);
+                    Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
                 }
             }
         }

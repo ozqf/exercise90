@@ -145,6 +145,7 @@ struct Cmd_EntityState
 struct Cmd_RemoveEntity
 {
     EntId entId;
+    i32 gfxNormal;
 };
 
 // 107 - Entity delta contains a list of fields to update

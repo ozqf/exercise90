@@ -363,7 +363,8 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
 			if (ent != NULL)
 			{
                 Vec3 p = ent->transform.pos;
-                Game_SpawnLocalEntity(p.x, p.y, p.z);
+                Vec3 normal = COM_UnpackVec3Normal(cmd.gfxNormal);
+                Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
 				Ent_Free(gs, ent);
 			}
 			else

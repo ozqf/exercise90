@@ -77,6 +77,17 @@ inline void Vec3_Normalise(Vec3* v)
     v->z /= vectorMagnitude;
 }
 
+inline Vec3 Vec3_CreateUnitVector(Vec3* v)
+{
+    Vec3 r = {};
+    f32 vectorMagnitude = Vec3_Magnitude(v);
+    if (vectorMagnitude == 0) { return r; }
+    r.x /= vectorMagnitude;
+    r.y /= vectorMagnitude;
+    r.z /= vectorMagnitude;
+    return r;
+}
+
 inline void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude)
 {
     Vec3_Normalise(v);
