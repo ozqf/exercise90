@@ -139,6 +139,11 @@ struct Cmd_EntityState
     // total 12b
     // -- 84b so far --
     // packet of 1000b = 11 updates per packet
+
+    u32 Write(u8* ptr)
+    {
+        return 0;
+    }
 };
 
 // 106

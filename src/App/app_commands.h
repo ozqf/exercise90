@@ -4,12 +4,12 @@
 
 void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
 {
-    BufferItemHeader h = { type, size };
+    CmdHeader h = { type, size };
     u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
-    Assert(remaining >= (sizeof(BufferItemHeader) + size));
+    Assert(remaining >= (sizeof(CmdHeader) + size));
     u8* start = g_appWriteBuffer->ptrWrite;
 	
-    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, BufferItemHeader);
+    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);
     g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
 
@@ -22,6 +22,15 @@ void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
             App_GetBufferName(g_appWriteBuffer->ptrStart)
         );
 	}
+}
+
+void App_CmdMacroTest()
+{
+    u8* ptr = 0;
+    CmdHeader h = {};
+    Cmd_EntityState cmd = {};
+
+    WRITE_CMD(ptr, h, cmd);
 }
 
 void App_SendToServer(u8* ptr, u32 type, u32 size)
@@ -336,8 +345,8 @@ void App_ReadCommandBuffer(ByteBuffer* commands)
     
     while (ptrRead < commands->ptrEnd) // && (numRead + numSkipped) < commands.count)
     {
-        BufferItemHeader header = {};
-        ptrRead += COM_COPY_STRUCT(ptrRead, &header, BufferItemHeader);
+        CmdHeader header = {};
+        ptrRead += COM_COPY_STRUCT(ptrRead, &header, CmdHeader);
 
         if (header.type == NULL)
         {

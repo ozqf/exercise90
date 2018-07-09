@@ -27,7 +27,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
     ///////////////////////////////
     // Write commands
 
-    BufferItemHeader cmdHeader = {};
+    CmdHeader cmdHeader = {};
     
     // Record current position to calculate bytes written after loop
     u8* startOfDynamicCmds = buf->ptrWrite;
@@ -48,7 +48,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
             Game_WriteStaticState(gs, e, &s);
             cmdHeader.type = CMD_TYPE_STATIC_STATE;
             cmdHeader.size = sizeof(Cmd_Spawn);
-            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, BufferItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, CmdHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_Spawn);
             printf("Writing static Ent %d/%d ent type %d\n",
                 s.entityId.iteration,
@@ -62,7 +62,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
             Game_WriteEntityState(gs, e, &s);
             cmdHeader.type = CMD_TYPE_ENTITY_STATE;
             cmdHeader.size = sizeof(Cmd_EntityState);
-            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, BufferItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, CmdHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_EntityState);
             printf("Writing dynamic %d/%d ent type %d\n",
                 s.entityId.iteration,
@@ -90,10 +90,10 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         // ? cmd.isLocal = cl->isLocal;
         cmd.input = cl->input;
 
-        BufferItemHeader cmdH = {};
+        CmdHeader cmdH = {};
         cmdH.type = CMD_TYPE_CLIENT_UPDATE;
         cmdH.size = sizeof(Cmd_ClientUpdate);
-        buf->ptrWrite += COM_COPY_STRUCT(&cmdH, buf->ptrWrite, BufferItemHeader);
+        buf->ptrWrite += COM_COPY_STRUCT(&cmdH, buf->ptrWrite, CmdHeader);
         buf->ptrWrite += COM_COPY_STRUCT(&cmd, buf->ptrWrite, Cmd_ClientUpdate);
 
         h.dynamicCommands.count++;

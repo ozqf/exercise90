@@ -116,28 +116,28 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
     case WM_LBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
-        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_LBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
-        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_RBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
-        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_RBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
-        Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
@@ -232,7 +232,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         if (inputCode != 0)
         {
             InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
-            Buf_WriteObject(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+            Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
             break;
         }
         else

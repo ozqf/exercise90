@@ -126,6 +126,28 @@ global_variable i32 numLaunchParams = 0;
 global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
 global_variable i32 g_textCommandLength = 0;
 
+
+inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
+{
+    u32 used = b->ptrWrite - b->ptrStart;
+    u32 space = b->capacity - used;
+    Assert((space - used) > itemSize + sizeof(PlatformEventHeader));
+
+    PlatformEventHeader header = {};
+    header.type = itemType;
+    header.size = itemSize;
+
+	u32 numHeaderBytes = sizeof(PlatformEventHeader);
+
+    b->ptrWrite += COM_COPY(&header, b->ptrWrite, numHeaderBytes);
+    b->ptrWrite += COM_COPY(source, b->ptrWrite, itemSize);
+    b->count++;
+
+	// Trap to catch specific items being written
+	Assert(itemType != 2);
+}
+
+
 /****************************************************************
 When something goes wrong
 ****************************************************************/

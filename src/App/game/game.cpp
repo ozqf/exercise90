@@ -434,9 +434,9 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
     u32 totalRead = 0;
     while(ptrRead < commands->ptrEnd)
     {
-        BufferItemHeader h = {};
-        ptrRead += COM_COPY_STRUCT(ptrRead, &h, BufferItemHeader);
-        totalRead += (sizeof(BufferItemHeader) + h.size);
+        CmdHeader h = {};
+        ptrRead += COM_COPY_STRUCT(ptrRead, &h, CmdHeader);
+        totalRead += (sizeof(CmdHeader) + h.size);
         if (verbose)
         {
             printf("  GAME EXEC %d (%d bytes) Total read: %d. Remaining: %d\n",
@@ -464,8 +464,8 @@ ByteBuffer* g_currentOutput = NULL;
 
 // void Game_WriteCmd(u32 type, u32 size, void* ptr)
 // {
-//     BufferItemHeader h = { type, size };
-//     g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, BufferItemHeader);
+//     CmdHeader h = { type, size };
+//     g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, CmdHeader);
 //     g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
 //     //printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
 // }
@@ -568,7 +568,7 @@ void Game_Tick(
 #if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
     {
-        // BufferItemHeader header = {};
+        // CmdHeader header = {};
         // header.type = CMD_TYPE_SPAWN;
         // header.size = sizeof(Cmd_Spawn);
         Cmd_EntityState cmd = {};
@@ -580,7 +580,7 @@ void Game_Tick(
 
         App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
 
-        //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, BufferItemHeader);
+        //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, CmdHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
         //output->count++;
     }

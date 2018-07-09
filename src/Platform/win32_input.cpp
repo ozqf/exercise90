@@ -184,21 +184,21 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
 	}
 #endif
 
-    BufferItemHeader header = {};
+    PlatformEventHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;
     header.size = sizeof(InputEvent);
 
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
-    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
-    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-    Buf_WriteObject(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
 }
 
 u32 Win32_KeyCode_To_Input_Code(u32 vkCode)

@@ -2,6 +2,12 @@
 
 #include "../common/com_defines.h"
 
+struct PlatformEventHeader
+{
+    i32 type;
+    i32 size;
+};
+
 /*
 Requirements app has of platform interface:
 > Render Scene

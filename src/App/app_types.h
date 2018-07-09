@@ -48,11 +48,58 @@ enum ReplayMode
 	PlayingReplay
 };
 
+#define CMD_HEADER_SIZE 8
+
 struct CmdHeader
 {
 	u32 type;
 	u32 size;
+
+    //u32 data1;
+	//u32 data2;
+
+    u32 Read(u8* ptr)
+    {
+        return CMD_HEADER_SIZE;
+    }
+
+    u32 Write(u8* ptr)
+    {
+        return CMD_HEADER_SIZE;
+    }
 };
+
+u32 Cmd_WriteHeader(u8 type)
+{
+
+    return 0;
+}
+
+
+/**
+ * Write cmd boilerplate
+ * > ptrWrite will be incremented to the next
+ *   write position
+ * > Header must be written after the actual command
+ *   so that the header can record bytes written
+ * > Therefore header must have fixed size
+ * > Header and Command structs must have a
+ *   u32 Write(u8*) function, returning bytes writtten
+ */
+#define WRITE_CMD(ptrWrite, ptrHeader, ptrCmd) \
+ \
+u8* ptrOrigin = ptrWrite##; \
+ \
+ptrWrite += CMD_HEADER_SIZE; \
+ \
+i32 cmdBytesWritten = ptrCmd##.Write(##ptrWrite##); \
+ \
+ptrWrite += cmdBytesWritten; \
+ptrHeader##.size = cmdBytesWritten; \
+ptrHeader##.Write(ptrOrigin) 
+
+
+//////////////////////////////////////////////////////
 
 struct InputAction
 {
