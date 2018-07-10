@@ -2,7 +2,7 @@
 
 #include "app_module.cpp"
 
-void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
+void App_WriteGameCmd(u8* ptr, u8 type, u16 size)
 {
     CmdHeader h = { type, size };
     u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
@@ -12,7 +12,7 @@ void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
     g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);
     g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
-
+    
     if (g_time.singleFrame)
 	{
 		printf("APP Wrote type %d (%d size, %d actual) to buffer %s\n",
@@ -24,16 +24,7 @@ void App_WriteGameCmd(u8* ptr, u32 type, u32 size)
 	}
 }
 
-void App_CmdMacroTest()
-{
-    u8* ptr = 0;
-    CmdHeader h = {};
-    Cmd_EntityState cmd = {};
-
-    WRITE_CMD(ptr, h, cmd);
-}
-
-void App_SendToServer(u8* ptr, u32 type, u32 size)
+void App_SendToServer(u8* ptr, u8 type, u16 size)
 {
     App_WriteGameCmd(ptr, type, size);
 }

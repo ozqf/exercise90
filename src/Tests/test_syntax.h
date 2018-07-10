@@ -43,4 +43,9 @@ void Test_Syntax()
     int r = ptrF->AccessA();
     int r2 = ptrF->AccessB();
     printf("ptrFoo results: %d and %d\n", r, r2);
+    {
+        int i = 7;
+        int j = 6;
+        printf("Block entered: %d\n", (7 + 6));
+    }
 }

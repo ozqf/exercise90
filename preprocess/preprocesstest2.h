@@ -36,7 +36,16 @@ struct GameCmd
 };
 
 /**
- * Write cmd boilerplate
+ * Write to the current game output buffer
+ * Do thread safe cack here if necessary...?
+ */
+inline void App_WriteGameOuput(u8* ptr, u32 size)
+{
+    g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
+}
+
+/**
+ * Write cmd boilerplate macro
  * > ptrWrite will be left incremented to the next
  *   write position
  * > Header must be written after the actual command

@@ -52,18 +52,24 @@ enum ReplayMode
 
 struct CmdHeader
 {
-	u32 type;
-	u32 size;
+    u32 type;
+    //u16 flags;
+    u32 size;
+    /* 4 bytes?
+    u8 type;
+    u8 flags;
+	u16 size;
+    */
 
     //u32 data1;
 	//u32 data2;
 
-    u32 Read(u8* ptr)
+    inline u16 Read(u8* ptr)
     {
         return CMD_HEADER_SIZE;
     }
 
-    u32 Write(u8* ptr)
+    inline u16 Write(u8* ptr)
     {
         return CMD_HEADER_SIZE;
     }
@@ -86,18 +92,28 @@ u32 Cmd_WriteHeader(u8 type)
  * > Header and Command structs must have a
  *   u32 Write(u8*) function, returning bytes writtten
  */
-#define WRITE_CMD(ptrWrite, ptrHeader, ptrCmd) \
+#define APP_COPY_CMD(u8ptr2ptr_write, u8_cmdType, u8_cmdFlags, cmdObject) \
+{ \
+u8* ptrOrigin = *u8ptr2ptr_write##; \
  \
-u8* ptrOrigin = ptrWrite##; \
+*u8ptr2ptr_write += sizeof(CmdHeader); \
  \
-ptrWrite += CMD_HEADER_SIZE; \
+u16 cmdBytesWritten = cmdObject##.WriteRaw(*##u8ptr2ptr_write##); \
  \
-i32 cmdBytesWritten = ptrCmd##.Write(##ptrWrite##); \
- \
-ptrWrite += cmdBytesWritten; \
-ptrHeader##.size = cmdBytesWritten; \
-ptrHeader##.Write(ptrOrigin) 
+*u8ptr2ptr_write += cmdBytesWritten; \
+CmdHeader h = {}; \
+h.type = u8_cmdType; \
+h.size = cmdBytesWritten; \
+h.Write(ptrOrigin); \
+}
 
+/** function requirements:
+> local scope command struct var
+> macro
+> command header info
+> target buffer
+> 
+*/
 
 //////////////////////////////////////////////////////
 

@@ -54,6 +54,12 @@ struct Cmd_ServerImpulse
 {
     i32 clientId;
     i32 impulse;
+    
+    inline u16 WriteRaw(u8* ptr)
+    {
+        return 0;
+    }
+    
 };
 
 //////////////////////////////////////////////////
@@ -140,7 +146,12 @@ struct Cmd_EntityState
     // -- 84b so far --
     // packet of 1000b = 11 updates per packet
 
-    u32 Write(u8* ptr)
+    inline u32 WriteRaw(u8* ptr)
+    {
+        return 0;
+    }
+    
+    inline u32 ReadRaw(u8* ptr)
     {
         return 0;
     }

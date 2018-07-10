@@ -29,7 +29,7 @@ struct ActorInput;
 // App functions that game can access
 /////////////////////////////////////////////////////
 // cmd writing
-void App_WriteGameCmd(u8* ptr, u32 type, u32 size);
+void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
 char* App_GetBufferName(u8* bufferStartAddr);
 
 // Clients
@@ -64,7 +64,7 @@ i32 AppGetTextureIndexByName(char* textureName);
 // commands
 
 // Buffers
-void App_SendToServer(u8* ptr, u32 type, u32 size);
+void App_SendToServer(u8* ptr, u8 type, u16 size);
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens);
 void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf);
 u8 App_LoadStateFromFile(GameState *gs, char *fileName);
