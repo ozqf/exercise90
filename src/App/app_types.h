@@ -71,6 +71,7 @@ struct CmdHeader
 
     inline u16 Write(u8* ptr)
     {
+        COM_COPY(this, ptr, CMD_HEADER_SIZE);
         return CMD_HEADER_SIZE;
     }
 };
@@ -92,7 +93,8 @@ u32 Cmd_WriteHeader(u8 type)
  * > Header and Command structs must have a
  *   u32 Write(u8*) function, returning bytes writtten
  */
-#define APP_COPY_CMD(u8ptr2ptr_write, u8_cmdType, u8_cmdFlags, cmdObject) \
+#ifndef APP_WRITE_CMD_TO_BUFFER
+#define APP_WRITE_CMD_TO_BUFFER(u8ptr2ptr_write, u8_cmdType, u8_cmdFlags, cmdObject) \
 { \
 u8* ptrOrigin = *u8ptr2ptr_write##; \
  \
@@ -106,7 +108,22 @@ h.type = u8_cmdType; \
 h.size = cmdBytesWritten; \
 h.Write(ptrOrigin); \
 }
+#endif
 
+#ifndef APP_WRITE_CMD
+#define APP_WRITE_CMD(i32_bufferId, u8_cmdType, u8_cmdFlags, cmdObject) \
+{ \
+	GameTime* ptrGameTime = GetAppTime(); \
+	if (ptrGameTime->singleFrame)\
+	{\
+		char* label = App_GetBufferName(g_appWriteBuffer->ptrStart); \
+		printf("Writing type %d to %s\n", u8_cmdType, label);\
+	}\
+\
+    u8** ptrToWritePtr = &g_appWriteBuffer->ptrWrite; \
+    APP_WRITE_CMD_TO_BUFFER(ptrToWritePtr, u8_cmdType, u8_cmdFlags, cmdObject) \
+}
+#endif
 /** function requirements:
 > local scope command struct var
 > macro

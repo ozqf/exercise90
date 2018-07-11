@@ -317,7 +317,8 @@ u8 App_StartSinglePlayer(char* path)
     g_localClientId = -1;
     spawnClient.clientId = g_localClientId;
     spawnClient.state = CLIENT_STATE_OBSERVER;
-    App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+    //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
     return 1;
 }
 

@@ -29,8 +29,10 @@ struct ActorInput;
 // App functions that game can access
 /////////////////////////////////////////////////////
 // cmd writing
-void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
+//void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
 char* App_GetBufferName(u8* bufferStartAddr);
+
+GameTime* GetAppTime();
 
 // Clients
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);

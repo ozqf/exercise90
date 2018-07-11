@@ -73,7 +73,7 @@ void Game_InitGameState(GameState *gs)
 
 void Game_BuildTestHud(GameState *state)
 {
-#if 1
+	#if 1
     EntId entId;
     Ent* ent;
     EC_Renderer* renderer;
@@ -92,12 +92,12 @@ void Game_BuildTestHud(GameState *state)
     state->rendererList.max = UI_MAX_ENTITIES;
 
 	Ent_ResetEntityIds(ents);
-#endif
+	#endif
 
 /////////////////////////////////////////////////////////////
 // A test HUD
 /////////////////////////////////////////////////////////////
-#if 1
+	#if 1
     // Crosshair (sprite rendering a single char from a character sheet)
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
@@ -112,9 +112,9 @@ void Game_BuildTestHud(GameState *state)
     RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
     RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '+');
-#endif
+	#endif
 
-#if 0
+	#if 0
     // Crosshair - position test (sprite rendering a single char from a character sheet)
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
@@ -129,10 +129,10 @@ void Game_BuildTestHud(GameState *state)
     RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
     //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
     RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, 'X');
-#endif
+	#endif
 
     i32 numChars;
-#if 1
+	#if 1
     // Game Messages
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
@@ -161,9 +161,9 @@ void Game_BuildTestHud(GameState *state)
     //printf("Draw asci array:\n%s\n", chars);
     //obj->transform.pos.x = -1;//-0.75f;
     //obj->transform.pos.y = 1;//0.75f;
-#endif
+	#endif
 
-#if 1
+	#if 1
     // Player Status
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
@@ -190,9 +190,9 @@ void Game_BuildTestHud(GameState *state)
     );
     //obj->transform.pos.x = -1;//-0.75f;
     //obj->transform.pos.y = 1;//0.75f;
-#endif
+	#endif
 
-#if 0
+	#if 0
     /////////////////////////////////////////////////////////////
     // Walls mesh
     /////////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ void Game_BuildTestHud(GameState *state)
     renderer = EC_AddRenderer(ent, state);
     
     RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
-#endif
+	#endif
 }
 
 void Game_BuildTestMenu()
@@ -376,6 +376,11 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         #if 1
 		case CMD_TYPE_PLAYER_INPUT:
 		{
+			u32 sizeOfCmd = sizeof(Cmd_PlayerInput);
+			if (bytes != sizeOfCmd)
+			{
+				printf("Size of player command is %d not %d!\n", sizeOfCmd, bytes);
+			}
 			Assert(bytes == sizeof(Cmd_PlayerInput));
             Cmd_PlayerInput cmd;
             COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerInput);
@@ -458,17 +463,6 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         ptrRead += h.size;
     }
 }
-
-// Set at the start of a frame and released at the end
-ByteBuffer* g_currentOutput = NULL;
-
-// void Game_WriteCmd(u32 type, u32 size, void* ptr)
-// {
-//     CmdHeader h = { type, size };
-//     g_currentOutput->ptrWrite += COM_COPY_STRUCT(&h, g_currentOutput->ptrWrite, CmdHeader);
-//     g_currentOutput->ptrWrite += COM_COPY(ptr, g_currentOutput->ptrWrite, size);
-//     //printf("GAME Wrote cmd type %d. %d bytes\n", type, size);
-// }
 
 /////////////////////////////////////////////////////////////////////////////
 // STEP PHYSICS
@@ -558,14 +552,13 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
-    g_currentOutput = output;
     //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
     gs->verbose = (u8)time->singleFrame;
     if (time->singleFrame)
     {
         printf("GAME Frame %d\n", time->gameFrameNumber);
     }
-#if 1
+	#if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
     {
         // CmdHeader header = {};
@@ -578,14 +571,15 @@ void Game_Tick(
         printf("Spawn test: %d/%d\n", cmd.entityId.iteration, cmd.entityId.index);
         //cmd.pos.y += 10;
 
-        App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
+        //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
+        APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
 
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, CmdHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
         //output->count++;
     }
-#endif
-#if 0
+	#endif
+	#if 0
     if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
     {
         i32 shapeId = 10;
@@ -596,7 +590,7 @@ void Game_Tick(
 		f32 speed = 20;
 		Phys_ChangeVelocity(shapeId, speed * (-forward.x), speed * (-forward.y), speed * (-forward.z));
     }
-#endif
+	#endif
 
     //////////////////////////////////////////////////////////////////
     // Read Commands
@@ -632,7 +626,5 @@ void Game_Tick(
 		// raise camera to eye height
         gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
     }
-    // Clear output buffer to NULL. This frame has finished as far as the game is concerned
-    g_currentOutput = NULL;
-    // Ent* ent = Ent_GetEntityById(&gs->entList, )
+    
 }

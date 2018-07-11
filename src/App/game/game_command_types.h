@@ -33,6 +33,22 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define ENTITY_TYPE_PROJECTILE 4
 #define ENTITY_TYPES_COUNT 5
 
+// Define placeholder raw read/write functions for commands.
+#ifndef GAME_CMD_DEFAULT_INTERFACE
+#define GAME_CMD_DEFAULT_INTERFACE(structType)\
+\
+inline u16 WriteRaw(u8* ptr)\
+{\
+    u32 structSize = sizeof(structType); \
+    return (u16)COM_COPY(this, ptr, structSize);\
+}\
+\
+inline u16 ReadRaw(u8* ptr)\
+{\
+    return (u16)COM_COPY(ptr, this, sizeof(structType));\
+}
+#endif
+
 // 100
 struct Cmd_Spawn
 {
@@ -42,6 +58,8 @@ struct Cmd_Spawn
     Vec3 rot;
     Vec3 size;
     u32 flags;
+	
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_Spawn)
 };
 
 //////////////////////////////////////////////////
@@ -55,10 +73,12 @@ struct Cmd_ServerImpulse
     i32 clientId;
     i32 impulse;
     
-    inline u16 WriteRaw(u8* ptr)
-    {
-        return 0;
-    }
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_ServerImpulse)
+    // inline u16 WriteRaw(u8* ptr)
+    // {
+    //     printf("Copying Impulse cmd\n");
+    //     return (u16)COM_COPY()
+    // }
     
 };
 
@@ -75,6 +95,8 @@ struct Cmd_PlayerInput
     i32 playerId;
     i32 state;
     ActorInput input;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerInput)
 };
 #endif
 //////////////////////////////////////////////////
@@ -90,6 +112,8 @@ struct Cmd_ClientUpdate
     EntId entId;
     ActorInput input;
     //i32 playerId;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_ClientUpdate)
 };
 
 // 104
@@ -146,15 +170,7 @@ struct Cmd_EntityState
     // -- 84b so far --
     // packet of 1000b = 11 updates per packet
 
-    inline u32 WriteRaw(u8* ptr)
-    {
-        return 0;
-    }
-    
-    inline u32 ReadRaw(u8* ptr)
-    {
-        return 0;
-    }
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_EntityState)
 };
 
 // 106
@@ -162,6 +178,8 @@ struct Cmd_RemoveEntity
 {
     EntId entId;
     i32 gfxNormal;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_RemoveEntity)
 };
 
 // 107 - Entity delta contains a list of fields to update
@@ -181,6 +199,8 @@ struct Cmd_PlayerState
     i32 playerId;
     i32 state;
     EntId avatarId;
+	
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerState)
 };
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);

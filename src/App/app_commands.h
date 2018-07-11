@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app_module.cpp"
-
+#if 0
 void App_WriteGameCmd(u8* ptr, u8 type, u16 size)
 {
     CmdHeader h = { type, size };
@@ -23,11 +23,12 @@ void App_WriteGameCmd(u8* ptr, u8 type, u16 size)
         );
 	}
 }
+#endif
 
-void App_SendToServer(u8* ptr, u8 type, u16 size)
-{
-    App_WriteGameCmd(ptr, type, size);
-}
+// void App_SendToServer(u8* ptr, u8 type, u16 size)
+// {
+//     App_WriteGameCmd(ptr, type, size);
+// }
 
 void App_DumpHeap()
 {
@@ -64,7 +65,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         cmd.clientId = g_localClientId;
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
-        App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
+        APP_WRITE_CMD(0, CMD_TYPE_IMPULSE, 0, cmd);
+        //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "SAVE"))

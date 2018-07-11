@@ -63,8 +63,11 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             printf("SV Write CMD %d\n", CMD_TYPE_ENTITY_STATE);
             printf("SV Write CMD %d\n", CMD_TYPE_CLIENT_UPDATE);
 
-            App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-            App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+            //App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
+            //App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+
+            APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, spawn);
+            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
 
             // Exec_Spawn(gs, &spawn);
             // Exec_UpdateClient(&clUpdate);

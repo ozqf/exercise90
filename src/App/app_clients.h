@@ -49,7 +49,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
                 cmd.impulse = IMPULSE_JOIN_GAME;
 
                 printf("APP: Client %d wishes to spawn\n", cl->clientId);
-                APP_COPY_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_IMPULSE, 0, cmd);
+                APP_WRITE_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_IMPULSE, 0, cmd);
                 //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
             #endif
@@ -68,7 +68,8 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             cmd.state = CLIENT_STATE_PLAYING;
 			cmd.clientId = cl->clientId;
             cmd.input = cl->input;
-            App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
+            APP_WRITE_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_PLAYER_INPUT, 0, cmd);
+            //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 
         case CLIENT_STATE_FREE:

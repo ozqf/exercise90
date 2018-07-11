@@ -58,46 +58,9 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
             cmd.entityId.index
         );
     }
-    App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-#if 0
-    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    EntId id = Ent_ReserveFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &id);
-    
-    //M4x4_SetToIdentity(ent->transform.matrix.cells);
-    //ent->transform.matrix.wAxis = originT->matrix.wAxis;
+    APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
+    //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
 
-    // Copy position and rotation
-    ent->transform.pos.x = x;
-    ent->transform.pos.y = y;
-    ent->transform.pos.z = z;
-    //Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
-    Transform_RotateY(&ent->transform, yawDegrees * DEG2RAD);
-    Transform_RotateX(&ent->transform, pitchDegrees * DEG2RAD);
-    
-    EC_Renderer* rend = EC_AddRenderer(gs, ent);
-    //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
-    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\BAL1A0.bmp"));
-    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
-
-    //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
-
-    EC_Projectile* prj = EC_AddProjectile(gs, ent);
-    prj->tock = 4.0f;
-    prj->tick = prj->tock;
-    
-    prj->move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
-    prj->move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
-    prj->move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
-    // move projectile forward a little
-    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
-    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
-    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
-    
-    prj->tick = 1.0f;
-    prj->tock = 1.0f;
-#endif
 }
 
 void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
@@ -249,7 +212,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 	Vec4 left = {};
 	Vec4 up = {};
 	Vec4 forward = {};
-#if 1
+    #if 1
     forward.x = sinf(radiansForward);
 	forward.y = 0;
 	forward.z = cosf(radiansForward);
@@ -267,7 +230,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     motor->debugCurrentSpeed = Vec3_Magnitude(&move);
 
     //move = moveForce;
-#endif
+    #endif
 
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 

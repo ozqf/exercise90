@@ -354,10 +354,22 @@ void App_Frame(GameTime *time)
 		u32 bytesWritten = g_appWriteBuffer->ptrWrite - g_appWriteBuffer->ptrStart;
 		printf("APP frame end. Read %d bytes, wrote %d bytes\n", bytesRead, bytesWritten);
 	}
-    // End of Frame. Swap Command Buffers.
+	///////////////////////////
+    // End of Frame.
+	///////////////////////////
+	
+	// Mark end of write buffer ready for reading next frame
+	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
+	if (time->singleFrame)
+	{
+		printf("Marked end of write buffer, %d bytes\n", (g_appWriteBuffer->ptrEnd - g_appWriteBuffer->ptrStart));
+	}
+	
+	//Swap Command Buffers.
     ByteBuffer* temp = g_appReadBuffer;
     g_appReadBuffer = g_appWriteBuffer;
     g_appWriteBuffer = temp;
+	
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
