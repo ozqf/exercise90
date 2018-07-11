@@ -48,13 +48,25 @@ enum ReplayMode
 	PlayingReplay
 };
 
-#define CMD_HEADER_SIZE 8
-
+/**
+ * Game Command Header
+ * 
+ * !Do not access members directly, use attached functions!
+ * 
+ * Notes;
+ * > Describes the type of command and the number of bytes used to store it
+ * > data is accessed via getter/setter to allow struct internals to be changed
+ *      more easily
+ * > Storing size allows free stepping through command buffers without knowledge of
+ *      commands themselves.
+ * > In future will store some bit flags for meta data about the command itself
+ *      (eg how it is encoded)
+ */
 struct CmdHeader
 {
-    u32 type;
+    u32 data1;
     //u16 flags;
-    u32 size;
+    u32 data2;
     /* 4 bytes?
     u8 type;
     u8 flags;
@@ -63,19 +75,22 @@ struct CmdHeader
 
     //u32 data1;
 	//u32 data2;
-    inline u8 GetType() { return (u8)type; }
-    inline u16 GetSize() { return (u16)size; }
+    
+    inline u8 GetType() { return (u8)data1; }
+    inline void SetType(u8 newType) { this->data1 = newType; }
+    inline u16 GetSize() { return (u16)data2; }
+    inline void SetSize(u16 newSize) { this->data2 = newSize; }
 
     inline u16 Read(u8* ptr)
     {
-        COM_COPY(ptr, this, CMD_HEADER_SIZE);
-        return CMD_HEADER_SIZE;
+        COM_COPY(ptr, this, sizeof(CmdHeader));
+        return sizeof(CmdHeader);
     }
 
     inline u16 Write(u8* ptr)
     {
-        COM_COPY(this, ptr, CMD_HEADER_SIZE);
-        return CMD_HEADER_SIZE;
+        COM_COPY(this, ptr, sizeof(CmdHeader));
+        return sizeof(CmdHeader);
     }
 };
 
@@ -107,8 +122,8 @@ u16 cmdBytesWritten = cmdObject##.WriteRaw(*##u8ptr2ptr_write##); \
  \
 *u8ptr2ptr_write += cmdBytesWritten; \
 CmdHeader newCmdHeader = {}; \
-newCmdHeader.type = u8_cmdType; \
-newCmdHeader.size = cmdBytesWritten; \
+newCmdHeader.SetType(##u8_cmdType##); \
+newCmdHeader.SetSize(cmdBytesWritten); \
 newCmdHeader.Write(ptrOrigin); \
 }
 #endif

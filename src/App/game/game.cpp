@@ -321,7 +321,7 @@ void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 
 u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 {
-    switch (header->type)
+    switch (header->GetType())
     {
         case CMD_TYPE_ENTITY_STATE:
         {
@@ -429,18 +429,18 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
     {
         CmdHeader h = {};
         ptrRead += h.Read(ptrRead);
-        totalRead += (sizeof(CmdHeader) + h.size);
+        totalRead += (sizeof(CmdHeader) + h.GetSize());
         if (verbose)
         {
             printf("  GAME EXEC %d (%d bytes) Total read: %d. Remaining: %d\n",
-                h.type,
-                h.size,
+                h.GetType(),
+                h.GetSize(),
                 totalRead,
-                (u32)(commands->ptrEnd - (ptrRead + h.size))
+                (u32)(commands->ptrEnd - (ptrRead + h.GetSize()))
             );
         }
         
-        if (h.type == NULL)
+        if (h.GetType() == NULL)
         {
             ptrRead = commands->ptrEnd;
         }
@@ -448,7 +448,7 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         {
             Game_ReadCmd(gs, &h, ptrRead);
         }
-        ptrRead += h.size;
+        ptrRead += h.GetSize();
     }
 }
 

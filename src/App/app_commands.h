@@ -312,15 +312,15 @@ void App_ReadCommandBuffer(ByteBuffer* commands)
         CmdHeader header = {};
         ptrRead += COM_COPY_STRUCT(ptrRead, &header, CmdHeader);
 
-        if (header.type == NULL)
+        if (header.GetType() == NULL)
         {
             // 0 == end here now
             ptrRead = commands->ptrEnd;
         }
         else
         {
-            App_ReadCommand(header.type, header.size, ptrRead);
-            ptrRead += header.size;
+            App_ReadCommand(header.GetType(), header.GetSize(), ptrRead);
+            ptrRead += header.GetSize();
         }
     }
 }

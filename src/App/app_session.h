@@ -46,8 +46,6 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         {
             Cmd_Spawn s = {};
             Game_WriteStaticState(gs, e, &s);
-            cmdHeader.type = CMD_TYPE_STATIC_STATE;
-            cmdHeader.size = sizeof(Cmd_Spawn);
             APP_WRITE_CMD(0, CMD_TYPE_STATIC_STATE, 0, s);
             printf("Writing static Ent %d/%d ent type %d\n",
                 s.entityId.iteration,
@@ -59,8 +57,6 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         {
             Cmd_EntityState s = {};
             Game_WriteEntityState(gs, e, &s);
-            cmdHeader.type = CMD_TYPE_ENTITY_STATE;
-            cmdHeader.size = sizeof(Cmd_EntityState);
             APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, s);
             printf("Writing dynamic %d/%d ent type %d\n",
                 s.entityId.iteration,
@@ -88,12 +84,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         // ? cmd.isLocal = cl->isLocal;
         cmd.input = cl->input;
 
-        CmdHeader cmdH = {};
-        cmdH.type = CMD_TYPE_CLIENT_UPDATE;
-        cmdH.size = sizeof(Cmd_ClientUpdate);
-        buf->ptrWrite += COM_COPY_STRUCT(&cmdH, buf->ptrWrite, CmdHeader);
-        buf->ptrWrite += COM_COPY_STRUCT(&cmd, buf->ptrWrite, Cmd_ClientUpdate);
-
+        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
         h.dynamicCommands.count++;
     }
 
