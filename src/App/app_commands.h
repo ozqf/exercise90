@@ -300,35 +300,6 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
             Input_TestForAction(&g_inputActions, ev.value, ev.inputID, g_time.platformFrameNumber);
         }
         break;
-#if 0
-        case CMD_TYPE_CLIENT_UPDATE:
-        {
-            Assert(bytes == sizeof(Cmd_ClientUpdate));
-            Cmd_ClientUpdate cmd = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, Cmd_ClientUpdate);
-            Exec_UpdateClient(&cmd);
-        } break;
-#endif
-        default:
-		{
-            #if 0
-			// Pass event down, if event is not handled
-            if (Game_ReadCmd(&g_gameState, type, ptrRead, bytes))
-            {
-                ptrRead += bytes;
-            }
-            else
-            {
-                // buffer may be corrupted. All stop
-                char buf[512];
-                sprintf_s(buf, 512, "App: Unrecognised command type: %d\n", type);
-                printf("%s\n", buf);
-                platform.Platform_Error(buf, "APP");
-                Assert(false);
-            }
-            #endif
-        }
-        break;
     }
 }
 

@@ -43,8 +43,13 @@ inline u16 WriteRaw(u8* ptr)\
     return (u16)COM_COPY(this, ptr, structSize);\
 }\
 \
-inline u16 ReadRaw(u8* ptr)\
+inline u16 Read(CmdHeader* h, u8* ptr)\
 {\
+    if (h->GetSize() != sizeof(structType))\
+    {\
+        printf("!GAME Read Raw size mismatch for cmd type %d\n", h->GetType());\
+        ILLEGAL_CODE_PATH \
+    } \
     return (u16)COM_COPY(ptr, this, sizeof(structType));\
 }
 #endif

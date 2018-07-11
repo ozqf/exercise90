@@ -63,9 +63,12 @@ struct CmdHeader
 
     //u32 data1;
 	//u32 data2;
+    inline u8 GetType() { return (u8)type; }
+    inline u16 GetSize() { return (u16)size; }
 
     inline u16 Read(u8* ptr)
     {
+        COM_COPY(ptr, this, CMD_HEADER_SIZE);
         return CMD_HEADER_SIZE;
     }
 
@@ -103,10 +106,10 @@ u8* ptrOrigin = *u8ptr2ptr_write##; \
 u16 cmdBytesWritten = cmdObject##.WriteRaw(*##u8ptr2ptr_write##); \
  \
 *u8ptr2ptr_write += cmdBytesWritten; \
-CmdHeader h = {}; \
-h.type = u8_cmdType; \
-h.size = cmdBytesWritten; \
-h.Write(ptrOrigin); \
+CmdHeader newCmdHeader = {}; \
+newCmdHeader.type = u8_cmdType; \
+newCmdHeader.size = cmdBytesWritten; \
+newCmdHeader.Write(ptrOrigin); \
 }
 #endif
 

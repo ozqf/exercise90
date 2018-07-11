@@ -48,8 +48,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
             Game_WriteStaticState(gs, e, &s);
             cmdHeader.type = CMD_TYPE_STATIC_STATE;
             cmdHeader.size = sizeof(Cmd_Spawn);
-            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, CmdHeader);
-            buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_Spawn);
+            APP_WRITE_CMD(0, CMD_TYPE_STATIC_STATE, 0, s);
             printf("Writing static Ent %d/%d ent type %d\n",
                 s.entityId.iteration,
                 s.entityId.index,
@@ -62,8 +61,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
             Game_WriteEntityState(gs, e, &s);
             cmdHeader.type = CMD_TYPE_ENTITY_STATE;
             cmdHeader.size = sizeof(Cmd_EntityState);
-            buf->ptrWrite += COM_COPY_STRUCT(&cmdHeader, buf->ptrWrite, CmdHeader);
-            buf->ptrWrite += COM_COPY_STRUCT(&s, buf->ptrWrite, Cmd_EntityState);
+            APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, s);
             printf("Writing dynamic %d/%d ent type %d\n",
                 s.entityId.iteration,
                 s.entityId.index,

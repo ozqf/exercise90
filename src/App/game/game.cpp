@@ -319,15 +319,14 @@ void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 
 }
 
-u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
+u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 {
-    switch (type)
+    switch (header->type)
     {
         case CMD_TYPE_ENTITY_STATE:
         {
             Cmd_EntityState cmd = {};
-            Assert(bytes == sizeof(Cmd_EntityState));
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_EntityState);
+            ptr += cmd.Read(header, ptr);
             if (gs->verbose)
             {
                 printf("EXEC spawn dynamic ent %d/%d type %d\n",
@@ -341,11 +340,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         case CMD_TYPE_STATIC_STATE:
         {
             Cmd_Spawn cmd = {};
-			// If size doesn't match, something is terribly wrong.
-			// > Possibly reading an old command file that has out-of-sync struct layouts
-			// > Or read pointer got mangled
-            Assert(bytes == sizeof(Cmd_Spawn));
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_Spawn);
+            ptr += cmd.Read(header, ptr);
             Exec_StaticEntityState(gs, &cmd);
             return 1;
         } break;
@@ -353,8 +348,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         case CMD_TYPE_REMOVE_ENT:
         {
             Cmd_RemoveEntity cmd = {};
-            Assert(bytes == sizeof(Cmd_RemoveEntity));
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_RemoveEntity);
+            ptr += cmd.Read(header, ptr);
             if (g_verbose)
             {
                 printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
@@ -376,14 +370,8 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         #if 1
 		case CMD_TYPE_PLAYER_INPUT:
 		{
-			u32 sizeOfCmd = sizeof(Cmd_PlayerInput);
-			if (bytes != sizeOfCmd)
-			{
-				printf("Size of player command is %d not %d!\n", sizeOfCmd, bytes);
-			}
-			Assert(bytes == sizeof(Cmd_PlayerInput));
             Cmd_PlayerInput cmd;
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerInput);
+            ptr += cmd.Read(header, ptr);
             Client* cl = App_FindClientById(cmd.clientId, &gs->clientList);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
@@ -403,7 +391,7 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
             //
             Cmd_PlayerState cmd = {};
 
-            Assert(bytes == sizeof(Cmd_PlayerState));
+            Assert(header->size == sizeof(Cmd_PlayerState));
             COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerState);
             Exec_PlayerState(gs, &cmd);
             return 1;
@@ -411,15 +399,15 @@ u8 Game_ReadCmd(GameState* gs, u32 type, u8* ptr, u32 bytes)
         #endif
         case CMD_TYPE_IMPULSE:
         {
-            Assert(bytes == sizeof(Cmd_ServerImpulse));
-			return SV_ReadImpulse(gs, (Cmd_ServerImpulse*)ptr);
+            Cmd_ServerImpulse cmd = {};
+            ptr += cmd.Read(header, ptr);
+			return SV_ReadImpulse(gs, &cmd);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
-            Assert(bytes == sizeof(Cmd_ClientUpdate));
             Cmd_ClientUpdate cmd = {};
-            ptr += COM_COPY_STRUCT(ptr, &cmd, Cmd_ClientUpdate);
+            ptr += cmd.Read(header, ptr);
             Exec_UpdateClient(gs, &cmd);
             return 1;
         } break;
@@ -440,7 +428,7 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
     while(ptrRead < commands->ptrEnd)
     {
         CmdHeader h = {};
-        ptrRead += COM_COPY_STRUCT(ptrRead, &h, CmdHeader);
+        ptrRead += h.Read(ptrRead);
         totalRead += (sizeof(CmdHeader) + h.size);
         if (verbose)
         {
@@ -458,7 +446,7 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         }
         else
         {
-            Game_ReadCmd(gs, h.type, ptrRead, h.size);
+            Game_ReadCmd(gs, &h, ptrRead);
         }
         ptrRead += h.size;
     }
