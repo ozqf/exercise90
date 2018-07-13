@@ -6,6 +6,7 @@
 #include "com_module.h"
 
 #include "com_types.cpp"
+#include "com_command_types.h"
 #include "com_maths.cpp"
 #include "com_transform.cpp"
 #include "com_memory_utils.cpp"

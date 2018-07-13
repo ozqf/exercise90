@@ -24,6 +24,7 @@
 #include "test_tokenise.h"
 #include "test_bitpacking.h"
 #include "test_syntax.h"
+#include "test_patch_state_file.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
@@ -38,8 +39,9 @@ int main(i32 argc, char* argv[])
 	//Test_MultiThreading();
 	//Test_Tokenise();
     //Test_StateSaving();
-    Test_Syntax();
+    //Test_Syntax();
     Test_Bitpacking();
+    Test_PatchStateFile();
 #endif
 
 #if 0

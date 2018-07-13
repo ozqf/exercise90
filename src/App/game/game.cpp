@@ -411,13 +411,13 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             Exec_UpdateClient(gs, &cmd);
             return 1;
         } break;
-
     }
     return 0;
 }
 
-void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
+i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
 {
+    i32 numExecuted = 0;
     u8* ptrRead = commands->ptrStart;
     if (verbose)
     {
@@ -446,10 +446,16 @@ void Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         }
         else
         {
-            Game_ReadCmd(gs, &h, ptrRead);
+            if (Game_ReadCmd(gs, &h, ptrRead) == 0)
+            {
+                printf("!GAME:  Unknown command type %d...\n", h.GetType());
+                ILLEGAL_CODE_PATH
+            }
+            numExecuted++;
         }
         ptrRead += h.GetSize();
     }
+    return numExecuted;
 }
 
 /////////////////////////////////////////////////////////////////////////////

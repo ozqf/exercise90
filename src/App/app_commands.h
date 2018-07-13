@@ -248,8 +248,9 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     
 	if (sub.capacity != 0) {
-		printf("APP Reading static command (%d bytes)\n", sub.capacity);
-		Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+		printf("APP Reading static commands (%d bytes)\n", sub.capacity);
+		i32 count = Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+        printf("  Executed %d commands\n", count);
 	}
 	else
 	{
@@ -264,7 +265,8 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
 	if (sub.capacity > 0)
 	{
 		printf("APP Reading dynamic commands (%d bytes)\n", sub.capacity);
-		Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+		i32 count = Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+        printf("  Executed %d commands\n", count);
 	}
 	else
 	{

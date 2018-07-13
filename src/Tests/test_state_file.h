@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../common/com_module.h"
-
+/*
 struct FileSegment
 {
 	u32 offset = 0;
@@ -31,7 +31,7 @@ struct CmdHeader
 	u32 type;
 	u32 size;
 };
-
+*/
 #define CMD_TYPE_SPAWN 100
 //#define CMD_TYPE_SPAWN_WORLD_CUBE 101
 
@@ -99,8 +99,8 @@ struct Cmd_RemoveEntity
 
 struct CommandDescription
 {
-	i32 type;
-	i32 size;
+	u8 type;
+	u16 size;
 	char label[32];
 };
 #if 0
@@ -114,7 +114,7 @@ CommandDescription g_descriptions[32];
 i32 g_numDescriptions = 0;
 #endif
 
-void Test_InitCmdDescription(CommandDescription* cmd, i32 type, i32 size, char* label)
+void Test_InitCmdDescription(CommandDescription* cmd, u8 type, u16 size, char* label)
 {
 	cmd->type = type;
 	cmd->size = size;
@@ -155,11 +155,11 @@ inline void FileSeg_Add(FileSegment* f, u32 fileSize)
 	f->size += fileSize;
 };
 
-inline void WriteCommandHeader(FILE* f, u32 type, u32 size)
+inline void WriteCommandHeader(FILE* f, u8 type, u16 size)
 {
 	CmdHeader h;
-	h.type = type;
-	h.size = size;
+	h.SetType(type);
+	h.SetSize(size);
 	fwrite(&h, sizeof(CmdHeader), 1, f);
 }
 
@@ -368,7 +368,7 @@ u8 Test_ReadState(char* fileName, u8 staticCommandsOnly)
 	{
 		CmdHeader cheader = {};
 		fread(&cheader, sizeof(CmdHeader), 1, f);
-		switch (cheader.type)
+		switch (cheader.GetType())
 		{
 		case CMD_TYPE_SPAWN:
 		{
@@ -383,9 +383,9 @@ u8 Test_ReadState(char* fileName, u8 staticCommandsOnly)
 
 		default:
 		{
-			printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.type, cheader.size);
-			Assert(cheader.size > 0);
-			fseek(f, ftell(f) + cheader.size, SEEK_SET);
+			printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.GetType(), cheader.GetSize());
+			Assert(cheader.GetSize() > 0);
+			fseek(f, ftell(f) + cheader.GetSize(), SEEK_SET);
 		}
 		}
 	}
@@ -403,7 +403,7 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 		CmdHeader cheader = {};
 		//fread(&cheader, sizeof(CmdHeader), 1, f);
 		read += COM_COPY_STRUCT(read, &cheader, CmdHeader);
-		switch (cheader.type)
+		switch (cheader.GetType())
 		{
 			case CMD_TYPE_SPAWN:
 			{
@@ -419,9 +419,9 @@ void Test_ReadCommandBuffer(ByteBuffer* bytes)
 
 			default:
 			{
-				printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.type, cheader.size);
-				Assert(cheader.size > 0);
-				read += cheader.size;
+				printf("Unknown cmd type %d. Skipping %d bytes\n", cheader.GetType(), cheader.GetSize());
+				Assert(cheader.GetSize() > 0);
+				read += cheader.GetSize();
 			}
 		}
 	}
@@ -527,15 +527,15 @@ void Test_PrintStateFileScan(char* filePath)
 		printf("* Scanning static commands\n");
 		u32 origin = h.staticCommands.offset;
 		fseek(f, origin, SEEK_SET);
-		u32 read = 0;
+		i32 read = 0;
 		i32 cmdCount = 0;
 		while (read < h.staticCommands.size)
 		{
 			CmdHeader cmdH = {};
 			fread(&cmdH, sizeof(CmdHeader), 1, f);
 			read += sizeof(CmdHeader);
-			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.type, cmdH.size);
-			read += cmdH.size;
+			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
+			read += cmdH.GetSize();
 			cmdCount++;
 			fseek(f, origin + read, SEEK_SET);
 		}
@@ -551,24 +551,24 @@ void Test_PrintStateFileScan(char* filePath)
 		printf("* Scanning dynamic commands\n");
 		u32 origin = h.dynamicCommands.offset;
 		fseek(f, origin, SEEK_SET);
-		u32 read = 0;
+		i32 read = 0;
 		u32 cmdCount = 0;
 		while (read < h.dynamicCommands.size)
 		{
 			CmdHeader cmdH = {};
 			fread(&cmdH, sizeof(CmdHeader), 1, f);
 			read += sizeof(CmdHeader);
-			CommandDescription* def = Test_GetCmdDescription(cmdH.type);
+			CommandDescription* def = Test_GetCmdDescription(cmdH.GetType());
 			if (def != NULL)
 			{
 				printf("  %s (%d)\n", def->label, def->size);
 			}
 			else
 			{
-				printf("  CMD %d: type %d (UNKNOWN!) size %d\n", cmdCount, cmdH.type, cmdH.size);
+				printf("  CMD %d: type %d (UNKNOWN!) size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
 			}
 			
-			read += cmdH.size;
+			read += cmdH.GetSize();
 			cmdCount++;
 			fseek(f, origin + read, SEEK_SET);
 		}
@@ -658,14 +658,14 @@ void Test_PrintStateFileScan(char* filePath)
 				//printf(" framePosition += %d\n", sizeof(CmdHeader));
 
 				numCommands++;
-				//printf("CMD type %d size %d, ", cmd.type, cmd.size);
-				if (cmd.size > 0){
-					fread(cmdMem.ptrMemory, cmd.size, 1, f);
-					Test_PrintCommandDetails(cmd.type, cmd.size, (u8*)cmdMem.ptrMemory);
-					//position += cmd.size;
-					framePosition += cmd.size;
+				//printf("CMD type %d size %d, ", cmd.GetType(), cmd.size);
+				if (cmd.GetSize() > 0){
+					fread(cmdMem.ptrMemory, cmd.GetSize(), 1, f);
+					Test_PrintCommandDetails(cmd.GetType(), cmd.GetSize(), (u8*)cmdMem.ptrMemory);
+					//position += cmd.GetSize();
+					framePosition += cmd.GetSize();
 					//fseek(f, framePosition, SEEK_SET);
-					//printf(" framePosition += %d\n", cmd.size);
+					//printf(" framePosition += %d\n", cmd.GetSize());
 				}
 				overFlow++;
 				if (overFlow > 50)
@@ -796,7 +796,7 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("base\\DEMO2.DEM");
+	Test_PrintStateFileScan("base\\REPLAY.DEM");
 	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 
