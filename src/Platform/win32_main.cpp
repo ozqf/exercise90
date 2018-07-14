@@ -332,7 +332,7 @@ int CALLBACK WinMain(
     consoleHandle = GetConsoleWindow();
     MoveWindow(consoleHandle, 1, 1, 680, 480, 1);
     printf("[%s] Console initialized.\n", __FILE__);
-
+    
     //MessageBox(0, "Start breakpoint", "Started", MB_OK | MB_ICONINFORMATION);
     //DebugBreak();
 

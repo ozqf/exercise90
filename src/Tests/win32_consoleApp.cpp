@@ -25,13 +25,14 @@
 #include "test_bitpacking.h"
 #include "test_syntax.h"
 #include "test_patch_state_file.h"
+#include "utils_read_ini.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
 
-#if 1
+    #if 1
 	//HeapTest();
 	//Test_pak();
 	//Test_Pack();
@@ -41,11 +42,12 @@ int main(i32 argc, char* argv[])
     //Test_Syntax();
     //Test_Bitpacking();
 
-    Test_PatchStateFile();
-    Test_StateSaving();
-#endif
+    //Test_PatchStateFile();
+    //Test_StateSaving();
+    Test_ReadIniFile();
+    #endif
 
-#if 0
+    #if 0
     printf("\n--- Options ---\n");
     printf("1. Test Common Library\n");
     printf("2. Test Common Library\n");
@@ -85,7 +87,7 @@ int main(i32 argc, char* argv[])
             printf("That means jack to me...\n");
         } break;
     }
-#endif
+    #endif
     
     return 0;
 }

@@ -11,6 +11,7 @@
 #include "com_transform.cpp"
 #include "com_memory_utils.cpp"
 #include "com_parse.h"
+#include "com_variables.h"
 
 #include "com_render_types.cpp"
 #include "com_collision.cpp"

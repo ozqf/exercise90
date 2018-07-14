@@ -201,6 +201,60 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
     Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
 }
 
+u32 Win32_StringToVKCode(char* string)
+{
+    char str[64];
+    COM_ZeroMemory((u8*)str, 64);
+    COM_CopyStringLimited(string, str, 64);
+    COM_StrToUpperCase(str);
+    if (COM_CompareStrings(str, "A") == 0)                  return (u32)'A';
+    if (COM_CompareStrings(str, "B") == 0)                  return (u32)'B';
+    if (COM_CompareStrings(str, "C") == 0)                  return (u32)'C';
+    if (COM_CompareStrings(str, "D") == 0)                  return (u32)'D';
+    if (COM_CompareStrings(str, "E") == 0)                  return (u32)'E';
+    if (COM_CompareStrings(str, "F") == 0)                  return (u32)'F';
+    if (COM_CompareStrings(str, "G") == 0)                  return (u32)'G';
+    if (COM_CompareStrings(str, "H") == 0)                  return (u32)'H';
+    if (COM_CompareStrings(str, "I") == 0)                  return (u32)'I';
+    if (COM_CompareStrings(str, "J") == 0)                  return (u32)'J';
+    if (COM_CompareStrings(str, "K") == 0)                  return (u32)'K';
+    if (COM_CompareStrings(str, "L") == 0)                  return (u32)'L';
+    if (COM_CompareStrings(str, "M") == 0)                  return (u32)'M';
+    if (COM_CompareStrings(str, "N") == 0)                  return (u32)'N';
+    if (COM_CompareStrings(str, "O") == 0)                  return (u32)'O';
+    if (COM_CompareStrings(str, "P") == 0)                  return (u32)'P';
+    if (COM_CompareStrings(str, "Q") == 0)                  return (u32)'Q';
+    if (COM_CompareStrings(str, "R") == 0)                  return (u32)'R';
+    if (COM_CompareStrings(str, "S") == 0)                  return (u32)'S';
+    if (COM_CompareStrings(str, "T") == 0)                  return (u32)'T';
+    if (COM_CompareStrings(str, "U") == 0)                  return (u32)'U';
+    if (COM_CompareStrings(str, "V") == 0)                  return (u32)'V';
+    if (COM_CompareStrings(str, "W") == 0)                  return (u32)'W';
+    if (COM_CompareStrings(str, "X") == 0)                  return (u32)'X';
+    if (COM_CompareStrings(str, "Y") == 0)                  return (u32)'Y';
+    if (COM_CompareStrings(str, "Z") == 0)                  return (u32)'Z';
+    if (COM_CompareStrings(str, "0") == 0)                  return (u32)'0';
+    if (COM_CompareStrings(str, "1") == 0)                  return (u32)'1';
+    if (COM_CompareStrings(str, "2") == 0)                  return (u32)'2';
+    if (COM_CompareStrings(str, "3") == 0)                  return (u32)'3';
+    if (COM_CompareStrings(str, "4") == 0)                  return (u32)'4';
+    if (COM_CompareStrings(str, "5") == 0)                  return (u32)'5';
+    if (COM_CompareStrings(str, "6") == 0)                  return (u32)'6';
+    if (COM_CompareStrings(str, "7") == 0)                  return (u32)'7';
+    if (COM_CompareStrings(str, "8") == 0)                  return (u32)'8';
+    if (COM_CompareStrings(str, "9") == 0)                  return (u32)'9';
+    if (COM_CompareStrings(str, "ESCAPE") == 0)             return VK_ESCAPE;
+    if (COM_CompareStrings(str, "UP") == 0)                 return VK_UP;
+    if (COM_CompareStrings(str, "DOWN") == 0)               return VK_DOWN;
+    if (COM_CompareStrings(str, "LEFT") == 0)               return VK_LEFT;
+    if (COM_CompareStrings(str, "RIGHT") == 0)              return VK_RIGHT;
+    if (COM_CompareStrings(str, "SPACE") == 0)              return VK_SPACE;
+    if (COM_CompareStrings(str, "CONTROL") == 0)            return VK_CONTROL;
+    if (COM_CompareStrings(str, "SHIFT") == 0)              return VK_SHIFT;
+
+    return Z_INPUT_CODE_NULL;
+}
+
 u32 Win32_KeyCode_To_Input_Code(u32 vkCode)
 {
     if (vkCode == 'A')              return Z_INPUT_CODE_A;

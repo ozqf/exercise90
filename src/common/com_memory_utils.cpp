@@ -289,6 +289,34 @@ static inline i32 COM_StrReplace(char* str, char target, char replacement)
     return count;
 }
 
+static inline void COM_StrToUpperCase(char* str)
+{
+    // A to B == 65 to 90
+    // a to b == 97 to 122
+    while (*str)
+    {
+        if (*str >= (char)97 && *str <= (char)122)
+        {
+            *str -= 32;
+        }
+        str++;
+    }
+}
+
+static inline void COM_StrToLowerCase(char* str)
+{
+    // A to B == 65 to 90
+    // a to b == 97 to 122
+    while (*str)
+    {
+        if (*str >= (char)65 && *str <= (char)90)
+        {
+            *str += 32;
+        }
+        str++;
+    }
+}
+
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
