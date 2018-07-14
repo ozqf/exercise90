@@ -500,102 +500,23 @@ void Test_PrintCommandDetails(i32 type, i32 size, u8* ptr)
 
 }
 
-void Test_PrintStateFileScan(char* filePath)
+void Test_PrintReplayFramesFromFile(FILE* f, u32 fileSize, StateSaveHeader* h)
 {
-	printf("*** State Save File %s ***\n", filePath);
-	FILE* f;
-	fopen_s(&f, filePath, "rb");
-	if (f == NULL)
+	if (h->frames.size == 0)
 	{
-		printf("  File not found\n");
+		printf("* No replay data found\n");
 		return;
 	}
-	StateSaveHeader h = {};
-	u32 fileSize = GetFileSizeAndSeekToStart(f);
-	fread(&h, sizeof(StateSaveHeader), 1, f);
-	if (!IsHeaderValid(&h))
-	{
-		printf("  %s is not a State save file\n", filePath);
-		return;
-	}
-
-	printf("File is %d bytes\n", fileSize);
-
-	// Static Commands
-	if (h.staticCommands.size > 0)
-	{
-		printf("* Scanning static commands\n");
-		u32 origin = h.staticCommands.offset;
-		fseek(f, origin, SEEK_SET);
-		i32 read = 0;
-		i32 cmdCount = 0;
-		while (read < h.staticCommands.size)
-		{
-			CmdHeader cmdH = {};
-			fread(&cmdH, sizeof(CmdHeader), 1, f);
-			read += sizeof(CmdHeader);
-			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
-			read += cmdH.GetSize();
-			cmdCount++;
-			fseek(f, origin + read, SEEK_SET);
-		}
-	}
-	else
-	{
-		printf("* No static commands found\n");
-	}
-	
-	// Dynamic Commands
-	if (h.dynamicCommands.size > 0)
-	{
-		printf("* Scanning dynamic commands\n");
-		u32 origin = h.dynamicCommands.offset;
-		fseek(f, origin, SEEK_SET);
-		i32 read = 0;
-		u32 cmdCount = 0;
-		while (read < h.dynamicCommands.size)
-		{
-			CmdHeader cmdH = {};
-			fread(&cmdH, sizeof(CmdHeader), 1, f);
-			read += sizeof(CmdHeader);
-			CommandDescription* def = Test_GetCmdDescription(cmdH.GetType());
-			if (def != NULL)
-			{
-				printf("  %s (%d)\n", def->label, def->size);
-			}
-			else
-			{
-				printf("  CMD %d: type %d (UNKNOWN!) size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
-			}
-			
-			read += cmdH.GetSize();
-			cmdCount++;
-			fseek(f, origin + read, SEEK_SET);
-		}
-		if (!(cmdCount == h.dynamicCommands.count))
-		{
-			printf("*** CMD Count mismatch! Claimed: %d Actual: %d", h.dynamicCommands.count, cmdCount);
-		}
-	}
-	else
-	{
-		printf("* No dynamic commands found\n");
-	}
-	
-
-	//////////////////////////////////////////////////////////
-	// Read Replay data
-	//////////////////////////////////////////////////////////
 	i32 batchCount = 0;
 
 	i32 sizeOfReplayHeader = sizeof(ReplayFrameHeader);
-	i32 framesOffset = h.dynamicCommands.offset + h.dynamicCommands.size;
+	i32 framesOffset = h->dynamicCommands.offset + h->dynamicCommands.size;
 	i32 totalFramesData = fileSize - framesOffset;
 	u32 filePosition = framesOffset;
 	u32 numFrames = 0;
 	u32 numInterestingFrames = 0;
 
-#define CMD_READ_BUFFER_SIZE 512
+	#define CMD_READ_BUFFER_SIZE 512
 
 	MemoryBlock cmdMem = { NULL, CMD_READ_BUFFER_SIZE };
 	cmdMem.ptrMemory = malloc( cmdMem.size );
@@ -700,10 +621,102 @@ void Test_PrintStateFileScan(char* filePath)
 			}
 		}
 	}
+
+	
+	free(cmdMem.ptrMemory);
 	printf("  %d frames read, of which %d were interesting\n\n", numFrames, numInterestingFrames);
 
+}
+
+void Test_PrintStateFileScan(char* filePath)
+{
+	printf("*** State Save File %s ***\n", filePath);
+	FILE* f;
+	fopen_s(&f, filePath, "rb");
+	if (f == NULL)
+	{
+		printf("  File not found\n");
+		return;
+	}
+	StateSaveHeader h = {};
+	u32 fileSize = GetFileSizeAndSeekToStart(f);
+	fread(&h, sizeof(StateSaveHeader), 1, f);
+	if (!IsHeaderValid(&h))
+	{
+		printf("  %s is not a State save file\n", filePath);
+		return;
+	}
+
+	printf("File is %d bytes\n", fileSize);
+
+	// Static Commands
+	if (h.staticCommands.size > 0)
+	{
+		printf("* Scanning static commands\n");
+		u32 origin = h.staticCommands.offset;
+		fseek(f, origin, SEEK_SET);
+		i32 read = 0;
+		i32 cmdCount = 0;
+		while (read < h.staticCommands.size)
+		{
+			CmdHeader cmdH = {};
+			fread(&cmdH, sizeof(CmdHeader), 1, f);
+			read += sizeof(CmdHeader);
+			printf("  CMD %d: type %d size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
+			read += cmdH.GetSize();
+			cmdCount++;
+			fseek(f, origin + read, SEEK_SET);
+		}
+	}
+	else
+	{
+		printf("* No static commands found\n");
+	}
+	
+	// Dynamic Commands
+	if (h.dynamicCommands.size > 0)
+	{
+		printf("* Scanning dynamic commands\n");
+		u32 origin = h.dynamicCommands.offset;
+		fseek(f, origin, SEEK_SET);
+		i32 read = 0;
+		u32 cmdCount = 0;
+		while (read < h.dynamicCommands.size)
+		{
+			CmdHeader cmdH = {};
+			fread(&cmdH, sizeof(CmdHeader), 1, f);
+			read += sizeof(CmdHeader);
+			CommandDescription* def = Test_GetCmdDescription(cmdH.GetType());
+			if (def != NULL)
+			{
+				printf("  %s (%d)\n", def->label, def->size);
+			}
+			else
+			{
+				printf("  CMD %d: type %d (UNKNOWN!) size %d\n", cmdCount, cmdH.GetType(), cmdH.GetSize());
+			}
+			
+			read += cmdH.GetSize();
+			cmdCount++;
+			fseek(f, origin + read, SEEK_SET);
+		}
+		if (!(cmdCount == h.dynamicCommands.count))
+		{
+			printf("*** CMD Count mismatch! Claimed: %d Actual: %d", h.dynamicCommands.count, cmdCount);
+		}
+	}
+	else
+	{
+		printf("* No dynamic commands found\n");
+	}
+	
+
+	//////////////////////////////////////////////////////////
+	// Read Replay data
+	//////////////////////////////////////////////////////////
+	Test_PrintReplayFramesFromFile(f, fileSize, &h);
+
 	DebugStateHeader(&h);
-	free(cmdMem.ptrMemory);
 	fclose(f);
 }
 
@@ -796,7 +809,7 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("base\\REPLAY.DEM");
+	Test_PrintStateFileScan("base\\testbox_new.lvl");
 	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 

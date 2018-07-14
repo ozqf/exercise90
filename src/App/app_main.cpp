@@ -318,7 +318,7 @@ void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
 	// Increment internal platform frame number here!
 	g_time.platformFrameNumber = time->platformFrameNumber;
     
-    App_ReadCommandBuffer(&platformCommands);
+    App_ReadPlatformCommandBuffer(&platformCommands);
     
     // Local debugging. Not command related
     if (Input_CheckActionToggledOn(&g_inputActions, "Cycle Debug", time->platformFrameNumber))

@@ -290,7 +290,7 @@ u8 App_LoadStateFromFile(GameState *gs, char *fileName)
 /////////////////////////////////////////////////////
 // READ COMMANDS
 /////////////////////////////////////////////////////
-void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
+void App_ReadPlatformCommand(u32 type, u32 bytes, u8 *ptrRead)
 {
     switch (type)
     {
@@ -305,24 +305,24 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead)
     }
 }
 
-void App_ReadCommandBuffer(ByteBuffer* commands)
+void App_ReadPlatformCommandBuffer(ByteBuffer* commands)
 {
     u8 *ptrRead = commands->ptrStart;
     
     while (ptrRead < commands->ptrEnd) // && (numRead + numSkipped) < commands.count)
     {
-        CmdHeader header = {};
-        ptrRead += COM_COPY_STRUCT(ptrRead, &header, CmdHeader);
+        PlatformEventHeader header = {};
+        ptrRead += COM_COPY_STRUCT(ptrRead, &header, PlatformEventHeader);
 
-        if (header.GetType() == NULL)
+        if (header.type == NULL)
         {
             // 0 == end here now
             ptrRead = commands->ptrEnd;
         }
         else
         {
-            App_ReadCommand(header.GetType(), header.GetSize(), ptrRead);
-            ptrRead += header.GetSize();
+            App_ReadPlatformCommand(header.type, header.size, ptrRead);
+            ptrRead += header.size;
         }
     }
 }

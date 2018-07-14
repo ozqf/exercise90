@@ -25,17 +25,36 @@
  */
 struct CmdHeader
 {
-    u32 data1;
-    //u16 flags;
-    u32 data2;
-    /* 4 bytes?
     u8 type;
     u8 flags;
 	u16 size;
-    */
+    
+    inline u8 GetType() { return (u8)type; }
+    inline void SetType(u8 newType) { this->type = newType; }
+    inline u16 GetSize() { return (u16)size; }
+    inline void SetSize(u16 newSize) { this->size = newSize; }
 
-    //u32 data1;
-	//u32 data2;
+    
+    inline u16 Read(u8* ptr)
+    {
+        return (u16)COM_CopyMemory(ptr, (u8*)this, sizeof(CmdHeader));
+    }
+
+    inline u16 Write(u8* ptr)
+    {
+        return (u16)COM_CopyMemory((u8*)this, ptr, sizeof(CmdHeader));
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+// Don't use these except for patching old files!
+/////////////////////////////////////////////////////////////////////////
+
+// Old command headers, for reading old command buffers.
+struct CmdHeader_ProtocolZero
+{
+    u32 data1;
+    u32 data2;
     
     inline u8 GetType() { return (u8)data1; }
     inline void SetType(u8 newType) { this->data1 = newType; }
@@ -44,14 +63,12 @@ struct CmdHeader
 
     inline u16 Read(u8* ptr)
     {
-        COM_COPY(ptr, this, sizeof(CmdHeader));
-        return sizeof(CmdHeader);
+        return (u16)COM_CopyMemory(ptr, (u8*)this, sizeof(CmdHeader_ProtocolZero));
     }
 
     inline u16 Write(u8* ptr)
     {
-        COM_COPY(this, ptr, sizeof(CmdHeader));
-        return sizeof(CmdHeader);
+        return (u16)COM_CopyMemory((u8*)this, ptr, sizeof(CmdHeader_ProtocolZero));
     }
 };
 
@@ -109,8 +126,20 @@ struct FileSegment
 > Dynamic entities are skipped if this file is a 'base' file
 > Frames are written into replay demo files.
 */
-   
-struct StateSaveHeader
+
+#define StateSaveHeader StateSaveHeader_New
+
+// struct StateSaveHeader
+// {
+// 	char magic[4] = { 'S', 'A', 'V', 'E' };
+// 	char baseFile[32];
+    
+// 	FileSegment staticCommands;
+// 	FileSegment dynamicCommands;
+// 	FileSegment frames;
+// };
+
+struct StateSaveHeader_ProtocolZero
 {
 	char magic[4] = { 'S', 'A', 'V', 'E' };
 	char baseFile[32];
@@ -120,11 +149,11 @@ struct StateSaveHeader
 	FileSegment frames;
 };
 
-struct StateSaveHeader2
+struct StateSaveHeader_New
 {
 	char magic[4] = { 'S', 'A', 'V', 'E' };
     u32 protocol = COMMAND_PROTOCOL_ID;
-    u32 flags = 0;
+    u8 settings[4] = { 0, 0, 0, 0 };
 	char baseFile[32];
     
 	FileSegment staticCommands;

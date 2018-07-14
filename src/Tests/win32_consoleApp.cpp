@@ -38,10 +38,11 @@ int main(i32 argc, char* argv[])
 	//Test_ReadMesh();
 	//Test_MultiThreading();
 	//Test_Tokenise();
-    //Test_StateSaving();
     //Test_Syntax();
-    Test_Bitpacking();
+    //Test_Bitpacking();
+
     Test_PatchStateFile();
+    Test_StateSaving();
 #endif
 
 #if 0

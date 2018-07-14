@@ -428,7 +428,8 @@ i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
     while(ptrRead < commands->ptrEnd)
     {
         CmdHeader h = {};
-        ptrRead += h.Read(ptrRead);
+		i32 headerRead = h.Read(ptrRead);
+		ptrRead += headerRead;
         totalRead += (sizeof(CmdHeader) + h.GetSize());
         if (verbose)
         {
