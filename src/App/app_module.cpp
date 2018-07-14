@@ -44,8 +44,11 @@ Client* App_FindClientById(i32 id, ClientList* cls);
 Client* App_FindOrCreateClient(i32 id, ClientList* cls);
 void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 
-// assets
+// assets and data
 i32 AppGetTextureIndexByName(char* textureName);
+
+i32 App_GetVarAsI32(char* name);
+inline Var* App_GetVar(char* name);
 
 /////////////////////////////////////////////////////////
 // Game Layer

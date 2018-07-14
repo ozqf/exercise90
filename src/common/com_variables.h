@@ -37,6 +37,7 @@ inline void COM_SetVar(Var* source, Var* vars, i32* numVars, i32 maxVars)
 		Assert(*numVars < maxVars);
 		target = &vars[*numVars];
 		*numVars += 1;
+		printf("added var %s: %s\n", source->name, source->value);
 	}
 	*target = *source;
 }
@@ -47,6 +48,7 @@ inline void COM_SetVarByString(char* name, char* value, Var* vars, i32* numVars,
 	COM_CopyStringLimited(name, v.name, VAR_FIELD_LENGTH);
 	COM_CopyStringLimited(value, v.value, VAR_FIELD_LENGTH);
 	COM_SetVar(&v, vars, numVars, maxVars);
+
 }
 
 ///////////////////////////////////////////////////////////////

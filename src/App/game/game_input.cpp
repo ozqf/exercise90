@@ -7,20 +7,24 @@
 #define GAME_INPUT_ON_FOOT 2
 
 #define MOUSE_SENSITIVITY_MULTIPLIER 0.0025f
+#define MOUSE_SENSITIVITY_DEFAULT 50
 
-u8 g_i_inverted = 1;
-i32 g_i_sensitivity = 50;
+//u8 g_i_inverted = 1;
+//i32 g_i_sensitivity = 50;
 internal u8 GAME_INPUT_MODE = 2;
-internal i8 g_i_mouseInverted = -1;
+//internal i8 g_i_mouseInverted = -1;
 
-inline i32 Mouse_InvertedMultiplier()
+static i32 Mouse_InvertedMultiplier()
 {
-	if (g_i_inverted) { return -1; } else { return 1; }
+	i32 val = App_GetVarAsI32("i_inverted");
+	if (val == 0) { return 1; } else { return -1; }
 }
 
-inline f32 Mouse_MoveMultiplier()
+static f32 Mouse_MoveMultiplier()
 {
-	return (f32)g_i_sensitivity * MOUSE_SENSITIVITY_MULTIPLIER;
+	i32 sensitivity = App_GetVarAsI32("i_sensitivity");
+	if (sensitivity <= 0) { sensitivity = MOUSE_SENSITIVITY_DEFAULT; }
+	return (f32)sensitivity * MOUSE_SENSITIVITY_MULTIPLIER;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -125,7 +129,6 @@ void Game_ApplyInputFlyMode(InputActionSet* actions, Vec3* degrees, Transform* t
 	////////////////////////////////////////////////////////////////////////
 	// Rotation
 	////////////////////////////////////////////////////////////////////////
-	i8 inverted = -1;
 
 	f32 turnRate = 90;
 	f32 turnStep = turnRate * dt;
@@ -242,7 +245,6 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 	////////////////////////////////////////////////////////////////////////
 	// Rotation
 	////////////////////////////////////////////////////////////////////////
-	i8 inverted = -1;
 
 	f32 turnRate = 90;
 	f32 turnStep = turnRate * dt;
@@ -385,8 +387,6 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 
 
 	// Orientation
-	i8 inverted = -1;
-
 	
 	input->degrees.y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * Mouse_MoveMultiplier()));
 

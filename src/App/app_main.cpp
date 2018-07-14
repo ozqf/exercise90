@@ -23,9 +23,29 @@ void App_InitMenus()
     
 }
 
+inline Var* App_GetVar(char* name)
+{
+    return COM_GetVar(g_vars, g_nextVar, name);
+}
+
+i32 App_GetVarAsI32(char* name)
+{
+	i32 result = 0;
+    Var* v = App_GetVar(name);
+	if (v != NULL)
+	{
+		result = COM_AsciToInt32(v->value);
+	}
+    else
+    {
+        printf("No var %s\n", name);
+    }
+    return result;
+}
+
 void App_InitVars()
 {
-    COM_SetVarByString("i_sensitivity", "50", g_vars, &g_nextVar, MAX_VARS);
+    COM_SetVarByString("i_sensitivity", "40", g_vars, &g_nextVar, MAX_VARS);
     COM_SetVarByString("i_inverted", "1", g_vars, &g_nextVar, MAX_VARS);
 }
 
@@ -52,6 +72,8 @@ i32 App_Init()
     {
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
+    
+    App_InitVars();
 
     //AllocateDebugStrings(&g_heap);
     //AllocateTestStrings(&g_heap);
