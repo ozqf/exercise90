@@ -23,6 +23,12 @@ void App_InitMenus()
     
 }
 
+void App_InitVars()
+{
+    COM_SetVarByString("i_sensitivity", "50", g_vars, &g_nextVar, MAX_VARS);
+    COM_SetVarByString("i_inverted", "1", g_vars, &g_nextVar, MAX_VARS);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 ////////////////////////////////////////////////////////////////////////////

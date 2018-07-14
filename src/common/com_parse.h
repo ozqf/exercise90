@@ -61,3 +61,22 @@ inline i32 COM_ReadTokens(char* source, char* destination, char** tokens)
 
     return tokensCount;
 }
+
+
+inline char* COM_RunToNewLine(char* buffer)
+{
+    u8 reading = true;
+    while (reading)
+    {
+        if (*buffer == '\n' || *buffer == EOF)
+        {
+            reading = false;
+        }
+        else
+        {
+            ++buffer;
+        }
+    }
+    return buffer;
+}
+
