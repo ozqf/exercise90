@@ -62,6 +62,15 @@ char* App_GetBufferName(u8* bufferStartAddr)
     return g_unknown;
 }
 
+void App_DebugListVariables(Var* vars, i32 numVars, i32 maxVars)
+{
+    printf("*** Variables - %d of %d max ***\n", numVars, maxVars);
+    for (i32 i = 0; i < numVars; ++i)
+    {
+        printf("  %d: %s: %s\n", i, vars[i].name, vars[i].value);
+    }
+}
+
 void AllocateDebugStrings(Heap *heap)
 {
     // Buffer used for live stat output

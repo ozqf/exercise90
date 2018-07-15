@@ -45,8 +45,21 @@ i32 App_GetVarAsI32(char* name)
 
 void App_InitVars()
 {
-    COM_SetVarByString("i_sensitivity", "40", g_vars, &g_nextVar, MAX_VARS);
-    COM_SetVarByString("i_inverted", "1", g_vars, &g_nextVar, MAX_VARS);
+    COM_SetVarByString("i.sensitivity", "40", g_vars, &g_nextVar, MAX_VARS);
+    COM_SetVarByString("i.inverted", "1", g_vars, &g_nextVar, MAX_VARS);
+}
+
+void App_LoadDataVariables()
+{
+    BlockRef ref = {};
+    if (!platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "config.ini", 0))
+    {
+        printf(" Failed to open config ini\n");
+        return;
+    }
+    printf("  Reading config.ini\n");
+    COM_ReadVariablesBuffer((char*)ref.ptrMemory, ref.objectSize, g_vars, &g_nextVar, MAX_VARS);
+    Heap_Free(&g_heap, ref.id);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -74,6 +87,8 @@ i32 App_Init()
     }
     
     App_InitVars();
+    printf(" Num data vars: %d\n", g_nextVar);
+    App_LoadDataVariables();
 
     //AllocateDebugStrings(&g_heap);
     //AllocateTestStrings(&g_heap);

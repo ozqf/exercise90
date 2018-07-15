@@ -46,6 +46,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  I or IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
         printf("  ENTS - List entities\n");
+        printf("  VARS - list data variables\n");
         printf("  DEBUG - Cycle debug print outs\n");
         printf("  DEBUG COLLISION 0/1/2 - Debug collider volumes mode\n");
         printf("  TEXTURES - List App textures handles\n");
@@ -67,6 +68,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         APP_WRITE_CMD(0, CMD_TYPE_IMPULSE, 0, cmd);
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
+        return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "VARS"))
+    {
+        App_DebugListVariables(g_vars, g_nextVar, MAX_VARS);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "SAVE"))

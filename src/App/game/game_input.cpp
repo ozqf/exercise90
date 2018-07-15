@@ -16,13 +16,13 @@ internal u8 GAME_INPUT_MODE = 2;
 
 static i32 Mouse_InvertedMultiplier()
 {
-	i32 val = App_GetVarAsI32("i_inverted");
+	i32 val = App_GetVarAsI32("i.inverted");
 	if (val == 0) { return 1; } else { return -1; }
 }
 
 static f32 Mouse_MoveMultiplier()
 {
-	i32 sensitivity = App_GetVarAsI32("i_sensitivity");
+	i32 sensitivity = App_GetVarAsI32("i.sensitivity");
 	if (sensitivity <= 0) { sensitivity = MOUSE_SENSITIVITY_DEFAULT; }
 	return (f32)sensitivity * MOUSE_SENSITIVITY_MULTIPLIER;
 }

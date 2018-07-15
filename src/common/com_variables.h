@@ -34,10 +34,14 @@ inline void COM_SetVar(Var* source, Var* vars, i32* numVars, i32 maxVars)
 	Var* target = COM_GetVar(vars, *numVars, source->name);
 	if (target == NULL)
 	{
+		printf("Creating var %s as %s\n", source->name, source->value);
 		Assert(*numVars < maxVars);
 		target = &vars[*numVars];
 		*numVars += 1;
-		printf("added var %s: %s\n", source->name, source->value);
+	}
+	else
+	{
+		printf("Patching var %s to %s\n", source->name, source->value);
 	}
 	*target = *source;
 }
@@ -127,7 +131,11 @@ static char* COM_LookForVarInLine(char* buffer, VarSet* varSet)
 
 static void COM_ReadVariablesBuffer(char* buffer, u32 numBytes, VarSet* varSet)
 {
-    printf("Reading settings from %d bytes\n", numBytes);
+    printf("Reading data vars from %d bytes\nVars loaded: %d, vars max: %d\n",
+		numBytes,
+		varSet->numVars,
+		varSet->maxVars
+	);
     char* end = buffer + numBytes;
     while (buffer < end)
     {
