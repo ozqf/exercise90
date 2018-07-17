@@ -57,76 +57,6 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     return ent;
 }
 
-#if 0
-Ent* Spawn_RigidbodyCube(GameState* gs, Cmd_Spawn* cmd)
-{
-    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
-
-    Transform_SetPosition(&ent->transform, cmd->pos.x, cmd->pos.y, cmd->pos.z);
-    
-    Transform_SetScale(&ent->transform, 1, 1, 1);
-    Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
-    
-    //controller = EC_AddAIController(ent, gs);
-    //Ent_InitAIController(controller, 1, 0, 0, 5);
-
-    EC_Renderer* renderer = EC_AddRenderer(gs, ent);
-	//RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
-	RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
-
-    f32 size = 1.0f;
-    EC_Collider* collider = EC_AddCollider(gs, ent);
-    collider->size = { size, size, size };
-    collider->shapeId = Phys_CreateBox(
-        ent->transform.pos.x,
-        ent->transform.pos.y,
-        ent->transform.pos.z,
-        size / 2, size / 2, size / 2,
-        0,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS,
-        ent->entId.index,
-        ent->entId.iteration);
-    return ent;
-}
-#endif
-#if 0
-Ent* Spawn_GroundActor(GameState* gs, Cmd_Spawn* cmd)
-{
-    //Ent *ent;
-    //EC_Renderer *renderer;
-    //EC_AIController *controller;
-    EC_Collider *collider;
-    EC_ActorMotor* motor;
-
-    //ent = Ent_GetFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
-    Transform_SetPosition(&ent->transform, 0, 0, 0);
-    collider = EC_AddCollider(gs, ent);
-	f32 playerHeight = 1.85f; // average male height in metres
-	f32 playerWidth = 0.46f; // reasonable shoulder width?
-    collider->size = { playerWidth, playerHeight, playerWidth };
-    collider->shapeId = Phys_CreateBox(
-        0, 0, 0,
-        playerWidth / 2, playerHeight / 2, playerWidth / 2,
-        ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_ACTOR,
-        ent->entId.index, ent->entId.iteration);
-
-    //renderer = EC_AddRenderer(gs, ent);
-    //RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\brbrick2.bmp"));
-
-    motor = EC_AddActorMotor(gs, ent);
-    motor->runSpeed = 10;
-    motor->runAcceleration = 50;
-
-    gs->localPlayerHasEnt = 1;
-    gs->localPlayerEntId = ent->entId;
-    return ent;
-}
-#endif
 Ent* Spawn_Null(GameState* gs, Cmd_Spawn* cmd)
 {
     ILLEGAL_CODE_PATH
@@ -187,6 +117,21 @@ Ent* Exec_StaticEntityState(GameState* gs, Cmd_Spawn* cmd)
     }
     return ent;
 #endif
+}
+
+Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
+{
+    Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
+
+    if (ent != NULL)
+    {
+        Assert(ent->factoryType == cmd->factoryType);
+    }
+    else
+    {
+
+    }
+    return ent;
 }
 
 Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
@@ -328,8 +273,10 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 
 
         EC_Projectile* prj = EC_AddProjectile(gs, ent);
-        prj->tock = cmd->tock;
-        prj->tick = cmd->tick;
+        prj->ticker.tock = cmd->ticker.tock;
+        prj->ticker.tockMax = cmd->ticker.tockMax;
+        prj->ticker.tick = cmd->ticker.tick;
+        prj->ticker.tickMax = cmd->ticker.tickMax;
         prj->move.x = cmd->vel.x;
         prj->move.y = cmd->vel.y;
         prj->move.z = cmd->vel.z;
@@ -375,14 +322,20 @@ void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
         {
             EC_Projectile* prj = EC_FindProjectile(gs, ent);
             Assert(prj);
-            s->tick = prj->tick;
-            s->tock = prj->tock;
+            s->ticker = prj->ticker;
         } break;
 
         case ENTITY_TYPE_ACTOR_GROUND:
         {
             EC_ActorMotor* motor = EC_FindActorMotor(gs, ent);
             Assert(motor);
+        } break;
+
+        case ENTITY_TYPE_THINKER:
+        {
+            EC_Thinker* thinker = EC_FindThinker(gs, ent);
+            Assert(thinker);
+            s->ticker = thinker->ticker;
         } break;
     }
 }
@@ -418,6 +371,11 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
         case ENTITY_TYPE_RIGIDBODY_CUBE:
         {
             ent = Ent_ReadRigidBodyCubeState(gs, cmd);
+        } break;
+
+        case ENTITY_TYPE_THINKER:
+        {
+            ent = Ent_ReadThinkerState(gs, cmd);
         } break;
 
         default:

@@ -31,7 +31,8 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define ENTITY_TYPE_RIGIDBODY_CUBE 2
 #define ENTITY_TYPE_ACTOR_GROUND 3
 #define ENTITY_TYPE_PROJECTILE 4
-#define ENTITY_TYPES_COUNT 5
+#define ENTITY_TYPE_THINKER 5
+#define ENTITY_TYPES_COUNT 6
 
 // Define placeholder raw read/write functions for commands.
 #ifndef GAME_CMD_DEFAULT_INTERFACE
@@ -146,6 +147,13 @@ struct Cmd_Text
 
 // State save/load
 // 105 - Complete entity restore
+
+/*
+TODO: This state update object is cramming every component's possible
+state data into one struct, some of it overlapping between entity types.
+Very ugly. Refactor somehow, or dump ECS and just have monolithic entities!
+*/
+
 struct Cmd_EntityState
 {
     // Identification
@@ -169,11 +177,7 @@ struct Cmd_EntityState
     // Settings
     u32 flags;
     f32 moveSpeed;
-    f32 tick;                
-    f32 tock;
-    // total 12b
-    // -- 84b so far --
-    // packet of 1000b = 11 updates per packet
+    Ticker ticker;
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_EntityState)
 };

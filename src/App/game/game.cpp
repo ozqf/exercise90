@@ -4,15 +4,6 @@
 
 #include "game_intersection_test.cpp"
 
-inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
-{
-    Vec3 v;
-    v.x = COM_Randf32() * (rangeX - -rangeX) + -rangeX;
-    v.y = COM_Randf32() * (rangeY - -rangeY) + -rangeY;
-    v.z = COM_Randf32() * (rangeZ - -rangeZ) + -rangeZ;
-    return v;
-}
-
 void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
@@ -67,6 +58,10 @@ void Game_InitGameState(GameState *gs)
     gs->healthList.items = g_health;
     gs->healthList.count = GAME_MAX_ENTITIES;
     gs->healthList.max = GAME_MAX_ENTITIES;
+    
+    gs->thinkerList.items = g_thinkers;
+    gs->thinkerList.count = GAME_MAX_ENTITIES;
+    gs->thinkerList.max = GAME_MAX_ENTITIES;
     
     Game_InitEntityFactory();
 }
@@ -253,6 +248,7 @@ void Game_Shutdown(GameState* gs)
 	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
 	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
 	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
+    COM_ZeroMemory((u8*)gs->thinkerList.items, sizeof(EC_Thinker) * gs->thinkerList.max);
 }
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)

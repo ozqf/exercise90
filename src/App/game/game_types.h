@@ -144,6 +144,14 @@ struct Damager
     i32 damage;
 };
 
+struct Ticker
+{
+    f32 tick;
+    f32 tickMax;
+    i32 tock;
+    i32 tockMax;
+};
+
 // Max of 32 components per entity
 
 //struct GameState;
@@ -154,6 +162,7 @@ struct Damager
 #define COMP_FLAG_PROJECTILE (1 << 4)
 #define COMP_FLAG_LABEL (1 << 5)
 #define COMP_FLAG_HEALTH (1 << 6)
+#define COM_FLAG_THINKER (1 << 7)
 
 struct EC_Collider
 {
@@ -183,7 +192,7 @@ struct EC_ActorMotor
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
-    f32 tick;
+    Ticker ticker;
     f32 debugCurrentSpeed;
 };
 
@@ -202,8 +211,8 @@ struct EC_Projectile
     u8 inUse;
     Vec3 move;
     f32 speed;
-    f32 tick;
-    f32 tock;
+    Ticker ticker;
+
     Damager damage;
 };
 
@@ -221,6 +230,28 @@ struct EC_Health
     i32 hp;
 };
 
+union Ent_Brain
+{
+    struct Spawner
+    {
+        i32 typeToSpawn;
+    };
+};
+
+#define EC_BRAIN_NULL 0
+#define EC_BRAIN_SPAWNER 1
+
+struct EC_Thinker
+{
+    EntId entId;
+    u8 inUse;
+
+    Ticker ticker;
+
+    i32 brainType;
+    Ent_Brain brain;
+};
+
 //////////////////////////////////////////////////
 // Define component list structs and GameState objects...
 //////////////////////////////////////////////////
@@ -233,6 +264,7 @@ DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
 DEFINE_ENT_COMPONENT_LIST(Health)
+DEFINE_ENT_COMPONENT_LIST(Thinker)
 
 //////////////////////////////////////////////////
 // Clients and players
@@ -294,6 +326,7 @@ struct GameState
     EC_ProjectileList projectileList;
     EC_LabelList labelList;
     EC_HealthList healthList;
+    EC_ThinkerList thinkerList;
     
     // view
     Transform cameraTransform;
@@ -321,3 +354,4 @@ DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
 DEFINE_ENT_COMPONENT_BASE(Health, health, COMP_FLAG_HEALTH)
+DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, COM_FLAG_THINKER)

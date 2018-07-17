@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "win32_gl_module.cpp"
 
 HGLRC g_openglRC = NULL;
 
