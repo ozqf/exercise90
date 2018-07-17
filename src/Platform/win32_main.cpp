@@ -85,7 +85,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
     }
     break;
 
-#if 1
+    #if 1
     case WM_INPUT:
     {
         /*
@@ -111,7 +111,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
         }
     }
     break;
-#endif
+    #endif
 
     case WM_LBUTTONDOWN:
     {
@@ -459,15 +459,15 @@ int CALLBACK WinMain(
                     DispatchMessage(&message);
                 }
 
-#if 0 // Force app to give up CPU time if not current focus target
+                #if 0 // Force app to give up CPU time if not current focus target
                 if (g_windowActive == 0)
                 {
                     Sleep(4);
                 }
-#endif
-#if 1 // I'm on my laptop, just give up CPU time
+                #endif
+                #if 1 // I'm on my laptop, just give up CPU time
                 Sleep(2);
-#endif
+                #endif
 
                 //////////////////////////////////////////////
                 // TIMING

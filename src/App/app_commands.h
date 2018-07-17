@@ -201,6 +201,20 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "CFG"))
+    {
+        if (numTokens != 3)
+        {
+            printf("  Incorrect tokens for CFG command. CFG <Action> <fileName>");
+            printf("  Actions: load, save");
+            return 1;
+        }
+        if (!COM_CompareStrings(tokens[1], "SAVE"))
+        {
+            App_SaveDataVariables(tokens[2]);
+        }
+        
+    }
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
@@ -243,7 +257,13 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
         h.magic[0] != 'S' || h.magic[1] != 'A' || h.magic[2] != 'V' || h.magic[3] != 'E')
     {
 		platform.Platform_Error("Buffer is not a SAVE file", "APP");
-        ILLEGAL_CODE_PATH
+    }
+
+    if (h.protocol != COMMAND_PROTOCOL_ID)
+    {
+        char errorMsg[128];
+        sprintf_s(errorMsg, 128, "Protocol mismatch in state buffer. Expected %d got %d\n", COMMAND_PROTOCOL_ID, h.protocol);
+        platform.Platform_Error(errorMsg, "APP");
     }
 
     // Read static

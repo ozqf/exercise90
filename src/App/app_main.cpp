@@ -49,10 +49,10 @@ void App_InitVars()
     COM_SetVarByString("i.inverted", "1", g_vars, &g_nextVar, MAX_VARS);
 }
 
-void App_LoadDataVariables()
+void App_LoadDataVariables(char* fileName)
 {
     BlockRef ref = {};
-    if (!platform.Platform_LoadFileIntoHeap(&g_heap, &ref, "config.ini", 0))
+    if (!platform.Platform_LoadFileIntoHeap(&g_heap, &ref, fileName, 0))
     {
         printf(" Failed to open config ini\n");
         return;
@@ -60,6 +60,33 @@ void App_LoadDataVariables()
     printf("  Reading config.ini\n");
     COM_ReadVariablesBuffer((char*)ref.ptrMemory, ref.objectSize, g_vars, &g_nextVar, MAX_VARS);
     Heap_Free(&g_heap, ref.id);
+}
+
+void App_SaveDataVariables(char* fileName)
+{
+    const i32 lineBufferSize = 512;
+    char lineBuffer[lineBufferSize];
+
+    i32 fileId = platform.Platform_OpenFileForWriting(fileName);
+    if (fileId == -1)
+    {
+        printf("  Failed to open %s for writing\n", fileName);
+        return;
+    }
+
+    i32 numWritten = 0;
+
+    numWritten = sprintf_s(lineBuffer, lineBufferSize, "# --- EX90 vars ---\n# Saved %s\n", __DATE__);
+    platform.Platform_WriteToFile(fileId, (u8*)lineBuffer, numWritten);
+
+    for (i32 i = 0; i < g_nextVar; ++i)
+    {
+        Var* v = &g_vars[i];
+        numWritten = sprintf_s(lineBuffer, lineBufferSize, "%s=%s\n", v->name, v->value);
+        platform.Platform_WriteToFile(fileId, (u8*)lineBuffer, numWritten);
+    }
+
+    platform.Platform_CloseFileForWriting(fileId);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -88,7 +115,7 @@ i32 App_Init()
     
     App_InitVars();
     printf(" Num data vars: %d\n", g_nextVar);
-    App_LoadDataVariables();
+    App_LoadDataVariables("config.ini");
 
     //AllocateDebugStrings(&g_heap);
     //AllocateTestStrings(&g_heap);

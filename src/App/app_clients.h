@@ -82,7 +82,6 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             char buf[256];
             sprintf_s(buf, 256, "APP Unknown client state %d\n", cl->state);
             platform.Platform_Error(buf, "APP");
-            ILLEGAL_CODE_PATH
         } break;
     }
 }
@@ -122,7 +121,6 @@ Client* App_FindOrCreateClient(i32 id, ClientList* cls)
         if (free == NULL)
         {
             platform.Platform_Error("No free clients", "APP");
-            ILLEGAL_CODE_PATH
         }
         else
         {

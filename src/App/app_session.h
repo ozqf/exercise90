@@ -296,7 +296,7 @@ u8 App_StartSinglePlayer(char* path)
     }
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
-	App_StartRecording(&g_gameState);
+	//App_StartRecording(&g_gameState);
 
 	// Spawn local client
 	// Assign local client id.

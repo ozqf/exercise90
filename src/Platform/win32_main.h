@@ -154,7 +154,7 @@ When something goes wrong
 void Win32_Error(char *msg, char *title)
 {
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
-    AssertAlways(false);
+	ILLEGAL_CODE_PATH
 }
 
 void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
