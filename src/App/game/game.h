@@ -193,6 +193,8 @@ ClientTick g_debugInput = {};
 #include "game_command_types.h"
 #include "game_local_entities.h"
 #include "game_entities.h"
+#include "ec_types.h"
+#include "ec_factory.h"
 #include "comp_rendObj.h"
 #include "comp_aiController.h"
 #include "game_players.h"

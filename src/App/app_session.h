@@ -289,11 +289,12 @@ u8 App_StartSinglePlayer(char* path)
 	printf(">>> APP Start single player session: %s <<<\n", path);
     
 	App_EndSession();
-
+    #if 0
     if (!App_LoadStateFromFile(&g_gameState, path))
     {
         return 0;
     }
+    #endif
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
 	//App_StartRecording(&g_gameState);

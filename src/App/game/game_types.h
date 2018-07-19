@@ -155,6 +155,7 @@ struct Ticker
 // Max of 32 components per entity
 
 //struct GameState;
+
 #define COMP_FLAG_AICONTROLLER (1 << 0)
 #define COMP_FLAG_COLLIDER (1 << 1)
 #define COMP_FLAG_RENDERER (1 << 2)

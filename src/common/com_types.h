@@ -273,8 +273,6 @@ union RendObj_Union
 // Individual render item
 struct RendObj
 {
-    u16 ownerIndex;
-    u16 inUse;
     u16 type;
     u32 flags;
     RendObj_Union data;

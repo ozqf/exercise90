@@ -117,7 +117,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         // Stop recording, or stop replay playback
         g_replayMode = NoReplayMode;
-        App_StartSession(NETMODE_SINGLE_PLAYER, "maps\\testbox.lvl");
+        App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
         return 1;
 
     }
