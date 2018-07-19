@@ -32,6 +32,10 @@ struct ActorInput;
 //void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
 char* App_GetBufferName(u8* bufferStartAddr);
 
+inline u8* App_StartCommandStream();
+inline u32 App_WriteCommandBytes(u8* stream, u32 numBytes);
+inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u32 cmdSize);
+
 GameTime* GetAppTime();
 
 // Clients

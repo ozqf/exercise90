@@ -1,6 +1,34 @@
 #pragma once
 
 #include "app_module.cpp"
+
+//////////////////////////////////////////////////////////////////////
+// Write unknown bytes into the current command buffer
+//////////////////////////////////////////////////////////////////////
+
+// leave a space for a header and return a write position to the caller
+inline u8* App_StartCommandStream()
+{
+    u8* headerWritePosition = g_appWriteBuffer->ptrWrite;
+    g_appWriteBuffer->ptrWrite += sizeof(CmdHeader);
+    return headerWritePosition;
+}
+
+inline u32 App_WriteCommandBytes(u8* stream, u32 numBytes)
+{
+    g_appWriteBuffer->ptrWrite += COM_COPY(stream, g_appWriteBuffer->ptrWrite, numBytes);
+    return numBytes;
+}
+
+// Write the given header information into the given position
+inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize)
+{
+    CmdHeader h = {};
+    h.SetType(cmdType);
+    h.SetSize(cmdSize);
+    h.Write(ptr);
+}
+
 #if 0
 void App_WriteGameCmd(u8* ptr, u8 type, u16 size)
 {

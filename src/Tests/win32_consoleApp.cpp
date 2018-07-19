@@ -26,6 +26,7 @@
 #include "test_syntax.h"
 #include "test_patch_state_file.h"
 #include "utils_read_ini.h"
+#include "test_ecs2.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
@@ -44,7 +45,8 @@ int main(i32 argc, char* argv[])
 
     //Test_PatchStateFile();
     //Test_StateSaving();
-    Test_ReadIniFile();
+    //Test_ReadIniFile();
+    Test_ECS2();
     #endif
 
     #if 0

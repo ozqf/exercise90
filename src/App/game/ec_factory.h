@@ -2,11 +2,11 @@
 
 #include "game.h"
 
-struct Ent_UpdateHeader
-{
-    EntId entId;
-    u32 componentBits;
-};
+// struct Ent_UpdateHeader
+// {
+//     EntId entId;
+//     u32 componentBits;
+// };
 
 #if 0
 u32 EC_AIController_ApplyState(GameState* gs, Ent* ent, u8* ptr)
@@ -48,24 +48,35 @@ u32 Ent_ApplyState(GameState* gs, Ent* ent, u32 messageComponentBits, u8* stream
     return (stream - origin);
 }
 
-u32 Test_WriteTestEntityBuffer(GameState* gs, u8* stream, i32 streamCapacity)
+void Test_WriteTestEntityBuffer(GameState* gs)
 {
-    u8* origin = stream;
-    Ent_UpdateHeader h = {};
+    // start write sequence
+    u8* headerPos = App_StartCommandStream();
+    u32 size = 0;
+    
+    // write state header
+    Cmd_EntityStateHeader h = {};
     h.entId = Ent_ReserveFreeEntity(&gs->entList);
     h.componentBits |= EC_FLAG_TRANSFORM;
     h.componentBits |= EC_FLAG_RENDERER;
 
+    size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
+
+    // create transform state
     Transform t = {};
     Transform_SetToIdentity(&t);
     t.pos.y += 0.5f;
-    stream += COM_COPY_STRUCT(&t, stream, Transform);
 
+    size += App_WriteCommandBytes((u8*)&t, sizeof(Cmd_EntityStateHeader));
+    
+    // create renderer state
     EC_RendererState r = {};
     COM_CopyStringLimited("cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\W33_5.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
 
-    stream += COM_COPY_STRUCT(&r, stream, EC_RendererState);
+    size += App_WriteCommandBytes((u8*)&r, sizeof(EC_RendererState));
 
-    return (stream - origin);
+    App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, size);
+    
+    return;
 }
