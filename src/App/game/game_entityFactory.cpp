@@ -42,7 +42,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
         Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
 
         EC_Collider* collider = EC_AddCollider(gs, ent);
-	    collider->size = { cmd->size.x, cmd->size.y, cmd->size.z };
+	    collider->state.size = { cmd->size.x, cmd->size.y, cmd->size.z };
         collider->shapeId = Phys_CreateBox(
             cmd->pos.x, cmd->pos.y, cmd->pos.z,
             cmd->size.x / 2.0f, cmd->size.y / 2.0f, cmd->size.z / 2.0f,
@@ -163,7 +163,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
         collider = EC_AddCollider(gs, ent);
 	    f32 playerHeight = 1.85f; // average male height in metres
 	    f32 playerWidth = 0.46f; // reasonable shoulder width?
-        collider->size = { playerWidth, playerHeight, playerWidth };
+        collider->state.size = { playerWidth, playerHeight, playerWidth };
         collider->shapeId = Phys_CreateBox(
             0, 0, 0,
             playerWidth / 2, playerHeight / 2, playerWidth / 2,
@@ -176,8 +176,8 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
         //RendObj_SetAsBillboard(&renderer->rendObj, 1, 1, 1, AppGetTextureIndexByName("textures\\brbrick2.bmp"));
 
         motor = EC_AddActorMotor(gs, ent);
-        motor->runSpeed = 10;
-        motor->runAcceleration = 50;
+        motor->state.runSpeed = 10;
+        motor->state.runAcceleration = 50;
 
         gs->localPlayerHasEnt = 1;
         gs->localPlayerEntId = ent->entId;
@@ -222,12 +222,12 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
         }
         else
         {
-            health->hp = 100;
+            health->state.hp = 100;
         }
         
         f32 size = 1.0f;
         EC_Collider* collider = EC_AddCollider(gs, ent);
-        collider->size = { size, size, size };
+        collider->state.size = { size, size, size };
         collider->shapeId = Phys_CreateBox(
             ent->transform.pos.x,
             ent->transform.pos.y,
@@ -274,13 +274,13 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 
 
         EC_Projectile* prj = EC_AddProjectile(gs, ent);
-        prj->ticker.tock = cmd->ticker.tock;
-        prj->ticker.tockMax = cmd->ticker.tockMax;
-        prj->ticker.tick = cmd->ticker.tick;
-        prj->ticker.tickMax = cmd->ticker.tickMax;
-        prj->move.x = cmd->vel.x;
-        prj->move.y = cmd->vel.y;
-        prj->move.z = cmd->vel.z;
+        prj->state.ticker.tock = cmd->ticker.tock;
+        prj->state.ticker.tockMax = cmd->ticker.tockMax;
+        prj->state.ticker.tick = cmd->ticker.tick;
+        prj->state.ticker.tickMax = cmd->ticker.tickMax;
+        prj->state.move.x = cmd->vel.x;
+        prj->state.move.y = cmd->vel.y;
+        prj->state.move.z = cmd->vel.z;
     
     }
     return ent;
@@ -295,9 +295,9 @@ void Game_WriteStaticState(GameState* gs, Ent* ent, Cmd_Spawn* s)
     s->pos.z = ent->transform.pos.z;
 
     EC_Collider* col = EC_FindCollider(gs, ent);
-    s->size.x = (col->size.x);
-    s->size.y = (col->size.y);
-    s->size.z = (col->size.z);
+    s->size.x = (col->state.size.x);
+    s->size.y = (col->state.size.y);
+    s->size.z = (col->state.size.z);
     //s->tag = ent->tag;
 }
 
@@ -323,7 +323,7 @@ void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
         {
             EC_Projectile* prj = EC_FindProjectile(gs, ent);
             Assert(prj);
-            s->ticker = prj->ticker;
+            s->ticker = prj->state.ticker;
         } break;
 
         case ENTITY_TYPE_ACTOR_GROUND:

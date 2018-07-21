@@ -12,7 +12,7 @@
 //         {
 //             obj->inUse = 1;
 //             obj->entId.index = ent->entId.index;
-//             ent->componentFlags |= ECOMP_FLAG_AI_CONTROLLER;
+//             ent->componentFlags |= EEC_FLAG_AI_CONTROLLER;
 //             return obj;
 //         }
 //     }
@@ -25,7 +25,7 @@
 //     Assert(ent != NULL);
 //     Assert(obj != NULL);
 //     Assert(ent->entId.index == obj->entId.index);
-//     ent->componentFlags &= ~ECOMP_FLAG_AI_CONTROLLER;
+//     ent->componentFlags &= ~EEC_FLAG_AI_CONTROLLER;
 //     obj->inUse = 0;
 // }
 

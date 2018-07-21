@@ -11,9 +11,9 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
     for (u32 i = 0; i < gs->rendererList.max; ++i)
     {
         EC_Renderer* rend = &gs->rendererList.items[i];
-        if (rend->inUse == 1)
+        if (rend->header.inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->entId.index);
+            Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);
             RScene_AddRenderItem(scene, &ent->transform, &rend->rendObj);
         }
     }

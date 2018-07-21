@@ -156,60 +156,95 @@ struct Ticker
 
 //struct GameState;
 
-#define COMP_FLAG_AICONTROLLER (1 << 0)
-#define COMP_FLAG_COLLIDER (1 << 1)
-#define COMP_FLAG_RENDERER (1 << 2)
-#define COMP_FLAG_ACTORMOTOR (1 << 3)
-#define COMP_FLAG_PROJECTILE (1 << 4)
-#define COMP_FLAG_LABEL (1 << 5)
-#define COMP_FLAG_HEALTH (1 << 6)
-#define COM_FLAG_THINKER (1 << 7)
-
-struct EC_Collider
+struct EC_Header
 {
     EntId entId;
     u8 inUse;
-    i32 shapeId;
+};
 
-    u32 lastFrameOverlapping;
-    Vec3 size;
-    Vec3 velocity;
-    i32 isOverlapping;
-    u8 isGrounded;
+#define EC_FLAG_TRANSFORM (1 << 0)
+#define EC_FLAG_RENDERER (1 << 1)
+#define EC_FLAG_COLLIDER (1 << 2)
+#define EC_FLAG_AICONTROLLER (1 << 3)
+#define EC_FLAG_ACTORMOTOR (1 << 4)
+#define EC_FLAG_PROJECTILE (1 << 5)
+#define EC_FLAG_LABEL (1 << 6)
+#define EC_FLAG_HEALTH (1 << 7)
+#define COM_FLAG_THINKER (1 << 8)
+
+#define EC_NUM_TYPES 9
+
+struct EC_Transform
+{
+    EC_Header header;
+
+    Transform t;
+};
+
+#define EC_RENDERER_STRING_LENGTH 32
+
+struct EC_RendererState
+{
+    char meshName[32];
+    char textureName[32];
+
 };
 
 struct EC_Renderer
 {
-    EntId entId;
-    u8 inUse;
+    EC_Header header;
+
     RendObj rendObj;
+
+    EC_RendererState state;
 };
 
-struct EC_ActorMotor
+struct EC_ColliderState
 {
-    EntId entId;
-    u8 inUse;
+    Vec3 size;
+    Vec3 velocity;
+};
+
+struct EC_Collider
+{
+    EC_Header header;
+
+    i32 shapeId;
+    u32 lastFrameOverlapping;
+    i32 isOverlapping;
+    u8 isGrounded;
+
+    EC_ColliderState state;
+};
+
+struct EC_ActorMotorState
+{
     ActorInput input;
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
     Ticker ticker;
+};
+
+struct EC_ActorMotor
+{
+    EC_Header header;
     f32 debugCurrentSpeed;
+
+    EC_ActorMotorState state;
 };
 
 // A quick test component
 struct EC_AIController
 {
-    EntId entId;
-    u8 inUse;
+    EC_Header header;
+
     Vec3 dir;
     f32 speed;
 };
 
-struct EC_Projectile
+struct EC_ProjectileState
 {
-    EntId entId;
-    u8 inUse;
     Vec3 move;
     f32 speed;
     Ticker ticker;
@@ -217,18 +252,35 @@ struct EC_Projectile
     Damager damage;
 };
 
+struct EC_Projectile
+{
+    EC_Header header;
+
+    EC_ProjectileState state;
+};
+
+struct EC_LabelState
+{
+    char label[32];
+};
+
 struct EC_Label
 {
-    EntId entId;
-    u8 inUse;
-    char label[32];
+    EC_Header header;
+
+    EC_LabelState state;
+};
+
+struct EC_HealthState
+{
+    i32 hp;
 };
 
 struct EC_Health
 {
-    EntId entId;
-    u8 inUse;
-    i32 hp;
+    EC_Header header;
+
+    EC_HealthState state;
 };
 
 union Ent_Brain
@@ -244,13 +296,26 @@ union Ent_Brain
 
 struct EC_Thinker
 {
-    EntId entId;
-    u8 inUse;
+    EC_Header header;
 
     Ticker ticker;
 
     i32 brainType;
     Ent_Brain brain;
+};
+
+// A full, no nonsense description of
+// an entity with all of it's components
+struct Entity_FullState
+{
+    EntId entId;
+    // As this contains every possible state struct
+    // use flags to know which should actually be used!
+    u32 componentFlags;
+    Transform t;
+    EC_RendererState renderState;
+    EC_LabelState labelState;
+    // note: size so far is 164 bytes
 };
 
 //////////////////////////////////////////////////
@@ -348,11 +413,11 @@ struct GameState
 // ...and Component Add/Remove/Has/Find functions.
 // Note: requires that GameState struct is defined!
 //////////////////////////////////////////////////
-DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_AICONTROLLER)
-DEFINE_ENT_COMPONENT_BASE(Collider, collider, COMP_FLAG_COLLIDER)
-DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, COMP_FLAG_RENDERER)
-DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, COMP_FLAG_ACTORMOTOR)
-DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, COMP_FLAG_PROJECTILE)
-DEFINE_ENT_COMPONENT_BASE(Label, label, COMP_FLAG_LABEL)
-DEFINE_ENT_COMPONENT_BASE(Health, health, COMP_FLAG_HEALTH)
+DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_FLAG_AICONTROLLER)
+DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_FLAG_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, EC_FLAG_RENDERER)
+DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_FLAG_ACTORMOTOR)
+DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_FLAG_PROJECTILE)
+DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)
+DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
 DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, COM_FLAG_THINKER)

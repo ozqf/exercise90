@@ -61,12 +61,12 @@ void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
     //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
 
     EC_Projectile* prj = EC_AddProjectile(gs, ent);
-    prj->ticker.tickMax = 1.0f;
-    prj->ticker.tick = prj->ticker.tickMax;
+    prj->state.ticker.tickMax = 1.0f;
+    prj->state.ticker.tick = prj->state.ticker.tickMax;
     
-    prj->move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
-    prj->move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
-    prj->move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
+    prj->state.move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
+    prj->state.move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
+    prj->state.move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
     // move projectile forward a little
     ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
     ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
@@ -143,28 +143,28 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
 
 inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
 {
-    Vec3 move = col->velocity;
+    Vec3 move = col->state.velocity;
 
     Vec3 input = {};
     Vec3 moveForce = {};
 
     u8 applyingInput = 0;
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
+    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_FORWARD)
     {
         applyingInput = 1;
         input.z -= 1;
     }
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
+    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
     {
         applyingInput = 1;
         input.z += 1;
     }
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT)
+    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_LEFT)
     {
         applyingInput = 1;
         input.x -= 1;
     }
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_RIGHT)
     {
         applyingInput = 1;
         input.x += 1;
@@ -172,14 +172,14 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 
     Vec3_Normalise(&input);
 
-    if (motor->input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
+    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
     {
         move.y = 10;// * deltaTime;
         //printf("Apply up force: %.2f\n", move.y);
     }
     
-	f32 radiansForward = motor->input.degrees.y * DEG2RAD;
-	f32 radiansLeft = (motor->input.degrees.y + 90) * DEG2RAD;
+	f32 radiansForward = motor->state.input.degrees.y * DEG2RAD;
+	f32 radiansLeft = (motor->state.input.degrees.y + 90) * DEG2RAD;
 
     
 	Vec4 left = {};
@@ -208,12 +208,12 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 
     // Attack
-    if (motor->ticker.tick <= 0)
+    if (motor->state.ticker.tick <= 0)
     {
-        if (motor->input.buttons & ACTOR_INPUT_ATTACK)
+        if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
-            motor->ticker.tick = 0.1f;
-            Ent* ent = Ent_GetEntityById(&gs->entList, &motor->entId);
+            motor->state.ticker.tick = 0.1f;
+            Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
             Transform* t = &ent->transform;
 
@@ -222,8 +222,8 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,
-                motor->input.degrees.x,
-                motor->input.degrees.y
+                motor->state.input.degrees.x,
+                motor->state.input.degrees.y
             );
             #if 1
             f32 spread = 2;
@@ -236,8 +236,8 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,
-                motor->input.degrees.x + pitchOffset,
-                motor->input.degrees.y + yawOffset
+                motor->state.input.degrees.x + pitchOffset,
+                motor->state.input.degrees.y + yawOffset
             );
  
             pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
@@ -247,8 +247,8 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,
-                motor->input.degrees.x + pitchOffset,
-                motor->input.degrees.y + yawOffset
+                motor->state.input.degrees.x + pitchOffset,
+                motor->state.input.degrees.y + yawOffset
             );
             #endif
             //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
@@ -256,7 +256,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     }
     else
     {
-        motor->ticker.tick -= deltaTime;
+        motor->state.ticker.tick -= deltaTime;
     }
 }
 
@@ -269,26 +269,26 @@ i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
         EC_ActorMotor* motor = &gs->actorMotorList.items[i];
-        if (motor->inUse == 0) { continue; }
+        if (motor->header.inUse == 0) { continue; }
         wroteSomething = 1;
         written += sprintf_s(
             ptrWrite,
             (maxChars - written),
 "Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R/U/D: %d/%d/%d/%d/%d/%d\n\
 ATK: %d TICK: %.2f SPEED: %.2f\n",
-            motor->entId.iteration,
-            motor->entId.index,
-            motor->input.degrees.x,
-            motor->input.degrees.y,
-            motor->input.degrees.z,
-            (motor->input.buttons & ACTOR_INPUT_MOVE_FORWARD),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_BACKWARD),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_LEFT),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_RIGHT),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_UP),
-            (motor->input.buttons & ACTOR_INPUT_MOVE_DOWN),
-            (motor->input.buttons & ACTOR_INPUT_ATTACK),
-            motor->ticker.tick,
+            motor->header.entId.iteration,
+            motor->header.entId.index,
+            motor->state.input.degrees.x,
+            motor->state.input.degrees.y,
+            motor->state.input.degrees.z,
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_FORWARD),
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_BACKWARD),
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_LEFT),
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_RIGHT),
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_UP),
+            (motor->state.input.buttons & ACTOR_INPUT_MOVE_DOWN),
+            (motor->state.input.buttons & ACTOR_INPUT_ATTACK),
+            motor->state.ticker.tick,
             motor->debugCurrentSpeed
         );
         ptrWrite = buf + written;
@@ -316,8 +316,8 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
         EC_ActorMotor* motor = &gs->actorMotorList.items[i];
-        if (motor->inUse == 0) { continue; }
-        EC_Collider* col = EC_FindCollider(gs, &motor->entId);
+        if (motor->header.inUse == 0) { continue; }
+        EC_Collider* col = EC_FindCollider(gs, &motor->header.entId);
         Assert(col != NULL);
         //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
         //Assert(ent != NULL);

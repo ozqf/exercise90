@@ -1,215 +1,125 @@
 #pragma once
 
+#include "game.h"
+
+inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
+{
+    EntId entId = {};
+    entId.index = ev->ownerId;
+    entId.iteration = ev->ownerIteration;
+    Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
+    if (ent == NULL)
+    {
+        return;
+    }
+    M4x4* updateM = (M4x4*)&ev->matrix;
+	f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
+	f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
+	f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
+    // Debugging trap
+	// if (ZABS(magX) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+	// if (ZABS(magY) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+	// if (ZABS(magZ) > 1.1f)
+	// {
+	// 	int foo = 1;
+	// }
+
+    EC_Collider* col = EC_FindCollider(gs, &entId);
+    Assert(col != NULL);
+    col->state.velocity.x = ev->vel[0]; 
+    col->state.velocity.y = ev->vel[1];
+    col->state.velocity.z = ev->vel[2];
+    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
 #if 0
-/**
- * !NO BULLET PHYSICS LIBRARY BEYOND THIS POINT!
- * 
- */
-#include "../../common/com_module.h"
+	//ent->transform.scale = { 1, 1, 1 };
+	ent->transform.pos.x = updateM->posX;
+	ent->transform.pos.y = updateM->posY;
+	ent->transform.pos.z = updateM->posZ;
+	Transform_ClearRotation(&ent->transform);
+	Transform_RotateX(&ent->transform, ev->rot[0]);
+	Transform_RotateY(&ent->transform, ev->rot[1]);
+	Transform_RotateZ(&ent->transform, ev->rot[2]);
+	/*Transform_RotateX(&ent->transform, updateM->xAxisW);
+	Transform_RotateY(&ent->transform, updateM->yAxisW);
+	Transform_RotateZ(&ent->transform, updateM->zAxisW);*/
+#endif
+#if 1
+    Transform_FromM4x4(&ent->transform, updateM);
+#endif
+}
 
-#include "../../../lib/bullet/btBulletCollisionCommon.h"
-#include "../../../lib/bullet/btBulletDynamicsCommon.h"
-
-#include <windows.h>
-
-/**
- * Contains Pointers to a Bullet Physics Shape
- */
-struct PhysBodyHandle
-{
-    u8 inUse;
-    i32 id;
-    btCollisionShape* shape;
-    btDefaultMotionState* motionState;
-    btRigidBody* rigidBody;
-};
-
-struct PhysBodyList
-{
-    PhysBodyHandle* items;
-    i32 capacity;
-};
-
-struct ZBulletWorld
-{
-    PhysBodyList bodies;
-
-    btBroadphaseInterface* broadphase;
-    btDefaultCollisionConfiguration* collisionConfiguration;
-    btCollisionDispatcher* dispatcher;
-    btSequentialImpulseConstraintSolver* solver;
-
-    btDiscreteDynamicsWorld* dynamicsWorld;
-};
-
-struct PhysicsTestState
-{
-    btCollisionShape* groundShape;
-    btDefaultMotionState* groundMotionState;
-    btRigidBody* groundRigidBody;
-
-    btCollisionShape* sphereShape;
-    btDefaultMotionState* sphereMotionState;
-    btRigidBody* sphereRigidBody;
-};
-
-ZBulletWorld g_world;
-PhysicsTestState g_physTest;
-
-Vec3 g_testPos;
-
-#define MAX_PHYS_BODIES 2048
-
-global_variable PhysBodyHandle g_bodies[MAX_PHYS_BODIES];
-
-PhysBodyHandle* PHYS_GetFreeBodyHandle(PhysBodyList* list)
+/////////////////////////////////////////////////////////////////////////////
+// STEP PHYSICS
+/////////////////////////////////////////////////////////////////////////////
+#define MAX_ALLOWED_PHYSICS_STEP 0.0334f
+void Game_StepPhysics(GameState* gs, GameTime* time)
 {
     
-    for(i32 i = 0; i < list->capacity; ++i)
+    // Force physics step to always be no lower than 30fps
+
+    /////////////////////////////////////////////////////////////////////////////
+    // STEP PHYSICS
+    f32 dt = time->deltaTime;
+    if (dt > MAX_ALLOWED_PHYSICS_STEP)
     {
-        PhysBodyHandle* handle = &list->items[i];
-        if (!handle->inUse)
+        dt = MAX_ALLOWED_PHYSICS_STEP;
+    }
+
+    MemoryBlock eventBuffer = Phys_Step(dt);
+    
+    //i32 ptrOffset = 0;
+    u8 reading = 1;
+	i32 eventsProcessed = 0;
+
+    u8* readPos = (u8*)eventBuffer.ptrMemory;
+    u8* end = (u8*)((u8*)eventBuffer.ptrMemory + eventBuffer.size);
+    while (readPos < end)
+    {
+        //u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
+        //i32 type = *(i32 *)mem;
+        PhysDataItemHeader h;
+        readPos += COM_COPY_STRUCT(readPos, &h, PhysDataItemHeader);
+        switch (h.type)
         {
-            handle->inUse = 1;
-            return handle;
+            case TransformUpdate:
+            {
+                PhysEV_TransformUpdate tUpdate = {};
+                readPos += COM_COPY_STRUCT(readPos, &tUpdate, PhysEV_TransformUpdate);
+                //COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
+                //ptrOffset += sizeof(PhysEV_TransformUpdate);
+                Game_HandleEntityUpdate(gs, &tUpdate);
+		    	eventsProcessed++;
+            } break;
+
+            case RaycastDebug:
+            {
+                PhysEv_RaycastDebug ray = {};
+                readPos += COM_COPY_STRUCT(readPos, (u8*)&ray, PhysEv_RaycastDebug);
+                RendObj_SetAsLine(
+                    &g_debugLine,
+                    ray.a[0], ray.a[1], ray.a[2],
+                    ray.b[0], ray.b[1], ray.b[2],
+                    ray.colour[0], ray.colour[1], ray.colour[2],
+                    ray.colour[0], ray.colour[1], ray.colour[2]
+                
+                );
+                // printf("Draw Raycast %.2f %.2f %.2f to %.2f %.2f %.2f\n",
+                //     ray.a[0], ray.a[1], ray.a[2],
+                //     ray.b[0], ray.b[1], ray.b[2]
+                // );
+                eventsProcessed++;
+            } break;
+
+            default:
+            {
+                readPos = end;
+            } break;
         }
     }
-    return NULL;
 }
-
-PhysBodyHandle* PHYS_CreateRigidBody(ZBulletWorld* world)
-{
-    PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
-
-
-
-    return handle;
-}
-
-void PHYS_Init()
-{
-    g_physTest = {};
-    g_world = {};
-    g_world.bodies.items = g_bodies;
-    g_world.bodies.capacity = MAX_PHYS_BODIES;
-
-    g_world.broadphase = new btDbvtBroadphase();
-
-    g_world.collisionConfiguration = new btDefaultCollisionConfiguration();
-    g_world.dispatcher = new btCollisionDispatcher(g_world.collisionConfiguration);
-
-    g_world.solver = new btSequentialImpulseConstraintSolver();
-
-    g_world.dynamicsWorld = new btDiscreteDynamicsWorld(g_world.dispatcher, g_world.broadphase, g_world.solver, g_world.collisionConfiguration);
-
-    g_world.dynamicsWorld->setGravity(btVector3(0, -15, 0));
-
-
-    // hello bullet physics
-
-    // Add static ground-plane
-    g_physTest.groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -1);
-    g_physTest.groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
-    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, g_physTest.groundMotionState, g_physTest.groundShape, btVector3(0, 0, 0));
-    groundRigidBodyCI.m_restitution = 1.0f;
-    g_physTest.groundRigidBody = new btRigidBody(groundRigidBodyCI);
-    g_world.dynamicsWorld->addRigidBody(g_physTest.groundRigidBody);
-
-    // Add dynamic sphere, 50m above the ground
-    g_physTest.sphereShape = new btSphereShape(1);
-    g_physTest.sphereMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 15, 0)));
-    
-    btScalar mass = 1;
-    btVector3 fallInertia(0, 0, 0);
-    g_physTest.sphereShape->calculateLocalInertia(mass, fallInertia);
-
-    btRigidBody::btRigidBodyConstructionInfo sphereBodyCI(mass, g_physTest.sphereMotionState, g_physTest.sphereShape, fallInertia);
-    sphereBodyCI.m_restitution = 0.75f;
-    sphereBodyCI.m_friction = 0.0f;
-    
-    g_physTest.sphereRigidBody = new btRigidBody(sphereBodyCI);
-    //g_physTest.sphereRigidBody->setRestitution(1);
-    g_world.dynamicsWorld->addRigidBody(g_physTest.sphereRigidBody);
-}
-
-void PHYS_Step(GameState* gs, GameTime* time)
-{
-    g_world.dynamicsWorld->stepSimulation(time->deltaTime, 10);
-    btTransform t;
-    g_physTest.sphereRigidBody->getMotionState()->getWorldTransform(t);
-
-    btVector3 pos = t.getOrigin();
-    g_testPos.x = pos.getX();
-    g_testPos.y = pos.getY();
-    g_testPos.z = pos.getZ();
-
-    char buf[128];
-        sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());
-        OutputDebugString(buf);
-    
-}
-
-/*
-
-Example of deleting full physics world:
-
-https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=1660
-
-"When a rigid body is added to the world, you should not delete it, until you after you removed it.
-In general, delete objects in reverse order of creation, for example see BasicDemo: "
-
-void	BasicDemo::exitPhysics()
-{
-	//cleanup in the reverse order of creation/initialization
-
-	//remove the rigidbodies from the dynamics world and delete them
-	int i;
-	for (i=m_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
-	{
-		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
-		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState())
-		{
-			delete body->getMotionState();
-		}
-		m_dynamicsWorld->removeCollisionObject( obj );
-		delete obj;
-	}
-
-	//delete collision shapes
-	for (int j=0;j<m_collisionShapes.size();j++)
-	{
-		btCollisionShape* shape = m_collisionShapes[j];
-		delete shape;
-	}
-
-	//delete dynamics world
-	delete m_dynamicsWorld;
-
-	//delete solver
-	delete m_solver;
-
-	//delete broadphase
-	delete m_overlappingPairCache;
-
-	//delete dispatcher
-	delete m_dispatcher;
-
-	delete m_collisionConfiguration;
-
-	
-}
-*/
-
-void PHYS_Shutdown()
-{
-    // Get order right or it will cause an access violation
-	delete g_world.dynamicsWorld;
-	delete g_world.solver;
-	delete g_world.dispatcher;
-	delete g_world.collisionConfiguration;
-    delete g_world.broadphase;
-}
-
-#endif

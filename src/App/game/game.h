@@ -199,6 +199,7 @@ ClientTick g_debugInput = {};
 #include "comp_aiController.h"
 #include "game_players.h"
 
+#include "game_physics.h"
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"
 #include "game_state.h"

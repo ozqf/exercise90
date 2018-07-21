@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game.h"
-
+#if 0
 //////////////////////////////////////////////////////
 // Types associated with the Entity Component System
 //////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ struct EC_RendererState
 
 };
 
-struct EC_Renderer2
+struct EC_Renderer
 {
     EC_Header header;
 
@@ -90,3 +90,4 @@ struct Entity_FullState
     EC_LabelState labelState;
     // note: size so far is 164 bytes
 };
+#endif

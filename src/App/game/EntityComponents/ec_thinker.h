@@ -23,7 +23,7 @@ void Game_UpdateThinkers(GameState* gs, GameTime* time)
     for (u32 i = 0; i < gs->thinkerList.max; ++i)
     {
         EC_Thinker* thinker = &gs->thinkerList.items[i];
-        if (thinker->inUse == 0) { continue; }
+        if (thinker->header.inUse == 0) { continue; }
 
         switch (thinker->brainType)
         {

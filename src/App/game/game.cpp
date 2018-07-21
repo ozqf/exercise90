@@ -3,70 +3,7 @@
 #include "game.h"
 
 #include "game_intersection_test.cpp"
-#if 0
-void Game_InitGameState(GameState *gs)
-{
-    printf("GAME Init State\n");
-    printf("GAME sizeof(Ent): %d\n", sizeof(Ent));
-    printf("GAME sizeof(Entity_FullState): %d\n", sizeof(Entity_FullState));
-    // Nice to preserve the debug mode!
-    u16 debugMode = gs->debugMode;
-    *gs = {};
-    gs->debugMode = debugMode;
-    //gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
-    Transform_SetToIdentity(&gs->cameraTransform);
-    Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
-    
-    // Don't wanna forget to assign all these.
-    // gs->playerList.items = g_players;
-    // gs->playerList.count = GAME_MAX_PLAYERS;
-    // gs->playerList.max = GAME_MAX_PLAYERS;
 
-    gs->clientList.items = g_clients;
-    gs->clientList.count = 0;
-    gs->clientList.max = GAME_MAX_CLIENTS;
-
-    gs->entList.items = g_gameEntities;
-    gs->entList.count = GAME_MAX_ENTITIES;
-    gs->entList.max = GAME_MAX_ENTITIES;
-    // MUST do this before using entity list
-	Ent_ResetEntityIds(&gs->entList);
-
-    gs->rendererList.items = g_renderers;
-    gs->rendererList.count = GAME_MAX_ENTITIES;
-    gs->rendererList.max = GAME_MAX_ENTITIES;
-
-    gs->aiControllerList.items = g_aiControllers;
-    gs->aiControllerList.count = GAME_MAX_ENTITIES;
-    gs->aiControllerList.max = GAME_MAX_ENTITIES;
-
-    gs->colliderList.items = g_colliders;
-    gs->colliderList.count = GAME_MAX_ENTITIES;
-    gs->colliderList.max = GAME_MAX_ENTITIES;
-
-    gs->actorMotorList.items = g_actorMotors;
-    gs->actorMotorList.count = GAME_MAX_ENTITIES;
-    gs->actorMotorList.max = GAME_MAX_ENTITIES;
-
-    gs->projectileList.items = g_prjControllers;
-    gs->projectileList.count = GAME_MAX_ENTITIES;
-    gs->projectileList.max = GAME_MAX_ENTITIES;
-    
-    gs->labelList.items = g_entLabels;
-    gs->labelList.count = GAME_MAX_ENTITIES;
-    gs->labelList.max = GAME_MAX_ENTITIES;
-    
-    gs->healthList.items = g_health;
-    gs->healthList.count = GAME_MAX_ENTITIES;
-    gs->healthList.max = GAME_MAX_ENTITIES;
-    
-    gs->thinkerList.items = g_thinkers;
-    gs->thinkerList.count = GAME_MAX_ENTITIES;
-    gs->thinkerList.max = GAME_MAX_ENTITIES;
-    
-    Game_InitEntityFactory();
-}
-#endif
 void Game_BuildTestHud(GameState *state)
 {
 	#if 1
@@ -218,92 +155,6 @@ void Game_Init()
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
 }
-#if 0
-void Game_Reset()
-{
-    // Need to be different yet?
-    Game_Init();
-}
-#endif
-#if 0
-void Game_Shutdown(GameState* gs)
-{
-	printf("GAME Shutdown\n");
-    // Reset all entities and game state here
-	for (u32 i = 0; i < gs->entList.max; ++i)
-	{
-		gs->entList.items[i].inUse = 0;
-	}
-    gs->localPlayerHasEnt = 0;
-	// Components
-	/*
-	EC_AIControllerList aiControllerList;
-	EC_RendererList rendererList;
-	EC_ColliderList colliderList;
-	EC_ActorMotorList actorMotorList;
-	EC_ProjectileList projectileList;
-	EC_LabelList labelList;
-	*/
-    Game_Reset();
-    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
-	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
-	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
-	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
-	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
-    COM_ZeroMemory((u8*)gs->thinkerList.items, sizeof(EC_Thinker) * gs->thinkerList.max);
-}
-#endif
-inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
-{
-    EntId entId = {};
-    entId.index = ev->ownerId;
-    entId.iteration = ev->ownerIteration;
-    Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
-    if (ent == NULL)
-    {
-        return;
-    }
-    M4x4* updateM = (M4x4*)&ev->matrix;
-	f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
-	f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
-	f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
-    // Debugging trap
-	// if (ZABS(magX) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-	// if (ZABS(magY) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-	// if (ZABS(magZ) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-
-    EC_Collider* col = EC_FindCollider(gs, &entId);
-    Assert(col != NULL);
-    col->velocity.x = ev->vel[0]; 
-    col->velocity.y = ev->vel[1];
-    col->velocity.z = ev->vel[2];
-    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
-#if 0
-	//ent->transform.scale = { 1, 1, 1 };
-	ent->transform.pos.x = updateM->posX;
-	ent->transform.pos.y = updateM->posY;
-	ent->transform.pos.z = updateM->posZ;
-	Transform_ClearRotation(&ent->transform);
-	Transform_RotateX(&ent->transform, ev->rot[0]);
-	Transform_RotateY(&ent->transform, ev->rot[1]);
-	Transform_RotateZ(&ent->transform, ev->rot[2]);
-	/*Transform_RotateX(&ent->transform, updateM->xAxisW);
-	Transform_RotateY(&ent->transform, updateM->yAxisW);
-	Transform_RotateZ(&ent->transform, updateM->zAxisW);*/
-#endif
-#if 1
-    Transform_FromM4x4(&ent->transform, updateM);
-#endif
-}
 
 void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 {
@@ -385,7 +236,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 				printf("!GAME No motor for Entity %d/%d\n", cl->entId.iteration, cl->entId.index);
 				return 1;
 			}
-            motor->input = cmd.input;
+            motor->state.input = cmd.input;
 			return 1;
 		} break;
         #endif
@@ -461,76 +312,6 @@ i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         ptrRead += h.GetSize();
     }
     return numExecuted;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// STEP PHYSICS
-/////////////////////////////////////////////////////////////////////////////
-#define MAX_ALLOWED_PHYSICS_STEP 0.0334f
-void Game_StepPhysics(GameState* gs, GameTime* time)
-{
-    
-    // Force physics step to always be no lower than 30fps
-
-    /////////////////////////////////////////////////////////////////////////////
-    // STEP PHYSICS
-    f32 dt = time->deltaTime;
-    if (dt > MAX_ALLOWED_PHYSICS_STEP)
-    {
-        dt = MAX_ALLOWED_PHYSICS_STEP;
-    }
-
-    MemoryBlock eventBuffer = Phys_Step(dt);
-    
-    //i32 ptrOffset = 0;
-    u8 reading = 1;
-	i32 eventsProcessed = 0;
-
-    u8* readPos = (u8*)eventBuffer.ptrMemory;
-    u8* end = (u8*)((u8*)eventBuffer.ptrMemory + eventBuffer.size);
-    while (readPos < end)
-    {
-        //u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
-        //i32 type = *(i32 *)mem;
-        PhysDataItemHeader h;
-        readPos += COM_COPY_STRUCT(readPos, &h, PhysDataItemHeader);
-        switch (h.type)
-        {
-            case TransformUpdate:
-            {
-                PhysEV_TransformUpdate tUpdate = {};
-                readPos += COM_COPY_STRUCT(readPos, &tUpdate, PhysEV_TransformUpdate);
-                //COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
-                //ptrOffset += sizeof(PhysEV_TransformUpdate);
-                Game_HandleEntityUpdate(gs, &tUpdate);
-		    	eventsProcessed++;
-            } break;
-
-            case RaycastDebug:
-            {
-                PhysEv_RaycastDebug ray = {};
-                readPos += COM_COPY_STRUCT(readPos, (u8*)&ray, PhysEv_RaycastDebug);
-                RendObj_SetAsLine(
-                    &g_debugLine,
-                    ray.a[0], ray.a[1], ray.a[2],
-                    ray.b[0], ray.b[1], ray.b[2],
-                    ray.colour[0], ray.colour[1], ray.colour[2],
-                    ray.colour[0], ray.colour[1], ray.colour[2]
-                
-                );
-                // printf("Draw Raycast %.2f %.2f %.2f to %.2f %.2f %.2f\n",
-                //     ray.a[0], ray.a[1], ray.a[2],
-                //     ray.b[0], ray.b[1], ray.b[2]
-                // );
-                eventsProcessed++;
-            } break;
-
-            default:
-            {
-                readPos = end;
-            } break;
-        }
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -621,7 +402,7 @@ void Game_Tick(
         Ent* ent = Ent_GetEntityById(&gs->entList, &gs->localPlayerEntId);
         Assert(ent != NULL);
         EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
-        Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->input.degrees);
+        Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->state.input.degrees);
 		// raise camera to eye height
         gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
     }

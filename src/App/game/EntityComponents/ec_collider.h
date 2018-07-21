@@ -69,9 +69,9 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
     for (u32 i = 0; i < gs->colliderList.max; ++i)
     {
         EC_Collider* collider = &gs->colliderList.items[i];
-        if (collider->inUse == 1)
+        if (collider->header.inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->entId.index);
+            Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->header.entId.index);
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
             item->transform = ent->transform;
@@ -79,11 +79,11 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             //if (collider->lastFrameOverlapping == time->frameNumber)
             if (collider->isGrounded)
             {
-                RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 1, 0, 0);
+                RendObj_SetAsAABB(&item->obj, collider->state.size.x, collider->state.size.y, collider->state.size.z, 1, 0, 0);
             }
             else
             {
-                RendObj_SetAsAABB(&item->obj, collider->size.x, collider->size.y, collider->size.z, 0, 1, 0);
+                RendObj_SetAsAABB(&item->obj, collider->state.size.x, collider->state.size.y, collider->state.size.z, 0, 1, 0);
             }
             
         }

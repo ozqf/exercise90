@@ -12,9 +12,9 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
     for (u32 i = 0; i < gs->labelList.max; ++i)
     {
         EC_Label* entLabel = &gs->labelList.items[i];
-        if (!COM_CompareStrings(entLabel->label, queryLabel))
+        if (!COM_CompareStrings(entLabel->state.label, queryLabel))
         {
-            return Ent_GetEntityById(&gs->entList, &entLabel->entId);
+            return Ent_GetEntityById(&gs->entList, &entLabel->header.entId);
         }
     }
     return NULL;
@@ -33,14 +33,14 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
     for (u32 i = 0; i < gs->projectileList.max; ++i)
     {
         EC_Projectile* prj = &gs->projectileList.items[i];
-        if (prj->inUse == 0) { continue; }
+        if (prj->header.inUse == 0) { continue; }
 
-        Ent* e = Ent_GetEntityByIndex(&gs->entList, prj->entId.index);
+        Ent* e = Ent_GetEntityByIndex(&gs->entList, prj->header.entId.index);
 
-        if (prj->ticker.tick <= 0.0f)
+        if (prj->state.ticker.tick <= 0.0f)
         {
             // Delete
-            Vec3 v = Vec3_CreateUnitVector(&prj->move);
+            Vec3 v = Vec3_CreateUnitVector(&prj->state.move);
             Ent_WriteRemoveCmd(e, v.parts, time->singleFrame == 1);
             #if 0
             Ent_MarkForFree(e);
@@ -56,16 +56,16 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         }
         else
         {
-            prj->ticker.tick -= time->deltaTime;
+            prj->state.ticker.tick -= time->deltaTime;
         }
 
         Transform* t = &e->transform;
 
         Vec3 newPos =
         {
-            t->pos.x + prj->move.x * time->deltaTime,
-            t->pos.y + prj->move.y * time->deltaTime,
-            t->pos.z + prj->move.z * time->deltaTime
+            t->pos.x + prj->state.move.x * time->deltaTime,
+            t->pos.y + prj->state.move.y * time->deltaTime,
+            t->pos.z + prj->state.move.z * time->deltaTime
         };
 
         //Phys_RayTest(t->pos.x, t->pos.y, t->pos.z, newPos.x, newPos.y, newPos.z);
@@ -91,20 +91,20 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                 PhysRayHit* hit = &results[j];
                 EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
                 Assert(col != NULL);
-                Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->entId);
+                Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->header.entId);
 				if (targetEnt == NULL)
 				{
-					printf("!GAME prj victim %d/%d is NULL!\n", col->entId.iteration, col->entId.index);
+					printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
 					continue;
 				}
                 if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
                 {
-                    EC_Health* health = EC_FindHealth(gs, &col->entId);
+                    EC_Health* health = EC_FindHealth(gs, &col->header.entId);
                     if (health != NULL)
                     {
-                        health->hp -= 10;
+                        health->state.hp -= 10;
                         // kill victim
-                        if (health->hp <= 0)
+                        if (health->state.hp <= 0)
                         {
                             Ent_WriteRemoveCmd(
                                 targetEnt,
@@ -143,9 +143,9 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (survived)
         {
             // Move
-            t->pos.x += prj->move.x * time->deltaTime;
-            t->pos.y += prj->move.y * time->deltaTime;
-            t->pos.z += prj->move.z * time->deltaTime;
+            t->pos.x += prj->state.move.x * time->deltaTime;
+            t->pos.y += prj->state.move.y * time->deltaTime;
+            t->pos.z += prj->state.move.z * time->deltaTime;
         }
     }
 }

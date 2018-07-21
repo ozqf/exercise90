@@ -40,11 +40,11 @@ static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
         comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->inUse == 0) \
+        if (comp->header.inUse == 0) \
         { \
-            comp->inUse = 1; \
-            comp->entId.index = ent->entId.index; \
-            comp->entId.iteration = ent->entId.iteration; \
+            comp->header.inUse = 1; \
+            comp->header.entId.index = ent->entId.index; \
+            comp->header.entId.iteration = ent->entId.iteration; \
             ent->componentFlags |= typeFlagDefine; \
             return comp; \
         } \
@@ -52,7 +52,7 @@ static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
     return NULL; \
 }; \
 \
-static inline unsigned char Ent_Has##type##(Ent* ent) { return (ent->componentFlags & typeFlagDefine); } \
+static inline unsigned char Ent_Has##type##(Ent* ent) { return (unsigned char)(ent->componentFlags & typeFlagDefine); } \
 \
 static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
 { \
@@ -61,7 +61,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
         comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->inUse == 1 && EntId_Equals(&ent->entId, &comp->entId)) \
+        if (comp->header.inUse == 1 && EntId_Equals(&ent->entId, &comp->header.entId)) \
         { \
             return comp; \
         } \
@@ -74,7 +74,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, EntId* id) \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
         comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->inUse == 1 && EntId_Equals(id, &comp->entId)) \
+        if (comp->header.inUse == 1 && EntId_Equals(id, &comp->header.entId)) \
         { \
             return comp; \
         } \
@@ -88,7 +88,7 @@ static inline void EC_Remove##type##(GameState* gs, Ent* ent) \
     EC_##type* comp = EC_Find##type##(gs, ent); \
     if (comp == 0) { return; } \
     ent->componentFlags &= ~typeFlagDefine; \
-    comp->inUse = 0; \
+    comp->header.inUse = 0; \
 }; \
 \
 
