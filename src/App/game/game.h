@@ -201,6 +201,7 @@ ClientTick g_debugInput = {};
 
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"
+#include "game_state.h"
 #include "game_input.cpp"
 #include "game_server.h"
 #include "game.cpp"

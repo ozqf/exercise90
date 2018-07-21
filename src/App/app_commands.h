@@ -98,6 +98,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "ECS"))
+    {
+        Test_WriteTestEntityBuffer(&g_gameState);
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "VARS"))
     {
         App_DebugListVariables(g_vars, g_nextVar, MAX_VARS);

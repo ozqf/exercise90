@@ -46,6 +46,17 @@ struct EC_Renderer2
 
     EC_RendererState state;
 };
+
+struct EC_LabelState
+{
+    char label[32];
+};
+
+struct EC_Label2
+{
+    EC_Header header;
+};
+
 #if 0
 struct EC_ColliderState
 {
@@ -65,3 +76,17 @@ struct EC_Collider
     EC_ColliderState state;
 };
 #endif
+
+// A full, no nonsense description of
+// an entity with all of it's components
+struct Entity_FullState
+{
+    EntId entId;
+    // As this contains every possible state struct
+    // use flags to know which should actually be used!
+    u32 componentFlags;
+    Transform t;
+    EC_RendererState renderState;
+    EC_LabelState labelState;
+    // note: size so far is 164 bytes
+};

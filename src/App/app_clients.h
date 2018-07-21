@@ -41,6 +41,10 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
         case CLIENT_STATE_OBSERVER:
         {
             //platform.Platform_WriteTextCommand("impulse 1");
+            if (g_debugCameraOn)
+            {
+                return;
+            }
             #if 1
             if (Input_CheckActionToggledOn(actions, "Move Up", frameNumber))
             {

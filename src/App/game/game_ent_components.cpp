@@ -14,7 +14,7 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
         EC_Label* entLabel = &gs->labelList.items[i];
         if (!COM_CompareStrings(entLabel->label, queryLabel))
         {
-            return Ent_GetEntity(&gs->entList, &entLabel->entId);
+            return Ent_GetEntityById(&gs->entList, &entLabel->entId);
         }
     }
     return NULL;

@@ -150,6 +150,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
                 printf("GAME: Ent is marked in use! Aborting\n");
                 ILLEGAL_CODE_PATH
             }
+            printf("GAME assigning Ent %d/%d\n", entId->iteration, entId->index);
 			return &ents->items[i];
 		}
 	}
@@ -158,18 +159,18 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
 	return NULL;
 }
 
-inline Ent* Ent_GetEntity(EntList* ents, EntId* entId)
-{
-	for (u32 i = 0; i < ents->max; ++i)
-	{
-		if (EntId_Equals(&ents->items[i].entId, entId))
-		{
-            Assert(ents->items[i].inUse == ENTITY_STATUS_IN_USE);
-			return &ents->items[i];
-		}
-	}
-	return NULL;
-}
+// inline Ent* Ent_GetEntity(EntList* ents, EntId* entId)
+// {
+// 	for (u32 i = 0; i < ents->max; ++)
+// 	{
+// 		if (EntId_Equals(&ents->items[i].entId, entId))
+// 		{
+//             Assert(ents->items[i].inUse == ENTITY_STATUS_IN_USE);
+// 			return &ents->items[i];
+// 		}
+// 	}
+// 	return NULL;
+// }
 
 inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
 {
@@ -177,7 +178,7 @@ inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
     return &ents->items[index];
 }
 
-// Will not return entities that are free or merely reserved. Only ones that are active
+// Will NOT return entities that are free or merely reserved. Only ones that are active
 inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)

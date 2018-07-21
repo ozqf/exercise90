@@ -176,7 +176,7 @@ i32 App_Shutdown()
 
     App_StopRecording();
 	
-    Game_Shutdown(&g_gameState);
+    GS_Clear(&g_gameState);
     Phys_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place

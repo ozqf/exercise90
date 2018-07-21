@@ -210,7 +210,7 @@ void App_EndSession()
 	
     App_StopRecording();
 
-	Game_Shutdown(&g_gameState);
+	GS_Clear(&g_gameState);
 	Phys_ClearWorld();
 	// Clear command buffer
 	//App_ClearClients();

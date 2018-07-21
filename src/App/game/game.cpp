@@ -3,11 +3,12 @@
 #include "game.h"
 
 #include "game_intersection_test.cpp"
-
+#if 0
 void Game_InitGameState(GameState *gs)
 {
     printf("GAME Init State\n");
     printf("GAME sizeof(Ent): %d\n", sizeof(Ent));
+    printf("GAME sizeof(Entity_FullState): %d\n", sizeof(Entity_FullState));
     // Nice to preserve the debug mode!
     u16 debugMode = gs->debugMode;
     *gs = {};
@@ -65,7 +66,7 @@ void Game_InitGameState(GameState *gs)
     
     Game_InitEntityFactory();
 }
-
+#endif
 void Game_BuildTestHud(GameState *state)
 {
 	#if 1
@@ -213,17 +214,18 @@ void Game_BuildTestMenu()
 
 void Game_Init()
 {
-    Game_InitGameState(&g_gameState);
+    GS_Init(&g_gameState);
     Game_BuildTestHud(&g_uiState);
     Game_BuildTestMenu();
 }
-
+#if 0
 void Game_Reset()
 {
     // Need to be different yet?
     Game_Init();
 }
-
+#endif
+#if 0
 void Game_Shutdown(GameState* gs)
 {
 	printf("GAME Shutdown\n");
@@ -250,13 +252,13 @@ void Game_Shutdown(GameState* gs)
 	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
     COM_ZeroMemory((u8*)gs->thinkerList.items, sizeof(EC_Thinker) * gs->thinkerList.max);
 }
-
+#endif
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 {
     EntId entId = {};
     entId.index = ev->ownerId;
     entId.iteration = ev->ownerIteration;
-    Ent *ent = Ent_GetEntity(&gs->entList, &entId);
+    Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
     if (ent == NULL)
     {
         return;
@@ -319,6 +321,12 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 {
     switch (header->GetType())
     {
+        case CMD_TYPE_ENTITY_STATE_2:
+        {
+            printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
+            Ent_ApplyState(gs, ptr, header->size);
+            return 1;
+        } break;
         case CMD_TYPE_ENTITY_STATE:
         {
             Cmd_EntityState cmd = {};

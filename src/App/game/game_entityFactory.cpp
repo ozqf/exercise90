@@ -212,7 +212,8 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 
         EC_Renderer* renderer = EC_AddRenderer(gs, ent);
 	    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
-	    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
+	    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1,
+            AppGetTextureIndexByName("textures\\W33_5.bmp"));
 
         EC_Health* health = EC_AddHealth(gs, ent);
         if (health == NULL)

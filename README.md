@@ -73,10 +73,15 @@ Linked as a .lib to the platform layer for compressing/decompressing files in .d
 
 ### Command Structure
 Move the engine and game to using commands.
-* Commands are stored in double buffers, swapped at the start of a frame.
-* Commands will flow Platform -> App -> Game, with each level choosing what goes down to the level below.
-* Similarly outputs are commands written to an output buffer.
-* The game is 'playing back' commands it is given, either from single player, a server or a recorded demo file.
+* Done Commands are stored in double buffers, swapped at the start of a frame.
+* Defunct - Commands will flow Platform -> App -> Game, with each level choosing what goes down to the level below.
+* Done Similarly outputs are commands written to an output buffer.
+* Done The game is 'playing back' commands it is given, either from single player, a server or a recorded demo file.
+
+### Command Refactor - 2018/7
+* **Refactor Entity Components** - Split entity components into their transferable server state and their local data/pointers etc.
+* **Rebuild Entity Factory** - Rewrite entity factory to work entirely from a 'recipe'. Prefab entities are prebuilt/stored recipes. State 
+* **Entity Updates in Stream** - variable sized command that can include only parts of an entity's state, for smaller updates.
 
 ### Bugs or fundamental issues
 * **Calculate View-Model matrix in renderer manually** - View model matrix is currently constructed by extracting euler angles from transform rotations then applying those angles to opengl's internal matrix. This mostly works but causes awful jittering when transforms come from the physics engine.
@@ -90,7 +95,7 @@ Move the engine and game to using commands.
 * **Entities**
     * Done 2018/3/30 *How will entities be stored? - Exact structure of entity system. Big structs for now with separate list of render objects built each frame?*
     * Done 2018/3/30 *Entity List - Until a better idea comes up, alloc a big array (4096 odd) of entity structs and use that.*
-    *Copy to keep active entities packed to start of array?*
+    *Copy to keep active entities packed to start of array?* - Why?
     * **Update loop**
 * Done 2018/3/14 **Create Heap** - Create main memory pool.
 * ~Collision Detection~ - Deferred to physics engine
