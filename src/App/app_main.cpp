@@ -134,6 +134,7 @@ i32 App_Init()
     Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD", 1);
 
     SharedAssets_Init();
+    Assets_InitMeshDB();
 
     BlockRef ref = {};
 

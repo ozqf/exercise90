@@ -79,17 +79,7 @@ internal f32 g_prim_spikeNormals[] =
 };
 
 
-internal Mesh g_meshSpike = {
-    0,
-    {
-		'S', 'p', 'i', 'k', 'e',
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0'
-	},
+internal MeshData g_meshSpike = {
     12,
     g_prim_spikeVerts,
     g_prim_spikeUVs,

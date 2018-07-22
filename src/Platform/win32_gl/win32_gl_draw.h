@@ -344,8 +344,10 @@ void R_RenderSprite(RenderSceneSettings* settings, Transform* camera, Transform*
 void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
 	RendObj_ColouredMesh* meshRend = &obj->data.mesh;
-	AssertAlways(meshRend->mesh != NULL);
-	Mesh* mesh = meshRend->mesh;
+	MeshData mesh = meshRend->mesh;
+	AssertAlways(mesh.verts != NULL);
+	AssertAlways(mesh.uvs != NULL);
+	AssertAlways(mesh.normals != NULL);
 
 	GLuint* texHandles = g_textureHandles;
 
@@ -357,9 +359,9 @@ void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* o
 	//f32* meshVerts = mesh->verts;
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, mesh->verts);
-	glTexCoordPointer(2, GL_FLOAT, 0, mesh->uvs);
-	glDrawArrays(GL_TRIANGLES, 0, mesh->numVerts);
+	glVertexPointer(3, GL_FLOAT, 0, mesh.verts);
+	glTexCoordPointer(2, GL_FLOAT, 0, mesh.uvs);
+	glDrawArrays(GL_TRIANGLES, 0, mesh.numVerts);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 

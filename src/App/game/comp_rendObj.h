@@ -40,7 +40,7 @@ inline void Game_BuildWeaponModelScene(RenderScene* scene)
     t.pos.y = -1;
     t.pos.z = -1.5;
     obj;
-    RendObj_SetAsMesh(&obj, &g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
+    RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
     RScene_AddRenderItem(scene, &t, &obj);
 
 #if 0

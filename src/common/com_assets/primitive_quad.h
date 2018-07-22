@@ -35,17 +35,7 @@ internal f32 g_prim_quadNormals[] =
 	-1,  1,  0
 };
 
-internal Mesh g_meshPrimitive_quad = {
-    0,
-	{
-		'Q', 'u', 'a', 'd', '\0',
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0', '\0', '\0', '\0', 
-        '\0', '\0'
-	},
+internal MeshData g_meshPrimitive_quad = {
     6,
     g_prim_quadVerts,
     g_prim_quadUVs

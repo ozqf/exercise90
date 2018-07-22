@@ -60,7 +60,7 @@ static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, 
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////
 
-static inline void RendObj_SetAsMesh(RendObj* obj, Mesh* mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
+static inline void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_MESH;
 

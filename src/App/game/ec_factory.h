@@ -51,7 +51,8 @@ u32 EC_Renderer_ApplyState(GameState* gs, Ent* ent, u8* stream)
     }
     RendObj_SetAsMesh(
         &r->rendObj,
-        &g_meshCube, 1, 1, 1,
+        Assets_GetMeshDataByName(state.meshName),// g_meshCube,
+        1, 1, 1,
         AppGetTextureIndexByName(state.textureName)
     );
 
@@ -116,7 +117,7 @@ void Test_WriteTestEntityBuffer(GameState* gs)
 
     // create renderer state
     EC_RendererState r = {};
-    COM_CopyStringLimited("cube", r.meshName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\W33_5.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
 
     size += App_WriteCommandBytes((u8*)&r, sizeof(EC_RendererState));

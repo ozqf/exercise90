@@ -36,7 +36,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
         //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
         RendObj_SetAsMesh(
             &renderer->rendObj,
-            &g_meshCube, 1, 1, 1,
+            g_meshCube, 1, 1, 1,
             AppGetTextureIndexByName("textures\\COMP03_1.bmp")
         );
         Transform_SetScale(&ent->transform, cmd->size.x, cmd->size.y, cmd->size.z);
@@ -212,7 +212,7 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 
         EC_Renderer* renderer = EC_AddRenderer(gs, ent);
 	    //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 6);
-	    RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1,
+	    RendObj_SetAsMesh(&renderer->rendObj, g_meshCube, 1, 1, 1,
             AppGetTextureIndexByName("textures\\W33_5.bmp"));
 
         EC_Health* health = EC_AddHealth(gs, ent);

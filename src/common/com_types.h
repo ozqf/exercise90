@@ -10,7 +10,7 @@ struct GL_Test_Input;
 /****************************************************************
 Graphics
 ****************************************************************/
-struct Mesh;
+struct MeshData;
 /*****************************************************
 SIMPLE TYPES
 *****************************************************/
@@ -50,6 +50,10 @@ union u64_union
 
 enum ZMouseMode { Free = 0, Captured = 1 };
 
+
+/////////////////////////////////////////////////////////////////////////////
+// Vector
+/////////////////////////////////////////////////////////////////////////////
 struct Vec3
 {
     union 
@@ -184,6 +188,31 @@ struct Transform
 };
 
 
+
+/****************************************************************
+Graphics
+****************************************************************/
+struct MeshData
+{
+	u32 numVerts;
+
+	f32* verts;
+	f32* uvs;
+    f32* normals;
+    
+};
+
+struct Texture2DHeader
+{
+	i32 index;
+	char name[32];
+	i32 width;
+	i32 height;
+	u32 *ptrMemory;
+};
+
+
+
 struct RendObj_Primitive
 {
     i32 primitiveType;
@@ -252,7 +281,7 @@ struct RendObj_AsciCharArray
 
 struct RendObj_ColouredMesh
 {
-    Mesh* mesh;
+    MeshData mesh;
     f32 r, g, b;
     i32 textureIndex;
 };
@@ -320,30 +349,6 @@ struct GL_Test_Input
 	Vec3 rotation;
 	f32 speed;
     f32 rotSpeed;
-};
-
-/****************************************************************
-Graphics
-****************************************************************/
-struct Mesh
-{
-	u32 id;
-    char name[32];
-	u32 numVerts;
-
-	f32* verts;
-	f32* uvs;
-    f32* normals;
-    
-};
-
-struct Texture2DHeader
-{
-	i32 index;
-	char name[32];
-	i32 width;
-	i32 height;
-	u32 *ptrMemory;
 };
 
 /*****************************************************

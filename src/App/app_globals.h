@@ -34,7 +34,7 @@ inline GameTime* GetAppTime() { return &g_time; }
 // Assets
 //global_variable i32 g_nextTextureIndex = 0;
 global_variable TextureHandles g_textureHandles;
-global_variable Mesh g_meshHandles;
+global_variable MeshHandles g_meshHandles;
 //global_variable TextureHandles g_textures;
 
 // Menu Rendering

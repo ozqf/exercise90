@@ -50,6 +50,7 @@ void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 
 // assets and data
 i32 AppGetTextureIndexByName(char* textureName);
+MeshData Assets_GetMeshDataByName(char* name);
 
 i32 App_GetVarAsI32(char* name);
 inline Var* App_GetVar(char* name);
@@ -118,6 +119,7 @@ void AppListTextures();
 #include "app_commands.h"
 #include "app_input.h"
 #include "assets/app_textures.cpp"
+#include "assets/app_meshes.cpp"
 #include "app_main.cpp"
 
 /***************************************
