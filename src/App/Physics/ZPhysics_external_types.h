@@ -88,6 +88,31 @@ struct ZShapeDef
 	u16 mask;
 	f32 pos[3];
 	ZShapeData_U data;
+
+	void SetAsBox(
+		f32 x,
+		f32 y,
+		f32 z,
+		f32 halfSizeX,
+    	f32 halfSizeY,
+    	f32 halfSizeZ,
+    	u32 newFlags,
+    	u16 newGroup,
+    	u16 newMask
+	)
+	{
+		*this = {};
+    	shapeType = box;
+    	flags = newFlags;
+    	group = newGroup;
+    	mask = newMask;
+    	pos[0] = x;
+    	pos[1] = y;
+    	pos[2] = z;
+    	data.box.halfSize[0] = halfSizeX;
+    	data.box.halfSize[1] = halfSizeY;
+    	data.box.halfSize[2] = halfSizeZ;
+	}
 };
 
 #endif

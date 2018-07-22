@@ -89,3 +89,20 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
         }
     }
 }
+
+void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
+{
+    EC_Collider* col = EC_FindCollider(gs, ent);
+    if (col == NULL)
+    {
+        printf("  GAME Create collider\n");
+        col = EC_AddCollider(gs, ent);
+        col->state = *state;
+        col->shapeId = Phys_CreateShape(&col->state.def, ent->entId.index, ent->entId.iteration);
+        //col->state.shapeId.SetAsBox(0, 0, 0, state->def);
+    }
+    else
+    {
+        // Restore state...
+    }
+}

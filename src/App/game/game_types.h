@@ -201,6 +201,8 @@ struct EC_Renderer
 
 struct EC_ColliderState
 {
+    ZShapeDef def;
+    
     Vec3 size;
     Vec3 velocity;
 };

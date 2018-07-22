@@ -1,12 +1,10 @@
 #pragma once
 
 #include "../../common/com_module.h"
+#include "../Physics/ZPhysics_interface.h"
 
 #include "game_types.h"
-
 #include "game_utils.h"
-//#include "game_physics.h"
-#include "../Physics/ZPhysics_interface.h"
 
 #define GAME_DEBUG_MODE_NONE 0
 #define GAME_DEBUG_MODE_CAMERA 1
@@ -194,6 +192,7 @@ ClientTick g_debugInput = {};
 #include "game_local_entities.h"
 #include "game_entities.h"
 #include "ec_types.h"
+#include "EntityComponents/ec_collider.h"
 #include "ec_factory.h"
 #include "comp_rendObj.h"
 #include "comp_aiController.h"
