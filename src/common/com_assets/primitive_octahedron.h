@@ -119,6 +119,15 @@ internal f32 g_prim_octahedronNormals[] =
 
 internal Mesh g_meshOctahedron = {
     0,
+    {
+		'O', 'c', 't', 'a', 'h',
+        'e', 'd', 'r', 'o', 'n', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0'
+	},
     24,
     g_prim_octahedronVerts,
     g_prim_octahedronUVs,

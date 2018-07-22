@@ -12,7 +12,7 @@
 #include "app_defines.h"
 #include "app_types.h"
 
-#include "app_testTextures.h"
+#include "assets/app_testTextures.cpp"
 
 #include <stdio.h>
 
@@ -117,7 +117,7 @@ void AppListTextures();
 #include "app_clients.h"
 #include "app_commands.h"
 #include "app_input.h"
-#include "app_textures.h"
+#include "assets/app_textures.cpp"
 #include "app_main.cpp"
 
 /***************************************

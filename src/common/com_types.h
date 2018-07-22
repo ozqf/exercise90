@@ -328,12 +328,13 @@ Graphics
 struct Mesh
 {
 	u32 id;
-
+    char name[32];
 	u32 numVerts;
 
 	f32* verts;
 	f32* uvs;
     f32* normals;
+    
 };
 
 struct Texture2DHeader

@@ -1,6 +1,6 @@
 #pragma once
 #if 1
-#include "../common/com_module.h"
+#include "../../common/com_module.h"
 
 #define TEST_BUFFER_WIDTH 32
 #define TEST_BUFFER_HEIGHT 32

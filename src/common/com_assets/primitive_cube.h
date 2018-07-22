@@ -170,10 +170,19 @@ internal f32 g_prim_cubeNormals[] =
 
 internal Mesh g_meshCube = {
     0,
+    {   'C', 'u', 'b', 'e', '\0',
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0' 
+    },
     36,
     g_prim_cubeVerts,
     g_prim_cubeUVs,
     g_prim_cubeNormals
+    
 };
 
 
@@ -324,6 +333,14 @@ internal f32 g_prim_inverseCubeNormals[] =
 
 internal Mesh g_meshInverseCube = {
     0,
+    {   'I', 'n', 'v', 'e', 'r',
+        's', 'e', '_', 'C', 'u', 
+        'b', 'e', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0', '\0', '\0', '\0', 
+        '\0', '\0' 
+    },
     36,
     g_prim_inverseCubeVerts,
     g_prim_inverseCubeUVs,
