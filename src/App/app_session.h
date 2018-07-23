@@ -295,6 +295,9 @@ u8 App_StartSinglePlayer(char* path)
         return 0;
     }
     #endif
+	#if 1
+	Game_BuildTestScene(&g_gameState);
+	#endif
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	
 	//App_StartRecording(&g_gameState);

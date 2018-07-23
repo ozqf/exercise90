@@ -31,6 +31,7 @@ u32 EC_Transform_ApplyState(GameState* gs, Ent* ent, u8* stream)
         t.pos.y,
         t.pos.z
     );
+	ent->transform = t;
     return (stream - origin);
 }
 
@@ -68,6 +69,25 @@ u32 EC_Collider_ReadState(GameState* gs, Ent* ent, u8* stream)
     return (stream - origin);
 }
 
+void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
+{
+    EC_Health* hp = EC_FindHealth(gs, ent);
+    if (hp == NULL)
+    {
+        hp = EC_AddHealth(gs, ent);
+        hp->state.hp = state->hp;
+    }
+}
+
+u32 EC_Health_ReadState(GameState* gs, Ent* ent, u8* stream)
+{
+    u8* origin = stream;
+    EC_HealthState state = {};
+    stream += COM_COPY_STRUCT(stream, &state, EC_HealthState);
+    EC_HealthApplyState(gs, ent, &state);
+    return (stream - origin);
+}
+
 #define EC_UPDATE_CALL(gameState, flag, func) \
 { \
     if (componentBits & flag##) \
@@ -91,11 +111,13 @@ u32 Ent_ApplyState(GameState* gs, u8* stream, u32 numBytes)
     {
         // create!
         ent = Ent_GetAndAssign(&gs->entList, &h.entId);
+        ent->factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
     }
     u32 componentBits = h.componentBits;
     EC_UPDATE_CALL(gs, EC_FLAG_TRANSFORM, EC_Transform_ApplyState)
     EC_UPDATE_CALL(gs, EC_FLAG_RENDERER, EC_Renderer_ApplyState)
     EC_UPDATE_CALL(gs, EC_FLAG_COLLIDER, EC_Collider_ReadState);
+    EC_UPDATE_CALL(gs, EC_FLAG_HEALTH, EC_Health_ReadState);
     return (stream - origin);
 }
 
@@ -113,6 +135,7 @@ void Test_WriteTestEntityBuffer(GameState* gs)
     h.componentBits |= EC_FLAG_TRANSFORM;
     h.componentBits |= EC_FLAG_RENDERER;
     h.componentBits |= EC_FLAG_COLLIDER;
+    h.componentBits |= EC_FLAG_HEALTH;
 
     size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
 
@@ -144,6 +167,10 @@ void Test_WriteTestEntityBuffer(GameState* gs)
     );
 
     size += App_WriteCommandBytes((u8*)&col, sizeof(EC_ColliderState));
+
+    EC_HealthState state = {};
+    state.hp = 100;
+    size += App_WriteCommandBytes((u8*)&state, sizeof(EC_HealthState));
 
     // Close command
     App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, (u16)size);

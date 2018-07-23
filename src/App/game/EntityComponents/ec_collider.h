@@ -95,7 +95,10 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
     EC_Collider* col = EC_FindCollider(gs, ent);
     if (col == NULL)
     {
-        printf("  GAME Create collider\n");
+        printf("  GAME Create collider for %d/%d\n",
+			ent->entId.iteration,
+			ent->entId.index
+		);
         col = EC_AddCollider(gs, ent);
         col->state = *state;
         col->shapeId = Phys_CreateShape(&col->state.def, ent->entId.index, ent->entId.iteration);
@@ -104,5 +107,6 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
     else
     {
         // Restore state...
+		// So who is setting the position here?
     }
 }

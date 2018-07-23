@@ -4,6 +4,66 @@
 
 #include "game_intersection_test.cpp"
 
+void Game_AddTestSolid(GameState* gs,
+	f32 x, f32 y, f32 z,
+	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ)
+{
+	u8* headerPos = App_StartCommandStream();
+	u32 size = 0;
+	Cmd_EntityStateHeader h = {};
+	
+	h.entId = Ent_ReserveFreeEntity(&gs->entList);
+	h.componentBits |= EC_FLAG_TRANSFORM;
+    h.componentBits |= EC_FLAG_RENDERER;
+    h.componentBits |= EC_FLAG_COLLIDER;
+	
+	size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
+
+    // create transform state
+    Transform t = {};
+    Transform_SetToIdentity(&t);
+	t.pos.x = x;
+    t.pos.y = y;
+	t.pos.z = z;
+	t.scale.x = halfSizeX * 2;
+	t.scale.y = halfSizeY * 2;
+	t.scale.z = halfSizeZ * 2;
+
+    size += App_WriteCommandBytes((u8*)&t, sizeof(Transform));
+    
+    // Wall texture "textures\\COMP03_1.bmp"
+    // Metal texture "textures\\W33_5.bmp"
+
+    // create renderer state
+    EC_RendererState r = {};
+    COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
+
+    size += App_WriteCommandBytes((u8*)&r, sizeof(EC_RendererState));
+
+    // Create Collider
+    EC_ColliderState col = {};
+    col.def.SetAsBox(
+        t.pos.x, t.pos.y, t.pos.z,
+        halfSizeX, halfSizeY, halfSizeZ, 
+        ZCOLLIDER_FLAG_STATIC,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_DEFAULT
+    );
+
+    size += App_WriteCommandBytes((u8*)&col, sizeof(EC_ColliderState));
+
+    // Close command
+    App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, (u16)size);
+    printf("Wrote cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
+}
+
+void Game_BuildTestScene(GameState* gs)
+{
+	Game_AddTestSolid(gs, 0, -6, 0, 12, 1, 12);
+	Game_AddTestSolid(gs, 0, 6, 0, 12, 1, 12);
+}
+
 void Game_BuildTestHud(GameState *state)
 {
 	#if 1
