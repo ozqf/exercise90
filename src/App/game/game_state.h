@@ -7,7 +7,7 @@ void GS_Init(GameState *gs)
 {
     printf("GAME Init State\n");
     printf("GAME sizeof(Ent): %d\n", sizeof(Ent));
-    printf("GAME sizeof(Entity_FullState): %d\n", sizeof(Entity_FullState));
+    printf("GAME sizeof(EntityState): %d\n", sizeof(EntityState));
     // Nice to preserve the debug mode!
     u16 debugMode = gs->debugMode;
     *gs = {};

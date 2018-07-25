@@ -2,50 +2,14 @@
 
 #include "game.h"
 
-// struct Ent_UpdateHeader
-// {
-//     EntId entId;
-//     u32 componentBits;
-// };
-
-#if 0
-u32 EC_AIController_ApplyState(GameState* gs, Ent* ent, u8* ptr)
-{
-    u8* origin = ptr;
-    EC_AIController update;
-    COM_COPY_STRUCT(ptr, &update, EC_AIController);
-
-    EC_AIController ai = EC_FindAIController(gs, entId);
-    
-    return 0;
-}
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////////
-// TRANSFORM
+// APPLY STATE
 ///////////////////////////////////////////////////////////////////////////////////
 void EC_Transform_ApplyState(GameState* gs, Ent* ent, Transform* transform)
 {
     ent->transform = *  transform;
 }
 
-u32 EC_Transform_ReadState(GameState* gs, Ent* ent, u8* stream)
-{
-    u8* origin = stream;
-    Transform t = {};
-    stream += COM_COPY_STRUCT(stream, &t, Transform);
-    printf("  Read transform pos %.2f, %.2f, %.2f\n",
-        t.pos.x,
-        t.pos.y,
-        t.pos.z
-    );
-	EC_Transform_ApplyState(gs, ent, &t);
-    return (stream - origin);
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-// RENDERER
-///////////////////////////////////////////////////////////////////////////////////
 void EC_Renderer_ApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
 {
     EC_Renderer* r = EC_FindRenderer(gs, ent);
@@ -61,23 +25,6 @@ void EC_Renderer_ApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
     );
 }
 
-u32 EC_Renderer_ReadState(GameState* gs, Ent* ent, u8* stream)
-{
-    u8* origin = stream;
-    EC_RendererState state = {};
-    stream += COM_COPY_STRUCT(stream, &state, EC_RendererState);
-    printf("Read Renderer State\n  Mesh: %s\n  Texture: %s\n",
-        state.meshName,
-        state.textureName
-    );
-    EC_Renderer_ApplyState(gs, ent, &state);
-    return (stream - origin);
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-// COLLIDER
-///////////////////////////////////////////////////////////////////////////////////
-
 void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
 {
     EC_Collider* col = EC_FindCollider(gs, ent);
@@ -90,7 +37,6 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
         col = EC_AddCollider(gs, ent);
         col->state = *state;
         col->shapeId = Phys_CreateShape(&col->state.def, ent->entId.index, ent->entId.iteration);
-        //col->state.shapeId.SetAsBox(0, 0, 0, state->def);
     }
     else
     {
@@ -99,18 +45,11 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
     }
 }
 
-u32 EC_Collider_ReadState(GameState* gs, Ent* ent, u8* stream)
+void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorState* state)
 {
-    u8* origin = stream;
-    EC_ColliderState state = {};
-    stream += COM_COPY_STRUCT(stream, &state, EC_ColliderState);
-    EC_ColliderApplyState(gs, ent, &state);
-    return (stream - origin);
+
 }
 
-///////////////////////////////////////////////////////////////////////////////////
-// HEALTH
-///////////////////////////////////////////////////////////////////////////////////
 void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
 {
     EC_Health* hp = EC_FindHealth(gs, ent);
@@ -121,12 +60,19 @@ void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
     }
 }
 
-u32 EC_Health_ReadState(GameState* gs, Ent* ent, u8* stream)
+void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileState* state)
 {
-    u8* origin = stream;
-    EC_HealthState state = {};
-    stream += COM_COPY_STRUCT(stream, &state, EC_HealthState);
-    return (stream - origin);
+
+}
+
+void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
+{
+    EC_Label* label = EC_FindLabel(gs, ent);
+    if (label == NULL)
+    {
+        label = EC_AddLabel(gs, ent);
+    }
+    COM_CopyStringLimited(state->label, label->state.label, EC_LABEL_LENGTH);
 }
 
 #define EC_UPDATE_CALL(gameState, flag, func) \
@@ -145,19 +91,23 @@ u32 EC_Health_ReadState(GameState* gs, Ent* ent, u8* stream)
     } \
 }
 
-void Ent_ApplyStateData(GameState* gs, Entity_FullState* state)
+void Ent_ApplyStateData(GameState* gs, EntityState* state)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &state->entId);
     if (ent == NULL)
     {
-        // create!
+        // create for now. TODO: Split into create/update functions
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
+        // TODO: pass factory type in state when spawning
         ent->factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
     }
     if (state->componentBits & EC_FLAG_TRANSFORM) { EC_Transform_ApplyState(gs, ent, &state->transform); }
     if (state->componentBits & EC_FLAG_RENDERER) { EC_Renderer_ApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
+    if (state->componentBits & EC_FLAG_ACTORMOTOR) { EC_ActorMotorApplyState(gs, ent, &state->actorState); }
     if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
+    if (state->componentBits & EC_FLAG_PROJECTILE) { EC_ProjectileApplyState(gs, ent, &state->projectileState); }
+    if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
 }
 
 u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
@@ -175,7 +125,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     COM_PrintBits(h.componentBits, 1);
     #endif
 
-    Entity_FullState state = {};
+    EntityState state = {};
     state.entId = h.entId;
     state.componentBits = h.componentBits;
 
@@ -197,28 +147,6 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     Ent_ApplyStateData(gs, &state);
 
     return read;
-}
-
-void Test_ReadEntityState(Entity_FullState* target, u8* stream, u32 numBytes)
-{
-    
-}
-
-void Test_WriteEntityState(Entity_FullState* target, u8* stream, u32 numBytes)
-{
-    
-}
-
-void Test_Template(GameState* gs)
-{
-    // Spawn an entity of a type but with specific state overridden...
-    /*
-    > Original
-        \/
-    patch fields
-        \/
-    > New version
-    */
 }
 
 void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)

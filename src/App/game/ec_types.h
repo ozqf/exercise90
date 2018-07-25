@@ -79,7 +79,7 @@ struct EC_Collider
 
 // A full, no nonsense description of
 // an entity with all of it's components
-struct Entity_FullState
+struct EntityState
 {
     EntId entId;
     // As this contains every possible state struct

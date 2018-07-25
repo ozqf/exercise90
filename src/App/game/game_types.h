@@ -261,9 +261,10 @@ struct EC_Projectile
     EC_ProjectileState state;
 };
 
+#define EC_LABEL_LENGTH 32
 struct EC_LabelState
 {
-    char label[32];
+    char label[EC_LABEL_LENGTH];
 };
 
 struct EC_Label
@@ -311,13 +312,16 @@ struct EC_Thinker
     Ent_Brain brain;
 };
 
-// A full, no nonsense description of
-// an entity with all of it's components
-struct Entity_FullState
+/**
+ * A master container for complete entity component state (spawning)
+ * or pieces of component state (updating)
+ */
+struct EntityState
 {
     EntId entId;
+    i32 factoryType;
     // As this contains every possible state struct
-    // use flags to know which should actually be used!
+    // use flags to know which should actually be used
     u32 componentBits;
 
     // keep in the same order or stuff will explode
