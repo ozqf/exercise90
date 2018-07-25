@@ -174,12 +174,12 @@ struct EC_Header
 
 #define EC_NUM_TYPES 9
 
-struct EC_Transform
-{
-    EC_Header header;
+// struct EC_Transform
+// {
+//     EC_Header header;
 
-    Transform t;
-};
+//     Transform t;
+// };
 
 #define EC_RENDERER_STRING_LENGTH 32
 
@@ -285,6 +285,11 @@ struct EC_Health
     EC_HealthState state;
 };
 
+struct EC_ThinkerState
+{
+    Ticker ticker;
+};
+
 union Ent_Brain
 {
     struct Spawner
@@ -313,11 +318,25 @@ struct Entity_FullState
     EntId entId;
     // As this contains every possible state struct
     // use flags to know which should actually be used!
-    u32 componentFlags;
-    Transform t;
+    u32 componentBits;
+
+    // keep in the same order or stuff will explode
+    Transform transform;
     EC_RendererState renderState;
+    EC_ColliderState colliderState;
+    EC_ActorMotorState actorState;
+    EC_HealthState healthState;
+
+    EC_ProjectileState projectileState;
     EC_LabelState labelState;
-    // note: size so far is 164 bytes
+};
+
+// Current things you can customise when you spawn an entity.
+struct EntitySpawnOptions
+{
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 scale;
 };
 
 //////////////////////////////////////////////////

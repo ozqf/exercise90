@@ -100,7 +100,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ECS"))
     {
-        Test_WriteTestEntityBuffer(&g_gameState);
+        EntitySpawnOptions options = {};
+        options.scale = { 1, 1, 1 };
+        options.pos.y = 0.75f;
+        options.rot.y = 45;
+        Game_WriteSpawnCmd(&g_gameState, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "VARS"))

@@ -55,7 +55,7 @@ void Game_AddTestSolid(GameState* gs,
 
     // Close command
     App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, (u16)size);
-    printf("Wrote cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
+    printf("  Add test solid: cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
 }
 
 void Game_BuildTestScene(GameState* gs)
@@ -235,7 +235,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         case CMD_TYPE_ENTITY_STATE_2:
         {
             printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
-            Ent_ApplyState(gs, ptr, header->size);
+            Ent_ReadStateData(gs, ptr, header->size);
             return 1;
         } break;
         case CMD_TYPE_ENTITY_STATE:

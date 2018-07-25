@@ -150,7 +150,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
                 printf("GAME: Ent is marked in use! Aborting\n");
                 ILLEGAL_CODE_PATH
             }
-            printf("GAME assigning Ent %d/%d\n", entId->iteration, entId->index);
+            //printf("GAME assigning Ent %d/%d\n", entId->iteration, entId->index);
 			return &ents->items[i];
 		}
 	}

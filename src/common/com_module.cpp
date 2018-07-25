@@ -17,3 +17,4 @@
 #include "com_collision.cpp"
 #include "com_heap/com_heap.cpp"
 #include "com_assets.cpp"
+#include "com_debug.cpp"
