@@ -3,14 +3,14 @@
 #include "game.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
-// APPLY STATE
+// APPLY COMPONENT STATE
 ///////////////////////////////////////////////////////////////////////////////////
-void EC_Transform_ApplyState(GameState* gs, Ent* ent, Transform* transform)
+void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
 {
     ent->transform = *  transform;
 }
 
-void EC_Renderer_ApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
+void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
 {
     EC_Renderer* r = EC_FindRenderer(gs, ent);
     if (r == NULL)
@@ -36,7 +36,11 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
 		);
         col = EC_AddCollider(gs, ent);
         col->state = *state;
-        col->shapeId = Phys_CreateShape(&col->state.def, ent->entId.index, ent->entId.iteration);
+        col->shapeId = Phys_CreateShape(
+            &col->state.def,
+            ent->entId.index,
+            ent->entId.iteration
+        );
     }
     else
     {
@@ -47,7 +51,12 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
 
 void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorState* state)
 {
-
+    EC_ActorMotor* motor = EC_FindActorMotor(gs, ent);
+    if (motor == NULL)
+    {
+        motor = EC_AddActorMotor(gs, ent);
+    }
+    motor->state = *state;
 }
 
 void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
@@ -62,7 +71,8 @@ void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
 
 void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileState* state)
 {
-
+    EC_Projectile* prj = EC_FindProjectile(gs, ent);
+    if ()
 }
 
 void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
@@ -75,22 +85,9 @@ void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
     COM_CopyStringLimited(state->label, label->state.label, EC_LABEL_LENGTH);
 }
 
-#define EC_UPDATE_CALL(gameState, flag, func) \
-{ \
-    if (componentBits & flag##) \
-    { \
-        stream += func##(##gameState##, ent, stream); \
-    } \
-}
-
-#define EC_APPLY_COMPONENT_STATE(gameState, flag, func) \
-{ \
-    if (componentBits & flag##) \
-    { \
-        stream += func##(##gameState##, ent, stream); \
-    } \
-}
-
+///////////////////////////////////////////////////////////////////////////////////
+// APPLY STATE
+///////////////////////////////////////////////////////////////////////////////////
 void Ent_ApplyStateData(GameState* gs, EntityState* state)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &state->entId);
@@ -101,8 +98,8 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
         // TODO: pass factory type in state when spawning
         ent->factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
     }
-    if (state->componentBits & EC_FLAG_TRANSFORM) { EC_Transform_ApplyState(gs, ent, &state->transform); }
-    if (state->componentBits & EC_FLAG_RENDERER) { EC_Renderer_ApplyState(gs, ent, &state->renderState); }
+    if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
+    if (state->componentBits & EC_FLAG_RENDERER) { EC_RendererApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
     if (state->componentBits & EC_FLAG_ACTORMOTOR) { EC_ActorMotorApplyState(gs, ent, &state->actorState); }
     if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
