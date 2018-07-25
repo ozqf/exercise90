@@ -72,7 +72,11 @@ void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
 void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileState* state)
 {
     EC_Projectile* prj = EC_FindProjectile(gs, ent);
-    if ()
+    if (prj == NULL)
+    {
+        prj = EC_AddProjectile(gs, ent);
+    }
+    prj->state = *state;
 }
 
 void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)

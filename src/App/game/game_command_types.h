@@ -56,6 +56,7 @@ inline u16 Read(CmdHeader* h, u8* ptr)\
 }
 #endif
 
+// TODO: REMOVE THIS WHEN SECOND VERISON OF ECS IS WORKING?
 // 100
 struct Cmd_Spawn
 {
@@ -149,12 +150,12 @@ struct Cmd_Text
 // State save/load
 // 105 - Complete entity restore
 
+// TODO: REMOVE THIS WHEN SECOND VERISON OF ECS IS WORKING
 /*
 TODO: This state update object is cramming every component's possible
 state data into one struct, some of it overlapping between entity types.
 Very ugly. Refactor somehow, or dump ECS and just have monolithic entities!
 */
-
 struct Cmd_EntityState
 {
     // Identification
@@ -218,6 +219,14 @@ struct Cmd_EntityStateHeader
 {
     EntId entId;
     u32 componentBits;
+};
+
+// 109 CMD_TYPE_ENTITY_STATE_2
+struct Cmd_EntitySpawn2
+{
+    EntId entId;
+    i32 factoryType;
+    EntitySpawnOptions options;
 };
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);

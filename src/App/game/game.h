@@ -194,6 +194,7 @@ ClientTick g_debugInput = {};
 #include "ec_types.h"
 #include "EntityComponents/ec_collider.h"
 #include "ec_factory.h"
+#include "EntityComponents/ent_templates.h"
 #include "comp_rendObj.h"
 #include "comp_aiController.h"
 #include "game_players.h"
