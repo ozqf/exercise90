@@ -2,8 +2,6 @@
 
 #include "win32_gl_module.cpp"
 
-HGLRC g_openglRC = NULL;
-
 i32 Win32_InitOpenGL(HWND window)
 {
 	if (g_openglRC != NULL) { return 1; }

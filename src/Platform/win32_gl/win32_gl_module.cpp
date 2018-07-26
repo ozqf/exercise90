@@ -27,12 +27,17 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 // Data
 //////////////////////////////////////////////////////////////////////////
 
+// HGLRC "HandleOpenGLRenderingContext"
+HGLRC g_openglRC = NULL;
+
 // Settings
 global_variable f32 win32_aspectRatio = 0;
 
 // assets
 #define NUM_TEST_TEXTURES 128
 GLuint g_textureHandles[NUM_TEST_TEXTURES];
+#define NUM_TEST_VERTEX_BUFFER_OBJECTS 128
+GLuint g_vboHandles[NUM_TEST_VERTEX_BUFFER_OBJECTS];
 
 //////////////////////////////////////////////////////////////////////////
 // Functions

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "win32_gl_module.cpp"
 
 void R_SetupTestTexture(i32 textureIndex)
 {
