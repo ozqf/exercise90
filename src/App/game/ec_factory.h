@@ -90,7 +90,7 @@ void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-// APPLY STATE
+// APPLY ENTITY STATE
 ///////////////////////////////////////////////////////////////////////////////////
 void Ent_ApplyStateData(GameState* gs, EntityState* state)
 {
@@ -129,7 +129,9 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     EntityState state = {};
     state.entId = h.entId;
     state.componentBits = h.componentBits;
-
+	
+	// TODO: Replace raw struct copy with proper encoding functions!
+    // WARNING: THIS IS ORDER DEPENDENT!
     if (h.componentBits & EC_FLAG_TRANSFORM) { stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
     if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendererState); }
     if (h.componentBits & EC_FLAG_COLLIDER) { stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
@@ -148,6 +150,54 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     Ent_ApplyStateData(gs, &state);
 
     return read;
+}
+
+/**
+ * Fill out a state struct for the given entity
+ */
+void Ent_CopyFullEntityState(EntityState* state, Ent* ent)
+{
+    
+}
+
+/**
+ * Write a state command to output.
+ */
+u16 Ent_WriteEntityStateCmd(EntityState* state)
+{
+    const u32 bufferSize = 1024;
+    u8 buffer[bufferSize];
+    u8* origin = buffer;
+    u8* stream = origin;
+    
+    
+    Cmd_EntityStateHeader h = {};
+    h.entId = state->entId;
+    h.componentBits = state->componentBits;
+    stream += COM_COPY_STRUCT(&h, stream, Cmd_EntityStateHeader);
+    
+    if (h.componentBits & EC_FLAG_TRANSFORM)
+    { stream += COM_COPY_STRUCT(&state->transform, stream, Transform); }
+    if (h.componentBits & EC_FLAG_RENDERER)
+    { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendererState); }
+    if (h.componentBits & EC_FLAG_COLLIDER)
+    { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_RendererState); }
+    if (h.componentBits & EC_FLAG_ACTORMOTOR)
+    { stream += COM_COPY_STRUCT(&state->actorState, stream, EC_ActorMotorState); }
+    if (h.componentBits & EC_FLAG_HEALTH)
+    { stream += COM_COPY_STRUCT(&state->healthState, stream, EC_HealthState); }
+    if (h.componentBits & EC_FLAG_PROJECTILE)
+    { stream += COM_COPY_STRUCT(&state->projectileState, stream, EC_ProjectileState); }
+    if (h.componentBits & EC_FLAG_LABEL)
+    { stream += COM_COPY_STRUCT(&state->labelState, stream, EC_LabelState); }
+
+    u16 bytesWritten = (u16)(stream - origin);
+
+    u8* cmdOrigin = App_StartCommandStream();
+    App_WriteCommandBytes(origin, bytesWritten);
+    App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
+
+    return bytesWritten;
 }
 
 void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
@@ -210,6 +260,14 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
 
 void Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
 {
+    EntityState s = {};
+    EntId entId = Ent_ReserveFreeEntity(&gs->entList);
+    s.entId = entId;
+    if (Game_WriteSpawnTemplate(factoryType, &s, options))
+    {
+        Ent_WriteEntityStateCmd(&s);
+    }
+    #if 0
     switch (factoryType)
     {
         case ENTITY_TYPE_RIGIDBODY_CUBE:
@@ -222,4 +280,5 @@ void Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* opti
             printf("GAME Unknown factory type %d\n", factoryType);
         } break;
     }
+    #endif
 }

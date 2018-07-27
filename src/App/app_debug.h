@@ -29,10 +29,12 @@ void App_DebugPrintEntities(GameState* gs)
     {
         Ent* e = &gs->entList.items[i];
         if (e->inUse == ENTITY_STATUS_FREE) { continue; }
+        Transform* t = &e->transform;
         count++;
-        printf("%d/%d: Type %d status %d\n",
+        printf("%d/%d: Type %d status %d pos: %.2f %.2f %.2f\n",
             e->entId.iteration, e->entId.index,
-            e->factoryType, e->inUse
+            e->factoryType, e->inUse,
+            t->pos.x, t->pos.y, t->pos.z
         );
     }
     printf(" %d active entities\n", count);

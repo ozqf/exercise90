@@ -235,7 +235,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         case CMD_TYPE_ENTITY_STATE_2:
         {
             printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
-            Ent_ReadStateData(gs, ptr, header->size);
+            Ent_ReadStateData(gs, ptr, header->GetSize());
             return 1;
         } break;
         case CMD_TYPE_ENTITY_STATE:
@@ -401,6 +401,11 @@ void Game_Tick(
 	#if 1
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
     {
+        EntitySpawnOptions options = {};
+        //options.scale = { 1, 1, 1 };
+        options.pos = Game_RandomSpawnOffset(10, 0, 10);
+        Game_WriteSpawnCmd(gs, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
+        #if 0
         // CmdHeader header = {};
         // header.type = CMD_TYPE_SPAWN;
         // header.size = sizeof(Cmd_Spawn);
@@ -417,6 +422,7 @@ void Game_Tick(
         //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, CmdHeader);
         //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
         //output->count++;
+        #endif
     }
 	#endif
 	#if 0

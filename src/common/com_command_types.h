@@ -25,10 +25,12 @@
  */
 struct CmdHeader
 {
+    private:
     u8 type;
     u8 flags;
 	u16 size;
     
+    public:
     inline u8 GetType() { return (u8)type; }
     inline void SetType(u8 newType) { this->type = newType; }
     inline u16 GetSize() { return (u16)size; }

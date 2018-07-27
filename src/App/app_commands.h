@@ -100,6 +100,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ECS"))
     {
+        printf("*** Entity Component System Test ***\n");
         EntitySpawnOptions options = {};
         options.scale = { 1, 1, 1 };
         options.pos.y = 0.75f;

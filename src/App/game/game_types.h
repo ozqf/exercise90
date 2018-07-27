@@ -341,6 +341,8 @@ struct EntitySpawnOptions
     Vec3 pos;
     Vec3 rot;
     Vec3 scale;
+
+    Vec3 vel;
 };
 
 //////////////////////////////////////////////////

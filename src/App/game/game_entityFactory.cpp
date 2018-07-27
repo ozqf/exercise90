@@ -184,7 +184,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
     }
     return ent;
 }
-
+#if 0
 Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -243,7 +243,7 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
     
     return ent;
 }
-
+#endif
 Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -368,12 +368,12 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
         {
             ent = Ent_ReadGroundActorState(gs, cmd);
         } break;
-
+        #if 0
         case ENTITY_TYPE_RIGIDBODY_CUBE:
         {
             ent = Ent_ReadRigidBodyCubeState(gs, cmd);
         } break;
-
+        #endif
         case ENTITY_TYPE_THINKER:
         {
             ent = Ent_ReadThinkerState(gs, cmd);
