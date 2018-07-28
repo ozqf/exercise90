@@ -76,7 +76,10 @@ To create an entity:
 // index: direct index into the entity array
 // iteration: Incremented for each use of this entity index
 //   to make recycled uses unique
+// NOTE: iteration starts at 1 and should never be zero
+// An EntId of 0/0 is a 'NULL' entity
 //////////////////////////////////////////////////
+#pragma pack(push, 1)
 union EntId
 {
     struct
@@ -85,14 +88,11 @@ union EntId
         u16 index;
     };
     u16 arr[2];
+    u32 value;
 };
+#pragma pack(pop)
 
-inline void EntId_Copy(EntId* source, EntId* target)
-{
-    target->index = source->index;
-    target->iteration = source->iteration;
-}
-
+// Is this necessary?s
 inline u8 EntId_Equals(EntId* a, EntId* b)
 {
     return (a->index == b->index && a->iteration == b->iteration);
@@ -111,6 +111,7 @@ struct Ent
     u8 priority;            // This entity's base update importance gained per frame
 
     // State
+    EntId source;
     Transform transform;
 };
 
@@ -170,7 +171,7 @@ struct EC_Header
 #define EC_FLAG_PROJECTILE (1 << 5)
 #define EC_FLAG_LABEL (1 << 6)
 #define EC_FLAG_HEALTH (1 << 7)
-#define COM_FLAG_THINKER (1 << 8)
+#define EC_FLAG_THINKER (1 << 8)
 
 #define EC_NUM_TYPES 9
 
@@ -323,6 +324,7 @@ struct EntityState
     // As this contains every possible state struct
     // use flags to know which should actually be used
     u32 componentBits;
+    EntId source;
 
     // keep in the same order or stuff will explode
     Transform transform;
@@ -343,6 +345,8 @@ struct EntitySpawnOptions
     Vec3 scale;
 
     Vec3 vel;
+
+    EntId source;
 };
 
 //////////////////////////////////////////////////
@@ -447,4 +451,4 @@ DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)
 DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
-DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, COM_FLAG_THINKER)
+DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_FLAG_THINKER)

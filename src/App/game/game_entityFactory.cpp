@@ -133,7 +133,7 @@ Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
     }
     return ent;
 }
-
+#if 0
 Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -160,6 +160,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
         ent = Ent_GetAndAssign(&gs->entList, &cmd->entityId);
         ent->factoryType = cmd->factoryType;
         Transform_SetPosition(&ent->transform, 0, 0, 0);
+
         collider = EC_AddCollider(gs, ent);
 	    f32 playerHeight = 1.85f; // average male height in metres
 	    f32 playerWidth = 0.46f; // reasonable shoulder width?
@@ -184,6 +185,7 @@ Ent* Ent_ReadGroundActorState(GameState* gs, Cmd_EntityState* cmd)
     }
     return ent;
 }
+#endif
 #if 0
 Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
 {
@@ -359,6 +361,7 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
     Ent* ent = NULL;
     switch (cmd->factoryType)
     {
+        #if 0
         case ENTITY_TYPE_PROJECTILE:
         {
             ent = Ent_ReadProjectileState(gs, cmd);
@@ -368,7 +371,7 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
         {
             ent = Ent_ReadGroundActorState(gs, cmd);
         } break;
-        #if 0
+        
         case ENTITY_TYPE_RIGIDBODY_CUBE:
         {
             ent = Ent_ReadRigidBodyCubeState(gs, cmd);

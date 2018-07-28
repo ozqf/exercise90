@@ -66,6 +66,7 @@ void Game_BuildTestScene(GameState* gs)
 
 void Game_BuildTestHud(GameState *state)
 {
+
 	#if 1
     EntId entId;
     Ent* ent;
@@ -87,9 +88,9 @@ void Game_BuildTestHud(GameState *state)
 	Ent_ResetEntityIds(ents);
 	#endif
 
-/////////////////////////////////////////////////////////////
-// A test HUD
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
+    // A test HUD
+    /////////////////////////////////////////////////////////////
 	#if 1
     // Crosshair (sprite rendering a single char from a character sheet)
     entId = Ent_ReserveFreeEntity(ents);
@@ -465,12 +466,20 @@ void Game_Tick(
 
     if (gs->localPlayerHasEnt)
     {
-        Ent* ent = Ent_GetEntityById(&gs->entList, &gs->localPlayerEntId);
-        Assert(ent != NULL);
-        EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
-        Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->state.input.degrees);
-		// raise camera to eye height
-        gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
+		EntId id = gs->localPlayerEntId;
+        Ent* ent = Ent_GetEntityById(&gs->entList, &id);
+		if (ent == NULL)
+		{
+			printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
+
+		}
+		else
+		{
+			EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
+			Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->state.input.degrees);
+			// raise camera to eye height
+			gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
+		}
     }
     
 }

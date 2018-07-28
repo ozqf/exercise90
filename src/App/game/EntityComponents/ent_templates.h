@@ -18,6 +18,12 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
     if (options->scale.y <= 0) { options->scale.y = 1; printf("  SpawnOptions had scaleY <= 0, forced to 1\n"); }
     if (options->scale.z <= 0) { options->scale.z = 1; printf("  SpawnOptions had scaleZ <= 0, forced to 1\n"); }
 
+    state->source = options->source;
+    if (state->source.value != 0)
+    {
+        printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
+    }
+
     if (state->componentBits & EC_FLAG_TRANSFORM)
     {
         Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
@@ -86,11 +92,34 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
-    ILLEGAL_CODE_PATH
-
     state->factoryType = ENTITY_TYPE_ACTOR_GROUND;
+    printf("GAME spawn actor ground %d/%d\n", state->entId.iteration, state->entId.index);
+
+    // apply defaults
+    state->componentBits |= EC_FLAG_TRANSFORM;
+    Transform_SetToIdentity(&state->transform);
 
 
+    state->componentBits |= EC_FLAG_COLLIDER;
+    f32 playerHeight = 1.85f; // average male height in metres
+	f32 playerWidth = 0.46f; // reasonable shoulder width?
+    state->colliderState.def.SetAsBox(
+        state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
+        playerWidth / 2, playerHeight / 2, playerWidth / 2, 
+        ZCOLLIDER_FLAG_NO_ROTATION,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_ACTOR
+    );
+
+    state->componentBits  |= EC_FLAG_ACTORMOTOR;
+    state->actorState.runSpeed = 10;
+    state->actorState.runAcceleration = 50;
+
+    state->componentBits |= EC_FLAG_HEALTH;
+    state->healthState.hp = 100;
+    
+
+    Ent_ApplySpawnOptions(state, options);
 }
 
 void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
@@ -100,24 +129,31 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    
     state->componentBits |= EC_FLAG_RENDERER;
-    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\W33_5.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited(
+        "Cube",
+        state->renderState.meshName,
+        EC_RENDERER_STRING_LENGTH
+    );
+    COM_CopyStringLimited(
+        "textures\\W33_5.bmp",
+        state->renderState.textureName,
+        EC_RENDERER_STRING_LENGTH
+    );
 
     state->componentBits |= EC_FLAG_PROJECTILE;
     state->projectileState = {};
     state->projectileState.damage.damage = 10;
     state->projectileState.speed = 100;
+    f32 timeToLive = 0.5f;
+    i32 tocks = 1;
+    state->projectileState.ticker = { timeToLive, timeToLive, tocks, tocks };
 
-    // apply options
-    //state->projectileState.ticker.tock = cmd->ticker.tock;
-    //state->projectileState.ticker.tockMax = cmd->ticker.tockMax;
-    //state->projectileState.ticker.tick = cmd->ticker.tick;
-    //state->projectileState.ticker.tickMax = cmd->ticker.tickMax;
     state->projectileState.move.x = options->vel.x;
     state->projectileState.move.y = options->vel.y;
     state->projectileState.move.z = options->vel.z;
+
+    Ent_ApplySpawnOptions(state, options);
 }
 
 void Ent_SetTemplate_Thinker(EntityState* state, EntitySpawnOptions* options)

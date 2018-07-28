@@ -22,6 +22,7 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 		case IMPULSE_JOIN_GAME:
 		{
             #if 0
+            // even older
 			printf("SV Client %d impulse %d: Spawn player\n", cmd->clientId, cmd->impulse);
 
             Player* plyr = SV_FindPlayerByClientId(&gs->playerList, cmd->clientId);
@@ -50,7 +51,27 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
                 printf("GAME Cannot spawn - client is free or playing already\n");
                 return 1;
             }
+
+            EntitySpawnOptions options = {};
+            options.pos.x = 0;
+            options.pos.y = 0;
+            options.pos.z = 0;
+            EntId entId = Game_WriteSpawnCmd(gs, ENTITY_TYPE_ACTOR_GROUND, &options);
             
+            gs->localPlayerHasEnt = 1;
+            gs->localPlayerEntId = entId;
+            printf("SV Spawning local client avatar %d/%d\n", entId.iteration, entId.index);
+
+            Cmd_ClientUpdate clUpdate = {};
+            clUpdate.clientId = cmd->clientId;
+            clUpdate.state = CLIENT_STATE_PLAYING;
+            clUpdate.entId = entId;
+            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+
+            #endif
+
+            #if 0
+            // Old
 			Cmd_EntityState spawn = {};
 			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
 			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
@@ -63,16 +84,11 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             printf("SV Write CMD %d\n", CMD_TYPE_ENTITY_STATE);
             printf("SV Write CMD %d\n", CMD_TYPE_CLIENT_UPDATE);
 
-            //App_WriteGameCmd((u8*)&spawn, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-            //App_WriteGameCmd((u8*)&clUpdate, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
-
             APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, spawn);
             APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
-
-            // Exec_Spawn(gs, &spawn);
-            // Exec_UpdateClient(&clUpdate);
-			return 1;
             #endif
+
+			return 1;
 		} break;
 
 		default:

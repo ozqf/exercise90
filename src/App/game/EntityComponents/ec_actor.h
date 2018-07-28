@@ -3,8 +3,19 @@
 #include "game.h"
 #include "../common/com_module.h"
 
-void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
+void SV_SpawnTestBullet(GameState* gs, EntId source, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
 {
+    EntitySpawnOptions options = {};
+    options.pos.x = x;
+    options.pos.y = y;
+    options.pos.z = z;
+    options.source = source;
+    
+    options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, 100);
+    
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
+
+    #if 0
     Cmd_EntityState cmd = {};
     cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
     cmd.factoryType = ENTITY_TYPE_PROJECTILE;
@@ -15,14 +26,7 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
     cmd.rot.x = pitchDegrees;
     cmd.moveSpeed = TEST_PROJECTILE_SPEED;
 
-    // Calculate velocity via a transform
-    Transform t;
-    Transform_SetToIdentity(&t);
-    Transform_RotateY(&t, yawDegrees * DEG2RAD);
-    Transform_RotateX(&t, pitchDegrees * DEG2RAD);
-    cmd.vel.x = -t.rotation.zAxis.x * cmd.moveSpeed;
-    cmd.vel.y = -t.rotation.zAxis.y * cmd.moveSpeed;
-    cmd.vel.z = -t.rotation.zAxis.z * cmd.moveSpeed;
+    cmd.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, cmd.moveSpeed);
 
     cmd.ticker.tickMax = 1.0f;
     cmd.ticker.tick = 0.5f;
@@ -36,7 +40,7 @@ void SV_SpawnTestBullet(GameState* gs, f32 x, f32 y, f32 z, f32 pitchDegrees, f3
     }
     APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
     //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-
+    #endif
 }
 
 void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
@@ -219,6 +223,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
 
             SV_SpawnTestBullet(
                 gs,
+                motor->header.entId,
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,
@@ -233,6 +238,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
             SV_SpawnTestBullet(
                 gs,
+                motor->header.entId,
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,
@@ -244,6 +250,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
             yawOffset = COM_Randf32() * (spread - -spread) + -spread;
             SV_SpawnTestBullet(
                 gs,
+                motor->header.entId,
                 t->pos.x,
                 t->pos.y,
                 t->pos.z,

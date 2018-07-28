@@ -44,7 +44,8 @@ EntId Ent_ReserveFreeEntity(EntList* ents)
 }
 
 /**
- * Clear ids and set all iterations back to 0
+ * Clear ids and set all iterations back to 1
+ * Iteration 0 == an unused (NULL) entity
  * Must be run before starting!
  */
 void Ent_ResetEntityIds(EntList* ents)
@@ -52,7 +53,7 @@ void Ent_ResetEntityIds(EntList* ents)
 	for (u16 i = 0; i < ents->max; ++i)
 	{
 		ents->items[i].inUse = ENTITY_STATUS_FREE;
-		ents->items[i].entId.iteration = 0;
+		ents->items[i].entId.iteration = 1;
         ents->items[i].entId.index = i;
 	}
 }
@@ -127,6 +128,11 @@ inline void Ent_Free(GameState* gs, Ent* ent)
 {
     Ent_ClearComponents(gs, ent);
 	ent->entId.iteration += 1;
+    // avoiding using iteration 0 if iteration wraps
+    if (ent->entId.iteration == 0)
+    {
+        ent->entId.iteration = 1;
+    }
     ent->inUse = ENTITY_STATUS_FREE;
     ent->componentFlags = 0;
 }

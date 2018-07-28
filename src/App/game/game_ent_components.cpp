@@ -90,6 +90,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             {
                 PhysRayHit* hit = &results[j];
                 EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
+
                 Assert(col != NULL);
                 Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->header.entId);
 				if (targetEnt == NULL)
@@ -97,6 +98,11 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 					printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
 					continue;
 				}
+                if (targetEnt->entId.value == e->source.value)
+                {
+                    continue;
+                }
+                printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
                 if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
                 {
                     EC_Health* health = EC_FindHealth(gs, &col->header.entId);

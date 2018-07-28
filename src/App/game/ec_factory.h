@@ -99,9 +99,9 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     {
         // create for now. TODO: Split into create/update functions
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
-        // TODO: pass factory type in state when spawning
-        ent->factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
+        ent->factoryType = state->factoryType;
     }
+    ent->source = state->source;
     if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
     if (state->componentBits & EC_FLAG_RENDERER) { EC_RendererApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
@@ -258,7 +258,7 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     #endif
 }
 
-void Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
+EntId Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
 {
     EntityState s = {};
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);
@@ -267,18 +267,5 @@ void Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* opti
     {
         Ent_WriteEntityStateCmd(&s);
     }
-    #if 0
-    switch (factoryType)
-    {
-        case ENTITY_TYPE_RIGIDBODY_CUBE:
-        {
-            Test_WriteTestEntityBuffer(gs, options);
-        } break;
-
-        default:
-        {
-            printf("GAME Unknown factory type %d\n", factoryType);
-        } break;
-    }
-    #endif
+    return entId;
 }
