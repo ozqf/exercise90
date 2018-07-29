@@ -58,8 +58,8 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             options.pos.z = 0;
             EntId entId = Game_WriteSpawnCmd(gs, ENTITY_TYPE_ACTOR_GROUND, &options);
             
-            gs->localPlayerHasEnt = 1;
-            gs->localPlayerEntId = entId;
+            gs->local.localPlayerHasEnt = 1;
+            gs->local.localPlayerEntId = entId;
             printf("SV Spawning local client avatar %d/%d\n", entId.iteration, entId.index);
 
             Cmd_ClientUpdate clUpdate = {};

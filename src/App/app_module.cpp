@@ -46,6 +46,7 @@ void App_AddLocalClient();
 void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
 Client* App_FindClientById(i32 id, ClientList* cls);
 Client* App_FindOrCreateClient(i32 id, ClientList* cls);
+Client* App_FindLocalClient(ClientList* cls);
 void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 
 // assets and data

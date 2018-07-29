@@ -314,16 +314,22 @@ u8 App_StartSinglePlayer(char* path)
 	
 	//App_StartRecording(&g_gameState);
 
-	// Spawn local client
-	// Assign local client id.
-    Cmd_ClientUpdate spawnClient = {};
-    // assign local id directly...
-    // TODO: Do local client Id assignment via network command
-    g_localClientId = -1;
-    spawnClient.clientId = g_localClientId;
-    spawnClient.state = CLIENT_STATE_OBSERVER;
-    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
-    //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+
+	// Spawn local client if one hasn't been restored via file
+    Client* cl = App_FindLocalClient(&g_gameState.clientList);
+    if (cl == NULL)
+    {
+        // Assign local client id.
+        Cmd_ClientUpdate spawnClient = {};
+        // assign local id directly...
+        // TODO: Do local client Id assignment via network command
+        g_localClientId = -1;
+        spawnClient.clientId = g_localClientId;
+        spawnClient.state = CLIENT_STATE_OBSERVER;
+        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+        //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+    }
+	
     return 1;
 }
 

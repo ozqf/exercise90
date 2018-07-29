@@ -36,6 +36,12 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         if (prj->header.inUse == 0) { continue; }
 
         Ent* e = Ent_GetEntityById(&gs->entList, &prj->header.entId);
+		if (e == NULL)
+		{
+			printf("ERROR: Prj has no Ent\n");
+			ILLEGAL_CODE_PATH
+		}
+
         EC_Transform* ecTrans = EC_FindTransform(gs, &prj->header.entId);
 
         if (prj->state.ticker.tick <= 0.0f)

@@ -139,15 +139,35 @@ inline void Ent_Free(GameState* gs, Ent* ent)
     ent->componentFlags = 0 | EC_FLAG_ENTITY;
 }
 
-inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
+/**
+ * Retrieve a free or reserved entity and mark it as ready for use
+ * Do NOT call for an entity that is in use or it will error
+*/
+inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 {
+	Ent* ent = &ents->items[queryId->index];
+	if (ent->inUse != ENTITY_STATUS_IN_USE)
+	{
+		// if a client machine, may not know iteration
+		ent->entId.iteration = queryId->iteration;
+		return ent;
+	}
+	else
+	{
+		printf("!ERROR Attempting to  assign to an in-use entity: %d/%d\n", ent->entId.iteration, ent->entId.index);
+		ILLEGAL_CODE_PATH
+		return NULL;
+	}
+	#if 0
 	for (u32 i = 0; i < ents->max; ++i)
 	{
 		Ent* result = &ents->items[i];
+		
 		if (EntId_Equals(&result->entId, entId))
 		{
 			// If server, entity should have been Reserved.
             // If client, entity should be free.
+
             if (result->inUse != ENTITY_STATUS_IN_USE)
             {
                 result->inUse = ENTITY_STATUS_IN_USE;
@@ -165,6 +185,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)
 	printf("GAME: No entity found matching Id %d/%d! Aborting\n", entId->iteration, entId->index);
     ILLEGAL_CODE_PATH
 	return NULL;
+	#endif
 }
 
 // inline Ent* Ent_GetEntity(EntList* ents, EntId* entId)

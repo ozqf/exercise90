@@ -380,6 +380,12 @@ struct ClientList
     i32 max;
 };
 
+struct GameStateLocal
+{
+    u8 localPlayerHasEnt = 0;
+    EntId localPlayerEntId;
+};
+
 // struct Player
 // {
 //     i32 playerId;
@@ -426,10 +432,8 @@ struct GameState
     // view
     Transform cameraTransform;
     
-    // specifics
-    u8 localPlayerHasEnt = 0;
-    EntId localPlayerEntId;
-
+    GameStateLocal local;
+    
     u16 debugMode = 0;
     char debugString[2048];
     u32 debugStringLength = 0;

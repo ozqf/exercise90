@@ -109,6 +109,7 @@ void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     // In theory safe to copy everything but being careful
     // In use and Id should be handled locally
     ent->tag = entState->tag;
+    ent->inUse = entState->inUse;
     ent->source = entState->source;
     ent->factoryType = entState->factoryType;
     ent->componentFlags = entState->componentFlags;
