@@ -100,7 +100,7 @@ struct Cmd_RemoveEntity
 struct CommandDescription
 {
 	u8 type;
-	u16 size;
+	i32 size;
 	char label[32];
 };
 #if 0
@@ -114,7 +114,7 @@ CommandDescription g_descriptions[32];
 i32 g_numDescriptions = 0;
 #endif
 
-void Test_InitCmdDescription(CommandDescription* cmd, u8 type, u16 size, char* label)
+void Test_InitCmdDescription(CommandDescription* cmd, u8 type, i32 size, char* label)
 {
 	cmd->type = type;
 	cmd->size = size;
@@ -123,18 +123,19 @@ void Test_InitCmdDescription(CommandDescription* cmd, u8 type, u16 size, char* l
 
 void Test_InitCmdDescriptions()
 {
-	Test_InitCmdDescription(&g_descriptions[0], 100, 48, "Spawn Static");
-	Test_InitCmdDescription(&g_descriptions[1], 101, 8, "Server Impulse");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 100, 48, "Spawn Static");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 101, 8, "Server Impulse");
 	// 16 bytes for input + 12 for ids etc
-	Test_InitCmdDescription(&g_descriptions[2], 102, 28, "Player Input");
-	Test_InitCmdDescription(&g_descriptions[3], 103, 28, "Client Update");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 102, 28, "Player Input");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 103, 28, "Client Update");
 
-	Test_InitCmdDescription(&g_descriptions[4], 104, 5, "Text");
-	Test_InitCmdDescription(&g_descriptions[5], 105, 84, "Dynamic Ent State");
-	Test_InitCmdDescription(&g_descriptions[6], 106, 4, "Remove Ent");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 104, 5, "Text");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 105, 84, "Dynamic Ent State");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 106, 4, "Remove Ent");
 	//Test_InitCmdDescription(&g_descriptions[7], 107, 4, "Ent Delta");
-	Test_InitCmdDescription(&g_descriptions[7], 108, 12, "Player State");
-	g_numDescriptions = 8;
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 108, 12, "Player State");
+	Test_InitCmdDescription(&g_descriptions[g_numDescriptions++], 109, -1, "Entity state");
+	//g_numDescriptions = 9;
 }
 
 CommandDescription* Test_GetCmdDescription(i32 type)
@@ -689,7 +690,7 @@ void Test_PrintStateFileScan(char* filePath)
 			CommandDescription* def = Test_GetCmdDescription(cmdH.GetType());
 			if (def != NULL)
 			{
-				printf("  %s (%d)\n", def->label, def->size);
+				printf("  %s (%d, actual %d)\n", def->label, def->size, cmdH.GetSize());
 			}
 			else
 			{
@@ -810,7 +811,7 @@ void Test_StateSaving()
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
 	//Test_PrintStateFileScan("base\\testbox_new.lvl");
-	Test_PrintStateFileScan("base\\foo");
+	Test_PrintStateFileScan("base\\foo2");
 	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 

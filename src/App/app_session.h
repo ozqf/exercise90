@@ -90,8 +90,13 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         cmd.entId = cl->entId;
         // ? cmd.isLocal = cl->isLocal;
         cmd.input = cl->input;
+        //CmdHeader cmdH = {};
+        //cmdH.SetType(CMD_TYPE_CLIENT_UPDATE);
+        //cmdH.SetSize()
 
-        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
+        COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
+
+        //APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
         h.dynamicCommands.count++;
     }
 
