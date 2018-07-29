@@ -11,7 +11,7 @@ typedef Ent* (Ent_ReadDynamicState)(GameState* gs, Cmd_EntityState* cmd);
 Ent_ReadDynamicState* g_spawnFunctions[12];
 i32 g_numSpawnFunctions = 0;
 #endif
-
+#if 0
 Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -56,7 +56,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
     
     return ent;
 }
-
+#endif
 Ent* Spawn_Null(GameState* gs, Cmd_Spawn* cmd)
 {
     ILLEGAL_CODE_PATH
@@ -73,7 +73,7 @@ void Game_InitEntityFactory()
     // g_spawnFunctions[ENTITY_TYPE_ACTOR_GROUND] = Spawn_GroundActor;
     // g_numSpawnFunctions = ENTITY_TYPES_COUNT;
 }
-
+#if 0
 Ent* Exec_StaticEntityState(GameState* gs, Cmd_Spawn* cmd)
 {
     if (g_verbose)
@@ -118,7 +118,7 @@ Ent* Exec_StaticEntityState(GameState* gs, Cmd_Spawn* cmd)
     return ent;
 #endif
 }
-
+#endif
 Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -246,6 +246,7 @@ Ent* Ent_ReadRigidBodyCubeState(GameState* gs, Cmd_EntityState* cmd)
     return ent;
 }
 #endif
+#if 0
 Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -287,14 +288,16 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
     }
     return ent;
 }
+#endif
 
 void Game_WriteStaticState(GameState* gs, Ent* ent, Cmd_Spawn* s)
 {
     s->entityId = ent->entId;
     s->factoryType = ent->factoryType;
-    s->pos.x = ent->transform.pos.x;
-    s->pos.y = ent->transform.pos.y;
-    s->pos.z = ent->transform.pos.z;
+    EC_Transform* ecTrans = EC_FindTransform(gs, &ent->entId);
+    s->pos.x = ecTrans->t.pos.x;
+    s->pos.y = ecTrans->t.pos.y;
+    s->pos.z = ecTrans->t.pos.z;
 
     EC_Collider* col = EC_FindCollider(gs, ent);
     s->size.x = (col->state.size.x);
@@ -309,15 +312,18 @@ void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
     s->factoryType = ent->factoryType;
     s->tag = ent->tag;
 
-    //
-    s->pos.x = ent->transform.pos.x;
-    s->pos.y = ent->transform.pos.y;
-    s->pos.z = ent->transform.pos.z;
+    EC_Transform* ecTrans = EC_FindTransform(gs, &ent->entId);
+    if (ecTrans != NULL)
+    {
+        s->pos.x = ecTrans->t.pos.x;
+        s->pos.y = ecTrans->t.pos.y;
+        s->pos.z = ecTrans->t.pos.z;
 
-    s->size.x = ent->transform.scale.x;
-    s->size.y = ent->transform.scale.y;
-    s->size.z = ent->transform.scale.z;
-
+        s->size.x = ecTrans->t.scale.x;
+        s->size.y = ecTrans->t.scale.y;
+        s->size.z = ecTrans->t.scale.z;
+    }
+    
     // Additional, factory specific
     switch (ent->factoryType)
     {

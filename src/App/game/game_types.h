@@ -104,15 +104,13 @@ struct Ent
     EntId entId;            // iteration + index of this entity
     i32 tag;                // can (and should) be shared between entities for triggering
 
+    EntId source;
+
     // 'type' information
     i32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
     u32 componentFlags;     // What components this Entity has
     u8 inUse;               // if 0 this entity is free to be recycled
     u8 priority;            // This entity's base update importance gained per frame
-
-    // State
-    EntId source;
-    Transform transform;
 };
 
 struct EntList
@@ -175,12 +173,12 @@ struct EC_Header
 
 #define EC_NUM_TYPES 9
 
-// struct EC_Transform
-// {
-//     EC_Header header;
+struct EC_Transform
+{
+    EC_Header header;
 
-//     Transform t;
-// };
+    Transform t;
+};
 
 #define EC_RENDERER_STRING_LENGTH 32
 
@@ -354,10 +352,11 @@ struct EntitySpawnOptions
 //////////////////////////////////////////////////
 // GameState will require component lists to be defined already!
 #include "game_entComponentBase.h"
-DEFINE_ENT_COMPONENT_LIST(AIController)
+DEFINE_ENT_COMPONENT_LIST(Transform)
 DEFINE_ENT_COMPONENT_LIST(Renderer)
 DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
+DEFINE_ENT_COMPONENT_LIST(AIController)
 DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
 DEFINE_ENT_COMPONENT_LIST(Health)
@@ -407,18 +406,18 @@ struct ClientList
 struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
-    // Entities
-    i32 nextEntityID;
-    EntList entList;
-    //i32 lastEntityIndex;
     
     //PlayerList playerList;
     ClientList clientList;
 
+    // Entities
+    //i32 nextEntityID;
+    EntList entList;
     // Components
-    EC_AIControllerList aiControllerList;
+    EC_TransformList transformList;
     EC_RendererList rendererList;
     EC_ColliderList colliderList;
+    EC_AIControllerList aiControllerList;
     EC_ActorMotorList actorMotorList;
     EC_ProjectileList projectileList;
     EC_LabelList labelList;
@@ -444,9 +443,10 @@ struct GameState
 // ...and Component Add/Remove/Has/Find functions.
 // Note: requires that GameState struct is defined!
 //////////////////////////////////////////////////
-DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_FLAG_AICONTROLLER)
-DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_FLAG_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(Transform, transform, EC_FLAG_TRANSFORM)
 DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, EC_FLAG_RENDERER)
+DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_FLAG_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_FLAG_AICONTROLLER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_FLAG_ACTORMOTOR)
 DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)

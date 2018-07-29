@@ -29,13 +29,23 @@ void App_DebugPrintEntities(GameState* gs)
     {
         Ent* e = &gs->entList.items[i];
         if (e->inUse == ENTITY_STATUS_FREE) { continue; }
-        Transform* t = &e->transform;
-        count++;
-        printf("%d/%d: Type %d status %d pos: %.2f %.2f %.2f\n",
+        EC_Transform* ecT = EC_FindTransform(gs, e);
+        if (ecT)
+        {
+            printf("%d/%d: Type %d status %d pos: %.2f %.2f %.2f\n",
             e->entId.iteration, e->entId.index,
             e->factoryType, e->inUse,
-            t->pos.x, t->pos.y, t->pos.z
+            ecT->t.pos.x, ecT->t.pos.y, ecT->t.pos.z
         );
+        }
+        else
+        {
+            printf("%d/%d: Type %d status %d\n",
+            e->entId.iteration, e->entId.index,
+            e->factoryType, e->inUse
+        );
+        }
+        count++;
     }
     printf(" %d active entities\n", count);
 }
@@ -158,6 +168,7 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
         case GAME_DEBUG_MODE_TRANSFORM:
         {
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 10);
+            EC_Transform* ecT = EC_FindTransform(gs, ent);
             M3x3 rotation = {};
             Vec3 inputRot = {};
             Vec3 pos = {};
@@ -173,11 +184,11 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
             }
             else
             {
-                rotation = ent->transform.rotation;
+                rotation = ecT->t.rotation;
                 inputRot = g_debugInput.degrees;
-                scale = ent->transform.scale;
-                pos = ent->transform.pos;
-                rot = Transform_GetEulerAnglesDegrees(&ent->transform);
+                scale = ecT->t.scale;
+                pos = ecT->t.pos;
+                rot = Transform_GetEulerAnglesDegrees(&ecT->t);
                 if (isnan(rot.x))
                 {
                     //App_ErrorStop();

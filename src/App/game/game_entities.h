@@ -4,7 +4,7 @@
 
 inline void Ent_Reset(Ent* ent)
 {
-    Transform_SetToIdentity(&ent->transform);
+    //Transform_SetToIdentity(&ent->transform);
     ent->factoryType = 0;
     ent->componentFlags = 0;
     ent->tag = 0;
@@ -88,9 +88,10 @@ Ent* Ent_GetFreeEntity(EntList* ents)
 
 void Ent_ClearComponents(GameState* gs, Ent* ent)
 {
-    EC_RemoveAIController(gs, ent);
-    EC_RemoveCollider(gs, ent);
+    EC_RemoveTransform(gs, ent);
     EC_RemoveRenderer(gs, ent);
+    EC_RemoveCollider(gs, ent);
+    EC_RemoveAIController(gs, ent);
     EC_RemoveActorMotor(gs, ent);
     EC_RemoveProjectile(gs, ent);
     EC_RemoveHealth(gs, ent);

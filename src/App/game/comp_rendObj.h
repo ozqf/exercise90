@@ -13,8 +13,9 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
         EC_Renderer* rend = &gs->rendererList.items[i];
         if (rend->header.inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);
-            RScene_AddRenderItem(scene, &ent->transform, &rend->rendObj);
+            //Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);
+            EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
+            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObj);
         }
     }
     // Draw local entities

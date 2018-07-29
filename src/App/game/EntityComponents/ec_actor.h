@@ -42,7 +42,7 @@ void SV_SpawnTestBullet(GameState* gs, EntId source, f32 x, f32 y, f32 z, f32 pi
     //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
     #endif
 }
-
+#if 0
 void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
 {
     //Ent* ent = Ent_GetFreeEntity(&gs->entList);
@@ -76,7 +76,7 @@ void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
     ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
     ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
 }
-
+#endif
 // public float friction = 8f;
 // public float air_accelerate = 100f;
 // public float ground_accelerate = 50f;
@@ -217,9 +217,11 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
         if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
             motor->state.ticker.tick = 0.1f;
-            Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+            //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+            EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
-            Transform* t = &ent->transform;
+            //Transform* t = &ent->transform;
+            Transform* t = &ecTrans->t;
 
             SV_SpawnTestBullet(
                 gs,

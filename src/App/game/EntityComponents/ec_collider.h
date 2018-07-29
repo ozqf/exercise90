@@ -71,11 +71,12 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
         EC_Collider* collider = &gs->colliderList.items[i];
         if (collider->header.inUse == 1)
         {
-            Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->header.entId.index);
+            //Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->header.entId.index);
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
-            item->transform = ent->transform;
-            Transform_SetScale(&item->transform, 1, 1, 1);
+            EC_Transform* entTrans = EC_FindTransform(gs, &collider->header.entId);
+            item->transform = entTrans->t;//ent->transform;
+            //Transform_SetScale(&item->transform, 1, 1, 1);
             //if (collider->lastFrameOverlapping == time->frameNumber)
             if (collider->isGrounded)
             {

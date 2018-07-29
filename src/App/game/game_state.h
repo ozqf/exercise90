@@ -32,6 +32,10 @@ void GS_Init(GameState *gs)
     // MUST do this before using entity list
 	Ent_ResetEntityIds(&gs->entList);
 
+    gs->transformList.items = g_transforms;
+    gs->transformList.count = GAME_MAX_ENTITIES;
+    gs->transformList.max = GAME_MAX_ENTITIES;
+
     gs->rendererList.items = g_renderers;
     gs->rendererList.count = GAME_MAX_ENTITIES;
     gs->rendererList.max = GAME_MAX_ENTITIES;

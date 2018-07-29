@@ -7,7 +7,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
 {
-    ent->transform = *  transform;
+    EC_Transform* ecT = EC_FindTransform(gs, &ent->entId);
+	if (ecT == NULL)
+	{
+		ecT = EC_AddTransform(gs, ent);
+	}
+    ecT->t = *transform;
 }
 
 void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)

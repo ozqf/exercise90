@@ -7,8 +7,9 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
     EntId entId = {};
     entId.index = ev->ownerId;
     entId.iteration = ev->ownerIteration;
-    Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
-    if (ent == NULL)
+    //Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
+    EC_Transform* ecTrans = EC_FindTransform(gs, &entId);
+    if (ecTrans == NULL)
     {
         return;
     }
@@ -50,7 +51,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 	Transform_RotateZ(&ent->transform, updateM->zAxisW);*/
 #endif
 #if 1
-    Transform_FromM4x4(&ent->transform, updateM);
+    Transform_FromM4x4(&ecTrans->t, updateM);
 #endif
 }
 

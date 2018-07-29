@@ -68,8 +68,10 @@ void Game_BuildTestHud(GameState *state)
 {
 
 	#if 1
+    // will be uesd for each entity so hoisted
     EntId entId;
     Ent* ent;
+    EC_Transform* ecT;
     EC_Renderer* renderer;
     EntList* ents = &state->entList;
 
@@ -80,6 +82,10 @@ void Game_BuildTestHud(GameState *state)
     state->entList.items = g_uiEntities;
     state->entList.count = UI_MAX_ENTITIES;
     state->entList.max = UI_MAX_ENTITIES;
+
+    state->transformList.items = g_transforms;
+    state->transformList.count = UI_MAX_ENTITIES;
+    state->transformList.max = UI_MAX_ENTITIES;
 
     state->rendererList.items = g_ui_renderers;
     state->rendererList.count = UI_MAX_ENTITIES;
@@ -95,10 +101,17 @@ void Game_BuildTestHud(GameState *state)
     // Crosshair (sprite rendering a single char from a character sheet)
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
-    ent->transform.pos.z = 0;
-    ent->transform.scale.x = 0.1f;
-    ent->transform.scale.y = 0.1f;
-    ent->transform.scale.z = 0.1f;
+
+    ecT = EC_AddTransform(state, ent);
+    ecT->t.pos.z = 0;
+    ecT->t.scale.x = 0.1f;
+    ecT->t.scale.y = 0.1f;
+    ecT->t.scale.z = 0.1f;
+
+    // ent->transform.pos.z = 0;
+    // ent->transform.scale.x = 0.1f;
+    // ent->transform.scale.y = 0.1f;
+    // ent->transform.scale.z = 0.1f;
 
     renderer = EC_AddRenderer(state, ent);
     // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
@@ -130,9 +143,10 @@ void Game_BuildTestHud(GameState *state)
     // Game Messages
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
-    ent->transform.pos.x = 0;
+    ecT = EC_AddTransform(state, ent);
+    ecT->t.pos.x = 0;
     //ent->transform.pos.y -= -1 - (0.05f * 3);
-    ent->transform.pos.y += 1;
+    ecT->t.pos.y += 1;
     // ent->transform.scale.x = 1f;
     // ent->transform.scale.y = 1f;
     // ent->transform.scale.z = 1f;
@@ -161,9 +175,10 @@ void Game_BuildTestHud(GameState *state)
     // Player Status
     entId = Ent_ReserveFreeEntity(ents);
     ent = Ent_GetAndAssign(ents, &entId);
-    ent->transform.pos.x = -1;
+    ecT = EC_AddTransform(state, ent);
+    ecT->t.pos.x = -1;
     //ent->transform.pos.y -= -1 - (0.05f * 3);
-    ent->transform.pos.y -= (1 - (0.075f * 3));
+    ecT->t.pos.y -= (1 - (0.075f * 3));
     // ent->transform.scale.x = 1f;
     // ent->transform.scale.y = 1f;
     // ent->transform.scale.z = 1f;
@@ -255,9 +270,10 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 
         case CMD_TYPE_STATIC_STATE:
         {
-            Cmd_Spawn cmd = {};
-            ptr += cmd.Read(header, ptr);
-            Exec_StaticEntityState(gs, &cmd);
+            printf("GAME: Defunct static state call\n");
+            //Cmd_Spawn cmd = {};
+            //ptr += cmd.Read(header, ptr);
+            //Exec_StaticEntityState(gs, &cmd);
             return 1;
         } break;
 
@@ -272,7 +288,9 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd.entId);
 			if (ent != NULL)
 			{
-                Vec3 p = ent->transform.pos;
+                //Vec3 p = ent->transform.pos;
+                EC_Transform* ecT = EC_FindTransform(gs, ent);
+                Vec3 p = ecT->t.pos;
                 Vec3 normal = COM_UnpackVec3Normal(cmd.gfxNormal);
                 Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
 				Ent_Free(gs, ent);
@@ -476,9 +494,17 @@ void Game_Tick(
 		else
 		{
 			EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->localPlayerEntId);
-			Transform_SetByPosAndDegrees(&gs->cameraTransform, &ent->transform.pos, &motor->state.input.degrees);
-			// raise camera to eye height
-			gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
+            EC_Transform* ecT = EC_FindTransform(gs, ent);
+			if (ecT == NULL)
+			{
+				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
+			}
+			else
+			{
+				Transform_SetByPosAndDegrees(&gs->cameraTransform, &ecT->t.pos, &motor->state.input.degrees);
+				// raise camera to eye height
+				gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
+			}
 		}
     }
     

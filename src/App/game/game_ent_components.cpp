@@ -35,7 +35,8 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         EC_Projectile* prj = &gs->projectileList.items[i];
         if (prj->header.inUse == 0) { continue; }
 
-        Ent* e = Ent_GetEntityByIndex(&gs->entList, prj->header.entId.index);
+        Ent* e = Ent_GetEntityById(&gs->entList, &prj->header.entId);
+        EC_Transform* ecTrans = EC_FindTransform(gs, &prj->header.entId);
 
         if (prj->state.ticker.tick <= 0.0f)
         {
@@ -59,7 +60,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             prj->state.ticker.tick -= time->deltaTime;
         }
 
-        Transform* t = &e->transform;
+        Transform* t = &ecTrans->t;
 
         Vec3 newPos =
         {
