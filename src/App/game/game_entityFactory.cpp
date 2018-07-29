@@ -289,7 +289,7 @@ Ent* Ent_ReadProjectileState(GameState* gs, Cmd_EntityState* cmd)
     return ent;
 }
 #endif
-
+#if 0
 void Game_WriteStaticState(GameState* gs, Ent* ent, Cmd_Spawn* s)
 {
     s->entityId = ent->entId;
@@ -305,7 +305,8 @@ void Game_WriteStaticState(GameState* gs, Ent* ent, Cmd_Spawn* s)
     s->size.z = (col->state.size.z);
     //s->tag = ent->tag;
 }
-
+#endif
+#if 0
 void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
 {
     s->entityId = ent->entId;
@@ -348,7 +349,7 @@ void Game_WriteEntityState(GameState* gs, Ent* ent, Cmd_EntityState* s)
         } break;
     }
 }
-
+#endif
 Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
     {
     if (cmd->factoryType == ENTITY_TYPE_WORLD_CUBE)

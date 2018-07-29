@@ -44,9 +44,9 @@ int main(i32 argc, char* argv[])
     //Test_Bitpacking();
 
     //Test_PatchStateFile();
-    //Test_StateSaving();
+    Test_StateSaving();
     //Test_ReadIniFile();
-    Test_ECS2();
+    //Test_ECS2();
     #endif
 
     #if 0

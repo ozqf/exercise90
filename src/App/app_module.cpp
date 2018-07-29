@@ -33,7 +33,7 @@ struct ActorInput;
 char* App_GetBufferName(u8* bufferStartAddr);
 
 inline u8* App_StartCommandStream();
-inline u32 App_WriteCommandBytes(u8* stream, u32 numBytes);
+inline u32 App_WriteCommandBytesToFrameOutput(u8* stream, u32 numBytes);
 inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize);
 
 GameTime* GetAppTime();

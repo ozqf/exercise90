@@ -52,7 +52,7 @@ static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
     return NULL; \
 }; \
 \
-static inline unsigned char Ent_Has##type##(Ent* ent) { return (unsigned char)(ent->componentFlags & typeFlagDefine); } \
+static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentFlags & typeFlagDefine); } \
 \
 static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
 { \

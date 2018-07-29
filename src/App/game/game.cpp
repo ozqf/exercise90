@@ -18,12 +18,12 @@ void Game_AddTestSolid(GameState* gs,
     h.componentBits |= EC_FLAG_RENDERER;
     h.componentBits |= EC_FLAG_COLLIDER;
 
-	size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
+	size += App_WriteCommandBytesToFrameOutput((u8*)&h, sizeof(Cmd_EntityStateHeader));
 
     Ent ent = {};
     ent.entId = h.entId;
     ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
-    size += App_WriteCommandBytes((u8*)&ent, sizeof(Ent));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&ent, sizeof(Ent));
 
     // create transform state
     Transform t = {};
@@ -35,7 +35,7 @@ void Game_AddTestSolid(GameState* gs,
 	t.scale.y = halfSizeY * 2;
 	t.scale.z = halfSizeZ * 2;
 
-    size += App_WriteCommandBytes((u8*)&t, sizeof(Transform));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&t, sizeof(Transform));
     
     // Wall texture "textures\\COMP03_1.bmp"
     // Metal texture "textures\\W33_5.bmp"
@@ -45,7 +45,7 @@ void Game_AddTestSolid(GameState* gs,
     COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
 
-    size += App_WriteCommandBytes((u8*)&r, sizeof(EC_RendererState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
 
     // Create Collider
     EC_ColliderState col = {};
@@ -57,7 +57,7 @@ void Game_AddTestSolid(GameState* gs,
         COL_MASK_DEFAULT
     );
 
-    size += App_WriteCommandBytes((u8*)&col, sizeof(EC_ColliderState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&col, sizeof(EC_ColliderState));
 
     // Close command
     App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, (u16)size);
@@ -368,7 +368,7 @@ i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         printf("GAME Reading %d bytes from %s\n", size, App_GetBufferName(commands->ptrStart));
     }
     u32 totalRead = 0;
-    while(ptrRead < commands    ->ptrEnd)
+    while(ptrRead < commands->ptrEnd)
     {
         CmdHeader h = {};
 		i32 headerRead = h.Read(ptrRead);

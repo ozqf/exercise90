@@ -27,8 +27,6 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
     ///////////////////////////////
     // Write commands
 
-    CmdHeader cmdHeader = {};
-    
     // Record current position to calculate bytes written after loop
     u8* startOfDynamicCmds = buf->ptrWrite;
     h.dynamicCommands.offset = (u32)(buf->ptrWrite - buf->ptrStart);
@@ -42,6 +40,15 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
         Ent* e = &gs->entList.items[i];
         if (e->inUse != ENTITY_STATUS_IN_USE) { continue; }
 
+        EntityState data = {};
+        Ent_CopyFullEntityState(gs, e, &data);
+        u32 written = Ent_WriteEntityStateCmd(buf->ptrWrite, &data);
+        printf("APP Write save state wrote %d bytes\n", written);
+        buf->ptrWrite += written;
+        //buf->ptrWrite += Ent_WriteEntityStateCmd(buf->ptrWrite, &data);
+        
+        #if 0
+        // OLD
         if (e->factoryType == ENTITY_TYPE_WORLD_CUBE)
         {
             Cmd_Spawn s = {};
@@ -64,7 +71,7 @@ u32 App_WriteSaveState(GameState* gs, ByteBuffer* buf, StateSaveHeader* header)
                 s.factoryType
             );
         }
-
+        #endif
         
         h.dynamicCommands.count++;
     }
@@ -289,14 +296,14 @@ u8 App_StartSinglePlayer(char* path)
 	printf(">>> APP Start single player session: %s <<<\n", path);
     
 	App_EndSession();
-    #if 0
+    #if 1
     if (!App_LoadStateFromFile(&g_gameState, path))
     {
         return 0;
     }
     #endif
-	#if 1
-	Game_BuildTestScene(&g_gameState);
+	#if 0
+    Game_BuildTestScene(&g_gameState);
 	#endif
 	COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 	

@@ -26,6 +26,8 @@ void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
     {
         r = EC_AddRenderer(gs, ent);
     }
+	COM_CopyStringLimited(state->meshName, r->state.meshName, EC_RENDERER_STRING_LENGTH);
+	COM_CopyStringLimited(state->textureName, r->state.textureName, EC_RENDERER_STRING_LENGTH);
     RendObj_SetAsMesh(
         &r->rendObj,
         Assets_GetMeshDataByName(state->meshName),// g_meshCube,
@@ -184,19 +186,21 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 /**
  * Write a state command to output.
  */
-u16 Ent_WriteEntityStateCmd(EntityState* state)
+u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
 {
     const u32 bufferSize = 1024;
     u8 buffer[bufferSize];
     u8* origin = buffer;
     u8* stream = origin;
     
+	// TODO: Fix me! Force entity meta data flag. Loading will always read it
+	state->componentBits |= EC_FLAG_ENTITY;
     
     Cmd_EntityStateHeader h = {};
     h.entId = state->entId;
     h.componentBits = state->componentBits;
     stream += COM_COPY_STRUCT(&h, stream, Cmd_EntityStateHeader);
-    
+
     if (h.componentBits & EC_FLAG_ENTITY)
     { stream += COM_COPY_STRUCT(&state->entMetaData, stream, Ent); }
     if (h.componentBits & EC_FLAG_TRANSFORM)
@@ -204,7 +208,7 @@ u16 Ent_WriteEntityStateCmd(EntityState* state)
     if (h.componentBits & EC_FLAG_RENDERER)
     { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendererState); }
     if (h.componentBits & EC_FLAG_COLLIDER)
-    { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_RendererState); }
+    { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_ColliderState); }
     if (h.componentBits & EC_FLAG_ACTORMOTOR)
     { stream += COM_COPY_STRUCT(&state->actorState, stream, EC_ActorMotorState); }
     if (h.componentBits & EC_FLAG_HEALTH)
@@ -216,19 +220,87 @@ u16 Ent_WriteEntityStateCmd(EntityState* state)
 
     u16 bytesWritten = (u16)(stream - origin);
 
-    u8* cmdOrigin = App_StartCommandStream();
-    App_WriteCommandBytes(origin, bytesWritten);
-    App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
+    if (optionalOutputStream == NULL)
+    {
+        // chuck into main app output
+        u8* cmdOrigin = App_StartCommandStream();
+        App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
+        App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
+        return bytesWritten;
+    }
+    else
+    {
+        printf("  Writing %d/%d state, compbits %d, bytes: %d\n",
+            state->entId.iteration,
+            state->entId.index,
+			state->componentBits,
+            bytesWritten
+        );
+        CmdHeader cmdHeader = {};
+        cmdHeader.SetType(CMD_TYPE_ENTITY_STATE_2);
+        cmdHeader.SetSize(bytesWritten);
+        optionalOutputStream += cmdHeader.Write(optionalOutputStream);
+        optionalOutputStream += COM_COPY(origin, optionalOutputStream, bytesWritten);
+        return bytesWritten + sizeof(CmdHeader);
+    }
+}
 
-    return bytesWritten;
+void Ent_PrintComponents(Ent* ent)
+{
+	printf("ENT %d/%d components\n", ent->entId.iteration, ent->entId.index);
+	COM_PrintBits(ent->componentFlags, 1);
+	if (Ent_HasTransform(ent))
+	{
+		printf("  Has Transform\n");
+	}
+	if (Ent_HasRenderer(ent))
+	{
+		printf("  Has Renderer\n");
+	}
+	if (Ent_HasCollider(ent))
+	{
+		printf("  Has Collider\n");
+	}
+	if (Ent_HasActorMotor(ent))
+	{
+		printf("  Has Actor\n");
+	}
+	if (Ent_HasHealth(ent))
+	{
+		printf("  Has Health\n");
+	}
+	if (Ent_HasProjectile(ent))
+	{
+		printf("  Has Projectile\n");
+	}
 }
 
 /**
  * Fill out a state struct for the given entity
  */
-void Ent_CopyFullEntityState(EntityState* state, Ent* ent)
+void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
 {
-    
+	if (gs->verbose)
+	{
+		Ent_PrintComponents(ent);
+	}
+    *state = {};
+    state->entId = ent->entId;
+    state->componentBits = ent->componentFlags;
+    state->entMetaData = *ent;
+
+	if (ent->componentFlags & EC_FLAG_TRANSFORM) { state->transform = (EC_FindTransform(gs, ent))->t; }
+    if (ent->componentFlags & EC_FLAG_RENDERER)
+    {
+        EC_Renderer* r = EC_FindRenderer(gs, ent);
+        COM_CopyStringLimited(r->state.meshName, state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited(r->state.textureName, state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    }
+    if (ent->componentFlags & EC_FLAG_COLLIDER) { state->colliderState = (EC_FindCollider(gs, ent))->state; }
+    if (ent->componentFlags & EC_FLAG_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
+	if (ent->componentFlags & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
+    if (ent->componentFlags & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
+    if (ent->componentFlags & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
 }
 
 void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
@@ -247,7 +319,7 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     h.componentBits |= EC_FLAG_COLLIDER;
     h.componentBits |= EC_FLAG_HEALTH;
 
-    size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&h, sizeof(Cmd_EntityStateHeader));
 
     // create transform state
     Transform t = {};
@@ -255,7 +327,7 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     Transform_SetByPosAndDegrees(&t, &options->pos, &options->rot);
     Transform_SetScale(&t, options->scale.x, options->scale.y, options->scale.z);
 
-    size += App_WriteCommandBytes((u8*)&t, sizeof(Transform));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&t, sizeof(Transform));
     
     // Wall texture "textures\\COMP03_1.bmp"
     // Metal texture "textures\\W33_5.bmp"
@@ -265,7 +337,7 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\W33_5.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
 
-    size += App_WriteCommandBytes((u8*)&r, sizeof(EC_RendererState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
 
     // Create Collider
     EC_ColliderState col = {};
@@ -277,11 +349,11 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
         COL_MASK_DEBRIS
     );
 
-    size += App_WriteCommandBytes((u8*)&col, sizeof(EC_ColliderState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&col, sizeof(EC_ColliderState));
 
     EC_HealthState state = {};
     state.hp = 100;
-    size += App_WriteCommandBytes((u8*)&state, sizeof(EC_HealthState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&state, sizeof(EC_HealthState));
 
     // Close command
     App_FinishCommandStream(headerPos, CMD_TYPE_ENTITY_STATE_2, 0, (u16)size);
@@ -296,7 +368,7 @@ EntId Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* opt
     s.entId = entId;
     if (Game_WriteSpawnTemplate(factoryType, &s, options))
     {
-        Ent_WriteEntityStateCmd(&s);
+        Ent_WriteEntityStateCmd(NULL, &s);
     }
     return entId;
 }

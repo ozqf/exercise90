@@ -161,18 +161,18 @@ struct EC_Header
     u8 inUse;
 };
 
-#define EC_FLAG_ENTITY (1 << 1)
-#define EC_FLAG_TRANSFORM (1 << 2)
-#define EC_FLAG_RENDERER (1 << 3)
-#define EC_FLAG_COLLIDER (1 << 4)
-#define EC_FLAG_AICONTROLLER (1 << 5)
-#define EC_FLAG_ACTORMOTOR (1 << 6)
-#define EC_FLAG_PROJECTILE (1 << 7)
-#define EC_FLAG_LABEL (1 << 8)
-#define EC_FLAG_HEALTH (1 << 9)
-#define EC_FLAG_THINKER (1 << 10)
+#define EC_FLAG_ENTITY (1 << 0)
+#define EC_FLAG_TRANSFORM (1 << 1)
+#define EC_FLAG_RENDERER (1 << 2)
+#define EC_FLAG_COLLIDER (1 << 3)
+#define EC_FLAG_AICONTROLLER (1 << 4)
+#define EC_FLAG_ACTORMOTOR (1 << 5)
+#define EC_FLAG_PROJECTILE (1 << 6)
+#define EC_FLAG_LABEL (1 << 7)
+#define EC_FLAG_HEALTH (1 << 8)
+#define EC_FLAG_THINKER (1 << 9)
 
-#define EC_NUM_TYPES 9
+//#define EC_NUM_TYPES 9
 
 struct EC_Transform
 {

@@ -55,6 +55,7 @@ void Ent_ResetEntityIds(EntList* ents)
 		ents->items[i].inUse = ENTITY_STATUS_FREE;
 		ents->items[i].entId.iteration = 1;
         ents->items[i].entId.index = i;
+        ents->items[i].componentFlags = 0 | EC_FLAG_ENTITY;
 	}
 }
 
@@ -135,7 +136,7 @@ inline void Ent_Free(GameState* gs, Ent* ent)
         ent->entId.iteration = 1;
     }
     ent->inUse = ENTITY_STATUS_FREE;
-    ent->componentFlags = 0;
+    ent->componentFlags = 0 | EC_FLAG_ENTITY;
 }
 
 inline Ent* Ent_GetAndAssign(EntList* ents, EntId* entId)

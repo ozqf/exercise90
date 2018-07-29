@@ -809,7 +809,8 @@ void Test_StateSaving()
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
-	Test_PrintStateFileScan("base\\testbox_new.lvl");
+	//Test_PrintStateFileScan("base\\testbox_new.lvl");
+	Test_PrintStateFileScan("base\\foo");
 	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 

@@ -14,9 +14,9 @@ inline u8* App_StartCommandStream()
     return headerWritePosition;
 }
 
-inline u32 App_WriteCommandBytes(u8* stream, u32 numBytes)
+inline u32 App_WriteCommandBytesToFrameOutput(u8* inputStream, u32 numBytes)
 {
-    g_appWriteBuffer->ptrWrite += COM_COPY(stream, g_appWriteBuffer->ptrWrite, numBytes);
+    g_appWriteBuffer->ptrWrite += COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
     return numBytes;
 }
 
@@ -82,6 +82,10 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  CLIENTS - List current client states\n");
         printf("  DUMPHEAP - List Heap memory allocations\n");
         return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
+    {
+        Game_BuildTestScene(&g_gameState);
     }
     if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
     {
