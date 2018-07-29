@@ -101,9 +101,16 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
 				}
                 if (targetEnt->entId.value == e->source.value)
                 {
+                    if (gs->verbose)
+                    {
+                        printf("PRJ from %d hit it's source ent %d\n", e->source.value, targetEnt->entId.value);    
+                    }
                     continue;
                 }
-                printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
+                if (gs->verbose)
+                {
+                    printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
+                }
                 if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
                 {
                     EC_Health* health = EC_FindHealth(gs, &col->header.entId);

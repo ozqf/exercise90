@@ -11,6 +11,10 @@ void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
 	if (ecT == NULL)
 	{
 		ecT = EC_AddTransform(gs, ent);
+        if (gs->verbose)
+        {
+            printf("EC Creating EC_Transform for %d/%d\n", ent->entId.iteration, ent->entId.index);
+        }
 	}
     ecT->t = *transform;
 }
@@ -35,10 +39,13 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
     EC_Collider* col = EC_FindCollider(gs, ent);
     if (col == NULL)
     {
-        printf("  GAME Create collider for %d/%d\n",
-			ent->entId.iteration,
-			ent->entId.index
-		);
+        if (gs->verbose)
+        {
+            printf("  GAME Create collider for %d/%d\n",
+			    ent->entId.iteration,
+			    ent->entId.index
+		    );
+        }
         col = EC_AddCollider(gs, ent);
         col->state = *state;
         col->shapeId = Phys_CreateShape(
@@ -94,6 +101,19 @@ void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
     COM_CopyStringLimited(state->label, label->state.label, EC_LABEL_LENGTH);
 }
 
+void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
+{
+    // TODO: Move these data items into an 'EC_MetaData' component
+    // In theory safe to copy everything but being careful
+    // In use and Id should be handled locally
+    ent->tag = entState->tag;
+    ent->source = entState->source;
+    ent->factoryType = entState->factoryType;
+    ent->componentFlags = entState->componentFlags;
+
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 // APPLY ENTITY STATE
 ///////////////////////////////////////////////////////////////////////////////////
@@ -104,9 +124,8 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     {
         // create for now. TODO: Split into create/update functions
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
-        ent->factoryType = state->factoryType;
     }
-    ent->source = state->source;
+    if (state->componentBits & EC_FLAG_ENTITY) { EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
     if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
     if (state->componentBits & EC_FLAG_RENDERER) { EC_RendererApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
@@ -122,13 +141,17 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     Cmd_EntityStateHeader h = {};
     stream += COM_COPY_STRUCT(stream, &h, Cmd_EntityStateHeader);
     #if 1
-    printf("Reading %d bytes of state for ent %d/%d, comp bits %d:\n  ",
-        numBytes,
-        h.entId.iteration,
-        h.entId.index,
-        h.componentBits
-    );
-    COM_PrintBits(h.componentBits, 1);
+    if (gs->verbose)
+    {
+        printf("Reading %d bytes of state for ent %d/%d, comp bits %d:\n  ",
+            numBytes,
+            h.entId.iteration,
+            h.entId.index,
+            h.componentBits
+        );
+        COM_PrintBits(h.componentBits, 1);
+    }
+    
     #endif
 
     EntityState state = {};
@@ -137,6 +160,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 	
 	// TODO: Replace raw struct copy with proper encoding functions!
     // WARNING: THIS IS ORDER DEPENDENT!
+    if (h.componentBits & EC_FLAG_ENTITY) { stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
     if (h.componentBits & EC_FLAG_TRANSFORM) { stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
     if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendererState); }
     if (h.componentBits & EC_FLAG_COLLIDER) { stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
@@ -158,14 +182,6 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 }
 
 /**
- * Fill out a state struct for the given entity
- */
-void Ent_CopyFullEntityState(EntityState* state, Ent* ent)
-{
-    
-}
-
-/**
  * Write a state command to output.
  */
 u16 Ent_WriteEntityStateCmd(EntityState* state)
@@ -181,6 +197,8 @@ u16 Ent_WriteEntityStateCmd(EntityState* state)
     h.componentBits = state->componentBits;
     stream += COM_COPY_STRUCT(&h, stream, Cmd_EntityStateHeader);
     
+    if (h.componentBits & EC_FLAG_ENTITY)
+    { stream += COM_COPY_STRUCT(&state->entMetaData, stream, Ent); }
     if (h.componentBits & EC_FLAG_TRANSFORM)
     { stream += COM_COPY_STRUCT(&state->transform, stream, Transform); }
     if (h.componentBits & EC_FLAG_RENDERER)
@@ -203,6 +221,14 @@ u16 Ent_WriteEntityStateCmd(EntityState* state)
     App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
 
     return bytesWritten;
+}
+
+/**
+ * Fill out a state struct for the given entity
+ */
+void Ent_CopyFullEntityState(EntityState* state, Ent* ent)
+{
+    
 }
 
 void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)

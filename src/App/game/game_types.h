@@ -161,15 +161,16 @@ struct EC_Header
     u8 inUse;
 };
 
-#define EC_FLAG_TRANSFORM (1 << 0)
-#define EC_FLAG_RENDERER (1 << 1)
-#define EC_FLAG_COLLIDER (1 << 2)
-#define EC_FLAG_AICONTROLLER (1 << 3)
-#define EC_FLAG_ACTORMOTOR (1 << 4)
-#define EC_FLAG_PROJECTILE (1 << 5)
-#define EC_FLAG_LABEL (1 << 6)
-#define EC_FLAG_HEALTH (1 << 7)
-#define EC_FLAG_THINKER (1 << 8)
+#define EC_FLAG_ENTITY (1 << 1)
+#define EC_FLAG_TRANSFORM (1 << 2)
+#define EC_FLAG_RENDERER (1 << 3)
+#define EC_FLAG_COLLIDER (1 << 4)
+#define EC_FLAG_AICONTROLLER (1 << 5)
+#define EC_FLAG_ACTORMOTOR (1 << 6)
+#define EC_FLAG_PROJECTILE (1 << 7)
+#define EC_FLAG_LABEL (1 << 8)
+#define EC_FLAG_HEALTH (1 << 9)
+#define EC_FLAG_THINKER (1 << 10)
 
 #define EC_NUM_TYPES 9
 
@@ -318,19 +319,17 @@ struct EC_Thinker
 struct EntityState
 {
     EntId entId;
-    i32 factoryType;
     // As this contains every possible state struct
     // use flags to know which should actually be used
     u32 componentBits;
-    EntId source;
 
     // keep in the same order or stuff will explode
+    Ent entMetaData;
     Transform transform;
     EC_RendererState renderState;
     EC_ColliderState colliderState;
     EC_ActorMotorState actorState;
     EC_HealthState healthState;
-
     EC_ProjectileState projectileState;
     EC_LabelState labelState;
 };

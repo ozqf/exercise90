@@ -14,18 +14,20 @@ Spawn sequence with templates:
 
 void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 {
-    if (options->scale.x <= 0) { options->scale.x = 1; printf("  SpawnOptions had scaleX <= 0, forced to 1\n"); }
-    if (options->scale.y <= 0) { options->scale.y = 1; printf("  SpawnOptions had scaleY <= 0, forced to 1\n"); }
-    if (options->scale.z <= 0) { options->scale.z = 1; printf("  SpawnOptions had scaleZ <= 0, forced to 1\n"); }
+    // TODO: More tidy way to handle scale issues...?
+    if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
+    if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }
+    if (options->scale.z <= 0) { options->scale.z = 1; /*printf("  SpawnOptions had scaleZ <= 0, forced to 1\n");*/ }
 
-    state->source = options->source;
-    if (state->source.value != 0)
-    {
-        printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
-    }
+    state->entMetaData.source = options->source;
+    // if (state->source.value != 0)
+    // {
+    //     printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
+    // }
 
     if (state->componentBits & EC_FLAG_TRANSFORM)
     {
+        //printf("  EC Apply transform options\n");
         Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
         Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
     }
@@ -41,9 +43,11 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 
 void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options)
 {
-    state->factoryType = ENTITY_TYPE_WORLD_CUBE;
-    
+    printf("GAME Spawn world cube template\n");
     // apply defaults
+    state->componentBits |= EC_FLAG_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE_WORLD_CUBE;
+
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
@@ -65,9 +69,9 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options)
 
 void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* options)
 {
-    state->factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
+    state->componentBits |= EC_FLAG_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
     
-    // apply defaults
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
@@ -92,7 +96,8 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
-    state->factoryType = ENTITY_TYPE_ACTOR_GROUND;
+    state->componentBits |= EC_FLAG_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE_ACTOR_GROUND;
     printf("GAME spawn actor ground %d/%d\n", state->entId.iteration, state->entId.index);
 
     // apply defaults
@@ -124,7 +129,8 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 
 void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
 {
-    state->factoryType = ENTITY_TYPE_PROJECTILE;
+    state->componentBits |= EC_FLAG_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE_PROJECTILE;
 
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
@@ -160,7 +166,7 @@ void Ent_SetTemplate_Thinker(EntityState* state, EntitySpawnOptions* options)
 {
     ILLEGAL_CODE_PATH
     
-    state->factoryType = ENTITY_TYPE_THINKER;
+    state->entMetaData.factoryType = ENTITY_TYPE_THINKER;
 }
 
 #define ENT_SET_TEMPLATE(caseValue, func, state, options) case caseValue##: \

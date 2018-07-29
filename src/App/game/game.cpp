@@ -13,11 +13,17 @@ void Game_AddTestSolid(GameState* gs,
 	Cmd_EntityStateHeader h = {};
 	
 	h.entId = Ent_ReserveFreeEntity(&gs->entList);
+    h.componentBits |= EC_FLAG_ENTITY;
 	h.componentBits |= EC_FLAG_TRANSFORM;
     h.componentBits |= EC_FLAG_RENDERER;
     h.componentBits |= EC_FLAG_COLLIDER;
-	
+
 	size += App_WriteCommandBytes((u8*)&h, sizeof(Cmd_EntityStateHeader));
+
+    Ent ent = {};
+    ent.entId = h.entId;
+    ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
+    size += App_WriteCommandBytes((u8*)&ent, sizeof(Ent));
 
     // create transform state
     Transform t = {};
@@ -83,7 +89,7 @@ void Game_BuildTestHud(GameState *state)
     state->entList.count = UI_MAX_ENTITIES;
     state->entList.max = UI_MAX_ENTITIES;
 
-    state->transformList.items = g_transforms;
+    state->transformList.items = g_ui_transforms;
     state->transformList.count = UI_MAX_ENTITIES;
     state->transformList.max = UI_MAX_ENTITIES;
 
@@ -250,7 +256,10 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
     {
         case CMD_TYPE_ENTITY_STATE_2:
         {
-            printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
+            if (gs->verbose)
+            {
+                printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
+            }
             Ent_ReadStateData(gs, ptr, header->GetSize());
             return 1;
         } break;
@@ -359,7 +368,7 @@ i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
         printf("GAME Reading %d bytes from %s\n", size, App_GetBufferName(commands->ptrStart));
     }
     u32 totalRead = 0;
-    while(ptrRead < commands->ptrEnd)
+    while(ptrRead < commands    ->ptrEnd)
     {
         CmdHeader h = {};
 		i32 headerRead = h.Read(ptrRead);
