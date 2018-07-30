@@ -349,12 +349,13 @@ void App_Render(GameTime* time)
 
     platform.Platform_RenderScene(&g_worldScene);
 
-    if (gs->local.localPlayerHasEnt && !g_debugCameraOn)
+    Client* cl = App_FindLocalClient(&gs->clientList);
+    if (cl && cl->state == CLIENT_STATE_PLAYING && !g_debugCameraOn)
     {
         Game_BuildWeaponModelScene(&g_weaponModelScene);
         platform.Platform_RenderScene(&g_weaponModelScene);
     }
-    
+
     // TODO: Not actually building the menu scene yet.
     // Paused message and actual menus are different items
     // displayed at different times, but always over the game and HUD
