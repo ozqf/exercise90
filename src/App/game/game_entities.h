@@ -150,6 +150,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 	{
 		// if a client machine, may not know iteration
 		ent->entId.iteration = queryId->iteration;
+        ent->inUse = ENTITY_STATUS_IN_USE;
 		return ent;
 	}
 	else

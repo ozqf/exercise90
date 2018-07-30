@@ -108,13 +108,12 @@ void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     // TODO: Move these data items into an 'EC_MetaData' component
     // In theory safe to copy everything but being careful
     // In use and Id should be handled locally
+    //ent->inUse = entState->inUse;
+
     ent->tag = entState->tag;
-    ent->inUse = entState->inUse;
     ent->source = entState->source;
     ent->factoryType = entState->factoryType;
     ent->componentFlags = entState->componentFlags;
-
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +125,10 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (ent == NULL)
     {
         // create for now. TODO: Split into create/update functions
+        if (gs->verbose)
+        {
+            printf("  Failed to find ent %d/%d, assigning\n", state->entId.iteration, state->entId.index);
+        }
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
     }
     if (state->componentBits & EC_FLAG_ENTITY) { EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
@@ -227,16 +230,26 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
         u8* cmdOrigin = App_StartCommandStream();
         App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
         App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
-        return bytesWritten;
-    }
-    else
-    {
-        printf("  Writing %d/%d state, compbits %d, bytes: %d\n",
+        #if 0
+        printf("  Writing %d/%d state to app output, compbits %d, bytes: %d\n",
             state->entId.iteration,
             state->entId.index,
 			state->componentBits,
             bytesWritten
         );
+        #endif
+        return bytesWritten;
+    }
+    else
+    {
+        #if 0
+        printf("  Writing %d/%d state to custom buffer, compbits %d, bytes: %d\n",
+            state->entId.iteration,
+            state->entId.index,
+			state->componentBits,
+            bytesWritten
+        );
+        #endif
         CmdHeader cmdHeader = {};
         cmdHeader.SetType(CMD_TYPE_ENTITY_STATE_2);
         cmdHeader.SetSize(bytesWritten);
@@ -288,7 +301,8 @@ void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
     *state = {};
     state->entId = ent->entId;
     state->componentBits = ent->componentFlags;
-    state->entMetaData = *ent;
+    EC_ApplyEntityMetaData(gs, &state->entMetaData, ent);
+    //state->entMetaData = *ent;
 
 	if (ent->componentFlags & EC_FLAG_TRANSFORM) { state->transform = (EC_FindTransform(gs, ent))->t; }
     if (ent->componentFlags & EC_FLAG_RENDERER)

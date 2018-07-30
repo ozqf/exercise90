@@ -84,12 +84,6 @@ void Platform_WriteTextCommand(char* ptr)
     COM_CopyStringLimited(ptr, g_textCommandInput, 2048);
 }
 
-void Win32_ToggleDebugInput()
-{
-    g_debugInputActive = !g_debugInputActive;
-    //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
-}
-
 void Win32_SetDebugInputTextureIndex(i32 index)
 {
     RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
@@ -104,6 +98,17 @@ void Win32_ResetDebugInput()
     COM_ZeroMemory((u8*)g_inputText.ptr, g_inputText.length);
     *(g_inputText.ptr) = '>';
     g_inputText.position = 1;
+}
+
+void Win32_ToggleDebugInput()
+{
+    g_debugInputActive = !g_debugInputActive;
+    
+    if (g_debugInputActive == 1)
+    {
+        Win32_ResetDebugInput();
+    }
+    //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
 void Win32_CheckTextBuffer()

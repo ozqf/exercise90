@@ -32,8 +32,24 @@ int main(i32 argc, char* argv[])
 {
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
+	for (int i = 0; i < argc; ++i)
+	{
+		printf("%d: %s\n", i, argv[i]);
+	}
 
-    #if 1
+	if (argc > 1)
+	{
+		if (!COM_CompareStrings(argv[1], "state"))
+		{
+			Test_StateSaving(argc, argv);
+		}
+	}
+	else
+	{
+		printf("EX90 Test/Debug utils:\nTODO: Instructions here!\n");
+	}
+	
+    #if 0
 	//HeapTest();
 	//Test_pak();
 	//Test_Pack();

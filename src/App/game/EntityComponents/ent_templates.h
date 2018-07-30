@@ -98,7 +98,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ACTOR_GROUND;
-    printf("GAME spawn actor ground %d/%d\n", state->entId.iteration, state->entId.index);
+    printf("  TEMPLATES spawn actor ground %d/%d\n", state->entId.iteration, state->entId.index);
 
     // apply defaults
     state->componentBits |= EC_FLAG_TRANSFORM;

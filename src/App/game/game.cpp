@@ -22,6 +22,7 @@ void Game_AddTestSolid(GameState* gs,
 
     Ent ent = {};
     ent.entId = h.entId;
+    ent.inUse = ENTITY_STATUS_IN_USE;
     ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
     size += App_WriteCommandBytesToFrameOutput((u8*)&ent, sizeof(Ent));
 
@@ -496,24 +497,24 @@ void Game_Tick(
     {
         EntId id = localClient->entId;
         Ent* ent = Ent_GetEntityById(&gs->entList, &id);
-        if (ent == NULL)
-        {
-            printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
-        }
-        else
+        if (ent != NULL)
         {
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &id);
             EC_Transform* ecT = EC_FindTransform(gs, ent);
-			if (ecT == NULL)
+			if (ecT != NULL)
 			{
-				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
-			}
-			else
-			{
-				Transform_SetByPosAndDegrees(&gs->cameraTransform, &ecT->t.pos, &motor->state.input.degrees);
+                Transform_SetByPosAndDegrees(&gs->cameraTransform, &ecT->t.pos, &motor->state.input.degrees);
 				// raise camera to eye height
 				gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
 			}
+			else if (gs->verbose)
+			{
+				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
+			}
+        }
+        else if (gs->verbose)
+        {
+            printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
         }
     }
 

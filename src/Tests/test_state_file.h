@@ -176,6 +176,11 @@ inline void FileSeg_PrintDebug(char* label, FileSegment* f)
 
 inline void DebugStateHeader(StateSaveHeader* h)
 {
+	printf("Command Protocol %d\nSettings: %d, %d, %d, %d\nBase File: %s\n",
+		h->protocol,
+		h->settings[0], h->settings[1], h->settings[2], h->settings[3],
+		h->baseFile
+	);
 	FileSeg_PrintDebug("Static Entities", &h->staticCommands);
 	FileSeg_PrintDebug("Dynamic Entities", &h->dynamicCommands);
 	FileSeg_PrintDebug("Frames", &h->frames);
@@ -647,7 +652,10 @@ void Test_PrintStateFileScan(char* filePath)
 		printf("  %s is not a State save file\n", filePath);
 		return;
 	}
-
+	
+	
+	DebugStateHeader(&h);
+	
 	printf("File is %d bytes\n", fileSize);
 
 	// Static Commands
@@ -717,7 +725,6 @@ void Test_PrintStateFileScan(char* filePath)
 	//////////////////////////////////////////////////////////
 	Test_PrintReplayFramesFromFile(f, fileSize, &h);
 
-	DebugStateHeader(&h);
 	fclose(f);
 }
 
@@ -804,14 +811,24 @@ u8 Test_LoadAndRun(char* filePath)
 	return 0;
 }
 
-void Test_StateSaving()
+void Test_StateSaving(i32 argc, char* argv[])
 {
 	Test_InitCmdDescriptions();
+	
+	if (argc == 4)
+	{
+		if (!COM_CompareStrings(argv[2], "print"))
+		{
+			//Test_PrintStateFileScan("base\\foo2");
+			Test_PrintStateFileScan(argv[3]);
+		}
+	}
+	
 	//Test_WriteStateFile("base\\testbox.lvl", NULL);
 	//Test_WriteStateFile("map2.lvl", "map1.lvl");
 
 	//Test_PrintStateFileScan("base\\testbox_new.lvl");
-	Test_PrintStateFileScan("base\\foo2");
+	//Test_PrintStateFileScan("base\\foo2");
 	//Test_PrintStateFileScan("base\\DEMO_2018-7-1_0-44-48.DEM");
 	//Test_PrintStateFileScan("base\\demo.dem");
 
