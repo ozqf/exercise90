@@ -66,11 +66,13 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
 
 void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
 {
+    i32 count = 0;
     for (u32 i = 0; i < gs->colliderList.max; ++i)
     {
         EC_Collider* collider = &gs->colliderList.items[i];
         if (collider->header.inUse == 1)
         {
+            count++;
             //Ent* ent = Ent_GetEntityByIndex(&gs->entList, collider->header.entId.index);
             RenderListItem* item = &scene->sceneItems[scene->numObjects];
             scene->numObjects++;
@@ -88,5 +90,9 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             }
             
         }
+    }
+    if (gs->verbose)
+    {
+        printf("GAME Draw %d Colliders\n", count);
     }
 }

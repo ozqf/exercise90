@@ -304,14 +304,26 @@ void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
     EC_ApplyEntityMetaData(gs, &state->entMetaData, ent);
     //state->entMetaData = *ent;
 
-	if (ent->componentFlags & EC_FLAG_TRANSFORM) { state->transform = (EC_FindTransform(gs, ent))->t; }
+    EC_Transform* ecT = EC_FindTransform(gs, ent);
+
+	if (ecT) { state->transform = ecT->t; }
     if (ent->componentFlags & EC_FLAG_RENDERER)
     {
         EC_Renderer* r = EC_FindRenderer(gs, ent);
         COM_CopyStringLimited(r->state.meshName, state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
         COM_CopyStringLimited(r->state.textureName, state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
     }
-    if (ent->componentFlags & EC_FLAG_COLLIDER) { state->colliderState = (EC_FindCollider(gs, ent))->state; }
+    EC_Collider* collider = EC_FindCollider(gs, ent);
+    if (collider)
+    {
+        if (ecT)
+        {
+            collider->state.def.pos[0] = ecT->t.pos.x;
+            collider->state.def.pos[1] = ecT->t.pos.y;
+            collider->state.def.pos[2] = ecT->t.pos.z;
+        }
+        state->colliderState = (EC_FindCollider(gs, ent))->state;
+    }
     if (ent->componentFlags & EC_FLAG_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
 	if (ent->componentFlags & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
     if (ent->componentFlags & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }

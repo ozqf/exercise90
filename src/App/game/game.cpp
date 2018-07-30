@@ -299,10 +299,20 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 			if (ent != NULL)
 			{
                 //Vec3 p = ent->transform.pos;
-                EC_Transform* ecT = EC_FindTransform(gs, ent);
-                Vec3 p = ecT->t.pos;
-                Vec3 normal = COM_UnpackVec3Normal(cmd.gfxNormal);
-                Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
+				if (Ent_HasTransform(ent))
+				{
+					EC_Transform* ecT = EC_FindTransform(gs, ent);
+					Vec3 p = ecT->t.pos;
+					Vec3 normal = COM_UnpackVec3Normal(cmd.gfxNormal);
+					Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
+				}
+				else
+				{
+					printf("GAME Ent %d/%d type %d has no transform...?\n",
+						ent->entId.iteration, ent->entId.index,
+						ent->factoryType
+					);
+				}
 				Ent_Free(gs, ent);
 			}
 			else
