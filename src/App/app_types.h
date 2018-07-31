@@ -9,6 +9,7 @@ struct UIEntity
 {
     i32 id;
     u8 inUse;
+    i32 state;
     Transform transform;
     RendObj rendObj;
 };

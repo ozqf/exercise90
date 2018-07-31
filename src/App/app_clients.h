@@ -74,10 +74,13 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 
         case CLIENT_STATE_PLAYING:
         {
-            if (!g_debugCameraOn)
+            if (g_menuOn == 0 && !g_debugCameraOn)
             {
                 Game_CreateClientInput(&g_inputActions, &cl->input);
-                
+            }
+            else
+            {
+                cl->input.buttons = 0;
             }
             // Always copy input (and other vars) even if it hasn't been affected or
             // the players orientation will be reset! (and everything else, including state)

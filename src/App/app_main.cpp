@@ -340,6 +340,7 @@ void App_Render(GameTime* time)
 
     #if 1
     Game_UpdateUI(g_ui_entities, UI_MAX_ENTITIES, time);
+    //App_BuildMenuRenderScene()
     UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);
 
 
@@ -364,6 +365,7 @@ void App_Render(GameTime* time)
     // displayed at different times, but always over the game and HUD
     if (g_menuOn)
     {
+        App_MenuInput(&g_inputActions, time);
         App_BuildMenuRenderScene();
         platform.Platform_RenderScene(&g_menuScene);
     }
