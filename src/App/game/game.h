@@ -98,24 +98,6 @@ void Game_SetDebugStringRender()
 }
 
 /////////////////////////////////////////////////////////////
-// Render Objects Memory
-/////////////////////////////////////////////////////////////
-// TODO: This stuff should probably be in the app, not the game area.
-// Game
-global_variable RenderScene g_worldScene;
-global_variable RenderListItem g_scene_renderList[GAME_MAX_ENTITIES];
-
-global_variable RendObj g_debugLine = {};
-
-// Weapon Model
-global_variable RenderScene g_weaponModelScene;
-global_variable RenderListItem g_weaponModel_renderList[UI_MAX_ENTITIES];
-
-// UI
-global_variable RenderScene g_uiScene;
-global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
-
-/////////////////////////////////////////////////////////////
 // Game State Memory
 /////////////////////////////////////////////////////////////
 // Game
@@ -124,8 +106,8 @@ global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
 global_variable GameState g_gameState;
 
 // UI
-global_variable GameState g_uiState;
-global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
+//global_variable GameState g_uiState;
+//global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
 
 // Game Command I/O buffer handles
 
@@ -178,8 +160,10 @@ global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
 global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
 
 // UI
-global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
-global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
+//global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
+//global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
+global_variable UIEntity              g_ui_entities[UI_MAX_ENTITIES];
+
 
 // GFX
 global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];

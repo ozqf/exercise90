@@ -24,6 +24,9 @@ struct Cmd_ClientUpdate;
 struct Client;
 struct ClientList;
 struct ActorInput;
+struct UIEntity;
+global_variable RendObj g_debugLine = {};
+#include "app_ui.h"
 
 /////////////////////////////////////////////////////
 // App functions that game can access
@@ -115,6 +118,7 @@ void AppListTextures();
 /////////////////////////////////////////////////////////
 
 #include "app_debug.h"
+#include "app_menu.h"
 #include "app_session.h"
 #include "app_clients.h"
 #include "app_commands.h"

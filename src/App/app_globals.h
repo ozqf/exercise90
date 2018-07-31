@@ -37,6 +37,9 @@ global_variable TextureHandles g_textureHandles;
 global_variable MeshHandles g_meshHandles;
 //global_variable TextureHandles g_textures;
 
+// Menu items
+global_variable UIEntity g_menu_entities[APP_MAX_MENU_ITEMS];
+
 // Menu Rendering
 global_variable RenderScene g_menuScene;
 global_variable RenderListItem g_menuRenderList[APP_MAX_MENU_ITEMS];
@@ -59,3 +62,20 @@ global_variable StateSaveHeader g_replayHeader = {};
 global_variable BlockRef g_replayData;
 global_variable ByteBuffer g_replayReadBuffer = {};
 global_variable u8* g_replayPtr = NULL;
+
+
+/////////////////////////////////////////////////////////////
+// Render Objects Memory
+/////////////////////////////////////////////////////////////
+// World scene
+global_variable RenderScene g_worldScene;
+global_variable RenderListItem g_scene_renderList[GAME_MAX_ENTITIES];
+
+// Weapon Model
+global_variable RenderScene g_weaponModelScene;
+global_variable RenderListItem g_weaponModel_renderList[UI_MAX_ENTITIES];
+
+// UI
+global_variable RenderScene g_uiScene;
+global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
+

@@ -6,23 +6,6 @@ holding game/menu state and calling game update when required
 
 #include "app_module.cpp"
 
-void App_InitMenus()
-{
-    Transform t = {};
-    Transform_SetToIdentity(&t);
-    t.pos.y = 0.5;
-    t.pos.z = -1;
-    t.scale.x = 0.5;
-    t.scale.y = 0.5;
-    t.scale.x = 0.5;
-    RendObj obj;
-    RendObj_SetAsBillboard(&obj, 1, 1, 1, AppGetTextureIndexByName("textures\\ui_text_menu_title.bmp"));
-
-    RScene_Init(&g_menuScene, g_menuRenderList, APP_MAX_MENU_ITEMS);
-    RScene_AddRenderItem(&g_menuScene, &t, &obj);
-    
-}
-
 inline Var* App_GetVar(char* name)
 {
     return COM_GetVar(g_vars, g_nextVar, name);
@@ -220,8 +203,7 @@ void App_UpdateGameState(GameTime* time)
     g_debugStr.length = 0;
 
     GameState *gs = &g_gameState;
-    GameState *ui = &g_uiState;
-
+    
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
     collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
@@ -315,12 +297,12 @@ void App_UpdateGameState(GameTime* time)
 void App_Render(GameTime* time)
 {
     GameState *gs = &g_gameState;
-    GameState *ui = &g_uiState;
-
+    
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;
     g_weaponModelScene.numObjects = 0;
     g_uiScene.numObjects = 0;
+    g_menuScene.numObjects = 0;
 
     // Camera selection
     if (g_debugCameraOn)
@@ -356,17 +338,11 @@ void App_Render(GameTime* time)
         platform.Platform_RenderScene(&g_weaponModelScene);
     }
 
-    // TODO: Not actually building the menu scene yet.
-    // Paused message and actual menus are different items
-    // displayed at different times, but always over the game and HUD
-    if (g_menuOn)
-    {
-        platform.Platform_RenderScene(&g_menuScene);
-    }
-    
     #if 1
-    Game_UpdateUI(ui, time);
-    Game_BuildRenderList(ui, &g_uiScene);
+    Game_UpdateUI(g_ui_entities, UI_MAX_ENTITIES, time);
+    UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);
+
+
     // Render debug string
     //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
     //App_WriteCameraDebug(time);
@@ -383,6 +359,15 @@ void App_Render(GameTime* time)
     platform.Platform_RenderScene(&g_uiScene);
     #endif
 
+    // TODO: Not actually building the menu scene yet.
+    // Paused message and actual menus are different items
+    // displayed at different times, but always over the game and HUD
+    if (g_menuOn)
+    {
+        App_BuildMenuRenderScene();
+        platform.Platform_RenderScene(&g_menuScene);
+    }
+    
 }
 
 void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)

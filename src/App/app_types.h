@@ -2,6 +2,20 @@
 
 #include "../common/com_module.h"
 
+////////////////////////////////////////////////////////////////////
+// UI
+////////////////////////////////////////////////////////////////////
+struct UIEntity
+{
+    i32 id;
+    u8 inUse;
+    Transform transform;
+    RendObj rendObj;
+};
+
+////////////////////////////////////////////////////////////////////
+// ASSETS
+////////////////////////////////////////////////////////////////////
 #define MAX_TEXTURES 128
 #define MAX_MESHES 128
 
@@ -35,21 +49,9 @@ enum ReplayMode
 	PlayingReplay
 };
 
-#ifndef APP_WRITE_CMD
-#define APP_WRITE_CMD(i32_bufferId, u8_cmdType, u8_cmdFlags, cmdObject) \
-{ \
-	GameTime* ptrGameTime = GetAppTime(); \
-	if (ptrGameTime->singleFrame)\
-	{\
-		char* label = App_GetBufferName(g_appWriteBuffer->ptrStart); \
-		printf("Writing type %d to %s\n", u8_cmdType, label);\
-	}\
-\
-    u8** ptrToWritePtr = &g_appWriteBuffer->ptrWrite; \
-    COM_WRITE_CMD_TO_BUFFER(ptrToWritePtr, u8_cmdType, u8_cmdFlags, cmdObject) \
-}
-#endif
-
+////////////////////////////////////////////////////////////////////
+// INPUT
+////////////////////////////////////////////////////////////////////
 struct InputAction
 {
     u32 keyCode;

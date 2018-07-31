@@ -71,160 +71,49 @@ void Game_BuildTestScene(GameState* gs)
 	Game_AddTestSolid(gs, 0, 6, 0, 12, 1, 12);
 }
 
-void Game_BuildTestHud(GameState *state)
+void Game_BuildTestHud()
 {
+    UIEntity* ent;
+    i32 bytesOfUI = sizeof(UIEntity) * UI_MAX_ENTITIES;
+    COM_ZeroMemory((u8*)g_ui_entities, bytesOfUI);
 
-	#if 1
-    // will be uesd for each entity so hoisted
-    EntId entId;
-    Ent* ent;
-    EC_Transform* ecT;
-    EC_Renderer* renderer;
-    EntList* ents = &state->entList;
+    // 0 Crosshair
+    ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
+    ent->transform.pos.z = 0;
+    ent->transform.scale = { 0.1f, 0.1f, 0.1f };
+    RendObj_SetAsSprite(&ent->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
+    RendObj_CalculateSpriteAsciUVs(&ent->rendObj.data.sprite, '+');
 
-    
-    // Init gs and component lists
-    *state = {};
 
-    state->entList.items = g_uiEntities;
-    state->entList.count = UI_MAX_ENTITIES;
-    state->entList.max = UI_MAX_ENTITIES;
-
-    state->transformList.items = g_ui_transforms;
-    state->transformList.count = UI_MAX_ENTITIES;
-    state->transformList.max = UI_MAX_ENTITIES;
-
-    state->rendererList.items = g_ui_renderers;
-    state->rendererList.count = UI_MAX_ENTITIES;
-    state->rendererList.max = UI_MAX_ENTITIES;
-
-	Ent_ResetEntityIds(ents);
-	#endif
-
-    /////////////////////////////////////////////////////////////
-    // A test HUD
-    /////////////////////////////////////////////////////////////
-	#if 1
-    // Crosshair (sprite rendering a single char from a character sheet)
-    entId = Ent_ReserveFreeEntity(ents);
-    ent = Ent_GetAndAssign(ents, &entId);
-
-    ecT = EC_AddTransform(state, ent);
-    ecT->t.pos.z = 0;
-    ecT->t.scale.x = 0.1f;
-    ecT->t.scale.y = 0.1f;
-    ecT->t.scale.z = 0.1f;
-
-    // ent->transform.pos.z = 0;
-    // ent->transform.scale.x = 0.1f;
-    // ent->transform.scale.y = 0.1f;
-    // ent->transform.scale.z = 0.1f;
-
-    renderer = EC_AddRenderer(state, ent);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
-
-    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
-    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
-    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, '+');
-	#endif
-
-	#if 0
-    // Crosshair - position test (sprite rendering a single char from a character sheet)
-    entId = Ent_ReserveFreeEntity(ents);
-    ent = Ent_GetAndAssign(ents, &entId);
-    ent->transform.pos.x = 2;
-    ent->transform.scale.x = 0.5f;
-    ent->transform.scale.y = 0.5f;
-    ent->transform.scale.z = 0.5f;
-
-    renderer = EC_AddRenderer(state, ent);
-    // RendObj_SetAsMesh(&renderer->rendObj, &g_meshOctahedron, 1, 1, 1, 2);
-
-    RendObj_SetAsSprite(&renderer->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
-    //RendObj_SetSpriteUVs(&obj->obj.sprite, 0.0625, 0.125, 0.5625, 0.5625 + 0.0625);
-    RendObj_CalculateSpriteAsciUVs(&renderer->rendObj.data.sprite, 'X');
-	#endif
-
-    i32 numChars;
-	#if 1
-    // Game Messages
-    entId = Ent_ReserveFreeEntity(ents);
-    ent = Ent_GetAndAssign(ents, &entId);
-    ecT = EC_AddTransform(state, ent);
-    ecT->t.pos.x = 0;
-    //ent->transform.pos.y -= -1 - (0.05f * 3);
-    ecT->t.pos.y += 1;
-    // ent->transform.scale.x = 1f;
-    // ent->transform.scale.y = 1f;
-    // ent->transform.scale.z = 1f;
-    renderer = EC_AddRenderer(state, ent);
-
-    //char* chars = g_debugStr.chars;
-	//char* chars = "Message Line 1\nMessage Line 2\nMessage Line 3\nMessage Line 4\n";
+    // 1 Info text
+    ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     char* chars = "Info\n";
-    numChars = COM_StrLen(chars);
-	//i32 numChars = g_testString;
-
+    i32 numChars = COM_StrLen(chars);
+    ent->transform.pos.x = 0;
+    ent->transform.pos.y = 1;
     RendObj_SetAsAsciCharArray(
-        &renderer->rendObj,
+        &ent->rendObj,
         chars,
         numChars,
         0.05f,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
-    //printf("Draw asci array:\n%s\n", chars);
-    //obj->transform.pos.x = -1;//-0.75f;
-    //obj->transform.pos.y = 1;//0.75f;
-	#endif
 
-	#if 1
-    // Player Status
-    entId = Ent_ReserveFreeEntity(ents);
-    ent = Ent_GetAndAssign(ents, &entId);
-    ecT = EC_AddTransform(state, ent);
-    ecT->t.pos.x = -1;
-    //ent->transform.pos.y -= -1 - (0.05f * 3);
-    ecT->t.pos.y -= (1 - (0.075f * 3));
-    // ent->transform.scale.x = 1f;
-    // ent->transform.scale.y = 1f;
-    // ent->transform.scale.z = 1f;
-    renderer = EC_AddRenderer(state, ent);
 
-    //char* chars = g_debugStr.chars;
-	char* placeholderChars2 = "HP\nENERGY\nRAGE\n";
-    numChars = COM_StrLen(placeholderChars2);
-	//i32 numChars = g_testString;
-
+    // 2 Player Status
+    ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
+    ent->transform.pos.x = -1;
+    ent->transform.pos.y = -(1 - (0.075f * 3));
+    char* placeholderChars2 = "HP\nENERGY\nRAGE\n";
     RendObj_SetAsAsciCharArray(
-        &renderer->rendObj, 
-        placeholderChars2, 
+        &ent->rendObj, 
+        placeholderChars2,
         numChars, 
         0.075f, 
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
-    //obj->transform.pos.x = -1;//-0.75f;
-    //obj->transform.pos.y = 1;//0.75f;
-	#endif
-
-	#if 0
-    /////////////////////////////////////////////////////////////
-    // Walls mesh
-    /////////////////////////////////////////////////////////////
-    ent = Ent_GetFreeEntity(&state->entList);
-
-    ent->transform.pos.x = 0;
-    ent->transform.pos.y = 0;
-    ent->transform.pos.z = 0;
-    ent->transform.scale.x = 12;
-    ent->transform.scale.y = 4;
-    ent->transform.scale.z = 12;
-
-    renderer = EC_AddRenderer(ent, state);
-    
-    RendObj_SetAsMesh(&renderer->rendObj, &g_meshInverseCube, 1, 1, 1, 5);
-	#endif
 }
 
 void Game_BuildTestMenu()
@@ -235,7 +124,7 @@ void Game_BuildTestMenu()
 void Game_Init()
 {
     GS_Init(&g_gameState);
-    Game_BuildTestHud(&g_uiState);
+    Game_BuildTestHud();
     Game_BuildTestMenu();
 }
 
@@ -312,7 +201,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 						ent->entId.iteration, ent->entId.index,
 						ent->factoryType
 					);
-				}
+				} 
 				Ent_Free(gs, ent);
 			}
 			else

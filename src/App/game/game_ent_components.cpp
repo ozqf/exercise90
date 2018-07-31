@@ -170,7 +170,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
     }
 }
 
-void Game_UpdateUI(GameState* gs, GameTime* time)
+void Game_UpdateUI(UIEntity* ents, i32 maxEntities, GameTime* time)
 {
     #if 0
     f32 speed = 8.0f;
