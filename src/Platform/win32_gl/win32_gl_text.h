@@ -70,15 +70,90 @@ void R_LoadAsciCharGeometry(
 
     glEnd();
 }
+
+void R_MeasureStringSize(char* str, i32* charsWide, i32* charsHigh)
+{
+	i32 accumulator = 0;
+	i32 longestLine = 0;
+	i32 numLines = 1;
+	while(*str)
+	{
+		if (*str == '\n')
+		{
+			if (accumulator > longestLine)
+			{
+				longestLine = accumulator;
+				accumulator = 0;
+				numLines++;
+			}
+		}
+		else
+		{
+			accumulator++;
+		}
+		str++;
+	}
+	if (longestLine == 0)
+	{
+		*charsWide = accumulator;
+	}
+	else
+	{
+		*charsWide = longestLine;
+	}
+	
+	*charsHigh = numLines;
+}
+
+void R_SetTextAlignmentOffsets(
+	i32 alignmentMode,
+	f32 charSize,
+	f32* resultX,
+	f32* resultY,
+	i32 charsWide,
+	i32 charsHigh
+)
+{
+	f32 halfWidth = (f32)charsWide / 2.0f;
+	f32 halfHeight = (f32)charsHigh / 2.0f;
+	*resultX = 0;
+	*resultY = 0;
+	switch(alignmentMode)
+	{
+		case TEXT_ALIGNMENT_MIDDLE_MIDDLE:
+		{
+			*resultX -= halfWidth * charSize;
+			*resultY += halfHeight * charSize;
+		} break;
+
+		case TEXT_ALIGNMENT_BOTTOM_LEFT:
+		{
+			*resultY += charsHigh * charSize;
+			int b = 0;
+		} break;
+
+		case TEXT_ALIGNMENT_TOP_LEFT:
+		{
+			int b = 0;
+		} break;
+	}
+	//*resultY = -*resultY;
+}
+
 void R_LoadAsciCharArrayGeometry(
 	char* charArray,
 	i32 sheetWidthPixels,
+	i32 alignmentMode,
 	f32 screenOriginX,
 	f32 screenOriginY,
 	f32 charSize,
 	f32 aspectRatio
 	)
 {
+	if (alignmentMode != 0)
+	{
+		int c = 0;
+	}
 	glBegin(GL_TRIANGLES);
 
 	u8* current = (u8*)charArray;
@@ -91,10 +166,34 @@ void R_LoadAsciCharArrayGeometry(
 	f32 letterWidth = charSize / aspectRatio;
 	f32 letterHeight = charSize;
 
+	if (!COM_CompareStrings(charArray, "ITEM 1"))
+	{
+		int a = 3;
+	}
+
+	// calculate alignment
+	i32 paragraphWidth;
+	i32 paragraphHeight;
+	R_MeasureStringSize(charArray, &paragraphWidth, &paragraphHeight);
+
+	f32 alignmentOffsetX = 0;
+	f32 alignmentOffsetY = 0;
+
+	R_SetTextAlignmentOffsets(
+		alignmentMode,
+		charSize,
+		&alignmentOffsetX,
+		&alignmentOffsetY,
+		paragraphWidth,
+		paragraphHeight
+	);
+
 	// Setup drawing position
 	// Align to top left of text block:
 	screenOriginX += (letterWidth * 0.5f);
 	screenOriginY -= (letterHeight * 0.5f);
+	screenOriginX += alignmentOffsetX;
+	screenOriginY += alignmentOffsetY;
 	f32 posX = screenOriginX;
 	f32 posY = screenOriginY;
 	f32 posZ = -1;

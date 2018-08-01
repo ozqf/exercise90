@@ -286,7 +286,7 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	R_SetupTestTexture(c->textureIndex);
 	Vec3 pos = objTransform->pos;
 	R_LoadAsciCharArrayGeometry(
-		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
+		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, c->alignmentMode,
 		pos.x, pos.y, c->size, win32_aspectRatio);
 	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
 }

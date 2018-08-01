@@ -94,7 +94,15 @@ void Game_InitDebugStr()
 
 void Game_SetDebugStringRender()
 {
-    RendObj_SetAsAsciCharArray(&g_debugStrRenderer, g_debugStr.chars, g_debugStr.length, 0.05f,  AppGetTextureIndexByName("textures\\charset.bmp"), 0, 1, 1);
+    RendObj_SetAsAsciCharArray(
+        &g_debugStrRenderer,
+        g_debugStr.chars,
+        g_debugStr.length,
+        0.05f,
+        TEXT_ALIGNMENT_MIDDLE_MIDDLE,
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        0, 1, 1
+    );
 }
 
 /////////////////////////////////////////////////////////////

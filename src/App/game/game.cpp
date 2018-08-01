@@ -96,6 +96,7 @@ void Game_BuildTestHud()
         chars,
         numChars,
         0.05f,
+        TEXT_ALIGNMENT_MIDDLE_MIDDLE,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
@@ -104,16 +105,19 @@ void Game_BuildTestHud()
     // 2 Player Status
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.x = -1;
-    ent->transform.pos.y = -(1 - (0.075f * 3));
-    char* placeholderChars2 = "HP\nENERGY\nRAGE\n";
+    ent->transform.pos.y = -1;// -(1 - (0.075f * 3));
+    char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\n";
+
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
         placeholderChars2,
         numChars, 
         0.075f, 
+        TEXT_ALIGNMENT_BOTTOM_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
+    printf("ALIGNMENT MODE FOR PLAYER STATUS: %d\n", ent->rendObj.data.charArray.alignmentMode);
 }
 
 void Game_BuildTestMenu()

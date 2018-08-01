@@ -146,28 +146,71 @@ void Win32_SetMouseScreenPosition(i32* posX, i32* posY)
     }
 }
 
+void Win32_SendMouseScreenPosition(ByteBuffer* cmdBuffer)
+{
+    i32 mousePosX = 0;
+    i32 mousePosY = 0;
+
+    
+    RECT selfRect;
+    GetClientRect(appWindow, &selfRect);
+    i32 width = (selfRect.right - selfRect.left);
+    i32 height = (selfRect.bottom - selfRect.top);
+    i32 halfWidth = width / 2;
+    i32 halfHeight = height / 2;
+    
+    InputEvent ev;
+    
+	// Mouse pos is resolution independent for app
+	// sent to app as a number from -1000 to 1000 on each axis
+	
+    // Windows mouse position are SCREEN offsets from the 0, 0 of this application's window
+    Win32_SetMouseScreenPosition(&mousePosX, &mousePosY);
+    // Deliver mouse pos as a percentage of the screen
+    f32 percentX = ((f32)mousePosX / (f32)width) * 100.0f;
+    f32 percentY = ((f32)mousePosY / (f32)height) * 100.0f;
+
+    PlatformEventHeader header = {};
+    header.type = PLATFORM_EVENT_CODE_INPUT;
+    header.size = sizeof(InputEvent);
+
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, (i32)(percentX * 10000));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, (i32)(percentY * 10000));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+}
+
 void Win32_TickInput(ByteBuffer* cmdBuffer)
 {
     i32 mouseMoveX = 0;
     i32 mouseMoveY = 0;
-    i32 mousePosX = 0;
-    i32 mousePosY = 0;
     
-    InputEvent ev;
+    RECT selfRect;
+    GetWindowRect(appWindow, &selfRect);
+    i32 width = (selfRect.right - selfRect.left);
+    i32 height = (selfRect.bottom - selfRect.top);
+    i32 halfWidth = width / 2;
+    i32 halfHeight = height / 2;
+    
+    // printf("Window size: %d, %d - pos %d, %d - Percent %.2f%% %.2f%%\n",
+    //     width,
+    //     height,
+    //     mousePosX,
+    //     mousePosY,
+    //     percentX,
+    //     percentY
+    // );
 
     if (mouseMode == Captured && g_windowActive)
     {
-#if Z_ALLOW_MOUSE_LOCK
-        RECT selfRect;
-        GetWindowRect(appWindow, &selfRect);
-        i32 halfWidth = (selfRect.right - selfRect.left) / 2;
-        i32 halfHeight = (selfRect.bottom - selfRect.top) / 2;
+        #if Z_ALLOW_MOUSE_LOCK
         SetCursorPos(selfRect.left + halfWidth, selfRect.top + halfHeight);
 
         // SetCursorPos(selfRect.right - selfRect.left, selfRect.bottom - selfRect.top);
 
         // ClipCursor(&selfRect);
-#endif
+        #endif
         Win32_PollMouse(&mouseMoveX, &mouseMoveY);
     }
     else
@@ -177,16 +220,12 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         mouseMoveX = 0;
         mouseMoveY = 0;
     }
-#if 0
-	if (mouseMoveX != 0 || mouseMoveY != 0)
-	{
-		OutputDebugStringA("Mouse moved\n");
-	}
-#endif
 
     PlatformEventHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;
     header.size = sizeof(InputEvent);
+
+    InputEvent ev;
 
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
     Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
@@ -194,11 +233,7 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
     Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
-    
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_SendMouseScreenPosition(cmdBuffer);
 }
 
 u32 Win32_StringToVKCode(char* string)

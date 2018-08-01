@@ -181,7 +181,8 @@ static inline void RendObj_SetAsAsciCharArray(
     RendObj* obj,
     char* asciCharArray,
     i32 numChars,
-    f32 size, 
+    f32 size,
+    i32 alignmentMode,
     i32 textureIndex,
     f32 red, f32 green, f32 blue
     )
@@ -192,6 +193,7 @@ static inline void RendObj_SetAsAsciCharArray(
     c->chars = asciCharArray;
     c->numChars = numChars;
     c->size = size;
+    c->alignmentMode = alignmentMode;
     c->textureIndex = textureIndex;
     c->r = red;
     c->g = green;
