@@ -84,8 +84,8 @@ void R_MeasureStringSize(char* str, i32* charsWide, i32* charsHigh)
 			{
 				longestLine = accumulator;
 				accumulator = 0;
-				numLines++;
 			}
+			numLines++;
 		}
 		else
 		{

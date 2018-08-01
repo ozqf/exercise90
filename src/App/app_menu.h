@@ -72,8 +72,8 @@ void App_InitMenus()
 	ent->inUse = 1;
 	ent->halfWidth = 20 * scale;
 	ent->halfHeight = 5 * scale;
-	ent->transform.pos.x = 0;//-0.25f;
-	ent->transform.pos.y = 0;//0.1f;
+	//ent->transform.pos.x = -0.25f;
+	ent->transform.pos.y = 0.1f;
 	ent->transform.pos.z = -1;
 	char* placeholderChars2 = "ITEM 1";
 	numChars = COM_StrLen(placeholderChars2);
@@ -91,7 +91,7 @@ void App_InitMenus()
 	ent->inUse = 1;
 	ent->halfWidth = 20 * scale;
 	ent->halfHeight = 5 * scale;
-	ent->transform.pos.x = -0.25f;
+	//ent->transform.pos.x = -0.25f;
 	ent->transform.pos.y = -0.1f;
 	ent->transform.pos.z = -1;
 	char* placeholderChars3 = "ITEM 2";
@@ -110,7 +110,7 @@ void App_InitMenus()
 	ent->inUse = 1;
 	ent->halfWidth = 20 * scale;
 	ent->halfHeight = 5 * scale;
-	ent->transform.pos.x = -0.25f;
+	//ent->transform.pos.x = -0.25f;
 	ent->transform.pos.y = -0.3f;
 	ent->transform.pos.z = -1;
 	char* placeholderChars4 = "ITEM 3";
@@ -125,7 +125,7 @@ void App_InitMenus()
         0, 1, 0
     );
 	
-	g_mainMenu.numItems = 2;
+	g_mainMenu.numItems = 4;
 
 	//g_pageMain = {};
 	//COM_CopyStringLimited("main", g_pageMain.label, 15);

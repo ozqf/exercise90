@@ -96,7 +96,7 @@ void Game_BuildTestHud()
         chars,
         numChars,
         0.05f,
-        TEXT_ALIGNMENT_MIDDLE_MIDDLE,
+        TEXT_ALIGNMENT_TOP_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
@@ -106,7 +106,7 @@ void Game_BuildTestHud()
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.x = -1;
     ent->transform.pos.y = -1;// -(1 - (0.075f * 3));
-    char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\n";
+    char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\nLINE 5";
 
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
