@@ -255,13 +255,9 @@ struct InputItem
     u32 lastChangeFrame = 0;
 };
 
-struct GL_Test_Input
+struct ScreenInfo
 {
-	// +z = forward, +y = up, +x = left
-	Vec3 movement;
-	Vec3 rotation;
-	f32 speed;
-    f32 rotSpeed;
+    i32 width;
+    i32 height;
+    f32 aspectRatio;
 };
-
-

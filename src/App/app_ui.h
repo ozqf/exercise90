@@ -25,6 +25,11 @@ void UI_BuildUIRenderScene(RenderScene* scene, UIEntity* ents, i32 maxEntities)
         if (ent->inUse == 1)
         {
             RScene_AddRenderItem(scene, &ent->transform, &ent->rendObj);
+			Transform t = ent->transform;
+			t.scale.x = ent->width;
+			t.scale.y = ent->height;
+			t.scale.z = 1;
+			RScene_AddRenderItem(scene, &t, &ent->debugRend);
         }
     }
 }

@@ -161,23 +161,16 @@ void Win32_SendMouseScreenPosition(ByteBuffer* cmdBuffer)
     
     InputEvent ev;
     
-	// Mouse pos is resolution independent for app
-	// sent to app as a number from -1000 to 1000 on each axis
-	
-    // Windows mouse position are SCREEN offsets from the 0, 0 of this application's window
     Win32_SetMouseScreenPosition(&mousePosX, &mousePosY);
-    // Deliver mouse pos as a percentage of the screen
-    f32 percentX = ((f32)mousePosX / (f32)width) * 100.0f;
-    f32 percentY = ((f32)mousePosY / (f32)height) * 100.0f;
-
+    
     PlatformEventHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;
     header.size = sizeof(InputEvent);
 
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, (i32)(percentX * 10000));
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
     Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, (i32)(percentY * 10000));
+    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
     Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
 }
 
@@ -193,15 +186,6 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
     i32 halfWidth = width / 2;
     i32 halfHeight = height / 2;
     
-    // printf("Window size: %d, %d - pos %d, %d - Percent %.2f%% %.2f%%\n",
-    //     width,
-    //     height,
-    //     mousePosX,
-    //     mousePosY,
-    //     percentX,
-    //     percentY
-    // );
-
     if (mouseMode == Captured && g_windowActive)
     {
         #if Z_ALLOW_MOUSE_LOCK

@@ -41,6 +41,7 @@ global_variable MeshHandles g_meshHandles;
 global_variable UIEntity g_menu_entities[APP_MAX_MENU_ITEMS];
 
 // Menu Rendering
+global_variable ScreenInfo g_screenInfo;
 global_variable RenderScene g_menuScene;
 global_variable RenderListItem g_menuRenderList[APP_MAX_MENU_ITEMS];
 

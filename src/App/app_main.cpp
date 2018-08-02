@@ -294,9 +294,10 @@ void App_UpdateGameState(GameTime* time)
 ///////////////////////////////////////////////////////////////////////////////
 // RENDER
 ///////////////////////////////////////////////////////////////////////////////
-void App_Render(GameTime* time)
+void App_Render(GameTime* time, ScreenInfo screenInfo)
 {
     GameState *gs = &g_gameState;
+    g_screenInfo = screenInfo;
     
     // Make sure  render lists have been cleared or bad stuff will happen
     g_worldScene.numObjects = 0;

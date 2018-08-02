@@ -113,9 +113,10 @@ i32 Win32_R_Shutdown()
 ////////////////////////////////////////////////////////////////////
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////
-void Win32_R_SetupFrame(HWND window)
+ScreenInfo Win32_R_SetupFrame(HWND window)
 {
-	if (g_openglRC == NULL) { return; }
+	ScreenInfo info = { 1, 1, 1 };
+	if (g_openglRC == NULL) { return info; }
 	/*if (renderedOnce == false)
     {
         renderedOnce = true;
@@ -140,6 +141,10 @@ void Win32_R_SetupFrame(HWND window)
 	GetClientRect(window, &r);
 	win32_aspectRatio = (f32)r.right / (f32)r.bottom;
 
+	info.width = r.right;
+	info.height = r.bottom;
+	info.aspectRatio = win32_aspectRatio;
+
 	/**
 	 * - Fixed function pipeline -
 	 * At a high level this is a sequence of commands to the driver. They are executed when the driver wants
@@ -159,6 +164,7 @@ void Win32_R_SetupFrame(HWND window)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	return info;
 }
 
 void Win32_R_FinishFrame(HWND window)

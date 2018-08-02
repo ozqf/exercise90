@@ -11,9 +11,10 @@ struct UIEntity
     u8 inUse;
     i32 state;
     Transform transform;
-    f32 halfWidth;
-    f32 halfHeight;
+    f32 width;
+    f32 height;
     RendObj rendObj;
+	RendObj debugRend;		// for drawing collision boxes
 };
 
 ////////////////////////////////////////////////////////////////////

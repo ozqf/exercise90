@@ -110,7 +110,7 @@ struct AppInterface
     i32 (*AppRendererReloaded)();
     void (*AppInput)(GameTime* time, ByteBuffer commands);
     void (*AppUpdate)(GameTime* time);
-	void (*AppRender)(GameTime* time);
+	void (*AppRender)(GameTime* time, ScreenInfo info);
     u8 (*AppParseCommandString)(char* str, char** tokens, i32 numTokens);
 };
 

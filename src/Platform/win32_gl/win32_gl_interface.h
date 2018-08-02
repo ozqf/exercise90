@@ -12,7 +12,7 @@ struct RenderInterface
 
     void (*R_BindTexture)(void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
 
-    void (*R_SetupFrame)(HWND window);
+    ScreenInfo (*R_SetupFrame)(HWND window);
     void (*R_FinishFrame)(HWND window);
     void (*R_RenderScene)(RenderScene* scene, GameTime* time);
 };

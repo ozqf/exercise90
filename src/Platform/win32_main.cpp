@@ -377,6 +377,9 @@ int CALLBACK WinMain(
     r.top = r.left = 0;
     r.right = windowWidth;
     r.bottom = windowHeight;
+    g_screenInfo.width = windowWidth;
+    g_screenInfo.height = windowHeight;
+    g_screenInfo.aspectRatio = (f32)windowWidth / (f32)windowHeight;
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -557,10 +560,10 @@ int CALLBACK WinMain(
                 // Render
                 if (g_rendererLink.moduleState == 1)
                 {
-                    g_renderer.R_SetupFrame(appWindow);
+                    g_screenInfo = g_renderer.R_SetupFrame(appWindow);
                 }
 
-				g_app.AppRender(&g_gameTime);
+				g_app.AppRender(&g_gameTime, g_screenInfo);
 
                 if (g_debugInputActive)
                 {

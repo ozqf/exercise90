@@ -89,6 +89,8 @@ global_variable HWND appWindow;
 global_variable win32_offscreen_buffer globalBackBuffer;
 global_variable u8 g_windowActive = 1;
 
+global_variable ScreenInfo g_screenInfo = {};
+
 // Control/Input
 global_variable bool globalRunning = true;
 global_variable POINT g_win32_mousePos = {};
@@ -144,9 +146,10 @@ inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, 
     b->count++;
 
 	// Trap to catch specific items being written
-	Assert(itemType != 2);
+	//Assert(itemType != 2);
 }
 
+void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
 
 /****************************************************************
 When something goes wrong
@@ -156,5 +159,3 @@ void Win32_Error(char *msg, char *title)
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
 	ILLEGAL_CODE_PATH
 }
-
-void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
