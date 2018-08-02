@@ -32,7 +32,8 @@ void R_SetupOrthoProjection(f32 halfScreenHeight)
 	f32 halfHeight = halfScreenHeight;
 
 	f32 prj[16];
-	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, 0, 1000);
+	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, -1, 1000);
+	//M4x4_SetOrddthoProjection(prj, -0.5, 0.5, -0.5, 0.5, 1, 10);
 	glLoadMatrixf(prj);
 }
 

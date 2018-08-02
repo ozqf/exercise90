@@ -366,7 +366,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     // displayed at different times, but always over the game and HUD
     if (g_menuOn)
     {
-        App_MenuInput(&g_inputActions, time);
+        App_MenuInput(&g_inputActions, time, &g_screenInfo);
         App_BuildMenuRenderScene();
         platform.Platform_RenderScene(&g_menuScene);
     }

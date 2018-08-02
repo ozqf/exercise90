@@ -713,4 +713,12 @@ void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f
     m[12] = (right + left) / (right - left);
     m[13] = (top + bottom) / (top - bottom);
     m[14] = (prjFar + prjNear) / (prjFar - prjNear);
+    m[15] = 1;
+
+    // m[0] = 2; 
+    // m[5] = 2;
+    // m[10] = -0.22f;
+
+    // m[14] = -1.22f;
+    // m[15] = 1;
 }

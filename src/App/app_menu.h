@@ -76,11 +76,12 @@ void App_InitMenus()
     #if 1
 	ent = &g_mainMenu.items[1];
 	ent->inUse = 1;
-	ent->width = 1.0f;//20 * scale;
-	ent->height = 1.0f;//5 * scale;
+	f32 squareSize = 0.7f;
+	ent->halfWidth = squareSize;
+	ent->halfHeight = squareSize;
 	//ent->transform.pos.x = -0.25f;
-	ent->transform.pos.y = 0.1f;
-	ent->transform.pos.z = -1;
+	//ent->transform.pos.y = 0.1f;
+	//ent->transform.pos.z = 1;
 	char* placeholderChars2 = "ITEM 1";
 	numChars = COM_StrLen(placeholderChars2);
     RendObj_SetAsAsciCharArray(
@@ -198,8 +199,8 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 		ent->rendObj.SetColour(1, 1, 1);
 		f32 x = ent->transform.pos.x;
 		f32 y = ent->transform.pos.y;
-		f32 hw = ent->width / 2;
-		f32 hh = ent->height / 2;
+		f32 hw = ent->halfWidth;
+		f32 hh = ent->halfHeight;
 
 		min[0] = x - hw;
 		min[1] = y - hh;
@@ -226,14 +227,36 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 	//if (!overlapped) { printf("No overlap\n"); }
 }
 
-void App_MenuInput(InputActionSet* inputs, GameTime* time)
+void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 {
 	// translate mouse pos to 0, 0 in centre, 50% either side
 	i32 mouseX = Input_GetActionValue(inputs, "Mouse Pos X");
 	i32 mouseY = Input_GetActionValue(inputs, "Mouse Pos Y");
-	printf("Mouse pos and screen size: %d, %d in %d, %d\n",
-		mouseX, mouseY, g_screenInfo.width, g_screenInfo.height
-	);
+
+	// printf("Mouse pos and screen size: %d, %d in %d, %d\n",
+	// 	mouseX, mouseY, g_screenInfo.width, g_screenInfo.height
+	// );
+
+	f32 halfWidth = (f32)info->width * 0.5f;
+	f32 halfHeight = (f32)info->height * 0.5f;
+
+	f32 mX = (f32)mouseX - (i32)halfWidth;
+	f32 mY = (f32)mouseY - (i32)halfHeight;
+
+	//f32 percentageX = (halfWidth / 100.0f) * mX;
+	//f32 percentageY = (halfHeight / 100.0f) * mY;
+	f32 percentageX = ((f32)mouseX / (f32)info->width) * 100.0f;
+	f32 percentageY = ((f32)mouseY / (f32)info->height) * 100.0f;
+	percentageX -= 50.0f;
+	percentageY -= 50.0f;
+	percentageX *= info->aspectRatio;
+	percentageX /= 50.0f;
+	percentageY /= 50.0f;
+	percentageY = -percentageY;
+	//printf("Mouse pos and screen size: %.3f, %.3f in %.3f, %.3f\n",
+	//	percentageX, percentageY, halfWidth, halfHeight
+	//);
+
 	//g_screenInfo
 	//mouseX -= 50.0f;
 	//mouseY -= 50.0f;
@@ -243,9 +266,29 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time)
 	//mouseX /= 50.0f;
 	//mouseY /= 50.0f;
 	//printf("Mouse pos: %.4f, %.4f\n", mouseX, mouseY);
+
+	if (Input_CheckActionToggledOn(inputs, "Move Right", time->platformFrameNumber))
+	{
+		g_mainMenu.items[1].transform.pos.x += 0.1f;
+	}
+	if (Input_CheckActionToggledOn(inputs, "Move Left", time->platformFrameNumber))
+	{
+		g_mainMenu.items[1].transform.pos.x -= 0.1f;
+	}
+	if (Input_GetActionValue(inputs, "Move Backward"))
+	{
+		g_mainMenu.items[1].transform.pos.z -= 0.1f;
+		printf("Pos Z: %.1f\n", g_mainMenu.items[1].transform.pos.z);
+	}
+	if (Input_GetActionValue(inputs, "Move Forward"))
+	{
+		g_mainMenu.items[1].transform.pos.z += 0.1f;
+		printf("Pos Z: %.1f\n", g_mainMenu.items[1].transform.pos.z);
+	}
 	
 	if (Input_CheckActionToggledOn(inputs, "Move Backward", time->platformFrameNumber))
 	{
+		#if 0
 		UIEntity* ent = &g_mainMenu.items[0];
 		if (ent->rendObj.type == RENDOBJ_TYPE_BILLBOARD)
 		{
@@ -272,6 +315,7 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time)
 				board->b = 0;
 			}
 		}
+		#endif
 	}
 	if (Input_CheckActionToggledOn(inputs, "Move Forward", time->platformFrameNumber))
 	{
