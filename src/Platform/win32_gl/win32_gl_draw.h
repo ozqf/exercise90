@@ -276,9 +276,17 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	//glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	if (settings->projectionMode == RENDER_PROJECTION_MODE_IDENTITY)
+	{
+		glLoadIdentity();
+	}
+	else
+	{
+		R_SetModelViewMatrix(settings, camera, objTransform);
+	}
 	//glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
 	//glTranslatef(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
+	
 	
 
 	RendObj_AsciCharArray* c = &obj->data.charArray;
@@ -296,6 +304,7 @@ void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transfo
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	R_SetModelViewMatrix_Billboard(settings, camera, objTransform);
+	//R_SetModelViewMatrix(settings, camera, objTransform);
 	RendObj_Billboard* b = &obj->data.billboard;
 	R_SetupTestTexture(b->textureIndex);
 	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);

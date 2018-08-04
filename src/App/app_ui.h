@@ -34,7 +34,7 @@ void UI_BuildUIRenderScene(RenderScene* scene, UIEntity* ents, i32 maxEntities)
 			Transform t = ent->transform;
             t.scale.x = ent->halfWidth;
             t.scale.y = ent->halfHeight;
-            t.pos.z -= 3;
+            t.pos.z += 4;
             RScene_AddRenderItem(scene, &t, &ent->debugRend);
             #endif
             #if 0

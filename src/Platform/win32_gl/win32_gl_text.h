@@ -83,8 +83,8 @@ void R_MeasureStringSize(char* str, i32* charsWide, i32* charsHigh)
 			if (accumulator > longestLine)
 			{
 				longestLine = accumulator;
-				accumulator = 0;
 			}
+			accumulator = 0;
 			numLines++;
 		}
 		else
@@ -93,7 +93,7 @@ void R_MeasureStringSize(char* str, i32* charsWide, i32* charsHigh)
 		}
 		str++;
 	}
-	if (longestLine == 0)
+	if (longestLine == 0 || accumulator > longestLine)
 	{
 		*charsWide = accumulator;
 	}
@@ -122,8 +122,11 @@ void R_SetTextAlignmentOffsets(
 	{
 		case TEXT_ALIGNMENT_MIDDLE_MIDDLE:
 		{
-			*resultX -= halfWidth * charSize;
-			*resultY += halfHeight * charSize;
+			*resultX = -(halfWidth * charSize);
+			*resultX /= 2.0f;
+			*resultX -= (charSize * 0.5f);
+			*resultY = halfHeight * charSize;
+			*resultY -= (charSize * 0.5f);
 		} break;
 
 		case TEXT_ALIGNMENT_BOTTOM_LEFT:
@@ -134,9 +137,19 @@ void R_SetTextAlignmentOffsets(
 
 		case TEXT_ALIGNMENT_TOP_LEFT:
 		{
-			int b = 0;
+			*resultX = charSize * 0.5f;
+			*resultY = -(charSize * 0.5f);
 		} break;
 	}
+	printf("Char size: %.2f, Chars wide/high: %d, %d. Half width/height: %.2f, %.2f\nOffset %.2f, %.2f\n",
+		charSize,
+		charsWide,
+		charsHigh,
+		halfWidth,
+		halfHeight,
+		*resultX,
+		*resultY
+	);
 	//*resultY = -*resultY;
 }
 
@@ -189,9 +202,12 @@ void R_LoadAsciCharArrayGeometry(
 	);
 
 	// Setup drawing position
-	// Align to top left of text block:
-	screenOriginX += (letterWidth * 0.5f);
-	screenOriginY -= (letterHeight * 0.5f);
+	// 0, 0 of chars is their centre so offset by a half
+	//screenOriginX = (letterWidth * 0.5f);
+	//screenOriginY = -(letterHeight * 0.5f);
+	screenOriginX = 0;
+	screenOriginY = 0;
+	// Apply alignment offset to this
 	screenOriginX += alignmentOffsetX;
 	screenOriginY += alignmentOffsetY;
 	f32 posX = screenOriginX;

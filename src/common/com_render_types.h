@@ -6,7 +6,7 @@
 //#define RENDOBJ_FLAG_DEBUG (1 << 0)
 
 
-
+// identity == render directly to camera space.
 #define RENDER_PROJECTION_MODE_3D 0
 #define RENDER_PROJECTION_MODE_ORTHOGRAPHIC 1
 #define RENDER_PROJECTION_MODE_IDENTITY 2

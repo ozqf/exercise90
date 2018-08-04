@@ -52,13 +52,13 @@ global_variable AppMenuPage* g_currentMenu;
 void App_InitMenus()
 {
 	UIEntity* ent;
-	//i32 numChars;
+	i32 numChars;
 	f32 scale = 1.0f;//0.01f;
 	
     RScene_Init(&g_menuScene, g_menuRenderList, APP_MAX_MENU_ITEMS);
 	g_menuScene.settings.projectionMode = RENDER_PROJECTION_MODE_ORTHOGRAPHIC;
     g_menuScene.settings.orthographicHalfHeight = 8;
-	Transform_SetRotationDegrees(&g_menuScene.cameraTransform, 0, 180, 0);
+	Transform_SetRotationDegrees(&g_menuScene.cameraTransform, 0, 180, 180);
 
 	g_mainMenu = {};
 	g_mainMenu.activeItem = 0;
@@ -69,8 +69,8 @@ void App_InitMenus()
 	Transform_SetToIdentity(&ent->transform);
 	Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
 	ent->inUse = 1;
-	ent->transform.pos.x = 0;
-	ent->transform.pos.y = 0;
+	ent->transform.pos.x = 8;
+	ent->transform.pos.y = 6;
 	ent->transform.pos.z = 4;
 	ent->transform.scale = { 4, 4, 4 };
 	ent->halfWidth = 8;
@@ -78,7 +78,15 @@ void App_InitMenus()
 	ent->transform.scale.x = 4;
 	ent->transform.scale.y = 4;
 	ent->transform.scale.z = 4;
-	RendObj_SetAsRainbowQuad(&ent->rendObj);
+	
+	#if 1
+	RendObj_SetAsMesh(
+		&ent->rendObj,
+		Assets_GetMeshDataByName("Cube"),
+		1, 1, 1,
+		AppGetTextureIndexByName("textures\\COMP03_1.bmp")
+	);
+	#endif
 	#if 0
 	RendObj_SetAsBillboard(
 		&ent->rendObj, 1, 1, 0,
@@ -86,39 +94,30 @@ void App_InitMenus()
 	);
 	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
-
-	#if 1
-	RendObj_SetAsMesh(
-		&ent->debugRend,
-		Assets_GetMeshDataByName("Cube"),
-		1, 1, 1,
-		AppGetTextureIndexByName("textures\\COMP03_1.bmp")
-	);
+	RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
 
-	#endif
-
-    #if 0
+    #if 1
 	ent = &g_mainMenu.items[1];
+	Transform_SetToIdentity(&ent->transform);
 	ent->inUse = 1;
 	f32 squareSize = 4;//0.7f;
 	ent->halfWidth = 8;
-	ent->halfHeight = 4;
-	//ent->transform.pos.x = -0.25f;
-	//ent->transform.pos.y = 0.1f;
-	ent->transform.pos.z = -2;
-	char* placeholderChars2 = "TEST1";
+	ent->halfHeight = 4.0f;
+	ent->transform.pos = { 0, 0, 1 };
+	char* placeholderChars2 = "TEST1\nLINE 1234\nLINE ABCDFGEJ";
 	numChars = COM_StrLen(placeholderChars2);
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
         placeholderChars2,
         numChars,
-        0.1f,
+        2,
 		TEXT_ALIGNMENT_MIDDLE_MIDDLE,
+		//TEXT_ALIGNMENT_TOP_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         0, 0, 1
     );
-	//RendObj_SetAsRainbowQuad(&ent->debugRend);
+	RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
 	#if 0
 	ent = &g_mainMenu.items[2];
@@ -292,11 +291,11 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 	//mouseY /= 50.0f;
 	//printf("Mouse pos: %.4f, %.4f\n", mouseX, mouseY);
 
-	if (Input_CheckActionToggledOn(inputs, "Move Right", time->platformFrameNumber))
+	if (Input_GetActionValue(inputs, "Move Right"))
 	{
 		g_mainMenu.items[1].transform.pos.x += 0.1f;
 	}
-	if (Input_CheckActionToggledOn(inputs, "Move Left", time->platformFrameNumber))
+	if (Input_GetActionValue(inputs, "Move Left"))
 	{
 		g_mainMenu.items[1].transform.pos.x -= 0.1f;
 	}
