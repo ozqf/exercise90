@@ -91,8 +91,8 @@ void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
             
         }
     }
-    if (gs->verbose)
-    {
-        printf("GAME Draw %d Colliders\n", count);
-    }
+    // if (gs->verbose)
+    // {
+    //     printf("GAME Draw %d Colliders\n", count);
+    // }
 }

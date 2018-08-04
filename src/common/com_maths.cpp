@@ -705,20 +705,23 @@ inline void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32
 
 void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f32 prjNear, f32 prjFar)
 {
+    #if 1
     M4x4_SetToIdentity(m);
     m[0] = 2 / (right - left);
     m[5] = 2 / (top - bottom);
     m[10] = -2 / (prjFar - prjNear);
 
-    m[12] = (right + left) / (right - left);
-    m[13] = (top + bottom) / (top - bottom);
-    m[14] = (prjFar + prjNear) / (prjFar - prjNear);
+    m[12] = -(right + left) / (right - left);
+    m[13] = -(top + bottom) / (top - bottom);
+    m[14] = -(prjFar + prjNear) / (prjFar - prjNear);
     m[15] = 1;
+    #endif
+    #if 0
+    m[0] = 2; 
+    m[5] = 2;
+    m[10] = -0.22f;
 
-    // m[0] = 2; 
-    // m[5] = 2;
-    // m[10] = -0.22f;
-
-    // m[14] = -1.22f;
-    // m[15] = 1;
+    m[14] = -1.22f;
+    m[15] = 1;
+    #endif
 }

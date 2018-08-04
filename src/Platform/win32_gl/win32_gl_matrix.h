@@ -1,5 +1,6 @@
 #pragma once
 
+#include "win32_gl_module.cpp"
 
 ////////////////////////////////////////////////////////////////////
 // Projection
@@ -31,9 +32,16 @@ void R_SetupOrthoProjection(f32 halfScreenHeight)
 	f32 halfWidth = halfScreenHeight * win32_aspectRatio;
 	f32 halfHeight = halfScreenHeight;
 
+	f32 prjNear = 0;
+	f32 prjFar = 1000;
+
 	f32 prj[16];
-	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, -1, 1000);
-	//M4x4_SetOrddthoProjection(prj, -0.5, 0.5, -0.5, 0.5, 1, 10);
+	// printf("Setup ortho projection %.2f by %.2f, near %.2f far %.2f\n",
+	// 	halfWidth, halfHeight, prjNear, prjFar
+	// );
+	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, prjNear, prjFar);
+	//M4x4_SetOrthoProjection(prj, -0.5, 0.5, -0.5, 0.5, 0, 10);
+	//glOrtho(-0.5, 0.5, 0.5, 0.5, 0, 1000);
 	glLoadMatrixf(prj);
 }
 

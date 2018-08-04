@@ -52,37 +52,62 @@ global_variable AppMenuPage* g_currentMenu;
 void App_InitMenus()
 {
 	UIEntity* ent;
-	i32 numChars;
+	//i32 numChars;
 	f32 scale = 1.0f;//0.01f;
-
+	
     RScene_Init(&g_menuScene, g_menuRenderList, APP_MAX_MENU_ITEMS);
+	g_menuScene.settings.projectionMode = RENDER_PROJECTION_MODE_ORTHOGRAPHIC;
+    g_menuScene.settings.orthographicHalfHeight = 8;
+	Transform_SetRotationDegrees(&g_menuScene.cameraTransform, 0, 180, 0);
 
 	g_mainMenu = {};
 	g_mainMenu.activeItem = 0;
 	g_mainMenu.numItems = 16;
 
-	#if 0
+	#if 1
 	ent = &g_mainMenu.items[0];
+	Transform_SetToIdentity(&ent->transform);
+	Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
 	ent->inUse = 1;
-	ent->transform.pos.y = 0.5;
-	ent->transform.pos.z = -1;
-	ent->transform.scale = { 0.5, 0.5, 0.5 };
+	ent->transform.pos.x = 0;
+	ent->transform.pos.y = 0;
+	ent->transform.pos.z = 4;
+	ent->transform.scale = { 4, 4, 4 };
+	ent->halfWidth = 8;
+	ent->halfHeight = 4;
+	ent->transform.scale.x = 4;
+	ent->transform.scale.y = 4;
+	ent->transform.scale.z = 4;
+	RendObj_SetAsRainbowQuad(&ent->rendObj);
+	#if 0
 	RendObj_SetAsBillboard(
 		&ent->rendObj, 1, 1, 0,
 		AppGetTextureIndexByName("textures\\ui_text_menu_title.bmp")
 	);
-	RendObj_SetAsRainbowQuad(&ent->debugRend);
+	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
-    #if 1
+
+	#if 1
+	RendObj_SetAsMesh(
+		&ent->debugRend,
+		Assets_GetMeshDataByName("Cube"),
+		1, 1, 1,
+		AppGetTextureIndexByName("textures\\COMP03_1.bmp")
+	);
+	#endif
+
+	#endif
+
+    #if 0
 	ent = &g_mainMenu.items[1];
 	ent->inUse = 1;
-	f32 squareSize = 0.7f;
-	ent->halfWidth = squareSize;
-	ent->halfHeight = squareSize;
+	f32 squareSize = 4;//0.7f;
+	ent->halfWidth = 8;
+	ent->halfHeight = 4;
 	//ent->transform.pos.x = -0.25f;
 	//ent->transform.pos.y = 0.1f;
-	//ent->transform.pos.z = 1;
-	char* placeholderChars2 = "ITEM 1";
+	ent->transform.pos.z = -2;
+	char* placeholderChars2 = "TEST1";
 	numChars = COM_StrLen(placeholderChars2);
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
@@ -93,17 +118,17 @@ void App_InitMenus()
         AppGetTextureIndexByName("textures\\charset.bmp"),
         0, 0, 1
     );
-	RendObj_SetAsRainbowQuad(&ent->debugRend);
+	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
 	#if 0
 	ent = &g_mainMenu.items[2];
 	ent->inUse = 1;
-	ent->width = 20 * scale;
-	ent->height = 5 * scale;
+	ent->halfWidth = 20 * scale;
+	ent->halfHeight = 5 * scale;
 	//ent->transform.pos.x = -0.25f;
 	ent->transform.pos.y = -0.1f;
-	ent->transform.pos.z = -1;
-	char* placeholderChars3 = "ITEM 2";
+	ent->transform.pos.z = -2;
+	char* placeholderChars3 = "TEST2";
 	numChars = COM_StrLen(placeholderChars3);
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
@@ -138,6 +163,7 @@ void App_InitMenus()
 	RendObj_SetAsRainbowQuad(&ent->debugRend);
 	#endif
 	g_mainMenu.numItems = 4;
+	//g_currentMenu = &g_mainMenu;
 
 	//g_pageMain = {};
 	//COM_CopyStringLimited("main", g_pageMain.label, 15);
@@ -159,12 +185,11 @@ void App_InitMenus()
 
 void App_BuildMenuRenderScene()
 {
-	//UI_BuildUIRenderScene(&g_menuScene, g_menu_entities, APP_MAX_MENU_ITEMS);
-	if (g_currentMenu != NULL)
-	{
-}
-
 	UI_BuildUIRenderScene(&g_menuScene, g_mainMenu.items, g_mainMenu.numItems);
+	// if (g_currentMenu != NULL)
+	// {
+	// 	UI_BuildUIRenderScene(&g_menuScene, g_mainMenu.items, g_mainMenu.numItems);
+	// }
 }
 
 void UI_MenuUp()
