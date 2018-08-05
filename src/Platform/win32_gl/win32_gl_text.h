@@ -118,13 +118,14 @@ void R_SetTextAlignmentOffsets(
 	f32 halfHeight = (f32)charsHigh / 2.0f;
 	*resultX = 0;
 	*resultY = 0;
+
 	switch(alignmentMode)
 	{
 		case TEXT_ALIGNMENT_MIDDLE_MIDDLE:
 		{
 			*resultX = -(halfWidth * charSize);
-			*resultX /= 2.0f;
-			*resultX -= (charSize * 0.5f);
+			//*resultX /= 2.0f;
+			*resultX += (charSize * 0.5f);
 			*resultY = halfHeight * charSize;
 			*resultY -= (charSize * 0.5f);
 		} break;
@@ -141,6 +142,7 @@ void R_SetTextAlignmentOffsets(
 			*resultY = -(charSize * 0.5f);
 		} break;
 	}
+	#if 0
 	printf("Char size: %.2f, Chars wide/high: %d, %d. Half width/height: %.2f, %.2f\nOffset %.2f, %.2f\n",
 		charSize,
 		charsWide,
@@ -150,6 +152,7 @@ void R_SetTextAlignmentOffsets(
 		*resultX,
 		*resultY
 	);
+	#endif
 	//*resultY = -*resultY;
 }
 
@@ -176,7 +179,8 @@ void R_LoadAsciCharArrayGeometry(
     f32 strideX = 1.0f / 16;
     f32 strideY = 1.0f / 16;
 
-	f32 letterWidth = charSize / aspectRatio;
+	// Aspect ratio can be applied here IF rendering directly to camera space...
+	f32 letterWidth = charSize;// / aspectRatio;
 	f32 letterHeight = charSize;
 
 	if (!COM_CompareStrings(charArray, "ITEM 1"))
