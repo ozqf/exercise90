@@ -287,16 +287,30 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	//glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
 	//glTranslatef(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
 	
-	
-
 	RendObj_AsciCharArray* c = &obj->data.charArray;
 	glColor3f(c->r, c->g, c->b);
 	R_SetupTestTexture(c->textureIndex);
 	Vec3 pos = objTransform->pos;
-	R_LoadAsciCharArrayGeometry(
-		c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, c->alignmentMode,
-		pos.x, pos.y, c->size, win32_aspectRatio);
-	//R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
+
+	
+	CharArrayGeometryData data = {};
+	data.charArray = c->chars;
+	data.sheetWidthPixels = ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS;
+	data.alignmentMode = c->alignmentMode;
+	data.screenOriginX = objTransform->pos.x;
+	data.screenOriginY = objTransform->pos.y;
+	data.charSize = c->size;
+	data.aspectRatio = win32_aspectRatio;
+	data.red = c->r;
+	data.green = c->g;
+	data.blue = c->b;
+	
+	R_LoadAsciCharArrayGeometry(settings, &data);
+
+	// R_LoadAsciCharArrayGeometry(
+	// 	settings,
+	// 	c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, c->alignmentMode,
+	// 	pos.x, pos.y, c->size, win32_aspectRatio);
 }
 
 void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)

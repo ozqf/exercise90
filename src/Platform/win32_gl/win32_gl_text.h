@@ -156,23 +156,19 @@ void R_SetTextAlignmentOffsets(
 	//*resultY = -*resultY;
 }
 
-void R_LoadAsciCharArrayGeometry(
-	char* charArray,
-	i32 sheetWidthPixels,
-	i32 alignmentMode,
-	f32 screenOriginX,
-	f32 screenOriginY,
-	f32 charSize,
-	f32 aspectRatio
-	)
+// void R_LoadAsciCharArrayGeometry(
+// 	RenderSceneSettings* settings,
+// 	char* charArray,
+// 	i32 sheetWidthPixels,
+// 	i32 alignmentMode,
+// 	f32 screenOriginX,
+// 	f32 screenOriginY,
+// 	f32 charSize,
+// 	f32 aspectRatio
+// 	)
+void R_LoadAsciCharArrayGeometry(RenderSceneSettings* settings, CharArrayGeometryData* data)
 {
-	if (alignmentMode != 0)
-	{
-		int c = 0;
-	}
-	glBegin(GL_TRIANGLES);
-
-	u8* current = (u8*)charArray;
+	u8* current = (u8*)data->charArray;
 
 	// Setup values to find uv position on char sheet
 	// asci char sheet will be 256 characters, 16x16
@@ -180,25 +176,20 @@ void R_LoadAsciCharArrayGeometry(
     f32 strideY = 1.0f / 16;
 
 	// Aspect ratio can be applied here IF rendering directly to camera space...
-	f32 letterWidth = charSize;// / aspectRatio;
-	f32 letterHeight = charSize;
-
-	if (!COM_CompareStrings(charArray, "ITEM 1"))
-	{
-		int a = 3;
-	}
+	f32 letterWidth = data->charSize;// / aspectRatio;
+	f32 letterHeight = data->charSize;
 
 	// calculate alignment
 	i32 paragraphWidth;
 	i32 paragraphHeight;
-	R_MeasureStringSize(charArray, &paragraphWidth, &paragraphHeight);
+	R_MeasureStringSize(data->charArray, &paragraphWidth, &paragraphHeight);
 
 	f32 alignmentOffsetX = 0;
 	f32 alignmentOffsetY = 0;
 
 	R_SetTextAlignmentOffsets(
-		alignmentMode,
-		charSize,
+		data->alignmentMode,
+		data->charSize,
 		&alignmentOffsetX,
 		&alignmentOffsetY,
 		paragraphWidth,
@@ -206,23 +197,29 @@ void R_LoadAsciCharArrayGeometry(
 	);
 
 	// Setup drawing position
-	// 0, 0 of chars is their centre so offset by a half
-	//screenOriginX = (letterWidth * 0.5f);
-	//screenOriginY = -(letterHeight * 0.5f);
-	screenOriginX = 0;
-	screenOriginY = 0;
+	
+	// screen origin is ignored unless projection mode is 'identity', ie
+	// Drawing directly into camera space.
+	if (settings->projectionMode != RENDER_PROJECTION_MODE_IDENTITY)
+	{
+		data->screenOriginX = 0;
+		data->screenOriginY = 0;
+	}
+	
 	// Apply alignment offset to this
-	screenOriginX += alignmentOffsetX;
-	screenOriginY += alignmentOffsetY;
-	f32 posX = screenOriginX;
-	f32 posY = screenOriginY;
+	data->screenOriginX += alignmentOffsetX;
+	data->screenOriginY += alignmentOffsetY;
+	f32 posX = data->screenOriginX;
+	f32 posY = data->screenOriginY;
 	f32 posZ = -1;
+
+	glBegin(GL_TRIANGLES);
 
 	while (*current)
 	{
 		if (*current == '\n')
 		{
-			posX = screenOriginX;
+			posX = data->screenOriginX;
 			posY -= letterHeight;
 			++current;
 			continue;

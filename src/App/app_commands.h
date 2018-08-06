@@ -71,6 +71,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         printf("  LOAD SOMEFILE.LVL - Load and execute a level/save/demo file\n");
         printf("  SAVE SOMEFILE - Save Game State\n");
+        printf("  TESTSCENE - Load basic test level\n");
         printf("  I or IMPULSE <number> - Execute simple server commands\n");
         printf("  IMPULSE LIST - List impulse commands\n");
         printf("  ENTS - List entities\n");
@@ -86,6 +87,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
     {
         Game_BuildTestScene(&g_gameState);
+        return 1;
     }
     if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
     {

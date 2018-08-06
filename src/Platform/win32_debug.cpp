@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include "win32_system_include.h"
 
+#include "win32_module.cpp"
+
 /****************************************************************
 Create a command window for debug output
 ****************************************************************/
@@ -322,7 +324,7 @@ void InitDebug()
     *item = {};
     item->transform.pos.x = -1;
     item->transform.pos.y = 1;
-    RendObj_SetAsAsciCharArray(&item->obj, g_inputText.ptr, 256, 0.05f, TEXT_ALIGNMENT_MIDDLE_MIDDLE, 1, 1, 1, 1);
+    RendObj_SetAsAsciCharArray(&item->obj, g_inputText.ptr, 256, 0.05f, TEXT_ALIGNMENT_TOP_LEFT, 1, 1, 1, 1);
 
     g_debugScene.settings.projectionMode = RENDER_PROJECTION_MODE_IDENTITY;
     g_debugScene.settings.fov = 90;
