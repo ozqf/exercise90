@@ -339,7 +339,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
         platform.Platform_RenderScene(&g_weaponModelScene);
     }
 
-    #if 0
+    #if 1
     Game_UpdateUI(g_ui_entities, UI_MAX_ENTITIES, time);
     //App_BuildMenuRenderScene()
     UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);

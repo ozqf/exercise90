@@ -66,7 +66,7 @@ void UI_InitEntAsButton(UIEntity* ent, char* text, f32 posX, f32 posY)
 		TEXT_ALIGNMENT_MIDDLE_MIDDLE,
 		//TEXT_ALIGNMENT_TOP_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
-        1, 1, 1
+        1, 1, 0
     );
 	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 	RendObj_SetAsColouredQuad(&ent->debugRend, 0.3f, 0.3f, 0.3f);
@@ -217,7 +217,7 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 	{
 		UIEntity* ent = &items[i];
 		if (ent->inUse != 1) { continue; }
-		ent->rendObj.SetColour(1, 1, 1);
+		//ent->rendObj.SetColour(1, 1, 1);
 		f32 x = ent->transform.pos.x;
 		f32 y = ent->transform.pos.y;
 		f32 hw = ent->halfWidth;
@@ -241,7 +241,7 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 			)
 		{
 			overlapped = 1;
-			ent->rendObj.SetColour(1, 1, 0);
+			//ent->rendObj.SetColour(1, 1, 0);
 			//printf("Over %d\n", i);
 		}
 	}

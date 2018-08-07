@@ -288,10 +288,8 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	//glTranslatef(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
 	
 	RendObj_AsciCharArray* c = &obj->data.charArray;
-	glColor3f(c->r, c->g, c->b);
 	R_SetupTestTexture(c->textureIndex);
 	Vec3 pos = objTransform->pos;
-
 	
 	CharArrayGeometryData data = {};
 	data.charArray = c->chars;

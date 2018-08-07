@@ -176,8 +176,17 @@ void R_LoadAsciCharArrayGeometry(RenderSceneSettings* settings, CharArrayGeometr
     f32 strideY = 1.0f / 16;
 
 	// Aspect ratio can be applied here IF rendering directly to camera space...
-	f32 letterWidth = data->charSize;// / aspectRatio;
+	f32 letterWidth;
 	f32 letterHeight = data->charSize;
+	if (settings->projectionMode == RENDER_PROJECTION_MODE_IDENTITY)
+	{
+		letterWidth = data->charSize / win32_aspectRatio;
+		letterHeight = data->charSize;
+	}
+	else
+	{
+		letterWidth = data->charSize;
+	}
 
 	// calculate alignment
 	i32 paragraphWidth;
@@ -200,7 +209,11 @@ void R_LoadAsciCharArrayGeometry(RenderSceneSettings* settings, CharArrayGeometr
 	
 	// screen origin is ignored unless projection mode is 'identity', ie
 	// Drawing directly into camera space.
-	if (settings->projectionMode != RENDER_PROJECTION_MODE_IDENTITY)
+	if (settings->projectionMode == RENDER_PROJECTION_MODE_IDENTITY)
+	{
+		data->screenOriginX += (data->charSize / 2);
+	}
+	else
 	{
 		data->screenOriginX = 0;
 		data->screenOriginY = 0;
@@ -244,28 +257,32 @@ void R_LoadAsciCharArrayGeometry(RenderSceneSettings* settings, CharArrayGeometr
 		f32 maxY = posY + hh;
 
 		// lower triangle. Bottom left -> Bottom Right -> Top Right
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		f32 r = data->red;
+		f32 g = data->green;
+		f32 b = data->blue;
+		
+		glColor3f(r, g, b);
 		glTexCoord2f(uvLeft, uvBottom);
 		glVertex3f(minX, minY, posZ);
 
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glColor3f(r, g, b);
 		glTexCoord2f(uvRight, uvBottom);
 		glVertex3f(maxX, minY, posZ);
 
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glColor3f(r, g, b);
 		glTexCoord2f(uvRight, uvTop);
 		glVertex3f(maxX, maxY, posZ);
 
 		// upper triangle
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glColor3f(r, g, b);
 		glTexCoord2f(uvLeft, uvBottom);
 		glVertex3f(minX, minY, posZ);
 
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glColor3f(r, g, b);
 		glTexCoord2f(uvRight, uvTop);
 		glVertex3f(maxX, maxY, posZ);
 
-		//glColor3f(sprite->r, sprite->g, sprite->b);
+		glColor3f(r, g, b);
 		glTexCoord2f(uvLeft, uvTop);
 		glVertex3f(minX, maxY, posZ);
 
