@@ -57,6 +57,7 @@ void UI_InitEntAsButton(UIEntity* ent, char* text, f32 posX, f32 posY)
 	ent->halfWidth = 8;
 	ent->halfHeight = 0.75f;
 	ent->transform.pos = { posX, posY, 1 };
+	ent->isInteractive = 1;
 	i32 numChars = COM_StrLen(text);
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
@@ -66,7 +67,7 @@ void UI_InitEntAsButton(UIEntity* ent, char* text, f32 posX, f32 posY)
 		TEXT_ALIGNMENT_MIDDLE_MIDDLE,
 		//TEXT_ALIGNMENT_TOP_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
-        1, 1, 0
+        1, 1, 1
     );
 	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 	RendObj_SetAsColouredQuad(&ent->debugRend, 0.3f, 0.3f, 0.3f);
@@ -217,7 +218,9 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 	{
 		UIEntity* ent = &items[i];
 		if (ent->inUse != 1) { continue; }
-		//ent->rendObj.SetColour(1, 1, 1);
+		if (ent->isInteractive == 0) { continue; }
+		ent->rendObj.SetColour(1, 1, 1);
+		ent->debugRend.SetColour(0.2f, 0.2f, 0.2f);
 		f32 x = ent->transform.pos.x;
 		f32 y = ent->transform.pos.y;
 		f32 hw = ent->halfWidth;
@@ -241,7 +244,8 @@ void App_MouseTestMenu(UIEntity* items, i32 numItems, f32 mouseX, f32 mouseY)
 			)
 		{
 			overlapped = 1;
-			//ent->rendObj.SetColour(1, 1, 0);
+			ent->rendObj.SetColour(0, 0, 0);
+			ent->debugRend.SetColour(1, 1, 1);
 			//printf("Over %d\n", i);
 		}
 	}
@@ -261,9 +265,14 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 	f32 halfWidth = (f32)info->width * 0.5f;
 	f32 halfHeight = (f32)info->height * 0.5f;
 
-	f32 mX = (f32)mouseX - (i32)halfWidth;
-	f32 mY = (f32)mouseY - (i32)halfHeight;
+	f32 mX = (f32)mouseX - halfWidth;
+	f32 mY = (f32)mouseY - halfHeight;
+	mY = -mY;
+	mX /= halfWidth / (12 * info->aspectRatio);
+	mY /= halfHeight / 12;
 
+	App_MouseTestMenu(g_mainMenu.items, g_mainMenu.numItems, (f32)mX, (f32)mY);
+	#if 0
 	//f32 percentageX = (halfWidth / 100.0f) * mX;
 	//f32 percentageY = (halfHeight / 100.0f) * mY;
 	f32 percentageX = ((f32)mouseX / (f32)info->width) * 100.0f;
@@ -277,7 +286,8 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 	//printf("Mouse pos and screen size: %.3f, %.3f in %.3f, %.3f\n",
 	//	percentageX, percentageY, halfWidth, halfHeight
 	//);
-
+	
+	#endif
 	//g_screenInfo
 	//mouseX -= 50.0f;
 	//mouseY -= 50.0f;
@@ -288,6 +298,7 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 	//mouseY /= 50.0f;
 	//printf("Mouse pos: %.4f, %.4f\n", mouseX, mouseY);
 
+	#if 0
 	if (Input_GetActionValue(inputs, "Move Right"))
 	{
 		g_mainMenu.items[1].transform.pos.x += 0.1f;
@@ -342,6 +353,8 @@ void App_MenuInput(InputActionSet* inputs, GameTime* time, ScreenInfo* info)
 	{
 
 	}
+	
 
 	App_MouseTestMenu(g_mainMenu.items, g_mainMenu.numItems, (f32)mouseX, (f32)mouseY);
+	#endif
 }

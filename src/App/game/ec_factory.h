@@ -73,6 +73,16 @@ void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorState* state)
     motor->state = *state;
 }
 
+void EC_AIControllerApplyState(GameState* gs, Ent* ent, EC_AIState* state)
+{
+    EC_AIController* ai = EC_FindAIController(gs, ent);
+    if (ai == NULL)
+    {
+        ai = EC_AddAIController(gs, ent);
+    }
+    ai->state = *state;
+}
+
 void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
 {
     EC_Health* hp = EC_FindHealth(gs, ent);
@@ -135,6 +145,7 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
     if (state->componentBits & EC_FLAG_RENDERER) { EC_RendererApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
+    if (state->componentBits & EC_FLAG_AICONTROLLER) { EC_AIControllerApplyState(gs, ent, &state->aiState); }
     if (state->componentBits & EC_FLAG_ACTORMOTOR) { EC_ActorMotorApplyState(gs, ent, &state->actorState); }
     if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
     if (state->componentBits & EC_FLAG_PROJECTILE) { EC_ProjectileApplyState(gs, ent, &state->projectileState); }
@@ -170,6 +181,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     if (h.componentBits & EC_FLAG_TRANSFORM) { stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
     if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendererState); }
     if (h.componentBits & EC_FLAG_COLLIDER) { stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
+    if (h.componentBits & EC_FLAG_AICONTROLLER) { stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
     if (h.componentBits & EC_FLAG_ACTORMOTOR) { stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
     if (h.componentBits & EC_FLAG_HEALTH) { stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
     if (h.componentBits & EC_FLAG_PROJECTILE) { stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
@@ -199,7 +211,9 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
     
 	// TODO: Fix me! Force entity meta data flag. Loading will always read it
 	state->componentBits |= EC_FLAG_ENTITY;
-    
+
+    // TODO: Replace raw struct copy with proper encoding functions!
+    // WARNING: THIS IS ORDER DEPENDENT!    
     Cmd_EntityStateHeader h = {};
     h.entId = state->entId;
     h.componentBits = state->componentBits;
@@ -213,6 +227,8 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
     { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendererState); }
     if (h.componentBits & EC_FLAG_COLLIDER)
     { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_ColliderState); }
+    if (h.componentBits & EC_FLAG_AICONTROLLER)
+    { stream += COM_COPY_STRUCT(&state->aiState, stream, EC_AIState); }
     if (h.componentBits & EC_FLAG_ACTORMOTOR)
     { stream += COM_COPY_STRUCT(&state->actorState, stream, EC_ActorMotorState); }
     if (h.componentBits & EC_FLAG_HEALTH)

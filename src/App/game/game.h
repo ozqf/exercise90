@@ -172,7 +172,6 @@ global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
 //global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
 global_variable UIEntity              g_ui_entities[UI_MAX_ENTITIES];
 
-
 // GFX
 global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 
@@ -190,8 +189,8 @@ ClientTick g_debugInput = {};
 #include "EntityComponents/ec_collider.h"
 #include "EntityComponents/ent_templates.h"
 #include "ec_factory.h"
-#include "comp_rendObj.h"
-#include "comp_aiController.h"
+#include "game_draw.h"
+#include "EntityComponents/ec_aiController.h"
 #include "game_players.h"
 
 #include "game_physics.h"

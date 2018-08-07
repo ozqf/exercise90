@@ -92,19 +92,21 @@ union EntId
 };
 #pragma pack(pop)
 
-// Is this necessary?s
+// Is this necessary?
 inline u8 EntId_Equals(EntId* a, EntId* b)
 {
     return (a->index == b->index && a->iteration == b->iteration);
 }
 
+// Entities are defined by the components grouped by ent id.
+// consider this struct as entity 'meta data'
 struct Ent
 {
     // Instance identification
     EntId entId;            // iteration + index of this entity
     i32 tag;                // can (and should) be shared between entities for triggering
 
-    EntId source;
+    EntId source;           // id of whatever spawned/shot this ent
 
     // 'type' information
     i32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
@@ -236,13 +238,18 @@ struct EC_ActorMotor
     EC_ActorMotorState state;
 };
 
+struct EC_AIState
+{
+    Vec3 dir;
+    f32 speed;
+};
+
 // A quick test component
 struct EC_AIController
 {
     EC_Header header;
 
-    Vec3 dir;
-    f32 speed;
+    EC_AIState state;
 };
 
 struct EC_ProjectileState
@@ -328,6 +335,7 @@ struct EntityState
     Transform transform;
     EC_RendererState renderState;
     EC_ColliderState colliderState;
+    EC_AIState aiState;
     EC_ActorMotorState actorState;
     EC_HealthState healthState;
     EC_ProjectileState projectileState;

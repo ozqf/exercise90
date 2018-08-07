@@ -9,6 +9,7 @@ struct UIEntity
 {
     i32 id;
     u8 inUse;
+    u8 isInteractive;
     i32 state;
     Transform transform;
     f32 halfWidth;

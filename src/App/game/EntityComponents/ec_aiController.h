@@ -31,10 +31,10 @@
 
 void Ent_InitAIController(EC_AIController* controller, f32 dirX, f32 dirY, f32 dirZ, f32 speed)
 {
-    controller->dir.x = dirX;
-    controller->dir.y = dirY;
-    controller->dir.z = dirZ;
-    controller->speed = speed;
+    controller->state.dir.x = dirX;
+    controller->state.dir.y = dirY;
+    controller->state.dir.z = dirZ;
+    controller->state.speed = speed;
 }
 
 f32 moveDistance = 12;

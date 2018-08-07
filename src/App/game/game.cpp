@@ -420,33 +420,4 @@ void Game_Tick(
             printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
         }
     }
-
-    #if 0
-    if (gs->local.localPlayerHasEnt)
-    {
-		EntId id = gs->local.localPlayerEntId;
-        Ent* ent = Ent_GetEntityById(&gs->entList, &id);
-		if (ent == NULL)
-		{
-			printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
-
-		}
-		else
-		{
-			EC_ActorMotor* motor = EC_FindActorMotor(gs, &gs->local.localPlayerEntId);
-            EC_Transform* ecT = EC_FindTransform(gs, ent);
-			if (ecT == NULL)
-			{
-				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
-			}
-			else
-			{
-				Transform_SetByPosAndDegrees(&gs->cameraTransform, &ecT->t.pos, &motor->state.input.degrees);
-				// raise camera to eye height
-				gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
-			}
-		}
-    }
-    #endif
-    
 }

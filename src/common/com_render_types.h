@@ -203,18 +203,25 @@ struct RendObj
     {
         switch (this->type)
         {
+            case RENDOBJ_TYPE_PRIMITIVE:
+            {
+                this->data.primitive.red = r;
+                this->data.primitive.green = g;
+                this->data.primitive.blue = b;
+            }  break;
+
             case RENDOBJ_TYPE_BILLBOARD:
             {
                 this->data.billboard.r = r;
-                this->data.billboard.g = r;
-                this->data.billboard.b = r;
+                this->data.billboard.g = g;
+                this->data.billboard.b = b;
             } break;
 
             case RENDOBJ_TYPE_ASCI_CHAR_ARRAY:
             {
                 this->data.charArray.r = r;
-                this->data.charArray.g = r;
-                this->data.charArray.b = r;
+                this->data.charArray.g = g;
+                this->data.charArray.b = b;
             } break;
         }
     }
