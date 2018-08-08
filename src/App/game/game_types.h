@@ -410,7 +410,11 @@ struct GameStateLocal
 //     i32 count;
 //     i32 max;
 // };
-
+struct GameSettings
+{
+    char mapName;
+    i32 mode;
+};
 //////////////////////////////////////////////////
 // GameState God Object
 // This is a very carefully implemented god object and you should all piss off
@@ -420,7 +424,7 @@ struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
     
-    //PlayerList playerList;
+    GameSettings settings;
     ClientList clientList;
 
     // Entities

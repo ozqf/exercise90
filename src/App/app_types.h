@@ -16,6 +16,7 @@ struct UIEntity
     f32 halfHeight;
     RendObj rendObj;
 	RendObj debugRend;		// for drawing collision boxes
+    char name[16];
 };
 
 ////////////////////////////////////////////////////////////////////

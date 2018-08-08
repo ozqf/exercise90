@@ -82,6 +82,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  GHOST - Toggle debug camera on/off\n");
         printf("  CLIENTS - List current client states\n");
         printf("  DUMPHEAP - List Heap memory allocations\n");
+		printf("  MENU - Open specific menu\n");
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
@@ -283,6 +284,10 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	{
 		printf("APP Built %s: %s\n", __DATE__, __TIME__);
 		return 0;
+	}
+	if (!COM_CompareStrings(tokens[0], "MENU"))
+	{
+		return Menu_ParseCommandString(str, tokens, numTokens);
 	}
     return 0;
 }
