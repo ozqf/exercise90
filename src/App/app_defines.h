@@ -5,7 +5,8 @@
 #define GAME_MAX_CLIENTS 8
 
 #define APP_MAX_MENU_ITEMS 256
-#define APP_FIRST_MAP "maps\\testbox.lvl"
+//#define APP_FIRST_MAP "maps\\testbox.lvl"
+#define APP_FIRST_MAP "TEST"
 
 #ifndef APP_WRITE_CMD
 #define APP_WRITE_CMD(i32_bufferId, u8_cmdType, u8_cmdFlags, cmdObject) \

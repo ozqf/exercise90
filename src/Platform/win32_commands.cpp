@@ -100,20 +100,19 @@ u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
     return 0;
 }
 
-void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
+void Win32_ReadTextCommand(char *str, i32 firstChar, i32 length)
 {
-    if (length <= 1)
-    {
-        return;
-    }
     COM_ZeroMemory((u8 *)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
     COM_COPY(str, g_textCommandBuffer, length);
     //printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
 
-    char copy[128];
+    // Avoid executing on the original string
+    char commandCopy[256];
+    char tokensBuffer[256];
     char *tokens[32];
 
-    i32 tokensCount = COM_ReadTokens(g_textCommandBuffer, copy, tokens);
+    COM_CopyString(g_textCommandBuffer, commandCopy);
+    i32 tokensCount = COM_ReadTokens(g_textCommandBuffer, tokensBuffer, tokens);
     if (tokensCount == 0)
     {
         return;
@@ -122,7 +121,7 @@ void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
     printf("PRINT TOKENS (%d)\n", tokensCount);
     for (int i = 0; i < tokensCount; ++i)
     {
-        //char* str2 = (char*)(copy + tokens[i]);
+        //char* str2 = (char*)(tokensBuffer + tokens[i]);
         printf("%s\n", tokens[i]);
     }
 #endif
@@ -156,4 +155,20 @@ void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
     }
 
     printf(" Unknown command %s\n", g_textCommandBuffer);
+    return;
+}
+
+void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
+{
+    // Gate execution
+    static i32 isExecuting = 0;
+    if (isExecuting)
+    {
+        printf("PLATFORM: attempted to parse \"%s\" but already executing!\n", str);
+        return;
+    }
+    isExecuting = 1;
+
+    Win32_ReadTextCommand(str, firstChar, length);
+    isExecuting = 0;
 }

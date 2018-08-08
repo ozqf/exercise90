@@ -388,8 +388,9 @@ void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
     }
     if (Input_CheckActionToggledOn(&g_inputActions, "Menu", time->platformFrameNumber))
     {
-        Input_ToggleMouseMode();
-        g_menuOn = !g_menuOn;
+        platform.Platform_WriteTextCommand("MENU ESCAPE");
+        // Input_ToggleMouseMode();
+        // g_menuOn = !g_menuOn;
     }
     if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->platformFrameNumber))
     {

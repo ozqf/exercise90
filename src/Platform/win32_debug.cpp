@@ -113,6 +113,11 @@ void Win32_ToggleDebugInput()
     //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
+void Win32_BufferCommandText(char* str)
+{
+    i32 len = COM_StrLen(str);
+}
+
 void Win32_CheckTextBuffer()
 {
     // Check user debug text input
@@ -131,6 +136,7 @@ void Win32_CheckTextBuffer()
     if (len > 0)
     {
         Win32_ParseTextCommand(g_textCommandInput, 0, len);
+        printf("PLATFORM Zero buffer\n");
         COM_ZeroMemory((u8*)g_textCommandInput, 2048);
     }
 }

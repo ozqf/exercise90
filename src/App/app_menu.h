@@ -300,9 +300,20 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
 	if (numTokens == 2)
 	{
+		if (!COM_CompareStrings(tokens[1], "CLOSE"))
+		{
+			Input_SetMouseMode(Captured);
+			g_menuOn = 0;
+		}
+		if (!COM_CompareStrings(tokens[1], "ESCAPE"))
+		{
+
+			Input_ToggleMouseMode();
+        	g_menuOn = !g_menuOn;
+		}
 		if (!COM_CompareStrings(tokens[1], "START"))
 		{
-			printf("  Start game\n");
+			platform.Platform_WriteTextCommand("LOAD TEST");
 		}
 		if (!COM_CompareStrings(tokens[1], "OPTIONS"))
 		{
