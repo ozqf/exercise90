@@ -12,6 +12,7 @@
 #include "com_heap/com_heap.h"
 #include "com_assets.h"
 
+#include "com_text_command_buffer.h"
 #include "com_types.cpp"
 #include "com_maths.cpp"
 #include "com_transform.cpp"

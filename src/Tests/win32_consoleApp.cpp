@@ -30,12 +30,15 @@
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
+	Test_Tokenise();
+#if 0
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);
 	for (int i = 0; i < argc; ++i)
 	{
 		printf("%d: %s\n", i, argv[i]);
 	}
+    printf("\n");
 
 	if (argc > 1)
 	{
@@ -43,11 +46,16 @@ int main(i32 argc, char* argv[])
 		{
 			Test_StateSaving(argc, argv);
 		}
+        if (!COM_CompareStrings(argv[1], "tokenise"))
+        {
+            Test_Tokenise();
+        }
 	}
 	else
 	{
 		printf("EX90 Test/Debug utils:\nTODO: Instructions here!\n");
 	}
+#endif
 	
     #if 0
 	//HeapTest();
@@ -55,7 +63,6 @@ int main(i32 argc, char* argv[])
 	//Test_Pack();
 	//Test_ReadMesh();
 	//Test_MultiThreading();
-	//Test_Tokenise();
     //Test_Syntax();
     //Test_Bitpacking();
 

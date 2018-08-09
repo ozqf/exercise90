@@ -2,7 +2,8 @@
 cd..
 cd bin
 @echo --------------------------------------------------------
-test90.exe state print base\\foo3
+@rem test90.exe state print base\\foo3
+test90.exe tokenise
 cd..
 cd build
 @echo on
