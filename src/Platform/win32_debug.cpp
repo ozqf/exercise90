@@ -22,7 +22,9 @@ struct Win32_TextInput
     i32 length;
 };
 
-char g_textCommandInput[2048];
+#define TEXT_COMMAND_BUFFER_SIZE 2048
+char g_textCommandInput[TEXT_COMMAND_BUFFER_SIZE];
+i32 g_textCommandCursor = 0;
 
 KeyConversion g_keyConversions[32];
 
@@ -116,6 +118,14 @@ void Win32_ToggleDebugInput()
 void Win32_BufferCommandText(char* str)
 {
     i32 len = COM_StrLen(str);
+    i32 remaining = TEXT_COMMAND_BUFFER_SIZE - g_textCommandCursor;
+    Assert(remaining > str);
+    if (g_textCommandCursor != 0)
+    {
+        g_textCommandBuffer[g_textCommandCursor] = ';';
+        g_textCommandCursor++;
+    }
+    COM_CopyStringLimited(str, g_textCommandBuffer + g_textCommandCursor, len);
 }
 
 void Win32_CheckTextBuffer()
