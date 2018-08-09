@@ -133,21 +133,31 @@ void Test_MultipleCommands()
 	char bufferMem[1024];
 	COM_ZeroMemory((u8*)bufferMem, 1024);
 	i32 position = 0;
-	
+	printf("=== Command batch 1 ===\n");
 	// load commands
 	position = COM_EnqueueTextCommand("START TESTBOX.LVL", bufferMem, position, 1024);
 	printf("Position: %d\n", position);
 	position = COM_EnqueueTextCommand("Say foo say bar say what", bufferMem, position, 1024);
-	printf("Position: %d\n", position);
-	position = COM_EnqueueTextCommand("Flibble biscuit", bufferMem, position, 1024);
-	printf("Position: %d\n", position);
-	position = COM_EnqueueTextCommand("Isn't that right Bindy Badgy?", bufferMem, position, 1024);
 	printf("Position: %d\n", position);
 	
 	printf("Result:\n--------------------------\n%s\n------------------------\n", bufferMem);
 
 	// execute
 	Test_ExecTextBuffer(bufferMem);
+
+	printf("=== Command batch 2 ===\n");
+	
+	position = 0;
+	position = COM_EnqueueTextCommand("Flibble biscuit", bufferMem, position, 1024);
+	printf("Position: %d\n", position);
+	position = COM_EnqueueTextCommand("Isn't that right Bindy Badgy?", bufferMem, position, 1024);
+	printf("Position: %d\n", position);
+	
+	printf("Result:\n--------------------------\n%s\n------------------------\n", bufferMem);
+	
+	// execute
+	Test_ExecTextBuffer(bufferMem);
+
 	
 	printf("\nDone\n");
 }
