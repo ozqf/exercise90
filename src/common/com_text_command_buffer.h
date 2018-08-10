@@ -28,7 +28,7 @@ inline i32 COM_EnqueueTextCommand(char* command, char* buffer, i32 position, i32
 	*ptrWrite = '\n';
 	ptrWrite += dataSize;
 	i32 wrote = (ptrWrite - ptrOrigin);
-	printf("wrote %d chars\n", wrote);
+	//printf("wrote %d chars\n", wrote);
 	return position + wrote;
 }
 

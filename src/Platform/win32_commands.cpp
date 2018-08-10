@@ -6,7 +6,7 @@
 /**********************************************************************
  * EXECUTE TEXT COMMAND
  *********************************************************************/
-u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
+u8 Win32_ExecTextCommand(char *str, char **tokens, i32 numTokens)
 {
     if (COM_CompareStrings(tokens[0], "QUIT") == 0 || COM_CompareStrings(tokens[0], "EXIT") == 0)
     {
@@ -100,6 +100,7 @@ u8 Win32_ExecTestCommand(char *str, char **tokens, i32 numTokens)
     return 0;
 }
 
+#if 0
 void Win32_ReadTextCommand(char *str, i32 firstChar, i32 length)
 {
     COM_ZeroMemory((u8 *)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
@@ -117,14 +118,14 @@ void Win32_ReadTextCommand(char *str, i32 firstChar, i32 length)
     {
         return;
     }
-#if 0
+    #if 0
     printf("PRINT TOKENS (%d)\n", tokensCount);
     for (int i = 0; i < tokensCount; ++i)
     {
         //char* str2 = (char*)(tokensBuffer + tokens[i]);
         printf("%s\n", tokens[i]);
     }
-#endif
+    #endif
 
     u8 handled;
     handled = Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount);
@@ -171,4 +172,83 @@ void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
 
     Win32_ReadTextCommand(str, firstChar, length);
     isExecuting = 0;
+}
+#endif
+
+void Win32_EnqueueTextCommand(char* command)
+{
+    i32 length = COM_StrLen(command) + 1;
+    i32 capacity = TEXT_COMMAND_BUFFER_SIZE - g_textCommandBufferPosition;
+    if (capacity <= length)
+    {
+        Win32_Error("Text command buffer overrun", "Buffer overrun");
+    }
+    g_textCommandBufferPosition = COM_EnqueueTextCommand(
+        command,
+        g_textCommandBuffer,
+        g_textCommandBufferPosition,
+        TEXT_COMMAND_BUFFER_SIZE
+    );
+}
+
+void Win32_ExecuteTextCommand(char* command)
+{
+    // Avoid executing on the original string
+    char commandCopy[256];
+    // null split version of command copy
+    char tokensBuffer[256];
+    // pointers to start of each token in tokensBuffer
+    char *tokens[32];
+    AssertAlways(COM_StrLen(command) < 256);
+    COM_CopyString(command, commandCopy);
+
+    i32 tokensCount = COM_ReadTokens(commandCopy, tokensBuffer, tokens);
+    if (tokensCount == 0) { return; }
+
+    u8 handled;
+    handled = Win32_ExecTextCommand(commandCopy, tokens, tokensCount);
+    if (handled) { return; }
+    
+    if (g_app.isValid)
+    {
+        handled = g_app.AppParseCommandString(commandCopy, tokens, tokensCount);
+        if (handled) { return; }
+    }
+
+    handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
+    if (handled) { return; }
+
+    // Version is allowed to cascade down so each subsystem prints it's version
+    if (COM_CompareStrings(tokens[0], "VERSION") == 0) { return; }
+
+    printf(" Unknown command %s\n", g_textCommandBuffer);
+}
+
+void Win32_ExecuteTextCommands()
+{
+    char executeBuffer[256];
+    i32 written = 0;
+    i32 position = 0;
+
+    i32 executeCount = 0;
+
+    for (;;)
+    {
+        written = COM_DequeueTextCommand(g_textCommandBuffer, executeBuffer, position, 256);
+        position += written;
+        if (written <= 1)
+        {
+            break;
+        }
+        Win32_ExecuteTextCommand(executeBuffer);
+        executeCount++;
+    }
+    // if (executeCount > 0)
+    // {
+    //     printf("PLATFORM Executed %d text commands\n", executeCount);
+    // }
+
+    // Clear buffer entirely
+    // TODO: Allow commands to wait for next frame...?
+    g_textCommandBufferPosition = 0;
 }

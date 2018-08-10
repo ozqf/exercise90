@@ -162,7 +162,7 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_GetBaseDirectoryName = Platform_GetBaseDirectoryName;
     platInterface.Platform_GetDateTime = Platform_GetDateTime;
 
-    platInterface.Platform_WriteTextCommand = Platform_WriteTextCommand;
+    platInterface.Platform_WriteTextCommand = Win32_EnqueueTextCommand;
 }
 
 void Win32_CloseAppLink()

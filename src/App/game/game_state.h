@@ -68,6 +68,9 @@ void GS_Init(GameState *gs)
     gs->thinkerList.count = GAME_MAX_ENTITIES;
     gs->thinkerList.max = GAME_MAX_ENTITIES;
 
+    // Make sure ALL component arrays are completely cleared here.
+    // TODO: Allocate these buffers on the Heap and realloc when restarted
+    COM_ZeroMemory((u8*)gs->transformList.items, sizeof(EC_Transform) * gs->transformList.max);
     COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
 	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
 	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);

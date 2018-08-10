@@ -22,9 +22,9 @@ struct Win32_TextInput
     i32 length;
 };
 
-#define TEXT_COMMAND_INPUT_SIZE 2048
-char g_textCommandInput[TEXT_COMMAND_INPUT_SIZE];
-i32 g_textCommandCursor = 0;
+//#define TEXT_COMMAND_INPUT_SIZE 2048
+//char g_textCommandInput[TEXT_COMMAND_INPUT_SIZE];
+//i32 g_textCommandCursor = 0;
 
 KeyConversion g_keyConversions[32];
 
@@ -82,11 +82,13 @@ u8 g_debugInputActive = 0;
 RenderListItem g_rendDebugItems[WIN32_NUM_DEBUG_ITEMS];
 RenderScene g_debugScene;
 
+#if 0
 void Platform_WriteTextCommand(char* ptr)
 {
     printf("PLATFORM writing text cmd %s\n", ptr);
     COM_CopyStringLimited(ptr, g_textCommandInput, 2048);
 }
+#endif
 
 void Win32_SetDebugInputTextureIndex(i32 index)
 {
@@ -115,6 +117,7 @@ void Win32_ToggleDebugInput()
     //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
+#if 0
 void Win32_BufferCommandText(char* str)
 {
     i32 len = COM_StrLen(str);
@@ -127,7 +130,8 @@ void Win32_BufferCommandText(char* str)
     }
     COM_CopyStringLimited(str, g_textCommandBuffer + g_textCommandCursor, len);
 }
-
+#endif
+#if 0
 void Win32_CheckTextBuffer()
 {
     // Check user debug text input
@@ -150,7 +154,7 @@ void Win32_CheckTextBuffer()
         COM_ZeroMemory((u8*)g_textCommandInput, 2048);
     }
 }
-
+#endif
 void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
 {
     if (g_textBufferAwaitingProcessing) { return; }
@@ -168,8 +172,9 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
     if (VKCode == VK_CODE_ENTER)
     {
         // Flag buffer as locked and awaiting reading
-        g_textBufferAwaitingProcessing = 1;
+        //g_textBufferAwaitingProcessing = 1;
         Win32_ToggleDebugInput();
+        Win32_EnqueueTextCommand(g_inputText.ptr + 1);
         return;
     }
     // skip unwanted keys

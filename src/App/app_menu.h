@@ -314,6 +314,8 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		if (!COM_CompareStrings(tokens[1], "START"))
 		{
 			platform.Platform_WriteTextCommand("LOAD TEST");
+			platform.Platform_WriteTextCommand("IMPULSE 1");
+			platform.Platform_WriteTextCommand("MENU CLOSE");
 		}
 		if (!COM_CompareStrings(tokens[1], "OPTIONS"))
 		{

@@ -124,9 +124,9 @@ global_variable u8 g_singleFrameRun = 0;
 global_variable char *launchParams[MAX_LAUNCH_PARAMS];
 global_variable i32 numLaunchParams = 0;
 
-#define TEXT_COMMAND_BUFFER_SIZE 256
+#define TEXT_COMMAND_BUFFER_SIZE 2048
 global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
-global_variable i32 g_textCommandLength = 0;
+global_variable i32 g_textCommandBufferPosition = 0;
 
 
 inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
@@ -149,7 +149,8 @@ inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, 
 	//Assert(itemType != 2);
 }
 
-void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
+//void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
+void Win32_EnqueueTextCommand(char* command);
 
 /****************************************************************
 When something goes wrong

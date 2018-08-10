@@ -527,7 +527,8 @@ int CALLBACK WinMain(
                 }
 
                 
-                Win32_CheckTextBuffer();
+                //Win32_CheckTextBuffer();
+                Win32_ExecuteTextCommands();
 
                 if (g_singleFrameStepMode == 1)
                 {
