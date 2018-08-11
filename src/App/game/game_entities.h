@@ -4,7 +4,6 @@
 
 inline void Ent_Reset(Ent* ent)
 {
-    //Transform_SetToIdentity(&ent->transform);
     ent->factoryType = 0;
     ent->componentFlags = 0;
     ent->tag = 0;
@@ -58,34 +57,6 @@ void Ent_ResetEntityIds(EntList* ents)
         ents->items[i].componentFlags = 0 | EC_FLAG_ENTITY;
 	}
 }
-
-/**
- * Find a free slot in the entity list
- */
-#if 0
-Ent* Ent_GetFreeEntity(EntList* ents)
-{
-    Ent* e = NULL;
-    for (u16 i = 0; i < ents->max; ++i)
-    {
-        e = &ents->items[i];
-        if (e->inUse == 0)
-        {
-            // new iteration of this entity
-            u16 iteration = e->entId.iteration;
-            *e = {};
-            Transform_SetToIdentity(&e->transform);
-            e->inUse = 1;
-            //e->entId.iteration = iteration + 1;
-            e->entId.index = i;
-			return e;
-        }
-    }
-    
-    Assert(e != NULL);
-    return NULL;
-}
-#endif
 
 void Ent_ClearComponents(GameState* gs, Ent* ent)
 {
@@ -159,48 +130,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 		ILLEGAL_CODE_PATH
 		return NULL;
 	}
-	#if 0
-	for (u32 i = 0; i < ents->max; ++i)
-	{
-		Ent* result = &ents->items[i];
-		
-		if (EntId_Equals(&result->entId, entId))
-		{
-			// If server, entity should have been Reserved.
-            // If client, entity should be free.
-
-            if (result->inUse != ENTITY_STATUS_IN_USE)
-            {
-                result->inUse = ENTITY_STATUS_IN_USE;
-			    result->entId = *entId;
-            }
-            else
-            {
-                printf("GAME: Ent is marked in use! Aborting\n");
-                ILLEGAL_CODE_PATH
-            }
-            //printf("GAME assigning Ent %d/%d\n", entId->iteration, entId->index);
-			return &ents->items[i];
-		}
-	}
-	printf("GAME: No entity found matching Id %d/%d! Aborting\n", entId->iteration, entId->index);
-    ILLEGAL_CODE_PATH
-	return NULL;
-	#endif
 }
-
-// inline Ent* Ent_GetEntity(EntList* ents, EntId* entId)
-// {
-// 	for (u32 i = 0; i < ents->max; ++)
-// 	{
-// 		if (EntId_Equals(&ents->items[i].entId, entId))
-// 		{
-//             Assert(ents->items[i].inUse == ENTITY_STATUS_IN_USE);
-// 			return &ents->items[i];
-// 		}
-// 	}
-// 	return NULL;
-// }
 
 inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
 {
@@ -243,16 +173,6 @@ inline Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)
     }
     return NULL;
 }
-
-// void Ent_InitEntityList()
-// {
-//     for (u16 i = 0; i < GAME_MAX_ENTITIES; ++i)
-//     {
-//         g_entities[i].entId.iteration = 0;
-//         g_entities[i].entId.index = i;
-//     }
-// }
-
 
 //////////////////////////////////////////////////////
 // Entity Component Utilities

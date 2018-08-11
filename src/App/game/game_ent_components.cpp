@@ -49,17 +49,6 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             // Delete
             Vec3 v = Vec3_CreateUnitVector(&prj->state.move);
             Ent_WriteRemoveCmd(e, v.parts, time->singleFrame == 1);
-            #if 0
-            Ent_MarkForFree(e);
-            Cmd_RemoveEntity cmd = {};
-            cmd.entId = e->entId;
-			if (time->singleFrame) { printf("GAME Delete prj %d/%d\n",
-				cmd.entId.iteration,
-				cmd.entId.index);
-			}
-            App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
-            #endif
-            //Ent_Free(gs, e);
         }
         else
         {
@@ -75,7 +64,6 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             t->pos.z + prj->state.move.z * time->deltaTime
         };
 
-        //Phys_RayTest(t->pos.x, t->pos.y, t->pos.z, newPos.x, newPos.y, newPos.z);
         PhysRayHit results[12];
         
         PhysCmd_Raycast ray = {};

@@ -425,8 +425,7 @@ int CALLBACK WinMain(
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
-
-            //Win32_CheckApplicationLink();
+            
 #if 1
             if (!Win32_LinkToApplication())
             {
@@ -439,13 +438,6 @@ int CALLBACK WinMain(
             Win32_UpdateFileTimeStamp(g_soundLink.path, &g_soundLink.timestamp);
 #endif
 
-#if 0
-            if (!Win32_LinkToAppStub())
-            {
-                MessageBox(0, "Failed to attach to app stub", "Error", MB_OK | MB_ICONINFORMATION);
-                return 1;
-            }
-#endif
             /****************************************************************
             Game loop
             ****************************************************************/

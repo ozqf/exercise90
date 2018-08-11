@@ -5,7 +5,7 @@
 #include "platform_interface.h"
 
 #include <stdio.h>
-
+#if 0
 /*****************************************************
 Empty, default App implementation
 *****************************************************/
@@ -37,3 +37,4 @@ AppInterface GetAppInterfaceStub(PlatformInterface platInterface)
     //app.AppFixedUpdate = AppFixedUpdate_Stub;
     return app;
 }
+#endif

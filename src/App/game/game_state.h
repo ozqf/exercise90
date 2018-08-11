@@ -13,15 +13,11 @@ void GS_Init(GameState *gs)
     u16 debugMode = gs->debugMode;
     *gs = {};
     gs->debugMode = debugMode;
-    //gs->debugMode = GAME_DEBUG_MODE_ACTOR_INPUT;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
     // Don't wanna forget to assign all these.
-    // gs->playerList.items = g_players;
-    // gs->playerList.count = GAME_MAX_PLAYERS;
-    // gs->playerList.max = GAME_MAX_PLAYERS;
-
+    
     gs->clientList.items = g_clients;
     gs->clientList.count = 0;
     gs->clientList.max = GAME_MAX_CLIENTS;

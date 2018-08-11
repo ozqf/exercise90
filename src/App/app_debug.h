@@ -1,24 +1,6 @@
 #pragma once
 
 #include "app_module.cpp"
-#if 0
-void App_DebugPrintPlayers(GameState* gs)
-{
-    i32 l = gs->playerList.max;
-    i32 count = 0;
-    for (i32 i = 0; i < l; ++i)
-    {
-        Player* p = &gs->playerList.items[i];
-        if (p->state == PLAYER_STATUS_FREE) { continue; }
-        count++;
-        printf("Plyr %d client %d state %d avatar %d/%d\n",
-            p->playerId, p->sv_clientId, p->state,
-            p->entId.iteration, p->entId.index
-        );
-    }
-    printf(" %d players\n", count);
-}
-#endif
 
 #if 1
 void App_DebugPrintEntities(GameState* gs)
@@ -185,7 +167,7 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
             else
             {
                 rotation = ecT->t.rotation;
-                inputRot = g_debugInput.degrees;
+                inputRot = {};
                 scale = ecT->t.scale;
                 pos = ecT->t.pos;
                 rot = Transform_GetEulerAnglesDegrees(&ecT->t);

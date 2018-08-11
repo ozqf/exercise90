@@ -28,22 +28,6 @@ struct LocalEnt
     RendObj rend;
 };
 
-struct ClientTick
-{
-    //i32 mouse[2];
-    //i32 mouseMovement[2];
-    char attack1, attack2;
-    char moveLeft, moveRight, moveUp, moveDown, moveForward, moveBackward;
-    char yawLeft, yawRight, pitchUp, pitchDown;
-    char rollLeft, rollRight;
-    //char escape;
-    //char reset;
-    //InputItem debug_cycle;
-    //char debug_break_game;
-
-    Vec3 degrees = {};
-};
-
 union EntId;
 struct Actor;
 
@@ -394,22 +378,6 @@ struct GameStateLocal
     EntId localPlayerEntId;
 };
 
-// struct Player
-// {
-//     i32 playerId;
-//     i32 state;
-//     EntId entId;
-
-//     // server only, not relicated
-//     i32 sv_clientId;
-// };
-
-// struct PlayerList
-// {
-//     Player* items;
-//     i32 count;
-//     i32 max;
-// };
 struct GameSettings
 {
     char mapName;

@@ -48,33 +48,6 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
         u32 written = Ent_WriteEntityStateCmd(buf->ptrWrite, &data);
         printf("APP Write save state wrote %d bytes\n", written);
         buf->ptrWrite += written;
-        //buf->ptrWrite += Ent_WriteEntityStateCmd(buf->ptrWrite, &data);
-
-#if 0
-        // OLD
-        if (e->factoryType == ENTITY_TYPE_WORLD_CUBE)
-        {
-            Cmd_Spawn s = {};
-            Game_WriteStaticState(gs, e, &s);
-            APP_WRITE_CMD(0, CMD_TYPE_STATIC_STATE, 0, s);
-            printf("Writing static Ent %d/%d ent type %d\n",
-                s.entityId.iteration,
-                s.entityId.index,
-                s.factoryType
-            );
-        }
-        else
-        {
-            Cmd_EntityState s = {};
-            Game_WriteEntityState(gs, e, &s);
-            APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, s);
-            printf("Writing dynamic %d/%d ent type %d\n",
-                s.entityId.iteration,
-                s.entityId.index,
-                s.factoryType
-            );
-        }
-#endif
 
         h.dynamicCommands.count++;
     }
@@ -91,15 +64,10 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
         cmd.clientId = cl->clientId;
         cmd.state = cl->state;
         cmd.entId = cl->entId;
-        // ? cmd.isLocal = cl->isLocal;
         cmd.input = cl->input;
-        //CmdHeader cmdH = {};
-        //cmdH.SetType(CMD_TYPE_CLIENT_UPDATE);
-        //cmdH.SetSize()
-
+        
         COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
 
-        //APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
         h.dynamicCommands.count++;
     }
 
@@ -125,11 +93,10 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
 
 ////////////////////////////////////////////////////////////
 
-// Returns id of the file opened to
+// Returns id of the file opened to (if it is left open natch)
 i32 App_WriteStateToFile(char *fileName, u8 closeFileAfterWrite, StateSaveHeader *header)
 {
     printf("APP Writing state to %s\n", fileName);
-    // Allocate a temporary chunk to write to, then dump it all out into a file
     i32 capacity = MegaBytes(10);
 
     MemoryBlock mem = {};
@@ -187,8 +154,7 @@ void App_StartRecording(GameState *gs)
     sprintf_s(fileName, 128, "DEMO_%d-%d-%d_%d-%d-%d.DEM",
               dt.year, dt.month, dt.dayOfTheMonth,
               dt.hour, dt.minute, dt.second);
-//COM_StrReplace(fileName, ':', '_');
-#if 1
+
     if (g_replayMode != None)
     {
         printf("APP already recording...\n");
@@ -202,19 +168,6 @@ void App_StartRecording(GameState *gs)
     g_replayMode = RecordingReplay;
     // Write state and keep file open for writing frames
     g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
-
-#if 0
-	u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
-    printf("APP Wrote %d bytes (%.2fKB) to %s:\n", written, ((f32)written / (f32)1024), demoName);
-    printf("  BASE FILE: %s\n", h.baseFile);
-    printf("  Dynamic Entities: offset %d count %d bytes %d\n",
-        h.dynamicCommands.offset,
-        h.dynamicCommands.count,
-        h.dynamicCommands.size
-    );
-#endif
-
-#endif
 }
 
 void App_EndSession()

@@ -24,31 +24,12 @@ void UI_BuildUIRenderScene(RenderScene* scene, UIEntity* ents, i32 maxEntities)
         UIEntity* ent = &ents[i];
         if (ent->inUse == 1)
         {
-			//Transform_SetToIdentity(&ent->transform);
-            //ent->transform.scale.x = 4;
-            //ent->transform.scale.y = 4;
-            //ent->transform.scale.z = 4;
-            //Transform_SetRotationDegrees(&ent->transform, 0, 180, 0);
-            RScene_AddRenderItem(scene, &ent->transform, &ent->rendObj);
-            #if 1
+			RScene_AddRenderItem(scene, &ent->transform, &ent->rendObj);
 			Transform t = ent->transform;
             t.scale.x = ent->halfWidth;
             t.scale.y = ent->halfHeight;
             t.pos.z += 4;
             RScene_AddRenderItem(scene, &t, &ent->debugRend);
-            #endif
-            #if 0
-            Transform t;
-            Transform_SetToIdentity(&t);
-            Transform_SetRotationDegrees(&t, 0, 180, 0);
-            t.pos.x = 4;
-            t.pos.y = 0;
-            t.pos.z = -2;//0.5f;
-			t.scale.x = 4;//1000;//0.5f;//ent->halfWidth;
-			t.scale.y = 4;//1000;//0.5f;//ent->halfHeight;
-			t.scale.z = 4;//1000;
-			RScene_AddRenderItem(scene, &t, &ent->debugRend);
-            #endif
         }
     }
 }

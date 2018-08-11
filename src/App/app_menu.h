@@ -2,24 +2,6 @@
 
 #include "app_module.cpp"
 
-/*
-Prototype menus:
-Main
-	Start
-	Scores
-		
-	Replays
-		-Replay List-
-		Replay 1 Score, Length, Date, file size
-		Replay 2
-		...
-		<pages>
-		Back
-	Options
-		Controls
-	Quit
-*/
-
 struct AppMenuPage
 {
 	char label[16];
@@ -37,17 +19,6 @@ struct AppMainMenuPage
 
 global_variable AppMainMenuPage g_mainMenu;
 global_variable AppMenuPage *g_currentMenu;
-
-//global_variable AppMenuPage g_pageMain;
-
-// 0 title graphic, 1 Start, 2 replays, 3 options, 4 quit
-//global_variable UIEntity g_mainMenuEnts[5];
-
-// void App_ChangeMenuPage(AppMenuPage* newPage, AppMenuPage* previousPage)
-// {
-// 	if (newPage == previousPage) { return; }
-// 	newPage->activeItem = 0;
-// }
 
 void UI_InitEntAsButton(UIEntity *ent, char *text, char *name, f32 posX, f32 posY)
 {
@@ -133,60 +104,12 @@ void App_InitMenus()
 	ent = &g_mainMenu.items[3];
 	UI_InitEntAsButton(ent, "QUIT", "QUIT", 0, -3);
 
-#if 0
-	// buttons
-	ent = &g_mainMenu.items[1];
-	Transform_SetToIdentity(&ent->transform);
-	ent->inUse = 1;
-	f32 squareSize = 4;//0.7f;
-	ent->halfWidth = 8;
-	ent->halfHeight = 1.0f;
-	ent->transform.pos = { 0, 0, 1 };
-	char* placeholderChars2 = "START";
-	numChars = COM_StrLen(placeholderChars2);
-    RendObj_SetAsAsciCharArray(
-        &ent->rendObj, 
-        placeholderChars2,
-        numChars,
-        1,
-		TEXT_ALIGNMENT_MIDDLE_MIDDLE,
-		//TEXT_ALIGNMENT_TOP_LEFT,
-        AppGetTextureIndexByName("textures\\charset.bmp"),
-        1, 1, 1
-    );
-	//RendObj_SetAsRainbowQuad(&ent->debugRend);
-	RendObj_SetAsColouredQuad(&ent->debugRend, 0.3f, 0.3f, 0.3f);
-
-#endif
-
 	g_mainMenu.numItems = 4;
-//g_currentMenu = &g_mainMenu;
-
-//g_pageMain = {};
-//COM_CopyStringLimited("main", g_pageMain.label, 15);
-//g_pageCurrent = &g_pageMain;
-#if 0
-    COM_ZeroMemory((u8*)g_menu_entities, sizeof(UIEntity) * APP_MAX_MENU_ITEMS);
-	ent = UI_GetFreeEntity(g_menu_entities, APP_MAX_MENU_ITEMS);
-    if (ent == NULL)
-    {
-        printf("Failed to get free UI entity\n");
-        ILLEGAL_CODE_PATH
-    }
-    ent->transform.pos.y = 0.5;
-    ent->transform.pos.z = -1;
-    ent->transform.scale = { 0.5, 0.5, 0.5 };
-    RendObj_SetAsBillboard(&ent->rendObj, 1, 1, 0, AppGetTextureIndexByName("textures\\ui_text_menu_title.bmp"));
-#endif
 }
 
 void App_BuildMenuRenderScene()
 {
 	UI_BuildUIRenderScene(&g_menuScene, g_mainMenu.items, g_mainMenu.numItems);
-	// if (g_currentMenu != NULL)
-	// {
-	// 	UI_BuildUIRenderScene(&g_menuScene, g_mainMenu.items, g_mainMenu.numItems);
-	// }
 }
 
 void UI_MenuUp()
@@ -233,13 +156,7 @@ i32 App_MouseTestMenu(UIEntity *items, i32 numItems, f32 mouseX, f32 mouseY)
 		min[1] = y - hh;
 		max[0] = x + hw;
 		max[1] = y + hh;
-#if 0
-		printf("%.2f, %.2f, vs box %.2f, %.2f to %.2f %.2f\n",
-			mouseX, mouseY,
-			min[0], min[1],
-			max[0], max[1]
-		);
-#endif
+
 		if (mouseX > min[0] && mouseX < max[0] && mouseY > min[1] && mouseY < max[1])
 		{
 			overlapped = 1;
@@ -256,10 +173,6 @@ void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 	// translate mouse pos to 0, 0 in centre, 50% either side
 	i32 mouseX = Input_GetActionValue(inputs, "Mouse Pos X");
 	i32 mouseY = Input_GetActionValue(inputs, "Mouse Pos Y");
-
-	// printf("Mouse pos and screen size: %d, %d in %d, %d\n",
-	// 	mouseX, mouseY, g_screenInfo.width, g_screenInfo.height
-	// );
 
 	f32 halfWidth = (f32)info->width * 0.5f;
 	f32 halfHeight = (f32)info->height * 0.5f;

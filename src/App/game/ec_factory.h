@@ -246,26 +246,10 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
         u8* cmdOrigin = App_StartCommandStream();
         App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
         App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
-        #if 0
-        printf("  Writing %d/%d state to app output, compbits %d, bytes: %d\n",
-            state->entId.iteration,
-            state->entId.index,
-			state->componentBits,
-            bytesWritten
-        );
-        #endif
         return bytesWritten;
     }
     else
     {
-        #if 0
-        printf("  Writing %d/%d state to custom buffer, compbits %d, bytes: %d\n",
-            state->entId.iteration,
-            state->entId.index,
-			state->componentBits,
-            bytesWritten
-        );
-        #endif
         CmdHeader cmdHeader = {};
         cmdHeader.SetType(CMD_TYPE_ENTITY_STATE_2);
         cmdHeader.SetSize(bytesWritten);

@@ -10,7 +10,6 @@ Var g_vars[MAX_VARS];
 i32 g_nextVar = 0;
 
 global_variable InputAction g_inputActionItems[MAX_INPUT_ITEMS];
-//global_variable i32 g_numInputActions = 0;
 
 global_variable InputActionSet g_inputActions = {
     g_inputActionItems,
@@ -32,10 +31,8 @@ global_variable GameTime g_time = {};
 inline GameTime* GetAppTime() { return &g_time; }
 
 // Assets
-//global_variable i32 g_nextTextureIndex = 0;
 global_variable TextureHandles g_textureHandles;
 global_variable MeshHandles g_meshHandles;
-//global_variable TextureHandles g_textures;
 
 // Menu items
 global_variable UIEntity g_menu_entities[APP_MAX_MENU_ITEMS];
@@ -79,4 +76,3 @@ global_variable RenderListItem g_weaponModel_renderList[UI_MAX_ENTITIES];
 // UI
 global_variable RenderScene g_uiScene;
 global_variable RenderListItem g_ui_renderList[UI_MAX_ENTITIES];
-

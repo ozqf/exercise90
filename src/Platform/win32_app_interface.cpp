@@ -51,23 +51,8 @@ void Platform_R_DrawScene(RenderScene* scene)
     {
         g_renderer.R_RenderScene(scene, &g_gameTime);
     }
-    //Win32_RenderFrame(scene);
 }
 
-// Returns number of textures loaded
-#if 0
-i32 Platform_LoadDebugTextures(Heap* heap)
-{
-    // BlockRef testBmpRef = Platform_LoadFileIntoHeap(heap, "base/BitmapTest.bmp");
-    // Win32_IO_ReadBMPTest(&testBmpRef);
-    BlockRef ref = {};
-    Win32_ReadBMPToHeap(heap, &ref, "base/BitmapTest.bmp");
-    Win32_ReadBMPToHeap(heap, &ref, "base/charset.bmp");
-    Win32_ReadBMPToHeap(heap, &ref, "base/brbrick2.bmp");
-    Win32_ReadBMPToHeap(heap, &ref, "base/BKEYA0.bmp");
-    
-    return g_nextTexture;
-}
 #endif
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
@@ -81,7 +66,6 @@ void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIn
     {
         g_renderer.R_BindTexture(rgbaPixels, width, height, textureIndex);
     }
-    //Win32_Platform_R_BindTexture(rgbaPixels, width, height, textureIndex);
 }
 
 void Platform_SetDebugInputTextureIndex(i32 i)
@@ -92,7 +76,6 @@ void Platform_SetDebugInputTextureIndex(i32 i)
 // Copy the base name into the given buffer
 i32 Platform_GetBaseDirectoryName(char* buffer, i32 bufferSize)
 {
-    //g_baseDirectoryName
     return COM_CopyStringLimited(g_baseDirectoryName, buffer, bufferSize);
 }
 
@@ -228,12 +211,6 @@ void Win32_UpdateFileTimeStamp(char* path, ULARGE_INTEGER* timeStamp)
         large.HighPart = time.dwHighDateTime;
         
         timeStamp->QuadPart = large.QuadPart;
-        
-        // if (large.QuadPart != timeStamp->QuadPart)
-        // {
-		// 	timeStamp->QuadPart = large.QuadPart;
-        //     return;
-        // }
     }
     return;
 }
@@ -257,35 +234,6 @@ u8 Win32_CheckFileModified(char* path, ULARGE_INTEGER* timeStamp)
         }
     }
     return 0;
-}
-
-#if 0
-void Win32_CheckApplicationLink()
-{
-    //DebugBreak();
-    FILETIME time;// = NULL;
-    HANDLE fileHandle = CreateFileA(appModulePath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-    BOOL gotTime = GetFileTime(fileHandle, NULL, NULL, &time);
-    CloseHandle(fileHandle);
-    if(gotTime)
-    {
-        ULARGE_INTEGER large;
-        large.LowPart = time.dwLowDateTime;
-        large.HighPart = time.dwHighDateTime;
-        
-        if (large.QuadPart != g_appModuleTimestamp.QuadPart)
-        {
-			g_appModuleTimestamp.QuadPart = large.QuadPart;
-            Win32_LinkToApplication();
-        }
-    }
-}
-#endif
-
-u8 Win32_LinkToAppStub()
-{
-    g_app = GetAppInterfaceStub(platInterface);
-    return 1;
 }
 
 ///////////////////////////////////////////////////////////

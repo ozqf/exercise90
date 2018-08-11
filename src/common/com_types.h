@@ -3,9 +3,6 @@
 
 #include "com_defines.h"
 
-//enum ZMouseMode;
-
-struct ClientTick;
 struct GL_Test_Input;
 /****************************************************************
 Graphics

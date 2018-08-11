@@ -21,28 +21,6 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 	{
 		case IMPULSE_JOIN_GAME:
 		{
-            #if 0
-            // even older
-			printf("SV Client %d impulse %d: Spawn player\n", cmd->clientId, cmd->impulse);
-
-            Player* plyr = SV_FindPlayerByClientId(&gs->playerList, cmd->clientId);
-            if (plyr != NULL)
-            {
-                printf("  Client already has a player.\n");
-                return 1;
-            }
-
-            Cmd_PlayerState s = {};
-            SV_CreateNewPlayer(&gs->playerList, cmd->clientId, &s);
-
-            printf("  Created player %d for client %d\n", s.playerId, cmd->clientId);
-
-            App_WriteGameCmd((u8*)&s, CMD_TYPE_PLAYER_STATE, sizeof(Cmd_PlayerState));
-
-            return 1;
-            #endif
-            
-            #if 1
 			// How to assign player Id at this point
             Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
             Assert(cl);
@@ -58,8 +36,6 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             options.pos.z = 0;
             EntId entId = Game_WriteSpawnCmd(gs, ENTITY_TYPE_ACTOR_GROUND, &options);
             
-            //gs->local.localPlayerHasEnt = 1;
-            //gs->local.localPlayerEntId = entId;
             printf("SV Spawning local client avatar %d/%d\n", entId.iteration, entId.index);
 
             Cmd_ClientUpdate clUpdate = {};
@@ -67,27 +43,6 @@ u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = entId;
             APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
-
-            #endif
-
-            #if 0
-            // Old
-			Cmd_EntityState spawn = {};
-			spawn.factoryType = ENTITY_TYPE_ACTOR_GROUND;
-			spawn.entityId = Ent_ReserveFreeEntity(&gs->entList);
-			
-            Cmd_ClientUpdate clUpdate = {};
-            clUpdate.clientId = cmd->clientId;
-            clUpdate.state = CLIENT_STATE_PLAYING;
-            clUpdate.entId = spawn.entityId;
-
-            printf("SV Write CMD %d\n", CMD_TYPE_ENTITY_STATE);
-            printf("SV Write CMD %d\n", CMD_TYPE_CLIENT_UPDATE);
-
-            APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, spawn);
-            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
-            #endif
-
 			return 1;
 		} break;
 

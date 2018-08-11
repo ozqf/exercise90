@@ -113,10 +113,6 @@ void Game_SetDebugStringRender()
 global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
 global_variable GameState g_gameState;
 
-// UI
-//global_variable GameState g_uiState;
-//global_variable Ent g_uiEntities[UI_MAX_ENTITIES];
-
 // Game Command I/O buffer handles
 
 // pointers used for I/O
@@ -133,10 +129,6 @@ global_variable BlockRef g_appBufferB_Ref;
 // Physics engine buffer handles
 global_variable BlockRef g_collisionCommandBuffer;
 global_variable BlockRef g_collisionEventBuffer;
-
-// Client input
-global_variable ClientTick g_localClientTick;
-
 
 /////////////////////////////////////////////////////////////
 // Entity + Entity Components Memory
@@ -178,9 +170,7 @@ global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 /////////////////////////////////////////////////////////////
 // Debug
 /////////////////////////////////////////////////////////////
-//M4x4 g_debugMatrix = {};
 Transform g_debugTransform = {};
-ClientTick g_debugInput = {};
 
 #include "game_command_types.h"
 #include "game_local_entities.h"

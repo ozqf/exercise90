@@ -9,10 +9,7 @@
 #define MOUSE_SENSITIVITY_MULTIPLIER 0.0025f
 #define MOUSE_SENSITIVITY_DEFAULT 50
 
-//u8 g_i_inverted = 1;
-//i32 g_i_sensitivity = 50;
 internal u8 GAME_INPUT_MODE = 2;
-//internal i8 g_i_mouseInverted = -1;
 
 static i32 Mouse_InvertedMultiplier()
 {
@@ -42,20 +39,11 @@ void Game_ApplyInputFullFreedom(InputActionSet* actions, Vec3* degrees, Transfor
 	Vec4 movement = {};
     Vec4 rotation = {}; // only used for constant rate keyboard rotation (roll atm)
 	
-	// if (input->yawLeft) { rotation.y += 1 * 90; }
-	// if (input->yawRight) { rotation.y += -1 * 90; }
-	// rotation.y *= time->deltaTime;
-
-	// if (input->pitchUp) { rotation.x += -1 * 90; }
-	// if (input->pitchDown) { rotation.x += 1 * 90; }
-	// rotation.x *= time->deltaTime;
-	
 	rotation.x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y") * Mouse_MoveMultiplier())) * Mouse_InvertedMultiplier();
 	rotation.y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * Mouse_MoveMultiplier()));
 	
 	if (Input_GetActionValue(actions, "Roll Left")) { rotation.z += 1 * PLAYER_ROTATION_SPEED; }
 	if (Input_GetActionValue(actions, "Roll Right")) { rotation.z += -1 * PLAYER_ROTATION_SPEED; }
-	//rotation.z *= DEG2RAD;
 	rotation.z *= dt;
 	
 	Transform_RotateZ(t, rotation.z * DEG2RAD);
@@ -117,8 +105,6 @@ void Game_ApplyInputFullFreedom(InputActionSet* actions, Vec3* degrees, Transfor
 ////////////////////////////////////////////////////////////////////////////
 void Game_ApplyInputFlyMode(InputActionSet* actions, Vec3* degrees, Transform* t, f32 dt, u32 frame)
 {
-	//g_debugInput = *input;
-	//if (input->reset)
 	if (Input_CheckActionToggledOn(actions, "Reset", frame))
 	{
 		Transform_SetToIdentity(t);
@@ -132,16 +118,8 @@ void Game_ApplyInputFlyMode(InputActionSet* actions, Vec3* degrees, Transform* t
 
 	f32 turnRate = 90;
 	f32 turnStep = turnRate * dt;
-	// if (input->yawLeft) { degrees->y += turnStep; }
-	// if (input->yawRight) { degrees->y += -turnStep; }
-	// degrees->y = COM_CapAngleDegrees(degrees->y);
 	
 	degrees->y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * Mouse_MoveMultiplier()));
-
-	//rotation.x = COM_CapAngleDegrees(t->rot.x);
-	
-	//if (input->pitchUp) { degrees->x += -turnStep; }
-	//if (input->pitchDown) { degrees->x += turnStep; }
 
 	degrees->x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y") * Mouse_MoveMultiplier())) * Mouse_InvertedMultiplier();
 
@@ -233,8 +211,6 @@ void Game_ApplyInputFlyMode(InputActionSet* actions, Vec3* degrees, Transform* t
 ////////////////////////////////////////////////////////////////////////////
 void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform* t, f32 dt, u32 frame)
 {
-	//g_debugInput = *input;
-	//if (input->reset)
 	if (Input_CheckActionToggledOn(actions, "Reset", frame))
 	{
 		Transform_SetToIdentity(t);
@@ -248,10 +224,7 @@ void Game_ApplyInputOnFootMode(InputActionSet* actions, Vec3* degrees, Transform
 
 	f32 turnRate = 90;
 	f32 turnStep = turnRate * dt;
-	// if (input->yawLeft) { degrees->y += turnStep; }
-	// if (input->yawRight) { degrees->y += -turnStep; }
-	// degrees->y = COM_CapAngleDegrees(degrees->y);
-
+	
 	degrees->y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * Mouse_MoveMultiplier()));
 
 	//rotation.x = COM_CapAngleDegrees(t->rot.x);
@@ -350,8 +323,6 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	// Clear buttons and rebuild
 	input->buttons = 0;
 	// Movement
-	//i32 val;
-	//val = Input_GetActionValue(actions, "Move Left");
 	if (Input_GetActionValue(actions, "Move Forward"))
 	{
 		input->buttons = input->buttons | ACTOR_INPUT_MOVE_FORWARD;

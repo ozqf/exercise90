@@ -137,11 +137,7 @@ void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
-
-    // char buf[256];
-    // sprintf_s(buf, 256, "APP: Client %d State: %d Avatar: iteration %d - id %d\n", cl->clientId, cl->state, cl->entIdArr[0], cl->entIdArr[1]);
     printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
-
 }
 
 u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
@@ -232,18 +228,6 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 			return 1;
 		} break;
         #endif
-        #if 0
-        case CMD_TYPE_PLAYER_STATE:
-        {
-            //
-            Cmd_PlayerState cmd = {};
-
-            Assert(header->size == sizeof(Cmd_PlayerState));
-            COM_COPY_STRUCT(ptr, &cmd, Cmd_PlayerState);
-            Exec_PlayerState(gs, &cmd);
-            return 1;
-        } break;
-        #endif
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
@@ -324,7 +308,6 @@ void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
-    //Game_ApplyInputToTransform(actions, &g_localClientTick.degrees, &gs->cameraTransform, time);
     gs->verbose = (u8)time->singleFrame;
     if (time->singleFrame)
     {

@@ -29,35 +29,6 @@ inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSiz
     h.Write(ptr);
 }
 
-#if 0
-void App_WriteGameCmd(u8* ptr, u8 type, u16 size)
-{
-    CmdHeader h = { type, size };
-    u32 remaining = g_appWriteBuffer->capacity - ((u32)g_appWriteBuffer->ptrWrite - (u32)g_appWriteBuffer->ptrStart);
-    Assert(remaining >= (sizeof(CmdHeader) + size));
-    u8* start = g_appWriteBuffer->ptrWrite;
-	
-    g_appWriteBuffer->ptrWrite += COM_COPY_STRUCT(&h, g_appWriteBuffer->ptrWrite, CmdHeader);
-    g_appWriteBuffer->ptrWrite += COM_COPY(ptr, g_appWriteBuffer->ptrWrite, size);
-	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
-    
-    if (g_time.singleFrame)
-	{
-		printf("APP Wrote type %d (%d size, %d actual) to buffer %s\n",
-            type,
-            size,
-            ((u32)g_appWriteBuffer->ptrWrite - (u32)start),
-            App_GetBufferName(g_appWriteBuffer->ptrStart)
-        );
-	}
-}
-#endif
-
-// void App_SendToServer(u8* ptr, u8 type, u16 size)
-// {
-//     App_WriteGameCmd(ptr, type, size);
-// }
-
 void App_DumpHeap()
 {
     printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n", g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);

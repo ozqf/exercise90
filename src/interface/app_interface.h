@@ -82,7 +82,6 @@
 
 struct InputEvent
 {
-    //u32 type = EV_CODE_INPUT;
     u32 inputID = 0;
     i32 value = 0;
 };
@@ -94,12 +93,6 @@ inline InputEvent NewInputEvent(u32 inputID, i32 value)
     ev.value = value;
     return ev;
 }
-
-// struct EventHeader
-// {
-//     u32 type;
-//     u32 data;
-// };
 
 // Contains pointers to App functions
 struct AppInterface

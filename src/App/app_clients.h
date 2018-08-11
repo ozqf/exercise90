@@ -53,7 +53,6 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
     {
         case CLIENT_STATE_OBSERVER:
         {
-            //platform.Platform_WriteTextCommand("impulse 1");
             if (g_debugCameraOn)
             {
                 return;
@@ -67,7 +66,6 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 
                 printf("APP: Client %d wishes to spawn\n", cl->clientId);
                 APP_WRITE_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_IMPULSE, 0, cmd);
-                //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(Cmd_ServerImpulse));
             }
             #endif
         } break;
