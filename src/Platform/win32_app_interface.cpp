@@ -53,7 +53,6 @@ void Platform_R_DrawScene(RenderScene* scene)
     }
 }
 
-#endif
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
     //Win32_ReadBMPToHeap(heap, result, path);

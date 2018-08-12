@@ -94,6 +94,36 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
     Ent_ApplySpawnOptions(state, options);
 }
 
+void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
+{
+    state->componentBits |= EC_FLAG_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
+    printf("  TEMPLATES spawn enemy %d/%d\n", state->entId.iteration, state->entId.index);
+
+    // apply defaults
+    state->componentBits |= EC_FLAG_TRANSFORM;
+    Transform_SetToIdentity(&state->transform);
+
+    
+    state->componentBits |= EC_FLAG_RENDERER;
+    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("textures\\W33_5.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+
+    state->componentBits |= EC_FLAG_COLLIDER;
+    state->colliderState.def.SetAsBox(
+        state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
+        0.5f, 0.5f, 0.5f, 
+        0,
+        COLLISION_LAYER_WORLD,
+        COL_MASK_DEBRIS
+    );
+
+    state->componentBits |= EC_FLAG_HEALTH;
+    state->healthState.hp = 100;
+
+    Ent_ApplySpawnOptions(state, options);
+}
+
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -183,6 +213,7 @@ u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptio
         ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
         ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
         ENT_SET_TEMPLATE(ENTITY_TYPE_THINKER, Ent_SetTemplate_Thinker, state, options);
+        ENT_SET_TEMPLATE(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options);
         default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
      }
      return 1;

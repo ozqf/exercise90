@@ -76,14 +76,20 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
-    if (!COM_CompareStrings(tokens[0], "ECS"))
+    if (!COM_CompareStrings(tokens[0], "SPAWN"))
     {
-        printf("*** Entity Component System Test ***\n");
-        EntitySpawnOptions options = {};
-        options.scale = { 1, 1, 1 };
-        options.pos.y = 0.75f;
-        options.rot.y = 45;
-        Game_WriteSpawnCmd(&g_gameState, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
+        if (numTokens == 2)
+        {
+            if (!COM_CompareStrings(tokens[1], "ENEMY"))
+            {
+                printf("*** SPAWN ENEMY ***\n");
+                EntitySpawnOptions options = {};
+                options.scale = { 1, 1, 1 };
+                options.pos.y = 0.75f;
+                options.rot.y = 45;
+                Game_WriteSpawnCmd(&g_gameState, ENTITY_TYPE_ENEMY, &options);
+            }
+        }
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "VARS"))
