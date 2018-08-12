@@ -54,6 +54,10 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited("textures\\COMP03_1.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    state->renderState.colourRGB[0] = 1;
+    state->renderState.colourRGB[1] = 1;
+    state->renderState.colourRGB[2] = 1;
+
 
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
@@ -77,7 +81,11 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\W33_5.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    state->renderState.colourRGB[0] = 0;
+    state->renderState.colourRGB[1] = 1;
+    state->renderState.colourRGB[2] = 1;
+
 
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
@@ -104,10 +112,14 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
+    state->componentBits |= EC_FLAG_AICONTROLLER;
     
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\W33_5.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    state->renderState.colourRGB[0] = 1;
+    state->renderState.colourRGB[1] = 0;
+    state->renderState.colourRGB[2] = 0;
 
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
@@ -172,10 +184,13 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
         EC_RENDERER_STRING_LENGTH
     );
     COM_CopyStringLimited(
-        "textures\\W33_5.bmp",
+        "textures\\white_bordered.bmp",
         state->renderState.textureName,
         EC_RENDERER_STRING_LENGTH
     );
+    state->renderState.colourRGB[0] = 1;
+    state->renderState.colourRGB[1] = 1;
+    state->renderState.colourRGB[2] = 0;
 
     state->componentBits |= EC_FLAG_PROJECTILE;
     state->projectileState = {};

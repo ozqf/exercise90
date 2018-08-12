@@ -173,7 +173,7 @@ struct EC_RendererState
 {
     char meshName[32];
     char textureName[32];
-
+    f32 colourRGB[3];
 };
 
 struct EC_Renderer
@@ -224,6 +224,7 @@ struct EC_ActorMotor
 
 struct EC_AIState
 {
+    EntId target;
     Vec3 dir;
     f32 speed;
 };

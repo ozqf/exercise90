@@ -45,6 +45,9 @@ void Game_AddTestSolid(GameState* gs,
     EC_RendererState r = {};
     COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
+    r.colourRGB[0] = 1;
+    r.colourRGB[1] = 1;
+    r.colourRGB[2] = 1;
 
     size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
 

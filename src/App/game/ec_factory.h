@@ -31,7 +31,7 @@ void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
     RendObj_SetAsMesh(
         &r->rendObj,
         Assets_GetMeshDataByName(state->meshName),// g_meshCube,
-        1, 1, 1,
+        state->colourRGB[0], state->colourRGB[1], state->colourRGB[2],
         AppGetTextureIndexByName(state->textureName)
     );
 }
