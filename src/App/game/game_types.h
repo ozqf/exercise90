@@ -141,6 +141,8 @@ struct Ticker
 
 //struct GameState;
 
+#define EC_GET_ID(ec) ( ec##->header.entId )
+
 struct EC_Header
 {
     EntId entId;
@@ -225,8 +227,11 @@ struct EC_ActorMotor
 struct EC_AIState
 {
     EntId target;
+    i32 state;
     Vec3 dir;
     f32 speed;
+
+    Ticker ticker;
 };
 
 // A quick test component

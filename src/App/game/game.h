@@ -4,6 +4,7 @@
 #include "../Physics/ZPhysics_interface.h"
 
 #include "game_types.h"
+#include "game_command_types.h"
 #include "game_utils.h"
 
 #define GAME_DEBUG_MODE_NONE 0
@@ -172,7 +173,6 @@ global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 /////////////////////////////////////////////////////////////
 Transform g_debugTransform = {};
 
-#include "game_command_types.h"
 #include "game_local_entities.h"
 #include "game_entities.h"
 #include "ec_types.h"

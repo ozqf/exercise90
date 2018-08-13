@@ -70,8 +70,14 @@ void Game_AddTestSolid(GameState* gs,
 
 void Game_BuildTestScene(GameState* gs)
 {
-	Game_AddTestSolid(gs, 0, -6, 0, 12, 1, 12);
-	Game_AddTestSolid(gs, 0, 6, 0, 12, 1, 12);
+	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24);
+	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24);
+
+    Game_AddTestSolid(gs, 24, 0, 0, 1, 12, 24);
+    Game_AddTestSolid(gs, -24, 0, 0, 1, 12, 24);
+
+    Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1);
+    Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1);
 }
 
 void Game_BuildTestHud()

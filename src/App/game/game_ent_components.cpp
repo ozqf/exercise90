@@ -7,11 +7,11 @@
 #include "EntityComponents/ec_collider.h"
 #include "EntityComponents/ec_thinker.h"
 
-Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
+Ent *Game_FindEntityByLabel(GameState *gs, char *queryLabel)
 {
     for (u32 i = 0; i < gs->labelList.max; ++i)
     {
-        EC_Label* entLabel = &gs->labelList.items[i];
+        EC_Label *entLabel = &gs->labelList.items[i];
         if (!COM_CompareStrings(entLabel->state.label, queryLabel))
         {
             return Ent_GetEntityById(&gs->entList, &entLabel->header.entId);
@@ -23,26 +23,29 @@ Ent* Game_FindEntityByLabel(GameState* gs, char* queryLabel)
 ///////////////////////////////////////////////////////////////////
 // Projectiles
 ///////////////////////////////////////////////////////////////////
-inline void Prj_PushRigidBody(EC_Collider* col)
+inline void Prj_PushRigidBody(EC_Collider *col)
 {
     Phys_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
-void Game_UpdateProjectiles(GameState* gs, GameTime* time)
+void Game_UpdateProjectiles(GameState *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
     {
-        EC_Projectile* prj = &gs->projectileList.items[i];
-        if (prj->header.inUse == 0) { continue; }
+        EC_Projectile *prj = &gs->projectileList.items[i];
+        if (prj->header.inUse == 0)
+        {
+            continue;
+        }
 
-        Ent* e = Ent_GetEntityById(&gs->entList, &prj->header.entId);
-		if (e == NULL)
-		{
-			printf("ERROR: Prj has no Ent\n");
-			ILLEGAL_CODE_PATH
-		}
+        Ent *e = Ent_GetEntityById(&gs->entList, &prj->header.entId);
+        if (e == NULL)
+        {
+            printf("ERROR: Prj has no Ent\n");
+            ILLEGAL_CODE_PATH
+        }
 
-        EC_Transform* ecTrans = EC_FindTransform(gs, &prj->header.entId);
+        EC_Transform *ecTrans = EC_FindTransform(gs, &prj->header.entId);
 
         if (prj->state.ticker.tick <= 0.0f)
         {
@@ -55,17 +58,16 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
             prj->state.ticker.tick -= time->deltaTime;
         }
 
-        Transform* t = &ecTrans->t;
+        Transform *t = &ecTrans->t;
 
         Vec3 newPos =
-        {
-            t->pos.x + prj->state.move.x * time->deltaTime,
-            t->pos.y + prj->state.move.y * time->deltaTime,
-            t->pos.z + prj->state.move.z * time->deltaTime
-        };
+            {
+                t->pos.x + prj->state.move.x * time->deltaTime,
+                t->pos.y + prj->state.move.y * time->deltaTime,
+                t->pos.z + prj->state.move.z * time->deltaTime};
 
         PhysRayHit results[12];
-        
+
         PhysCmd_Raycast ray = {};
         ray.start[0] = t->pos.x;
         ray.start[1] = t->pos.y;
@@ -83,21 +85,21 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
         {
             for (i32 j = 0; j < numHits; ++j)
             {
-                PhysRayHit* hit = &results[j];
-                EC_Collider* col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
+                PhysRayHit *hit = &results[j];
+                EC_Collider *col = EC_ColliderGetByShapeId(&gs->colliderList, results[j].shapeId);
 
                 Assert(col != NULL);
-                Ent* targetEnt = Ent_GetEntityById(&gs->entList, &col->header.entId);
-				if (targetEnt == NULL)
-				{
-					printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
-					continue;
-				}
+                Ent *targetEnt = Ent_GetEntityById(&gs->entList, &col->header.entId);
+                if (targetEnt == NULL)
+                {
+                    printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
+                    continue;
+                }
                 if (targetEnt->entId.value == e->source.value)
                 {
                     if (gs->verbose)
                     {
-                        printf("PRJ from %d hit it's source ent %d\n", e->source.value, targetEnt->entId.value);    
+                        printf("PRJ from %d hit it's source ent %d\n", e->source.value, targetEnt->entId.value);
                     }
                     continue;
                 }
@@ -105,6 +107,42 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                 {
                     printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
                 }
+
+                // factory type agnostic hit code
+#if 1
+                EC_Health *health = EC_FindHealth(gs, &col->header.entId);
+                if (health != NULL)
+                {
+                    health->state.hp -= 10;
+                    // kill victim
+                    if (health->state.hp <= 0)
+                    {
+                        Ent_WriteRemoveCmd(
+                            targetEnt,
+                            hit->normal,
+                            time->singleFrame == 1);
+                        // is this the time to do this...?
+                        Phys_RemoveShape(col->shapeId);
+                        //printf("Killed cube!\n");
+                    }
+                    else
+                    {
+                        //printf("Hit cube, hp: %d\n", health->hp);
+                        Prj_PushRigidBody(col);
+                    }
+                }
+
+                // kill prj
+                t->pos.x = hit->worldPos[0];
+                t->pos.y = hit->worldPos[1];
+                t->pos.z = hit->worldPos[2];
+                survived = 0;
+                Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
+#endif
+
+                // TODO: Replace this. Factory type should not be used for logic!
+                // factory type specific hit code
+#if 0
                 if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
                 {
                     EC_Health* health = EC_FindHealth(gs, &col->header.entId);
@@ -146,6 +184,7 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
                     survived = 0;
                     Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
                 }
+#endif
             }
         }
         if (survived)
@@ -158,9 +197,9 @@ void Game_UpdateProjectiles(GameState* gs, GameTime* time)
     }
 }
 
-void Game_UpdateUI(UIEntity* ents, i32 maxEntities, GameTime* time)
+void Game_UpdateUI(UIEntity *ents, i32 maxEntities, GameTime *time)
 {
-    #if 0
+#if 0
     f32 speed = 8.0f;
     Ent* ent = &gs->entList.items[0];
     if (input->yawLeft)
@@ -189,5 +228,5 @@ void Game_UpdateUI(UIEntity* ents, i32 maxEntities, GameTime* time)
     {
         ent->transform.pos.z += speed * time->deltaTime;
     }
-    #endif
+#endif
 }

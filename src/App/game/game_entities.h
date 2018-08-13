@@ -153,6 +153,11 @@ inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 	}
 }
 
+inline Ent* Ent_GetEntityById(GameState* gs, EntId* id)
+{
+    return Ent_GetEntityById(&gs->entList, id);
+}
+
 inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)

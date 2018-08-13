@@ -148,7 +148,12 @@ i32 App_Init()
 
     App_InitMenus();
     
-    App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+    //App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+    platform.Platform_WriteTextCommand("LOAD TEST");
+	platform.Platform_WriteTextCommand("IMPULSE 1");
+	platform.Platform_WriteTextCommand("MENU CLOSE");
+    platform.Platform_WriteTextCommand("SPAWN ENEMY");
+
 
     //App_DumpHeap();
     return 1;

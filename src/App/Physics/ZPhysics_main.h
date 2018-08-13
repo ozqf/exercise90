@@ -204,6 +204,11 @@ void PhysExec_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
     {
         return;
     }
+    if (handle->def.flags & ZCOLLIDER_FLAG_STATIC)
+    {
+        printf("PHYS Attempting to Change velocity of static body %d\n", cmd->shapeId);
+        return;
+    }
     Phys_SetBodyVelocity(handle->rigidBody, cmd->vel[0], cmd->vel[1], cmd->vel[2]);
     /*handle->rigidBody->activate(true);
 	btVector3 newVelocity;

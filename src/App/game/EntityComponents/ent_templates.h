@@ -102,6 +102,9 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
     Ent_ApplySpawnOptions(state, options);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// ENEMY
+//////////////////////////////////////////////////////////////////////////
 void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -113,6 +116,7 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
     Transform_SetToIdentity(&state->transform);
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
+    state->aiState.ticker.tickMax = 0.1f;
     
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
@@ -129,6 +133,11 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
     );
+
+    state->componentBits  |= EC_FLAG_ACTORMOTOR;
+    state->actorState.runSpeed = 1;
+    state->actorState.runAcceleration = 1;
+
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.hp = 100;

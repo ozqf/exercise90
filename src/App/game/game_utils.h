@@ -26,3 +26,16 @@ inline Vec3 Vec3_ForwardFromAngles(f32 yawDegrees, f32 pitchDegrees, f32 magnitu
     v.z = -t.rotation.zAxis.z * magnitude;
     return v;
 }
+
+inline EntId AI_FindNearestPlayer(GameState* gs, Vec3 pos)
+{
+    EntId result = {};
+	Client* cl = NULL;
+    for (i32 i = 0; i < gs->clientList.max; ++i)
+    {
+        cl = &gs->clientList.items[0];
+        if (cl->state != CLIENT_STATE_PLAYING) { continue; }
+        return cl->entId;
+    }
+    return result;
+}
