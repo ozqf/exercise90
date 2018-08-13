@@ -61,10 +61,11 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         Transform *t = &ecTrans->t;
 
         Vec3 newPos =
-            {
-                t->pos.x + prj->state.move.x * time->deltaTime,
-                t->pos.y + prj->state.move.y * time->deltaTime,
-                t->pos.z + prj->state.move.z * time->deltaTime};
+        {
+            t->pos.x + prj->state.move.x * time->deltaTime,
+            t->pos.y + prj->state.move.y * time->deltaTime,
+            t->pos.z + prj->state.move.z * time->deltaTime
+        };
 
         PhysRayHit results[12];
 
@@ -128,6 +129,11 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                     else
                     {
                         //printf("Hit cube, hp: %d\n", health->hp);
+                        EC_AIController* ai = EC_FindAIController(gs, &targetEnt->entId);
+                        if (ai != NULL)
+                        {
+                            AI_Stun(gs, ai);
+                        }
                         Prj_PushRigidBody(col);
                     }
                 }

@@ -55,6 +55,13 @@ inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
     motor->state.input.buttons = 0;
 }
 
+void AI_Stun(GameState* gs, EC_AIController* ai)
+{
+    AI_ClearInput(gs, ai);
+    ai->state.state = 2;
+    ai->state.ticker.tick = 0.5f;
+}
+
 void AI_Tock(GameState* gs, EC_AIController* ai)
 {
     //printf("AI tock\n");
@@ -89,7 +96,7 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
         } break;
         case 2:
         {
-
+            ai->state.state = 1;
         } break;
         default:
         {
