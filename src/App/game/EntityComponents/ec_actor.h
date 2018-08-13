@@ -201,7 +201,7 @@ inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collide
     moveForce.x = (forward.x * input.z) + (left.x * input.x);
     moveForce.z = (forward.z * input.z) + (left.z * input.x);
 
-    Vec3 moveResult = MoveGround(&moveForce, &move, col->isGrounded, 100, 12, deltaTime);
+    Vec3 moveResult = MoveGround(&moveForce, &move, col->isGrounded, motor->state.runAcceleration, motor->state.runSpeed, deltaTime);
     move.x = moveResult.x;
     move.z = moveResult.z;
     motor->debugCurrentSpeed = Vec3_Magnitude(&move);

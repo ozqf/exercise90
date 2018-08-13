@@ -135,8 +135,8 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
     );
 
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
-    state->actorState.runSpeed = 1;
-    state->actorState.runAcceleration = 1;
+    state->actorState.runSpeed = 10;
+    state->actorState.runAcceleration = 75;
 
 
     state->componentBits |= EC_FLAG_HEALTH;
@@ -168,8 +168,8 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     );
 
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
-    state->actorState.runSpeed = 10;
-    state->actorState.runAcceleration = 50;
+    state->actorState.runSpeed = 12;
+    state->actorState.runAcceleration = 100;
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.hp = 100;
@@ -185,6 +185,7 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
 
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
+    Transform_SetScale(&state->transform, 0.35f, 0.35f, 0.35f);
 
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited(

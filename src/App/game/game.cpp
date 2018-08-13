@@ -328,7 +328,8 @@ void Game_Tick(
         EntitySpawnOptions options = {};
         //options.scale = { 1, 1, 1 };
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
-        Game_WriteSpawnCmd(gs, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
+        //Game_WriteSpawnCmd(gs, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
+        Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
         #if 0
         // CmdHeader header = {};
         // header.type = CMD_TYPE_SPAWN;

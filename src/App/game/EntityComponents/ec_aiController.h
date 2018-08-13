@@ -57,7 +57,7 @@ inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
 
 void AI_Tock(GameState* gs, EC_AIController* ai)
 {
-    printf("AI tock\n");
+    //printf("AI tock\n");
     switch (ai->state.state)
     {
         case 1:
@@ -80,7 +80,7 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             f32 dz = selfTrans->t.pos.z - targetTrans->t.pos.z;
 
             f32 radians = atan2f(dx, dz);
-            printf("  To player: %.2f\n", radians * RAD2DEG);
+            //printf("  To player: %.2f\n", radians * RAD2DEG);
 
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
             motor->state.input.degrees.y = radians * RAD2DEG;
