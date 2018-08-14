@@ -26,6 +26,7 @@ void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
     {
         r = EC_AddRenderer(gs, ent);
     }
+    r->state = *state;
 	COM_CopyStringLimited(state->meshName, r->state.meshName, EC_RENDERER_STRING_LENGTH);
 	COM_CopyStringLimited(state->textureName, r->state.textureName, EC_RENDERER_STRING_LENGTH);
     RendObj_SetAsMesh(
@@ -310,6 +311,8 @@ void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
     if (ent->componentFlags & EC_FLAG_RENDERER)
     {
         EC_Renderer* r = EC_FindRenderer(gs, ent);
+        state->renderState = r->state;
+        printf("GAME Writing Renderer RGB %.2f, %.2f, %.2f\n", r->state.colourRGB[0], r->state.colourRGB[1], r->state.colourRGB[2]);
         COM_CopyStringLimited(r->state.meshName, state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
         COM_CopyStringLimited(r->state.textureName, state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
     }

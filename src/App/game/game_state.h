@@ -69,6 +69,7 @@ void GS_Init(GameState *gs)
     COM_ZeroMemory((u8*)gs->transformList.items, sizeof(EC_Transform) * gs->transformList.max);
     COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
 	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
+    COM_ZeroMemory((u8*)gs->aiControllerList.items, sizeof(EC_AIController) * gs->aiControllerList.max);
 	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);
 	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
 	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
