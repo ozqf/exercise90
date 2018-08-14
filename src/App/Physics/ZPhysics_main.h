@@ -380,7 +380,9 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
 
         PhysEv_RaycastDebug rayEv = {};
         
-        if (h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION)
+        if ((
+            h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION) ||
+            h->def.flags & ZCOLLIDER_FLAG_GROUNDCHECK)
         {
             u8 val = PhysCmd_GroundTest(world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2], &rayEv);
             if (val)

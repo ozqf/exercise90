@@ -2,43 +2,6 @@
 
 #include "game.h"
 
-// EC_AIController* Ent_AddAIController(Ent* ent)
-// {
-//     EC_AIController* obj = NULL;
-//     for (u32 i = 0; i < R_MAX_RENDER_OBJECTS; ++i)
-//     {
-//         obj = &g_aiControllers[i];
-//         if (obj->inUse == 0)
-//         {
-//             obj->inUse = 1;
-//             obj->entId.index = ent->entId.index;
-//             ent->componentFlags |= EEC_FLAG_AI_CONTROLLER;
-//             return obj;
-//         }
-//     }
-//     Assert(obj != NULL);
-//     return NULL;
-// }
-
-// void Ent_RemoveAIController(Ent* ent, EC_AIController* obj)
-// {
-//     Assert(ent != NULL);
-//     Assert(obj != NULL);
-//     Assert(ent->entId.index == obj->entId.index);
-//     ent->componentFlags &= ~EEC_FLAG_AI_CONTROLLER;
-//     obj->inUse = 0;
-// }
-
-void Ent_InitAIController(EC_AIController *controller, f32 dirX, f32 dirY, f32 dirZ, f32 speed)
-{
-    controller->state.dir.x = dirX;
-    controller->state.dir.y = dirY;
-    controller->state.dir.z = dirZ;
-    controller->state.speed = speed;
-}
-
-f32 moveDistance = 12;
-
 u8 AI_AcquireAndValidateTarget(GameState *gs, EntId* id)
 {
     if (id->value == 0) { *id = AI_FindNearestPlayer(gs, {0, 0, 0}); }
@@ -55,7 +18,7 @@ inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
     motor->state.input.buttons = 0;
 }
 
-void AI_Stun(GameState* gs, EC_AIController* ai)
+inline void AI_Stun(GameState* gs, EC_AIController* ai)
 {
     AI_ClearInput(gs, ai);
     ai->state.state = 2;
@@ -81,10 +44,28 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
                 AI_ClearInput(gs, ai);
                 return;
             }
+
+            EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
+            if (col != NULL && col->isGrounded == 0) { return; }
+
             //f32 dx = targetTrans->t.pos.x - selfTrans->t.pos.x;
             //f32 dz = targetTrans->t.pos.z - selfTrans->t.pos.z;
             f32 dx = selfTrans->t.pos.x - targetTrans->t.pos.x;
             f32 dz = selfTrans->t.pos.z - targetTrans->t.pos.z;
+
+            f32 mag = Vec3_Magnitudef(dx, 0, dz);
+            
+            if (mag < 2.0f)
+            {
+                //printf("mag: %.2f STOP\n", mag);
+                AI_ClearInput(gs, ai);
+                return;
+            }
+            else
+            {
+                //printf("mag: %.2f PUPPY!\n", mag);
+            }
+            
 
             f32 radians = atan2f(dx, dz);
             //printf("  To player: %.2f\n", radians * RAD2DEG);
@@ -110,8 +91,6 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
 
 void Game_UpdateAIControllers(GameState *gs, GameTime *time)
 {
-
-#if 1
     u32 max = gs->aiControllerList.max;
     for (u32 i = 0; i < max; ++i)
     {
@@ -130,27 +109,5 @@ void Game_UpdateAIControllers(GameState *gs, GameTime *time)
         {
             s->ticker.tick -= time->deltaTime;
         }
-#if 0
-        Ent* ent = Ent_GetEntityByIndex(&gs->entList, controller->entId.index);
-        if (controller->dir.x < 0)
-        {
-            ent->transform.pos.x -= controller->speed * time->deltaTime;
-            if (ent->transform.pos.x < -moveDistance)
-            {
-                ent->transform.pos.x = -moveDistance;
-                controller->dir.x = 1;
-            }
-        }
-        else if (controller->dir.x > 0)
-        {
-            ent->transform.pos.x += controller->speed * time->deltaTime;
-            if (ent->transform.pos.x > moveDistance)
-            {
-                ent->transform.pos.x = moveDistance;
-                controller->dir.x = -1;
-            }
-        }
-#endif
     }
-#endif
 }

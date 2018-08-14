@@ -129,7 +129,7 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
-        0,
+        ZCOLLIDER_FLAG_GROUNDCHECK,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
     );
@@ -149,8 +149,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ACTOR_GROUND;
-    printf("  TEMPLATES spawn actor ground %d/%d\n", state->entId.iteration, state->entId.index);
-
+    
     // apply defaults
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);

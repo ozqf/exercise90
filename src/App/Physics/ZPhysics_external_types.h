@@ -22,6 +22,7 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_STATIC (1 << 0)
 #define ZCOLLIDER_FLAG_KINEMATIC (1 << 1)
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
+#define ZCOLLIDER_FLAG_GROUNDCHECK (1 << 3)
 #if 0
 
 struct ZShapeDef
