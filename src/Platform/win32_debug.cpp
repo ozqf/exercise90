@@ -22,10 +22,6 @@ struct Win32_TextInput
     i32 length;
 };
 
-//#define TEXT_COMMAND_INPUT_SIZE 2048
-//char g_textCommandInput[TEXT_COMMAND_INPUT_SIZE];
-//i32 g_textCommandCursor = 0;
-
 KeyConversion g_keyConversions[32];
 
 #define VK_CODE_BACKSPACE 8
@@ -74,6 +70,7 @@ u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
 }
 
 Win32_TextInput g_inputText;
+u8 g_debugPrintKeycodes = 0;
 u8 g_textBufferAwaitingProcessing = 0;
 u8 g_debugInputActive = 0;
 
@@ -81,14 +78,6 @@ u8 g_debugInputActive = 0;
 // 0 = background, 1 = console text over background
 RenderListItem g_rendDebugItems[WIN32_NUM_DEBUG_ITEMS];
 RenderScene g_debugScene;
-
-#if 0
-void Platform_WriteTextCommand(char* ptr)
-{
-    printf("PLATFORM writing text cmd %s\n", ptr);
-    COM_CopyStringLimited(ptr, g_textCommandInput, 2048);
-}
-#endif
 
 void Win32_SetDebugInputTextureIndex(i32 index)
 {
@@ -114,57 +103,20 @@ void Win32_ToggleDebugInput()
     {
         Win32_ResetDebugInput();
     }
-    //printf("PLATFORM Debug input active %d\n", g_debugInputActive);
 }
 
-#if 0
-void Win32_BufferCommandText(char* str)
-{
-    i32 len = COM_StrLen(str);
-    i32 remaining = TEXT_COMMAND_BUFFER_SIZE - g_textCommandCursor;
-    Assert(remaining > (i32)str);
-    if (g_textCommandCursor != 0)
-    {
-        g_textCommandBuffer[g_textCommandCursor] = ';';
-        g_textCommandCursor++;
-    }
-    COM_CopyStringLimited(str, g_textCommandBuffer + g_textCommandCursor, len);
-}
-#endif
-#if 0
-void Win32_CheckTextBuffer()
-{
-    // Check user debug text input
-    if (g_textBufferAwaitingProcessing)
-    {
-        g_textBufferAwaitingProcessing = 0;
-        // execute
-        // start at 1 to avoid including the '>' prompt
-        // position is also the null terminator
-        Win32_ParseTextCommand(g_inputText.ptr + 1, 0, g_inputText.position);
-        Win32_ResetDebugInput();
-    }
-
-    // Check internal text command input
-    i32 len = COM_StrLen(g_textCommandInput);
-    if (len > 0)
-    {
-        Win32_ParseTextCommand(g_textCommandInput, 0, len);
-        printf("PLATFORM Zero buffer\n");
-        COM_ZeroMemory((u8*)g_textCommandInput, 2048);
-    }
-}
-#endif
 void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
 {
     if (g_textBufferAwaitingProcessing) { return; }
     u16 shift = GetKeyState(VK_CODE_SHIFT);
-    //u16 word;
-    //u8 c = (u8)ToAscii(VKCode, 0, 0, &word, 0);
-    //printf("%d to asci %d\n", VKCode, c);
-
-
-
+    if (g_debugPrintKeycodes)
+    {
+        u16 word;
+        u8 c = (u8)ToAscii(VKCode, 0, 0, &word, 0);
+        printf("%d to asci %d\n", VKCode, c);
+    }
+    
+    
     // translate specific keys
     VKCode = (i32)Win32_ConvertVKCode(VKCode, shift);
 
@@ -311,12 +263,6 @@ void InitDebug()
 
     // Make sure end is null
     g_keyConversions[21].VKCode = NULL;
-
-
-
-
-
-
 
     g_inputText = {};
     g_inputText.start = 1;

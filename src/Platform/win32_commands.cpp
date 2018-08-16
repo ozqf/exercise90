@@ -20,6 +20,8 @@ u8 Win32_ExecTextCommand(char *str, char **tokens, i32 numTokens)
         printf("  VERSION - show version info\n");
         printf("  MANIFEST - List data files entries\n");
         printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
+        printf("  KEYCODES - toggle printing keycodes in debug input\n");
+        printf("  LAPTOP - Toggle mode to give up cpu time each frame\n");
         return 0;
     }
     else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
@@ -95,6 +97,18 @@ u8 Win32_ExecTextCommand(char *str, char **tokens, i32 numTokens)
     else if (COM_CompareStrings(tokens[0], "BREAK") == 0)
     {
         DebugBreak();
+        return 1;
+    }
+    else if (!COM_CompareStrings(tokens[0], "KEYCODES"))
+    {
+        g_debugPrintKeycodes = !g_debugPrintKeycodes;
+        printf("PLATFORM: Print keycodes: %d\n", g_debugPrintKeycodes);
+        return 1;
+    }
+    else if (!COM_CompareStrings(tokens[0], "LAPTOP"))
+    {
+        g_lowPowerMode = !g_lowPowerMode;
+        printf("PLATFORM: Low power mode: %d\n", g_lowPowerMode);
         return 1;
     }
     return 0;

@@ -68,6 +68,18 @@
 #define Z_INPUT_CODE_MOUSE_POS_Y            57
 #define Z_INPUT_CODE_MOUSE_MOVE_X           58
 #define Z_INPUT_CODE_MOUSE_MOVE_Y           59
+#define Z_INPUT_CODE_F1                     60
+#define Z_INPUT_CODE_F2                     61
+#define Z_INPUT_CODE_F3                     62
+#define Z_INPUT_CODE_F4                     63
+#define Z_INPUT_CODE_F5                     64
+#define Z_INPUT_CODE_F6                     65
+#define Z_INPUT_CODE_F7                     66
+#define Z_INPUT_CODE_F8                     67
+#define Z_INPUT_CODE_F9                     68
+#define Z_INPUT_CODE_F10                    69
+#define Z_INPUT_CODE_F11                    70
+#define Z_INPUT_CODE_F12                    71
 
 //////////////////////////////////////////////////////////////////////
 // System event types

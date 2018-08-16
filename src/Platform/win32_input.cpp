@@ -260,6 +260,18 @@ u32 Win32_KeyCode_To_Input_Code(u32 vkCode)
     if (vkCode == VK_SPACE)         return Z_INPUT_CODE_SPACE;
     if (vkCode == VK_CONTROL)       return Z_INPUT_CODE_CONTROL;
     if (vkCode == VK_SHIFT)         return Z_INPUT_CODE_SHIFT;
+    if (vkCode == 112)              return Z_INPUT_CODE_F1;
+    if (vkCode == 113)              return Z_INPUT_CODE_F2;
+    if (vkCode == 114)              return Z_INPUT_CODE_F3;
+    if (vkCode == 115)              return Z_INPUT_CODE_F4;
+    if (vkCode == 116)              return Z_INPUT_CODE_F5;
+    if (vkCode == 117)              return Z_INPUT_CODE_F6;
+    if (vkCode == 118)              return Z_INPUT_CODE_F7;
+    if (vkCode == 119)              return Z_INPUT_CODE_F8;
+    if (vkCode == 120)              return Z_INPUT_CODE_F9;
+    if (vkCode == 121)              return Z_INPUT_CODE_F10;
+    if (vkCode == 122)              return Z_INPUT_CODE_F11;
+    if (vkCode == 123)              return Z_INPUT_CODE_F12;
 
     return Z_INPUT_CODE_NULL;
 }
