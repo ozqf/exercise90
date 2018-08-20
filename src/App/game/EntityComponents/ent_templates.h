@@ -39,26 +39,26 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
     }
 }
 
-// TODO: Setting EntId - done by the caller?
-
-void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options)
+void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, i32 factoryType)
 {
     printf("GAME Spawn world cube template\n");
     // apply defaults
     state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_WORLD_CUBE;
+    state->entMetaData.factoryType = factoryType;
 
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    state->componentBits |= EC_FLAG_RENDERER;
-    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\COMP03_1.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
-    state->renderState.colourRGB[0] = 1;
-    state->renderState.colourRGB[1] = 1;
-    state->renderState.colourRGB[2] = 1;
-
-
+    if (factoryType == ENTITY_TYPE_WORLD_CUBE)
+    {
+        state->componentBits |= EC_FLAG_RENDERER;
+        COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited("textures\\COMP03_1.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+        state->renderState.colourRGB[0] = 1;
+        state->renderState.colourRGB[1] = 1;
+        state->renderState.colourRGB[2] = 1;
+    }
+    
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
@@ -105,7 +105,7 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 //////////////////////////////////////////////////////////////////////////
 // ENEMY
 //////////////////////////////////////////////////////////////////////////
-void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options)
+void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
@@ -228,16 +228,23 @@ void Ent_SetTemplate_Thinker(EntityState* state, EntitySpawnOptions* options)
     func##(##state##, options##); \
 } break;
 
+#define ENT_SET_TEMPLATE_WITH_SUB_TYPES(caseValue, func, state, options, factoryType) \
+case caseValue##: \
+{ \
+    func##(##state##, options##, factoryType##); \
+} break;
+
 u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options)
 {
      switch (factoryType)
      {
-        ENT_SET_TEMPLATE(ENTITY_TYPE_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options);
+        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
+        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
         ENT_SET_TEMPLATE(ENTITY_TYPE_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
         ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
         ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
         ENT_SET_TEMPLATE(ENTITY_TYPE_THINKER, Ent_SetTemplate_Thinker, state, options);
-        ENT_SET_TEMPLATE(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options);
+        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
         default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
      }
      return 1;

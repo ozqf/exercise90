@@ -6,7 +6,7 @@
 
 void Game_AddTestSolid(GameState* gs,
 	f32 x, f32 y, f32 z,
-	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ)
+	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u8 isVisible)
 {
 	u8* headerPos = App_StartCommandStream();
 	u32 size = 0;
@@ -15,7 +15,7 @@ void Game_AddTestSolid(GameState* gs,
 	h.entId = Ent_ReserveFreeEntity(&gs->entList);
     h.componentBits |= EC_FLAG_ENTITY;
 	h.componentBits |= EC_FLAG_TRANSFORM;
-    h.componentBits |= EC_FLAG_RENDERER;
+    if (isVisible) { h.componentBits |= EC_FLAG_RENDERER; }
     h.componentBits |= EC_FLAG_COLLIDER;
 
 	size += App_WriteCommandBytesToFrameOutput((u8*)&h, sizeof(Cmd_EntityStateHeader));
@@ -23,7 +23,15 @@ void Game_AddTestSolid(GameState* gs,
     Ent ent = {};
     ent.entId = h.entId;
     ent.inUse = ENTITY_STATUS_IN_USE;
-    ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
+    if (isVisible)
+    {
+        ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
+    }
+    else
+    {
+        ent.factoryType = ENTITY_TYPE_BLOCKING_VOLUME;
+    }
+    
     size += App_WriteCommandBytesToFrameOutput((u8*)&ent, sizeof(Ent));
 
     // create transform state
@@ -41,21 +49,22 @@ void Game_AddTestSolid(GameState* gs,
     // Wall texture "textures\\COMP03_1.bmp"
     // Metal texture "textures\\W33_5.bmp"
 
-    // create renderer state
-    EC_RendererState r = {};
-    COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
-    r.colourRGB[0] = 1;
-    r.colourRGB[1] = 1;
-    r.colourRGB[2] = 1;
-
-    size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
+    if (isVisible)
+    {
+        EC_RendererState r = {};
+        COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
+        r.colourRGB[0] = 1;
+        r.colourRGB[1] = 1;
+        r.colourRGB[2] = 1;
+        size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
+    }
 
     // Create Collider
     EC_ColliderState col = {};
     col.def.SetAsBox(
         t.pos.x, t.pos.y, t.pos.z,
-        halfSizeX, halfSizeY, halfSizeZ, 
+        halfSizeX, halfSizeY, halfSizeZ,
         ZCOLLIDER_FLAG_STATIC,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEFAULT
@@ -70,14 +79,14 @@ void Game_AddTestSolid(GameState* gs,
 
 void Game_BuildTestScene(GameState* gs)
 {
-	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24);
-	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24);
+	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
+	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 1);
 
-    Game_AddTestSolid(gs, 24, 0, 0, 1, 12, 24);
-    Game_AddTestSolid(gs, -24, 0, 0, 1, 12, 24);
+    Game_AddTestSolid(gs, 24, 0, 0, 1, 12, 24, 0);
+    Game_AddTestSolid(gs, -24, 0, 0, 1, 12, 24, 0);
 
-    Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1);
-    Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1);
+    Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
+    Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 }
 
 void Game_BuildTestHud()
