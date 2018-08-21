@@ -173,6 +173,8 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         } break;
         case CMD_TYPE_ENTITY_STATE:
         {
+            printf("GAME: Defunct dynamic state call\n");
+            #if 0
             Cmd_EntityState cmd = {};
             ptr += cmd.Read(header, ptr);
             if (gs->verbose)
@@ -182,6 +184,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
                 );
             }
             Exec_DynamicEntityState(gs, &cmd);
+            #endif
 			return 1;
         } break;
 

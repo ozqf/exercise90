@@ -90,7 +90,7 @@ Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
 }
 
 Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
-    {
+{
     if (cmd->factoryType == ENTITY_TYPE_WORLD_CUBE)
     {
         printf("Factory type %d cannot be dynamic!\n", cmd->factoryType);
