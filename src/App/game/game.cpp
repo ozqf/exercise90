@@ -338,28 +338,14 @@ void Game_Tick(
     if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
     {
         EntitySpawnOptions options = {};
-        //options.scale = { 1, 1, 1 };
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
-        //Game_WriteSpawnCmd(gs, ENTITY_TYPE_RIGIDBODY_CUBE, &options);
         Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
-        #if 0
-        // CmdHeader header = {};
-        // header.type = CMD_TYPE_SPAWN;
-        // header.size = sizeof(Cmd_Spawn);
-        Cmd_EntityState cmd = {};
-		cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
-        cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
-        cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
-        printf("Spawn test: %d/%d\n", cmd.entityId.iteration, cmd.entityId.index);
-        //cmd.pos.y += 10;
-
-        //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-        APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
-
-        //output->ptrWrite += COM_COPY_STRUCT(&header, output->ptrWrite, CmdHeader);
-        //output->ptrWrite += COM_COPY_STRUCT(&cmd, output->ptrWrite, Cmd_Spawn);
-        //output->count++;
-        #endif
+    }
+    if (Input_CheckActionToggledOn(actions, "Spawn Test 2", time->platformFrameNumber))
+    {
+        EntitySpawnOptions options = {};
+        options.pos = Game_RandomSpawnOffset(10, 0, 10);
+        Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_BRUTE, &options);
     }
 	#endif
 	#if 0

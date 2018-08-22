@@ -105,6 +105,7 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 //////////////////////////////////////////////////////////////////////////
 // ENEMY
 //////////////////////////////////////////////////////////////////////////
+#if 0
 void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -144,7 +145,7 @@ void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 
 
     Ent_ApplySpawnOptions(state, options);
 }
-
+#endif
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -236,16 +237,20 @@ case caseValue##: \
 
 u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options)
 {
-     switch (factoryType)
-     {
-        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
-        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
-        ENT_SET_TEMPLATE(ENTITY_TYPE_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
-        ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
-        ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
-        ENT_SET_TEMPLATE(ENTITY_TYPE_THINKER, Ent_SetTemplate_Thinker, state, options);
-        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
-        default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
-     }
-     return 1;
+    if (Ent_SetTemplate_Enemy(state, options, factoryType))
+    {
+        return 1;
+    }
+    switch (factoryType)
+    {
+       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
+       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_THINKER, Ent_SetTemplate_Thinker, state, options);
+       //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
+       default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
+    }
+    return 1;
 }

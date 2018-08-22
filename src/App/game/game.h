@@ -173,10 +173,14 @@ global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 /////////////////////////////////////////////////////////////
 Transform g_debugTransform = {};
 
+// Interface
+void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
+
 #include "game_local_entities.h"
 #include "game_entities.h"
 #include "ec_types.h"
 #include "EntityComponents/ec_collider.h"
+#include "EntityComponents/ent_enemy_templates.h"
 #include "EntityComponents/ent_templates.h"
 #include "ec_factory.h"
 #include "game_draw.h"

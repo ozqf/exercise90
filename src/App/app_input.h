@@ -37,6 +37,7 @@ void App_InitInput(InputActionSet* actions)
     Input_InitAction(actions, Z_INPUT_CODE_E, "Roll Right");
 
     Input_InitAction(actions, Z_INPUT_CODE_G, "Spawn Test");
+    Input_InitAction(actions, Z_INPUT_CODE_H, "Spawn Test 2");
     Input_InitAction(actions, Z_INPUT_CODE_P, "Pause");
 
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_POS_X, "Mouse Pos X");

@@ -127,13 +127,17 @@ i32 PhysCmd_RayTest(
     return world->nextQueryId++;
 }
 
+#define GROUND_CHECK_EPSILON 0.2f
+
 inline u8 PhysCmd_GroundTest(
     ZBulletWorld *world,
     f32 x0, f32 y0, f32 z0,
+    f32 halfHeight,
     PhysEv_RaycastDebug* ev)
 {
-    f32 halfHeight = (1.85f / 2.0f);
-    f32 y1 = y0 -  halfHeight - 0.2f;
+    //f32 halfHeight = (1.85f / 2.0f);
+
+    f32 y1 = y0 -  halfHeight - GROUND_CHECK_EPSILON;
     btVector3 start(x0, y0, z0);
     btVector3 end(x0, y1, z0);
     if (ev != NULL)

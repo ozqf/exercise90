@@ -384,7 +384,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
             h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION) ||
             h->def.flags & ZCOLLIDER_FLAG_GROUNDCHECK)
         {
-            u8 val = PhysCmd_GroundTest(world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2], &rayEv);
+            // TODO: Assuming handle is for a box and halfsize is valid!
+            u8 val = PhysCmd_GroundTest(
+                world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2],
+                h->def.data.box.halfSize[1],
+                &rayEv);
             if (val)
             {
                 ev.flags |= PHYS_EV_FLAG_GROUNDED;

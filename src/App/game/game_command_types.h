@@ -36,6 +36,7 @@ internal u16 COL_MASK_DEBRIS = COLLISION_LAYER_WORLD | COLLISION_LAYER_DEBRIS;
 #define ENTITY_TYPE_THINKER 5
 #define ENTITY_TYPE_ENEMY 6
 #define ENTITY_TYPE_BLOCKING_VOLUME 7
+#define ENTITY_TYPE_ENEMY_BRUTE 8
 //#define ENTITY_TYPES_COUNT 6
 
 // Define placeholder raw read/write functions for commands.
