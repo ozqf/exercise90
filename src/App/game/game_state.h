@@ -64,6 +64,10 @@ void GS_Init(GameState *gs)
     gs->thinkerList.count = GAME_MAX_ENTITIES;
     gs->thinkerList.max = GAME_MAX_ENTITIES;
 
+    gs->multiRendObjList.items = g_multiRenderers;
+    gs->multiRendObjList.count = GAME_MAX_ENTITIES;
+    gs->multiRendObjList.max = GAME_MAX_ENTITIES;
+
     // Make sure ALL component arrays are completely cleared here.
     // TODO: Allocate these buffers on the Heap and realloc when restarted
     COM_ZeroMemory((u8*)gs->transformList.items, sizeof(EC_Transform) * gs->transformList.max);
@@ -74,6 +78,7 @@ void GS_Init(GameState *gs)
 	COM_ZeroMemory((u8*)gs->projectileList.items, sizeof(EC_Projectile) * gs->projectileList.max);
 	COM_ZeroMemory((u8*)gs->labelList.items, sizeof(EC_Label) * gs->labelList.max);
     COM_ZeroMemory((u8*)gs->thinkerList.items, sizeof(EC_Thinker) * gs->thinkerList.max);
+    COM_ZeroMemory((u8*)gs->multiRendObjList.items, sizeof(EC_MultiRendObj) * gs->multiRendObjList.max);
     
     Game_InitEntityFactory();
 }

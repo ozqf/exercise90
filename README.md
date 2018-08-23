@@ -62,17 +62,16 @@ Linked as a .lib to the platform layer for compressing/decompressing files in .d
 * Rewrite platform/engine layer for linux once engine is developed enough.
 
 #### Engine
-* Split the renderer off from the platform layer as another DLL, and use the platform layer simply as a kernal which intermediates between the game and specific services such as rendering or networking?
-    * Like this idea, hot reloading the renderer will make it easier to iterate and debug!
+* Done - Split the renderer off from the platform layer as another DLL, and use the platform layer simply as a kernal which intermediates between the game and specific services such as rendering or networking?
+    * Done - Like this idea, hot reloading the renderer will make it easier to iterate and debug!
 * Upgrade to later version of opengl.
+    * Shaders!
 * Proper tree based scene graph with parent/child object transforms.
-
-#### Game
 
 ## Random todo list
 
 ### Command Structure
-Move the engine and game to using commands.
+Done Move the engine and game to using commands.
 * Done Commands are stored in double buffers, swapped at the start of a frame.
 * Defunct - Commands will flow Platform -> App -> Game, with each level choosing what goes down to the level below.
 * Done Similarly outputs are commands written to an output buffer.
@@ -93,11 +92,15 @@ Move the engine and game to using commands.
     * Done 2018/6/10 *Improved movement* - Movement code uses adapted version of Quake's movement code.
 * Done 2018/5 *Basic Arena Level* - Something to stand on and contain the player!
 * **Entities**
+    **Reduce Boilerplate** - lot of fiddly boilerplate related to adding components. Reduce this.
     * Done 2018/3/30 *How will entities be stored? - Exact structure of entity system. Big structs for now with separate list of render objects built each frame?*
     * Done 2018/3/30 *Entity List - Until a better idea comes up, alloc a big array (4096 odd) of entity structs and use that.*
     *Copy to keep active entities packed to start of array?* - Why?
     * **Update loop**
 * Done 2018/3/14 **Create Heap** - Create main memory pool.
+    * **Split Heaps** - Two or more heaps for application and session memory
+        Short lived: Specific session related: Entities/game state
+        
 * ~Collision Detection~ - Deferred to physics engine
     * **Ray vs plane** - For hitscan vs world.
     * Done 2018/4/2 ...in 2D yes, in 3D, probably *Ray vs AABB* - For hitscan vs actor.

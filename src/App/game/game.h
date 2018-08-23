@@ -159,6 +159,7 @@ global_variable EC_Projectile       g_prjControllers[GAME_MAX_ENTITIES];
 global_variable EC_Label            g_entLabels[GAME_MAX_ENTITIES];
 global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
 global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
+global_variable EC_MultiRendObj     g_multiRenderers[GAME_MAX_ENTITIES];
 
 // UI
 //global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];

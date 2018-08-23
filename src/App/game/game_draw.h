@@ -7,8 +7,9 @@
  */
 inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 {
+    u32 l = gs->singleRendObjList.max;
     // Draw Ent render components
-    for (u32 i = 0; i < gs->singleRendObjList.max; ++i)
+    for (u32 i = 0; i < l; ++i)
     {
         EC_SingleRendObj* rend = &gs->singleRendObjList.items[i];
         if (rend->header.inUse == 1)
@@ -16,6 +17,21 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
             //Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);
             EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
             RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObj);
+        }
+    }
+    l = gs->multiRendObjList.max;
+    for (u32 i = 0; i < l; ++i)
+    {
+        EC_MultiRendObj* rend = &gs->multiRendObjList.items[i];
+        if (rend->header.inUse == 1)
+        {
+            EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
+            // TODO: Multi renderer mode selects which rendobjs are active
+            // TODO: Calculate final transform for rend object from
+            // ent transform + offsets and pitch/yaw overrides
+            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[0]);
+            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[1]);
+            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[2]);
         }
     }
     // Draw local entities
