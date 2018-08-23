@@ -19,12 +19,12 @@ void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
     ecT->t = *transform;
 }
 
-void EC_RendererApplyState(GameState* gs, Ent* ent, EC_RendererState* state)
+void EC_SingleRendObjApplyState(GameState* gs, Ent* ent, EC_RendObjState* state)
 {
-    EC_Renderer* r = EC_FindRenderer(gs, ent);
+    EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
     if (r == NULL)
     {
-        r = EC_AddRenderer(gs, ent);
+        r = EC_AddSingleRendObj(gs, ent);
     }
     r->state = *state;
 	COM_CopyStringLimited(state->meshName, r->state.meshName, EC_RENDERER_STRING_LENGTH);
@@ -144,7 +144,7 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     }
     if (state->componentBits & EC_FLAG_ENTITY) { EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
     if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
-    if (state->componentBits & EC_FLAG_RENDERER) { EC_RendererApplyState(gs, ent, &state->renderState); }
+    if (state->componentBits & EC_FLAG_RENDERER) { EC_SingleRendObjApplyState(gs, ent, &state->renderState); }
     if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
     if (state->componentBits & EC_FLAG_AICONTROLLER) { EC_AIControllerApplyState(gs, ent, &state->aiState); }
     if (state->componentBits & EC_FLAG_ACTORMOTOR) { EC_ActorMotorApplyState(gs, ent, &state->actorState); }
@@ -180,7 +180,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     // WARNING: THIS IS ORDER DEPENDENT!
     if (h.componentBits & EC_FLAG_ENTITY) { stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
     if (h.componentBits & EC_FLAG_TRANSFORM) { stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
-    if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendererState); }
+    if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendObjState); }
     if (h.componentBits & EC_FLAG_COLLIDER) { stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
     if (h.componentBits & EC_FLAG_AICONTROLLER) { stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
     if (h.componentBits & EC_FLAG_ACTORMOTOR) { stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
@@ -225,7 +225,7 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
     if (h.componentBits & EC_FLAG_TRANSFORM)
     { stream += COM_COPY_STRUCT(&state->transform, stream, Transform); }
     if (h.componentBits & EC_FLAG_RENDERER)
-    { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendererState); }
+    { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendObjState); }
     if (h.componentBits & EC_FLAG_COLLIDER)
     { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_ColliderState); }
     if (h.componentBits & EC_FLAG_AICONTROLLER)
@@ -268,9 +268,9 @@ void Ent_PrintComponents(Ent* ent)
 	{
 		printf("  Has Transform\n");
 	}
-	if (Ent_HasRenderer(ent))
+	if (Ent_HasSingleRendObj(ent))
 	{
-		printf("  Has Renderer\n");
+		printf("  Has Single Renderer\n");
 	}
 	if (Ent_HasCollider(ent))
 	{
@@ -310,7 +310,7 @@ void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
 	if (ecT) { state->transform = ecT->t; }
     if (ent->componentFlags & EC_FLAG_RENDERER)
     {
-        EC_Renderer* r = EC_FindRenderer(gs, ent);
+        EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
         state->renderState = r->state;
         COM_CopyStringLimited(r->state.meshName, state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
         COM_CopyStringLimited(r->state.textureName, state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
@@ -362,11 +362,11 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     // Metal texture "textures\\W33_5.bmp"
 
     // create renderer state
-    EC_RendererState r = {};
+    EC_RendObjState r = {};
     COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited(("textures\\W33_5.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
 
-    size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendererState));
+    size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendObjState));
 
     // Create Collider
     EC_ColliderState col = {};

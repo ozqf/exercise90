@@ -32,9 +32,9 @@ void GS_Init(GameState *gs)
     gs->transformList.count = GAME_MAX_ENTITIES;
     gs->transformList.max = GAME_MAX_ENTITIES;
 
-    gs->rendererList.items = g_renderers;
-    gs->rendererList.count = GAME_MAX_ENTITIES;
-    gs->rendererList.max = GAME_MAX_ENTITIES;
+    gs->singleRendObjList.items = g_renderers;
+    gs->singleRendObjList.count = GAME_MAX_ENTITIES;
+    gs->singleRendObjList.max = GAME_MAX_ENTITIES;
 
     gs->aiControllerList.items = g_aiControllers;
     gs->aiControllerList.count = GAME_MAX_ENTITIES;
@@ -67,7 +67,7 @@ void GS_Init(GameState *gs)
     // Make sure ALL component arrays are completely cleared here.
     // TODO: Allocate these buffers on the Heap and realloc when restarted
     COM_ZeroMemory((u8*)gs->transformList.items, sizeof(EC_Transform) * gs->transformList.max);
-    COM_ZeroMemory((u8*)gs->rendererList.items, sizeof(EC_Renderer) * gs->rendererList.max);
+    COM_ZeroMemory((u8*)gs->singleRendObjList.items, sizeof(EC_SingleRendObj) * gs->singleRendObjList.max);
 	COM_ZeroMemory((u8*)gs->colliderList.items, sizeof(EC_Collider) * gs->colliderList.max);
     COM_ZeroMemory((u8*)gs->aiControllerList.items, sizeof(EC_AIController) * gs->aiControllerList.max);
 	COM_ZeroMemory((u8*)gs->actorMotorList.items, sizeof(EC_ActorMotor) * gs->actorMotorList.max);

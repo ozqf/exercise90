@@ -61,7 +61,7 @@ void Ent_ResetEntityIds(EntList* ents)
 void Ent_ClearComponents(GameState* gs, Ent* ent)
 {
     EC_RemoveTransform(gs, ent);
-    EC_RemoveRenderer(gs, ent);
+    EC_RemoveSingleRendObj(gs, ent);
     EC_RemoveCollider(gs, ent);
     EC_RemoveAIController(gs, ent);
     EC_RemoveActorMotor(gs, ent);

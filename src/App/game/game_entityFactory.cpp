@@ -32,7 +32,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
         
         ent->transform.pos = cmd->pos;
 
-        EC_Renderer* renderer = EC_AddRenderer(gs, ent);
+        EC_SingleRendObj* renderer = EC_AddSingleRendObj(gs, ent);
         //RendObj_SetAsMesh(&renderer->rendObj, &g_meshCube, 1, 1, 1, 7);
         RendObj_SetAsMesh(
             &renderer->rendObj,

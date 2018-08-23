@@ -8,9 +8,9 @@
 inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 {
     // Draw Ent render components
-    for (u32 i = 0; i < gs->rendererList.max; ++i)
+    for (u32 i = 0; i < gs->singleRendObjList.max; ++i)
     {
-        EC_Renderer* rend = &gs->rendererList.items[i];
+        EC_SingleRendObj* rend = &gs->singleRendObjList.items[i];
         if (rend->header.inUse == 1)
         {
             //Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);

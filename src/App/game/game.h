@@ -151,7 +151,7 @@ global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 
 // Entity Components
 global_variable EC_Transform        g_transforms[GAME_MAX_ENTITIES];
-global_variable EC_Renderer         g_renderers[GAME_MAX_ENTITIES];
+global_variable EC_SingleRendObj         g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
@@ -162,7 +162,7 @@ global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
 
 // UI
 //global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
-//global_variable EC_Renderer         g_ui_renderers[UI_MAX_ENTITIES];
+//global_variable EC_SingleRendObj         g_ui_renderers[UI_MAX_ENTITIES];
 global_variable UIEntity              g_ui_entities[UI_MAX_ENTITIES];
 
 // GFX

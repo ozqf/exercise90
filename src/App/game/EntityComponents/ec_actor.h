@@ -57,7 +57,7 @@ void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
     //Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
     Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
     
-    EC_Renderer* rend = EC_AddRenderer(gs, ent);
+    EC_SingleRendObj* rend = EC_AddSingleRendObj(gs, ent);
     //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
     RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
     rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;

@@ -159,6 +159,7 @@ struct EC_Header
 #define EC_FLAG_LABEL (1 << 7)
 #define EC_FLAG_HEALTH (1 << 8)
 #define EC_FLAG_THINKER (1 << 9)
+#define EC_FLAG_MULTI_RENDOBJ (1 << 10)
 
 //#define EC_NUM_TYPES 9
 
@@ -169,23 +170,53 @@ struct EC_Transform
     Transform t;
 };
 
+///////////////////////////////////////////////////////
+//  RENDER COMPONENTS
+///////////////////////////////////////////////////////
 #define EC_RENDERER_STRING_LENGTH 32
 
-struct EC_RendererState
+#define EC_RENDOBJ_ANGLE_MODE_DEFAULT 0
+#define EC_RENDOBJ_ANGLE_MODE_BIPED 1
+
+#if 1 // Single mesh renderer component
+struct EC_RendObjState
 {
-    char meshName[32];
-    char textureName[32];
+    char meshName[EC_RENDERER_STRING_LENGTH];
+    char textureName[EC_RENDERER_STRING_LENGTH];
     f32 colourRGB[3];
+    f32 pitchDegrees;
+    f32 yawDegrees;
+    u8 mode;
 };
 
-struct EC_Renderer
+struct EC_SingleRendObj
 {
     EC_Header header;
 
     RendObj rendObj;
 
-    EC_RendererState state;
+    EC_RendObjState state;
 };
+#endif
+
+#define EC_MULTI_RENDERER_CAPACITY 2
+#if 1
+struct EC_MultiRendObjState
+{
+    EC_RendObjState objStates[EC_MULTI_RENDERER_CAPACITY];
+};
+
+struct EC_MultiRendObj
+{
+    EC_Header header;
+
+    RendObj rendObjs[EC_MULTI_RENDERER_CAPACITY];
+    EC_MultiRendObjState state;
+};
+#endif
+
+
+
 
 struct EC_ColliderState
 {
@@ -323,7 +354,7 @@ struct EntityState
     // keep in the same order or stuff will explode
     Ent entMetaData;
     Transform transform;
-    EC_RendererState renderState;
+    EC_RendObjState renderState;
     EC_ColliderState colliderState;
     EC_AIState aiState;
     EC_ActorMotorState actorState;
@@ -350,7 +381,7 @@ struct EntitySpawnOptions
 // GameState will require component lists to be defined already!
 #include "game_entComponentBase.h"
 DEFINE_ENT_COMPONENT_LIST(Transform)
-DEFINE_ENT_COMPONENT_LIST(Renderer)
+DEFINE_ENT_COMPONENT_LIST(SingleRendObj)
 DEFINE_ENT_COMPONENT_LIST(Collider)
 DEFINE_ENT_COMPONENT_LIST(ActorMotor)
 DEFINE_ENT_COMPONENT_LIST(AIController)
@@ -358,6 +389,7 @@ DEFINE_ENT_COMPONENT_LIST(Projectile)
 DEFINE_ENT_COMPONENT_LIST(Label)
 DEFINE_ENT_COMPONENT_LIST(Health)
 DEFINE_ENT_COMPONENT_LIST(Thinker)
+DEFINE_ENT_COMPONENT_LIST(MultiRendObj)
 
 //////////////////////////////////////////////////
 // Clients and players
@@ -406,7 +438,7 @@ struct GameState
     EntList entList;
     // Components
     EC_TransformList transformList;
-    EC_RendererList rendererList;
+    EC_SingleRendObjList singleRendObjList;
     EC_ColliderList colliderList;
     EC_AIControllerList aiControllerList;
     EC_ActorMotorList actorMotorList;
@@ -414,6 +446,7 @@ struct GameState
     EC_LabelList labelList;
     EC_HealthList healthList;
     EC_ThinkerList thinkerList;
+    EC_MultiRendObjList multiRendObjList;
     
     // view
     Transform cameraTransform;
@@ -433,7 +466,7 @@ struct GameState
 // Note: requires that GameState struct is defined!
 //////////////////////////////////////////////////
 DEFINE_ENT_COMPONENT_BASE(Transform, transform, EC_FLAG_TRANSFORM)
-DEFINE_ENT_COMPONENT_BASE(Renderer, renderer, EC_FLAG_RENDERER)
+DEFINE_ENT_COMPONENT_BASE(SingleRendObj, singleRendObj, EC_FLAG_RENDERER)
 DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_FLAG_COLLIDER)
 DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_FLAG_AICONTROLLER)
 DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_FLAG_ACTORMOTOR)
@@ -441,3 +474,4 @@ DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_FLAG_PROJECTILE)
 DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)
 DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
 DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_FLAG_THINKER)
+DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_FLAG_MULTI_RENDOBJ)
