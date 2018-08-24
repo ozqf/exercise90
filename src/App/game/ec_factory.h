@@ -57,6 +57,8 @@ void EC_MultiRendObjApplyState(GameState* gs, Ent* ent, EC_MultiRendObjState* st
     }
     r->state = *state;
     COM_CopyStringLimited(state->objStates[0].meshName, state->objStates[0].meshName, EC_RENDERER_STRING_LENGTH);
+    EC_RestoreRendObj(&r->rendObjs[EC_MULTI_RENDOBJ_BASE], &state->objStates[EC_MULTI_RENDOBJ_BASE]);
+    EC_RestoreRendObj(&r->rendObjs[EC_MULTI_RENDOBJ_HEAD], &state->objStates[EC_MULTI_RENDOBJ_HEAD]);
 }
 
 void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
@@ -356,6 +358,7 @@ void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
 	if (ent->componentFlags & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
     if (ent->componentFlags & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
     if (ent->componentFlags & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
+    if (ent->componentFlags & EC_FLAG_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
 }
 
 void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)

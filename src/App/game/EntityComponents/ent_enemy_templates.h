@@ -24,24 +24,24 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
     state->componentBits |= EC_FLAG_AICONTROLLER;
     state->aiState.ticker.tickMax = 0.1f;
     
-    state->componentBits |= EC_FLAG_RENDERER;
-    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
-    state->renderState.colourRGB[0] = 1;
-    state->renderState.colourRGB[1] = 0;
-    state->renderState.colourRGB[2] = 0;
+    //state->componentBits |= EC_FLAG_RENDERER;
+    //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
+    //COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    //state->renderState.colourRGB[0] = 1;
+    //state->renderState.colourRGB[1] = 0;
+    //state->renderState.colourRGB[2] = 0;
 
+    #if 1
     state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
-    //EC_RendObjState* rendObj = &state->multiRendState.objStates[0];
-    //EC_SetRendObjStateDefault(rendObj);
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[0]);
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[1]);
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
+    //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
+    #endif
 
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
-        0.5f, 0.5f, 0.5f, 
+        0.5f, 1.0f, 0.5f, 
         ZCOLLIDER_FLAG_GROUNDCHECK | ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
@@ -69,17 +69,17 @@ void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
     Ent_SetTemplate_GenericEnemy(state, options);
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
-        2, 2, 2, 
+        1, 2, 1, 
         ZCOLLIDER_FLAG_GROUNDCHECK  | ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
     );
-    state->transform.scale = { 4, 4, 4 };
+    state->transform.scale = { 2, 2, 2 };
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 1;
     state->healthState.hp = 500;
-    options->scale = { 4, 4, 4 };
+    options->scale = { 2, 2, 2 };
     Ent_ApplySpawnOptions(state, options);
 }
 

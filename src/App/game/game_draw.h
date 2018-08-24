@@ -26,12 +26,29 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
         if (rend->header.inUse == 1)
         {
             EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
+			Assert(entTrans != NULL);
             // TODO: Multi renderer mode selects which rendobjs are active
             // TODO: Calculate final transform for rend object from
             // ent transform + offsets and pitch/yaw overrides
-            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[0]);
-            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[1]);
-            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObjs[2]);
+
+            Transform baseTrans = entTrans->t;
+            Transform headTrans = entTrans->t;
+            baseTrans.pos.y -= 0.5f;
+            headTrans.pos.y += 0.5f;
+
+            
+            EC_ActorMotor* m = EC_FindActorMotor(gs, &rend->header.entId);
+            if (m != NULL)
+            {
+                f32 pitch = m->state.input.degrees.x;
+                f32 yaw = m->state.input.degrees.y;
+                Transform_SetRotationDegrees(&baseTrans, 0, yaw, 0);
+                Transform_SetRotationDegrees(&headTrans, pitch, yaw, 0);
+            }
+
+            RScene_AddRenderItem(scene, &baseTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_BASE]);
+            
+            RScene_AddRenderItem(scene, &headTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]);
         }
     }
     // Draw local entities

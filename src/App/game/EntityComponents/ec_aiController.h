@@ -48,31 +48,29 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
             if (col != NULL && col->isGrounded == 0) { return; }
 
-            //f32 dx = targetTrans->t.pos.x - selfTrans->t.pos.x;
-            //f32 dz = targetTrans->t.pos.z - selfTrans->t.pos.z;
+            ////////////////////////////////////
+            // flat plane angle
             f32 dx = selfTrans->t.pos.x - targetTrans->t.pos.x;
             f32 dz = selfTrans->t.pos.z - targetTrans->t.pos.z;
 
-            f32 mag = Vec3_Magnitudef(dx, 0, dz);
+            f32 flatMagnitude = Vec3_Magnitudef(dx, 0, dz);
             
-            if (mag < 2.0f)
+            if (flatMagnitude < 1.0f)
             {
-                //printf("mag: %.2f STOP\n", mag);
                 AI_ClearInput(gs, ai);
                 return;
             }
-            else
-            {
-                //printf("mag: %.2f PUPPY!\n", mag);
-            }
+            f32 yawRadians = atan2f(dx, dz);
             
-
-            f32 radians = atan2f(dx, dz);
-            //printf("  To player: %.2f\n", radians * RAD2DEG);
+            ////////////////////////////////////
+            // Pitch, look up/down angle
+            f32 dy = selfTrans->t.pos.y - targetTrans->t.pos.y;
+            f32 pitchRadians = atan2f(dy, flatMagnitude);
 
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            motor->state.input.degrees.y = radians * RAD2DEG;
-            motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+            motor->state.input.degrees.y = yawRadians * RAD2DEG;
+            motor->state.input.degrees.x = -(pitchRadians * RAD2DEG);
+            //motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
 
         } break;
         case 2:

@@ -67,6 +67,7 @@ void Ent_ClearComponents(GameState* gs, Ent* ent)
     EC_RemoveActorMotor(gs, ent);
     EC_RemoveProjectile(gs, ent);
     EC_RemoveHealth(gs, ent);
+    EC_RemoveMultiRendObj(gs, ent);
 }
 
 inline void Ent_MarkForFree(Ent* ent)

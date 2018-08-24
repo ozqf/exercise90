@@ -200,6 +200,8 @@ struct EC_SingleRendObj
 #endif
 
 #define EC_MULTI_RENDERER_CAPACITY 2
+#define EC_MULTI_RENDOBJ_BASE 0
+#define EC_MULTI_RENDOBJ_HEAD 1
 #if 1
 struct EC_MultiRendObjState
 {

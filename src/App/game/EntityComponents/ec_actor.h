@@ -14,74 +14,7 @@ void SV_SpawnTestBullet(GameState* gs, EntId source, f32 x, f32 y, f32 z, f32 pi
     options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, 100);
     
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
-
-    #if 0
-    Cmd_EntityState cmd = {};
-    cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
-    cmd.factoryType = ENTITY_TYPE_PROJECTILE;
-    cmd.pos.x = x;
-    cmd.pos.y = y;
-    cmd.pos.z = z;
-    cmd.rot.y = yawDegrees;
-    cmd.rot.x = pitchDegrees;
-    cmd.moveSpeed = TEST_PROJECTILE_SPEED;
-
-    cmd.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, cmd.moveSpeed);
-
-    cmd.ticker.tickMax = 1.0f;
-    cmd.ticker.tick = 0.5f;
-
-    if (g_verbose)
-    {
-        printf("SV Creating prj command, entID: %d/%d\n",
-            cmd.entityId.iteration,
-            cmd.entityId.index
-        );
-    }
-    APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
-    //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-    #endif
 }
-#if 0
-void Game_SpawnTestBulletOld(GameState* gs, Transform* originT)
-{
-    //Ent* ent = Ent_GetFreeEntity(&gs->entList);
-    EntId id = Ent_ReserveFreeEntity(&gs->entList);
-    Ent* ent = Ent_GetAndAssign(&gs->entList, &id);
-    
-    //M4x4_SetToIdentity(ent->transform.matrix.cells);
-    //ent->transform.matrix.wAxis = originT->matrix.wAxis;
-
-    // Copy position and rotation
-    ent->transform = *originT;
-    //Transform_SetScale(&ent->transform, 0.1f, 0.1f, 0.5f);
-    Transform_SetScale(&ent->transform, 0.3f, 0.3f, 0.3f);
-    
-    EC_SingleRendObj* rend = EC_AddSingleRendObj(gs, ent);
-    //RendObj_SetAsMesh(&rend->rendObj, &g_meshSpike, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
-    RendObj_SetAsBillboard(&rend->rendObj, 1, 1, 1, AppGetTextureIndexByName("BAL1A0.bmp"));
-    rend->rendObj.flags = 0 | RENDOBJ_FLAG_DEBUG;
-
-    //Vec4 scale = M4x4_GetScale(ent->transform.matrix.cells);
-
-    EC_Projectile* prj = EC_AddProjectile(gs, ent);
-    prj->state.ticker.tickMax = 1.0f;
-    prj->state.ticker.tick = prj->state.ticker.tickMax;
-    
-    prj->state.move.x = -ent->transform.rotation.zAxis.x * TEST_PROJECTILE_SPEED;
-    prj->state.move.y = -ent->transform.rotation.zAxis.y * TEST_PROJECTILE_SPEED;
-    prj->state.move.z = -ent->transform.rotation.zAxis.z * TEST_PROJECTILE_SPEED;
-    // move projectile forward a little
-    ent->transform.pos.x += -ent->transform.rotation.zAxis.x * 1;
-    ent->transform.pos.y += -ent->transform.rotation.zAxis.y * 1;
-    ent->transform.pos.z += -ent->transform.rotation.zAxis.z * 1;
-}
-#endif
-// public float friction = 8f;
-// public float air_accelerate = 100f;
-// public float ground_accelerate = 50f;
-// public float max_velocity_ground = 8f;
-// public float max_velocity_air = 2f;
 
 f32 friction = 7;
 f32 accelerate = 100;
@@ -120,23 +53,6 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
         accelVel = 0;
     }
 
-    // printf("Speed %.1f, AccelDir: %.1f, %.1f, prevVel: %.1f, %.1f, %.1f\n",
-    //     speed,
-    //     accelDir->x,
-    //     accelDir->z,
-    //     prevVelocity->x,
-    //     prevVelocity->y,
-    //     prevVelocity->z
-    // );
-
-    // printf("ProjVel: %.1f, AccelVel: %.1f, Acceleration: %.1f, max: %.1f\n",
-    //     projectionVelocity,
-    //     accelVel,
-    //     acceleration,
-    //     maxVelocity
-    // );
-
-
     Vec3 result = {};
     result.x = prevVelocity->x + accelDir->x * accelVel;
     //result.y = prevVelocity->y + accelDir->y * accelVel;
@@ -145,7 +61,12 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
     return result;
 }
 
-inline void ApplyActorMotorInput(GameState* gs, EC_ActorMotor* motor, EC_Collider* col, f32 deltaTime)
+inline void ApplyActorMotorInput(
+    GameState* gs,
+    EC_ActorMotor* motor,
+    EC_Collider* col,
+    f32 deltaTime
+    )
 {
     Vec3 move = col->state.velocity;
 
@@ -328,30 +249,6 @@ void Game_UpdateActorMotors(GameState* gs, GameTime* time)
         if (motor->header.inUse == 0) { continue; }
         EC_Collider* col = EC_FindCollider(gs, &motor->header.entId);
         Assert(col != NULL);
-        //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
-        //Assert(ent != NULL);
         ApplyActorMotorInput(gs, motor, col, time->deltaTime);
-
     }
-    #if 0
-    static float fireTick = 0;
-    Ent* ent = Ent_GetEntityByIndex(&gs->entList, gs->playerEntityIndex);
-
-    if (fireTick <= 0)
-    {
-        if (Input_GetActionValue(actions, "Attack 1"))
-        {
-            fireTick = 0.1f;
-            Transform* t = &g_worldScene.cameraTransform;
-            
-            Game_SpawnTestBullet(gs, t);
-        }
-    }
-    else
-    {
-        fireTick -= time->deltaTime;
-    }
-    #endif
 }
-
-
