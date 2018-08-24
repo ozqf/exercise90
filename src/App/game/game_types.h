@@ -361,6 +361,7 @@ struct EntityState
     EC_HealthState healthState;
     EC_ProjectileState projectileState;
     EC_LabelState labelState;
+    EC_MultiRendObjState multiRendState;
 };
 
 // Current things you can customise when you spawn an entity.

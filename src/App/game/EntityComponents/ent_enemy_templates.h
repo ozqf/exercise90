@@ -2,6 +2,15 @@
 
 #include "game.h"
 
+void EC_SetRendObjStateDefault(EC_RendObjState* rendObj)
+{
+    COM_CopyStringLimited("Cube", rendObj->meshName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("textures\\white_bordered.bmp", rendObj->textureName, EC_RENDERER_STRING_LENGTH);
+    rendObj->colourRGB[0] = 1;
+    rendObj->colourRGB[1] = 0;
+    rendObj->colourRGB[2] = 0;
+}
+
 void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -22,11 +31,18 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 0;
 
+    state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
+    //EC_RendObjState* rendObj = &state->multiRendState.objStates[0];
+    //EC_SetRendObjStateDefault(rendObj);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[0]);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[1]);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
+
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
-        ZCOLLIDER_FLAG_GROUNDCHECK,
+        ZCOLLIDER_FLAG_GROUNDCHECK | ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
     );
@@ -43,7 +59,7 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
 }
 
 void Ent_SetTemplate_Grunt(EntityState* state, EntitySpawnOptions* options)
-{
+{ 
     Ent_SetTemplate_GenericEnemy(state, options);
     Ent_ApplySpawnOptions(state, options);
 }
@@ -54,7 +70,7 @@ void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         2, 2, 2, 
-        ZCOLLIDER_FLAG_GROUNDCHECK,
+        ZCOLLIDER_FLAG_GROUNDCHECK  | ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEBRIS
     );

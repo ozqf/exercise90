@@ -19,6 +19,16 @@ void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
     ecT->t = *transform;
 }
 
+void EC_RestoreRendObj(RendObj* rendObj, EC_RendObjState* state)
+{
+    RendObj_SetAsMesh(
+        rendObj,
+        Assets_GetMeshDataByName(state->meshName),// g_meshCube,
+        state->colourRGB[0], state->colourRGB[1], state->colourRGB[2],
+        AppGetTextureIndexByName(state->textureName)
+    );
+}
+
 void EC_SingleRendObjApplyState(GameState* gs, Ent* ent, EC_RendObjState* state)
 {
     EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
@@ -29,12 +39,24 @@ void EC_SingleRendObjApplyState(GameState* gs, Ent* ent, EC_RendObjState* state)
     r->state = *state;
 	COM_CopyStringLimited(state->meshName, r->state.meshName, EC_RENDERER_STRING_LENGTH);
 	COM_CopyStringLimited(state->textureName, r->state.textureName, EC_RENDERER_STRING_LENGTH);
-    RendObj_SetAsMesh(
-        &r->rendObj,
-        Assets_GetMeshDataByName(state->meshName),// g_meshCube,
-        state->colourRGB[0], state->colourRGB[1], state->colourRGB[2],
-        AppGetTextureIndexByName(state->textureName)
-    );
+    EC_RestoreRendObj(&r->rendObj, &r->state);
+    //RendObj_SetAsMesh(
+    //    &r->rendObj,
+    //    Assets_GetMeshDataByName(state->meshName),// g_meshCube,
+    //    state->colourRGB[0], state->colourRGB[1], state->colourRGB[2],
+    //    AppGetTextureIndexByName(state->textureName)
+    //);
+}
+
+void EC_MultiRendObjApplyState(GameState* gs, Ent* ent, EC_MultiRendObjState* state)
+{
+    EC_MultiRendObj* r = EC_FindMultiRendObj(gs, ent);
+    if (r == NULL)
+    {
+        r = EC_AddMultiRendObj(gs, ent);
+    }
+    r->state = *state;
+    COM_CopyStringLimited(state->objStates[0].meshName, state->objStates[0].meshName, EC_RENDERER_STRING_LENGTH);
 }
 
 void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
@@ -151,6 +173,7 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
     if (state->componentBits & EC_FLAG_PROJECTILE) { EC_ProjectileApplyState(gs, ent, &state->projectileState); }
     if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
+    if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) { EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
 }
 
 u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
@@ -187,6 +210,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     if (h.componentBits & EC_FLAG_HEALTH) { stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
     if (h.componentBits & EC_FLAG_PROJECTILE) { stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
     if (h.componentBits & EC_FLAG_LABEL) { stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
+    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ) { stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
 
     u32 read = (stream - origin);
     if (read != numBytes)
@@ -238,6 +262,8 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
     { stream += COM_COPY_STRUCT(&state->projectileState, stream, EC_ProjectileState); }
     if (h.componentBits & EC_FLAG_LABEL)
     { stream += COM_COPY_STRUCT(&state->labelState, stream, EC_LabelState); }
+    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)
+    { stream += COM_COPY_STRUCT(&state->multiRendState, stream, EC_MultiRendObjState); }
 
     u16 bytesWritten = (u16)(stream - origin);
 
