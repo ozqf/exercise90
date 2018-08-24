@@ -2,13 +2,19 @@
 
 #include "game.h"
 
-void EC_SetRendObjStateDefault(EC_RendObjState* rendObj)
+void EC_SetRendObjStateDefault(EC_RendObjState* rendObj, f32 red, f32 green, f32 blue)
 {
-    COM_CopyStringLimited("Cube", rendObj->meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\white_bordered.bmp", rendObj->textureName, EC_RENDERER_STRING_LENGTH);
-    rendObj->colourRGB[0] = 1;
-    rendObj->colourRGB[1] = 0;
-    rendObj->colourRGB[2] = 0;
+    COM_CopyStringLimited(
+        "Cube",
+        rendObj->meshName, EC_RENDERER_STRING_LENGTH
+    );
+    COM_CopyStringLimited(
+        "textures\\white_bordered.bmp",
+        rendObj->textureName, EC_RENDERER_STRING_LENGTH
+    );
+    rendObj->colourRGB[0] = red;
+    rendObj->colourRGB[1] = green;
+    rendObj->colourRGB[2] = blue;
 }
 
 void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* options)
@@ -33,8 +39,8 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
 
     #if 1
     state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[0]);
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[1]);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[0], 1, 0, 0);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[1], 1, 1, 1);
     //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
     #endif
 

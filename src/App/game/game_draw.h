@@ -2,6 +2,45 @@
 
 #include "game.h"
 
+inline void Game_AddPowerUpOverlayMesh(
+    RenderScene* scene,
+    Transform* baseT,
+    Transform* headT,
+    RendObj* baseObj,
+    RendObj* headObj
+    )
+{
+    i32 textureIndex = AppGetTextureIndexByName("textures\\charset.bmp");
+    Transform t;
+    RendObj obj;
+
+    // Base
+    t = *baseT;
+    t.scale.x += 0.1f;
+    t.scale.y += 0.1f;
+    t.scale.z += 0.1f;
+
+    obj = *baseObj;
+    obj.data.mesh.textureIndex = textureIndex;
+    obj.data.mesh.r = 0.2f;
+    obj.data.mesh.g = 0.2f;
+    obj.data.mesh.b = 1.0f;
+    RScene_AddRenderItem(scene, &t, &obj);
+
+    // Head
+    t = *headT;
+    t.scale.x += 0.1f;
+    t.scale.y += 0.1f;
+    t.scale.z += 0.1f;
+
+    obj = *headObj;
+    obj.data.mesh.textureIndex = textureIndex;
+    obj.data.mesh.r = 0.2f;
+    obj.data.mesh.g = 0.2f;
+    obj.data.mesh.b = 1.0f;
+    RScene_AddRenderItem(scene, &t, &obj);
+}
+
 /**
  * Load relevant entity renderers into rend object list
  */
@@ -49,6 +88,21 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
             RScene_AddRenderItem(scene, &baseTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_BASE]);
             
             RScene_AddRenderItem(scene, &headTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]);
+
+            // Add FX mesh
+            Game_AddPowerUpOverlayMesh(scene, &baseTrans, &headTrans,
+                &rend->rendObjs[EC_MULTI_RENDOBJ_BASE],
+                &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]
+            );
+            #if 0
+            RendObj obj = rend->rendObjs[EC_MULTI_RENDOBJ_HEAD];
+            headTrans.scale.x += 0.1f;
+            headTrans.scale.y += 0.1f;
+            headTrans.scale.z += 0.1f;
+            obj.data.mesh.textureIndex = AppGetTextureIndexByName("textures\\charset.bmp");
+            
+            RScene_AddRenderItem(scene, &headTrans, &obj);
+            #endif
         }
     }
     // Draw local entities
