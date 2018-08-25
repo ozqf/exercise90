@@ -144,12 +144,12 @@ void Game_BuildTestHud()
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.x = -1;
     ent->transform.pos.y = -1;// -(1 - (0.075f * 3));
-    char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\nLINE 5";
+    //char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\nLINE 5";
 
     RendObj_SetAsAsciCharArray(
         &ent->rendObj, 
-        placeholderChars2,
-        numChars, 
+        g_playerStatusText,
+        -1, 
         0.075f, 
         TEXT_ALIGNMENT_BOTTOM_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
@@ -390,6 +390,7 @@ void Game_Tick(
         {
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &id);
             EC_Transform* ecT = EC_FindTransform(gs, ent);
+            EC_Health* hp = EC_FindHealth(gs, ent);
 			if (ecT != NULL)
 			{
                 Transform_SetByPosAndDegrees(&gs->cameraTransform, &ecT->t.pos, &motor->state.input.degrees);
@@ -400,6 +401,10 @@ void Game_Tick(
 			{
 				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
 			}
+            if (hp != NULL)
+            {
+                sprintf_s(g_playerStatusText, PLAYER_STATUS_TEXT_LENGTH, "HP: %d", hp->state.hp);
+            }
         }
         else if (gs->verbose)
         {

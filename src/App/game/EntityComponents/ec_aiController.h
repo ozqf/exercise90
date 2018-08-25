@@ -7,6 +7,7 @@ u8 AI_AcquireAndValidateTarget(GameState *gs, EntId* id)
     if (id->value == 0) { *id = AI_FindNearestPlayer(gs, {0, 0, 0}); }
     if (id->value == 0) { return 0; }
     Ent* ent = Ent_GetEntityById(gs, id);
+	if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
     return 1;
 }
@@ -75,6 +76,8 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             {
                 motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             }
+            motor->state.input.buttons |= ACTOR_INPUT_ATTACK;
+            
             motor->state.input.degrees.y = yawRadians * RAD2DEG;
             motor->state.input.degrees.x = -(pitchRadians * RAD2DEG);
 

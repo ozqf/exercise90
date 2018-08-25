@@ -146,6 +146,11 @@ void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
         {
             // Do stuff
             printf("GAME Client %d avatar died\n", cl->clientId);
+            Cmd_ClientUpdate clUpdate = {};
+            clUpdate.clientId = cl->clientId;
+            clUpdate.state = CLIENT_STATE_OBSERVER;
+            clUpdate.entId = { };
+            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
         }
         
 		Ent_Free(gs, ent);

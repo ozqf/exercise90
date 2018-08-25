@@ -151,7 +151,7 @@ global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
 
 // Entity Components
 global_variable EC_Transform        g_transforms[GAME_MAX_ENTITIES];
-global_variable EC_SingleRendObj         g_renderers[GAME_MAX_ENTITIES];
+global_variable EC_SingleRendObj    g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
 global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
 global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
@@ -164,7 +164,9 @@ global_variable EC_MultiRendObj     g_multiRenderers[GAME_MAX_ENTITIES];
 // UI
 //global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
 //global_variable EC_SingleRendObj         g_ui_renderers[UI_MAX_ENTITIES];
-global_variable UIEntity              g_ui_entities[UI_MAX_ENTITIES];
+global_variable UIEntity            g_ui_entities[UI_MAX_ENTITIES];
+#define PLAYER_STATUS_TEXT_LENGTH 256
+global_variable char                g_playerStatusText[PLAYER_STATUS_TEXT_LENGTH];
 
 // GFX
 global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
