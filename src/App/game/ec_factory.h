@@ -433,6 +433,11 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     #endif
 }
 
+void Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
+{
+    
+}
+
 EntId Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
 {
     EntityState s = {};

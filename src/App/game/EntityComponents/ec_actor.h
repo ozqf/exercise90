@@ -3,19 +3,6 @@
 #include "game.h"
 #include "../common/com_module.h"
 
-void SV_SpawnTestBullet(GameState* gs, EntId source, f32 x, f32 y, f32 z, f32 pitchDegrees, f32 yawDegrees)
-{
-    EntitySpawnOptions options = {};
-    options.pos.x = x;
-    options.pos.y = y;
-    options.pos.z = z;
-    options.source = source;
-    
-    options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, 150);
-    
-    Game_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
-}
-
 f32 friction = 7;
 f32 accelerate = 100;
 
@@ -131,19 +118,27 @@ inline void ApplyActorMotorInput(
     #endif
 
     Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
-
+    Ticker* ticker = &motor->state.ticker;
     // Attack
-    if (motor->state.ticker.tick <= 0)
+    if (ticker->tick <= 0)
     {
         if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
-            motor->state.ticker.tick = 0.05f;
+            ticker->tick = ticker->tickMax;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
             //Transform* t = &ent->transform;
             Transform* t = &ecTrans->t;
 
+            AttackInfo info = {};
+            info.type = motor->state.attackType;
+            info.origin = t->pos;
+            info.source = motor->header.entId;
+            info.yawDegrees = motor->state.input.degrees.y;
+            info.pitchDegrees = motor->state.input.degrees.x;
+            SV_FireAttack(gs, &info);
+            #if 0
             SV_SpawnTestBullet(
                 gs,
                 motor->header.entId,
@@ -182,11 +177,12 @@ inline void ApplyActorMotorInput(
             );
             #endif
             //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
+            #endif
         }
     }
     else
     {
-        motor->state.ticker.tick -= deltaTime;
+        ticker->tick -= deltaTime;
     }
 }
 

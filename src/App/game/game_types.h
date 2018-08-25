@@ -123,6 +123,16 @@ struct EntityLink
 //////////////////////////////////////////////////
 
 
+struct AttackInfo
+{
+    i32 type;
+    Vec3 origin;
+    EntId source;
+    f32 yawDegrees;
+    f32 pitchDegrees;
+};
+
+
 struct Damager
 {
     EntId source;
@@ -250,6 +260,7 @@ struct EC_ActorMotorState
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
+    i32 attackType;
     Ticker ticker;
 };
 

@@ -187,6 +187,7 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 #include "EntityComponents/ent_templates.h"
 #include "ec_factory.h"
 #include "game_draw.h"
+#include "EntityComponents/ent_attacks.h"
 #include "EntityComponents/ec_aiController.h"
 #include "game_players.h"
 
