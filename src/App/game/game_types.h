@@ -186,6 +186,7 @@ struct EC_RendObjState
     f32 colourRGB[3];
     f32 pitchDegrees;
     f32 yawDegrees;
+    f32 heightOffset;
     u8 mode;
 };
 
@@ -206,6 +207,9 @@ struct EC_SingleRendObj
 struct EC_MultiRendObjState
 {
     EC_RendObjState objStates[EC_MULTI_RENDERER_CAPACITY];
+
+    EC_RendObjState* GetBaseRendObj() { return &this->objStates[EC_MULTI_RENDOBJ_BASE]; }
+    EC_RendObjState* GetHeadRendObj() { return &this->objStates[EC_MULTI_RENDOBJ_HEAD]; }
 };
 
 struct EC_MultiRendObj

@@ -28,7 +28,7 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
     Transform_SetToIdentity(&state->transform);
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
-    state->aiState.ticker.tickMax = 0.1f;
+    state->aiState.ticker.tickMax = 0.033f;
     state->aiState.minApproachDistance = 5.0f;
     
     //state->componentBits |= EC_FLAG_RENDERER;
@@ -40,8 +40,10 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
 
     #if 1
     state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[0], 1, 0, 0);
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[1], 1, 1, 1);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_BASE], 1, 0, 0);
+    state->multiRendState.GetBaseRendObj()->heightOffset = -0.5f;
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 1, 1, 1);
+    state->multiRendState.GetHeadRendObj()->heightOffset = 0.5f;
     //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
     #endif
 
@@ -87,6 +89,10 @@ void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
     state->renderState.colourRGB[2] = 1;
     state->healthState.hp = 500;
     options->scale = { 2, 2, 2 };
+
+    state->multiRendState.GetBaseRendObj()->heightOffset = -1.0f;
+    state->multiRendState.GetHeadRendObj()->heightOffset = 1.0f;
+
     Ent_ApplySpawnOptions(state, options);
 }
 

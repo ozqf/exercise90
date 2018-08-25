@@ -74,8 +74,8 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 
             Transform baseTrans = entTrans->t;
             Transform headTrans = entTrans->t;
-            baseTrans.pos.y -= 0.5f;
-            headTrans.pos.y += 0.5f;
+            baseTrans.pos.y += rend->state.GetBaseRendObj()->heightOffset;
+            headTrans.pos.y += rend->state.GetHeadRendObj()->heightOffset;
 
             
             EC_ActorMotor* m = EC_FindActorMotor(gs, &rend->header.entId);
@@ -92,10 +92,12 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
             RScene_AddRenderItem(scene, &headTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]);
 
             // Add FX mesh
+            #if 0
             Game_AddPowerUpOverlayMesh(scene, &baseTrans, &headTrans,
                 &rend->rendObjs[EC_MULTI_RENDOBJ_BASE],
                 &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]
             );
+            #endif
         }
     }
     // Draw local entities
