@@ -205,7 +205,7 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_PROJECTILE;
     state->projectileState = {};
     state->projectileState.damage.damage = 10;
-    state->projectileState.speed = 100;
+    state->projectileState.speed = 150;
     f32 timeToLive = 0.5f;
     i32 tocks = 1;
     state->projectileState.ticker = { timeToLive, timeToLive, tocks, tocks };
@@ -217,11 +217,26 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     Ent_ApplySpawnOptions(state, options);
 }
 
-void Ent_SetTemplate_Thinker(EntityState* state, EntitySpawnOptions* options)
+void Ent_SetTemplate_Spawner(EntityState* state, EntitySpawnOptions* options)
 {
-    ILLEGAL_CODE_PATH
+    state->entMetaData.factoryType = ENTITY_TYPE_SPAWNER;
+    state->componentBits |= EC_FLAG_TRANSFORM;
+    Transform_SetToIdentity(&state->transform);
+
+    state->componentBits |= EC_FLAG_THINKER;
+    EC_ThinkerState* s = &state->thinkerState;
+    s->type = EC_THINKER_SPAWNER;
+    s->ticker.tickMax = 1.5f;
+    s->ticker.tick = 0.5f;//s->ticker.tickMax;
+
+    Ent_ApplySpawnOptions(state, options);
     
-    state->entMetaData.factoryType = ENTITY_TYPE_THINKER;
+    printf("GAME Create Spawner at %.2f, %.2f, %.2f\n",
+        state->transform.pos.x,
+        state->transform.pos.y,
+        state->transform.pos.z
+    );
+
 }
 
 #define ENT_SET_TEMPLATE(caseValue, func, state, options) case caseValue##: \
@@ -248,7 +263,7 @@ u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptio
        ENT_SET_TEMPLATE(ENTITY_TYPE_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
        ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
        ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_THINKER, Ent_SetTemplate_Thinker, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_SPAWNER, Ent_SetTemplate_Spawner, state, options);
        //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
        default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
     }

@@ -87,6 +87,26 @@ void Game_BuildTestScene(GameState* gs)
 
     Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
+
+    
+    EntitySpawnOptions options;
+    options = {};
+    options.pos = { 20, 0, 20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+
+    options = {};
+    options.pos = { -20, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+
+    #if 1
+    options = {};
+    options.pos = { -20, 0, 20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+
+    options = {};
+    options.pos = { 20, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    #endif
 }
 
 void Game_BuildTestHud()
@@ -171,6 +191,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             Ent_ReadStateData(gs, ptr, header->GetSize());
             return 1;
         } break;
+
         case CMD_TYPE_ENTITY_STATE:
         {
             printf("GAME: Defunct dynamic state call\n");
@@ -201,37 +222,10 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         {
             Cmd_RemoveEntity cmd = {};
             ptr += cmd.Read(header, ptr);
-            if (g_verbose)
-            {
-                printf("GAME Removing Ent %d/%d\n", cmd.entId.iteration, cmd.entId.index);
-            }
-            Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd.entId);
-			if (ent != NULL)
-			{
-                //Vec3 p = ent->transform.pos;
-				if (Ent_HasTransform(ent))
-				{
-					EC_Transform* ecT = EC_FindTransform(gs, ent);
-					Vec3 p = ecT->t.pos;
-					Vec3 normal = COM_UnpackVec3Normal(cmd.gfxNormal);
-					Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
-				}
-				else
-				{
-					printf("GAME Ent %d/%d type %d has no transform...?\n",
-						ent->entId.iteration, ent->entId.index,
-						ent->factoryType
-					);
-				} 
-				Ent_Free(gs, ent);
-			}
-			else
-			{
-				printf("GAME Ent %d/%d not found to remove!\n", cmd.entId.iteration, cmd.entId.index);
-			}
+            SV_RemoveEntity(gs, &cmd);
             return 1;
         } break;
-        #if 1
+        
 		case CMD_TYPE_PLAYER_INPUT:
 		{
             Cmd_PlayerInput cmd;
@@ -248,7 +242,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             motor->state.input = cmd.input;
 			return 1;
 		} break;
-        #endif
+        
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
@@ -380,6 +374,7 @@ void Game_Tick(
     Game_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
+    Game_UpdateThinkers(gs, time);
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 

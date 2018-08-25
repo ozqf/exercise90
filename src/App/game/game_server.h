@@ -111,3 +111,47 @@ void SV_IterateImportance(EntityLink* links, i32 numLinks)
 
     // Sort list by importance
 }
+
+void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
+{
+    if (g_verbose)
+    {
+        printf("GAME Removing Ent %d/%d\n", cmd->entId.iteration, cmd->entId.index);
+    }
+    Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd->entId);
+	if (ent != NULL)
+	{
+        EC_Transform* ecT = EC_FindTransform(gs, ent);
+
+        // spawn fx
+		if (ecT)
+		{
+			Vec3 p = ecT->t.pos;
+			Vec3 normal = COM_UnpackVec3Normal(cmd->gfxNormal);
+			Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
+		}
+		else
+		{
+			printf("GAME Ent %d/%d type %d has no transform...?\n",
+				ent->entId.iteration, ent->entId.index,
+				ent->factoryType
+			);
+		}
+
+        // inform interested parties
+
+        // is the entity a player?
+        Client* cl = App_FindClientByEntId(cmd->entId, &gs->clientList);
+        if (cl)
+        {
+            // Do stuff
+            printf("GAME Client %d avatar died\n", cl->clientId);
+        }
+        
+		Ent_Free(gs, ent);
+	}
+	else
+	{
+		printf("GAME Ent %d/%d not found to remove!\n", cmd->entId.iteration, cmd->entId.index);
+	}
+}

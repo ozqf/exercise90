@@ -25,6 +25,7 @@ struct Client;
 struct ClientList;
 struct ActorInput;
 struct UIEntity;
+union EntId;
 global_variable RendObj g_debugLine = {};
 #include "app_ui.h"
 
@@ -48,6 +49,7 @@ void App_ClearClientGameLinks(ClientList* cls);
 void App_AddLocalClient();
 void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
 Client* App_FindClientById(i32 id, ClientList* cls);
+Client* App_FindClientByEntId(EntId entId, ClientList* cls);
 Client* App_FindOrCreateClient(i32 id, ClientList* cls);
 Client* App_FindLocalClient(ClientList* cls);
 void App_UpdateLocalClients(GameTime* time, ClientList* cls);

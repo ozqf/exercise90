@@ -152,10 +152,7 @@ i32 App_Init()
     platform.Platform_WriteTextCommand("LOAD TEST");
 	platform.Platform_WriteTextCommand("IMPULSE 1");
 	platform.Platform_WriteTextCommand("MENU CLOSE");
-    platform.Platform_WriteTextCommand("SPAWN ENEMY");
-
-
-    //App_DumpHeap();
+    
     return 1;
 }
 

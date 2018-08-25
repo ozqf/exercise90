@@ -88,6 +88,16 @@ void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
     }
 }
 
+void EC_ThinkerApplyState(GameState* gs, Ent* ent, EC_ThinkerState* state)
+{
+    EC_Thinker* thinker = EC_FindThinker(gs, ent);
+    if (thinker == NULL)
+    {
+        thinker = EC_AddThinker(gs, ent);
+    }
+    thinker->state = *state;
+}
+
 void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorState* state)
 {
     EC_ActorMotor* motor = EC_FindActorMotor(gs, ent);
@@ -175,6 +185,7 @@ void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
     if (state->componentBits & EC_FLAG_PROJECTILE) { EC_ProjectileApplyState(gs, ent, &state->projectileState); }
     if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
+    if (state->componentBits & EC_FLAG_THINKER) { EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
     if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) { EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
 }
 
@@ -212,6 +223,7 @@ u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     if (h.componentBits & EC_FLAG_HEALTH) { stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
     if (h.componentBits & EC_FLAG_PROJECTILE) { stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
     if (h.componentBits & EC_FLAG_LABEL) { stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
+    if (h.componentBits & EC_FLAG_THINKER) { stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
     if (h.componentBits & EC_FLAG_MULTI_RENDOBJ) { stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
 
     u32 read = (stream - origin);
@@ -264,6 +276,8 @@ u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
     { stream += COM_COPY_STRUCT(&state->projectileState, stream, EC_ProjectileState); }
     if (h.componentBits & EC_FLAG_LABEL)
     { stream += COM_COPY_STRUCT(&state->labelState, stream, EC_LabelState); }
+    if (h.componentBits & EC_FLAG_THINKER)
+    { stream += COM_COPY_STRUCT(&state->thinkerState, stream, EC_ThinkerState); }
     if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)
     { stream += COM_COPY_STRUCT(&state->multiRendState, stream, EC_MultiRendObjState); }
 

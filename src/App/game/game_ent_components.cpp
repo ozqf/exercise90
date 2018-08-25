@@ -134,7 +134,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                         {
                             AI_Stun(gs, ai);
                         }
-                        Prj_PushRigidBody(col);
+                        //Prj_PushRigidBody(col);
                     }
                 }
 

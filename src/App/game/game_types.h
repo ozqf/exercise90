@@ -323,28 +323,18 @@ struct EC_Health
 
 struct EC_ThinkerState
 {
+    i32 type;
     Ticker ticker;
 };
 
-union Ent_Brain
-{
-    struct Spawner
-    {
-        i32 typeToSpawn;
-    };
-};
-
-#define EC_BRAIN_NULL 0
-#define EC_BRAIN_SPAWNER 1
+#define EC_THINKER_NULL 0
+#define EC_THINKER_SPAWNER 1
 
 struct EC_Thinker
 {
     EC_Header header;
 
-    Ticker ticker;
-
-    i32 brainType;
-    Ent_Brain brain;
+    EC_ThinkerState state;
 };
 
 /**
@@ -368,6 +358,7 @@ struct EntityState
     EC_HealthState healthState;
     EC_ProjectileState projectileState;
     EC_LabelState labelState;
+    EC_ThinkerState thinkerState;
     EC_MultiRendObjState multiRendState;
 };
 

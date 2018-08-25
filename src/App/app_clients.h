@@ -117,6 +117,19 @@ Client* App_FindClientById(i32 id, ClientList* cls)
     return NULL;
 }
 
+Client* App_FindClientByEntId(EntId entId, ClientList* cls)
+{
+    for (i32 i = 0; i < cls->max; ++i)
+    {
+        Client* query = &cls->items[i];
+        if (query->entId.value == entId.value)
+        {
+            return query;
+        }
+    }
+    return NULL;
+}
+
 Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 {
     Client* free = NULL;

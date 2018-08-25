@@ -11,7 +11,7 @@ void SV_SpawnTestBullet(GameState* gs, EntId source, f32 x, f32 y, f32 z, f32 pi
     options.pos.z = z;
     options.source = source;
     
-    options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, 100);
+    options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, 150);
     
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
 }
@@ -137,7 +137,7 @@ inline void ApplyActorMotorInput(
     {
         if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
-            motor->state.ticker.tick = 0.1f;
+            motor->state.ticker.tick = 0.05f;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;

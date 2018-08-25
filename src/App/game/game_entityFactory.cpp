@@ -73,7 +73,7 @@ void Game_InitEntityFactory()
     // g_spawnFunctions[ENTITY_TYPE_ACTOR_GROUND] = Spawn_GroundActor;
     // g_numSpawnFunctions = ENTITY_TYPES_COUNT;
 }
-
+#if 0
 Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
@@ -116,3 +116,4 @@ Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
     }
     return ent;
 }
+#endif

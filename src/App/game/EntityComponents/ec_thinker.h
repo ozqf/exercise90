@@ -6,41 +6,44 @@
 // true if a 'tock' was triggered
 inline u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)
 {
-    if (thinker->ticker.tick <= 0)
+    #if 1
+    if (thinker->state.ticker.tick <= 0)
     {
-        thinker->ticker.tick = thinker->ticker.tickMax;
+        thinker->state.ticker.tick = thinker->state.ticker.tickMax;
         return 1;
     }
     else
     {
-        thinker->ticker.tick -= deltaTime;
+        thinker->state.ticker.tick -= deltaTime;
         return 0;
     }
+    #endif
 }
 
 void Game_UpdateThinkers(GameState* gs, GameTime* time)
 {
+    #if 1
     for (u32 i = 0; i < gs->thinkerList.max; ++i)
     {
         EC_Thinker* thinker = &gs->thinkerList.items[i];
         if (thinker->header.inUse == 0) { continue; }
 
-        switch (thinker->brainType)
+        switch (thinker->state.type)
         {
-            case EC_BRAIN_SPAWNER:
+            case EC_THINKER_SPAWNER:
             {
                 if (!Game_TockThinker(thinker, time->deltaTime)) { continue; }
 
-                Cmd_EntityState cmd = {};
-		        cmd.entityId = Ent_ReserveFreeEntity(&gs->entList);
-                cmd.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
-                cmd.pos = Game_RandomSpawnOffset(10, 0, 10);
-                printf("Spawn test: %d/%d\n", cmd.entityId.iteration, cmd.entityId.index);
-                //cmd.pos.y += 10;
-            
-                //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_ENTITY_STATE, sizeof(Cmd_EntityState));
-                APP_WRITE_CMD(0, CMD_TYPE_ENTITY_STATE, 0, cmd);
+                EntitySpawnOptions options = {};
+                EC_Transform* ect = EC_FindTransform(gs, &thinker->header.entId);
+                options.pos = ect->t.pos;
+                printf("SPAWN enemy at %.2f, %.2f, %.2f\n",
+                    options.pos.x, options.pos.y, options.pos.z
+                
+                );
+                Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
             } break;
         }
     }
+    #endif
 }

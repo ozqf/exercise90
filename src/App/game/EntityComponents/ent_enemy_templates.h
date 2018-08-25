@@ -62,7 +62,7 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
 
 
     state->componentBits |= EC_FLAG_HEALTH;
-    state->healthState.hp = 100;
+    state->healthState.hp = 35;
 
     //Ent_ApplySpawnOptions(state, options);
 }
