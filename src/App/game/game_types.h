@@ -418,17 +418,33 @@ struct ClientList
     i32 max;
 };
 
+
+///////////////////////////////////////////////////////////////////////
+// Session data
+///////////////////////////////////////////////////////////////////////
+
+// Stores the starting conditions of the current game instance
+// Session is data spanning multiple levels
+// From hitting start in the main menu to game over
+struct GameSession
+{
+    char mapName[64];
+    i32 levelsCompleted = 0;
+};
+
+// overall game information in the current instance (eg progress, wave count, scores etc)
+struct GameInstance
+{
+    i32 score;
+};
+
+// Specific local settings on this machine
 struct GameStateLocal
 {
     u8 localPlayerHasEnt = 0;
     EntId localPlayerEntId;
 };
 
-struct GameSettings
-{
-    char mapName;
-    i32 mode;
-};
 //////////////////////////////////////////////////
 // GameState God Object
 // This is a very carefully implemented god object and you should all piss off
@@ -438,8 +454,10 @@ struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
     
-    GameSettings settings;
+    GameSession session;
+    GameInstance instance;
     ClientList clientList;
+    GameStateLocal local;
 
     // Entities
     //i32 nextEntityID;
@@ -458,8 +476,6 @@ struct GameState
     
     // view
     Transform cameraTransform;
-    
-    GameStateLocal local;
     
     u16 debugMode = 0;
     char debugString[2048];

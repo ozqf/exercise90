@@ -45,6 +45,10 @@ Sound library. Linked to win32sound.dll.
 [https://zlib.net/]
 Linked as a .lib to the platform layer for compressing/decompressing files in .dat files
 
+## Reading/Resources
+* [docs.gl: GL API 'Can use'](http://docs.gl/)
+    * Shader related functions: glBindProgram, glCompileShader, glLinkProgram
+
 ## Intended Features:
 
 ### High Concept
@@ -57,6 +61,10 @@ Linked as a .lib to the platform layer for compressing/decompressing files in .d
 * Renderer and Sound are also DLLs but also contain platform specific code - should do something about this eventually.
 * All DLLs are automatically 'hot reloaded' if the platform detects the file has been modified.
 * Assets will be stored together in ZIP files.
+
+#### Renderer
+* Very basic fixed function. Naively draws a 'scene' object assembled by the game (or the app for menus and platform for debug input). Need to convert to a command buffer like everything else.
+* Currently has no lighting, blending, vertex buffers... or *any* occulusion whatsoever.
 
 ### Future thoughts:
 * Rewrite platform/engine layer for linux once engine is developed enough.
