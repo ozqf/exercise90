@@ -54,12 +54,7 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             f32 dz = selfTrans->t.pos.z - targetTrans->t.pos.z;
 
             f32 flatMagnitude = Vec3_Magnitudef(dx, 0, dz);
-            
-            if (flatMagnitude < 1.0f)
-            {
-                AI_ClearInput(gs, ai);
-                return;
-            }
+
             f32 yawRadians = atan2f(dx, dz);
             
             ////////////////////////////////////
@@ -67,10 +62,21 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             f32 dy = selfTrans->t.pos.y - targetTrans->t.pos.y;
             f32 pitchRadians = atan2f(dy, flatMagnitude);
 
+            ////////////////////////////////////
+            // Apply inputs and angles to motor
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            u8 applyMove = (flatMagnitude < ai->state.minApproachDistance);
+            
+            if (applyMove)
+            {
+                AI_ClearInput(gs, ai);
+            }
+            else
+            {
+                motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+            }
             motor->state.input.degrees.y = yawRadians * RAD2DEG;
             motor->state.input.degrees.x = -(pitchRadians * RAD2DEG);
-            //motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
 
         } break;
         case 2:

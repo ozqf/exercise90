@@ -29,6 +29,7 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
     state->aiState.ticker.tickMax = 0.1f;
+    state->aiState.minApproachDistance = 5.0f;
     
     //state->componentBits |= EC_FLAG_RENDERER;
     //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);

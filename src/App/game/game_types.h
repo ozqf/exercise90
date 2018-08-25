@@ -263,6 +263,7 @@ struct EC_AIState
     i32 state;
     Vec3 dir;
     f32 speed;
+    f32 minApproachDistance;
 
     Ticker ticker;
 };
