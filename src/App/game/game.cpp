@@ -92,6 +92,22 @@ void Game_BuildTestScene(GameState* gs)
     #if 1
     EntitySpawnOptions options;
     options = {};
+    options.pos = { 20, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    //options = {};
+    //options.pos = { 10, 0, -20 };
+    //Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    //options = {};
+    //options.pos = { -10, 0, -20 };
+    //Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    options = {};
+    options.pos = { -20, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    #endif
+
+    #if 0
+    EntitySpawnOptions options;
+    options = {};
     options.pos = { 20, 0, 20 };
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
 

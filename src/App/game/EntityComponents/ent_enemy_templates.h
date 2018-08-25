@@ -57,7 +57,7 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
     );
 
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
-    state->actorState.runSpeed = 10;
+    state->actorState.runSpeed = 6;
     state->actorState.runAcceleration = 75;
     state->actorState.ticker.tickMax = 1.0f;
     state->actorState.attackType = 2;

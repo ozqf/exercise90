@@ -433,9 +433,14 @@ void Test_WriteTestEntityBuffer(GameState* gs, EntitySpawnOptions* options)
     #endif
 }
 
-void Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
+u8 Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)
 {
+    *target = {};
+    EntId entId = Ent_ReserveFreeEntity(&gs->entList);
     
+    u8 result = Game_WriteSpawnTemplate(factoryType, target, options);
+    target->entId = entId;
+    return result;
 }
 
 EntId Game_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)

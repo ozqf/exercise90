@@ -15,9 +15,9 @@ Spawn sequence with templates:
 void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 {
     // TODO: More tidy way to handle scale issues...?
-    if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
-    if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }
-    if (options->scale.z <= 0) { options->scale.z = 1; /*printf("  SpawnOptions had scaleZ <= 0, forced to 1\n");*/ }
+    //if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
+    //if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }
+    //if (options->scale.z <= 0) { options->scale.z = 1; /*printf("  SpawnOptions had scaleZ <= 0, forced to 1\n");*/ }
 
     state->entMetaData.source = options->source;
     // if (state->source.value != 0)
@@ -29,7 +29,11 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
     {
         //printf("  EC Apply transform options\n");
         Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
-        Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
+        if (options->scale.x != 0 && options->scale.y != 0 && options->scale.z != 0)
+        {
+            Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
+        }
+        
     }
     if (state->componentBits & EC_FLAG_COLLIDER)
     {
