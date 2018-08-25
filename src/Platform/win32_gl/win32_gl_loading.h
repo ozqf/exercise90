@@ -1,8 +1,24 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "win32_gl_module.cpp"
 
-#include <gl/gl.h>
+void Win32_GetExtensions(Extensions* ex)
+{
+    *ex = {};
+
+	// Name of opengl extension when found in gl strings:
+	//char* extensionName = "WGL_EXT_swap_control";
+	ex->SwapInterval = (wgl_swap_interval_ext*)wglGetProcAddress(PROCNAME_SWAP_INTERVAL);
+	if (ex->SwapInterval)
+	{
+		printf("REND Got proc Swap Interval\n");
+		ex->SwapInterval(1);
+	}
+	else
+	{
+		printf("REND Failed to get proc Swap Interval\n");
+	}
+}
 
 /**
  * Load a texture into a specific texture index

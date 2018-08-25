@@ -10,15 +10,17 @@ inline void Game_AddPowerUpOverlayMesh(
     RendObj* headObj
     )
 {
-    i32 textureIndex = AppGetTextureIndexByName("textures\\charset.bmp");
+    //i32 textureIndex = AppGetTextureIndexByName("textures\\white_latice.bmp");
+    i32 textureIndex = AppGetTextureIndexByName("textures\\white_v_lines.bmp");
+    //i32 textureIndex = AppGetTextureIndexByName("textures\\white_h_lines.bmp");
     Transform t;
     RendObj obj;
 
     // Base
     t = *baseT;
-    t.scale.x += 0.1f;
-    t.scale.y += 0.1f;
-    t.scale.z += 0.1f;
+    t.scale.x += 0.11f;
+    t.scale.y += 0.11f;
+    t.scale.z += 0.11f;
 
     obj = *baseObj;
     obj.data.mesh.textureIndex = textureIndex;
@@ -94,15 +96,6 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
                 &rend->rendObjs[EC_MULTI_RENDOBJ_BASE],
                 &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]
             );
-            #if 0
-            RendObj obj = rend->rendObjs[EC_MULTI_RENDOBJ_HEAD];
-            headTrans.scale.x += 0.1f;
-            headTrans.scale.y += 0.1f;
-            headTrans.scale.z += 0.1f;
-            obj.data.mesh.textureIndex = AppGetTextureIndexByName("textures\\charset.bmp");
-            
-            RScene_AddRenderItem(scene, &headTrans, &obj);
-            #endif
         }
     }
     // Draw local entities

@@ -17,7 +17,7 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 
 */
 
-#include <windows.h>
+#include "../win32_system_include.h"
 #include <stdio.h>
 #include <gl/gl.h>
 
@@ -40,6 +40,8 @@ struct CharArrayGeometryData
     f32 blue;
 };
 
+#include "win32_gl_extension_defs.h"
+
 //////////////////////////////////////////////////////////////////////////
 // Data
 //////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,8 @@ HGLRC g_openglRC = NULL;
 
 // Settings
 global_variable f32 win32_aspectRatio = 0;
+
+Extensions g_extensions = {};
 
 // assets
 #define NUM_TEST_TEXTURES 128

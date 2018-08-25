@@ -2,8 +2,6 @@
 
 #include "win32_gl_module.cpp"
 
-typedef BOOL WINAPI wgl_swap_interval_ext(int interval);
-
 i32 Win32_InitOpenGL(HWND window)
 {
 	if (g_openglRC != NULL) { return 1; }
@@ -46,22 +44,8 @@ i32 Win32_InitOpenGL(HWND window)
 
     if (wglMakeCurrent(windowContext, g_openglRC))
     {
-		// Name of opengl extension when found in gl strings:
-		//char* extensionName = "WGL_EXT_swap_control";
-
-		// name of actual, raw function pointer:
-		char* procName = "wglSwapIntervalEXT";
-		wgl_swap_interval_ext *proc = (wgl_swap_interval_ext*)wglGetProcAddress(procName);
-		if (proc)
-		{
-			printf("REND Got proc %s\n", procName);
-			proc(1);
-		}
-		else
-		{
-			printf("REND Failed to get proc %s\n", procName);
-		}
-    }
+		Win32_GetExtensions(&g_extensions);
+	}
     else
     {
         GLenum err = glGetError();
