@@ -284,6 +284,7 @@ u8 App_StartSinglePlayer(char *path)
         spawnClient.state = CLIENT_STATE_OBSERVER;
         APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
         //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+        //platform.Platform_WriteTextCommand("SPAWN ENEMY");
     }
 
     return 1;

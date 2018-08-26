@@ -34,6 +34,13 @@ void Game_UpdateThinkers(GameState* gs, GameTime* time)
             {
                 if (!Game_TockThinker(thinker, time->deltaTime)) { continue; }
 
+                // Stop spawning if no players are around
+                EntId id = AI_FindNearestPlayer(gs, { 0, 0, 0 });
+                if (id.value == 0)
+                {
+                    return;
+                }
+                
                 EntitySpawnOptions options = {};
                 EC_Transform* ect = EC_FindTransform(gs, &thinker->header.entId);
                 options.pos = ect->t.pos;

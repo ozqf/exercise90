@@ -4,9 +4,15 @@
 
 u8 AI_AcquireAndValidateTarget(GameState *gs, EntId* id)
 {
-    if (id->value == 0) { *id = AI_FindNearestPlayer(gs, {0, 0, 0}); }
-    if (id->value == 0) { return 0; }
     Ent* ent = Ent_GetEntityById(gs, id);
+    if (!ent)
+    {
+        id->value = 0;
+        *id = AI_FindNearestPlayer(gs, {0, 0, 0});
+    }
+    if (id->value == 0) { return 0; }
+    //  printf("AI Acquired %d/%d\n", id->iteration, id->index);
+    ent = Ent_GetEntityById(gs, id);
 	if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
     return 1;
@@ -28,7 +34,7 @@ inline void AI_Stun(GameState* gs, EC_AIController* ai)
 
 void AI_Tock(GameState* gs, EC_AIController* ai)
 {
-    //printf("AI tock\n");
+    //printf("AI tock. State: %d\n", ai->state.state);
     switch (ai->state.state)
     {
         case 1:
@@ -91,6 +97,11 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             if (AI_AcquireAndValidateTarget(gs, &ai->state.target))
             {
                 ai->state.state = 1;
+            }
+            else if (ai->state.target.value != 0)
+            {
+                ai->state.target.value = 0;
+                AI_ClearInput(gs, ai);
             }
         } break;
     }

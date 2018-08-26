@@ -35,6 +35,7 @@ inline EntId AI_FindNearestPlayer(GameState* gs, Vec3 pos)
     {
         cl = &gs->clientList.items[0];
         if (cl->state != CLIENT_STATE_PLAYING) { continue; }
+        //printf("GUTIL Found nearest player ent %d/%d\n", cl->entId.iteration, cl->entId.index);
         return cl->entId;
     }
     return result;

@@ -40,7 +40,7 @@ void Game_SpawnLocalEntity(
 	LocalEnt* e = Game_GetFreeLocalEntitiy();
 	if (e == NULL) { return; }
 	Vec3_Set(&e->pos, x, y, z);
-	RendObj_SetAsBillboard(&e->rend, 1, 1, 1,
+	RendObj_SetAsBillboard(&e->rend, 0.3f, 0.3f, 0.3f,
         AppGetTextureIndexByName("textures\\white.bmp")
     );
     Vec3_Set(&e->scale, 0.2f, 0.2f, 0.2f);

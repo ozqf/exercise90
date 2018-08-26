@@ -404,6 +404,9 @@ DEFINE_ENT_COMPONENT_LIST(MultiRendObj)
 //////////////////////////////////////////////////
 // Clients and players
 //////////////////////////////////////////////////
+#define CLIENT_STATE_FREE 0
+#define CLIENT_STATE_OBSERVER 1
+#define CLIENT_STATE_PLAYING 2
 struct Client
 {
     i32 clientId;
@@ -411,6 +414,8 @@ struct Client
     EntId entId;
     i32 isLocal;
     ActorInput input;
+
+    u8 IsPlaying() { return (this->state == CLIENT_STATE_PLAYING); }
 };
 
 struct ClientList

@@ -78,6 +78,29 @@ Linked as a .lib to the platform layer for compressing/decompressing files in .d
 
 ## Random todo list
 
+### ECS complexity
+Insanely fiddly steps to adding a new component:
+
+Game Types
+1. define component flag
+2. Add the component struct
+3. Add the component state struct
+4. Add state var to master EntityState struct
+5. Define component list
+6. Add list var to GameState
+7. Define Component base functions
+
+Game State
+8. declare array of components
+9. assign array to GameState
+10. Zero component memory on gamestate reset
+11. Clear component on entity removal
+
+ec_factory:
+12. Add component state read call
+13. add component state write call
+14. Add apply state function 
+
 ### Command Structure
 Done Move the engine and game to using commands.
 * Done Commands are stored in double buffers, swapped at the start of a frame.

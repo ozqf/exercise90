@@ -114,9 +114,6 @@ struct Cmd_PlayerInput
 //////////////////////////////////////////////////
 // 103
 // Client management
-#define CLIENT_STATE_FREE 0
-#define CLIENT_STATE_OBSERVER 1
-#define CLIENT_STATE_PLAYING 2
 struct Cmd_ClientUpdate
 {
     i32 clientId;

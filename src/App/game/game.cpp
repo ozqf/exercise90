@@ -89,7 +89,7 @@ void Game_BuildTestScene(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 
 
-    #if 1
+    #if 0
     EntitySpawnOptions options;
     options = {};
     options.pos = { 20, 0, -20 };
@@ -398,7 +398,7 @@ void Game_Tick(
     Game_StepPhysics(gs, time);
 
     Client* localClient = App_FindLocalClient(&gs->clientList);
-    if (localClient && localClient->state == CLIENT_STATE_PLAYING)
+    if (localClient && localClient->IsPlaying())
     {
         EntId id = localClient->entId;
         Ent* ent = Ent_GetEntityById(&gs->entList, &id);

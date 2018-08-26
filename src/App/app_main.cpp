@@ -335,7 +335,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     platform.Platform_RenderScene(&g_worldScene);
 
     Client* cl = App_FindLocalClient(&gs->clientList);
-    if (cl && cl->state == CLIENT_STATE_PLAYING && !g_debugCameraOn)
+    if (cl && cl->IsPlaying() && !g_debugCameraOn)
     {
         Game_BuildWeaponModelScene(&g_weaponModelScene);
         platform.Platform_RenderScene(&g_weaponModelScene);

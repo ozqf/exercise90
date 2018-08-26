@@ -128,7 +128,7 @@ void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
 		{
 			Vec3 p = ecT->t.pos;
 			Vec3 normal = COM_UnpackVec3Normal(cmd->gfxNormal);
-			Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 10);
+			Game_SpawnLocalEntity(p.x, p.y, p.z, &normal, 1);
 		}
 		else
 		{
