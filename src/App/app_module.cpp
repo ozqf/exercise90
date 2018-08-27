@@ -55,7 +55,7 @@ Client* App_FindLocalClient(ClientList* cls);
 void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 
 // assets and data
-i32 AppGetTextureIndexByName(char* textureName);
+internal i32 AppGetTextureIndexByName(char* textureName);
 MeshData Assets_GetMeshDataByName(char* name);
 
 i32 App_GetVarAsI32(char* name);
@@ -105,15 +105,15 @@ void App_InitInput(InputActionSet* actions);
 
 /////////////////////////////////////////////////////////
 // textures
-void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref);
-void AppBindTexture(Texture2DHeader *header);
-BlockRef AppLoadTexture(char *filePath);
+internal void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref);
+internal void AppBindTexture(Texture2DHeader *header);
+internal BlockRef AppLoadTexture(char *filePath);
 //void AppLoadAndRegisterTexture(char *filePath);
-i32 AppLoadAndBindTexture(char* filePath);
-void AppBindAllTextures();
-void AppLoadTestTextures();
-i32 AppRendererReloaded();
-void AppListTextures();
+internal i32 AppLoadAndBindTexture(char* filePath);
+internal void AppBindAllTextures();
+internal void AppLoadTestTextures();
+internal i32 AppRendererReloaded();
+internal void AppListTextures();
 
 /////////////////////////////////////////////////////////
 // Implementations

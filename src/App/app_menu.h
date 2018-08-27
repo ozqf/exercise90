@@ -68,7 +68,7 @@ void App_InitMenus()
 	Transform_SetToIdentity(&ent->transform);
 	Transform_SetRotationDegrees(&ent->transform, 0, 0, 0);
 	ent->inUse = 1;
-	ent->transform.pos.x = 8;
+	ent->transform.pos.x = 0;
 	ent->transform.pos.y = 6;
 	ent->transform.pos.z = 4;
 	ent->transform.scale = {4, 4, 4};

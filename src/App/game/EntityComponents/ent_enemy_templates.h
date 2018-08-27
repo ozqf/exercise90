@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-void EC_SetRendObjStateDefault(EC_RendObjState* rendObj, f32 red, f32 green, f32 blue)
+internal void EC_SetRendObjStateDefault(EC_RendObjState* rendObj, f32 red, f32 green, f32 blue)
 {
     COM_CopyStringLimited(
         "Cube",
@@ -17,7 +17,7 @@ void EC_SetRendObjStateDefault(EC_RendObjState* rendObj, f32 red, f32 green, f32
     rendObj->colourRGB[2] = blue;
 }
 
-void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* options)
+internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
@@ -69,13 +69,13 @@ void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* option
     //Ent_ApplySpawnOptions(state, options);
 }
 
-void Ent_SetTemplate_Grunt(EntityState* state, EntitySpawnOptions* options)
+internal void Ent_SetTemplate_Grunt(EntityState* state, EntitySpawnOptions* options)
 { 
     Ent_SetTemplate_GenericEnemy(state, options);
     Ent_ApplySpawnOptions(state, options);
 }
 
-void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
+internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
 {
     Ent_SetTemplate_GenericEnemy(state, options);
     state->colliderState.def.SetAsBox(
@@ -98,7 +98,7 @@ void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* options)
     Ent_ApplySpawnOptions(state, options);
 }
 
-u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
+internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     switch(templateId)
     {

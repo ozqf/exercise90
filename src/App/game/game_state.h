@@ -3,7 +3,7 @@
 #include "game.h"
 
 
-void GS_Init(GameState *gs)
+internal void GS_Init(GameState *gs)
 {
     printf("GAME Init State\n");
     printf("  GAME sizeof(Ent): %d\n", sizeof(Ent));
@@ -83,7 +83,7 @@ void GS_Init(GameState *gs)
     Game_InitEntityFactory();
 }
 
-void GS_Clear(GameState* gs)
+internal void GS_Clear(GameState* gs)
 {
     GS_Init(gs);
 }

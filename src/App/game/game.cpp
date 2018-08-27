@@ -4,7 +4,7 @@
 
 #include "game_intersection_test.cpp"
 
-void Game_AddTestSolid(GameState* gs,
+internal void Game_AddTestSolid(GameState* gs,
 	f32 x, f32 y, f32 z,
 	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u8 isVisible)
 {
@@ -77,7 +77,7 @@ void Game_AddTestSolid(GameState* gs,
     printf("  Add test solid: cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
 }
 
-void Game_BuildTestScene(GameState* gs)
+internal void Game_BuildTestScene(GameState* gs)
 {
 	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
 	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 1);
@@ -125,7 +125,7 @@ void Game_BuildTestScene(GameState* gs)
     #endif
 }
 
-void Game_BuildTestHud()
+internal void Game_BuildTestHud()
 {
     UIEntity* ent;
     i32 bytesOfUI = sizeof(UIEntity) * UI_MAX_ENTITIES;
@@ -174,19 +174,19 @@ void Game_BuildTestHud()
     printf("ALIGNMENT MODE FOR PLAYER STATUS: %d\n", ent->rendObj.data.charArray.alignmentMode);
 }
 
-void Game_BuildTestMenu()
+internal void Game_BuildTestMenu()
 {
     
 }
 
-void Game_Init()
+internal void Game_Init()
 {
     GS_Init(&g_gameState);
     Game_BuildTestHud();
     Game_BuildTestMenu();
 }
 
-void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
+internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 {
     Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
     cl->state = cmd->state;
@@ -194,7 +194,7 @@ void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
 }
 
-u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
+internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 {
     switch (header->GetType())
     {
@@ -277,7 +277,7 @@ u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
     return 0;
 }
 
-i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
+internal i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
 {
     i32 numExecuted = 0;
     u8* ptrRead = commands->ptrStart;
@@ -322,17 +322,9 @@ i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Update Clients
-/////////////////////////////////////////////////////////////////////////////
-void Game_UpdatePlayers(ByteBuffer* output, Client* cl, InputActionSet* actions)
-{
-
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
-void Game_Tick(
+internal void Game_Tick(
     GameState *gs,
     ByteBuffer* input,
     ByteBuffer* output,

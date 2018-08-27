@@ -86,14 +86,14 @@ global_variable char g_debugStrBuffer[GAME_DEBUG_BUFFER_LENGTH];
 global_variable RendObj g_debugStrRenderer;
 global_variable u8 g_verbose = 0;
 
-void Game_InitDebugStr()
+internal void Game_InitDebugStr()
 {
     g_debugStr = {};
     g_debugStr.chars = g_debugStrBuffer;
     g_debugStr.maxLength = GAME_DEBUG_BUFFER_LENGTH;
 }
 
-void Game_SetDebugStringRender()
+internal void Game_SetDebugStringRender()
 {
     RendObj_SetAsAsciCharArray(
         &g_debugStrRenderer,
@@ -177,7 +177,7 @@ global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 Transform g_debugTransform = {};
 
 // Interface
-void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
+internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 
 #include "game_local_entities.h"
 #include "game_entities.h"
@@ -185,6 +185,7 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 #include "EntityComponents/ec_collider.h"
 #include "EntityComponents/ent_enemy_templates.h"
 #include "EntityComponents/ent_templates.h"
+#include "EntityComponents/ec_apply_state.h"
 #include "ec_factory.h"
 #include "game_draw.h"
 #include "EntityComponents/ent_attacks.h"

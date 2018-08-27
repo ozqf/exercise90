@@ -2,7 +2,7 @@
 
 #include "app_module.cpp"
 
-void AppListTextures()
+internal void AppListTextures()
 {
     i32 l = g_textureHandles.numTextures;
     printf("--- APP TEXTURES (%d) ---\n", l);
@@ -13,7 +13,7 @@ void AppListTextures()
     }
 }
 
-i32 AppGetTextureIndexByName(char* textureName)
+internal i32 AppGetTextureIndexByName(char* textureName)
 {
     i32 l = g_textureHandles.numTextures;
     for (i32 i = 0; i < l; ++i)
@@ -34,7 +34,7 @@ i32 AppGetTextureIndexByName(char* textureName)
  * > BlockRef should be a Heap block for a Texture2DHeader!
  */
 #if 1
-void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
+internal void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
 {
     i32 index = g_textureHandles.numTextures;
     header->index = index;
@@ -53,7 +53,7 @@ void AppRegisterTexture(Texture2DHeader *header, BlockRef *ref)
 /**
  * Upload a texture to the GPU
  */
-void AppBindTexture(Texture2DHeader *header)
+internal void AppBindTexture(Texture2DHeader *header)
 {
     platform.Platform_BindTexture(header->ptrMemory, header->width, header->height, header->index);
     printf("APP tex %s bound to index %d\n", header->name, header->index);
@@ -62,7 +62,7 @@ void AppBindTexture(Texture2DHeader *header)
 /**
  * Read a texture onto the Global Heap
  */
-BlockRef AppLoadTexture(char *filePath)
+internal BlockRef AppLoadTexture(char *filePath)
 {
     BlockRef ref = {};
     platform.Platform_LoadTexture(&g_heap, &ref, filePath);
@@ -74,7 +74,7 @@ BlockRef AppLoadTexture(char *filePath)
  * Returns the texture's index
  */
 #if 1
-i32 AppLoadAndBindTexture(char *filePath)
+internal i32 AppLoadAndBindTexture(char *filePath)
 {
     BlockRef ref = AppLoadTexture(filePath);
     Heap_GetBlockMemoryAddress(&g_heap, &ref);
@@ -87,7 +87,7 @@ i32 AppLoadAndBindTexture(char *filePath)
 /**
  * Upload all registered textures
  */
-void AppBindAllTextures()
+internal void AppBindAllTextures()
 {
     i32 numTextures = g_textureHandles.numTextures;
     for (i32 i = 0; i < numTextures; ++i)
@@ -96,7 +96,7 @@ void AppBindAllTextures()
     }
 }
 
-void AppLoadTestTextures()
+internal void AppLoadTestTextures()
 {
     BlockRef ref;
     Texture2DHeader *header;
@@ -153,7 +153,7 @@ void AppLoadTestTextures()
     platform.Platform_SetDebugInputTextureIndex(AppGetTextureIndexByName("textures\\charset.bmp"));
 }
 
-i32 AppRendererReloaded()
+internal i32 AppRendererReloaded()
 {
     AppBindAllTextures();
     return 1;

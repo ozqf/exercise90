@@ -4,12 +4,12 @@ Server only functions
 */
 #include "app_module.cpp"
 
-void SV_UpdateLocalPlayers(GameState* gs, GameTime* time)
+internal void SV_UpdateLocalPlayers(GameState* gs, GameTime* time)
 {
 
 }
 
-u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
+internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 {
     if (!IsRunningServer(gs->netMode))
 	{
@@ -66,7 +66,7 @@ Server construction of a relevance list for a specific client.
     whilst the whole game is one arena though!)
 
 */
-i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, EntList* ents)
+internal i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, EntList* ents)
 {
     i32 count = 0;
     for (u32 i = 0; i < ents->count; ++i)
@@ -85,7 +85,7 @@ i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, EntList* 
     return count;
 }
 
-void SV_IterateImportance(EntityLink* links, i32 numLinks)
+internal void SV_IterateImportance(EntityLink* links, i32 numLinks)
 {
 
     /*
@@ -112,7 +112,15 @@ void SV_IterateImportance(EntityLink* links, i32 numLinks)
     // Sort list by importance
 }
 
-void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
+void SV_DontRunMe()
+{
+    ILLEGAL_CODE_PATH
+    SV_BuildRelevanceList(NULL, NULL, 0, NULL);
+    SV_IterateImportance(NULL, 0);
+    SV_UpdateLocalPlayers(NULL, NULL);
+}
+
+internal void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
 {
     if (g_verbose)
     {
