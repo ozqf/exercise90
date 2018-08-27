@@ -60,6 +60,19 @@ i32 Win32_InitOpenGL(HWND window)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	// Light test
+	#if 0
+	glEnable(GL_LIGHTING);
+
+	GLfloat values[4] = { 1, 1, 1, 1 };
+	glEnable(GL_LIGHT0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, values);
+	glEnable(GL_COLOR_MATERIAL);
+	// position is in object space
+	GLfloat pos[4] = { 0, 1, 0, 1 };
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	#endif
+
 	// Transparent textures
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

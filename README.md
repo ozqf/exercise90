@@ -119,6 +119,8 @@ Done Move the engine and game to using commands.
 * **Game requires asset files to launch (added 2018/4/2)** - Some very basic assets should be baked into the code for such early development work. Only thing that cannot be procedurally generated is the console char sheet. So that first.
 
 ### Game
+* **Gameplay**
+    * **Enemy Attack Cycle** - pause, shoot, pause, continue
 * Done 2018/3/16 *Player movement* - Current player movement is messed up - rebuild.
     * Done 2018/6/10 *Improved movement* - Movement code uses adapted version of Quake's movement code.
 * Done 2018/5 *Basic Arena Level* - Something to stand on and contain the player!
@@ -156,7 +158,7 @@ Done Move the engine and game to using commands.
 
 ### Engine
 * Done 2018/5/4 *Command Buffer* - Change nature of inputs to processing of frame specific command buffers
-    * **Record Command input** - Allow for playback of game commands.
+    * Done *Record Command input* - Allow for playback of game commands.
 * *Debug Console* - Console for viewing debug output and entering commands.
     * Done 2018/6 *Windows console* - Use printf via a windows command prompt for debugging output. 
     * Defunct *Basic Text log* - A scrolling block of text.
@@ -168,6 +170,10 @@ Done Move the engine and game to using commands.
     * Done 2018/4/8 *Rebindable Textures* - Allow platform to rebind loaded textures at any time, allowing a reloaded renderer
 
 ### Rendering
+* **Convert Renderer to Command Queue**
+    * **Renderer Commands**
+        * **Draw Object** - Implements current drawing system
+        * **Settings Data** - Set the current camera and lighting settings
 * Done 2018/3/18 *ZBuffer - Currently no hidden surface removal.*
 * Done *Basic Text* - Just some means of rendering text for debug output and placeholder UI.
     * Done *Render from Char sheet* - Can double for sprite sheet rendering too.
