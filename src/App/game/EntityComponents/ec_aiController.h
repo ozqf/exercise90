@@ -8,6 +8,7 @@
 #define AI_STATE_BEGIN_ATTACK 3
 #define AI_STATE_ATTACKING 4
 #define AI_STATE_FINISH_ATTACK 5
+#define AI_STATE_WANDER 6
 
 struct AITargetInfo
 {
@@ -82,7 +83,7 @@ inline void AI_ApplyLookAngles(EC_ActorMotor* m, f32 yawRadians, f32 pitchRadian
     m->state.input.degrees.x = -(pitchRadians * RAD2DEG);
 }
 
-inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
+inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
     switch (ai->state.state)
@@ -101,17 +102,26 @@ inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             }
         } break;
 
+        case AI_STATE_WANDER:
+        {
+            AI_ClearInput(gs, ai);
+            ai->state.state = AI_STATE_TRACKING;
+            // reset think time so think is performed immediately on next frame
+            ai->state.nextThink = 0;
+            return 0;
+        } break;
+
         case AI_STATE_TRACKING:
         {
 			AITargetInfo info = {};
 			if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
 			{
 				AI_Reset(gs, ai);
-				return;
+				return 1;
 			}
 
             EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
-            if (col != NULL && col->isGrounded == 0) { return; }
+            if (col != NULL && col->isGrounded == 0) { return 1; }
 
             AI_BuildThinkInfo(gs, ai, &info);
             if (info.flatMagnitude < 20)
@@ -155,9 +165,8 @@ inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
         {
             ai->state.state = AI_STATE_NULL;
         } break;
-
-
     }
+    return 1;
 }
 
 inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
@@ -165,7 +174,10 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
     //printf("AI tock. State: %d\n", ai->state.state);
     if (ai->state.nextThink <= time->sessionEllapsed)
     {
-        AI_Think(gs, ai, time);
+        if (!AI_Think(gs, ai, time))
+        {
+            return;
+        }
     }
     #if 1
     switch (ai->state.state)
@@ -190,7 +202,10 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
             
             if (applyMove)
             {
-                AI_ClearInput(gs, ai);
+                //AI_ClearInput(gs, ai);
+                ai->state.state = AI_STATE_WANDER;
+                motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+                info.yawRadians += (90 * DEG2RAD);
             }
             else
             {

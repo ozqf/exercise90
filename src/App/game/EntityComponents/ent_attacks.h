@@ -115,6 +115,11 @@ inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
     }
 }
 
+inline void SV_FireAttack_04(GameState *gs, AttackInfo *info)
+{
+    
+}
+
 void SV_FireAttack(GameState *gs, AttackInfo *info)
 {
     switch (info->type)

@@ -88,9 +88,9 @@ internal void Game_BuildTestScene(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 
-
-    #if 1
     EntitySpawnOptions options;
+    #if 0
+    
     options = {};
     options.pos = { 20, 0, -20 };
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
