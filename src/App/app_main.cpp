@@ -332,6 +332,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
 
     Game_IntersectionTest(gs, &g_worldScene);
 
+    g_worldScene.settings.lightBits |= (1 << 0);
     platform.Platform_RenderScene(&g_worldScene);
 
     Client* cl = App_FindLocalClient(&gs->clientList);

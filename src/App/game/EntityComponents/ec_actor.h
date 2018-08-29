@@ -138,46 +138,6 @@ inline void ApplyActorMotorInput(
             info.yawDegrees = motor->state.input.degrees.y;
             info.pitchDegrees = motor->state.input.degrees.x;
             SV_FireAttack(gs, &info);
-            #if 0
-            SV_SpawnTestBullet(
-                gs,
-                motor->header.entId,
-                t->pos.x,
-                t->pos.y,
-                t->pos.z,
-                motor->state.input.degrees.x,
-                motor->state.input.degrees.y
-            );
-            #if 1
-            f32 spread = 2;
-            f32 pitchOffset;
-            f32 yawOffset;
-            pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
-            yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            SV_SpawnTestBullet(
-                gs,
-                motor->header.entId,
-                t->pos.x,
-                t->pos.y,
-                t->pos.z,
-                motor->state.input.degrees.x + pitchOffset,
-                motor->state.input.degrees.y + yawOffset
-            );
- 
-            pitchOffset = COM_Randf32() * (spread - -spread) + -spread;
-            yawOffset = COM_Randf32() * (spread - -spread) + -spread;
-            SV_SpawnTestBullet(
-                gs,
-                motor->header.entId,
-                t->pos.x,
-                t->pos.y,
-                t->pos.z,
-                motor->state.input.degrees.x + pitchOffset,
-                motor->state.input.degrees.y + yawOffset
-            );
-            #endif
-            //printf("GAME Spawn bullet pitch %.1f, yaw %.1f\n", motor->input.degrees.x, motor->input.degrees.y);
-            #endif
         }
     }
     else

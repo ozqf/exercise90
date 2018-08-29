@@ -236,12 +236,24 @@ struct RenderListItem
 #define VIEW_MODEL_MODE_EULER 0
 #define VIEW_MODEL_MODE_DIRECT 1
 
+#define RENDERER_MAX_LIGHTS 8
+
+struct SimpleLight
+{
+	i32 state;				// if 0, ignore
+	f32 rgba[4];
+	Vec3 worldPosition;
+	i32 intensity;
+};
+
 struct RenderSceneSettings
 {
     i32 projectionMode = 0;
     f32 orthographicHalfHeight = 8;
     i32 fov = 90;
     i32 viewModelMode = 0;
+    u8 lightBits;
+	SimpleLight lights[RENDERER_MAX_LIGHTS];
 };
 
 // Scene container for render call each frame

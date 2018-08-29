@@ -123,6 +123,9 @@ internal void Game_BuildTestScene(GameState* gs)
     options.pos = { 20, 0, -20 };
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
     #endif
+
+    EntitySpawnOptions options = {};
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
 }
 
 internal void Game_BuildTestHud()

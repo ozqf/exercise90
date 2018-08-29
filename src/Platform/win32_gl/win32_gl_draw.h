@@ -13,6 +13,46 @@ void R_SetupTestTexture(i32 textureIndex)
 
 }
 
+inline void R_SetupLights(RenderSceneSettings* settings, Transform* model)
+{
+	GLfloat pos[4];
+	GLfloat intensity[4];
+	SimpleLight* light;
+	u8 bits = settings->lightBits;
+	if (bits & (1 << 0))
+	{
+		glEnable(GL_LIGHT0);		
+		light = &settings->lights[0];
+
+		intensity[0] = 1;
+		intensity[1] = 1;
+		intensity[2] = 1;
+		intensity[3] = 1;
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, intensity);
+
+		intensity[0] = 0.2f;
+		intensity[1] = 0.2f;
+		intensity[2] = 0.2f;
+		intensity[3] = 1;
+		glLightfv(GL_LIGHT0, GL_AMBIENT, intensity);
+		//pos[0] = light->worldPosition.x - model->pos.x;
+		//pos[1] = light->worldPosition.y - model->pos.y;
+		//pos[2] = light->worldPosition.z - model->pos.z;
+		//pos[0] = model->pos.x - light->worldPosition.x;
+		//pos[1] = model->pos.y - light->worldPosition.y;
+		//pos[2] = model->pos.z - light->worldPosition.z;
+		//pos[0] = light->worldPosition.x;
+		//pos[1] = light->worldPosition.y;
+		//pos[2] = light->worldPosition.z;
+		//pos[0] = 3;
+		//pos[1] = 0;
+		//pos[2] = 0;
+		pos[3] = 1;
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
+		//printf("Light pos %.2f, %.2f, %.2f, %.2f\n", pos[0], pos[1], pos[2], pos[3]);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////
 // Draw Quad
 ////////////////////////////////////////////////////////////////////
@@ -376,6 +416,10 @@ void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* o
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(meshRend->r, meshRend->g, meshRend->b);
 	R_SetModelViewMatrix(settings, camera, objTransform);
+	if (settings->lightBits != 0)
+	{
+		R_SetupLights(settings, objTransform);
+	}
 	R_SetupTestTexture(meshRend->textureIndex);
 	
 	//f32* meshVerts = mesh->verts;
@@ -389,6 +433,10 @@ void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* o
 
 void R_RenderEntity(RenderSceneSettings* settings, Transform* camera, RenderListItem* item)
 {
+	// if (settings->lightBits != 0)
+	// {
+	// 	R_SetupLights(settings, &item->transform);
+	// }
 	switch(item->obj.type)
 	{
 		case RENDOBJ_TYPE_MESH:
@@ -431,6 +479,14 @@ void R_RenderEntity(RenderSceneSettings* settings, Transform* camera, RenderList
 void R_RenderScene(RenderScene* scene)
 {
 	R_SetupProjection(scene);
+	if (scene->settings.lightBits == 0)
+	{
+		glDisable(GL_LIGHTING);
+	}
+	else
+	{
+		glEnable(GL_LIGHTING);
+	}
 	//R_SetupOrthoProjection(8);
     for (u32 i = 0; i < scene->numObjects; ++i)
     {

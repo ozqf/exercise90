@@ -171,6 +171,15 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
         COL_MASK_ACTOR
     );
 
+    #if 1
+    state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_BASE], 1, 0, 0);
+    state->multiRendState.GetBaseRendObj()->heightOffset = -0.5f;
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 1, 1, 1);
+    state->multiRendState.GetHeadRendObj()->heightOffset = 0.5f;
+    //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
+    #endif
+
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
     state->actorState.runSpeed = 12;
     state->actorState.runAcceleration = 100;
