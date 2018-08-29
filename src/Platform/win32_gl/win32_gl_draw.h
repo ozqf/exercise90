@@ -21,7 +21,7 @@ inline void R_SetupLights(RenderSceneSettings* settings, Transform* model)
 	u8 bits = settings->lightBits;
 	if (bits & (1 << 0))
 	{
-		glEnable(GL_LIGHT0);		
+		glEnable(GL_LIGHT0);
 		light = &settings->lights[0];
 
 		intensity[0] = 1;
@@ -30,11 +30,13 @@ inline void R_SetupLights(RenderSceneSettings* settings, Transform* model)
 		intensity[3] = 1;
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, intensity);
 
+		#if 0
 		intensity[0] = 0.2f;
 		intensity[1] = 0.2f;
 		intensity[2] = 0.2f;
 		intensity[3] = 1;
 		glLightfv(GL_LIGHT0, GL_AMBIENT, intensity);
+		#endif
 		//pos[0] = light->worldPosition.x - model->pos.x;
 		//pos[1] = light->worldPosition.y - model->pos.y;
 		//pos[2] = light->worldPosition.z - model->pos.z;
@@ -44,10 +46,13 @@ inline void R_SetupLights(RenderSceneSettings* settings, Transform* model)
 		//pos[0] = light->worldPosition.x;
 		//pos[1] = light->worldPosition.y;
 		//pos[2] = light->worldPosition.z;
-		//pos[0] = 3;
-		//pos[1] = 0;
-		//pos[2] = 0;
-		pos[3] = 1;
+		//pos[0] = 0 - model->pos.x;
+		//pos[1] = 0 - model->pos.y;
+		//pos[2] = 0 - model->pos.z;
+		pos[0] = 1;
+		pos[1] = 0;
+		pos[2] = 0;
+		pos[3] = 0;
 		glLightfv(GL_LIGHT0, GL_POSITION, pos);
 		//printf("Light pos %.2f, %.2f, %.2f, %.2f\n", pos[0], pos[1], pos[2], pos[3]);
 	}
@@ -416,10 +421,7 @@ void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* o
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(meshRend->r, meshRend->g, meshRend->b);
 	R_SetModelViewMatrix(settings, camera, objTransform);
-	if (settings->lightBits != 0)
-	{
-		R_SetupLights(settings, objTransform);
-	}
+	
 	R_SetupTestTexture(meshRend->textureIndex);
 	
 	//f32* meshVerts = mesh->verts;

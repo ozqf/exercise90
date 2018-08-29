@@ -205,6 +205,7 @@ struct ZStringHeader
 struct GameTime
 {
     f32 deltaTime;
+    f32 sessionEllapsed;
     u32 platformFrameNumber;
 	u32 gameFrameNumber;
     /*u32 fixedFrameNumber;

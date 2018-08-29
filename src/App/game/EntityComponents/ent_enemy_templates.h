@@ -28,7 +28,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     Transform_SetToIdentity(&state->transform);
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
-    state->aiState.ticker.tickMax = 0.033f;
+    //state->aiState.ticker.tickMax = 0.033f;
     state->aiState.minApproachDistance = 5.0f;
     
     //state->componentBits |= EC_FLAG_RENDERER;

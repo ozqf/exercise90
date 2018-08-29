@@ -158,5 +158,5 @@ internal void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     ent->tag = entState->tag;
     ent->source = entState->source;
     ent->factoryType = entState->factoryType;
-    ent->componentFlags = entState->componentFlags;
+    ent->componentBits = entState->componentBits;
 }

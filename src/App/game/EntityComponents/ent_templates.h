@@ -183,8 +183,8 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
     state->actorState.runSpeed = 12;
     state->actorState.runAcceleration = 100;
-    state->actorState.attackType = 1;
-    state->actorState.ticker.tickMax = 0.05f;
+    state->actorState.attackType = 3;
+    state->actorState.ticker.tickMax = 0.25f;
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.hp = 100;
@@ -223,7 +223,7 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     state->projectileState.speed = 150;
     f32 timeToLive = 0.5f;
     i32 tocks = 1;
-    state->projectileState.ticker = { timeToLive, timeToLive, tocks, tocks };
+    state->projectileState.ticker = { timeToLive, timeToLive };
 
     state->projectileState.move.x = options->vel.x;
     state->projectileState.move.y = options->vel.y;

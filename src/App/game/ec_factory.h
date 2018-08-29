@@ -55,17 +55,17 @@ internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 	
 	// TODO: Replace raw struct copy with proper encoding functions!
     // WARNING: THIS IS ORDER DEPENDENT!
-    if (h.componentBits & EC_FLAG_ENTITY) { stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
-    if (h.componentBits & EC_FLAG_TRANSFORM) { stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
-    if (h.componentBits & EC_FLAG_RENDERER) { stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendObjState); }
-    if (h.componentBits & EC_FLAG_COLLIDER) { stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
-    if (h.componentBits & EC_FLAG_AICONTROLLER) { stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
-    if (h.componentBits & EC_FLAG_ACTORMOTOR) { stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
-    if (h.componentBits & EC_FLAG_HEALTH) { stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
-    if (h.componentBits & EC_FLAG_PROJECTILE) { stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
-    if (h.componentBits & EC_FLAG_LABEL) { stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
-    if (h.componentBits & EC_FLAG_THINKER) { stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
-    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ) { stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
+    if (h.componentBits & EC_FLAG_ENTITY) 			{ stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
+    if (h.componentBits & EC_FLAG_TRANSFORM) 		{ stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
+    if (h.componentBits & EC_FLAG_RENDERER) 		{ stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendObjState); }
+    if (h.componentBits & EC_FLAG_COLLIDER) 		{ stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
+    if (h.componentBits & EC_FLAG_AICONTROLLER) 	{ stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
+    if (h.componentBits & EC_FLAG_ACTORMOTOR) 		{ stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
+    if (h.componentBits & EC_FLAG_HEALTH) 			{ stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
+    if (h.componentBits & EC_FLAG_PROJECTILE) 		{ stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
+    if (h.componentBits & EC_FLAG_LABEL) 			{ stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
+    if (h.componentBits & EC_FLAG_THINKER) 			{ stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
+    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)	{ stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
 
     u32 read = (stream - origin);
     if (read != numBytes)
@@ -84,7 +84,8 @@ internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
  */
 internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
 {
-    const u32 bufferSize = 1024;
+	// bumping this up 
+    const u32 bufferSize = (sizeof(EntityState) * 2);
     u8 buffer[bufferSize];
     u8* origin = buffer;
     u8* stream = origin;
@@ -146,7 +147,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
 internal void Ent_PrintComponents(Ent* ent)
 {
 	printf("ENT %d/%d components\n", ent->entId.iteration, ent->entId.index);
-	COM_PrintBits(ent->componentFlags, 1);
+	COM_PrintBits(ent->componentBits, 1);
 	if (Ent_HasTransform(ent))
 	{
 		printf("  Has Transform\n");
@@ -171,6 +172,10 @@ internal void Ent_PrintComponents(Ent* ent)
 	{
 		printf("  Has Projectile\n");
 	}
+	if (Ent_HasMultiRendObj(ent))
+	{
+		printf("  Has Multi-Renderer\n");
+	}
 }
 
 /**
@@ -184,14 +189,14 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
 	}
     *state = {};
     state->entId = ent->entId;
-    state->componentBits = ent->componentFlags;
+    state->componentBits = ent->componentBits;
     EC_ApplyEntityMetaData(gs, &state->entMetaData, ent);
     //state->entMetaData = *ent;
 
     EC_Transform* ecT = EC_FindTransform(gs, ent);
 
 	if (ecT) { state->transform = ecT->t; }
-    if (ent->componentFlags & EC_FLAG_RENDERER)
+    if (ent->componentBits & EC_FLAG_RENDERER)
     {
         EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
         state->renderState = r->state;
@@ -209,11 +214,11 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
         }
         state->colliderState = (EC_FindCollider(gs, ent))->state;
     }
-    if (ent->componentFlags & EC_FLAG_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
-	if (ent->componentFlags & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
-    if (ent->componentFlags & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
-    if (ent->componentFlags & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
-    if (ent->componentFlags & EC_FLAG_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
+	if (ent->componentBits & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
 }
 
 internal u8 Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)

@@ -63,6 +63,8 @@ GLuint g_vboHandles[NUM_TEST_VERTEX_BUFFER_OBJECTS];
 //////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////
+void R_SetupLights(RenderSceneSettings* settings, Transform* model);
+
 #include "win32_gl_loading.h"
 #include "win32_gl_primitives.h"
 #include "win32_gl_text.h"

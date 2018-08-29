@@ -52,6 +52,33 @@ inline void SV_FireAttack_01(GameState* gs, AttackInfo* info)
         state.renderState.colourRGB[2] = 1;
         Ent_WriteEntityStateCmd(NULL, &state);
     }
+    
+}
+
+inline void SV_FireAttack_03(GameState* gs, AttackInfo* info)
+{
+    EntitySpawnOptions options = {};
+    
+    EntityState state;
+    Ent_SetProjectileSpawnOptions(
+        &options,
+        info->source,
+        info->origin,
+        info->yawDegrees,
+        info->pitchDegrees,
+        150
+    );
+    if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    {
+        state.renderState.colourRGB[0] = 0.3f;
+        state.renderState.colourRGB[1] = 0.3f;
+        state.renderState.colourRGB[2] = 1;
+        Ent_WriteEntityStateCmd(NULL, &state);
+    }
+    for (i32 i = 0; i < 22; ++i)
+    {
+        f32 = randOffset = Game_RandomSpawnOffset();
+    }
     #if 0
     Ent_SetProjectileSpawnOptions(
         &options,

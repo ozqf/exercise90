@@ -94,7 +94,7 @@ struct Ent
 
     // 'type' information
     i32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
-    u32 componentFlags;     // What components this Entity has
+    u32 componentBits;     // What components this Entity has
     u8 inUse;               // if 0 this entity is free to be recycled
     u8 priority;            // This entity's base update importance gained per frame
 };
@@ -143,8 +143,8 @@ struct Ticker
 {
     f32 tick;
     f32 tickMax;
-    i32 tock;
-    i32 tockMax;
+    //i32 tock;
+    //i32 tockMax;
 };
 
 // Max of 32 components per entity
@@ -279,8 +279,10 @@ struct EC_AIState
     Vec3 dir;
     f32 speed;
     f32 minApproachDistance;
-
-    Ticker ticker;
+    i32 attackIndex;
+    //Ticker ticker;
+    f32 nextMoveCalc;
+    f32 nextThink;
 };
 
 // A quick test component

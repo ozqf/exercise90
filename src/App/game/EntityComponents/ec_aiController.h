@@ -11,6 +11,8 @@
 
 struct AITargetInfo
 {
+    Vec3 selfPos;
+    Vec3 targetPos;
     f32 dx, dy, dz;
     f32 pitchRadians, yawRadians;
     f32 flatMagnitude;
@@ -29,17 +31,25 @@ inline u8 AI_AcquireAndValidateTarget(GameState *gs, EntId* id)
     ent = Ent_GetEntityById(gs, id);
 	if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
+    if ((ent->componentBits & EC_FLAG_TRANSFORM) == 0) { return 0; }
     return 1;
 }
 
-inline void AI_CalcTargetInfo(Transform* self, Transform* target, AITargetInfo* info)
+inline void AI_BuildThinkInfo(GameState* gs, EC_AIController* ai, AITargetInfo* info)
 {
-    
+    EC_Transform* selfTrans = EC_FindTransform(gs, &ai->header.entId);
+    EC_Transform* targetTrans = EC_FindTransform(gs, &ai->state.target);
+    Assert(selfTrans);
+    Assert(targetTrans);
+
+    info->selfPos = selfTrans->t.pos;
+    info->targetPos = targetTrans->t.pos;
+
     ////////////////////////////////////
     // flat plane angle
-    info->dx = self->pos.x - target->pos.x;
-    info->dy = self->pos.y - target->pos.y;
-    info->dz = self->pos.z - target->pos.z;
+    info->dx = info->selfPos.x - info->targetPos.x;
+    info->dy = info->selfPos.y - info->targetPos.y;
+    info->dz = info->selfPos.z - info->targetPos.z;
     info->flatMagnitude = Vec3_Magnitudef(info->dx, 0, info->dz);
     info->yawRadians = atan2f(info->dx, info->dz);            
     ////////////////////////////////////
@@ -54,11 +64,17 @@ inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
     motor->state.input.buttons = 0;
 }
 
-inline void AI_Stun(GameState* gs, EC_AIController* ai)
+inline void AI_Reset(GameState* gs, EC_AIController* ai)
 {
     AI_ClearInput(gs, ai);
-    ai->state.state = 2;
-    ai->state.ticker.tick = 0.5f;
+    ai->state.state = AI_STATE_NULL;
+}
+
+inline void AI_Stun(GameState* gs, EC_AIController* ai, GameTime* time)
+{
+    AI_ClearInput(gs, ai);
+    ai->state.state = AI_STATE_STUNNED;
+
 }
 
 inline void AI_ApplyLookAngles(EC_ActorMotor* m, f32 yawRadians, f32 pitchRadians)
@@ -67,10 +83,83 @@ inline void AI_ApplyLookAngles(EC_ActorMotor* m, f32 yawRadians, f32 pitchRadian
     m->state.input.degrees.x = -(pitchRadians * RAD2DEG);
 }
 
-void AI_Tock(GameState* gs, EC_AIController* ai)
+inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
+{
+    //printf("AI Think %d\n", ai->state.state);
+    switch (ai->state.state)
+    {
+        case AI_STATE_NULL:
+        {
+            if (AI_AcquireAndValidateTarget(gs, &ai->state.target))
+            {
+                ai->state.state = AI_STATE_TRACKING;
+            }
+            else if (ai->state.target.value != 0)
+            {
+                ai->state.target.value = 0;
+                AI_ClearInput(gs, ai);
+            }
+        } break;
+
+        case AI_STATE_TRACKING:
+        {
+            EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
+            if (col != NULL && col->isGrounded == 0) { return; }
+
+            AITargetInfo info = {};
+            AI_BuildThinkInfo(gs, ai, &info);
+            if (info.flatMagnitude < 20)
+            {
+                ai->state.state = AI_STATE_ATTACKING;
+
+                EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+                motor->state.input.buttons = 0;
+                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+                ai->state.nextThink = time->sessionEllapsed + 1.0f;
+            }
+        } break;
+        
+        // case AI_STATE_BEGIN_ATTACK:
+        // {
+        //     EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+        //     motor->state.input.buttons = 0;
+        //     ai->state.state = AI_STATE_ATTACKING;
+            
+        // } break;
+        
+        case AI_STATE_ATTACKING:
+        {
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            EC_Transform* selfTrans = EC_FindTransform(gs, &EC_GET_ID(ai));
+            Assert(motor);
+            Assert(selfTrans);
+
+            AttackInfo info = {};
+            info.type = 2;//ai->state.attackIndex;
+            info.origin = selfTrans->t.pos;
+            info.source = EC_GET_ID(ai);
+            info.yawDegrees = motor->state.input.degrees.y;
+            info.pitchDegrees = motor->state.input.degrees.x;
+            SV_FireAttack(gs, &info);
+            ai->state.state = AI_STATE_TRACKING;
+            ai->state.nextThink = time->sessionEllapsed + 2.5f;
+        } break;
+        
+        case AI_STATE_STUNNED:
+        {
+            ai->state.state = AI_STATE_NULL;
+        } break;
+    }
+}
+
+inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
 {
     //printf("AI tock. State: %d\n", ai->state.state);
-    #if 0
+    if (ai->state.nextThink <= time->sessionEllapsed)
+    {
+        AI_Think(gs, ai, time);
+    }
+    #if 1
     switch (ai->state.state)
     {
         case AI_STATE_TRACKING:
@@ -80,34 +169,11 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
                 AI_ClearInput(gs, ai);
                 return;
             }
-            EC_Transform* selfTrans = EC_FindTransform(gs, &ai->header.entId);
-            EC_Transform* targetTrans = EC_FindTransform(gs, &ai->state.target);
-            if (targetTrans == NULL)
-            {
-                AI_ClearInput(gs, ai);
-                return;
-            }
-
             EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
             if (col != NULL && col->isGrounded == 0) { return; }
 
             AITargetInfo info = {};
-            AI_CalcTargetInfo(&selfTrans->t, &targetTrans->t, &info);
-            #if 0
-            ////////////////////////////////////
-            // flat plane angle
-            f32 dx = selfTrans->t.pos.x - targetTrans->t.pos.x;
-            f32 dz = selfTrans->t.pos.z - targetTrans->t.pos.z;
-
-            f32 flatMagnitude = Vec3_Magnitudef(dx, 0, dz);
-
-            f32 yawRadians = atan2f(dx, dz);
-            
-            ////////////////////////////////////
-            // Pitch, look up/down angle
-            f32 dy = selfTrans->t.pos.y - targetTrans->t.pos.y;
-            f32 pitchRadians = atan2f(dy, flatMagnitude);
-            #endif
+            AI_BuildThinkInfo(gs, ai, &info);
             ////////////////////////////////////
             // Apply inputs and angles to motor
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
@@ -121,52 +187,20 @@ void AI_Tock(GameState* gs, EC_AIController* ai)
             {
                 motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             }
-            motor->state.input.buttons |= ACTOR_INPUT_ATTACK;
-            
             AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
         } break;
 
-        case AI_STATE_STUNNED:
-        {
-            ai->state.state = AI_STATE_NULL;
-        } break;
-
-        case AI_STATE_BEGIN_ATTACK:
-        {
-            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            motor->state.input.buttons = 0;
-        } break;
-
-        case AI_STATE_ATTACKING:
-        {
-            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            motor->state.input.buttons = 1;
-        } break;
-        
         case AI_STATE_FINISH_ATTACK:
         {
             ai->state.state = AI_STATE_TRACKING;
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
             motor->state.input.buttons = 0;
         } break;
-
-        default:
-        {
-            if (AI_AcquireAndValidateTarget(gs, &ai->state.target))
-            {
-                ai->state.state = AI_STATE_TRACKING;
-            }
-            else if (ai->state.target.value != 0)
-            {
-                ai->state.target.value = 0;
-                AI_ClearInput(gs, ai);
-            }
-        } break;
     }
     #endif
 }
 
-void Game_UpdateAIControllers(GameState *gs, GameTime *time)
+static void Game_UpdateAIControllers(GameState *gs, GameTime *time)
 {
     u32 max = gs->aiControllerList.max;
     for (u32 i = 0; i < max; ++i)
@@ -177,14 +211,22 @@ void Game_UpdateAIControllers(GameState *gs, GameTime *time)
             continue;
         }
         EC_AIState *s = &ai->state;
-        if (s->ticker.tick < 0)
-        {
-            s->ticker.tick = s->ticker.tickMax;
-            AI_Tock(gs, ai);
-        }
-        else
-        {
-            s->ticker.tick -= time->deltaTime;
-        }
+        //printf("Session ellapsed: %.2f vs next think %.2f\n", time->sessionEllapsed, ai->state.nextThink);
+        AI_Tick(gs, ai, time);
+        // if (time->sessionEllapsed >= ai->state.nextThink)
+        // {
+        //     ai->state.nextThink = time->sessionEllapsed + 0.f;
+        //     AI_Tock(gs, ai);
+        // }
+
+        //if (s->ticker.tick < 0)
+        //{
+        //    s->ticker.tick = s->ticker.tickMax;
+        //    AI_Tock(gs, ai);
+        //}
+        //else
+        //{
+        //    s->ticker.tick -= time->deltaTime;
+        //}
     }
 }

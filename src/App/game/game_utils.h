@@ -2,6 +2,11 @@
 
 #include "game.h"
 
+inline f32 Game_RandomInRange(f32 range)
+{
+    return COM_Randf32() * (range - -range) + -range;
+}
+
 inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 {
     Vec3 v;

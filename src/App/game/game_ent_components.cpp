@@ -132,7 +132,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                         EC_AIController* ai = EC_FindAIController(gs, &targetEnt->entId);
                         if (ai != NULL)
                         {
-                            AI_Stun(gs, ai);
+                            AI_Stun(gs, ai, time);
                         }
                         //Prj_PushRigidBody(col);
                     }

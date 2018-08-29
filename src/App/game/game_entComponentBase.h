@@ -45,14 +45,14 @@ static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
             comp->header.inUse = 1; \
             comp->header.entId.index = ent->entId.index; \
             comp->header.entId.iteration = ent->entId.iteration; \
-            ent->componentFlags |= typeFlagDefine; \
+            ent->componentBits |= typeFlagDefine; \
             return comp; \
         } \
     } \
     return NULL; \
 }; \
 \
-static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentFlags & typeFlagDefine); } \
+static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
 \
 static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
 { \
@@ -87,7 +87,7 @@ static inline void EC_Remove##type##(GameState* gs, Ent* ent) \
 { \
     EC_##type* comp = EC_Find##type##(gs, ent); \
     if (comp == 0) { return; } \
-    ent->componentFlags &= ~typeFlagDefine; \
+    ent->componentBits &= ~typeFlagDefine; \
     comp->header.inUse = 0; \
 }; \
 \

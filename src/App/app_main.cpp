@@ -287,6 +287,8 @@ void App_UpdateGameState(GameTime* time)
               &g_inputActions);
 
     g_appReadBuffer->ptrEnd = g_appReadBuffer->ptrWrite;
+
+    time->sessionEllapsed += time->deltaTime;
 }
 
 
@@ -332,7 +334,8 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
 
     Game_IntersectionTest(gs, &g_worldScene);
 
-    g_worldScene.settings.lightBits |= (1 << 0);
+    // Set lights and render
+    //g_worldScene.settings.lightBits |= (1 << 0);
     platform.Platform_RenderScene(&g_worldScene);
 
     Client* cl = App_FindLocalClient(&gs->clientList);

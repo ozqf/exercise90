@@ -98,8 +98,16 @@ void R_SetupProjection(RenderScene* scene)
 ////////////////////////////////////////////////////////////////////
 
 // DO NOT CHANGE - This actually works!
-void R_SetViewModelMatrixByEuler(Transform* view, Transform* model)
+void R_SetViewModelMatrixByEuler(RenderSceneSettings* settings, Transform* view, Transform* model)
 {
+	
+	#if 0
+	if (settings->lightBits != 0)
+	{
+		R_SetupLights(settings, model);
+	}
+	#endif
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
@@ -111,6 +119,13 @@ void R_SetViewModelMatrixByEuler(Transform* view, Transform* model)
 	glRotatef(-camRot.y, 0, 1, 0);
 	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
 
+	#if 0
+	if (settings->lightBits != 0)
+	{
+		R_SetupLights(settings, model);
+	}
+	#endif
+
 	// *slightly* improvement on horrible jitter from physics transforms.
 	// Yeah... also breaks projectile rotations so no ta.
 	//wd(model->rotation.cells, 0.0001f);
@@ -121,6 +136,28 @@ void R_SetViewModelMatrixByEuler(Transform* view, Transform* model)
 	glRotatef(modelRot.x, 1, 0, 0);
 	glRotatef(modelRot.z, 0, 0, 1);
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
+
+	glPushMatrix();
+	glLoadIdentity();
+	#if 1
+	glRotatef(-camRot.z, 0, 0, 1);
+	glRotatef(-camRot.x, 1, 0, 0);
+	glRotatef(-camRot.y, 0, 1, 0);
+	glTranslatef(-camPos.x, -camPos.y, -camPos.z);
+	#endif
+	#if 1
+	glTranslatef(model->pos.x, model->pos.y, model->pos.z);
+	glRotatef(modelRot.y, 0, 1, 0);
+	glRotatef(modelRot.x, 1, 0, 0);
+	glRotatef(modelRot.z, 0, 0, 1);
+	#endif
+	#if 0
+	if (settings->lightBits != 0)
+	{
+		R_SetupLights(settings, model);
+	}
+	#endif
+	glPopMatrix();
 }
 
 // BROKEN
@@ -244,7 +281,7 @@ void R_SetModelViewMatrix(RenderSceneSettings* settings, Transform *view, Transf
 	else
 	{
 		//R_SetViewModelMatrixDirect(view, model);
-		R_SetViewModelMatrixByEuler(view, model);
+		R_SetViewModelMatrixByEuler(settings, view, model);
 	}
 	
 	// TODO: Figure out how to construct ViewModel matrix entirely from
