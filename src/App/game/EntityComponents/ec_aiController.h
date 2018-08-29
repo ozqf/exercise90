@@ -59,7 +59,6 @@ inline void AI_BuildThinkInfo(GameState* gs, EC_AIController* ai, AITargetInfo* 
 
 inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
 {
-    ai->state.state = 0;
     EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
     motor->state.input.buttons = 0;
 }
@@ -93,20 +92,27 @@ inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             if (AI_AcquireAndValidateTarget(gs, &ai->state.target))
             {
                 ai->state.state = AI_STATE_TRACKING;
+                //printf("Acquired target. State: %d\n", ai->state.state);
             }
             else if (ai->state.target.value != 0)
             {
                 ai->state.target.value = 0;
-                AI_ClearInput(gs, ai);
+                AI_Reset(gs, ai);
             }
         } break;
 
         case AI_STATE_TRACKING:
         {
+			AITargetInfo info = {};
+			if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
+			{
+				AI_Reset(gs, ai);
+				return;
+			}
+
             EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
             if (col != NULL && col->isGrounded == 0) { return; }
 
-            AITargetInfo info = {};
             AI_BuildThinkInfo(gs, ai, &info);
             if (info.flatMagnitude < 20)
             {
@@ -115,7 +121,7 @@ inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
                 EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
                 motor->state.input.buttons = 0;
                 AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
-                ai->state.nextThink = time->sessionEllapsed + 1.0f;
+                ai->state.nextThink = time->sessionEllapsed + 0.3f;
             }
         } break;
         
@@ -142,13 +148,15 @@ inline void AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             info.pitchDegrees = motor->state.input.degrees.x;
             SV_FireAttack(gs, &info);
             ai->state.state = AI_STATE_TRACKING;
-            ai->state.nextThink = time->sessionEllapsed + 2.5f;
+            ai->state.nextThink = time->sessionEllapsed + 1.0f;
         } break;
         
         case AI_STATE_STUNNED:
         {
             ai->state.state = AI_STATE_NULL;
         } break;
+
+
     }
 }
 
@@ -166,7 +174,8 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
         {
             if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
             {
-                AI_ClearInput(gs, ai);
+                printf("AI Failed to validate target\n");
+                AI_Reset(gs, ai);
                 return;
             }
             EC_Collider* col = EC_FindCollider(gs, &EC_GET_ID(ai));
@@ -211,22 +220,6 @@ static void Game_UpdateAIControllers(GameState *gs, GameTime *time)
             continue;
         }
         EC_AIState *s = &ai->state;
-        //printf("Session ellapsed: %.2f vs next think %.2f\n", time->sessionEllapsed, ai->state.nextThink);
         AI_Tick(gs, ai, time);
-        // if (time->sessionEllapsed >= ai->state.nextThink)
-        // {
-        //     ai->state.nextThink = time->sessionEllapsed + 0.f;
-        //     AI_Tock(gs, ai);
-        // }
-
-        //if (s->ticker.tick < 0)
-        //{
-        //    s->ticker.tick = s->ticker.tickMax;
-        //    AI_Tock(gs, ai);
-        //}
-        //else
-        //{
-        //    s->ticker.tick -= time->deltaTime;
-        //}
     }
 }

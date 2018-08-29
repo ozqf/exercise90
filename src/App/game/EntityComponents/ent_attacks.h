@@ -3,39 +3,38 @@
 #include "../game.h"
 
 void SV_SpawnTestBullet(
-    GameState* gs,
+    GameState *gs,
     EntId source,
     f32 x,
     f32 y,
     f32 z,
     f32 pitchDegrees,
     f32 yawDegrees,
-    f32 speed
-    )
+    f32 speed)
 {
     EntitySpawnOptions options = {};
     options.pos.x = x;
     options.pos.y = y;
     options.pos.z = z;
     options.source = source;
-    
+
     options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
-    
+
     //Game_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
     static EntityState state;
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
-		state.renderState.colourRGB[0] = 1;
-		state.renderState.colourRGB[1] = 0;
-		state.renderState.colourRGB[2] = 1;
+        state.renderState.colourRGB[0] = 1;
+        state.renderState.colourRGB[1] = 0;
+        state.renderState.colourRGB[2] = 1;
         Ent_WriteEntityStateCmd(NULL, &state);
     }
 }
 
-inline void SV_FireAttack_01(GameState* gs, AttackInfo* info)
+inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
-    
+
     EntityState state;
     Ent_SetProjectileSpawnOptions(
         &options,
@@ -43,8 +42,7 @@ inline void SV_FireAttack_01(GameState* gs, AttackInfo* info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        150
-    );
+        150);
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
@@ -52,13 +50,12 @@ inline void SV_FireAttack_01(GameState* gs, AttackInfo* info)
         state.renderState.colourRGB[2] = 1;
         Ent_WriteEntityStateCmd(NULL, &state);
     }
-    
 }
 
-inline void SV_FireAttack_03(GameState* gs, AttackInfo* info)
+inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
-    
+
     EntityState state;
     Ent_SetProjectileSpawnOptions(
         &options,
@@ -66,8 +63,7 @@ inline void SV_FireAttack_03(GameState* gs, AttackInfo* info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        150
-    );
+        150);
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
@@ -77,77 +73,27 @@ inline void SV_FireAttack_03(GameState* gs, AttackInfo* info)
     }
     for (i32 i = 0; i < 22; ++i)
     {
-        f32 = randOffset = Game_RandomSpawnOffset();
-    }
-    #if 0
-    Ent_SetProjectileSpawnOptions(
-        &options,
-        info->source,
-        info->origin,
-        info->yawDegrees - 5,
-        info->pitchDegrees,
-        150
-    );
-    if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
-    {
-        state.renderState.colourRGB[0] = 0.3f;
-        state.renderState.colourRGB[1] = 0.3f;
-        state.renderState.colourRGB[2] = 1;
-        Ent_WriteEntityStateCmd(NULL, &state);
-    }
+        f32 randOffsetX = Game_RandomInRange(7);
+        f32 randOffsetY = Game_RandomInRange(3);
 
-    Ent_SetProjectileSpawnOptions(
-        &options,
-        info->source,
-        info->origin,
-        info->yawDegrees + 5,
-        info->pitchDegrees,
-        150
-    );
-    if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
-    {
-        state.renderState.colourRGB[0] = 0.3f;
-        state.renderState.colourRGB[1] = 0.3f;
-        state.renderState.colourRGB[2] = 1;
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_SetProjectileSpawnOptions(
+            &options,
+            info->source,
+            info->origin,
+            info->yawDegrees + randOffsetX,
+            info->pitchDegrees + randOffsetY,
+            150);
+        if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+        {
+            state.renderState.colourRGB[0] = 0.3f;
+            state.renderState.colourRGB[1] = 0.3f;
+            state.renderState.colourRGB[2] = 1;
+            Ent_WriteEntityStateCmd(NULL, &state);
+        }
     }
-    #endif
-
-    #if 0
-    SV_SpawnTestBullet(
-        gs,
-        info->source,
-        info->origin.x,
-        info->origin.y,
-        info->origin.z,
-        info->pitchDegrees,
-        info->yawDegrees,
-        150
-    );
-    SV_SpawnTestBullet(
-        gs,
-        info->source,
-        info->origin.x,
-        info->origin.y,
-        info->origin.z,
-        info->pitchDegrees,
-        info->yawDegrees - 5,
-        150
-    );
-    SV_SpawnTestBullet(
-        gs,
-        info->source,
-        info->origin.x,
-        info->origin.y,
-        info->origin.z,
-        info->pitchDegrees,
-        info->yawDegrees + 5,
-        150
-    );
-    #endif
 }
 
-inline void SV_FireAttack_02(GameState* gs, AttackInfo* info)
+inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
     EntityState state;
@@ -157,8 +103,7 @@ inline void SV_FireAttack_02(GameState* gs, AttackInfo* info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        25
-    );
+        17);
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
         state.projectileState.ticker.tickMax = 2.0f;
@@ -170,33 +115,29 @@ inline void SV_FireAttack_02(GameState* gs, AttackInfo* info)
     }
 }
 
-void SV_FireAttack(GameState* gs, AttackInfo* info)
+void SV_FireAttack(GameState *gs, AttackInfo *info)
 {
-    switch(info->type)
+    switch (info->type)
     {
         case 1:
         {
             SV_FireAttack_01(gs, info);
-        } break;
+        }
+        break;
 
         case 2:
         {
-            #if 1
             SV_FireAttack_02(gs, info);
-            #endif
+        } break;
 
-            #if 0
-            SV_SpawnTestBullet(
-                gs,
-                info->source,
-                info->origin.x,
-                info->origin.y,
-                info->origin.z,
-                info->pitchDegrees,
-                info->yawDegrees,
-                25
-            );
-            #endif
+        case 3:
+        {
+            SV_FireAttack_03(gs, info);
+        } break;
+
+        default:
+        {
+            printf("GAME: Unknown attack %d\n", info->type);
         } break;
     }
 }

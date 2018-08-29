@@ -104,17 +104,17 @@ i32 App_Init()
     //AllocateTestStrings(&g_heap);
 
     // Buffers, enlarge if necessary
-    Heap_Allocate(&g_heap, &g_appBufferA_Ref, KiloBytes(1024), "App Buffer A", 1);
+    Heap_Allocate(&g_heap, &g_appBufferA_Ref, MegaBytes(4), "App Buffer A", 1);
     g_appBufferA = Heap_RefToByteBuffer(&g_heap, &g_appBufferA_Ref);
-    Heap_Allocate(&g_heap, &g_appBufferB_Ref, KiloBytes(1024), "App Buffer B", 1);
+    Heap_Allocate(&g_heap, &g_appBufferB_Ref, MegaBytes(4), "App Buffer B", 1);
     g_appBufferB = Heap_RefToByteBuffer(&g_heap, &g_appBufferB_Ref);
 
     g_appWriteBuffer = &g_appBufferA;
     g_appReadBuffer = &g_appBufferB;
 
     // 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
-    Heap_Allocate(&g_heap, &g_collisionEventBuffer, KiloBytes(64), "Collision EV", 1);
-    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, KiloBytes(64), "Collision CMD", 1);
+    Heap_Allocate(&g_heap, &g_collisionEventBuffer, MegaBytes(4), "Collision EV", 1);
+    Heap_Allocate(&g_heap, &g_collisionCommandBuffer, MegaBytes(4), "Collision CMD", 1);
 
     SharedAssets_Init();
     Assets_InitMeshDB();

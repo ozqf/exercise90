@@ -122,6 +122,10 @@ struct EntityLink
 //   u8 inUse;
 //////////////////////////////////////////////////
 
+#define ATTACK_INDEX_NULL 0
+#define ATTACK_INDEX_FAST_PROJECTILE 1
+#define ATTACK_INDEX_SLOW_PROJECTILE 2
+#define ATTACK_INDEX_PROJECTILE_SHOTGUN 3
 
 struct AttackInfo
 {

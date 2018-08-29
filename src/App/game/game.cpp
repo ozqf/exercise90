@@ -89,17 +89,17 @@ internal void Game_BuildTestScene(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 
 
-    #if 0
+    #if 1
     EntitySpawnOptions options;
     options = {};
     options.pos = { 20, 0, -20 };
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
-    //options = {};
-    //options.pos = { 10, 0, -20 };
-    //Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
-    //options = {};
-    //options.pos = { -10, 0, -20 };
-    //Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    options = {};
+    options.pos = { 10, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    options = {};
+    options.pos = { -10, 0, -20 };
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
     options = {};
     options.pos = { -20, 0, -20 };
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
@@ -124,7 +124,8 @@ internal void Game_BuildTestScene(GameState* gs)
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
     #endif
 
-    EntitySpawnOptions options = {};
+    //EntitySpawnOptions options = {};
+    options = {};
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
 }
 
