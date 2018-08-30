@@ -27,10 +27,13 @@
 #include "test_patch_state_file.h"
 #include "utils_read_ini.h"
 #include "test_ecs2.h"
+#include "test_misc.h"
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-	Test_Tokenise();
+    //Test_WriteRandomNumberTable("random2.txt", 512, 0);
+    Test_RandomNumbers();
+	//Test_Tokenise();
 #if 0
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);

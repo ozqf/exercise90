@@ -4,6 +4,7 @@
 #include "com_types.h"
 #include "com_render_types.h"
 #include "com_bitpack.h"
+#include "com_random.h"
 #include "com_maths.h"
 #include "com_transform.h"
 #include "com_memory_utils.h"

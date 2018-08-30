@@ -35,7 +35,7 @@ static inline f32 COM_CapAngleDegrees(f32 angle)
     return angle;
 }
 
-static inline f32 COM_Randf32()
+static inline f32 COM_STDRandf32()
 {
     return (f32)rand() / (f32)RAND_MAX;
 }

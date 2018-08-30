@@ -4,15 +4,15 @@
 
 inline f32 Game_RandomInRange(f32 range)
 {
-    return COM_Randf32() * (range - -range) + -range;
+    return COM_STDRandf32() * (range - -range) + -range;
 }
 
 inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 {
     Vec3 v;
-    v.x = COM_Randf32() * (rangeX - -rangeX) + -rangeX;
-    v.y = COM_Randf32() * (rangeY - -rangeY) + -rangeY;
-    v.z = COM_Randf32() * (rangeZ - -rangeZ) + -rangeZ;
+    v.x = COM_STDRandf32() * (rangeX - -rangeX) + -rangeX;
+    v.y = COM_STDRandf32() * (rangeY - -rangeY) + -rangeY;
+    v.z = COM_STDRandf32() * (rangeZ - -rangeZ) + -rangeZ;
     return v;
 }
 
