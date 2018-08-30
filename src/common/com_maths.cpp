@@ -16,6 +16,16 @@ static inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
     return start + lerp * (end - start);
 }
 
+
+static inline float COM_LinearEase(
+    f32 currentIteration,
+    f32 startValue,
+    f32 changeInValue,
+    f32 totalIterations)
+{
+    return changeInValue * currentIteration / totalIterations + startValue;
+}
+
 static inline f32 COM_CapAngleDegrees(f32 angle)
 {
     u32 loopCount = 0;

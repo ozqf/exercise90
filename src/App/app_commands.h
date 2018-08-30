@@ -100,6 +100,13 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "GFX"))
+    {
+        if (numTokens == 1) { printf("Need GFX type\n"); return 1; }
+        i32 i = COM_AsciToInt32(tokens[1]);
+        Game_SpawnLocalEntity(0, 0, 0, NULL, 0, i);
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "VARS"))
     {
         App_DebugListVariables(g_vars, g_nextVar, MAX_VARS);

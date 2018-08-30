@@ -5,6 +5,10 @@
 #define LOCAL_ENT_STATUS_FREE 0
 #define LOCAL_ENT_STATUS_IN_USE 1
 
+#define LOCAL_ENT_TYPE_NULL 0
+#define LOCAL_ENT_TYPE_IMPACT 1
+#define LOCAL_ENT_TYPE_SPAWN 2
+
 // Local entities are simple client side objects only and
 // can have NO effect on server Ents whatsoever.
 struct LocalEnt
@@ -15,8 +19,11 @@ struct LocalEnt
     Vec3 pos;
     Vec3 scale;
     Vec3 originalScale;
+    Vec3 targetScale;
     Vec3 dir;
     f32 speed;
+
+    i32 type;
 
     // timing
     f32 tick;
