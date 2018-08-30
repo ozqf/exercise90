@@ -93,7 +93,9 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                 Ent *targetEnt = Ent_GetEntityById(&gs->entList, &col->header.entId);
                 if (targetEnt == NULL)
                 {
-                    printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
+                    // If an entity was marked for deletion by a previous projectile/attack this frame
+                    // it can be detected but is already dead so ignore
+                    //printf("!GAME prj victim %d/%d is NULL!\n", col->header.entId.iteration, col->header.entId.index);
                     continue;
                 }
                 if (targetEnt->entId.value == e->source.value)
@@ -109,8 +111,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                     printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
                 }
 
-                // factory type agnostic hit code
-#if 1
+                // Attempt to deal damage
                 EC_Health *health = EC_FindHealth(gs, &col->header.entId);
                 if (health != NULL)
                 {
@@ -144,53 +145,6 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                 t->pos.z = hit->worldPos[2];
                 survived = 0;
                 Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
-#endif
-
-                // TODO: Replace this. Factory type should not be used for logic!
-                // factory type specific hit code
-#if 0
-                if (targetEnt->factoryType == ENTITY_TYPE_RIGIDBODY_CUBE)
-                {
-                    EC_Health* health = EC_FindHealth(gs, &col->header.entId);
-                    if (health != NULL)
-                    {
-                        health->state.hp -= 10;
-                        // kill victim
-                        if (health->state.hp <= 0)
-                        {
-                            Ent_WriteRemoveCmd(
-                                targetEnt,
-                                hit->normal,
-                                time->singleFrame == 1
-                            );
-                            // is this the time to do this...?
-                            Phys_RemoveShape(col->shapeId);
-                            //printf("Killed cube!\n");
-                        }
-                        else
-                        {
-                            //printf("Hit cube, hp: %d\n", health->hp);
-                            Prj_PushRigidBody(col);
-                        }
-                    }
-                    
-                    // kill prj
-                    t->pos.x = hit->worldPos[0];
-                    t->pos.y = hit->worldPos[1];
-                    t->pos.z = hit->worldPos[2];
-                    survived = 0;
-                    Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
-                }
-                else if (targetEnt->factoryType == ENTITY_TYPE_WORLD_CUBE)
-                {
-                    // kill prj
-                    t->pos.x = hit->worldPos[0];
-                    t->pos.y = hit->worldPos[1];
-                    t->pos.z = hit->worldPos[2];
-                    survived = 0;
-                    Ent_WriteRemoveCmd(e, hit->normal, time->singleFrame == 1);
-                }
-#endif
             }
         }
         if (survived)

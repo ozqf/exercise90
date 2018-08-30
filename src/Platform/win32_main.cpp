@@ -199,6 +199,31 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
             Win32_DebugReadKey(VKCode, wParam, lParam);
             break;
         }
+		// F1 -> quick minimise
+		if (VKCode == 112)
+		{
+			/*
+			https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-showwindow
+			https://docs.microsoft.com/en-us/windows/desktop/api/shellapi/ns-shellapi-_notifyicondataa
+			SW_SHOW
+			SW_HIDE
+			SW_MAXIMIZE
+			SW_MINIMIZE
+			SW_RESTORE
+			
+			BOOL Shell_NotifyIconA(
+					DWORD dwMessage,
+					PNOTIFYICONDATAA lpData
+			);
+			*/
+			/*
+			https://docs.microsoft.com/en-us/windows/desktop/shell/notification-area
+			Notifications area
+			*/
+			ShowWindow(appWindow, SW_MINIMIZE);
+			ShowWindow(consoleHandle, SW_MINIMIZE);
+			break;
+		}
 
         // if (VKCode == 'P' && isDown)
         // {

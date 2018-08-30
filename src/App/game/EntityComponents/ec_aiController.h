@@ -186,7 +186,6 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
         {
             if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
             {
-                printf("AI Failed to validate target\n");
                 AI_Reset(gs, ai);
                 return;
             }

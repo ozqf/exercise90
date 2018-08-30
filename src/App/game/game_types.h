@@ -445,10 +445,22 @@ struct GameSession
     i32 levelsCompleted = 0;
 };
 
+#define GAME_INSTANCE_STATE_WARMUP 0
+#define GAME_INSTANCE_STATE_PLAYING 1
+#define GAME_INSTANCE_STATE_FAILED 2
+#define GAME_INSTANCE_STATE_SUCCESS 3
+
 // overall game information in the current instance (eg progress, wave count, scores etc)
 struct GameInstance
 {
     i32 score;
+    i32 state;
+	
+	u8 AllowPlayerSpawning()
+	{
+		return (this->state == GAME_INSTANCE_STATE_PLAYING
+		|| this->state == GAME_INSTANCE_STATE_WARMUP);
+	}
 };
 
 // Specific local settings on this machine
@@ -457,6 +469,8 @@ struct GameStateLocal
     u8 localPlayerHasEnt = 0;
     EntId localPlayerEntId;
 };
+
+#define IS_SERVER(ptrGameState) (IsRunningServer(##ptrGameState##->netMode))
 
 //////////////////////////////////////////////////
 // GameState God Object

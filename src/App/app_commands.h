@@ -80,6 +80,14 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         if (numTokens == 2)
         {
+			i32 i = COM_AsciToInt32(tokens[1]);
+			if (i != 0)
+			{
+				EntitySpawnOptions options = {};
+                options.scale = { 1, 1, 1 };
+				Game_WriteSpawnCmd(&g_gameState, i, &options);
+				return 1;
+			}
             if (!COM_CompareStrings(tokens[1], "ENEMY"))
             {
                 printf("*** SPAWN ENEMY ***\n");

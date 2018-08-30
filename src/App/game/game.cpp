@@ -193,9 +193,34 @@ internal void Game_Init()
 internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
 {
     Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
+    printf("Client avatar was %d/%d now %d/%d\n",
+        cl->entId.iteration, cl->entId.index,
+        cmd->entId.iteration, cmd->entId.index
+    );
+    u8 spawn = (cl->entId.value == 0 && cmd->entId.value != 0);
+    u8 death = (cl->entId.value != 0 && cmd->entId.value == 0);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
     printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
+    if (spawn)
+    {
+        SV_ProcessClientSpawn(gs, cl);
+    }
+    if (death)
+    {
+        // death!
+        SV_ProcessClientDeath(gs, cl);
+    }
+}
+
+internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameInstanceState* cmd)
+{
+	gs->instance.state = cmd->state;
+}
+
+internal void Exec_SpawnViaTemplate(GameState* gs, Cmd_SpawnViaTemplate* cmd)
+{
+	
 }
 
 internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
@@ -228,6 +253,14 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             #endif
 			return 1;
         } break;
+		
+		case CMD_TYPE_SPAWN_VIA_TEMPLATE:
+		{
+			Cmd_SpawnViaTemplate cmd = {};
+			ptr += cmd.Read(header, ptr);
+			Exec_SpawnViaTemplate(gs, &cmd);
+			return 1;
+		} break;
 
         case CMD_TYPE_STATIC_STATE:
         {
@@ -277,6 +310,14 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             Exec_UpdateClient(gs, &cmd);
             return 1;
         } break;
+		
+		case CMD_TYPE_GAME_INSTANCE_STATE:
+		{
+			Cmd_GameInstanceState cmd = {};
+			ptr += cmd.Read(header, ptr);
+			Exec_UpdateGameInstance(gs, &cmd);
+			return 1;
+		} break;
     }
     return 0;
 }

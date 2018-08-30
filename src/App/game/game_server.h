@@ -26,10 +26,15 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             Assert(cl);
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
-                printf("GAME Cannot spawn - client is free or playing already\n");
+                printf("SV Cannot spawn - client is free or playing already\n");
                 return 1;
             }
-
+			if (!gs->instance.AllowPlayerSpawning())
+			{
+				printf("SV: Instance disallows player spawning\n");
+				return 1;
+			}
+			
             EntitySpawnOptions options = {};
             options.pos.x = 0;
             options.pos.y = 0;
@@ -120,6 +125,34 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
+internal void SV_ProcessClientSpawn(GameState* gs, Client* cl)
+{
+	IS_SERVER(gs);
+    printf("SV: GAME START\n");
+}
+
+internal void SV_ProcessClientDeath(GameState* gs, Client* cl)
+{
+	IS_SERVER(gs);
+    if (App_NumPlayingClients(&gs->clientList) == 0)
+    {
+        printf("SV: GAME OVER\n");
+    }
+}
+
+internal void SV_ProcessPlayerDeath(GameState* gs, Client* cl)
+{
+    //if (!IsRunningServer(gs->netMode)) { return; }
+	IS_SERVER(gs);
+    printf("GAME Client %d avatar died\n", cl->clientId);
+    Cmd_ClientUpdate clUpdate = {};
+    clUpdate.clientId = cl->clientId;
+    clUpdate.state = CLIENT_STATE_OBSERVER;
+    clUpdate.entId = { };
+    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+}
+
+// TODO: MOVE ME: This isn't a server only function!
 internal void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
 {
     if (g_verbose)
@@ -152,13 +185,7 @@ internal void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
         Client* cl = App_FindClientByEntId(cmd->entId, &gs->clientList);
         if (cl)
         {
-            // Do stuff
-            printf("GAME Client %d avatar died\n", cl->clientId);
-            Cmd_ClientUpdate clUpdate = {};
-            clUpdate.clientId = cl->clientId;
-            clUpdate.state = CLIENT_STATE_OBSERVER;
-            clUpdate.entId = { };
-            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+            SV_ProcessPlayerDeath(gs, cl);
         }
         
 		Ent_Free(gs, ent);

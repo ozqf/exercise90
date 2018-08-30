@@ -117,6 +117,19 @@ Client* App_FindClientById(i32 id, ClientList* cls)
     return NULL;
 }
 
+i32 App_NumPlayingClients(ClientList* cls)
+{
+    i32 count = 0;
+    for (i32 i = 0; i < cls->max; ++i)
+    {
+        if (cls->items[i].entId.value != 0)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
 Client* App_FindClientByEntId(EntId entId, ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)

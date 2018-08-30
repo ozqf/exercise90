@@ -2,6 +2,9 @@
 
 #include "../game.h"
 
+typedef void (*Fn_EntFromTemplate)(EntityState* state, EntitySpawnOptions* options, i32 factoryType);
+internal Fn_EntFromTemplate g_templates[32];
+
 // EntityState g_templates[64];
 // i32 g_numTemplates = 0;
 /*
@@ -10,7 +13,7 @@ Spawn sequence with templates:
 > Set it to 'default' values for the specified entity template via 'SetTemplate'
 > Patch values via 'options' data
 > write spawn command to stream
-*/
+*/ 
 
 void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 {
@@ -109,47 +112,6 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 //////////////////////////////////////////////////////////////////////////
 // ENEMY
 //////////////////////////////////////////////////////////////////////////
-#if 0
-void Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
-{
-    state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
-    printf("  TEMPLATES spawn enemy %d/%d\n", state->entId.iteration, state->entId.index);
-
-    // apply defaults
-    state->componentBits |= EC_FLAG_TRANSFORM;
-    Transform_SetToIdentity(&state->transform);
-
-    state->componentBits |= EC_FLAG_AICONTROLLER;
-    state->aiState.ticker.tickMax = 0.1f;
-    
-    state->componentBits |= EC_FLAG_RENDERER;
-    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
-    state->renderState.colourRGB[0] = 1;
-    state->renderState.colourRGB[1] = 0;
-    state->renderState.colourRGB[2] = 0;
-
-    state->componentBits |= EC_FLAG_COLLIDER;
-    state->colliderState.def.SetAsBox(
-        state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
-        0.5f, 0.5f, 0.5f, 
-        ZCOLLIDER_FLAG_GROUNDCHECK,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS
-    );
-
-    state->componentBits  |= EC_FLAG_ACTORMOTOR;
-    state->actorState.runSpeed = 10;
-    state->actorState.runAcceleration = 75;
-
-
-    state->componentBits |= EC_FLAG_HEALTH;
-    state->healthState.hp = 100;
-
-    Ent_ApplySpawnOptions(state, options);
-}
-#endif
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
@@ -162,7 +124,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 
     state->componentBits |= EC_FLAG_COLLIDER;
     f32 playerHeight = 1.85f; // average male height in metres
-	f32 playerWidth = 0.46f; // reasonable shoulder width?
+	f32 playerWidth = 0.8f; //0.46f; // reasonable shoulder width?
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         playerWidth / 2, playerHeight / 2, playerWidth / 2, 
