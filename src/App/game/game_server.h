@@ -19,6 +19,24 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
     printf("SV EXEC impulse %d from client %d\n", cmd->impulse, cmd->clientId);
 	switch (cmd->impulse)
 	{
+        case IMPULSE_NEXT_WEAPON:
+        {
+            Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
+            Assert(cl);
+            if (cl->entId.value == 0) { return 1; }
+            Ent* ent = Ent_GetEntityById(gs, &cl->entId);
+            Assert(ent);
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &ent->entId);
+            Assert(motor);
+            motor->state.attackType++;
+            if (motor->state.attackType >= 4)
+            {
+                motor->state.attackType = 1;
+            }
+            return  1;
+        } break;
+
+
 		case IMPULSE_JOIN_GAME:
 		{
 			// How to assign player Id at this point

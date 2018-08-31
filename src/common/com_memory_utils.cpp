@@ -317,6 +317,26 @@ static inline void COM_StrToLowerCase(char* str)
     }
 }
 
+static inline u8 COM_AsciIsDecimalInt32(const char *str)
+{
+    i32 read = 0;
+	while (str && *str)
+	{
+        char c = *str;
+		if (c < '0' || c > '9')
+        {
+            if (c != '-')
+            {
+                return 0;
+            }
+            
+        }
+        ++read;
+		++str;
+	}
+    return (read > 0);
+}
+
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"

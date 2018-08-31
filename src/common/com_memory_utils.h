@@ -55,3 +55,4 @@ static inline i32 COM_StrLen(const char* str);
 // "-54" "12" "0x432146fd" "-0X4AbdC"
 static inline i32 COM_AsciToInt32(const char *str);
 static inline f32 COM_AsciToFloat32(const char *str);
+static inline u8 COM_AsciIsDecimalInt32(const char *str);

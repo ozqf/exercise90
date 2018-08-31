@@ -73,7 +73,7 @@ void Game_SpawnLocalEntity(
         {
             RendObj_SetAsMesh(&e->rend, 
                 Assets_GetMeshDataByName("Cube"),
-                1.0, 1.0, 0.0f,
+                1.0f, 1.0f, 0.0f,
                 AppGetTextureIndexByName("textures\\white_v_lines.bmp")
             );
             
@@ -83,7 +83,7 @@ void Game_SpawnLocalEntity(
             e->originalScale.y = 10.0f;
             e->originalScale.z = 3.0f;
             e->targetScale.x = 0.1f;
-            //e->targetScale.y = 0.1f;
+            e->targetScale.y = 10.0f;
             e->targetScale.z = 0.1f;
             e->scale = e->originalScale;
         } break;
@@ -116,19 +116,39 @@ void LocalEnt_Tick_Impact(LocalEnt *e, f32 dt, u8 verbose)
     }
 }
 
+void LocalEnt_InterpolateColour(LocalEnt* e, f32 dt)
+{
+	f32 dr = e->endColour.red - e->startColour.red;
+	f32 dg = e->endColour.green - e->startColour.green;
+	f32 db = e->endColour.blue - e->startColour.blue;
+	f32 da = e->endColour.alpha - e->startColour.alpha;
+}
+
+void LocalEnt_InterpolateScale(LocalEnt* e, f32 dt)
+{
+	f32 dx = e->targetScale.x - e->originalScale.x;
+    f32 dy = e->targetScale.y - e->originalScale.y;
+    f32 dz = e->targetScale.z - e->originalScale.z;
+    e->scale.x = COM_LinearEase(e->tick, e->originalScale.x, dx, e->tickMax);
+    e->scale.y = COM_LinearEase(e->tick, e->originalScale.y, dy, e->tickMax);
+    e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
+}
+
 void LocalEnt_Tick_Spawn(LocalEnt *e, f32 dt, u8 verbose)
 {
     //f32 lerp = (e->tickMax / 100.0f) * e->tick;
     //f32 lerp = e->tickMax / 100.0f;
     //lerp /= 100;
-    f32 dx = e->targetScale.x - e->originalScale.x;
-    f32 dy = e->targetScale.y - e->originalScale.y;
-    f32 dz = e->targetScale.z - e->originalScale.z;
-    e->scale.x = COM_LinearEase(e->tick, e->originalScale.x, dx, e->tickMax);
+	LocalEnt_InterpolateScale(e, dt);
+	LocalEnt_InterpolateColour(e, dt);
+    //f32 dx = e->targetScale.x - e->originalScale.x;
+    //f32 dy = e->targetScale.y - e->originalScale.y;
+    //f32 dz = e->targetScale.z - e->originalScale.z;
+    //e->scale.x = COM_LinearEase(e->tick, e->originalScale.x, dx, e->tickMax);
     //e->scale.y = COM_LinearEase(e->tick, e->originalScale.y, dy, e->tickMax);
-    e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
+    //e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
     // printf("GFX Tick %.2f SCALE: %.2f, %.2f, %.2f\n",
-    //     e->tick, e->scale.x, e->scale.y, e->scale.z);
+        // e->tick, e->scale.x, e->scale.y, e->scale.z);
     if (e->tick > e->tickMax)
     {
         e->status = LOCAL_ENT_STATUS_FREE;

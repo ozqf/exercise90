@@ -15,11 +15,20 @@ struct LocalEnt
 {
     i32 id;
     i32 status;
+	
     // movement
     Vec3 pos;
+	Vec3 startPos;
+	Vec3 endPos;
+	
     Vec3 scale;
     Vec3 originalScale;
     Vec3 targetScale;
+	
+	Colour colour;
+	Colour startColour;
+	Colour endColour;
+	
     Vec3 dir;
     f32 speed;
 

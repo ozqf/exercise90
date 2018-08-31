@@ -93,12 +93,12 @@ Game Types
 Game State
 8. declare array of components
 9. assign array to GameState
-10. Zero component memory on gamestate reset
+10. Zero component memory on gamestate reset - could be done by just clearing the heap
 11. Clear component on entity removal
 
 ec_factory:
 12. Add component state read call
-13. add component state write call
+13. Add component state write call
 14. Add apply state function 
 
 ### Command Structure

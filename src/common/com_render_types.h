@@ -39,6 +39,7 @@
 #define REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD 1
 #define REND_PRIMITIVE_TYPE_AABB 2
 
+union Colour;
 struct RendObj_Primitive;
 struct RendObj_Billboard;
 struct RendObj_Sprite;
@@ -84,6 +85,16 @@ static inline void RendObj_CalculateSpriteAsciUVs(RendObj_Sprite* sprite, u8 asc
 /****************************************************************
 Graphics
 ****************************************************************/
+
+union Colour
+{
+	f32 array[4];
+	struct
+	{
+		f32 red, green, blue, alpha;
+	};
+};
+
 struct MeshData
 {
 	u32 numVerts;

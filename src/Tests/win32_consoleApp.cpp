@@ -32,8 +32,8 @@
 int main(i32 argc, char* argv[])
 {
     //Test_WriteRandomNumberTable("random2.txt", 512, 0);
-    Test_RandomNumbers();
-	//Test_Tokenise();
+    //Test_RandomNumbers();
+	Test_Tokenise();
 #if 0
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);

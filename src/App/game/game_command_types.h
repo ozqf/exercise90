@@ -81,6 +81,7 @@ struct Cmd_Spawn
 // Always exec on the server!
 #define IMPULSE_NULL 0
 #define IMPULSE_JOIN_GAME 1
+#define IMPULSE_NEXT_WEAPON 2
 struct Cmd_ServerImpulse
 {
     i32 clientId;

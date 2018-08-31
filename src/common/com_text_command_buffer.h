@@ -9,6 +9,79 @@ struct TextBuffer
 	i32 capacity;
 };
 
+// return 1 if command is handled
+typedef u8 (*ZParseTextCommand)(char* text, char** tokens, i32 numTokens);
+
+#define ZTEXT_COMMAND_HANDLER_NAME_LENGTH 32
+struct ZTextCommandHandler
+{
+	u8 inUse;
+	char name[ZTEXT_COMMAND_HANDLER_NAME_LENGTH];
+	i32 minTokens;	// must be >= 1. name == first token
+	i32 maxTokens;
+	ZParseTextCommand func;
+};
+
+// returns 0 if no errors found
+inline u8 COM_ValidateTextCommandHandler(char* name, i32 minTokens, i32 maxTokens, ZParseTextCommand func)
+{
+	i32 len = COM_StrLen(name);
+    if (len > 32 || len <= 0)
+    {
+        return 1;
+    }
+
+    if (minTokens < 1)
+    {
+        return 2;
+    }
+    if (minTokens > maxTokens)
+    {
+        return 3;
+    }
+
+    if (func == NULL)
+    {
+        return 4;
+    }
+
+    return 0;
+}
+
+// pattern is either t for text, or n for numeric:
+// eg spawn enemy 3 5 7 would be ttnnn\0
+inline u8 COM_CheckTokenPattern(char** tokens, i32 numTokens, char* pattern)
+{
+	i32 patternLength = COM_StrLenA(pattern);
+	
+	if (patternLength != numTokens)
+	{
+		return 0;
+	}
+	for (i32 i = 0; i < patternLength; ++i)
+	{
+		char c = pattern[i];
+		printf("Checking token %s vs pattern symbol %c\n", tokens[i], c);
+		if (c == 'n')
+		{
+			if (!COM_AsciIsDecimalInt32(tokens[i]))
+			{
+				return 0;
+			}
+		}
+		else if (c == 't')
+		{
+			continue;
+		}
+		else
+		{
+			printf("Unknown pattern symbol %c\n", c);
+			return 0;
+		}
+	}
+	return 1;
+}
+
 /*
 -- Example command strings --
 EXIT\0

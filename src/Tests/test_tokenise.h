@@ -162,11 +162,35 @@ void Test_MultipleCommands()
 	printf("\nDone\n");
 }
 
+void Test_StringIsDecimal(char* str)
+{
+	u8 result = COM_AsciIsDecimalInt32(str);
+	printf("%s is decimal i32: %d\n", str, result);
+}
+
+void Test_TokenisePattern()
+{
+	char tokensBuffer[256];
+	char *tokens[32];
+
+	i32 numTokens = COM_ReadTokens("SPAWN ENEMY 1 2 3", tokensBuffer, tokens);
+	printf("Read %d tokens\n", numTokens);
+	u8 patternMatch = COM_CheckTokenPattern(tokens, numTokens, "ttnnn");
+	printf("Pattern matched: %d\n", patternMatch);
+}
+
 void Test_Tokenise()
 {
 	printf("*** Test Tokenise ***\n");
 
-	Test_MultipleCommands();
+	//Test_MultipleCommands();
+
+	Test_StringIsDecimal("foo");
+	Test_StringIsDecimal("-1");
+	Test_StringIsDecimal("37");
+	Test_StringIsDecimal("");
+
+	Test_TokenisePattern();
 
 	//char* input = "  set sensitivity 5  ";
 	//printf("Input string: \"%s\"\n", input);

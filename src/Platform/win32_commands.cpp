@@ -2,192 +2,163 @@
 
 #include "win32_module.cpp"
 
+global_variable i32 g_nextTextCommandIndex = 0;
+global_variable ZTextCommandHandler g_textCommands[64];
+
+#define TEXT_COMMAND_HANDLER(funcName) u8 TextExec_##funcName##(char* text, char** tokens, i32 numTokens)
+
+u8 TextExec_ConsoleHelp(char* text, char** tokens, i32 numTokens)
+{
+    printf("--- Command List ---\n");
+    printf("  QUIT or EXIT - shutdown\n");
+    printf("  VERSION - show version info\n");
+    printf("  MANIFEST - List data files entries\n");
+    printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
+    printf("  KEYCODES - toggle printing keycodes in debug input\n");
+    printf("  LAPTOP - Toggle mode to give up cpu time each frame\n");
+    return 0;
+}
+
+u8 TextExec_Quit(char* text, char** tokens, i32 numTokens)
+{
+    Win32_Shutdown();
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Version)
+{
+    printf("--- VERSIONS ---\n");
+    printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
+    return 0;
+}
+
+TEXT_COMMAND_HANDLER(Manifest)
+{
+    Win32_DebugPrintDataManifest();
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Restart)
+{
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Hello)
+{
+    printf("HI.\n");
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Time)
+{
+    SYSTEMTIME t;
+    GetSystemTime(&t);
+    printf("  TIME: %d/%d/%d - %d:%d:%d\n",
+        t.wYear,
+        t.wMonth,
+        t.wDay,
+        t.wHour,
+        t.wMinute,
+        t.wSecond
+    );
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(StepMode)
+{
+    g_singleFrameStepMode = !g_singleFrameStepMode;
+    printf("PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Step)
+{
+    g_singleFrameRun = 1;
+    printf("PLATFORM Step frame\n");
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Break)
+{
+    DebugBreak();
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(KeyCodes)
+{
+    g_debugPrintKeycodes = !g_debugPrintKeycodes;
+    printf("PLATFORM: Print keycodes: %d\n", g_debugPrintKeycodes);
+    return 1;
+}
+
+TEXT_COMMAND_HANDLER(Laptop)
+{
+    g_lowPowerMode = !g_lowPowerMode;
+    printf("PLATFORM: Low power mode: %d\n", g_lowPowerMode);
+    return 1;
+}
+
+void Win32_AddTextCommand(char* name, i32 minTokens, i32 maxTokens, ZParseTextCommand func)
+{
+    u8 error = COM_ValidateTextCommandHandler(name, minTokens, maxTokens, func);
+    if (error != 0)
+    {
+        printf("Error creating command %s: %d\n", name, error);
+        return;
+    }
+
+    ZTextCommandHandler* h = &g_textCommands[g_nextTextCommandIndex];
+    g_nextTextCommandIndex++;
+    
+    COM_CopyStringLimited(name, h->name, 32);
+    h->minTokens = minTokens;
+    h->maxTokens = maxTokens;
+    h->func = func;
+}
+
+void Win32_BuildTextCommandList()
+{
+    Win32_AddTextCommand("HELP", 1, 1, TextExec_ConsoleHelp);
+    Win32_AddTextCommand("QUIT", 1, 1, TextExec_Quit);
+    Win32_AddTextCommand("EXIT", 1, 1, TextExec_Quit);
+    Win32_AddTextCommand("VERSION", 1, 1, TextExec_Version);
+    Win32_AddTextCommand("MANIFEST", 1, 1, TextExec_Manifest);
+    Win32_AddTextCommand("TIME", 1, 1, TextExec_Time);
+    Win32_AddTextCommand("RESTART", 2, 2, TextExec_Restart);
+    Win32_AddTextCommand("HELLO", 1, 1, TextExec_Hello);
+    Win32_AddTextCommand("STEPMODE", 1, 1, TextExec_StepMode);
+    Win32_AddTextCommand("Z", 1, 1, TextExec_StepMode);
+    Win32_AddTextCommand("STEP", 1, 1, TextExec_Step);
+    Win32_AddTextCommand("BREAK", 1, 1, TextExec_Break);
+    Win32_AddTextCommand("KEYCODES", 1, 1, TextExec_KeyCodes);
+    Win32_AddTextCommand("LAPTOP", 1, 1, TextExec_Laptop);
+}
 
 /**********************************************************************
  * EXECUTE TEXT COMMAND
  *********************************************************************/
-u8 Win32_ExecTextCommand(char *str, char **tokens, i32 numTokens)
+u8 Win32_ExecTextCommand(char* str, char** tokens, i32 numTokens)
 {
-    if (COM_CompareStrings(tokens[0], "QUIT") == 0 || COM_CompareStrings(tokens[0], "EXIT") == 0)
+    i32 l = g_nextTextCommandIndex;
+    for (i32 i = 0; i < l; ++i)
     {
-        Win32_Shutdown();
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "HELP") == 0)
-    {
-        printf("--- Command List ---\n");
-        printf("  QUIT or EXIT - shutdown\n");
-        printf("  VERSION - show version info\n");
-        printf("  MANIFEST - List data files entries\n");
-        printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
-        printf("  KEYCODES - toggle printing keycodes in debug input\n");
-        printf("  LAPTOP - Toggle mode to give up cpu time each frame\n");
-        return 0;
-    }
-    else if (COM_CompareStrings(tokens[0], "VERSION") == 0)
-    {
-        printf("--- VERSIONS ---\n");
-        printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
-        return 0;
-    }
-    else if (COM_CompareStrings(tokens[0], "MANIFEST") == 0)
-    {
-        Win32_DebugPrintDataManifest();
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "RESTART") == 0)
-    {
-        if (numTokens != 2)
+        ZTextCommandHandler* h = &g_textCommands[i];
+        #if 1
+        if (!COM_CompareStrings(tokens[0], h->name))
         {
-            printf("  Must specify: APP, RENDERER or SOUND\n");
-            return 1;
+            printf("Matched cmd %s\n", h->name);
+            if (numTokens < h->minTokens || numTokens > h->maxTokens)
+            {
+                printf("Invalid token count. Got %d. Supports %d to %d\n",
+                    numTokens, h->minTokens, h->maxTokens);
+                return 1;
+            }
+            return h->func(str, tokens, numTokens);
         }
-
-        if (COM_CompareStrings(tokens[1], "APP") == 0)
-        {
-            printf("  Restarting app\n");
-            g_appLink.timestamp = {};
-            return 1;
-        }
-        else if (COM_CompareStrings(tokens[1], "RENDERER") == 0)
-        {
-            printf("  Restarting renderer\n");
-            g_rendererLink.timestamp = {};
-            return 1;
-        }
-        else if (COM_CompareStrings(tokens[1], "SOUND") == 0)
-        {
-            printf("  Restarting sound\n");
-            g_soundLink.timestamp = {};
-            return 1;
-        }
-    }
-    else if (COM_CompareStrings(tokens[0], "TIME") == 0)
-    {
-        //printf("HI.");
-        SYSTEMTIME t;
-        GetSystemTime(&t);
-        printf("  TIME: %d/%d/%d - %d:%d:%d\n",
-            t.wYear,
-            t.wMonth,
-            t.wDay,
-            t.wHour,
-            t.wMinute,
-            t.wSecond
-        );
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "HELLO") == 0)
-    {
-        printf("HI.\n");
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "Z") == 0 || COM_CompareStrings(tokens[0], "STEPMODE") == 0)
-    {
-        g_singleFrameStepMode = !g_singleFrameStepMode;
-        printf("PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "STEP") == 0)
-    {
-        g_singleFrameRun = 1;
-        printf("PLATFORM Step frame\n");
-        return 1;
-    }
-    else if (COM_CompareStrings(tokens[0], "BREAK") == 0)
-    {
-        DebugBreak();
-        return 1;
-    }
-    else if (!COM_CompareStrings(tokens[0], "KEYCODES"))
-    {
-        g_debugPrintKeycodes = !g_debugPrintKeycodes;
-        printf("PLATFORM: Print keycodes: %d\n", g_debugPrintKeycodes);
-        return 1;
-    }
-    else if (!COM_CompareStrings(tokens[0], "LAPTOP"))
-    {
-        g_lowPowerMode = !g_lowPowerMode;
-        printf("PLATFORM: Low power mode: %d\n", g_lowPowerMode);
-        return 1;
+        #endif
     }
     return 0;
 }
-
-#if 0
-void Win32_ReadTextCommand(char *str, i32 firstChar, i32 length)
-{
-    COM_ZeroMemory((u8 *)g_textCommandBuffer, TEXT_COMMAND_BUFFER_SIZE);
-    COM_COPY(str, g_textCommandBuffer, length);
-    //printf("EXEC \"%s\" (%d chars)\n", g_textCommandBuffer, length);
-
-    // Avoid executing on the original string
-    char commandCopy[256];
-    char tokensBuffer[256];
-    char *tokens[32];
-
-    COM_CopyString(g_textCommandBuffer, commandCopy);
-    i32 tokensCount = COM_ReadTokens(g_textCommandBuffer, tokensBuffer, tokens);
-    if (tokensCount == 0)
-    {
-        return;
-    }
-    #if 0
-    printf("PRINT TOKENS (%d)\n", tokensCount);
-    for (int i = 0; i < tokensCount; ++i)
-    {
-        //char* str2 = (char*)(tokensBuffer + tokens[i]);
-        printf("%s\n", tokens[i]);
-    }
-    #endif
-
-    u8 handled;
-    handled = Win32_ExecTestCommand(g_textCommandBuffer, tokens, tokensCount);
-    if (handled)
-    {
-        return;
-    }
-
-    if (g_app.isValid)
-    {
-        handled = g_app.AppParseCommandString(g_textCommandBuffer, tokens, tokensCount);
-    }
-    if (handled)
-    {
-        return;
-    }
-
-    handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
-    if (handled)
-    {
-        return;
-    }
-
-    // Version is allowed to cascade down so each subsystem prints it's version
-    if (COM_CompareStrings(tokens[0], "VERSION") == 0)
-    {
-        return;
-    }
-
-    printf(" Unknown command %s\n", g_textCommandBuffer);
-    return;
-}
-
-void Win32_ParseTextCommand(char *str, i32 firstChar, i32 length)
-{
-    // Gate execution
-    static i32 isExecuting = 0;
-    if (isExecuting)
-    {
-        printf("PLATFORM: attempted to parse \"%s\" but already executing!\n", str);
-        return;
-    }
-    isExecuting = 1;
-
-    Win32_ReadTextCommand(str, firstChar, length);
-    isExecuting = 0;
-}
-#endif
 
 void Win32_EnqueueTextCommand(char* command)
 {

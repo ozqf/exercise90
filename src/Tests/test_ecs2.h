@@ -1,9 +1,24 @@
 #pragma once
 
 #include "../common/com_module.h"
+/*
+=== Entity Component interface ===
+Add
+Remove
+Find
+Has
+Update
 
+Create Memory
+Assign Memory
+Clear Memory
 
-void Test_ECS2()
+*/
+
+typedef void (*EC_Update)(void* gs, GameTime* time);
+
+struct EntityComponent
 {
-    printf("ECS iteration 2\n");
-}
+    i32 flag;
+    EC_Update updateFunction;
+};
