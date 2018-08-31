@@ -73,17 +73,17 @@ void Game_SpawnLocalEntity(
         {
             RendObj_SetAsMesh(&e->rend, 
                 Assets_GetMeshDataByName("Cube"),
-                0, 0, 1.0f,
+                1.0, 1.0, 0.0f,
                 AppGetTextureIndexByName("textures\\white_v_lines.bmp")
             );
             
             e->tick = 0;
-            e->tickMax = 1;
+            e->tickMax = 0.35f;
             e->originalScale.x = 3.0f;
-            e->originalScale.y = 3.0f;
+            e->originalScale.y = 10.0f;
             e->originalScale.z = 3.0f;
             e->targetScale.x = 0.1f;
-            e->targetScale.y = 0.1f;
+            //e->targetScale.y = 0.1f;
             e->targetScale.z = 0.1f;
             e->scale = e->originalScale;
         } break;
@@ -125,10 +125,10 @@ void LocalEnt_Tick_Spawn(LocalEnt *e, f32 dt, u8 verbose)
     f32 dy = e->targetScale.y - e->originalScale.y;
     f32 dz = e->targetScale.z - e->originalScale.z;
     e->scale.x = COM_LinearEase(e->tick, e->originalScale.x, dx, e->tickMax);
-    e->scale.y = COM_LinearEase(e->tick, e->originalScale.y, dy, e->tickMax);
+    //e->scale.y = COM_LinearEase(e->tick, e->originalScale.y, dy, e->tickMax);
     e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
-    printf("GFX Tick %.2f SCALE: %.2f, %.2f, %.2f\n",
-        e->tick, e->scale.x, e->scale.y, e->scale.z);
+    // printf("GFX Tick %.2f SCALE: %.2f, %.2f, %.2f\n",
+    //     e->tick, e->scale.x, e->scale.y, e->scale.z);
     if (e->tick > e->tickMax)
     {
         e->status = LOCAL_ENT_STATUS_FREE;

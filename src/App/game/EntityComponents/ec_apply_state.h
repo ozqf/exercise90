@@ -114,6 +114,12 @@ internal void EC_AIControllerApplyState(GameState* gs, Ent* ent, EC_AIState* sta
     if (ai == NULL)
     {
         ai = EC_AddAIController(gs, ent);
+        EC_Transform* trans = EC_FindTransform(gs, ent);
+        if (trans)
+        {
+            Transform* t = &trans->t;
+            Game_SpawnLocalEntity(t->pos.x, t->pos.y, t->pos.z, NULL, 0, 2);
+        }
     }
     ai->state = *state;
 }
