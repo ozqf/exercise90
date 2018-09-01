@@ -214,6 +214,13 @@ struct RendObj
     {
         switch (this->type)
         {
+            case RENDOBJ_TYPE_MESH:
+            {
+                this->data.mesh.r = r;
+                this->data.mesh.g = g;
+                this->data.mesh.b = b;
+            }  break;
+
             case RENDOBJ_TYPE_PRIMITIVE:
             {
                 this->data.primitive.red = r;

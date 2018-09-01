@@ -25,7 +25,7 @@ Ent *Game_FindEntityByLabel(GameState *gs, char *queryLabel)
 ///////////////////////////////////////////////////////////////////
 inline void Prj_PushRigidBody(EC_Collider *col)
 {
-    Phys_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
+    PhysCmd_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
 void Game_UpdateProjectiles(GameState *gs, GameTime *time)
@@ -78,7 +78,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         ray.end[1] = newPos.y;
         ray.end[2] = newPos.z;
 
-        i32 numHits = Phys_QueryRay(&ray, results, 12);
+        i32 numHits = PhysExt_QueryRay(&ray, results, 12);
 
         u8 survived = 1;
 
@@ -124,7 +124,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                             hit->normal,
                             time->singleFrame == 1);
                         // is this the time to do this...?
-                        Phys_RemoveShape(col->shapeId);
+                        PhysCmd_RemoveShape(col->shapeId);
                         //printf("Killed cube!\n");
                     }
                     else

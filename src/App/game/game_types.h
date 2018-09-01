@@ -8,6 +8,11 @@
 #define LOCAL_ENT_TYPE_NULL 0
 #define LOCAL_ENT_TYPE_IMPACT 1
 #define LOCAL_ENT_TYPE_SPAWN 2
+#define LOCAL_ENT_TYPE_EXPLOSION 3
+
+#define LOCAL_ENT_UPDATER_DEFAULT 0
+#define LOCAL_ENT_UPDATER_DYNAMIC 1
+#define LOCAL_ENT_UPDATER_STATIC 2
 
 // Local entities are simple client side objects only and
 // can have NO effect on server Ents whatsoever.
@@ -32,7 +37,7 @@ struct LocalEnt
     Vec3 dir;
     f32 speed;
 
-    i32 type;
+    i32 updaterIndex;
 
     // timing
     f32 tick;

@@ -355,8 +355,7 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	{
 		input->buttons = input->buttons | ACTOR_INPUT_ATTACK;
 	}
-
-
+	
 	// Orientation
 	
 	input->degrees.y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * Mouse_MoveMultiplier()));

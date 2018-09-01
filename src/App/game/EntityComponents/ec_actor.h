@@ -117,7 +117,7 @@ inline void ApplyActorMotorInput(
     //move = moveForce;
     #endif
 
-    Phys_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
+    PhysCmd_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
     Ticker* ticker = &motor->state.ticker;
     // Attack
     if (ticker->tick <= 0)

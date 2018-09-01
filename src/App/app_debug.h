@@ -214,7 +214,7 @@ Rotation:\n\
         {
             // char* str;
             // u32 numChars;
-            Phys_GetDebugString(&h.chars, &h.length);
+            PhysExt_GetDebugString(&h.chars, &h.length);
             
         } break;
 

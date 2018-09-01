@@ -72,7 +72,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
         dt = MAX_ALLOWED_PHYSICS_STEP;
     }
 
-    MemoryBlock eventBuffer = Phys_Step(dt);
+    MemoryBlock eventBuffer = PhysExt_Step(dt);
     
     //i32 ptrOffset = 0;
     u8 reading = 1;

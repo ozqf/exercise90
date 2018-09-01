@@ -125,7 +125,7 @@ i32 App_Init()
     g_textureHandles.numTextures = 0;
     AppLoadTestTextures();
 
-    Phys_Init(
+    PhysExt_Init(
         g_collisionCommandBuffer.ptrMemory,
         g_collisionCommandBuffer.objectSize,
         g_collisionEventBuffer.ptrMemory,
@@ -163,7 +163,7 @@ i32 App_Shutdown()
     App_StopRecording();
 	
     GS_Clear(&g_gameState);
-    Phys_Shutdown();
+    PhysExt_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};

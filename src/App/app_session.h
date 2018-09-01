@@ -177,7 +177,7 @@ void App_EndSession()
     App_StopRecording();
 
     GS_Clear(&g_gameState);
-    Phys_ClearWorld();
+    PhysExt_ClearWorld();
     // Clear command buffer
     //App_ClearClients();
     // Break client links

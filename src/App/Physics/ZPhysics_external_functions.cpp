@@ -2,6 +2,8 @@
 
 #include "../../common/com_defines.h"
 
+#include "ZPhysics_interface.h"
+
 /////////////////////////////////////////////////////////////
 // ISSUE COMMAND
 /////////////////////////////////////////////////////////////
@@ -18,7 +20,7 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 }
 #endif
 
-i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
+i32 PhysCmd_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
 {
     Assert(def != NULL);
     PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
@@ -32,7 +34,7 @@ i32 Phys_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
     return h->id;
 }
 
-i32 Phys_CreateBox(
+i32 PhysCmd_CreateBox(
     f32 x,
     f32 y,
     f32 z,
@@ -57,23 +59,23 @@ i32 Phys_CreateBox(
     def.data.box.halfSize[0] = halfSizeX;
     def.data.box.halfSize[1] = halfSizeY;
     def.data.box.halfSize[2] = halfSizeZ;
-    return Phys_CreateShape(&def, ownerId, ownerIteration);
+    return PhysCmd_CreateShape(&def, ownerId, ownerIteration);
 }
 
-void Phys_RemoveShape(i32 shapeId)
+void PhysCmd_RemoveShape(i32 shapeId)
 {
     PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
     g_cmdBuf.ptrWrite += COM_WriteByte(Remove, g_cmdBuf.ptrWrite);
     g_cmdBuf.ptrWrite += COM_WriteI32(shapeId, g_cmdBuf.ptrWrite);
 }
 
-void Phys_SetState(PhysCmd_State* state)
+void PhysCmd_SetState(PhysCmd_State* state)
 {
     g_cmdBuf.ptrWrite += COM_WriteByte(SetState, g_cmdBuf.ptrWrite);
     g_cmdBuf.ptrWrite += COM_COPY_STRUCT(state, g_cmdBuf.ptrWrite, PhysCmd_State);
 }
 
-void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
+void PhysCmd_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
 {
     PhysCmd_Teleport cmd = {};
     cmd.shapeId = shapeId;
@@ -85,7 +87,7 @@ void Phys_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
     g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_Teleport);
 }
 
-void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
+void PhysCmd_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 {
 	PhysCmd_VelocityChange cmd = {};
 	cmd.shapeId = shapeId;
@@ -102,46 +104,47 @@ void Phys_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 /////////////////////////////////////////////////////////////
 
 // return number of hits or number of hits written if max is lower
-i32 Phys_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
+i32 PhysExt_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
 {
     return Phys_QuickRaycast(&g_world, cmd, hits, maxHits);
 }
 
 // Return bytes written
-// i32 Phys_QueryRay(PhysCmd_Raycast* cmd, u8* resultsBuffer, u32 bufferCapacity)
+// i32 PhysExt_QueryRay(PhysCmd_Raycast* cmd, u8* resultsBuffer, u32 bufferCapacity)
 // {
 //     return Phys_ExecRaycast(&g_world, cmd, resultsBuffer, bufferCapacity);
 // }
 
-i32 Phys_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
+i32 PhysExt_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
 {
     return PhysCmd_RayTest(&g_world, x0, y0, z0, x1, y1, y2);
 }
 
-void Phys_GetDebugString(char** str, i32* length)
+void PhysExt_GetDebugString(char** str, i32* length)
 {
     *str = g_debugString;
     *length = g_debugStringSize;
 }
 
-i32 Phys_QueryHitscan()
+i32 PhysExt_QueryHitscan()
 {
     return 0;
 }
 
-i32 Phys_QueryVolume()
+i32 PhysExt_QueryVolume()
 {
     return 0;
 }
 
-Vec3 Phys_DebugGetPosition()
+Vec3 PhysExt_DebugGetPosition()
 {
     return g_testPos;
 }
 
+#if 0
 void Phys_CreateTestScene(ZBulletWorld* world)
 {
-#if 0
+
     // hello bullet physics
     // Add static ground-plane
     g_physTest.groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -1);
@@ -167,15 +170,16 @@ void Phys_CreateTestScene(ZBulletWorld* world)
     g_physTest.sphereRigidBody = new btRigidBody(sphereBodyCI);
     //g_physTest.sphereRigidBody->setRestitution(1);
     world->dynamicsWorld->addRigidBody(g_physTest.sphereRigidBody);
-#endif
+
 }
+#endif
 
 /////////////////////////////////////////////////////////////
 // Lifetime
 /////////////////////////////////////////////////////////////
 
 // If the provided command buffer is NULL or the size is zero, fail
-void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize)
+void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize)
 {
     if (
         commandBufferSize == 0
@@ -224,10 +228,10 @@ void Phys_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuff
 	g_world.dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
     g_world.dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);
     
-    Phys_CreateTestScene(&g_world);
+    //Phys_CreateTestScene(&g_world);
 }
 
-void Phys_ClearWorld()
+void PhysExt_ClearWorld()
 {
     for (int i = 0; i < g_world.bodies.capacity; ++i)
     {
@@ -235,9 +239,9 @@ void Phys_ClearWorld()
     }
 }
 
-void Phys_Shutdown()
+void PhysExt_Shutdown()
 {
-    Phys_ClearWorld();
+    PhysExt_ClearWorld();
     // Get order right or it will cause an access violation
 	delete g_world.dynamicsWorld;
 	delete g_world.solver;
@@ -246,7 +250,7 @@ void Phys_Shutdown()
     delete g_world.broadphase;
 }
 
-MemoryBlock Phys_Step(f32 deltaTime)
+MemoryBlock PhysExt_Step(f32 deltaTime)
 {
     MemoryBlock eventBuffer = {};
 

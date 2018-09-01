@@ -46,24 +46,32 @@ void Game_SpawnLocalEntity(
         return;
     }
     Vec3_Set(&e->pos, x, y, z);
-    e->type = type;
     switch (type)
     {
         case LOCAL_ENT_TYPE_IMPACT:
         {
+            e->updaterIndex = LOCAL_ENT_UPDATER_DYNAMIC;
+            #if 0
             RendObj_SetAsBillboard(&e->rend, 0.3f, 0.3f, 0.3f,
                 AppGetTextureIndexByName("textures\\white.bmp")
             );
-            Vec3_Set(&e->scale, 0.2f, 0.2f, 0.2f);
-            //e->rend.flags = 0 | RENDOBJ_FLAG_DEBUG;
-            e->tick = 1.0f;
+            #endif
+            RendObj_SetAsMesh(&e->rend, 
+                Assets_GetMeshDataByName("Cube"),
+                1.0f, 1.0f, 0.0f,
+                AppGetTextureIndexByName("textures\\white.bmp")
+            );
+            e->originalScale = { 0.4f, 0.4f, 0.4f };
+            e->targetScale = { 0.05f, 0.05f, 0.05f };
+            e->tick = 0.0f;
+            e->tickMax = 0.5f + (1.1f * COM_STDRandf32());
+
+            e->startColour = { 1, 1, 1, 1 };
+            e->endColour = { 0.1f, 0.1f, 0.1f };
 
             // apply launch
             if (dir != NULL)
             {
-                // printf("Spawn local dir: %.2f, %.2f, %.2f\n",
-                //     e->dir.x, e->dir.y, e->dir.z
-                // );
                 e->dir = *dir;
                 e->speed = power;
             }
@@ -71,6 +79,7 @@ void Game_SpawnLocalEntity(
 
         case LOCAL_ENT_TYPE_SPAWN:
         {
+            e->updaterIndex = LOCAL_ENT_UPDATER_STATIC;
             RendObj_SetAsMesh(&e->rend, 
                 Assets_GetMeshDataByName("Cube"),
                 1.0f, 1.0f, 0.0f,
@@ -79,6 +88,8 @@ void Game_SpawnLocalEntity(
             
             e->tick = 0;
             e->tickMax = 0.35f;
+            e->startColour = { 1, 1, 0, 1 };
+            e->endColour = { 0.2f, 0.2f, 0 };
             e->originalScale.x = 3.0f;
             e->originalScale.y = 10.0f;
             e->originalScale.z = 3.0f;
@@ -87,33 +98,37 @@ void Game_SpawnLocalEntity(
             e->targetScale.z = 0.1f;
             e->scale = e->originalScale;
         } break;
+
+        case LOCAL_ENT_TYPE_EXPLOSION:
+        {
+            e->updaterIndex = LOCAL_ENT_UPDATER_STATIC;
+            RendObj_SetAsMesh(&e->rend, 
+                Assets_GetMeshDataByName("Cube"),
+                1.0f, 1.0f, 0.0f,
+                AppGetTextureIndexByName("textures\\white.bmp")
+            );
+            e->tick = 0;
+            e->tickMax = 0.2f;
+            e->startColour = { 1, 1, 0, 1 };
+            e->endColour = { 0.3f, 0.2f, 0 };
+            e->originalScale = { 0.5f, 0.5f, 0.5f };
+            e->targetScale = { 5.5f, 3.5f, 5.5f };
+
+            for (i32 i = 0; i < 30; ++i)
+            {
+                Vec3 offset = Game_RandomSpawnOffset(2.5f, 0.5f, 2.5f);
+                offset.x += x;
+                offset.y += y;
+                offset.z += z;
+
+                Game_SpawnLocalEntity(
+                    offset.x, offset.y, offset.z,
+                    NULL, 0, LOCAL_ENT_TYPE_IMPACT);
+            }
+
+        } break;
     }
     
-}
-
-void LocalEnt_Tick_Impact(LocalEnt *e, f32 dt, u8 verbose)
-{
-    if (e->tick <= 0)
-    {
-        e->status = LOCAL_ENT_STATUS_FREE;
-        return;
-    }
-    else
-    {
-        Vec3 vel;
-        Vec3_Set(&vel,
-                 e->dir.x * e->speed,
-                 e->dir.y * e->speed,
-                 e->dir.z * e->speed
-        );
-        e->pos.x += vel.x * dt;
-        e->pos.y += vel.y * dt;
-        e->pos.z += vel.z * dt;
-        //e->scale.x = 1 * e->tick;
-        //e->scale.y = 1 * e->tick;
-        //e->scale.z = 1 * e->tick;
-        e->tick -= dt;
-    }
 }
 
 void LocalEnt_InterpolateColour(LocalEnt* e, f32 dt)
@@ -121,7 +136,12 @@ void LocalEnt_InterpolateColour(LocalEnt* e, f32 dt)
 	f32 dr = e->endColour.red - e->startColour.red;
 	f32 dg = e->endColour.green - e->startColour.green;
 	f32 db = e->endColour.blue - e->startColour.blue;
-	f32 da = e->endColour.alpha - e->startColour.alpha;
+	//f32 da = e->endColour.alpha - e->startColour.alpha;
+    e->rend.SetColour(
+        COM_LinearEase(e->tick, e->startColour.red, dr, e->tickMax),
+        COM_LinearEase(e->tick, e->startColour.green, dg, e->tickMax),
+        COM_LinearEase(e->tick, e->startColour.blue, db, e->tickMax)
+    );
 }
 
 void LocalEnt_InterpolateScale(LocalEnt* e, f32 dt)
@@ -134,21 +154,34 @@ void LocalEnt_InterpolateScale(LocalEnt* e, f32 dt)
     e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
 }
 
-void LocalEnt_Tick_Spawn(LocalEnt *e, f32 dt, u8 verbose)
+void LocalEnt_Tick_Impact(LocalEnt *e, f32 dt, u8 verbose)
 {
-    //f32 lerp = (e->tickMax / 100.0f) * e->tick;
-    //f32 lerp = e->tickMax / 100.0f;
-    //lerp /= 100;
-	LocalEnt_InterpolateScale(e, dt);
+    if (e->tick > e->tickMax)
+    {
+        e->status = LOCAL_ENT_STATUS_FREE;
+        return;
+    }
+    else
+    {
+        LocalEnt_InterpolateScale(e, dt);
+	    LocalEnt_InterpolateColour(e, dt);
+        Vec3 vel;
+        Vec3_Set(&vel,
+                 e->dir.x * e->speed,
+                 e->dir.y * e->speed,
+                 e->dir.z * e->speed
+        );
+        e->pos.x += vel.x * dt;
+        e->pos.y += vel.y * dt;
+        e->pos.z += vel.z * dt;
+        e->tick += dt;
+    }
+}
+
+void LocalEnt_Tick_Static(LocalEnt *e, f32 dt, u8 verbose)
+{
+    LocalEnt_InterpolateScale(e, dt);
 	LocalEnt_InterpolateColour(e, dt);
-    //f32 dx = e->targetScale.x - e->originalScale.x;
-    //f32 dy = e->targetScale.y - e->originalScale.y;
-    //f32 dz = e->targetScale.z - e->originalScale.z;
-    //e->scale.x = COM_LinearEase(e->tick, e->originalScale.x, dx, e->tickMax);
-    //e->scale.y = COM_LinearEase(e->tick, e->originalScale.y, dy, e->tickMax);
-    //e->scale.z = COM_LinearEase(e->tick, e->originalScale.z, dz, e->tickMax);
-    // printf("GFX Tick %.2f SCALE: %.2f, %.2f, %.2f\n",
-        // e->tick, e->scale.x, e->scale.y, e->scale.z);
     if (e->tick > e->tickMax)
     {
         e->status = LOCAL_ENT_STATUS_FREE;
@@ -165,13 +198,13 @@ void Game_TickLocalEntities(f32 dt, u8 verbose)
         {
             continue;
         }
-        switch (e->type)
+        switch (e->updaterIndex)
         {
-        case LOCAL_ENT_TYPE_IMPACT:
+        case LOCAL_ENT_UPDATER_DYNAMIC:
             LocalEnt_Tick_Impact(e, dt, verbose);
             break;
         case LOCAL_ENT_TYPE_SPAWN:
-            LocalEnt_Tick_Spawn(e, dt, verbose);
+            LocalEnt_Tick_Static(e, dt, verbose);
             break;
         default:
             e->status = LOCAL_ENT_STATUS_FREE;
@@ -189,7 +222,7 @@ void Game_AddLocalEntitiesToRender(RenderScene *scene)
         {
             continue;
         }
-
+        
         RScene_AddRenderItem(scene, &e->rend,
                              e->pos.x, e->pos.y, e->pos.z,
                              e->scale.x, e->scale.y, e->scale.z);
