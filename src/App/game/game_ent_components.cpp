@@ -126,8 +126,15 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                             hit->normal,
                             time->singleFrame == 1);
                         // is this the time to do this...?
+                        // TODO ^^ No, it isn't!
                         PhysCmd_RemoveShape(col->shapeId);
                         //printf("Killed cube!\n");
+                        Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
+                        Vec3_Normalise(&dir);
+                        for (i32 k = 0; k < 10; ++k)
+                        {
+                            Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], &dir, 10, LOCAL_ENT_TYPE_DEBRIS);
+                        }
                     }
                     else
                     {

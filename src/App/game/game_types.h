@@ -9,22 +9,27 @@
 #define LOCAL_ENT_TYPE_IMPACT 1
 #define LOCAL_ENT_TYPE_SPAWN 2
 #define LOCAL_ENT_TYPE_EXPLOSION 3
+#define LOCAL_ENT_TYPE_DEBRIS 4
 
 #define LOCAL_ENT_UPDATER_DEFAULT 0
 #define LOCAL_ENT_UPDATER_DYNAMIC 1
 #define LOCAL_ENT_UPDATER_STATIC 2
+#define LOCAL_ENT_UPDATER_PHYSICS 3
+
+#define LOCAL_ENT_FLAG_PHYSICS (1 << 1)
 
 // Local entities are simple client side objects only and
 // can have NO effect on server Ents whatsoever.
 struct LocalEnt
 {
-    i32 id;
+    u32 id;
     i32 status;
 	
     // movement
     Vec3 pos;
 	Vec3 startPos;
 	Vec3 endPos;
+    Vec3 rotationDegrees;
 	
     Vec3 scale;
     Vec3 originalScale;
@@ -38,6 +43,8 @@ struct LocalEnt
     f32 speed;
 
     i32 updaterIndex;
+    u32 flags;
+    i32 shapeId;
 
     // timing
     f32 tick;

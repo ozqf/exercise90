@@ -4,6 +4,11 @@
 
 inline void LocalEnt_Reset(LocalEnt *e)
 {
+	//printf("Reset local ent %d\n", e->id);
+    if (e->flags & LOCAL_ENT_FLAG_PHYSICS)
+    {
+        PhysCmd_RemoveShape(e->shapeId);
+    }
     *e = {};
     e->scale = {1, 1, 1};
 }
@@ -14,6 +19,14 @@ inline void Game_ResetLocalEntities()
     {
         LocalEnt_Reset(&g_localEntities[i]);
     }
+}
+
+inline LocalEnt* Game_GetLocalEntByIndex(u32 index)
+{
+    AssertAlways(index < GAME_MAX_LOCAL_ENTITIES);
+    LocalEnt* e = &g_localEntities[index];
+    AssertAlways(e->status == LOCAL_ENT_STATUS_IN_USE);
+    return e;
 }
 
 inline LocalEnt *Game_GetFreeLocalEntitiy()
@@ -28,6 +41,7 @@ inline LocalEnt *Game_GetFreeLocalEntitiy()
         LocalEnt_Reset(e);
         e->id = i;
         e->status = LOCAL_ENT_STATUS_IN_USE;
+		//printf("Init local ent %d\n", e->id);
         return e;
     }
     return NULL;
@@ -127,6 +141,53 @@ void Game_SpawnLocalEntity(
             }
 
         } break;
+
+        case LOCAL_ENT_TYPE_DEBRIS:
+        {
+			e->updaterIndex = LOCAL_ENT_UPDATER_PHYSICS;
+			e->flags |= LOCAL_ENT_FLAG_PHYSICS;
+
+            RendObj_SetAsMesh(&e->rend, 
+                Assets_GetMeshDataByName("Cube"),
+                4.0f, 4.0f, 4.0f,
+                AppGetTextureIndexByName("textures\\white.bmp")
+            );
+            
+            ZShapeDef def = {};
+            def.SetAsBox(
+                e->pos.x, e->pos.y, e->pos.z,
+                0.25f, 0.25f, 0.25f,
+                0/*ZCOLLIDER_FLAG_NO_ROTATION*/, COLLISION_LAYER_DEBRIS, COL_MASK_DEBRIS, 1
+            );
+
+            e->shapeId = PhysCmd_CreateShape(&def, e->id);
+
+            e->tick = 0;
+            e->tickMax = 1;
+            e->startColour = { 0.7f, 0.7f, 0.7f, 1 };
+            e->endColour = { 0.2f, 0.2f, 0.2f };
+            e->originalScale = { 0.5f, 0.5f, 0.5f };
+			e->targetScale = { 0.5f, 0.5f, 0.5f };
+
+			// apply launch
+			if (dir != NULL)
+			{
+				f32 vx = (e->dir.x * power);
+				f32 vy = (e->dir.y * power);
+				f32 vz = (e->dir.z * power);
+				PhysCmd_ChangeVelocity(e->shapeId, vx, vy, vz);
+			}
+			else
+			{
+				f32 vx = (COM_STDRandf32() * 20.0f) - 10.0f;
+				f32 vy = (COM_STDRandf32() * 20.0f) - 10.0f;
+				f32 vz = (COM_STDRandf32() * 20.0f) - 10.0f;
+				PhysCmd_ChangeVelocity(e->shapeId, vx, vy, vz);
+			}
+
+        } break;
+
+
     }
     
 }
@@ -189,6 +250,16 @@ void LocalEnt_Tick_Static(LocalEnt *e, f32 dt, u8 verbose)
     e->tick += dt;
 }
 
+void LocalEnt_Tick_Physics(LocalEnt *e, f32 dt, u8 verbose)
+{
+	LocalEnt_InterpolateScale(e, dt);
+	LocalEnt_InterpolateColour(e, dt);
+	if (e->tick < e->tickMax)
+	{
+		e->tick += dt;
+	}
+}
+
 void Game_TickLocalEntities(f32 dt, u8 verbose)
 {
     for (i32 i = 0; i < GAME_MAX_LOCAL_ENTITIES; ++i)
@@ -203,8 +274,11 @@ void Game_TickLocalEntities(f32 dt, u8 verbose)
         case LOCAL_ENT_UPDATER_DYNAMIC:
             LocalEnt_Tick_Impact(e, dt, verbose);
             break;
-        case LOCAL_ENT_TYPE_SPAWN:
+        case LOCAL_ENT_UPDATER_STATIC:
             LocalEnt_Tick_Static(e, dt, verbose);
+            break;
+        case LOCAL_ENT_UPDATER_PHYSICS:
+			LocalEnt_Tick_Physics(e, dt, verbose);
             break;
         default:
             e->status = LOCAL_ENT_STATUS_FREE;
@@ -223,8 +297,17 @@ void Game_AddLocalEntitiesToRender(RenderScene *scene)
             continue;
         }
         
+		#if 1
+		Transform t = {};
+		Transform_SetByPosAndDegrees(&t, &e->pos, &e->rotationDegrees);
+		Transform_SetScale(&t, e->scale.x, e->scale.y, e->scale.z);
+		RScene_AddRenderItem(scene, &t, &e->rend);
+		#endif
+
+		#if 0
         RScene_AddRenderItem(scene, &e->rend,
                              e->pos.x, e->pos.y, e->pos.z,
                              e->scale.x, e->scale.y, e->scale.z);
+		#endif
     }
 }

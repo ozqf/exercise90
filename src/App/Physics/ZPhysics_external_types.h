@@ -109,7 +109,7 @@ struct ZShapeDef
     	flags = newFlags;
     	group = newGroup;
     	mask = newMask;
-		newTag = tag;
+		tag = newTag;
     	pos[0] = x;
     	pos[1] = y;
     	pos[2] = z;

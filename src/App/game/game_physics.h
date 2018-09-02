@@ -4,39 +4,56 @@
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 {
-    EntId entId = {};
-    entId.value = ev->ownerId;
-    EC_Transform* ecTrans = EC_FindTransform(gs, &entId);
-    if (ecTrans == NULL)
+    if (ev->tag == 0)
     {
-        return;
+        EntId entId = {};
+        entId.value = ev->ownerId;
+        EC_Transform* ecTrans = EC_FindTransform(gs, &entId);
+        if (ecTrans == NULL)
+        {
+            return;
+        }
+        M4x4* updateM = (M4x4*)&ev->matrix;
+    	//f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
+    	//f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
+    	//f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
+    #if 0
+    	//ent->transform.scale = { 1, 1, 1 };
+    	ent->transform.pos.x = updateM->posX;
+    	ent->transform.pos.y = updateM->posY;
+    	ent->transform.pos.z = updateM->posZ;
+    	Transform_ClearRotation(&ent->transform);
+    	Transform_RotateX(&ent->transform, ev->rot[0]);
+    	Transform_RotateY(&ent->transform, ev->rot[1]);
+    	Transform_RotateZ(&ent->transform, ev->rot[2]);
+    	/*Transform_RotateX(&ent->transform, updateM->xAxisW);
+    	Transform_RotateY(&ent->transform, updateM->yAxisW);
+    	Transform_RotateZ(&ent->transform, updateM->zAxisW);*/
+    #endif
+    #if 1
+        Transform_FromM4x4(&ecTrans->t, updateM);
+    #endif
+        EC_Collider* col = EC_FindCollider(gs, &entId);
+        Assert(col != NULL);
+        col->state.velocity.x = ev->vel[0]; 
+        col->state.velocity.y = ev->vel[1];
+        col->state.velocity.z = ev->vel[2];
+        col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
     }
-    M4x4* updateM = (M4x4*)&ev->matrix;
-	//f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
-	//f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
-	//f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
-#if 0
-	//ent->transform.scale = { 1, 1, 1 };
-	ent->transform.pos.x = updateM->posX;
-	ent->transform.pos.y = updateM->posY;
-	ent->transform.pos.z = updateM->posZ;
-	Transform_ClearRotation(&ent->transform);
-	Transform_RotateX(&ent->transform, ev->rot[0]);
-	Transform_RotateY(&ent->transform, ev->rot[1]);
-	Transform_RotateZ(&ent->transform, ev->rot[2]);
-	/*Transform_RotateX(&ent->transform, updateM->xAxisW);
-	Transform_RotateY(&ent->transform, updateM->yAxisW);
-	Transform_RotateZ(&ent->transform, updateM->zAxisW);*/
-#endif
-#if 1
-    Transform_FromM4x4(&ecTrans->t, updateM);
-#endif
-    EC_Collider* col = EC_FindCollider(gs, &entId);
-    Assert(col != NULL);
-    col->state.velocity.x = ev->vel[0]; 
-    col->state.velocity.y = ev->vel[1];
-    col->state.velocity.z = ev->vel[2];
-    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
+    else
+    {
+        M4x4* updateM = (M4x4*)&ev->matrix;
+        // object is a local ent
+        LocalEnt* e = Game_GetLocalEntByIndex(ev->ownerId);
+        e->pos.x = updateM->posX;
+        e->pos.y = updateM->posY;
+        e->pos.z = updateM->posZ;
+		Vec3 rot = M4x4_GetEulerAnglesDegrees(ev->matrix);
+		e->rotationDegrees.x = rot.x;
+		e->rotationDegrees.y = rot.y;
+		e->rotationDegrees.z = rot.z;
+    }
+    
 }
 
 /////////////////////////////////////////////////////////////////////////////
