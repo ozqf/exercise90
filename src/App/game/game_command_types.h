@@ -24,6 +24,11 @@ internal u16 COL_MASK_DEBRIS =
 internal u16 COL_MASK_FENCE =
     COLLISION_LAYER_ACTOR;
 
+internal u16 COL_MASK_PROJECTILE =
+    COLLISION_LAYER_WORLD |
+    COLLISION_LAYER_ACTOR |
+    COLLISION_LAYER_DEBRIS;
+
 //////////////////////////////////////////////////
 // Game Commands
 //////////////////////////////////////////////////

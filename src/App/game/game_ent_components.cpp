@@ -70,6 +70,8 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         PhysRayHit results[12];
 
         PhysCmd_Raycast ray = {};
+        ray.mask = COL_MASK_PROJECTILE;
+        ray.group = COLLISION_LAYER_ACTOR;
         ray.start[0] = t->pos.x;
         ray.start[1] = t->pos.y;
         ray.start[2] = t->pos.z;

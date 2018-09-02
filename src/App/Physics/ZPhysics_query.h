@@ -71,8 +71,8 @@ inline i32 Phys_QuickRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, PhysRayH
     btVector3 end(cmd->end[0], cmd->end[1], cmd->end[2]);
 
     btCollisionWorld::AllHitsRayResultCallback rayCallback(start, end);
-    rayCallback.m_collisionFilterGroup = (1 << 0);
-    rayCallback.m_collisionFilterMask = (1 << 0) | (1 << 1);
+    rayCallback.m_collisionFilterGroup = cmd->group;
+    rayCallback.m_collisionFilterMask = cmd->mask;
     world->dynamicsWorld->rayTest(start, end, rayCallback);
     i32 numHits = rayCallback.m_collisionObjects.size();
 
