@@ -49,6 +49,9 @@ internal void Game_AddTestSolid(GameState* gs,
     // Wall texture "textures\\COMP03_1.bmp"
     // Metal texture "textures\\W33_5.bmp"
 
+    u16 group;
+    u16 mask;
+
     if (isVisible)
     {
         EC_RendObjState r = {};
@@ -58,6 +61,13 @@ internal void Game_AddTestSolid(GameState* gs,
         r.colourRGB[1] = 1;
         r.colourRGB[2] = 1;
         size += App_WriteCommandBytesToFrameOutput((u8*)&r, sizeof(EC_RendObjState));
+        group = COLLISION_LAYER_WORLD;
+        mask = COL_MASK_DEFAULT;
+    }
+    else
+    {
+        group = COLLISION_LAYER_FENCE;
+        mask = COL_MASK_DEFAULT;
     }
 
     // Create Collider
@@ -66,8 +76,8 @@ internal void Game_AddTestSolid(GameState* gs,
         t.pos.x, t.pos.y, t.pos.z,
         halfSizeX, halfSizeY, halfSizeZ,
         ZCOLLIDER_FLAG_STATIC,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT,
+        group,
+        mask,
         0
     );
 

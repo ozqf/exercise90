@@ -176,6 +176,8 @@ struct PhysCmd_Raycast
 	i32 id;
 	f32 start[3];
 	f32 end[3];
+	u16 group;
+	u16 mask;
 };
 
 #endif
