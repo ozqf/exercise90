@@ -85,6 +85,7 @@ struct ZShapeDef
 	
 	u32 flags;
 	i32 handleId;
+	i32 tag;
 	u16 group;
 	u16 mask;
 	f32 pos[3];
@@ -99,7 +100,8 @@ struct ZShapeDef
     	f32 halfSizeZ,
     	u32 newFlags,
     	u16 newGroup,
-    	u16 newMask
+    	u16 newMask,
+		i32 newTag
 	)
 	{
 		*this = {};
@@ -107,6 +109,7 @@ struct ZShapeDef
     	flags = newFlags;
     	group = newGroup;
     	mask = newMask;
+		newTag = tag;
     	pos[0] = x;
     	pos[1] = y;
     	pos[2] = z;
@@ -204,6 +207,7 @@ struct PhysEV_TransformUpdate
 	f32 vel[3];
 	f32 angularVel[3];
 	u32 flags;
+	i32 tag;
 };
 
 struct PhysRayHit

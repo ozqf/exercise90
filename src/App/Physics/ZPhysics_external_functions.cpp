@@ -42,6 +42,7 @@ i32 PhysCmd_CreateBox(
     f32 halfSizeY,
     f32 halfSizeZ,
     u32 flags,
+    i32 tag,
     u16 group,
     u16 mask,
     u16 ownerId,
@@ -53,6 +54,7 @@ i32 PhysCmd_CreateBox(
     def.flags = flags;
     def.group = group;
     def.mask = mask;
+    def.tag = tag;
     def.pos[0] = x;
     def.pos[1] = y;
     def.pos[2] = z;

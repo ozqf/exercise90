@@ -14,7 +14,12 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
     
     handle->shape = new btBoxShape(btVector3(box->halfSize[0], box->halfSize[1], box->halfSize[2]));
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def->pos[0], def->pos[1], def->pos[2])));
-    handle->mask = def->mask;
+    //handle->mask = def->mask;
+    //handle->group = def->group;
+    printf("PHYS New shape group %d, mask %d\n",
+        def->mask, def->group
+    );
+
     handle->def = *def;
 
     btScalar mass;

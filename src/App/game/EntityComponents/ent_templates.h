@@ -72,7 +72,8 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, 
         0.5f, 0.5f, 0.5f, 
         ZCOLLIDER_FLAG_STATIC,
         COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT
+        COL_MASK_DEFAULT,
+        0
     );
 
     Ent_ApplySpawnOptions(state, options);
@@ -99,8 +100,9 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
         0,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS
+        COLLISION_LAYER_DEBRIS,
+        COL_MASK_DEBRIS,
+        1
     );
 
     state->componentBits |= EC_FLAG_HEALTH;
@@ -129,8 +131,9 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         playerWidth / 2, playerHeight / 2, playerWidth / 2, 
         ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_ACTOR
+        COLLISION_LAYER_ACTOR,
+        COL_MASK_ACTOR,
+        0
     );
 
     #if 1

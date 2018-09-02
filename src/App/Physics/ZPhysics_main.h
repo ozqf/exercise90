@@ -362,6 +362,7 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
         PhysEV_TransformUpdate ev = {};
         ev.ownerId = h->ownerId;
         ev.ownerIteration = h->ownerIteration;
+        ev.tag = h->def.tag;
         
         btTransform t;
         h->rigidBody->getMotionState()->getWorldTransform(t);

@@ -7,36 +7,15 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
     EntId entId = {};
     entId.index = ev->ownerId;
     entId.iteration = ev->ownerIteration;
-    //Ent *ent = Ent_GetEntityById(&gs->entList, &entId);
     EC_Transform* ecTrans = EC_FindTransform(gs, &entId);
     if (ecTrans == NULL)
     {
         return;
     }
     M4x4* updateM = (M4x4*)&ev->matrix;
-	f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
-	f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
-	f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
-    // Debugging trap
-	// if (ZABS(magX) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-	// if (ZABS(magY) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-	// if (ZABS(magZ) > 1.1f)
-	// {
-	// 	int foo = 1;
-	// }
-
-    EC_Collider* col = EC_FindCollider(gs, &entId);
-    Assert(col != NULL);
-    col->state.velocity.x = ev->vel[0]; 
-    col->state.velocity.y = ev->vel[1];
-    col->state.velocity.z = ev->vel[2];
-    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
+	//f32 magX = Vec3_Magnitudef(updateM->x0, updateM->x1, updateM->x2);
+	//f32 magY = Vec3_Magnitudef(updateM->y0, updateM->y1, updateM->y2);
+	//f32 magZ = Vec3_Magnitudef(updateM->z0, updateM->z1, updateM->z2);
 #if 0
 	//ent->transform.scale = { 1, 1, 1 };
 	ent->transform.pos.x = updateM->posX;
@@ -53,6 +32,12 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 #if 1
     Transform_FromM4x4(&ecTrans->t, updateM);
 #endif
+    EC_Collider* col = EC_FindCollider(gs, &entId);
+    Assert(col != NULL);
+    col->state.velocity.x = ev->vel[0]; 
+    col->state.velocity.y = ev->vel[1];
+    col->state.velocity.z = ev->vel[2];
+    col->isGrounded = (ev->flags & PHYS_EV_FLAG_GROUNDED);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -67,7 +67,8 @@ internal void Game_AddTestSolid(GameState* gs,
         halfSizeX, halfSizeY, halfSizeZ,
         ZCOLLIDER_FLAG_STATIC,
         COLLISION_LAYER_WORLD,
-        COL_MASK_DEFAULT
+        COL_MASK_DEFAULT,
+        0
     );
 
     size += App_WriteCommandBytesToFrameOutput((u8*)&col, sizeof(EC_ColliderState));

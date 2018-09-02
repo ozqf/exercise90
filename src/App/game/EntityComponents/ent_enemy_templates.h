@@ -52,8 +52,9 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 1.0f, 0.5f, 
         ZCOLLIDER_FLAG_GROUNDCHECK | ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS
+        COLLISION_LAYER_ACTOR,
+        COL_MASK_ACTOR,
+        0
     );
 
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
@@ -83,7 +84,8 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
         1, 2, 1, 
         ZCOLLIDER_FLAG_GROUNDCHECK  | ZCOLLIDER_FLAG_NO_ROTATION,
         COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS
+        COL_MASK_DEBRIS,
+        0
     );
     state->transform.scale = { 2, 2, 2 };
     state->renderState.colourRGB[0] = 1;
