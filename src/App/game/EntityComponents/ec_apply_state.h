@@ -77,8 +77,7 @@ internal void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* s
         col->state = *state;
         col->shapeId = PhysCmd_CreateShape(
             &col->state.def,
-            ent->entId.index,
-            ent->entId.iteration
+            ent->entId.value
         );
     }
     else

@@ -15,8 +15,7 @@ struct PhysBodyHandle
     // internal id, matches user index on btRigidbody
     i32 id;
     // external id
-    u16 ownerId;
-    u16 ownerIteration;
+    u32 ownerId;;
     
     ZShapeDef def;
     

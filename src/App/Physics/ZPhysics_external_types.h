@@ -202,8 +202,7 @@ enum PhysEventType
 struct PhysEV_TransformUpdate
 {
 	//i32 type;
-	u16 ownerId;
-	u16 ownerIteration;
+	u32 ownerId;
 	f32 matrix[16];
 	f32 rot[3];
 	f32 vel[3];

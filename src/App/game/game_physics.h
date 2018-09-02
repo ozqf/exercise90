@@ -5,8 +5,7 @@
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 {
     EntId entId = {};
-    entId.index = ev->ownerId;
-    entId.iteration = ev->ownerIteration;
+    entId.value = ev->ownerId;
     EC_Transform* ecTrans = EC_FindTransform(gs, &entId);
     if (ecTrans == NULL)
     {

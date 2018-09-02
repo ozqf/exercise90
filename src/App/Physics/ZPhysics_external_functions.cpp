@@ -20,7 +20,7 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 }
 #endif
 
-i32 PhysCmd_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
+i32 PhysCmd_CreateShape(ZShapeDef* def, u32 ownerId)
 {
     Assert(def != NULL);
     PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
@@ -28,12 +28,11 @@ i32 PhysCmd_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration)
     Assert(h != NULL);
     def->handleId = h->id;
 	h->ownerId = ownerId;
-	h->ownerIteration = ownerIteration;
     g_cmdBuf.ptrWrite += COM_WriteByte(Create, g_cmdBuf.ptrWrite);
     g_cmdBuf.ptrWrite += COM_COPY_STRUCT(def, g_cmdBuf.ptrWrite, ZShapeDef);
     return h->id;
 }
-
+#if 0
 i32 PhysCmd_CreateBox(
     f32 x,
     f32 y,
@@ -45,8 +44,7 @@ i32 PhysCmd_CreateBox(
     i32 tag,
     u16 group,
     u16 mask,
-    u16 ownerId,
-    u16 ownerIteration
+    u32 ownerId
     )
 {
     ZShapeDef def = {};
@@ -61,9 +59,9 @@ i32 PhysCmd_CreateBox(
     def.data.box.halfSize[0] = halfSizeX;
     def.data.box.halfSize[1] = halfSizeY;
     def.data.box.halfSize[2] = halfSizeZ;
-    return PhysCmd_CreateShape(&def, ownerId, ownerIteration);
+    return PhysCmd_CreateShape(&def, ownerId);
 }
-
+#endif
 void PhysCmd_RemoveShape(i32 shapeId)
 {
     PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);

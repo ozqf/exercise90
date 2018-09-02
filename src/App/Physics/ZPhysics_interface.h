@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////
 // Queued commands
 //////////////////////////////////////////////////////////////////
-i32 PhysCmd_CreateShape(ZShapeDef* def, u16 ownerId, u16 ownerIteration);
+i32 PhysCmd_CreateShape(ZShapeDef* def, u32 ownerId);
 i32 PhysCmd_CreateBox(
     f32 x,
     f32 y,
@@ -27,8 +27,7 @@ i32 PhysCmd_CreateBox(
     u32 flags,
     u16 group,
     u16 mask,
-    u16 ownerId,
-    u16 ownerIteration
+    u32 ownerId
     );
 //i32 Phys_CreateSphere(f32 x, f32 y, f32 z, f32 radius, u32 flags, u16 mask, u16 ownerId, u16 ownerIteration);
 //int Phys_CreateBox(f32 x, f32 y, f32 z, f32 halfWidthX, f32 halfWidthY, f32 halfWidthZ, u32 flags, u16 mask, u16 ownerId, u16 ownerIteration);
