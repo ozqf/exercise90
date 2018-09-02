@@ -102,7 +102,7 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
         0,
         COLLISION_LAYER_DEBRIS,
         COL_MASK_DEBRIS,
-        1
+        0
     );
 
     state->componentBits |= EC_FLAG_HEALTH;

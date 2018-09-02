@@ -45,6 +45,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_ENTITY_STATE_2 109
 #define CMD_TYPE_GAME_INSTANCE_STATE 110
 #define CMD_TYPE_SPAWN_VIA_TEMPLATE 111
+#define CMD_TYPE_SPAWN_GFX 112
 
 //////////////////////////////////////////////////
 // Spawning

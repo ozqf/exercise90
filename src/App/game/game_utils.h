@@ -7,6 +7,7 @@ inline f32 Game_RandomInRange(f32 range)
     return COM_STDRandf32() * (range - -range) + -range;
 }
 
+// range 10 will result in a value between -10 and 10 on given axis
 inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 {
     Vec3 v;

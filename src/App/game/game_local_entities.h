@@ -150,7 +150,7 @@ void Game_SpawnLocalEntity(
             RendObj_SetAsMesh(&e->rend, 
                 Assets_GetMeshDataByName("Cube"),
                 4.0f, 4.0f, 4.0f,
-                AppGetTextureIndexByName("textures\\white.bmp")
+                AppGetTextureIndexByName("textures\\white_bordered.bmp")
             );
             
             ZShapeDef def = {};
@@ -164,7 +164,7 @@ void Game_SpawnLocalEntity(
 
             e->tick = 0;
             e->tickMax = 1;
-            e->startColour = { 0.7f, 0.7f, 0.7f, 1 };
+            e->startColour = { COM_STDRandf32(), COM_STDRandf32(), COM_STDRandf32(), 1 };
             e->endColour = { 0.2f, 0.2f, 0.2f };
             e->originalScale = { 0.5f, 0.5f, 0.5f };
 			e->targetScale = { 0.5f, 0.5f, 0.5f };
@@ -172,9 +172,12 @@ void Game_SpawnLocalEntity(
 			// apply launch
 			if (dir != NULL)
 			{
-				f32 vx = (e->dir.x * power);
-				f32 vy = (e->dir.y * power);
-				f32 vz = (e->dir.z * power);
+                e->dir = *dir;
+                //printf("Launch input: Dir: %.2f, %.2f, %.2f. Power: %.2f\n", dir->x, dir->y, dir->z, power);
+				f32 vx = (dir->x * power);
+				f32 vy = (dir->y * power);
+				f32 vz = (dir->z * power);
+                //printf("    Launch result: %.2f, %.2f, %.2f\n", vx, vy, vz);
 				PhysCmd_ChangeVelocity(e->shapeId, vx, vy, vz);
 			}
 			else
