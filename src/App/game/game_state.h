@@ -86,5 +86,6 @@ internal void GS_Init(GameState *gs)
 
 internal void GS_Clear(GameState* gs)
 {
+	Game_ResetLocalEntities();
     GS_Init(gs);
 }

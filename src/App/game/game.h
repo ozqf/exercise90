@@ -167,13 +167,15 @@ global_variable EC_MultiRendObj     g_multiRenderers[GAME_MAX_ENTITIES];
 global_variable UIEntity            g_ui_entities[UI_MAX_ENTITIES];
 #define PLAYER_STATUS_TEXT_LENGTH 256
 global_variable char                g_playerStatusText[PLAYER_STATUS_TEXT_LENGTH];
+#define HUD_CENTRE_TEXT_LENGTH 256
+global_variable char                g_hud_centreText[HUD_CENTRE_TEXT_LENGTH];
 
 // GFX
 global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 
 /////////////////////////////////////////////////////////////
-// Debug
-/////////////////////////////////////////////////////////////
+// Debug/
+////////////////////////////////////////////////////////////
 Transform g_debugTransform = {};
 
 // Interface

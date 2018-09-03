@@ -163,9 +163,10 @@ void Game_SpawnLocalEntity(
             e->shapeId = PhysCmd_CreateShape(&def, e->id);
 
             e->tick = 0;
-            e->tickMax = 1;
-            e->startColour = { COM_STDRandf32(), COM_STDRandf32(), COM_STDRandf32(), 1 };
-            e->endColour = { 0.2f, 0.2f, 0.2f };
+            e->tickMax = 3;
+			e->timeToLive = 10;
+            e->startColour = { COM_STDRandf32() * 0.5f, COM_STDRandf32() * 0.5f, COM_STDRandf32() * 0.5f, 1 };
+            e->endColour = { COM_STDRandf32() * 0.1f, COM_STDRandf32() * 0.1f, COM_STDRandf32() * 0.1f };
             e->originalScale = { 0.5f, 0.5f, 0.5f };
 			e->targetScale = { 0.5f, 0.5f, 0.5f };
 
@@ -260,6 +261,11 @@ void LocalEnt_Tick_Physics(LocalEnt *e, f32 dt, u8 verbose)
 	if (e->tick < e->tickMax)
 	{
 		e->tick += dt;
+	}
+	e->timeToLive -= dt;
+	if (e->timeToLive <= 0)
+	{
+		LocalEnt_Reset(e);
 	}
 }
 

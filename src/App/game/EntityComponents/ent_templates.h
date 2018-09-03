@@ -165,7 +165,7 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
 
     state->componentBits |= EC_FLAG_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
-    Transform_SetScale(&state->transform, 0.35f, 0.35f, 0.35f);
+    Transform_SetScale(&state->transform, 0.45f, 0.45f, 0.45f);
 
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited(

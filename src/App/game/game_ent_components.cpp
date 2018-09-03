@@ -141,7 +141,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                         {
                             //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
                             Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
-                            f32 power = 10.0f + Game_RandomInRange(20.0f);
+                            f32 power = 10.0f + Game_RandomInRange(40.0f);
                             Game_SpawnLocalEntity(hit->worldPos[0] + offset.x, hit->worldPos[1] + offset.y, hit->worldPos[2] + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
                         }
                     }
@@ -173,6 +173,22 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
             t->pos.z += prj->state.move.z * time->deltaTime;
         }
     }
+}
+
+void GameUI_SetCentreMessage(char* text)
+{
+    sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, text);
+    #if 0
+    for (i32 i = 0; i < UI_MAX_ENTITIES; ++i)
+    {
+        UIEntity* e = &g_ui_entities[i];
+        if (e->inUse == 0) { continue; }
+        if (!COM_CompareStrings("CentreMSG", e->name))
+        {
+            COM_CopyStringLimited(text, )
+        }
+    }
+    #endif
 }
 
 void Game_UpdateUI(UIEntity *ents, i32 maxEntities, GameTime *time)

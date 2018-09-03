@@ -49,8 +49,7 @@ struct LocalEnt
     // timing
     f32 tick;
     f32 tickMax;
-    i32 tock;
-    i32 tockMax;
+	f32 timeToLive;
 
     // display
     RendObj rend;
@@ -464,30 +463,31 @@ struct ClientList
 // Session data
 ///////////////////////////////////////////////////////////////////////
 
-// Stores the starting conditions of the current game instance
-// Session is data spanning multiple levels
+// A Campaign spans multiple sessions
+// Stores the starting conditions of the current game session and
+// results of previous sessions
 // From hitting start in the main menu to game over
-struct GameSession
+struct GameCampaign
 {
     char mapName[64];
     i32 levelsCompleted = 0;
 };
 
-#define GAME_INSTANCE_STATE_WARMUP 0
-#define GAME_INSTANCE_STATE_PLAYING 1
-#define GAME_INSTANCE_STATE_FAILED 2
-#define GAME_INSTANCE_STATE_SUCCESS 3
+#define GAME_SESSION_STATE_WARMUP 0
+#define GAME_SESSION_STATE_PLAYING 1
+#define GAME_SESSION_STATE_FAILED 2
+#define GAME_SESSION_STATE_SUCCESS 3
 
 // overall game information in the current instance (eg progress, wave count, scores etc)
-struct GameInstance
+struct GameSession
 {
     i32 score;
     i32 state;
 	
 	u8 AllowPlayerSpawning()
 	{
-		return (this->state == GAME_INSTANCE_STATE_PLAYING
-		|| this->state == GAME_INSTANCE_STATE_WARMUP);
+		return (this->state == GAME_SESSION_STATE_PLAYING
+		|| this->state == GAME_SESSION_STATE_WARMUP);
 	}
 };
 
@@ -509,8 +509,9 @@ struct GameState
 {
     u8 netMode; // 0 == server, 1 == client
     
+    GameCampaign campaign;
     GameSession session;
-    GameInstance instance;
+    
     ClientList clientList;
     GameStateLocal local;
 

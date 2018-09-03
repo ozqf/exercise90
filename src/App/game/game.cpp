@@ -175,6 +175,7 @@ internal void Game_BuildTestHud()
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.x = -1;
     ent->transform.pos.y = -1;// -(1 - (0.075f * 3));
+    COM_CopyStringLimited("CentreMSG", ent->name, 16);
     //char* placeholderChars2 = "LINE 1\nLINE 2\nLINE 3\nLINE 4\nLINE 5";
 
     RendObj_SetAsAsciCharArray(
@@ -186,7 +187,25 @@ internal void Game_BuildTestHud()
         AppGetTextureIndexByName("textures\\charset.bmp"),
         1, 1, 1
     );
-    printf("ALIGNMENT MODE FOR PLAYER STATUS: %d\n", ent->rendObj.data.charArray.alignmentMode);
+    //printf("ALIGNMENT MODE FOR PLAYER STATUS: %d\n", ent->rendObj.data.charArray.alignmentMode);
+    
+    // 3 Centre Message
+    ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
+    //char* message = "GAME OVER";
+    //numChars = COM_StrLen(chars);
+    sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "WAITING");
+    ent->transform.pos.x = 0;
+    ent->transform.pos.y = 0.5f;
+    RendObj_SetAsAsciCharArray(
+        &ent->rendObj,
+        g_hud_centreText,
+        0,
+        0.2f,
+        TEXT_ALIGNMENT_MIDDLE_MIDDLE,
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        1, 1, 1
+    );
+    
 }
 
 internal void Game_BuildTestMenu()
@@ -224,9 +243,23 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     }
 }
 
-internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameInstanceState* cmd)
+internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameSessionState* cmd)
 {
-	gs->instance.state = cmd->state;
+    if (gs->session.state == cmd->state) { return; }
+	printf("GAME Session state changing. %d to %d\n", gs->session.state, cmd->state);
+	gs->session.state = cmd->state;
+    if (cmd->state == GAME_SESSION_STATE_PLAYING)
+    {
+        sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "");
+    }
+    else if (cmd->state == GAME_SESSION_STATE_FAILED)
+    {
+        sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "GAME OVER");
+    }
+    else if (cmd->state == GAME_SESSION_STATE_SUCCESS)
+    {
+        sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "SUCCESS");
+    }
 }
 
 internal void Exec_SpawnViaTemplate(GameState* gs, Cmd_SpawnViaTemplate* cmd)
@@ -322,9 +355,9 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             return 1;
         } break;
 		
-		case CMD_TYPE_GAME_INSTANCE_STATE:
+		case CMD_TYPE_GAME_SESSION_STATE:
 		{
-			Cmd_GameInstanceState cmd = {};
+			Cmd_GameSessionState cmd = {};
 			ptr += cmd.Read(header, ptr);
 			Exec_UpdateGameInstance(gs, &cmd);
 			return 1;

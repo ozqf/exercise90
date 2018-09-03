@@ -47,7 +47,7 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
                 printf("SV Cannot spawn - client is free or playing already\n");
                 return 1;
             }
-			if (!gs->instance.AllowPlayerSpawning())
+			if (!gs->session.AllowPlayerSpawning())
 			{
 				printf("SV: Instance disallows player spawning\n");
 				return 1;
@@ -145,23 +145,32 @@ void SV_DontRunMe()
 
 internal void SV_ProcessClientSpawn(GameState* gs, Client* cl)
 {
-	IS_SERVER(gs);
-    printf("SV: GAME START\n");
+	if(!IS_SERVER(gs)) { return; }
+    if (gs->session.state == 0)
+    {
+        printf("SV: GAME START\n");
+        Cmd_GameSessionState cmd = {};
+        cmd.state = GAME_SESSION_STATE_PLAYING;
+        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, cmd);
+        //sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "");
+    }
 }
 
 internal void SV_ProcessClientDeath(GameState* gs, Client* cl)
 {
-	IS_SERVER(gs);
+	if(!IS_SERVER(gs)) { return; }
     if (App_NumPlayingClients(&gs->clientList) == 0)
     {
         printf("SV: GAME OVER\n");
+        Cmd_GameSessionState cmd = {};
+        cmd.state = GAME_SESSION_STATE_FAILED;
+        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, cmd);
     }
 }
 
 internal void SV_ProcessPlayerDeath(GameState* gs, Client* cl)
 {
-    //if (!IsRunningServer(gs->netMode)) { return; }
-	IS_SERVER(gs);
+	if(!IS_SERVER(gs)) { return; }
     printf("GAME Client %d avatar died\n", cl->clientId);
     Cmd_ClientUpdate clUpdate = {};
     clUpdate.clientId = cl->clientId;

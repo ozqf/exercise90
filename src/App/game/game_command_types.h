@@ -43,9 +43,10 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_ENTITY_DELTA 107
 #define CMD_TYPE_PLAYER_STATE 108
 #define CMD_TYPE_ENTITY_STATE_2 109
-#define CMD_TYPE_GAME_INSTANCE_STATE 110
-#define CMD_TYPE_SPAWN_VIA_TEMPLATE 111
-#define CMD_TYPE_SPAWN_GFX 112
+#define CMD_TYPE_GAME_SESSION_STATE 110
+#define CMD_TYPE_GAME_CAMPAIGN_STATE 111
+#define CMD_TYPE_SPAWN_VIA_TEMPLATE 112
+#define CMD_TYPE_SPAWN_GFX 113
 
 //////////////////////////////////////////////////
 // Spawning
@@ -254,11 +255,18 @@ struct Cmd_EntitySpawn2
 
 Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
 
-struct Cmd_GameInstanceState
+struct Cmd_GameSessionState
 {
 	i32 state;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameInstanceState)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameSessionState)
+};
+
+struct Cmd_GameCampaignState
+{
+	i32 state;
+	
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState)
 };
 
 struct Cmd_SpawnViaTemplate
@@ -266,5 +274,5 @@ struct Cmd_SpawnViaTemplate
 	i32 factoryType;
 	EntitySpawnOptions options;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameInstanceState)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnViaTemplate)
 };

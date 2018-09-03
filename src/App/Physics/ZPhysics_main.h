@@ -287,7 +287,7 @@ void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
                 }
                 else
                 {
-                    printf("PHYS Removed shape %d\n", shapeId);
+                    //printf("PHYS Removed shape %d\n", shapeId);
                     Phys_FreeHandle(&g_world, h);
                 }
             } break;

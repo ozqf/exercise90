@@ -367,7 +367,6 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     platform.Platform_RenderScene(&g_uiScene);
     #endif
 
-    // TODO: Not actually building the menu scene yet.
     // Paused message and actual menus are different items
     // displayed at different times, but always over the game and HUD
     if (g_menuOn)
@@ -379,6 +378,11 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     
 }
 
+
+
+///////////////////////////////////////////////////////////////////////////////
+// PLATFORM INPUT
+///////////////////////////////////////////////////////////////////////////////
 void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
 {
 	// Increment internal platform frame number here!
