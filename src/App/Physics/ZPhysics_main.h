@@ -26,7 +26,8 @@ PhysBodyHandle *Phys_GetHandleById(PhysBodyList *list, i32 queryId)
     Assert(queryId >= 0);
     Assert(queryId < list->capacity);
     // Handles that have not been 'issued' have no business being found!
-    Assert(list->items[queryId].inUse);
+	if (list->items[queryId].inUse == FALSE) { return NULL; }
+    //Assert(list->items[queryId].inUse);
     return &list->items[queryId];
 }
 

@@ -233,6 +233,8 @@ void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventB
 
 void PhysExt_ClearWorld()
 {
+	COM_ZeroMemory(g_cmdBuf.ptrStart, g_cmdBuf.capacity);
+	COM_ZeroMemory(g_eventBuf.ptrStart, g_eventBuf.capacity);
     for (int i = 0; i < g_world.bodies.capacity; ++i)
     {
         Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);

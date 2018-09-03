@@ -29,7 +29,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
     //state->aiState.ticker.tickMax = 0.033f;
-    state->aiState.minApproachDistance = 6.0f;
+    state->aiState.minApproachDistance = 1.0f;
     
     //state->componentBits |= EC_FLAG_RENDERER;
     //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
@@ -82,9 +82,9 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         1, 2, 1, 
-        ZCOLLIDER_FLAG_GROUNDCHECK  | ZCOLLIDER_FLAG_NO_ROTATION,
-        COLLISION_LAYER_WORLD,
-        COL_MASK_DEBRIS,
+        ZCOLLIDER_FLAG_GROUNDCHECK | ZCOLLIDER_FLAG_NO_ROTATION,
+        COLLISION_LAYER_ACTOR,
+        COL_MASK_ACTOR,
         0
     );
     state->transform.scale = { 2, 2, 2 };
@@ -93,6 +93,8 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
     state->renderState.colourRGB[2] = 1;
     state->healthState.hp = 500;
     options->scale = { 2, 2, 2 };
+
+    state->actorState.runSpeed = 3;
 
     state->multiRendState.GetBaseRendObj()->heightOffset = -1.0f;
     state->multiRendState.GetHeadRendObj()->heightOffset = 1.0f;

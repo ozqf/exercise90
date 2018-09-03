@@ -71,10 +71,12 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
         state.renderState.colourRGB[2] = 1;
         Ent_WriteEntityStateCmd(NULL, &state);
     }
-    for (i32 i = 0; i < 22; ++i)
+    f32 spreadX = 3.0f;
+    f32 spreadY = 1.5f;// 3f;
+    for (i32 i = 0; i < 12; ++i)
     {
-        f32 randOffsetX = Game_RandomInRange(7);
-        f32 randOffsetY = Game_RandomInRange(3);
+        f32 randOffsetX = Game_RandomInRange(spreadX);
+        f32 randOffsetY = Game_RandomInRange(spreadY);
 
         Ent_SetProjectileSpawnOptions(
             &options,

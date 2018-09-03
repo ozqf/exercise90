@@ -149,7 +149,7 @@ internal void Game_BuildTestHud()
     // 0 Crosshair
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.z = 0;
-    ent->transform.scale = { 0.1f, 0.1f, 0.1f };
+    ent->transform.scale = { 0.04f, 0.04f, 0.04f };
     RendObj_SetAsSprite(&ent->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
     RendObj_CalculateSpriteAsciUVs(&ent->rendObj.data.sprite, '+');
 
