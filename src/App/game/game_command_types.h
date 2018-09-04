@@ -59,6 +59,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define ENTITY_TYPE_ENEMY 6
 #define ENTITY_TYPE_BLOCKING_VOLUME 7
 #define ENTITY_TYPE_ENEMY_BRUTE 8
+#define ENTITY_TYPE_ENEMY_CHARGER 9
 //#define ENTITY_TYPES_COUNT 6
 
 // Define placeholder raw read/write functions for commands.

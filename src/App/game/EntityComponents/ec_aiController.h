@@ -222,7 +222,24 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
                 motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             }
             #endif
-            AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+            if (ai->state.type == 0)
+            {
+                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+            }
+            else
+            {
+                motor->state.input.degrees.x += -1;
+                printf("Pitch: %.4f\n", motor->state.input.degrees.x);
+                #if 0
+                f32 degreesChange = (25 * time->deltaTime);
+                motor->state.input.degrees.x += degreesChange;
+                printf("Pitch %.2f Degrees change %.2f\n", motor->state.input.degrees.x, degreesChange);
+                f32 pitch =  motor->state.input.degrees.x;
+                printf("Apply pitch %.2f\n", pitch);
+                AI_ApplyLookAngles(motor, info.yawRadians, pitch * DEG2RAD);
+                #endif
+            }
+            
         } break;
 
         case AI_STATE_FINISH_ATTACK:

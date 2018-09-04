@@ -102,12 +102,51 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
     Ent_ApplySpawnOptions(state, options);
 }
 
+internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* options)
+{
+    Ent_SetTemplate_GenericEnemy(state, options);
+    state->colliderState.def.SetAsBox(
+        state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
+        1, 1, 1, 
+        ZCOLLIDER_FLAG_GROUNDCHECK | ZCOLLIDER_FLAG_NO_ROTATION,
+        COLLISION_LAYER_ACTOR,
+        COL_MASK_ACTOR,
+        0
+    );
+    state->transform.scale = { 2, 2, 2 };
+    state->renderState.colourRGB[0] = 1;
+    state->renderState.colourRGB[1] = 0;
+    state->renderState.colourRGB[2] = 1;
+    state->healthState.SetHealthAndMax(250);
+    options->scale = { 2, 2, 2 };
+
+    state->actorState.runSpeed = 7;
+
+    state->aiState.minApproachDistance = 3.0f;
+    state->aiState.type = 1;
+
+    // Disable multi-render component
+    state->componentBits &= ~EC_FLAG_MULTI_RENDOBJ;
+    //state->multiRendState.GetBaseRendObj()->heightOffset = -1.0f;
+    //state->multiRendState.GetHeadRendObj()->heightOffset = 1.0f;
+
+    state->componentBits |= EC_FLAG_RENDERER;
+    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    state->renderState.colourRGB[0] = 0.2f;
+    state->renderState.colourRGB[1] = 0.2f;
+    state->renderState.colourRGB[2] = 1;
+
+    Ent_ApplySpawnOptions(state, options);
+}
+
 internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     switch(templateId)
     {
         case ENTITY_TYPE_ENEMY: { Ent_SetTemplate_Grunt(state, options); } return 1;
         case ENTITY_TYPE_ENEMY_BRUTE: { Ent_SetTemplate_Brute(state, options); } return 1;
+        case ENTITY_TYPE_ENEMY_CHARGER: { Ent_SetTemplate_Charger(state, options); } return 1;
         default: return 0;
     }
 }

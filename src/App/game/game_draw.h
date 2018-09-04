@@ -57,7 +57,17 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
         {
             //Ent* ent = Ent_GetEntityByIndex(&gs->entList, rend->header.entId.index);
             EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
-            RScene_AddRenderItem(scene, &entTrans->t, &rend->rendObj);
+
+            Transform t = entTrans->t;
+            EC_ActorMotor* m = EC_FindActorMotor(gs, &rend->header.entId);
+            if (m)
+            {
+                f32 pitch = m->state.input.degrees.x;
+                f32 yaw = m->state.input.degrees.y;
+                Transform_SetRotationDegrees(&t, pitch, yaw, 0);
+            }
+
+            RScene_AddRenderItem(scene, &t, &rend->rendObj);
         }
     }
     l = gs->multiRendObjList.max;

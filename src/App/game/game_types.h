@@ -307,6 +307,7 @@ struct EC_AIState
 {
     EntId target;
     i32 state;
+    i32 type;
     Vec3 dir;
     f32 speed;
     f32 minApproachDistance;
