@@ -222,6 +222,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
 			*/
 			ShowWindow(appWindow, SW_MINIMIZE);
 			ShowWindow(consoleHandle, SW_MINIMIZE);
+			Win32_ExecuteTextCommand("MINIMISED");
 			break;
 		}
 

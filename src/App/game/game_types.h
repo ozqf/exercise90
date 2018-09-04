@@ -356,12 +356,14 @@ struct EC_Label
 struct EC_HealthState
 {
     i32 hp;
+	u32 lastHitFrame;
+	EntId lastHitSource;
 };
 
 struct EC_Health
 {
     EC_Header header;
-
+    
     EC_HealthState state;
 };
 

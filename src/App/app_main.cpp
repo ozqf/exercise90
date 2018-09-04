@@ -28,7 +28,7 @@ i32 App_GetVarAsI32(char* name)
 
 void App_InitVars()
 {
-    COM_SetVarByString("i.sensitivity", "40", g_vars, &g_nextVar, MAX_VARS);
+    COM_SetVarByString("i.sensitivity", "20", g_vars, &g_nextVar, MAX_VARS);
     COM_SetVarByString("i.inverted", "1", g_vars, &g_nextVar, MAX_VARS);
 }
 
@@ -219,9 +219,12 @@ void App_UpdateGameState(GameTime* time)
     // Prepare input buffer
 	ByteBuffer* input = g_appReadBuffer;
 	
+	
+	//////////////////////////////////////////////
 	// demo buffer
+	//////////////////////////////////////////////
+	#if 1
 	ByteBuffer replayBuffer = {};
-#if 1
     if (g_replayMode == RecordingReplay)
     {
         // > Write frame header
@@ -277,6 +280,7 @@ void App_UpdateGameState(GameTime* time)
             //platform.Platform_WriteTextCommand("PLAY DEMO2.DEM");
         }
     }
+	//////////////////////////////////////////////
 #endif
 
     // Game state update
@@ -402,23 +406,21 @@ void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
         // Input_ToggleMouseMode();
         // g_menuOn = !g_menuOn;
     }
-    if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->platformFrameNumber))
-    {
-        g_paused = !g_paused;
-        printf("PAUSED: %d\n", g_paused);
-    }
+    // if (Input_CheckActionToggledOn(&g_inputActions, "Pause", time->platformFrameNumber))
+    // {
+        // g_paused = !g_paused;
+        // printf("PAUSED: %d\n", g_paused);
+    // }
 }
 
 void App_Frame(GameTime *time)
 {
+	if (g_paused || g_minimised) { return; }
+	
     g_time = *time;
-
-    //if (!g_paused)
-    //{
-        App_UpdateGameState(time);
-        //time->frameNumber++;
-    //}
-    
+	
+	App_UpdateGameState(time);
+	
     if (time->singleFrame)
 	{
 		u32 bytesRead = g_appReadBuffer->ptrWrite - g_appReadBuffer->ptrStart;

@@ -281,6 +281,14 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	{
 		return Menu_ParseCommandString(str, tokens, numTokens);
 	}
+	if (!COM_CompareStrings(tokens[0], "MINIMISED"))
+	{
+		g_minimised = 1;
+	}
+	if (!COM_CompareStrings(tokens[0], "MAXIMISED"))
+	{
+		g_minimised = 0;
+	}
     return 0;
 }
 

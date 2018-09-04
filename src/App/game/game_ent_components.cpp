@@ -118,7 +118,12 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                 if (health != NULL)
                 {
                     health->state.hp -= 10;
+					
+					health->state.lastHitFrame = time->gameFrameNumber;
+					health->state.lastHitSource = e->source;
+					
                     // kill victim
+                    #if 0
                     if (health->state.hp <= 0)
                     {
                         Ent_WriteRemoveCmd(
@@ -155,6 +160,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                         }
                         //Prj_PushRigidBody(col);
                     }
+                    #endif
                 }
 
                 // kill prj
@@ -174,7 +180,60 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         }
     }
 }
+void Game_UpdateHealth(GameState *gs, GameTime *time)
+{
+    for (u32 i = 0; i < gs->healthList.max; ++i)
+    {
+        EC_Health *health = &gs->healthList.items[i];
+        if (health->header.inUse == 0)
+        {
+            continue;
+        }
+        
+        if (health->state.hp <= 0)
+        {
+            f32 normal[3] = { 0, 1, 0 };
+            Ent_WriteRemoveCmd(
+                Ent_GetEntityById(gs, &health->header.entId),
+                normal,
+                time->singleFrame == 1);
+            /**********************************
+             * // is this the time to do this...?
+            // TODO ^^ No, it isn't!
+            **********************************/
+            EC_Collider* col = EC_FindCollider(gs, &health->header.entId);
+            Assert(col);
+            PhysCmd_RemoveShape(col->shapeId);
+            //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION
+            //printf("Killed cube!\n");
+            //Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
+            Vec3 dir = { normal[0], normal[1], normal[2] };
+            Vec3_Normalise(&dir);
 
+            EC_Transform* trans = EC_FindTransform(gs, &health->header.entId);
+            Transform* t = &trans->t;
+            Assert(trans);
+            
+            for (i32 k = 0; k < 10; ++k)
+            {
+                //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
+                Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
+                f32 power = 10.0f + Game_RandomInRange(40.0f);
+                Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
+            }
+        }
+        else if (health->state.lastHitFrame == time->gameFrameNumber)
+        {
+            //printf("Hit cube, hp: %d\n", health->hp);
+            EC_AIController* ai = EC_FindAIController(gs, &health->header.entId);
+            if (ai != NULL)
+            {
+                AI_Stun(gs, ai, time);
+            }
+            //Prj_PushRigidBody(col);
+        }
+    }
+}
 void GameUI_SetCentreMessage(char* text)
 {
     sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, text);

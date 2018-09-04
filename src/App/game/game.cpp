@@ -472,6 +472,7 @@ internal void Game_Tick(
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
     Game_UpdateThinkers(gs, time);
+    Game_UpdateHealth(gs, time);
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 
