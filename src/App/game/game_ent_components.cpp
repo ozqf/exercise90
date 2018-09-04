@@ -213,12 +213,22 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
             EC_Transform* trans = EC_FindTransform(gs, &health->header.entId);
             Transform* t = &trans->t;
             Assert(trans);
+
+            
+            
+            f32 launchPower = 20.0f;// * percentage;
+            if (health->state.maxHp > 0)
+            {
+                i32 overkill = -health->state.hp;
+                f32 percentage = ((f32)overkill  / (f32)health->state.maxHp);
+                launchPower = 20.0f + (20.0f * percentage);
+            }
             
             for (i32 k = 0; k < 10; ++k)
             {
                 //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
                 Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
-                f32 power = 10.0f + Game_RandomInRange(40.0f);
+                f32 power = 10.0f + Game_RandomInRange(launchPower);
                 Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
             }
         }

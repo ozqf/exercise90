@@ -356,8 +356,16 @@ struct EC_Label
 struct EC_HealthState
 {
     i32 hp;
+    i32 maxHp;
+    u32 team;
 	u32 lastHitFrame;
 	EntId lastHitSource;
+
+    void SetHealthAndMax(i32 max)
+    {
+        this->maxHp = max;
+        this->hp = max;
+    }
 };
 
 struct EC_Health

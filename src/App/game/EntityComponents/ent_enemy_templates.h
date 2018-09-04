@@ -29,7 +29,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
 
     state->componentBits |= EC_FLAG_AICONTROLLER;
     //state->aiState.ticker.tickMax = 0.033f;
-    state->aiState.minApproachDistance = 1.0f;
+    state->aiState.minApproachDistance = 25.0f;
     
     //state->componentBits |= EC_FLAG_RENDERER;
     //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
@@ -65,7 +65,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
 
 
     state->componentBits |= EC_FLAG_HEALTH;
-    state->healthState.hp = 35;
+    state->healthState.SetHealthAndMax(100);
 
     //Ent_ApplySpawnOptions(state, options);
 }
@@ -91,7 +91,7 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 1;
-    state->healthState.hp = 500;
+    state->healthState.SetHealthAndMax(500);
     options->scale = { 2, 2, 2 };
 
     state->actorState.runSpeed = 3;

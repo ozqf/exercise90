@@ -6,6 +6,13 @@
 #define SIXTEEN_BIT_MASK 65535
 #define TWENTY_FOUR_BIT_MASK 16777215
 
+inline void COM_DisableBits(u32* flags, u32 mask)
+{
+    // bitwise AND and bitwise NOT to disable bit
+    // expanded: flags = flags & ~mask
+    *flags &= ~mask;
+}
+
 // Used to generate the mask constants used above
 inline i32 COM_CreateBitmask(i32 numBits)
 {

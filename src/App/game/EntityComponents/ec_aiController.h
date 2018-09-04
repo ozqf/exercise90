@@ -124,7 +124,7 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             if (col != NULL && col->isGrounded == 0) { return 1; }
 
             AI_BuildThinkInfo(gs, ai, &info);
-            if (info.flatMagnitude < 20)
+            if (info.flatMagnitude < 100)
             {
                 ai->state.state = AI_STATE_ATTACKING;
 
@@ -197,8 +197,19 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
             ////////////////////////////////////
             // Apply inputs and angles to motor
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            u8 applyMove = (info.flatMagnitude < ai->state.minApproachDistance);
+            u8 applyMove = (info.flatMagnitude > ai->state.minApproachDistance);
             
+            if (applyMove)
+            {
+                motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+            }
+            else
+            {
+                // disable bit
+                motor->state.input.buttons &= ~ACTOR_INPUT_MOVE_FORWARD;
+            }
+            // crappy wander movement when close
+            #if 0
             if (applyMove)
             {
                 //AI_ClearInput(gs, ai);
@@ -210,6 +221,7 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
             {
                 motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             }
+            #endif
             AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
         } break;
 

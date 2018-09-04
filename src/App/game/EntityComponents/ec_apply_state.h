@@ -129,7 +129,7 @@ internal void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state
     if (hp == NULL)
     {
         hp = EC_AddHealth(gs, ent);
-        hp->state.hp = state->hp;
+        hp->state = *state;
     }
 }
 
