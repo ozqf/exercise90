@@ -7,6 +7,37 @@ inline f32 Game_RandomInRange(f32 range)
     return COM_STDRandf32() * (range - -range) + -range;
 }
 
+inline f32 DotProduct2D(f32 vx0, f32 vy0, f32 vx1, f32 vy1)
+{
+    return vx0 * vx1 + vy0 * vy1;
+}
+
+
+inline u8 IsPointLeftOfLine(f32 lineX, f32 lineY, f32 lineVX, f32 lineVY, f32 pX, f32 pY)
+{
+    f32 vx = lineX - pX;
+    f32 vy = lineY - pY;
+    f32 normalX = lineVY;
+    f32 normalY = -lineVX;
+    f32 dp = DotProduct2D(vx, vy, normalX, normalY);
+    if (dp <= 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+inline u8 Game_IsInfront2D(
+    f32 selfX, f32 selfY,
+    f32 selfDirX, f32 selfDirY,
+    f32 targetX, f32 targetY)
+{
+    return 1;
+}
+
 // range 10 will result in a value between -10 and 10 on given axis
 inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ)
 {

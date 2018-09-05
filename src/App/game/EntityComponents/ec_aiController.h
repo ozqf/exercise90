@@ -85,6 +85,13 @@ inline void AI_ApplyLookAngles(EC_ActorMotor* m, f32 yawRadians, f32 pitchRadian
     m->state.input.degrees.x = -(pitchRadians * RAD2DEG);
 }
 
+inline void AI_ReduceNextThink(EC_AIController* ai, GameTime* time, f32 newNextThinkTime)
+{
+    f32 diff = ai->state.nextThink - time->sessionEllapsed;
+    if (diff < newNextThinkTime) { return; }
+    ai->state.nextThink = time->sessionEllapsed + newNextThinkTime;
+}
+
 inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
@@ -147,12 +154,19 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
 
         case AI_STATE_REV_UP_CHARGE:
         {
+            #if 0
             ai->state.state = AI_STATE_CHARGING;
-            ai->state.nextThink = time->sessionEllapsed + 2.0f;
+            ai->state.nextThink = time->sessionEllapsed + 3.0f;
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
             motor->state.runSpeed = 50;
             motor->state.runAcceleration = 200;
             motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+            #endif
+            #if 1
+            // debug charge behaviour
+            ai->state.state = AI_STATE_CHARGING;
+            ai->state.nextThink = time->sessionEllapsed + 9999999.0f;
+            #endif
         } break;
 
         case AI_STATE_CHARGING:
@@ -270,7 +284,35 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
         case AI_STATE_CHARGING:
         {
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-			motor->state.input.degrees.x += -16;
+            f32 yawRadians = motor->state.input.degrees.y * DEG2RAD;
+            // cos(x) sin(z) gives infront/behind
+            // cos(z) sin(x) gives left of/right of
+            f32 vx = cosf(yawRadians);
+            f32 vz = sinf(yawRadians);
+            //f32 vz = cosf(yawRadians);
+            //f32 vx = sinf(yawRadians);
+
+            motor->state.input.degrees.y += 45 * time->deltaTime;
+
+            EC_Transform* selfTrans = EC_FindTransform(gs, &ai->header.entId);
+            EC_Transform* tarTrans = EC_FindTransform(gs, &ai->state.target);
+            u8 isLeft = IsPointLeftOfLine(
+                selfTrans->t.pos.x, selfTrans->t.pos.z,
+                vx, vz,
+                tarTrans->t.pos.x, tarTrans->t.pos.z
+            );
+            if (isLeft)
+            {
+                printf("Left of\n");
+                motor->state.input.degrees.x += -(600 * time->deltaTime);
+            }
+            else
+            {
+                printf("Right of\n");
+                motor->state.input.degrees.x += -(600 * time->deltaTime);
+                //printf("Reduce think\n");
+                //AI_ReduceNextThink(ai, time, 0.2f);
+            }
         } break;
 
         case AI_STATE_FINISH_ATTACK:
