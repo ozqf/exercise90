@@ -115,52 +115,14 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
 
                 // Attempt to deal damage
                 EC_Health *health = EC_FindHealth(gs, &col->header.entId);
+                i32 dmg = 10;
                 if (health != NULL)
                 {
-                    health->state.hp -= 10;
+                    health->state.hp -= dmg;
+                    health->state.damageThisFrame += dmg;
 					
 					health->state.lastHitFrame = time->gameFrameNumber;
 					health->state.lastHitSource = e->source;
-					
-                    // kill victim
-                    #if 0
-                    if (health->state.hp <= 0)
-                    {
-                        Ent_WriteRemoveCmd(
-                            targetEnt,
-                            hit->normal,
-                            time->singleFrame == 1);
-                        /**********************************
-                         * // is this the time to do this...?
-                        // TODO ^^ No, it isn't!
-                        **********************************/
-                        PhysCmd_RemoveShape(col->shapeId);
-
-                        //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION);
-
-                        //printf("Killed cube!\n");
-                        Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
-                        Vec3_Normalise(&dir);
-                        
-                        for (i32 k = 0; k < 10; ++k)
-                        {
-                            //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
-                            Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
-                            f32 power = 10.0f + Game_RandomInRange(40.0f);
-                            Game_SpawnLocalEntity(hit->worldPos[0] + offset.x, hit->worldPos[1] + offset.y, hit->worldPos[2] + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
-                        }
-                    }
-                    else
-                    {
-                        //printf("Hit cube, hp: %d\n", health->hp);
-                        EC_AIController* ai = EC_FindAIController(gs, &targetEnt->entId);
-                        if (ai != NULL)
-                        {
-                            AI_Stun(gs, ai, time);
-                        }
-                        //Prj_PushRigidBody(col);
-                    }
-                    #endif
                 }
 
                 // kill prj
@@ -197,6 +159,7 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
                 Ent_GetEntityById(gs, &health->header.entId),
                 normal,
                 time->singleFrame == 1);
+
             /**********************************
              * // is this the time to do this...?
             // TODO ^^ No, it isn't!
@@ -204,6 +167,9 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
             EC_Collider* col = EC_FindCollider(gs, &health->header.entId);
             Assert(col);
             PhysCmd_RemoveShape(col->shapeId);
+
+
+
             //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION
             //printf("Killed cube!\n");
             //Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
@@ -232,16 +198,19 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
                 Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
             }
         }
-        else if (health->state.lastHitFrame == time->gameFrameNumber)
+        else if (health->state.lastHitFrame == time->gameFrameNumber && health->state.damageThisFrame > health->state.stunThreshold)
         {
             //printf("Hit cube, hp: %d\n", health->hp);
             EC_AIController* ai = EC_FindAIController(gs, &health->header.entId);
             if (ai != NULL)
             {
+                printf("Stun!\n");
                 AI_Stun(gs, ai, time);
             }
             //Prj_PushRigidBody(col);
         }
+
+        health->state.damageThisFrame = 0;
     }
 }
 void GameUI_SetCentreMessage(char* text)

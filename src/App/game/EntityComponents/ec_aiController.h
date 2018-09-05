@@ -9,6 +9,8 @@
 #define AI_STATE_ATTACKING 4
 #define AI_STATE_FINISH_ATTACK 5
 #define AI_STATE_WANDER 6
+#define AI_STATE_REV_UP_CHARGE 7
+#define AI_STATE_CHARGING 8
 
 struct AITargetInfo
 {
@@ -19,13 +21,13 @@ struct AITargetInfo
     f32 flatMagnitude;
 };
 
-inline u8 AI_AcquireAndValidateTarget(GameState *gs, EntId* id)
+inline u8 AI_AcquireAndValidateTarget(GameState *gs, Vec3 selfPos, EntId* id)
 {
     Ent* ent = Ent_GetEntityById(gs, id);
     if (!ent)
     {
         id->value = 0;
-        *id = AI_FindNearestPlayer(gs, {0, 0, 0});
+        *id = AI_FindNearestPlayer(gs, { selfPos.x, selfPos.y, selfPos.z });
     }
     if (id->value == 0) { return 0; }
     //  printf("AI Acquired %d/%d\n", id->iteration, id->index);
@@ -90,7 +92,7 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
     {
         case AI_STATE_NULL:
         {
-            if (AI_AcquireAndValidateTarget(gs, &ai->state.target))
+            if (AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
             {
                 ai->state.state = AI_STATE_TRACKING;
                 //printf("Acquired target. State: %d\n", ai->state.state);
@@ -114,7 +116,7 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
         case AI_STATE_TRACKING:
         {
 			AITargetInfo info = {};
-			if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
+			if (!AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
 			{
 				AI_Reset(gs, ai);
 				return 1;
@@ -126,13 +128,40 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             AI_BuildThinkInfo(gs, ai, &info);
             if (info.flatMagnitude < 100)
             {
-                ai->state.state = AI_STATE_ATTACKING;
+				if (ai->state.type == 0)
+				{
+					ai->state.state = AI_STATE_ATTACKING;
+                    ai->state.nextThink = time->sessionEllapsed + 0.3f;
+				}
+				else
+				{
+					ai->state.state = AI_STATE_REV_UP_CHARGE;
+                    ai->state.nextThink = time->sessionEllapsed + 1.0f;
+				}
 
                 EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
                 motor->state.input.buttons = 0;
                 AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
-                ai->state.nextThink = time->sessionEllapsed + 0.3f;
             }
+        } break;
+
+        case AI_STATE_REV_UP_CHARGE:
+        {
+            ai->state.state = AI_STATE_CHARGING;
+            ai->state.nextThink = time->sessionEllapsed + 2.0f;
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            motor->state.runSpeed = 50;
+            motor->state.runAcceleration = 200;
+            motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
+        } break;
+
+        case AI_STATE_CHARGING:
+        {
+            ai->state.state = AI_STATE_TRACKING;
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            motor->state.runSpeed = 10;
+            motor->state.runAcceleration = 100;
+            ai->state.nextThink = time->sessionEllapsed + 1.0f;
         } break;
         
         // case AI_STATE_BEGIN_ATTACK:
@@ -184,7 +213,7 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
     {
         case AI_STATE_TRACKING:
         {
-            if (!AI_AcquireAndValidateTarget(gs, &ai->state.target))
+            if (!AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
             {
                 AI_Reset(gs, ai);
                 return;
@@ -222,24 +251,26 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
                 motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             }
             #endif
-            if (ai->state.type == 0)
-            {
-                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
-            }
-            else
-            {
-                motor->state.input.degrees.x += -1;
-                printf("Pitch: %.4f\n", motor->state.input.degrees.x);
-                #if 0
-                f32 degreesChange = (25 * time->deltaTime);
-                motor->state.input.degrees.x += degreesChange;
-                printf("Pitch %.2f Degrees change %.2f\n", motor->state.input.degrees.x, degreesChange);
-                f32 pitch =  motor->state.input.degrees.x;
-                printf("Apply pitch %.2f\n", pitch);
-                AI_ApplyLookAngles(motor, info.yawRadians, pitch * DEG2RAD);
-                #endif
-            }
+
+            AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
             
+        } break;
+		
+		case AI_STATE_REV_UP_CHARGE:
+		{
+			AITargetInfo info = {};
+            AI_BuildThinkInfo(gs, ai, &info);
+			
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+			motor->state.input.degrees.x += -16;
+            motor->state.input.degrees.y = info.yawRadians * RAD2DEG;
+            //printf("Pitch: %.4f\n", motor->state.input.degrees.x);
+		} break;
+
+        case AI_STATE_CHARGING:
+        {
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+			motor->state.input.degrees.x += -16;
         } break;
 
         case AI_STATE_FINISH_ATTACK:

@@ -8,6 +8,7 @@ void Win32_GetExtensions(Extensions* ex)
 
 	// Name of opengl extension when found in gl strings:
 	//char* extensionName = "WGL_EXT_swap_control";
+	#if 0
 	ex->SwapInterval = (wgl_swap_interval_ext*)wglGetProcAddress(PROCNAME_SWAP_INTERVAL);
 	if (ex->SwapInterval)
 	{
@@ -18,6 +19,7 @@ void Win32_GetExtensions(Extensions* ex)
 	{
 		printf("REND Failed to get proc Swap Interval\n");
 	}
+	#endif
 }
 
 /**

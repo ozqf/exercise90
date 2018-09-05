@@ -354,11 +354,15 @@ struct EC_Label
     EC_LabelState state;
 };
 
+#define EC_HEALTH_FLAG_STUN_IMMUNE (1 << 1)
+
 struct EC_HealthState
 {
     i32 hp;
     i32 maxHp;
     u32 team;
+    i32 damageThisFrame;
+    i32 stunThreshold;
 	u32 lastHitFrame;
 	EntId lastHitSource;
 

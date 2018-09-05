@@ -137,7 +137,8 @@ internal void Game_BuildTestScene(GameState* gs)
 
     //EntitySpawnOptions options = {};
     options = {};
-    Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
+    
 }
 
 internal void Game_BuildTestHud()

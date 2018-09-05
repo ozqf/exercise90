@@ -117,8 +117,11 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 1;
-    state->healthState.SetHealthAndMax(250);
     options->scale = { 2, 2, 2 };
+
+
+    state->healthState.SetHealthAndMax(250);
+    state->healthState.stunThreshold = 1000;
 
     state->actorState.runSpeed = 7;
 
@@ -127,8 +130,6 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
 
     // Disable multi-render component
     state->componentBits &= ~EC_FLAG_MULTI_RENDOBJ;
-    //state->multiRendState.GetBaseRendObj()->heightOffset = -1.0f;
-    //state->multiRendState.GetHeadRendObj()->heightOffset = 1.0f;
 
     state->componentBits |= EC_FLAG_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
