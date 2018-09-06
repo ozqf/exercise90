@@ -21,7 +21,7 @@ struct AITargetInfo
     f32 flatMagnitude;
 };
 
-inline u8 AI_AcquireAndValidateTarget(GameState *gs, Vec3 selfPos, EntId* id)
+inline u8 AI_AcquireAndValidateTarget(GameState *gs, i32 selfTeam, Vec3 selfPos, EntId* id)
 {
     Ent* ent = Ent_GetEntityById(gs, id);
     if (!ent)
@@ -35,6 +35,7 @@ inline u8 AI_AcquireAndValidateTarget(GameState *gs, Vec3 selfPos, EntId* id)
 	if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
     if ((ent->componentBits & EC_FLAG_TRANSFORM) == 0) { return 0; }
+    if (!Game_AttackIsValid(selfTeam, ent->team)) { return 0; }
     return 1;
 }
 
@@ -92,14 +93,14 @@ inline void AI_ReduceNextThink(EC_AIController* ai, GameTime* time, f32 newNextT
     ai->state.nextThink = time->sessionEllapsed + newNextThinkTime;
 }
 
-inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
+inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
     switch (ai->state.state)
     {
         case AI_STATE_NULL:
         {
-            if (AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
+            if (AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
             {
                 ai->state.state = AI_STATE_TRACKING;
                 //printf("Acquired target. State: %d\n", ai->state.state);
@@ -123,7 +124,7 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
         case AI_STATE_TRACKING:
         {
 			AITargetInfo info = {};
-			if (!AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
+			if (!AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
 			{
 				AI_Reset(gs, ai);
 				return 1;
@@ -194,8 +195,10 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
             Assert(selfTrans);
 
             AttackInfo info = {};
+            
             info.type = 2;//ai->state.attackIndex;
             info.origin = selfTrans->t.pos;
+            info.team = self->team;
             info.source = EC_GET_ID(ai);
             info.yawDegrees = motor->state.input.degrees.y;
             info.pitchDegrees = motor->state.input.degrees.x;
@@ -212,12 +215,12 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
     return 1;
 }
 
-inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
+inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI tock. State: %d\n", ai->state.state);
     if (ai->state.nextThink <= time->sessionEllapsed)
     {
-        if (!AI_Think(gs, ai, time))
+        if (!AI_Think(gs, self, ai, time))
         {
             return;
         }
@@ -227,7 +230,7 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
     {
         case AI_STATE_TRACKING:
         {
-            if (!AI_AcquireAndValidateTarget(gs, { 0, 0, 0 }, &ai->state.target))
+            if (!AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
             {
                 AI_Reset(gs, ai);
                 return;
@@ -352,7 +355,8 @@ static void Game_UpdateAIControllers(GameState *gs, GameTime *time)
         {
             continue;
         }
+        Ent* self = Ent_GetEntityById(&gs->entList, &ai->header.entId);
         EC_AIState *s = &ai->state;
-        AI_Tick(gs, ai, time);
+        AI_Tick(gs, self, ai, time);
     }
 }

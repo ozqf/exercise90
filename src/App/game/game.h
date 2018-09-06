@@ -181,6 +181,7 @@ Transform g_debugTransform = {};
 // Interface
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 
+#include "game_teams.h"
 #include "game_local_entities.h"
 #include "game_entities.h"
 #include "ec_types.h"

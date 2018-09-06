@@ -81,6 +81,7 @@ inline EntId AI_FindNearestPlayer(GameState* gs, Vec3 pos)
 inline void Ent_SetProjectileSpawnOptions(
     EntitySpawnOptions* options,
     EntId source,
+    i32 team,
     Vec3 pos,
     f32 yawDegrees,
     f32 pitchDegrees,
@@ -89,5 +90,7 @@ inline void Ent_SetProjectileSpawnOptions(
     *options = {};
     options->pos = pos;
     options->source = source;
+    options->flags |= ENT_OPTION_FLAG_TEAM;
+    options->team = team;
     options->vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
 }

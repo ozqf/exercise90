@@ -21,6 +21,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
+    state->entMetaData.team = TEAM_ENEMIES;
     printf("  TEMPLATES spawn enemy %d/%d\n", state->entId.iteration, state->entId.index);
 
     // apply defaults

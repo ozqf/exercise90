@@ -116,6 +116,7 @@ struct Ent
     // Instance identification
     EntId entId;            // iteration + index of this entity
     i32 tag;                // can (and should) be shared between entities for triggering
+    i32 team;
 
     EntId source;           // id of whatever spawned/shot this ent
 
@@ -159,6 +160,7 @@ struct AttackInfo
     i32 type;
     Vec3 origin;
     EntId source;
+    i32 team;
     f32 yawDegrees;
     f32 pitchDegrees;
 };
@@ -421,9 +423,12 @@ struct EntityState
     EC_MultiRendObjState multiRendState;
 };
 
+#define ENT_OPTION_FLAG_SCALE (1 << 1)
+#define ENT_OPTION_FLAG_TEAM (1 << 2)
 // Current things you can customise when you spawn an entity.
 struct EntitySpawnOptions
 {
+    u32 flags;
     Vec3 pos;
     Vec3 rot;
     Vec3 scale;
@@ -431,6 +436,7 @@ struct EntitySpawnOptions
     Vec3 vel;
 
     EntId source;
+    i32 team;
 };
 
 //////////////////////////////////////////////////

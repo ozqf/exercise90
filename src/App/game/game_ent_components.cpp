@@ -116,7 +116,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                 // Attempt to deal damage
                 EC_Health *health = EC_FindHealth(gs, &col->header.entId);
                 i32 dmg = 10;
-                if (health != NULL)
+                if (health != NULL && Game_AttackIsValid(e->team, targetEnt->team))
                 {
                     health->state.hp -= dmg;
                     health->state.damageThisFrame += dmg;
@@ -204,7 +204,6 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
             EC_AIController* ai = EC_FindAIController(gs, &health->header.entId);
             if (ai != NULL)
             {
-                printf("Stun!\n");
                 AI_Stun(gs, ai, time);
             }
             //Prj_PushRigidBody(col);

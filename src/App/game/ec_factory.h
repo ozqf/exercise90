@@ -28,6 +28,7 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
     if (state->componentBits & EC_FLAG_THINKER) { EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
     if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) { EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
+
 }
 
 internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)

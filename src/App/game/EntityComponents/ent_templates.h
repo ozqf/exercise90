@@ -27,12 +27,17 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
     // {
     //     printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
     // }
+    if (options->flags & ENT_OPTION_FLAG_TEAM)
+    {
+        state->entMetaData.team = options->team;
+    }
 
     if (state->componentBits & EC_FLAG_TRANSFORM)
     {
         //printf("  EC Apply transform options\n");
         Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
-        if (options->scale.x != 0 && options->scale.y != 0 && options->scale.z != 0)
+        //if (options->scale.x != 0 && options->scale.y != 0 && options->scale.z != 0)
+        if (options->flags & ENT_OPTION_FLAG_SCALE)
         {
             Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
         }

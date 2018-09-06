@@ -5,6 +5,7 @@
 void SV_SpawnTestBullet(
     GameState *gs,
     EntId source,
+    i32 team,
     f32 x,
     f32 y,
     f32 z,
@@ -16,7 +17,10 @@ void SV_SpawnTestBullet(
     options.pos.x = x;
     options.pos.y = y;
     options.pos.z = z;
+
     options.source = source;
+    options.flags |= ENT_OPTION_FLAG_TEAM;
+    options.team = team;
 
     options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
 
@@ -39,6 +43,7 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
     Ent_SetProjectileSpawnOptions(
         &options,
         info->source,
+        info->team,
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
@@ -60,6 +65,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
     Ent_SetProjectileSpawnOptions(
         &options,
         info->source,
+        info->team,
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
@@ -81,6 +87,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
         Ent_SetProjectileSpawnOptions(
             &options,
             info->source,
+            info->team,
             info->origin,
             info->yawDegrees + randOffsetX,
             info->pitchDegrees + randOffsetY,
@@ -102,6 +109,7 @@ inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
     Ent_SetProjectileSpawnOptions(
         &options,
         info->source,
+        info->team,
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,

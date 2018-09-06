@@ -12,7 +12,7 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
     // Apply friction
     // TODO: Forcing onGround to true for now as bunny hop acceleration requires tweaking
     onGround = 1;
-#if 1
+    #if 1
     if (onGround && speed != 0) // avoid divide by zero ninny
     {
         float drop = speed * friction * deltaTime;
@@ -21,7 +21,7 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
         prevVelocity->x *= frictionScalar;
         prevVelocity->z *= frictionScalar;
     }
-#endif
+    #endif
 
 
     // Accelerate
@@ -130,9 +130,11 @@ inline void ApplyActorMotorInput(
             //Transform* t = &g_worldScene.cameraTransform;
             //Transform* t = &ent->transform;
             Transform* t = &ecTrans->t;
-
+            Ent* self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+            
             AttackInfo info = {};
             info.type = motor->state.attackType;
+            info.team = self->team;
             info.origin = t->pos;
             info.source = motor->header.entId;
             info.yawDegrees = motor->state.input.degrees.y;

@@ -161,6 +161,7 @@ internal void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     //ent->inUse = entState->inUse;
 
     ent->tag = entState->tag;
+    ent->team = entState->team;
     ent->source = entState->source;
     ent->factoryType = entState->factoryType;
     ent->componentBits = entState->componentBits;
