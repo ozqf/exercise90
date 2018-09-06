@@ -141,6 +141,25 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     Ent_ApplySpawnOptions(state, options);
 }
 
+internal void Ent_SetTemplate_Swarm(EntityState* state, EntitySpawnOptions* options)
+{
+	Ent_SetTemplate_GenericEnemy(state, options);
+	Ent_ApplySpawnOptions(state, options);
+	
+}
+
+internal void Ent_SetTemplate_Fodder(EntityState* state, EntitySpawnOptions* options)
+{
+	Ent_SetTemplate_GenericEnemy(state, options);
+	Ent_ApplySpawnOptions(state, options);
+}
+
+internal void Ent_SetTemplate_Spinner(EntityState* state, EntitySpawnOptions* options)
+{
+	Ent_SetTemplate_GenericEnemy(state, options);
+	Ent_ApplySpawnOptions(state, options);
+}
+
 internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     switch(templateId)
@@ -148,6 +167,9 @@ internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* option
         case ENTITY_TYPE_ENEMY: { Ent_SetTemplate_Grunt(state, options); } return 1;
         case ENTITY_TYPE_ENEMY_BRUTE: { Ent_SetTemplate_Brute(state, options); } return 1;
         case ENTITY_TYPE_ENEMY_CHARGER: { Ent_SetTemplate_Charger(state, options); } return 1;
+		case ENTITY_TYPE_ENEMY_SWARM: { Ent_SetTemplate_Swarm(state, options); } return 1;
+		case ENTITY_TYPE_ENEMY_FODDER: { Ent_SetTemplate_Fodder(state, options); } return 1;
+		case ENTITY_TYPE_ENEMY_SPINNER: { Ent_SetTemplate_Spinner(state, options); } return 1;
         default: return 0;
     }
 }

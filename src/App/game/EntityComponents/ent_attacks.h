@@ -42,7 +42,7 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        150);
+        250);
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
@@ -63,7 +63,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        150);
+        250);
     if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
@@ -84,7 +84,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
             info->origin,
             info->yawDegrees + randOffsetX,
             info->pitchDegrees + randOffsetY,
-            150);
+            250);
         if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
         {
             state.renderState.colourRGB[0] = 0.3f;

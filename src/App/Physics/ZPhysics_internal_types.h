@@ -21,6 +21,7 @@ struct PhysBodyHandle
     
     // pointers to bullet physics objects
     btCollisionShape* shape;
+    btGhostObject* ghost;
     btDefaultMotionState* motionState;
     btRigidBody* rigidBody;
 };

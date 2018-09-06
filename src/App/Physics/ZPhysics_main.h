@@ -65,7 +65,7 @@ void Phys_RecycleHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// CREATE SHAPES
+// OVERLAP RECORDS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 internal i32 Phys_FindOverlapPair(ZBulletWorld *world, i32 a, i32 b)
@@ -139,6 +139,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             w->numOverlaps++;
         }
     }
+    //printf("Post solve overlaps %d\n", w->numOverlaps);
 }
 
 void Phys_NeverCall()

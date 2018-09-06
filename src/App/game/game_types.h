@@ -547,6 +547,7 @@ struct GameState
     
     // view
     Transform cameraTransform;
+    EntId cameraEntId;
     
     u16 debugMode = 0;
     char debugString[2048];

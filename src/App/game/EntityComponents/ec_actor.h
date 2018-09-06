@@ -86,7 +86,7 @@ inline void ApplyActorMotorInput(
 
     if (motor->state.input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
     {
-        move.y = 10;// * deltaTime;
+        move.y = 7.5f;// * deltaTime;
         //printf("Apply up force: %.2f\n", move.y);
     }
     

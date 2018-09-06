@@ -439,6 +439,12 @@ internal void Game_Tick(
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
         Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_BRUTE, &options);
     }
+    if (Input_CheckActionToggledOn(actions, "Spawn Test 3", time->platformFrameNumber))
+    {
+        EntitySpawnOptions options = {};
+        options.pos = Game_RandomSpawnOffset(10, 0, 10);
+        Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
+    }
 	#endif
 	#if 0
     if (Input_CheckActionToggledOn(actions, "Attack 2", time->frameNumber))
@@ -484,6 +490,7 @@ internal void Game_Tick(
     if (localClient && localClient->IsPlaying())
     {
         EntId id = localClient->entId;
+        gs->cameraEntId = id;
         Ent* ent = Ent_GetEntityById(&gs->entList, &id);
         if (ent != NULL)
         {
@@ -509,5 +516,10 @@ internal void Game_Tick(
         {
             printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
         }
+    }
+    else
+    {
+        // Clear attached entity
+        gs->cameraEntId.value = 0;
     }
 }

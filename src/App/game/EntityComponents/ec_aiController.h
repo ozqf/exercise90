@@ -143,7 +143,7 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
 				else
 				{
 					ai->state.state = AI_STATE_REV_UP_CHARGE;
-                    ai->state.nextThink = time->sessionEllapsed + 1.0f;
+                    ai->state.nextThink = time->sessionEllapsed + 0.5f;
 				}
 
                 EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
@@ -154,15 +154,15 @@ inline i32 AI_Think(GameState* gs, EC_AIController* ai, GameTime* time)
 
         case AI_STATE_REV_UP_CHARGE:
         {
-            #if 0
+            #if 1
             ai->state.state = AI_STATE_CHARGING;
-            ai->state.nextThink = time->sessionEllapsed + 3.0f;
+            ai->state.nextThink = time->sessionEllapsed + 1.0f;
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            motor->state.runSpeed = 50;
+            motor->state.runSpeed = 35;
             motor->state.runAcceleration = 200;
             motor->state.input.buttons |= ACTOR_INPUT_MOVE_FORWARD;
             #endif
-            #if 1
+            #if 0
             // debug charge behaviour
             ai->state.state = AI_STATE_CHARGING;
             ai->state.nextThink = time->sessionEllapsed + 9999999.0f;
@@ -276,7 +276,8 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
             AI_BuildThinkInfo(gs, ai, &info);
 			
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-			motor->state.input.degrees.x += -16;
+			motor->state.input.degrees.x += -(600 * time->deltaTime);
+            motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
             motor->state.input.degrees.y = info.yawRadians * RAD2DEG;
             //printf("Pitch: %.4f\n", motor->state.input.degrees.x);
 		} break;
@@ -284,15 +285,28 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
         case AI_STATE_CHARGING:
         {
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            #if 1
+            motor->state.input.degrees.x += -(600 * time->deltaTime);
+            motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
+            #endif
+            // Debugging 'Left/Right of'
+            #if 0
+            f32 yawDegrees = motor->state.input.degrees.y;
             f32 yawRadians = motor->state.input.degrees.y * DEG2RAD;
-            // cos(x) sin(z) gives infront/behind
-            // cos(z) sin(x) gives left of/right of
+            // cos(x) sin(z) gives infront/behind...?
+            // cos(z) sin(x) gives left of/right of...?
             f32 vx = cosf(yawRadians);
             f32 vz = sinf(yawRadians);
             //f32 vz = cosf(yawRadians);
             //f32 vx = sinf(yawRadians);
 
-            motor->state.input.degrees.y += 45 * time->deltaTime;
+            //motor->state.input.degrees.y += 10 * time->deltaTime;
+            //motor->state.input.degrees.y = 45;
+            //motor->state.input.degrees.y = 135;
+            //motor->state.input.degrees.y = 225;
+            //motor->state.input.degrees.y = 270;
+            motor->state.input.degrees.y = 180;
+            motor->state.input.degrees.y = COM_CapAngleDegrees(motor->state.input.degrees.y);
 
             EC_Transform* selfTrans = EC_FindTransform(gs, &ai->header.entId);
             EC_Transform* tarTrans = EC_FindTransform(gs, &ai->state.target);
@@ -303,16 +317,19 @@ inline void AI_Tick(GameState* gs, EC_AIController* ai, GameTime* time)
             );
             if (isLeft)
             {
-                printf("Left of\n");
+                printf("Facing %.2f degrees. vx/vz: %.2f/%.2f Left of\n", yawDegrees, vx, vz);
                 motor->state.input.degrees.x += -(600 * time->deltaTime);
+                motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
             }
             else
             {
-                printf("Right of\n");
+                printf("Facing %.2f degrees. vx/vz: %.2f/%.2f  Right of\n", yawDegrees, vx, vz);
                 motor->state.input.degrees.x += -(600 * time->deltaTime);
+                motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
                 //printf("Reduce think\n");
                 //AI_ReduceNextThink(ai, time, 0.2f);
             }
+            #endif
         } break;
 
         case AI_STATE_FINISH_ATTACK:

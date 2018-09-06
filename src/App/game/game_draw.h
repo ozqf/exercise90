@@ -76,6 +76,8 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
         EC_MultiRendObj* rend = &gs->multiRendObjList.items[i];
         if (rend->header.inUse == 1)
         {
+            if (gs->cameraEntId.value == rend->header.entId.value) { continue; }
+            
             EC_Transform* entTrans = EC_FindTransform(gs, &rend->header.entId);
 			Assert(entTrans != NULL);
             // TODO: Multi renderer mode selects which rendobjs are active

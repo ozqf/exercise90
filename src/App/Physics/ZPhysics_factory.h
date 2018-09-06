@@ -58,6 +58,15 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
 
     world->dynamicsWorld->addRigidBody(handle->rigidBody, def->group, def->mask);
 
+    // Create Ghost Object
+    // http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers
+    // https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=7468
+    // http://bulletphysics.org/Bullet/BulletFull/classbtPairCachingGhostObject.html
+    // https://www.gamedev.net/forums/topic/692573-bullet-btghostobject/
+    //handle->ghost = new btGhostObject();
+    //handle->ghost->setCollisionShape(new btBoxShape(btVector3(box->halfSize[0], box->halfSize[1], box->halfSize[2])));
+    //world->dynamicsWorld->addCollisionObject(handle->ghost);
+
     return handle;
 }
 #if 0

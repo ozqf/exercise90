@@ -13,6 +13,7 @@
 #include "../../../lib/bullet/btBulletDynamicsCommon.h"
 
 #include "../../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
+//#include "btGhostObject.h"
 
 // For debug output ONLY
 #include <windows.h>
