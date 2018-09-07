@@ -31,6 +31,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     state->componentBits |= EC_FLAG_AICONTROLLER;
     //state->aiState.ticker.tickMax = 0.033f;
     state->aiState.minApproachDistance = 25.0f;
+    state->aiState.atkSettings.Set(2, 0.3f, 0.0f, 1, 1.0f, ATTACK_FLAG_NO_TARGET_TRACK);
     
     //state->componentBits |= EC_FLAG_RENDERER;
     //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
@@ -43,7 +44,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_BASE], 1, 0, 0);
     state->multiRendState.GetBaseRendObj()->heightOffset = -0.5f;
-    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 1, 1, 1);
+    EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 1, 0, 0);
     state->multiRendState.GetHeadRendObj()->heightOffset = 0.5f;
     //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
     #endif
@@ -95,6 +96,8 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
     state->healthState.SetHealthAndMax(500);
     options->scale = { 2, 2, 2 };
 
+    state->aiState.atkSettings.Set(2, 1.0f, 0.1f, 10, 1.0f, 0);
+    
     state->actorState.runSpeed = 3;
 
     state->multiRendState.GetBaseRendObj()->heightOffset = -1.0f;
@@ -120,7 +123,6 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     state->renderState.colourRGB[2] = 1;
     options->scale = { 2, 2, 2 };
 
-
     state->healthState.SetHealthAndMax(250);
     state->healthState.stunThreshold = 1000;
 
@@ -128,6 +130,7 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
 
     state->aiState.minApproachDistance = 3.0f;
     state->aiState.type = 1;
+    state->aiState.atkSettings.Set(-1, 0.5f, 0.0f, 1, 1.0f, 0);
 
     // Disable multi-render component
     state->componentBits &= ~EC_FLAG_MULTI_RENDOBJ;

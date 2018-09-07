@@ -154,11 +154,13 @@ void Game_SpawnLocalEntity(
             );
             
             ZShapeDef def = {};
+            
             def.SetAsBox(
                 e->pos.x, e->pos.y, e->pos.z,
                 0.25f, 0.25f, 0.25f,
-                0/*ZCOLLIDER_FLAG_NO_ROTATION*/, COLLISION_LAYER_DEBRIS, COL_MASK_DEBRIS, 1
+                0, COLLISION_LAYER_DEBRIS, COL_MASK_DEBRIS, 1
             );
+            def.restitution = 0.5f;
 
             e->shapeId = PhysCmd_CreateShape(&def, e->id);
 

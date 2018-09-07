@@ -80,6 +80,7 @@ internal void Game_AddTestSolid(GameState* gs,
         mask,
         0
     );
+    col.def.restitution = 1.0f;
 
     size += App_WriteCommandBytesToFrameOutput((u8*)&col, sizeof(EC_ColliderState));
 
@@ -91,7 +92,7 @@ internal void Game_AddTestSolid(GameState* gs,
 internal void Game_BuildTestScene(GameState* gs)
 {
 	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
-	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 1);
+	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 0);
 
     Game_AddTestSolid(gs, 24, 0, 0, 1, 12, 24, 0);
     Game_AddTestSolid(gs, -24, 0, 0, 1, 12, 24, 0);

@@ -21,6 +21,16 @@ struct AITargetInfo
     f32 flatMagnitude;
 };
 
+inline u8 AI_ValidateTargetById(GameState* gs, EntId* id, i32 selfTeam)
+{
+    Ent* ent = Ent_GetEntityById(gs, id);
+    if (!ent) { return 0; }
+    if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
+    if ((ent->componentBits & EC_FLAG_TRANSFORM) == 0) { return 0; }
+    if (!Game_AttackIsValid(selfTeam, ent->team)) { return 0; }
+    return 1;
+}
+
 inline u8 AI_AcquireAndValidateTarget(GameState *gs, i32 selfTeam, Vec3 selfPos, EntId* id)
 {
     Ent* ent = Ent_GetEntityById(gs, id);
@@ -32,11 +42,7 @@ inline u8 AI_AcquireAndValidateTarget(GameState *gs, i32 selfTeam, Vec3 selfPos,
     if (id->value == 0) { return 0; }
     //  printf("AI Acquired %d/%d\n", id->iteration, id->index);
     ent = Ent_GetEntityById(gs, id);
-	if (!ent) { return 0; }
-    if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
-    if ((ent->componentBits & EC_FLAG_TRANSFORM) == 0) { return 0; }
-    if (!Game_AttackIsValid(selfTeam, ent->team)) { return 0; }
-    return 1;
+	return AI_ValidateTargetById(gs, id, selfTeam);
 }
 
 inline void AI_BuildThinkInfo(GameState* gs, EC_AIController* ai, AITargetInfo* info)
@@ -139,13 +145,12 @@ inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
 				if (ai->state.type == 0)
 				{
 					ai->state.state = AI_STATE_ATTACKING;
-                    ai->state.nextThink = time->sessionEllapsed + 0.3f;
 				}
 				else
 				{
 					ai->state.state = AI_STATE_REV_UP_CHARGE;
-                    ai->state.nextThink = time->sessionEllapsed + 0.5f;
 				}
+                ai->state.nextThink = time->sessionEllapsed + ai->state.atkSettings.startUpDelay;
 
                 EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
                 motor->state.input.buttons = 0;
@@ -157,7 +162,7 @@ inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
         {
             #if 1
             ai->state.state = AI_STATE_CHARGING;
-            ai->state.nextThink = time->sessionEllapsed + 1.0f;
+            ai->state.nextThink = time->sessionEllapsed + ai->state.atkSettings.recoverDelay;
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
             motor->state.runSpeed = 35;
             motor->state.runAcceleration = 200;
@@ -194,17 +199,42 @@ inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
             Assert(motor);
             Assert(selfTrans);
 
-            AttackInfo info = {};
+            if ((ai->state.atkSettings.flags & ATTACK_FLAG_NO_TARGET_TRACK) == 0)
+            {
+                i32 team = Ent_GetEntityById(gs, &ai->header.entId)->team;
+                if (AI_ValidateTargetById(gs, &ai->state.target, team) == 0)
+                {
+                    // drop attack
+                    AI_Reset(gs, ai);
+                    break;
+                }
+
+                AITargetInfo info = {};
+                AI_BuildThinkInfo(gs, ai, &info);
+                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+            }
+
+            AttackInfo atk = {};
             
-            info.type = 2;//ai->state.attackIndex;
-            info.origin = selfTrans->t.pos;
-            info.team = self->team;
-            info.source = EC_GET_ID(ai);
-            info.yawDegrees = motor->state.input.degrees.y;
-            info.pitchDegrees = motor->state.input.degrees.x;
-            SV_FireAttack(gs, &info);
-            ai->state.state = AI_STATE_TRACKING;
-            ai->state.nextThink = time->sessionEllapsed + 1.0f;
+            atk.type = ai->state.atkSettings.type;
+            atk.origin = selfTrans->t.pos;
+            atk.team = self->team;
+            atk.source = EC_GET_ID(ai);
+            atk.yawDegrees = motor->state.input.degrees.y;
+            atk.pitchDegrees = motor->state.input.degrees.x;
+            SV_FireAttack(gs, &atk);
+            ai->state.attackCount++;
+            if (ai->state.attackCount >= ai->state.atkSettings.repeatCount)
+            {
+                // finish
+                ai->state.state = AI_STATE_TRACKING;
+                ai->state.attackCount = 0;
+                ai->state.nextThink = time->sessionEllapsed + ai->state.atkSettings.recoverDelay;
+            }
+            else
+            {
+                ai->state.nextThink = time->sessionEllapsed + ai->state.atkSettings.repeatDelay;
+            }
         } break;
         
         case AI_STATE_STUNNED:
@@ -272,6 +302,19 @@ inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
             AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
             
         } break;
+		
+		case AI_STATE_ATTACKING:
+		{
+			EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+            Assert(motor);
+
+            if ((ai->state.atkSettings.flags & ATTACK_FLAG_NO_TARGET_TRACK) == 0)
+            {
+                AITargetInfo info = {};
+                AI_BuildThinkInfo(gs, ai, &info);
+                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+            }
+		} break;
 		
 		case AI_STATE_REV_UP_CHARGE:
 		{

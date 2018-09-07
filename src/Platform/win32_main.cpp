@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "win32_module.cpp"
@@ -222,7 +221,7 @@ internal LRESULT CALLBACK Win32_MainWindowCallback(
 			*/
 			ShowWindow(appWindow, SW_MINIMIZE);
 			ShowWindow(consoleHandle, SW_MINIMIZE);
-			Win32_ExecuteTextCommand("MINIMISED");
+			//Win32_ExecuteTextCommand("MINIMISED");
 			break;
 		}
 

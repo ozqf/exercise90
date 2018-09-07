@@ -104,6 +104,7 @@ union EntId
 #pragma pack(pop)
 
 // Is this necessary?
+// TODO: No it isn't. Compare via id.value is much easier
 inline u8 EntId_Equals(EntId* a, EntId* b)
 {
     return (a->index == b->index && a->iteration == b->iteration);
@@ -116,13 +117,13 @@ struct Ent
     // Instance identification
     EntId entId;            // iteration + index of this entity
     i32 tag;                // can (and should) be shared between entities for triggering
-    i32 team;
-
+    
+	i32 team;
     EntId source;           // id of whatever spawned/shot this ent
 
     // 'type' information
     i32 factoryType;        // Spawn/Save/Sync function index used to generate this entity
-    u32 componentBits;     // What components this Entity has
+    u32 componentBits;      // What components this Entity has
     u8 inUse;               // if 0 this entity is free to be recycled
     u8 priority;            // This entity's base update importance gained per frame
 };
@@ -305,6 +306,35 @@ struct EC_ActorMotor
     EC_ActorMotorState state;
 };
 
+#define ATTACK_FLAG_NO_TARGET_TRACK (1 << 0)
+#define ATTACK_FLAG_BREAK_ON_LOS_LOSS (1 << 1)
+
+struct AI_AttackSettings
+{
+    i32 type;
+    f32 startUpDelay;
+    f32 repeatDelay;
+    i32 repeatCount;
+    f32 recoverDelay;
+    u32 flags;
+
+    void Set(
+        i32 newType,
+        f32 newStartDelay,
+        f32 newRepeatDelay,
+        i32 newRepeatCount,
+        f32 newRecoverDelay,
+        u32 newFlags)
+    {
+        this->type = newType;
+        this->startUpDelay = newStartDelay;
+        this->repeatDelay = newRepeatDelay;
+        this->repeatCount = newRepeatCount;
+        this->recoverDelay = newRecoverDelay;
+        this->flags = newFlags;
+    }
+};
+
 struct EC_AIState
 {
     EntId target;
@@ -313,10 +343,11 @@ struct EC_AIState
     Vec3 dir;
     f32 speed;
     f32 minApproachDistance;
-    i32 attackIndex;
-    //Ticker ticker;
     f32 nextMoveCalc;
     f32 nextThink;
+    i32 attackCount;
+
+    AI_AttackSettings atkSettings;
 };
 
 // A quick test component

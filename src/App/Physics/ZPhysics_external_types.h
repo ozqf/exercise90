@@ -23,29 +23,6 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_KINEMATIC (1 << 1)
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
 #define ZCOLLIDER_FLAG_GROUNDCHECK (1 << 3)
-#if 0
-
-struct ZShapeDef
-{
-	u32 type;
-	u32 flags;
-	u16 mask;
-	f32 pos[3];
-};
-
-struct ZSphereDef
-{
-	ZShapeDef base;
-	f32 radius;
-};
-
-struct ZBoxDef
-{
-	ZShapeDef base;
-	f32 halfSize[3];
-};
-
-#endif
 
 #if 1
 
@@ -88,6 +65,7 @@ struct ZShapeDef
 	i32 tag;
 	u16 group;
 	u16 mask;
+	f32 restitution;
 	f32 pos[3];
 	ZShapeData_U data;
 

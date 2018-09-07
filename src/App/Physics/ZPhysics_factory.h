@@ -52,6 +52,8 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
     {
         handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
     }
+    handle->rigidBody->setRestitution(def->restitution);
+    printf("Restitution: %.2f\n", def->restitution);
     
     handle->rigidBody->setUserIndex(handle->id);
     handle->rigidBody->setCollisionFlags(btFlags);

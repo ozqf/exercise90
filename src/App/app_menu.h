@@ -71,12 +71,12 @@ void App_InitMenus()
 	ent->transform.pos.x = 0;
 	ent->transform.pos.y = 6;
 	ent->transform.pos.z = 4;
-	ent->transform.scale = {4, 4, 4};
+	//ent->transform.scale = {4, 4, 4};
 	ent->halfWidth = 8;
 	ent->halfHeight = 4;
-	ent->transform.scale.x = 4;
-	ent->transform.scale.y = 4;
-	ent->transform.scale.z = 4;
+	ent->transform.scale.x = 16;
+	ent->transform.scale.y = 16;
+	ent->transform.scale.z = 1;
 
 #if 1
 	RendObj_SetAsMesh(
@@ -92,7 +92,7 @@ void App_InitMenus()
 	);
 	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 #endif
-	RendObj_SetAsRainbowQuad(&ent->debugRend);
+	//RendObj_SetAsRainbowQuad(&ent->debugRend);
 #endif
 
 	ent = &g_mainMenu.items[1];
