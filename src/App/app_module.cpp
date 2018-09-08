@@ -3,7 +3,7 @@
 #define APP_MODULE_H
 
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
-//#include "../Platform/win32_system_include.h"
+#include "../Platform/win32_system_include.h"
 #include <stdio.h>
 
 #include "../common/com_module.h"
@@ -13,8 +13,6 @@
 #include "app_types.h"
 
 #include "assets/app_testTextures.cpp"
-
-#include <stdio.h>
 
 // TODO: Hack to get it to build
 // Current client spawning behaviour

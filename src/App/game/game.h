@@ -100,7 +100,7 @@ internal void Game_SetDebugStringRender()
         g_debugStr.chars,
         g_debugStr.length,
         0.05f,
-        TEXT_ALIGNMENT_MIDDLE_MIDDLE,
+        TEXT_ALIGNMENT_TOP_LEFT,
         AppGetTextureIndexByName("textures\\charset.bmp"),
         0, 1, 1
     );

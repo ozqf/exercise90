@@ -83,12 +83,12 @@ inline void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
     cmd.gfxNormal = COM_PackVec3NormalToI32(gfxNormalVec3);
     if (verbose)
     {
-        printf("Packed GFX Normal %.2f, %.2f, %.2f to %d\n",
-            gfxNormalVec3[0],
-            gfxNormalVec3[1],
-            gfxNormalVec3[2],
-            cmd.gfxNormal
-        );
+        // printf("Packed GFX Normal %.2f, %.2f, %.2f to %d\n",
+        //     gfxNormalVec3[0],
+        //     gfxNormalVec3[1],
+        //     gfxNormalVec3[2],
+        //     cmd.gfxNormal
+        // );
         printf("GAME Delete ent %d/%d\n",
 		    cmd.entId.iteration,
 		    cmd.entId.index

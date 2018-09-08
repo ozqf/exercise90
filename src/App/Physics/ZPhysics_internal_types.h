@@ -43,6 +43,7 @@ struct PhysDebugInfo
 
 struct PhysOverlapPair
 {
+    u32 postSolveFrame;
     i32 indexA;
     i32 indexB;
 };

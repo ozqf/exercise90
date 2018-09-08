@@ -72,7 +72,7 @@ win32_window_dimension Win32_GetWindowDimension(HWND window)
 /*********************************************************************
 Windows message callback
 *********************************************************************/
-internal LRESULT CALLBACK Win32_MainWindowCallback(
+LRESULT CALLBACK Win32_MainWindowCallback(
     HWND window, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT result = 0;
@@ -348,7 +348,16 @@ int CALLBACK WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
+	
+#if 0
+	Win32_AttachErrorHandlers();
+	char* crashString = NULL;
+	printf(crashString);
+#endif
+
+#if 1
     // Spawn debugging windows cmd
+#if 1
     FILE *stream;
     AllocConsole();
     freopen_s(&stream, "conin$", "r", stdin);
@@ -357,6 +366,7 @@ int CALLBACK WinMain(
     consoleHandle = GetConsoleWindow();
     MoveWindow(consoleHandle, 1, 1, 680, 480, 1);
     printf("[%s] Console initialized.\n", __FILE__);
+#endif
 
     Win32_BuildTextCommandList();
     
@@ -480,6 +490,8 @@ int CALLBACK WinMain(
                     TranslateMessage(&message);
                     DispatchMessage(&message);
                 }
+
+				Win32_AttachErrorHandlers();
 
                 // Force app to give up CPU time if not current focus target
                 // or on a laptop!
@@ -619,4 +631,5 @@ int CALLBACK WinMain(
 		g_app.AppShutdown();
 	}
     return 0;
+#endif
 }

@@ -6,7 +6,7 @@
 RENDERING
 ****************************************************************/
 
-internal void Win32ResizeDIBSection(win32_offscreen_buffer *buffer, int width, int height)
+void Win32ResizeDIBSection(win32_offscreen_buffer *buffer, int width, int height)
 {
 	// TODO: Bulletproof this.
 	// Maybe don't free first, free after, then free first if that succeeds

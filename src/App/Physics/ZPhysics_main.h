@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
 ////////////////////////////////////////////////////////////////////////////////////////////
-PhysBodyHandle *Phys_GetFreeBodyHandle(PhysBodyList *list)
+internal PhysBodyHandle *Phys_GetFreeBodyHandle(PhysBodyList *list)
 {
 
     for (i32 i = 0; i < list->capacity; ++i)
@@ -21,7 +21,7 @@ PhysBodyHandle *Phys_GetFreeBodyHandle(PhysBodyList *list)
     return NULL;
 }
 
-PhysBodyHandle *Phys_GetHandleById(PhysBodyList *list, i32 queryId)
+internal PhysBodyHandle *Phys_GetHandleById(PhysBodyList *list, i32 queryId)
 {
     Assert(queryId >= 0);
     Assert(queryId < list->capacity);
@@ -32,7 +32,7 @@ PhysBodyHandle *Phys_GetHandleById(PhysBodyList *list, i32 queryId)
 }
 
 // Delete all objects on this handle
-void Phys_FreeHandle(ZBulletWorld *world, PhysBodyHandle *handle)
+internal void Phys_FreeHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 {
     // TODO: This is almost certainly NOT how to free stuff in bullet
     // !find proper example!
@@ -59,7 +59,7 @@ void Phys_FreeHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 /**
  * deactivate all objects on this handle and mark it for reuse
  */
-void Phys_RecycleHandle(ZBulletWorld *world, PhysBodyHandle *handle)
+internal void Phys_RecycleHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 {
     handle->inUse = FALSE;
 }
@@ -120,15 +120,17 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             if (pt.getDistance() < F32_EPSILON)
             {
                 areTouching = 1;
-                const btVector3 &ptA = pt.getPositionWorldOnA();
-                const btVector3 &ptB = pt.getPositionWorldOnB();
-                const btVector3 &normalOnB = pt.m_normalWorldOnB;
+                // more info...?
+                //const btVector3 &ptA = pt.getPositionWorldOnA();
+                //const btVector3 &ptB = pt.getPositionWorldOnB();
+                //const btVector3 &normalOnB = pt.m_normalWorldOnB;
             }
         }
 
         if (areTouching)
         {
-            if (Phys_FindOverlapPair(w, indexA, indexB) >= 0)
+            i32 pairIndex = Phys_FindOverlapPair(w, indexA, indexB);
+            if (pairIndex >= 0)
             {
                 continue;
             }
@@ -136,12 +138,18 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             Assert(w->numOverlaps < MAX_PHYS_OVERLAPS);
             w->overlapPairs[w->numOverlaps].indexA = indexA;
             w->overlapPairs[w->numOverlaps].indexB = indexB;
+            w->overlapPairs[w->numOverlaps].postSolveFrame = w->debug.postSolves;
             w->numOverlaps++;
         }
     }
+
+    // 
+
     //printf("Post solve overlaps %d\n", w->numOverlaps);
 }
 
+// Hack because I want these functions to be internal
+// but I also want to avoid the compile time warning in this specific case
 void Phys_NeverCall()
 {
     ILLEGAL_CODE_PATH
@@ -151,6 +159,9 @@ void Phys_NeverCall()
     Phys_ReadCommands(NULL, NULL);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// COMMANDS
+////////////////////////////////////////////////////////////////////////////////////////////
 inline void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
 {
     btTransform t;
@@ -172,7 +183,7 @@ inline void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
     body->setLinearVelocity(newVelocity);
 }
 
-void PhysExec_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
+internal void PhysExec_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -199,7 +210,7 @@ void PhysExec_TeleportShape(ZBulletWorld *world, PhysCmd_Teleport *cmd)
 #endif
 }
 
-void PhysExec_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
+internal void PhysExec_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -220,7 +231,7 @@ void PhysExec_ChangeVelocity(ZBulletWorld *world, PhysCmd_VelocityChange *cmd)
 	handle->rigidBody->setLinearVelocity(newVelocity);*/
 }
 
-void PhysExec_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
+internal void PhysExec_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
 {
     PhysBodyHandle *handle = Phys_GetHandleById(&world->bodies, cmd->shapeId);
     if (handle == NULL)
@@ -234,13 +245,13 @@ void PhysExec_SetState(ZBulletWorld* world, PhysCmd_State *cmd)
 ////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP
 ////////////////////////////////////////////////////////////////////////////////////////////
-void Phys_LockCommandBuffer(ByteBuffer *buffer)
+internal void Phys_LockCommandBuffer(ByteBuffer *buffer)
 {
     *buffer->ptrWrite = 0;
     buffer->ptrEnd = buffer->ptrWrite;
 }
 
-void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
+internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 {
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
     ByteBuffer *buffer = &g_cmdBuf;
@@ -486,17 +497,25 @@ Num Overlaps: %d\n\
                         world->debug.postSolves,
                         world->debug.numManifolds,
                         world->numOverlaps);
-    //   ptr += written;
-    //   remaining -= written;
+      ptr += written;
+      remaining -= written;
 
-    //   for (int i = 0; i < world->numOverlaps; ++i)
-    //   {
-    //       written = sprintf_s(ptr, remaining, "(%d vs %d)\n", world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
-    //       //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
-    //       //written = sprintf_s(ptr, remaining, "12345");
-    //       ptr += written;
-    //       remaining -= written;
-    //       if (remaining <= 0) { break; }
-    //   }
-    //ptr = NULL;
+	  char* format = "(%d vs %d)\n";
+	  // length of format + 4 characters per shape id
+	  i32 lineLengthEstimate = 9 + 4 + 4;
+
+      for (int i = 0; i < world->numOverlaps; ++i)
+      {
+		  if (remaining < lineLengthEstimate)
+		  {
+			  printf("ZPHYS Debug line overflow, %d remaining\n", remaining);
+			  break;
+		  }
+          written = sprintf_s(ptr, remaining, format, world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
+          //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
+          //written = sprintf_s(ptr, remaining, "12345");
+          ptr += written;
+          remaining -= written;
+      }
+    ptr = NULL;
 }

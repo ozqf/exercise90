@@ -78,6 +78,7 @@ void App_SaveDataVariables(char* fileName)
 
 i32 App_Init()
 {
+    App_Win32_AttachErrorHandlers();
     //DebugBreak();
     u32 heapMB = 64;
     u32 mainMemorySize = MegaBytes(heapMB);

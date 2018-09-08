@@ -259,3 +259,28 @@ Rotation:\n\
 #endif
     return h;
 }
+
+
+
+////////////////////////////////////////////////////////////
+// Windows C Runtime error handler
+////////////////////////////////////////////////////////////
+
+void App_Win32_invalid_parameter(  
+   const wchar_t * expression,  
+   const wchar_t * function,   
+   const wchar_t * file,   
+   unsigned int line,  
+   uintptr_t pReserved  
+)
+{
+    DebugBreak();
+    ILLEGAL_CODE_PATH
+    //Win32_Error("An invalid parameter was pasted to the C runtime library", "C runtime error");
+}
+
+void App_Win32_AttachErrorHandlers()
+{
+	_set_invalid_parameter_handler(App_Win32_invalid_parameter);
+	_set_thread_local_invalid_parameter_handler(App_Win32_invalid_parameter);
+}

@@ -175,8 +175,43 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
     RendObj_SetAsAsciCharArray(&g_rendDebugItems[1].obj, g_inputText.ptr, g_inputText.position, 0.05f, TEXT_ALIGNMENT_TOP_LEFT, 1, 1, 1, 1);
 }
 
+
+//////////////////////////////////////////////////////////////////
+// Attempts to handle C runtime errors. At least, according to
+// MSDN. Doesn't seem to help with game's errors atm
+//////////////////////////////////////////////////////////////////
+/*
+// https://msdn.microsoft.com/en-us/library/a9yf33zb.aspx
+void _invalid_parameter(  
+   const wchar_t * expression,  
+   const wchar_t * function,   
+   const wchar_t * file,   
+   unsigned int line,  
+   uintptr_t pReserved  
+);
+*/
+void Win32_invalid_parameter(  
+   const wchar_t * expression,  
+   const wchar_t * function,   
+   const wchar_t * file,   
+   unsigned int line,  
+   uintptr_t pReserved  
+)
+{
+    DebugBreak();
+    Win32_Error("An invalid parameter was pasted to the C runtime library", "C runtime error");
+}
+
+void Win32_AttachErrorHandlers()
+{
+	_set_invalid_parameter_handler(Win32_invalid_parameter);
+	_set_thread_local_invalid_parameter_handler(Win32_invalid_parameter);
+}
+
 void InitDebug()
 {
+	Win32_AttachErrorHandlers();
+
     g_keyConversions[0].VKCode = VK_CODE_DASH;
     g_keyConversions[0].baseChar = '-';
     g_keyConversions[0].shiftChar = '_';
