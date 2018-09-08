@@ -72,13 +72,31 @@ internal i32 Phys_FindOverlapPair(ZBulletWorld *world, i32 a, i32 b)
 {
     for (int i = 0; i < world->numOverlaps; ++i)
     {
+        PhysOverlapPair* p = &world->overlapPairs[i];
         // order of indices doesn't matter
         if (
-            (world->overlapPairs[i].indexA == a && world->overlapPairs[i].indexB == b) ||
-            (world->overlapPairs[i].indexA == b && world->overlapPairs[i].indexB == a))
+            p->isActive &&
+            ((p->indexA == a && p->indexB == b) ||
+            (p->indexA == b && p->indexB == a)))
         {
             return i;
         }
+    }
+    return -1;
+}
+
+internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
+{
+    for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
+    {
+        PhysOverlapPair* p = &world->overlapPairs[i];
+        if (p->isActive) { continue; }
+        p->isActive = 1;
+        p->indexA = a;
+        p->indexB = b;
+        p->startFrame = frame;
+        p->latestFrame = frame;
+        return i;
     }
     return -1;
 }
@@ -91,18 +109,25 @@ internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar tim
     ++g_world.debug.preSolves;
 }
 
+/*
+> Iterate bt's overlaps.
+> Search current overlap pairs array for that overlap.
+    > If not found, add
+    > If found, set postSolveFrame.
+> Afterward, iterate overlaps.
+    > if startFrame == this frame, write 'collisionStarted' cmd
+    > if latestFrame != this frame, write 'collision ended' cmd and wipe overlap record
+*/
 internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
 {
     ZBulletWorld *w = &g_world;
-    ++w->debug.postSolves;
-
-    // Reset overlap list and rebuild
-    w->numOverlaps = 0;
+    u32 currentFrame = ++w->debug.postSolves;
 
     int numManifolds = dynWorld->getDispatcher()->getNumManifolds();
     g_world.debug.numManifolds = numManifolds;
     for (int i = 0; i < numManifolds; i++)
     {
+        // All this spiel is iterating bullet's collisions 
         btPersistentManifold *contactManifold = dynWorld->getDispatcher()->getManifoldByIndexInternal(i);
         const btCollisionObject *obA = contactManifold->getBody0();
         const btCollisionObject *obB = contactManifold->getBody1();
@@ -120,7 +145,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             if (pt.getDistance() < F32_EPSILON)
             {
                 areTouching = 1;
-                // more info...?
+                // if you want more info...?
                 //const btVector3 &ptA = pt.getPositionWorldOnA();
                 //const btVector3 &ptB = pt.getPositionWorldOnB();
                 //const btVector3 &normalOnB = pt.m_normalWorldOnB;
@@ -129,21 +154,50 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
 
         if (areTouching)
         {
+            // Cool we have stuff to do
             i32 pairIndex = Phys_FindOverlapPair(w, indexA, indexB);
             if (pairIndex >= 0)
             {
+                w->overlapPairs[pairIndex].latestFrame = currentFrame;
                 continue;
             }
-
-            Assert(w->numOverlaps < MAX_PHYS_OVERLAPS);
-            w->overlapPairs[w->numOverlaps].indexA = indexA;
-            w->overlapPairs[w->numOverlaps].indexB = indexB;
-            w->overlapPairs[w->numOverlaps].postSolveFrame = w->debug.postSolves;
-            w->numOverlaps++;
+            else
+            {
+                pairIndex = Phys_AddOverlapPair(w, indexA, indexB, currentFrame);
+                if (pairIndex >= 0)
+                {
+                    printf("PHYS Add overlap pair %d/%d - index %d, Frame %d\n", indexA, indexB, i, currentFrame);
+                }
+                else
+                {
+                    ILLEGAL_CODE_PATH
+                }
+            }
+            
+            // Assert(w->numOverlaps < MAX_PHYS_OVERLAPS);
+            // w->overlapPairs[w->numOverlaps].indexA = indexA;
+            // w->overlapPairs[w->numOverlaps].indexB = indexB;
+            // w->overlapPairs[w->numOverlaps].postSolveFrame = currentFrame;
+            // w->numOverlaps++;
         }
     }
 
-    // 
+    // Check for start/end events
+    for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
+    {
+        PhysOverlapPair* pair = &w->overlapPairs[i];
+        if (!pair->isActive) { continue; }
+        if (pair->startFrame == currentFrame)
+        {
+            // collision began
+        }
+        else if (pair->latestFrame != currentFrame)
+        {
+            // collision ended
+            printf("PHYS Remove overlap pair %d/%d - index %d, Frame %d\n", pair->indexA, pair->indexB, i, currentFrame);
+            pair->isActive = 0;
+        }
+    }
 
     //printf("Post solve overlaps %d\n", w->numOverlaps);
 }
@@ -504,14 +558,16 @@ Num Overlaps: %d\n\
 	  // length of format + 4 characters per shape id
 	  i32 lineLengthEstimate = 9 + 4 + 4;
 
-      for (int i = 0; i < world->numOverlaps; ++i)
+      for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
       {
 		  if (remaining < lineLengthEstimate)
 		  {
 			  printf("ZPHYS Debug line overflow, %d remaining\n", remaining);
 			  break;
 		  }
-          written = sprintf_s(ptr, remaining, format, world->overlapPairs[i].indexA, world->overlapPairs[i].indexB);
+          PhysOverlapPair* pair = &world->overlapPairs[i];
+          if (!pair->isActive) { continue; }
+          written = sprintf_s(ptr, remaining, format, pair->indexA, pair->indexB);
           //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
           //written = sprintf_s(ptr, remaining, "12345");
           ptr += written;

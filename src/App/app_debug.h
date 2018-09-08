@@ -266,6 +266,9 @@ Rotation:\n\
 // Windows C Runtime error handler
 ////////////////////////////////////////////////////////////
 
+#define EX90_WINDOWS
+
+#if defined EX90_WINDOWS
 void App_Win32_invalid_parameter(  
    const wchar_t * expression,  
    const wchar_t * function,   
@@ -274,9 +277,7 @@ void App_Win32_invalid_parameter(
    uintptr_t pReserved  
 )
 {
-    DebugBreak();
-    ILLEGAL_CODE_PATH
-    //Win32_Error("An invalid parameter was pasted to the C runtime library", "C runtime error");
+    platform.Platform_Error("An invalid parameter was pasted to the C runtime library", "Fatal error\n");
 }
 
 void App_Win32_AttachErrorHandlers()
@@ -284,3 +285,4 @@ void App_Win32_AttachErrorHandlers()
 	_set_invalid_parameter_handler(App_Win32_invalid_parameter);
 	_set_thread_local_invalid_parameter_handler(App_Win32_invalid_parameter);
 }
+#endif

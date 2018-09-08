@@ -100,7 +100,7 @@ internal void Game_BuildTestScene(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 
-    EntitySpawnOptions options;
+    //EntitySpawnOptions options;
     #if 0
     
     options = {};
@@ -137,8 +137,8 @@ internal void Game_BuildTestScene(GameState* gs)
     #endif
 
     //EntitySpawnOptions options = {};
-    options = {};
-    Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
+    //options = {};
+    //Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
     
 }
 
