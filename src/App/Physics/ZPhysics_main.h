@@ -2,6 +2,11 @@
 
 #include "ZPhysics_module.cpp"
 
+// internal ByteBuffer* Phys_GetOutputBuffer()
+// {
+
+// }
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +109,7 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
 ////////////////////////////////////////////////////////////////////////////////////////////
 // CALLBACKS
 ////////////////////////////////////////////////////////////////////////////////////////////
-internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep)
+internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
 {
     ++g_world.debug.preSolves;
 }
@@ -182,7 +187,9 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
         }
     }
 
-    // Check for start/end events
+    // Output start/end events
+    ByteBuffer* buf = &g_eventBuf;
+
     for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
     {
         PhysOverlapPair* pair = &w->overlapPairs[i];
@@ -385,13 +392,13 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
     buffer->ptrWrite = buffer->ptrStart;
 }
 
-internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 deltaTime)
+internal void Phys_StepWorld(ZBulletWorld *world, ByteBuffer *output, f32 deltaTime)
 {
     ++world->debug.stepCount;
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
-    u8 *writePosition = (u8 *)eventBuffer->ptrMemory;
-	u8 *endPosition = writePosition + eventBuffer->size;
+    u8 *writePosition = output->ptrStart;
+	u8 *endPosition = output->ptrStart + output->capacity;
     i32 len = world->bodies.capacity;
 	i32 updatesWritten = 0;
 	i32 unusedSkipped = 0;
@@ -474,6 +481,8 @@ internal void Phys_StepWorld(ZBulletWorld *world, MemoryBlock *eventBuffer, f32 
 
     // Mark end of buffer
     *writePosition = 0;
+    output->ptrEnd = writePosition;
+    output->ptrWrite = writePosition;
 
     /*char buf[128];
         sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());

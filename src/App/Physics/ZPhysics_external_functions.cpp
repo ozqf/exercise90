@@ -221,7 +221,11 @@ void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventB
 
     g_world.solver = new btSequentialImpulseConstraintSolver();
 
-    g_world.dynamicsWorld = new btDiscreteDynamicsWorld(g_world.dispatcher, g_world.broadphase, g_world.solver, g_world.collisionConfiguration);
+    g_world.dynamicsWorld = new btDiscreteDynamicsWorld(
+        g_world.dispatcher,
+        g_world.broadphase,
+        g_world.solver,
+        g_world.collisionConfiguration);
 
     g_world.dynamicsWorld->setGravity(btVector3(0, -20, 0));
 
@@ -252,17 +256,19 @@ void PhysExt_Shutdown()
     delete g_world.broadphase;
 }
 
-MemoryBlock PhysExt_Step(f32 deltaTime)
+ByteBuffer PhysExt_Step(f32 deltaTime)
 {
-    MemoryBlock eventBuffer = {};
+    //MemoryBlock eventBuffer = {};
 
     ByteBuffer buf = {};
     buf.ptrStart = g_eventBuf.ptrStart;
     buf.ptrEnd = g_eventBuf.ptrStart + g_eventBuf.capacity;
     buf.ptrWrite = g_eventBuf.ptrStart;
+    buf.capacity = g_eventBuf.capacity;
     
-    eventBuffer.ptrMemory = g_eventBuf.ptrStart;
-    eventBuffer.size = g_eventBuf.capacity;
+    //eventBuffer.ptrMemory = g_eventBuf.ptrStart;
+    //eventBuffer.size = g_eventBuf.capacity;
+
     // TODO: Lot of ickyness here
     // Internal functions should not reference global buffers, but receive buffers via
     // params, so that locations of 'current' buffers can be changed in this function
@@ -271,9 +277,9 @@ MemoryBlock PhysExt_Step(f32 deltaTime)
     // So commands both read and write... Is this going to work?
     Phys_ReadCommands(&g_world, &buf);
 
-    Phys_StepWorld(&g_world, &eventBuffer, deltaTime);
+    Phys_StepWorld(&g_world, &buf, deltaTime);
     Phys_WriteDebugOutput(&g_world);
-    return eventBuffer;
+    return buf;
 }
 
 

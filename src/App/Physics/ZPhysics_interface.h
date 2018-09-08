@@ -57,7 +57,7 @@ Vec3 PhysExt_DebugGetPosition();
 void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize);
 //void Phys_ReadCommands(MemoryBlock* commandBuffer);
 // Returns memory block of the event buffer assigned at init
-MemoryBlock PhysExt_Step(f32 deltaTime);
+ByteBuffer PhysExt_Step(f32 deltaTime);
 // Remove all objects from simulation, resetting it
 void PhysExt_ClearWorld();
 // Shut down library. destroy all objects.

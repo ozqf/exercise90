@@ -73,14 +73,17 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
         dt = MAX_ALLOWED_PHYSICS_STEP;
     }
 
-    MemoryBlock eventBuffer = PhysExt_Step(dt);
+    ByteBuffer eventBuffer = PhysExt_Step(dt);
     
     //i32 ptrOffset = 0;
     u8 reading = 1;
 	i32 eventsProcessed = 0;
 
-    u8* readPos = (u8*)eventBuffer.ptrMemory;
-    u8* end = (u8*)((u8*)eventBuffer.ptrMemory + eventBuffer.size);
+    //u8* readPos = (u8*)eventBuffer.ptrMemory;
+    //u8* end = (u8*)((u8*)eventBuffer.ptrMemory + eventBuffer.size);
+
+    u8* readPos = eventBuffer.ptrStart;
+    u8* end = eventBuffer.ptrEnd;
     while (readPos < end)
     {
         //u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);

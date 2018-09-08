@@ -212,6 +212,19 @@ struct PhysEv_RaycastDebug
 	f32 colour[3];
 };
 
+enum PhysEv_EventType
+{
+	OverlapStarted,
+	OverlapEnded
+};
+
+struct PhysEv_Event
+{
+	PhysEv_EventType type;
+	u32 shapeA;
+	u32 shapeB;
+};
+
 //////////////////////////////////////////////////////////////////
 // Header for all items in event or command buffers
 //////////////////////////////////////////////////////////////////
