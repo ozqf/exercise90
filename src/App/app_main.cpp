@@ -72,6 +72,11 @@ void App_SaveDataVariables(char* fileName)
     platform.Platform_CloseFileForWriting(fileId);
 }
 
+void App_PhysicsErrorHandler(char* message)
+{
+    platform.Platform_Error(message, "Physics Error");
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // App Interface
 ////////////////////////////////////////////////////////////////////////////
@@ -130,7 +135,9 @@ i32 App_Init()
         g_collisionCommandBuffer.ptrMemory,
         g_collisionCommandBuffer.objectSize,
         g_collisionEventBuffer.ptrMemory,
-        g_collisionEventBuffer.objectSize);
+        g_collisionEventBuffer.objectSize,
+        App_PhysicsErrorHandler
+        );
     
     
     Game_Init();

@@ -434,7 +434,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
         }
         Assert(h->motionState != NULL);
         i32 requiredSize = sizeof(PhysDataItemHeader) + sizeof(PhysEV_TransformUpdate);
-		Assert((writePosition +  requiredSize < endPosition));
+        if (writePosition +  requiredSize > endPosition)
+        {
+            Phys_Error("Output Buffer overrun\n");
+        }
+		//Assert((writePosition +  requiredSize < endPosition));
 
 		updatesWritten++;
 
@@ -567,18 +571,23 @@ PreSolves: %d\n\
 PostSolves: %d\n\
 Num Manifolds: %d\n\
 Num Overlaps: %d\n\
+Peak input bytes: %d\n\
+Peak output bytes: %d\n\
 --Collision Pairs--\n\
 ",
                         world->debug.stepCount,
                         world->debug.preSolves,
                         world->debug.postSolves,
                         world->debug.numManifolds,
-                        world->numOverlaps);
+                        world->numOverlaps,
+                        world->debug.inputPeakBytes,
+                        world->debug.outputPeakBytes
+                        );
       ptr += written;
       remaining -= written;
 
 	  char* format = "(%d vs %d)\n";
-	  // length of format + 4 characters per shape id
+	  // length of format + 4 digits per shape id
 	  i32 lineLengthEstimate = 9 + 4 + 4;
 
       for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)

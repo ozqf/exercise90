@@ -54,7 +54,12 @@ Vec3 PhysExt_DebugGetPosition();
 
 // Must pass two blocks of memory for the physics to use for I/O
 // Size... to be determined
-void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize);
+void PhysExt_Init(
+    void* ptrCommandBuffer,
+    u32 commandBufferSize,
+    void* ptrEventBuffer,
+    u32 eventBufferSize,
+    PhysErrorHandler errorHandler);
 //void Phys_ReadCommands(MemoryBlock* commandBuffer);
 // Returns memory block of the event buffer assigned at init
 ByteBuffer PhysExt_Step(f32 deltaTime);

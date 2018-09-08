@@ -236,3 +236,5 @@ struct PhysCmd_State
 	f32 rot[3];
 	f32 vel[3];
 };
+
+typedef void (*PhysErrorHandler)(char* message);

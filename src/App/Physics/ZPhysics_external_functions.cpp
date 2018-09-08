@@ -4,6 +4,16 @@
 
 #include "ZPhysics_interface.h"
 
+void Phys_Error(char* message)
+{
+    printf("PHYS Error: %s\n", message);
+    if (g_errorHandler)
+    {
+        g_errorHandler(message);
+    }
+    ILLEGAL_CODE_PATH
+}
+
 /////////////////////////////////////////////////////////////
 // ISSUE COMMAND
 /////////////////////////////////////////////////////////////
@@ -179,7 +189,15 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 /////////////////////////////////////////////////////////////
 
 // If the provided command buffer is NULL or the size is zero, fail
-void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventBuffer, u32 eventBufferSize)
+// TODO: Could give the option to call function pointers for input/output
+// instead of using buffers.
+void PhysExt_Init(
+    void* ptrCommandBuffer,
+    u32 commandBufferSize,
+    void* ptrEventBuffer,
+    u32 eventBufferSize,
+    PhysErrorHandler errorHandler
+    )
 {
     if (
         commandBufferSize == 0
@@ -190,6 +208,8 @@ void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventB
     {
         Assert(false);
     }
+
+    g_errorHandler = errorHandler;
 
     COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
     COM_ZeroMemory((u8*)ptrEventBuffer, eventBufferSize);
@@ -273,7 +293,12 @@ ByteBuffer PhysExt_Step(f32 deltaTime)
     // Internal functions should not reference global buffers, but receive buffers via
     // params, so that locations of 'current' buffers can be changed in this function
     Phys_LockCommandBuffer(&g_input);
-    
+    u32 reading = g_input.ptrWrite - g_input.ptrStart;
+    if (reading > g_world.debug.inputPeakBytes)
+    {
+        g_world.debug.inputPeakBytes = reading;
+    }
+
     // Reset output
     g_output.ptrWrite = g_output.ptrStart;
     g_output.ptrEnd = g_output.ptrStart;
@@ -282,6 +307,12 @@ ByteBuffer PhysExt_Step(f32 deltaTime)
     Phys_ReadCommands(&g_world, &g_output);
 
     Phys_StepWorld(&g_world, deltaTime);
+    u32 written = g_output.ptrWrite - g_output.ptrStart;
+    if (written > g_world.debug.outputPeakBytes)
+    {
+        g_world.debug.outputPeakBytes = written;
+    }
+    // TODO: Should only write the debug string if is asked for!
     Phys_WriteDebugOutput(&g_world);
     ByteBuffer buf = g_output;
     return buf;

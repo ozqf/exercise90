@@ -2,7 +2,7 @@
 
 #include "ZPhysics_internal_types.h"
 
-
+internal PhysErrorHandler g_errorHandler = NULL;
 internal ZBulletWorld g_world;
 internal ByteBuffer g_input;
 internal ByteBuffer g_output;
