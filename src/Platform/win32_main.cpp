@@ -115,28 +115,28 @@ LRESULT CALLBACK Win32_MainWindowCallback(
     case WM_LBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
-        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_LBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
-        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_RBUTTONDOWN:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
-        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
     case WM_RBUTTONUP:
     {
         InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
-        Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
     }
     break;
 
@@ -257,7 +257,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
         if (inputCode != 0)
         {
             InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
-            Win32_WritePlatformCommand(&g_cmdBuf, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+            Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
             break;
         }
         else
@@ -297,7 +297,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 
 void Win32_SendAppInput()
 {
-    Win32_TickInput(&g_cmdBuf);
+    Win32_TickInput(&g_input);
     //////////////////////////////////////////////////////////////////
     // Command handling:
     // > Mark buffer as ended
@@ -305,23 +305,23 @@ void Win32_SendAppInput()
     // > Swap platform buffer between A and B
     // > Send copy to app
     //////////////////////////////////////////////////////////////////
-    //*(u8*)g_cmdBuf.ptrWrite = 0;
-    g_cmdBuf.ptrEnd = g_cmdBuf.ptrWrite;
-    ByteBuffer frameCommands = g_cmdBuf;
+    //*(u8*)g_input.ptrWrite = 0;
+    g_input.ptrEnd = g_input.ptrWrite;
+    ByteBuffer frameCommands = g_input;
     //OutputDebugStringA("Swap platform buffers\n");
-    if (g_cmdBuf.ptrStart == g_commandBufferA)
+    if (g_input.ptrStart == g_commandBufferA)
     {
-        g_cmdBuf.ptrStart = g_commandBufferB;
-        g_cmdBuf.ptrWrite = g_commandBufferB;
-        g_cmdBuf.ptrEnd = g_commandBufferB;
-        g_cmdBuf.count = 0;
+        g_input.ptrStart = g_commandBufferB;
+        g_input.ptrWrite = g_commandBufferB;
+        g_input.ptrEnd = g_commandBufferB;
+        g_input.count = 0;
     }
-    else if (g_cmdBuf.ptrStart == g_commandBufferB)
+    else if (g_input.ptrStart == g_commandBufferB)
     {
-        g_cmdBuf.ptrStart = g_commandBufferA;
-        g_cmdBuf.ptrWrite = g_commandBufferA;
-        g_cmdBuf.ptrEnd = g_commandBufferA;
-        g_cmdBuf.count = 0;
+        g_input.ptrStart = g_commandBufferA;
+        g_input.ptrWrite = g_commandBufferA;
+        g_input.ptrEnd = g_commandBufferA;
+        g_input.count = 0;
     }
     else
     {

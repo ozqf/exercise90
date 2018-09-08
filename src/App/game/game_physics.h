@@ -121,6 +121,16 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
                 eventsProcessed++;
             } break;
 
+            case OverlapStarted:
+            {
+                printf("Overlap started!\n");
+            } break;
+
+            case OverlapEnded:
+            {
+                printf("Overlap ended!\n");
+            } break;
+
             default:
             {
                 readPos = end;

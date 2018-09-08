@@ -169,11 +169,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             else
             {
                 pairIndex = Phys_AddOverlapPair(w, indexA, indexB, currentFrame);
-                if (pairIndex >= 0)
-                {
-                    printf("PHYS Add overlap pair %d/%d - index %d, Frame %d\n", indexA, indexB, i, currentFrame);
-                }
-                else
+                if (pairIndex < 0)
                 {
                     ILLEGAL_CODE_PATH
                 }
@@ -188,7 +184,9 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     }
 
     // Output start/end events
-    ByteBuffer* buf = &g_eventBuf;
+    ByteBuffer* buf = &g_output;
+    PhysDataItemHeader h = {};
+    PhysEv_Collision ev = {};
 
     for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
     {
@@ -197,14 +195,30 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
         if (pair->startFrame == currentFrame)
         {
             // collision began
+            h.size = sizeof(PhysEv_Collision);
+            h.type = OverlapStarted;
+            ev.shapeA = pair->indexA;
+            ev.shapeB = pair->indexB;
+
+            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, sizeof(PhysDataItemHeader));
+            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, sizeof(PhysDataItemHeader));
         }
         else if (pair->latestFrame != currentFrame)
         {
             // collision ended
-            printf("PHYS Remove overlap pair %d/%d - index %d, Frame %d\n", pair->indexA, pair->indexB, i, currentFrame);
+            //printf("PHYS Remove overlap pair %d/%d - index %d, Frame %d\n", pair->indexA, pair->indexB, i, currentFrame);
+            // collision began
+            h.size = sizeof(PhysEv_Collision);
+            h.type = OverlapEnded;
+            ev.shapeA = pair->indexA;
+            ev.shapeB = pair->indexB;
+
+            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, sizeof(PhysDataItemHeader));
+            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, sizeof(PhysDataItemHeader));
             pair->isActive = 0;
         }
     }
+    buf->ptrEnd = buf->ptrWrite;
 
     //printf("Post solve overlaps %d\n", w->numOverlaps);
 }
@@ -315,7 +329,7 @@ internal void Phys_LockCommandBuffer(ByteBuffer *buffer)
 internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 {
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
-    ByteBuffer *buffer = &g_cmdBuf;
+    ByteBuffer *buffer = &g_input;
     u8 *ptrRead = buffer->ptrStart;
     while (*ptrRead != NULL && ptrRead < buffer->ptrEnd)
     {
@@ -392,13 +406,13 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
     buffer->ptrWrite = buffer->ptrStart;
 }
 
-internal void Phys_StepWorld(ZBulletWorld *world, ByteBuffer *output, f32 deltaTime)
+internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 {
     ++world->debug.stepCount;
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
-    u8 *writePosition = output->ptrStart;
-	u8 *endPosition = output->ptrStart + output->capacity;
+    u8 *writePosition = g_output.ptrWrite;
+	u8 *endPosition = g_output.ptrStart + g_output.capacity;
     i32 len = world->bodies.capacity;
 	i32 updatesWritten = 0;
 	i32 unusedSkipped = 0;
@@ -481,8 +495,8 @@ internal void Phys_StepWorld(ZBulletWorld *world, ByteBuffer *output, f32 deltaT
 
     // Mark end of buffer
     *writePosition = 0;
-    output->ptrEnd = writePosition;
-    output->ptrWrite = writePosition;
+    g_output.ptrEnd = writePosition;
+    g_output.ptrWrite = writePosition;
 
     /*char buf[128];
         sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());

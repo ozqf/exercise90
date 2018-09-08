@@ -84,4 +84,4 @@ internal void Phys_LockCommandBuffer(ByteBuffer* buffer);
 
 internal void Phys_ReadCommands(ZBulletWorld* world, ByteBuffer* output);
 
-internal void Phys_StepWorld(ZBulletWorld* world, ByteBuffer* eventBuffer, f32 deltaTime);
+internal void Phys_StepWorld(ZBulletWorld* world, f32 deltaTime);

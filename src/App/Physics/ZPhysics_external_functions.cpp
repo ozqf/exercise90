@@ -14,8 +14,8 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
     // Thread safe...? do you care...?
     i32 id = g_world.nextQueryId++;
     ev->id = id;
-    g_cmdBuf.ptrWrite += COM_WriteByte(Raycast, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(ev, g_cmdBuf.ptrWrite, PhysCmd_Raycast);
+    g_input.ptrWrite += COM_WriteByte(Raycast, g_input.ptrWrite);
+    g_input.ptrWrite += COM_COPY_STRUCT(ev, g_input.ptrWrite, PhysCmd_Raycast);
     return id;
 }
 #endif
@@ -28,8 +28,8 @@ i32 PhysCmd_CreateShape(ZShapeDef* def, u32 ownerId)
     Assert(h != NULL);
     def->handleId = h->id;
 	h->ownerId = ownerId;
-    g_cmdBuf.ptrWrite += COM_WriteByte(Create, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(def, g_cmdBuf.ptrWrite, ZShapeDef);
+    g_input.ptrWrite += COM_WriteByte(Create, g_input.ptrWrite);
+    g_input.ptrWrite += COM_COPY_STRUCT(def, g_input.ptrWrite, ZShapeDef);
     return h->id;
 }
 #if 0
@@ -65,14 +65,14 @@ i32 PhysCmd_CreateBox(
 void PhysCmd_RemoveShape(i32 shapeId)
 {
     PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
-    g_cmdBuf.ptrWrite += COM_WriteByte(Remove, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_WriteI32(shapeId, g_cmdBuf.ptrWrite);
+    g_input.ptrWrite += COM_WriteByte(Remove, g_input.ptrWrite);
+    g_input.ptrWrite += COM_WriteI32(shapeId, g_input.ptrWrite);
 }
 
 void PhysCmd_SetState(PhysCmd_State* state)
 {
-    g_cmdBuf.ptrWrite += COM_WriteByte(SetState, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(state, g_cmdBuf.ptrWrite, PhysCmd_State);
+    g_input.ptrWrite += COM_WriteByte(SetState, g_input.ptrWrite);
+    g_input.ptrWrite += COM_COPY_STRUCT(state, g_input.ptrWrite, PhysCmd_State);
 }
 
 void PhysCmd_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
@@ -83,8 +83,8 @@ void PhysCmd_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
     cmd.pos[1] = posY;
     cmd.pos[2] = posZ;
 	
-    g_cmdBuf.ptrWrite += COM_WriteByte(Teleport, g_cmdBuf.ptrWrite);
-    g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_Teleport);
+    g_input.ptrWrite += COM_WriteByte(Teleport, g_input.ptrWrite);
+    g_input.ptrWrite += COM_COPY_STRUCT(&cmd, g_input.ptrWrite, PhysCmd_Teleport);
 }
 
 void PhysCmd_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
@@ -95,8 +95,8 @@ void PhysCmd_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 	cmd.vel[1] = velY;
 	cmd.vel[2] = velZ;
 
-	g_cmdBuf.ptrWrite += COM_WriteByte(SetVelocity, g_cmdBuf.ptrWrite);
-	g_cmdBuf.ptrWrite += COM_COPY_STRUCT(&cmd, g_cmdBuf.ptrWrite, PhysCmd_VelocityChange);
+	g_input.ptrWrite += COM_WriteByte(SetVelocity, g_input.ptrWrite);
+	g_input.ptrWrite += COM_COPY_STRUCT(&cmd, g_input.ptrWrite, PhysCmd_VelocityChange);
 }
 
 /////////////////////////////////////////////////////////////
@@ -194,17 +194,17 @@ void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventB
     COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
     COM_ZeroMemory((u8*)ptrEventBuffer, eventBufferSize);
 
-    g_cmdBuf = {};
-    g_cmdBuf.ptrStart = (u8*)ptrCommandBuffer;
-    g_cmdBuf.ptrEnd = g_cmdBuf.ptrStart;
-    g_cmdBuf.ptrWrite = g_cmdBuf.ptrStart;
-    g_cmdBuf.capacity = commandBufferSize;
+    g_input = {};
+    g_input.ptrStart = (u8*)ptrCommandBuffer;
+    g_input.ptrEnd = g_input.ptrStart;
+    g_input.ptrWrite = g_input.ptrStart;
+    g_input.capacity = commandBufferSize;
 
-    g_eventBuf = {};
-    g_eventBuf.ptrStart = (u8*)ptrEventBuffer;
-    g_eventBuf.ptrEnd = g_eventBuf.ptrStart;
-    g_eventBuf.ptrWrite = g_eventBuf.ptrStart;
-    g_eventBuf.capacity = eventBufferSize;
+    g_output = {};
+    g_output.ptrStart = (u8*)ptrEventBuffer;
+    g_output.ptrEnd = g_output.ptrStart;
+    g_output.ptrWrite = g_output.ptrStart;
+    g_output.capacity = eventBufferSize;
     
 
     //g_physTest = {};
@@ -237,8 +237,8 @@ void PhysExt_Init(void* ptrCommandBuffer, u32 commandBufferSize, void* ptrEventB
 
 void PhysExt_ClearWorld()
 {
-	COM_ZeroMemory(g_cmdBuf.ptrStart, g_cmdBuf.capacity);
-	COM_ZeroMemory(g_eventBuf.ptrStart, g_eventBuf.capacity);
+	COM_ZeroMemory(g_input.ptrStart, g_input.capacity);
+	COM_ZeroMemory(g_output.ptrStart, g_output.capacity);
     for (int i = 0; i < g_world.bodies.capacity; ++i)
     {
         Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);
@@ -260,25 +260,30 @@ ByteBuffer PhysExt_Step(f32 deltaTime)
 {
     //MemoryBlock eventBuffer = {};
 
-    ByteBuffer buf = {};
-    buf.ptrStart = g_eventBuf.ptrStart;
-    buf.ptrEnd = g_eventBuf.ptrStart + g_eventBuf.capacity;
-    buf.ptrWrite = g_eventBuf.ptrStart;
-    buf.capacity = g_eventBuf.capacity;
     
-    //eventBuffer.ptrMemory = g_eventBuf.ptrStart;
-    //eventBuffer.size = g_eventBuf.capacity;
+    
+    
+    
+    
+    
+    //eventBuffer.ptrMemory = g_output.ptrStart;
+    //eventBuffer.size = g_output.capacity;
 
     // TODO: Lot of ickyness here
     // Internal functions should not reference global buffers, but receive buffers via
     // params, so that locations of 'current' buffers can be changed in this function
-    Phys_LockCommandBuffer(&g_cmdBuf);
+    Phys_LockCommandBuffer(&g_input);
+    
+    // Reset output
+    g_output.ptrWrite = g_output.ptrStart;
+    g_output.ptrEnd = g_output.ptrStart;
 
     // So commands both read and write... Is this going to work?
-    Phys_ReadCommands(&g_world, &buf);
+    Phys_ReadCommands(&g_world, &g_output);
 
-    Phys_StepWorld(&g_world, &buf, deltaTime);
+    Phys_StepWorld(&g_world, deltaTime);
     Phys_WriteDebugOutput(&g_world);
+    ByteBuffer buf = g_output;
     return buf;
 }
 

@@ -39,6 +39,8 @@ struct PhysDebugInfo
     u32 postSolves = 0;
 
     u32 numManifolds = 0;
+    u32 inputPeakBytes;
+    u32 outputPeakBytes;
 };
 
 struct PhysOverlapPair

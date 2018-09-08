@@ -4,8 +4,8 @@
 
 
 internal ZBulletWorld g_world;
-internal ByteBuffer g_cmdBuf;
-internal ByteBuffer g_eventBuf;
+internal ByteBuffer g_input;
+internal ByteBuffer g_output;
 //internal PhysicsTestState g_physTest;
 
 internal Vec3 g_testPos;

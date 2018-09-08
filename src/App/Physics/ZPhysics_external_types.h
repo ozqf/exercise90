@@ -169,7 +169,9 @@ enum PhysEventType
 	None = 0,
 	TransformUpdate = 1,
 	RaycastResult = 2,
-	RaycastDebug = 3
+	RaycastDebug = 3,
+	OverlapStarted = 4,
+	OverlapEnded = 5
 };
 #define PHYS_UPDATE_NULL 0
 #define PHYS_EVENT_TRANSFORM 1
@@ -212,15 +214,8 @@ struct PhysEv_RaycastDebug
 	f32 colour[3];
 };
 
-enum PhysEv_EventType
+struct PhysEv_Collision
 {
-	OverlapStarted,
-	OverlapEnded
-};
-
-struct PhysEv_Event
-{
-	PhysEv_EventType type;
 	u32 shapeA;
 	u32 shapeB;
 };
