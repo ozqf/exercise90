@@ -154,6 +154,13 @@ inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 	}
 }
 
+inline Ent* Ent_GetEntityByIdValue(EntList* ents, u32 entIdValue)
+{
+    EntId id {};
+    id.value = entIdValue;
+    return Ent_GetEntityById(ents, &id);
+}
+
 inline Ent* Ent_GetEntityById(GameState* gs, EntId* id)
 {
     return Ent_GetEntityById(&gs->entList, id);

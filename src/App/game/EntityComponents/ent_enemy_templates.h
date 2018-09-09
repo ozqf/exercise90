@@ -90,13 +90,16 @@ internal void Ent_SetTemplate_Brute(EntityState* state, EntitySpawnOptions* opti
         0
     );
     state->transform.scale = { 2, 2, 2 };
+    options->scale = { 2, 2, 2 };
+
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 1;
-    state->healthState.SetHealthAndMax(500);
-    options->scale = { 2, 2, 2 };
 
-    state->aiState.atkSettings.Set(2, 1.0f, 0.1f, 10, 1.0f, 0);
+    state->healthState.SetHealthAndMax(500);
+    state->healthState.stunThreshold = 1000;
+
+    state->aiState.atkSettings.Set(2, 1.0f, 0.35f, 999, 1.0f, 0);
     
     state->actorState.runSpeed = 3;
 

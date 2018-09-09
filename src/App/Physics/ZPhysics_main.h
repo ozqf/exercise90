@@ -601,7 +601,8 @@ Peak output bytes: %d\n\
       {
 		  if (remaining < lineLengthEstimate)
 		  {
-			  printf("ZPHYS Debug line overflow, %d remaining\n", remaining);
+              // TODO: Tidy this function up
+			  //printf("ZPHYS Debug line overflow, %d remaining\n", remaining);
 			  break;
 		  }
           PhysOverlapPair* pair = &world->overlapPairs[i];

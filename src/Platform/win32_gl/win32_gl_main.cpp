@@ -155,7 +155,7 @@ ScreenInfo Win32_R_SetupFrame(HWND window)
 
     // Magenta (debugging)
 	// Toned down to be less eye bleeding atm
-	glClearColor(0.5f, 0.0f, 0.5f, 0.0f);
+	//glClearColor(0.5f, 0.0f, 0.5f, 0.0f);
 	// Appears you don't have to manually clear to black
     //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 

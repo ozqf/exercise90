@@ -142,6 +142,7 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         }
     }
 }
+
 void Game_UpdateHealth(GameState *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->healthList.max; ++i)

@@ -266,7 +266,9 @@ struct EC_MultiRendObj
 #endif
 
 
-
+// #define EC_COLLIDER_HANDLER_NONE 0
+// #define EC_COLLIDER_HANDLER_AI 1
+// #define EC_COLLIDER_HANDLER_HEALTH 1
 
 struct EC_ColliderState
 {

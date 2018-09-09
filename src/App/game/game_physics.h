@@ -2,6 +2,72 @@
 
 #include "game.h"
 
+/////////////////////////////////////////////////////////////////////////////
+// PHYSICS OUTPUT
+/////////////////////////////////////////////////////////////////////////////
+internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u32 id_B)
+{
+    //EC_Collider* a = EC_ColliderGetByShapeId(&gs->colliderList, id_A);
+    //EC_Collider* b = EC_ColliderGetByShapeId(&gs->colliderList, id_B);
+
+    Ent* a = Ent_GetEntityByIdValue(&gs->entList, id_A);
+    Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
+    Assert((a != NULL && b != NULL));
+
+    printf("Collision: %d/%d vs %d/%d\n",
+        a->entId.iteration, a->entId.index,
+        b->entId.iteration, b->entId.index
+    );
+
+    //EC_Collider* colA = EC_FindCollider(gs, a);
+    //EC_Collider* colB = EC_FindCollider(gs, b);
+    //Assert((colA != NULL && colB != NULL));
+
+    //i32 tagA = colA->state.def.tag;
+    //i32 tagB = colA->state.def.tag;
+    //printf("Tags %d vs %d\n", tagA, tagB);
+
+    // How to figure out what to do with the collision pair?
+    // how to determine the situation:
+    // a wants to do damage
+    // a wants to take damage
+    // b wants to do damage
+    // b wants to take damage
+    
+    EC_Health* healthA = EC_FindHealth(gs, a);
+    EC_Health* healthB = EC_FindHealth(gs, b);
+    EC_AIController* aiA = EC_FindAIController(gs, a);
+    EC_AIController* aiB = EC_FindAIController(gs, b);
+
+    // A hits B
+    if (aiA != NULL &&
+        healthB != NULL &&
+        (aiA->state.state == AI_STATE_CHARGING) &&
+        Game_AttackIsValid(a->team, b->team)
+        )
+    {
+        printf("A hits B!\n");
+        healthB->state.hp -= 10;
+        healthB->state.damageThisFrame += 10;
+		healthB->state.lastHitFrame = time->gameFrameNumber;
+		healthB->state.lastHitSource = a->entId;
+    }
+
+    // B hits A
+    if (aiB != NULL &&
+        healthA != NULL &&
+        (aiB->state.state == AI_STATE_CHARGING) &&
+        Game_AttackIsValid(b->team, a->team)
+        )
+    {
+        printf("B hits A!\n");
+        healthA->state.hp -= 10;
+        healthA->state.damageThisFrame += 10;
+		healthA->state.lastHitFrame = time->gameFrameNumber;
+		healthA->state.lastHitSource = b->entId;
+    }
+}
+
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 {
     if (ev->tag == 0)
@@ -64,7 +130,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
 {
     
     // Force physics step to always be no lower than 30fps
-
+    // TODO: Force game update and physics step to specific, locked framerate
     /////////////////////////////////////////////////////////////////////////////
     // STEP PHYSICS
     f32 dt = time->deltaTime;
@@ -124,7 +190,8 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
                 PhysEv_Collision ev = {};
                 COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
                 if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
-                printf("Overlap started: %d vs %d\n", ev.a.externalId, ev.b.externalId);
+                //printf("Overlap started: %d vs %d\n", ev.a.externalId, ev.b.externalId);
+                Game_EntVsEntCollision(gs, time, ev.a.externalId, ev.b.externalId);
             } break;
 
             case OverlapEnded:
@@ -132,7 +199,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
                 PhysEv_Collision ev = {};
                 COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
                 if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
-                printf("Overlap ended: %d vs %d\n", ev.a.externalId, ev.b.externalId);
+                //printf("Overlap ended: %d vs %d\n", ev.a.externalId, ev.b.externalId);
             } break;
 
             case NULL:
