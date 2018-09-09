@@ -15,7 +15,7 @@ struct PhysBodyHandle
     // internal id, matches user index on btRigidbody
     i32 id;
     // external id
-    u32 ownerId;
+    u32 externalId;
     
     ZShapeDef def;
     
@@ -43,13 +43,23 @@ struct PhysDebugInfo
     u32 outputPeakBytes;
 };
 
+// Owner Ids must be recorded here, due to read/write order of commands and events
+// (handle may be released before pair is checked...)
+struct PhysOverlapItem
+{
+    i32 internalId;
+    u32 externalId;
+    i32 shapeTag;
+};
+
 struct PhysOverlapPair
 {
     i32 isActive;
     u32 startFrame;
     u32 latestFrame;
-    i32 indexA;
-    i32 indexB;
+	
+    PhysOverlapItem a;
+    PhysOverlapItem b;
 };
 
 struct PhysInfinitePlane

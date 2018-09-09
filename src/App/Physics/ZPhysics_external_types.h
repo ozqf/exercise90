@@ -59,10 +59,11 @@ union ZShapeData_U
 struct ZShapeDef
 {
 	ZShapeType shapeType;
+	// externally set value for user grouping/selection only
+	i32 tag;
 	
 	u32 flags;
 	i32 handleId;
-	i32 tag;
 	u16 group;
 	u16 mask;
 	f32 restitution;
@@ -214,10 +215,16 @@ struct PhysEv_RaycastDebug
 	f32 colour[3];
 };
 
+struct PhysEv_CollisionItem
+{
+	u32 externalId;
+	i32 shapeTag;
+};
+
 struct PhysEv_Collision
 {
-	u32 shapeA;
-	u32 shapeB;
+	PhysEv_CollisionItem a;
+	PhysEv_CollisionItem b;
 };
 
 //////////////////////////////////////////////////////////////////

@@ -30,14 +30,14 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 }
 #endif
 
-i32 PhysCmd_CreateShape(ZShapeDef* def, u32 ownerId)
+i32 PhysCmd_CreateShape(ZShapeDef* def, u32 externalId)
 {
     Assert(def != NULL);
     PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
     
     Assert(h != NULL);
     def->handleId = h->id;
-	h->ownerId = ownerId;
+	h->externalId = externalId;
     g_input.ptrWrite += COM_WriteByte(Create, g_input.ptrWrite);
     g_input.ptrWrite += COM_COPY_STRUCT(def, g_input.ptrWrite, ZShapeDef);
     return h->id;

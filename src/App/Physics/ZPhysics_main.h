@@ -81,8 +81,8 @@ internal i32 Phys_FindOverlapPair(ZBulletWorld *world, i32 a, i32 b)
         // order of indices doesn't matter
         if (
             p->isActive &&
-            ((p->indexA == a && p->indexB == b) ||
-            (p->indexA == b && p->indexB == a)))
+            ((p->a.internalId == a && p->b.internalId == b) ||
+            (p->a.internalId == b && p->b.internalId == a)))
         {
             return i;
         }
@@ -96,11 +96,26 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
     {
         PhysOverlapPair* p = &world->overlapPairs[i];
         if (p->isActive) { continue; }
+
+        PhysBodyHandle* handleA = Phys_GetHandleById(&world->bodies, a);
+		PhysBodyHandle* handleB = Phys_GetHandleById(&world->bodies, b);
+		if (!handleA || !handleB)
+		{
+			Phys_Error("Add overlap pair failed: Null handle\n");
+		}
+
+        *p = {};
         p->isActive = 1;
-        p->indexA = a;
-        p->indexB = b;
         p->startFrame = frame;
         p->latestFrame = frame;
+
+        p->a.internalId = a;
+        p->a.externalId = handleA->externalId;
+        p->a.shapeTag = handleA->def.tag;
+
+        p->b.internalId = b;
+        p->b.externalId = handleB->externalId;
+        p->b.shapeTag = handleB->def.tag;
         return i;
     }
     return -1;
@@ -197,11 +212,25 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             // collision began
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapStarted;
-            ev.shapeA = pair->indexA;
-            ev.shapeB = pair->indexB;
+            //ev.ownerIdA = pair->indexA;
+            //ev.ownerIdB = pair->indexB;
+			PhysBodyHandle* handleA = Phys_GetHandleById(&g_world.bodies, pair->a.internalId);
+			PhysBodyHandle* handleB = Phys_GetHandleById(&g_world.bodies, pair->b.internalId);
+			if (!handleA || !handleB)
+			{
+				printf("PHYS Cannot write collision started: Null handle\n");
+				continue;
+			}
+			ev.a.externalId = pair->a.externalId;
+			ev.a.shapeTag = pair->a.shapeTag;
+			ev.b.externalId = pair->b.externalId;
+			ev.b.shapeTag = pair->b.shapeTag;
 
-            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, sizeof(PhysDataItemHeader));
-            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, sizeof(PhysDataItemHeader));
+            /*ev.ownerIdA = Phys_GetHandleById(&g_world.bodies, pair->indexA)->ownerId;
+            ev.ownerIdB = Phys_GetHandleById(&g_world.bodies, pair->indexB)->ownerId;*/
+
+            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
         }
         else if (pair->latestFrame != currentFrame)
         {
@@ -210,11 +239,26 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             // collision began
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapEnded;
-            ev.shapeA = pair->indexA;
-            ev.shapeB = pair->indexB;
+            //ev.ownerIdA = pair->indexA;
+            //ev.ownerIdB = pair->indexB;
 
-            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, sizeof(PhysDataItemHeader));
-            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, sizeof(PhysDataItemHeader));
+			/*PhysBodyHandle* handleA = Phys_GetHandleById(&g_world.bodies, pair->indexA);
+			PhysBodyHandle* handleB = Phys_GetHandleById(&g_world.bodies, pair->indexB);
+			if (!handleA || !handleB)
+			{
+				printf("PHYS Cannot write collision ended: Null handle\n");
+				continue;
+			}*/
+			ev.a.externalId = pair->a.externalId;
+			ev.a.shapeTag = pair->a.shapeTag;
+			ev.b.externalId = pair->b.externalId;
+			ev.b.shapeTag = pair->b.shapeTag;
+
+            //ev.ownerIdA = Phys_GetHandleById(&g_world.bodies, pair->indexA)->ownerId;
+            //ev.ownerIdB = Phys_GetHandleById(&g_world.bodies, pair->indexB)->ownerId;
+
+            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+            buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             pair->isActive = 0;
         }
     }
@@ -448,11 +492,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
         // TODO: If updates vary in size in the future (and they are big,
         // what with containing an entire matrix and all) this will have to be set
         // AFTER the update is written to the buffer
-        dataHeader.size = sizeof(TransformUpdate);
+        dataHeader.size = sizeof(PhysEV_TransformUpdate);
         writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
 
         PhysEV_TransformUpdate ev = {};
-        ev.ownerId = h->ownerId;
+        ev.ownerId = h->externalId;
         ev.tag = h->def.tag;
         
         btTransform t;
@@ -470,12 +514,11 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
         ev.vel[1] = vel.getY();
         ev.vel[2] = vel.getZ();
 
-        PhysEv_RaycastDebug rayEv = {};
-        
         if ((
             h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION) ||
             h->def.flags & ZCOLLIDER_FLAG_GROUNDCHECK)
         {
+            PhysEv_RaycastDebug rayEv = {};
             // TODO: Assuming handle is for a box and halfsize is valid!
             u8 val = PhysCmd_GroundTest(
                 world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2],
@@ -485,16 +528,18 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
             {
                 ev.flags |= PHYS_EV_FLAG_GROUNDED;
             }
+            writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
+
+            // Write ground check debug
+            dataHeader.type = RaycastDebug;
+            dataHeader.size = sizeof(PhysEv_RaycastDebug);
+            writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
+            writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RaycastDebug);
         }
-
-        writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
-
-        // Write ground check debug
-        dataHeader.type = RaycastDebug;
-        dataHeader.size = sizeof(PhysEv_RaycastDebug);
-        writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
-
-        writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RaycastDebug);
+        else
+        {
+            writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
+        }
     }
 
     // Mark end of buffer
@@ -599,7 +644,7 @@ Peak output bytes: %d\n\
 		  }
           PhysOverlapPair* pair = &world->overlapPairs[i];
           if (!pair->isActive) { continue; }
-          written = sprintf_s(ptr, remaining, format, pair->indexA, pair->indexB);
+          written = sprintf_s(ptr, remaining, format, pair->a.internalId, pair->b.internalId);
           //written = sprintf_s(ptr, remaining, "(%d vs %d)\n", 1, 2);
           //written = sprintf_s(ptr, remaining, "12345");
           ptr += written;

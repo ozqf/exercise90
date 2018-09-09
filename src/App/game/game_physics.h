@@ -86,18 +86,16 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
     u8* end = eventBuffer.ptrEnd;
     while (readPos < end)
     {
-        //u8 *mem = (u8 *)((u8 *)eventBuffer.ptrMemory + ptrOffset);
-        //i32 type = *(i32 *)mem;
         PhysDataItemHeader h;
         readPos += COM_COPY_STRUCT(readPos, &h, PhysDataItemHeader);
+        u8* copyPos = readPos;
+        readPos += h.size;
         switch (h.type)
         {
             case TransformUpdate:
             {
                 PhysEV_TransformUpdate tUpdate = {};
-                readPos += COM_COPY_STRUCT(readPos, &tUpdate, PhysEV_TransformUpdate);
-                //COM_CopyMemory(mem, (u8 *)&tUpdate, sizeof(PhysEV_TransformUpdate));
-                //ptrOffset += sizeof(PhysEV_TransformUpdate);
+                COM_COPY_STRUCT(copyPos, &tUpdate, PhysEV_TransformUpdate);
                 Game_HandleEntityUpdate(gs, &tUpdate);
 		    	eventsProcessed++;
             } break;
@@ -105,7 +103,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
             case RaycastDebug:
             {
                 PhysEv_RaycastDebug ray = {};
-                readPos += COM_COPY_STRUCT(readPos, (u8*)&ray, PhysEv_RaycastDebug);
+                COM_COPY_STRUCT(copyPos, &ray, PhysEv_RaycastDebug);
                 RendObj_SetAsLine(
                     &g_debugLine,
                     ray.a[0], ray.a[1], ray.a[2],
@@ -123,17 +121,29 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
 
             case OverlapStarted:
             {
-                printf("Overlap started!\n");
+                PhysEv_Collision ev = {};
+                COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
+                if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
+                printf("Overlap started: %d vs %d\n", ev.a.externalId, ev.b.externalId);
             } break;
 
             case OverlapEnded:
             {
-                printf("Overlap ended!\n");
+                PhysEv_Collision ev = {};
+                COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
+                if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
+                printf("Overlap ended: %d vs %d\n", ev.a.externalId, ev.b.externalId);
+            } break;
+
+            case NULL:
+            {
+                printf("End of buffer\n");
             } break;
 
             default:
             {
-                readPos = end;
+                printf("Unknown physics event type %d: size %d\n", h.type, h.size);
+                //readPos = end;
             } break;
         }
     }
