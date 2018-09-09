@@ -321,7 +321,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         {
             Cmd_RemoveEntity cmd = {};
             ptr += cmd.Read(header, ptr);
-            SV_RemoveEntity(gs, &cmd);
+            Game_RemoveEntity(gs, &cmd);
             return 1;
         } break;
         
@@ -335,7 +335,9 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
 			if (motor == NULL)
 			{
-				printf("!GAME No motor for Entity %d/%d\n", cl->entId.iteration, cl->entId.index);
+				printf("!GAME No motor for Entity %d/%d\n",
+                    cl->entId.iteration,
+                    cl->entId.index);
 				return 1;
 			}
             motor->state.input = cmd.input;

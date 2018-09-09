@@ -419,6 +419,8 @@ struct EC_ThinkerState
 {
     i32 type;
     Ticker ticker;
+    i32 count;
+    i32 max;
 };
 
 #define EC_THINKER_NULL 0

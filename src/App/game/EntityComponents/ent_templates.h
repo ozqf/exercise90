@@ -210,6 +210,7 @@ void Ent_SetTemplate_Spawner(EntityState* state, EntitySpawnOptions* options)
 
     state->componentBits |= EC_FLAG_THINKER;
     EC_ThinkerState* s = &state->thinkerState;
+    s->max = 4;
     s->type = EC_THINKER_SPAWNER;
     s->ticker.tickMax = 1.5f;
     s->ticker.tick = 0.5f;//s->ticker.tickMax;

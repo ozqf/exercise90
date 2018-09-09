@@ -168,19 +168,33 @@ internal void SV_ProcessClientDeath(GameState* gs, Client* cl)
     }
 }
 
-internal void SV_ProcessPlayerDeath(GameState* gs, Client* cl)
+internal void SV_ProcessEntityDeath(GameState* gs, Ent* ent)
 {
-	if(!IS_SERVER(gs)) { return; }
-    printf("GAME Client %d avatar died\n", cl->clientId);
-    Cmd_ClientUpdate clUpdate = {};
-    clUpdate.clientId = cl->clientId;
-    clUpdate.state = CLIENT_STATE_OBSERVER;
-    clUpdate.entId = { };
-    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+    if(!IS_SERVER(gs)) { return; }
+    // is the entity a player?
+    Client* cl = App_FindClientByEntId(ent->entId, &gs->clientList);
+    if (cl)
+    {
+        printf("GAME Client %d avatar died\n", cl->clientId);
+        Cmd_ClientUpdate clUpdate = {};
+        clUpdate.clientId = cl->clientId;
+        clUpdate.state = CLIENT_STATE_OBSERVER;
+        clUpdate.entId = { };
+        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+    }
+    // inform source entity
+    EC_Thinker* thinker = EC_FindThinker(gs, &ent->source);
+    if (thinker)
+    {
+        if (thinker->state.type == EC_THINKER_SPAWNER)
+        {
+            thinker->state.count--;
+        }
+    }
 }
 
 // TODO: MOVE ME: This isn't a server only function!
-internal void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
+internal void Game_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
 {
     if (g_verbose)
     {
@@ -207,14 +221,7 @@ internal void SV_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
 		}
 
         // inform interested parties
-
-        // is the entity a player?
-        Client* cl = App_FindClientByEntId(cmd->entId, &gs->clientList);
-        if (cl)
-        {
-            SV_ProcessPlayerDeath(gs, cl);
-        }
-        
+        SV_ProcessEntityDeath(gs, ent);
 		Ent_Free(gs, ent);
 	}
 	else

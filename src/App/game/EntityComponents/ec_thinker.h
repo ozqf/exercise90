@@ -33,7 +33,7 @@ void Game_UpdateThinkers(GameState* gs, GameTime* time)
             case EC_THINKER_SPAWNER:
             {
                 if (!Game_TockThinker(thinker, time->deltaTime)) { continue; }
-
+                if (thinker->state.count >= thinker->state.max) { continue; }
                 // Stop spawning if no players are around
                 EntId id = AI_FindNearestPlayer(gs, { 0, 0, 0 });
                 if (id.value == 0)
@@ -42,12 +42,14 @@ void Game_UpdateThinkers(GameState* gs, GameTime* time)
                 }
                 
                 EntitySpawnOptions options = {};
+                options.source = thinker->header.entId;
                 EC_Transform* ect = EC_FindTransform(gs, &thinker->header.entId);
                 options.pos = ect->t.pos;
                 printf("SPAWN enemy at %.2f, %.2f, %.2f\n",
                     options.pos.x, options.pos.y, options.pos.z
                 
                 );
+                thinker->state.count++;
                 Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
             } break;
         }

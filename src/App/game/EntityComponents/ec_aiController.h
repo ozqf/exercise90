@@ -305,6 +305,11 @@ inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
 		
 		case AI_STATE_ATTACKING:
 		{
+			if (!AI_ValidateTargetById(gs, &ai->state.target, self->team))
+			{
+				AI_Reset(gs, ai);
+				break;
+			}
 			EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
             Assert(motor);
 
