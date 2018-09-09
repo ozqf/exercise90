@@ -2,11 +2,6 @@
 
 #include "ZPhysics_module.cpp"
 
-// internal ByteBuffer* Phys_GetOutputBuffer()
-// {
-
-// }
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MANAGE HANDLES
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +124,14 @@ internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep
     ++g_world.debug.preSolves;
 }
 
+internal void Phys_WriteCollisionEvent(PhysEv_Collision* ev, PhysOverlapPair* pair)
+{
+	ev->a.externalId = pair->a.externalId;
+	ev->a.shapeTag = pair->a.shapeTag;
+	ev->b.externalId = pair->b.externalId;
+	ev->b.shapeTag = pair->b.shapeTag;
+}
+
 /*
 > Iterate bt's overlaps.
 > Search current overlap pairs array for that overlap.
@@ -189,12 +192,6 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
                     ILLEGAL_CODE_PATH
                 }
             }
-            
-            // Assert(w->numOverlaps < MAX_PHYS_OVERLAPS);
-            // w->overlapPairs[w->numOverlaps].indexA = indexA;
-            // w->overlapPairs[w->numOverlaps].indexB = indexB;
-            // w->overlapPairs[w->numOverlaps].postSolveFrame = currentFrame;
-            // w->numOverlaps++;
         }
     }
 
@@ -212,51 +209,16 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             // collision began
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapStarted;
-            //ev.ownerIdA = pair->indexA;
-            //ev.ownerIdB = pair->indexB;
-			PhysBodyHandle* handleA = Phys_GetHandleById(&g_world.bodies, pair->a.internalId);
-			PhysBodyHandle* handleB = Phys_GetHandleById(&g_world.bodies, pair->b.internalId);
-			if (!handleA || !handleB)
-			{
-				printf("PHYS Cannot write collision started: Null handle\n");
-				continue;
-			}
-			ev.a.externalId = pair->a.externalId;
-			ev.a.shapeTag = pair->a.shapeTag;
-			ev.b.externalId = pair->b.externalId;
-			ev.b.shapeTag = pair->b.shapeTag;
-
-            /*ev.ownerIdA = Phys_GetHandleById(&g_world.bodies, pair->indexA)->ownerId;
-            ev.ownerIdB = Phys_GetHandleById(&g_world.bodies, pair->indexB)->ownerId;*/
-
+			Phys_WriteCollisionEvent(&ev, pair);
             buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
         }
         else if (pair->latestFrame != currentFrame)
         {
             // collision ended
-            //printf("PHYS Remove overlap pair %d/%d - index %d, Frame %d\n", pair->indexA, pair->indexB, i, currentFrame);
-            // collision began
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapEnded;
-            //ev.ownerIdA = pair->indexA;
-            //ev.ownerIdB = pair->indexB;
-
-			/*PhysBodyHandle* handleA = Phys_GetHandleById(&g_world.bodies, pair->indexA);
-			PhysBodyHandle* handleB = Phys_GetHandleById(&g_world.bodies, pair->indexB);
-			if (!handleA || !handleB)
-			{
-				printf("PHYS Cannot write collision ended: Null handle\n");
-				continue;
-			}*/
-			ev.a.externalId = pair->a.externalId;
-			ev.a.shapeTag = pair->a.shapeTag;
-			ev.b.externalId = pair->b.externalId;
-			ev.b.shapeTag = pair->b.shapeTag;
-
-            //ev.ownerIdA = Phys_GetHandleById(&g_world.bodies, pair->indexA)->ownerId;
-            //ev.ownerIdB = Phys_GetHandleById(&g_world.bodies, pair->indexB)->ownerId;
-
+			Phys_WriteCollisionEvent(&ev, pair);
             buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             pair->isActive = 0;
