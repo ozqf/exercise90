@@ -170,6 +170,25 @@ static inline i32 COM_CompareStrings(const char *a, const char *b)
     return ((*a < *b) ? -1 : 1);
 }
 
+// returns 1 if true, 0 if not
+static inline i32 COM_MatchStringStart(const char *str, const char *start)
+{
+    i32 strLen = COM_StrLen(str);
+	i32 startLen = COM_StrLen(start);
+	if (strLen < startLen) { return 0; }
+	if (strLen == 0) { return 0; }
+	if (startLen == 0) { return 0; }
+	i32 i = 0;
+	for(;;)
+	{
+		char a = str[i];
+		char b = start[i];
+		if (b == '\0') { return 1; }
+		i++;
+		if (a != b) { return 0; }
+	}
+}
+
 static inline void COM_CopyStringA(const char *source, char *target)
 {
     while (true)
@@ -317,6 +336,18 @@ static inline void COM_StrToLowerCase(char* str)
     }
 }
 
+static inline u8 COM_CharIsDecimalInt32(const char c)
+{
+	if (c < '0' || c > '9')
+	{
+		if (c != '-')
+		{
+			return 0;
+		}
+    }
+	return 1;
+}
+
 static inline u8 COM_AsciIsDecimalInt32(const char *str)
 {
     i32 read = 0;
@@ -401,6 +432,36 @@ static inline i32 COM_AsciToInt32(const char *str)
 static inline f32 COM_AsciToFloat32(const char *str)
 {
     return 0.0f;
+}
+
+static inline i32 COM_StripTrailingInteger(char* text, char separator, i32 failureValue)
+{
+	i32 pos = COM_StrLen(text);
+	if (pos <= 0) { return failureValue; }
+	pos -= 1;	// step back to last char, over null terminator
+	i32 result = failureValue;
+	for (;;)
+	{
+		char c = text[pos];
+		//printf("%c, ", c);
+		if (c == separator)
+		{
+			result = COM_AsciToInt32(&text[++pos]);
+			break;
+		}
+		else if (!COM_CharIsDecimalInt32(c))
+		{
+			break;
+		}
+		else if (pos == 0)
+		{
+			result = COM_AsciToInt32(&text[pos]);
+			break;
+		}
+		pos--;
+	}
+	printf("\n");
+	return result;
 }
 
 static inline i32 ZSTR_WriteChars(ZStringHeader* str, char* sourceChars, i32 numChars)

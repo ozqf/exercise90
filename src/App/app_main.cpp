@@ -182,6 +182,12 @@ i32 App_Shutdown()
     return 1;
 }
 
+void App_ClearIOBuffers()
+{
+	COM_ZeroMemory(g_appReadBuffer->ptrStart, g_appReadBuffer->capacity);
+	COM_ZeroMemory(g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // INPUT
 ////////////////////////////////////////////////////////////////////////////
@@ -438,6 +444,7 @@ void App_Frame(GameTime *time)
 	///////////////////////////
     // End of Frame.
 	///////////////////////////
+
 	
 	// Mark end of write buffer ready for reading next frame
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
@@ -445,6 +452,9 @@ void App_Frame(GameTime *time)
 	{
 		printf("Marked end of write buffer, %d bytes\n", (g_appWriteBuffer->ptrEnd - g_appWriteBuffer->ptrStart));
 	}
+
+
+
 	
 	//Swap Command Buffers.
     ByteBuffer* temp = g_appReadBuffer;
@@ -456,6 +466,27 @@ void App_Frame(GameTime *time)
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
     COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
     //*g_appWriteBuffer->ptrWrite = NULL;
+
+
+	// Perform state related operations
+	switch (g_appStateOperation.op)
+	{
+	case APP_STATE_OP_SAVE:
+	{
+		StateSaveHeader h = {};
+		App_WriteStateToFile(g_appStateOperation.fileName, true, &h);
+	} break;
+
+	case APP_STATE_OP_LOAD:
+	{
+		if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName))
+		{
+			printf("Failed to load game\n");
+		}
+	} break;
+	}
+	g_appStateOperation.op = APP_STATE_OP_NONE;
+
 
     time->gameFrameNumber++;
 }

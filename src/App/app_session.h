@@ -71,6 +71,11 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
         h.dynamicCommands.count++;
     }
 
+	/////////////////////////////////////////////////////////
+	// Write Command buffer
+	/////////////////////////////////////////////////////////
+	ByteBuffer* input = g_appReadBuffer;
+
     u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
 
     // write header
@@ -251,9 +256,15 @@ u8 App_StartSinglePlayer(char *path)
 
     App_EndSession();
 #if 1
-    if (!COM_CompareStrings(path, "TEST"))
+	
+	if (!COM_CompareStrings(path, "TEST"))
+	{
+		Game_BuildTestScene(&g_gameState, 0);
+	}
+    else if (COM_MatchStringStart(path, "TEST_"))
     {
-        Game_BuildTestScene(&g_gameState);
+		i32 index = COM_StripTrailingInteger(path, '_', 0);
+        Game_BuildTestScene(&g_gameState, index);
     }
     else
     {
@@ -293,6 +304,7 @@ u8 App_StartSinglePlayer(char *path)
 i32 App_StartSession(u8 netMode, char *path)
 {
     printf("\n**** APP START SESSION ****\n");
+	App_ClearIOBuffers();
     switch (netMode)
     {
     case NETMODE_SINGLE_PLAYER:

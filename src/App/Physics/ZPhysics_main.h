@@ -337,6 +337,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
     ByteBuffer *buffer = &g_input;
     u8 *ptrRead = buffer->ptrStart;
+	i32 executed = 0;
     while (*ptrRead != NULL && ptrRead < buffer->ptrEnd)
     {
         u8 cmdType = COM_ReadByte(&ptrRead);
@@ -344,6 +345,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
         {
             case Teleport:
             {
+				++executed;
                 PhysCmd_Teleport cmd = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_Teleport);
                 PhysExec_TeleportShape(world, &cmd);
@@ -351,6 +353,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 
             case SetVelocity:
             {
+				++executed;
                 PhysCmd_VelocityChange cmd = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_VelocityChange);
                 PhysExec_ChangeVelocity(world, &cmd);
@@ -358,6 +361,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 
             case SetState:
             {
+				++executed;
                 PhysCmd_State cmd = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &cmd, PhysCmd_State);
                 PhysExec_SetState(world, &cmd);
@@ -365,6 +369,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 
             case Create:
             {
+				++executed;
                 ZShapeDef def = {};
                 ptrRead += COM_COPY_STRUCT(ptrRead, &def, ZShapeDef);
                 PhysExec_CreateShape(world, &def);
@@ -372,6 +377,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 
             case Remove:
             {
+				++executed;
                 i32 shapeId = COM_ReadI32(&ptrRead);
                 PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
                 if (h == NULL)
@@ -405,6 +411,10 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
             } break;
         }
     }
+	if (world->verbose)
+	{
+		printf("  Executed %d cmds\n", executed);
+	}
     // Clear
     buffer->ptrEnd = buffer->ptrStart;
     COM_WriteByte(0, buffer->ptrStart);

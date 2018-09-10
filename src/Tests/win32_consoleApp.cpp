@@ -28,12 +28,42 @@
 #include "utils_read_ini.h"
 #include "test_ecs2.h"
 #include "test_misc.h"
+
+
+void Test_StripTrailingInt(char* txt)
+{
+	i32 val = COM_StripTrailingInteger(txt, '_', -1);
+	printf("%s val: %d\n", txt, val);
+}
+
+void Test_MatchStringStart(char* a, char* b)
+{
+	i32 result = COM_MatchStringStart(a, b);
+	printf("%s starts with %s? %d\n", a, b, result);
+}
+
+void Test_ParseTestMapPath(char* path)
+{
+	char* header = "TEST_";
+	if (COM_MatchStringStart(path, header))
+    {
+		i32 index = COM_StripTrailingInteger(path, '_', 0);
+        printf("Path %s index: %d\n", path, index);
+    }
+    else
+    {
+        printf("Path %s does not start with %s\n", path, header);
+    }
+}
+
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-    //Test_WriteRandomNumberTable("random2.txt", 512, 0);
-    //Test_RandomNumbers();
-	Test_Tokenise();
+	Test_ParseTestMapPath("TEST_1");
+	Test_ParseTestMapPath("TEST_-1");
+	Test_ParseTestMapPath("TEST_37");
+	Test_ParseTestMapPath("LEVEL_15");
+	
 #if 0
     printf("*** Exercise 90 win32 tests ***\n");
     printf("Built on %s at %s, file: %s, line: %d\n", __DATE__, __TIME__, __FILE__, __LINE__);

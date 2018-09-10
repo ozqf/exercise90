@@ -16,10 +16,13 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def->pos[0], def->pos[1], def->pos[2])));
     //handle->mask = def->mask;
     //handle->group = def->group;
-    //printf("PHYS New shape: shapeId %d, ownerId %d, group %d, mask %d, tag %d\n",
-    //    handle->id, handle->ownerId, def->mask, def->group, def->tag
-    //);
-
+    if (world->verbose)
+    {
+        printf("PHYS New shape: shapeId %d, ownerId %d, group %d, mask %d, tag %d\n",
+            handle->id, handle->externalId, def->mask, def->group, def->tag
+        );
+    }
+    
     handle->def = *def;
 
     btScalar mass;

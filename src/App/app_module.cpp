@@ -79,6 +79,7 @@ inline Var* App_GetVar(char* name);
 // commands
 
 // Buffers
+void App_ClearIOBuffers();
 void App_SendToServer(u8* ptr, u8 type, u16 size);
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens);
 void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf);

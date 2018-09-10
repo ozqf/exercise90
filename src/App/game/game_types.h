@@ -390,16 +390,19 @@ struct EC_Label
 };
 
 #define EC_HEALTH_FLAG_STUN_IMMUNE (1 << 1)
+#define EC_HEALTH_FLAG_INVULNERABLE (1 << 2)
 
 struct EC_HealthState
 {
     i32 hp;
     i32 maxHp;
     u32 team;
+    u32 flags;
     i32 damageThisFrame;
     i32 stunThreshold;
 	u32 lastHitFrame;
 	EntId lastHitSource;
+
 
     void SetHealthAndMax(i32 max)
     {

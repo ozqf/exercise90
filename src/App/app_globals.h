@@ -62,6 +62,18 @@ global_variable BlockRef g_replayData;
 global_variable ByteBuffer g_replayReadBuffer = {};
 global_variable u8* g_replayPtr = NULL;
 
+#define APP_STATE_OP_NONE 0
+#define APP_STATE_OP_SAVE 1
+#define APP_STATE_OP_LOAD 2
+#define APP_STATE_OP_RECORD 3
+#define APP_STATE_OP_PLAY 4
+
+struct AppStateOperation
+{
+	i32 op;
+	char fileName[64];
+} g_appStateOperation;
+
 
 /////////////////////////////////////////////////////////////
 // Render Objects Memory

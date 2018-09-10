@@ -74,7 +74,8 @@ struct ZBulletWorld
 
     PhysOverlapPair* overlapPairs;
     i32 numOverlaps;
-    i32 nextQueryId = 0;
+    i32 nextQueryId;
+    i32 verbose;
 
     btBroadphaseInterface* broadphase;
     btDefaultCollisionConfiguration* collisionConfiguration;

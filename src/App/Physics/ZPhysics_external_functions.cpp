@@ -40,6 +40,11 @@ i32 PhysCmd_CreateShape(ZShapeDef* def, u32 externalId)
 	h->externalId = externalId;
     g_input.ptrWrite += COM_WriteByte(Create, g_input.ptrWrite);
     g_input.ptrWrite += COM_COPY_STRUCT(def, g_input.ptrWrite, ZShapeDef);
+    if (g_world.verbose)
+    {
+        printf("PHYS Assigning shape Id %d for external %d\n", def->handleId, h->externalId);
+    }
+    
     return h->id;
 }
 #if 0
@@ -209,6 +214,8 @@ void PhysExt_Init(
         Assert(false);
     }
 
+	printf("PHYS INIT\n");
+
     g_errorHandler = errorHandler;
 
     COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
@@ -229,6 +236,7 @@ void PhysExt_Init(
 
     //g_physTest = {};
     g_world = {};
+	//g_world.verbose = 1;
     g_world.bodies.items = g_bodies;
     g_world.bodies.capacity = MAX_PHYS_BODIES;
     g_world.overlapPairs = g_overlapPairs;
@@ -257,8 +265,12 @@ void PhysExt_Init(
 
 void PhysExt_ClearWorld()
 {
-	COM_ZeroMemory(g_input.ptrStart, g_input.capacity);
-	COM_ZeroMemory(g_output.ptrStart, g_output.capacity);
+    if (g_world.verbose)
+    {
+        printf("PHYS Clear world\n");
+    }
+	Buf_Clear(&g_input);
+	Buf_Clear(&g_output);
     for (int i = 0; i < g_world.bodies.capacity; ++i)
     {
         Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);
@@ -298,6 +310,10 @@ ByteBuffer PhysExt_Step(f32 deltaTime)
     {
         g_world.debug.inputPeakBytes = reading;
     }
+	if (g_world.verbose)
+	{
+		printf("PHYS Reading %d bytes\n", reading);
+	}
 
     // Reset output
     g_output.ptrWrite = g_output.ptrStart;
@@ -312,6 +328,11 @@ ByteBuffer PhysExt_Step(f32 deltaTime)
     {
         g_world.debug.outputPeakBytes = written;
     }
+	if (g_world.verbose)
+	{
+		printf("PHYS Wrote %d bytes\n", written);
+	}
+
     // TODO: Should only write the debug string if is asked for!
     Phys_WriteDebugOutput(&g_world);
     ByteBuffer buf = g_output;

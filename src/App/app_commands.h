@@ -37,6 +37,24 @@ void App_DumpHeap()
 
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
+    if (!COM_CompareStrings(tokens[0], "GOD"))
+    {
+        Ent* ent = Game_GetLocalClientEnt(&g_gameState);
+        if (!ent) { return 1; }
+        EC_Health* hp = EC_FindHealth(&g_gameState, ent);
+        if (!hp) { return 1; }
+        if ((hp->state.flags & EC_HEALTH_FLAG_INVULNERABLE))
+        {
+            COM_DisableBits(&hp->state.flags, EC_HEALTH_FLAG_INVULNERABLE);
+            printf("God OFF\n");
+        }
+        else
+        {
+            printf("God ON\n");
+            hp->state.flags |= EC_HEALTH_FLAG_INVULNERABLE;
+        }
+        return 1;
+    }
     //printf("App Parse %s\n", str);
     if (!COM_CompareStrings(tokens[0], "HELP"))
     {
@@ -58,7 +76,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
     {
-        Game_BuildTestScene(&g_gameState);
+        Game_BuildTestScene(&g_gameState, 0);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
@@ -119,18 +137,22 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("  No file name specified for save\n");
             return 1;
         }
-        StateSaveHeader h = {};
-        App_WriteStateToFile(tokens[1], true, &h);
+		COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+		g_appStateOperation.op = APP_STATE_OP_SAVE;
+        /*StateSaveHeader h = {};
+        App_WriteStateToFile(tokens[1], true, &h);*/
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "LOAD"))
     {
         if (numTokens == 2)
         {
-            if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
+			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+			g_appStateOperation.op = APP_STATE_OP_LOAD;
+            /*if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
             {
                 printf("Failed to load game\n");
-            }
+            }*/
         }
         else
         {

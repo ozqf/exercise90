@@ -61,11 +61,10 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
         Transform *t = &ecTrans->t;
 
         Vec3 newPos =
-        {
-            t->pos.x + prj->state.move.x * time->deltaTime,
-            t->pos.y + prj->state.move.y * time->deltaTime,
-            t->pos.z + prj->state.move.z * time->deltaTime
-        };
+            {
+                t->pos.x + prj->state.move.x * time->deltaTime,
+                t->pos.y + prj->state.move.y * time->deltaTime,
+                t->pos.z + prj->state.move.z * time->deltaTime};
 
         PhysRayHit results[12];
 
@@ -120,9 +119,9 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
                 {
                     health->state.hp -= dmg;
                     health->state.damageThisFrame += dmg;
-					
-					health->state.lastHitFrame = time->gameFrameNumber;
-					health->state.lastHitSource = e->source;
+
+                    health->state.lastHitFrame = time->gameFrameNumber;
+                    health->state.lastHitSource = e->source;
                 }
 
                 // kill prj
@@ -152,57 +151,60 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
         {
             continue;
         }
-        
+
         if (health->state.hp <= 0)
         {
-            f32 normal[3] = { 0, 1, 0 };
-            Ent_WriteRemoveCmd(
-                Ent_GetEntityById(gs, &health->header.entId),
-                normal,
-                time->singleFrame == 1);
+            if (health->state.flags & EC_HEALTH_FLAG_INVULNERABLE)
+            {
+                health->state.hp = 1;
+            }
+            else
+            {
+                f32 normal[3] = {0, 1, 0};
+                Ent_WriteRemoveCmd(
+                    Ent_GetEntityById(gs, &health->header.entId),
+                    normal,
+                    time->singleFrame == 1);
 
-            /**********************************
+                /**********************************
              * // is this the time to do this...?
             // TODO ^^ No, it isn't!
             **********************************/
-            EC_Collider* col = EC_FindCollider(gs, &health->header.entId);
-            Assert(col);
-            PhysCmd_RemoveShape(col->shapeId);
+                EC_Collider *col = EC_FindCollider(gs, &health->header.entId);
+                Assert(col);
+                PhysCmd_RemoveShape(col->shapeId);
 
+                //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION
+                //printf("Killed cube!\n");
+                //Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
+                Vec3 dir = {normal[0], normal[1], normal[2]};
+                Vec3_Normalise(&dir);
 
+                EC_Transform *trans = EC_FindTransform(gs, &health->header.entId);
+                Transform *t = &trans->t;
+                Assert(trans);
 
-            //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION
-            //printf("Killed cube!\n");
-            //Vec3 dir = { prj->state.move.x, prj->state.move.y, prj->state.move.z };
-            Vec3 dir = { normal[0], normal[1], normal[2] };
-            Vec3_Normalise(&dir);
+                f32 launchPower = 20.0f; // * percentage;
+                if (health->state.maxHp > 0)
+                {
+                    i32 overkill = -health->state.hp;
+                    f32 percentage = ((f32)overkill / (f32)health->state.maxHp);
+                    launchPower = 20.0f + (20.0f * percentage);
+                }
 
-            EC_Transform* trans = EC_FindTransform(gs, &health->header.entId);
-            Transform* t = &trans->t;
-            Assert(trans);
-
-            
-            
-            f32 launchPower = 20.0f;// * percentage;
-            if (health->state.maxHp > 0)
-            {
-                i32 overkill = -health->state.hp;
-                f32 percentage = ((f32)overkill  / (f32)health->state.maxHp);
-                launchPower = 20.0f + (20.0f * percentage);
-            }
-            
-            for (i32 k = 0; k < 10; ++k)
-            {
-                //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
-                Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
-                f32 power = 10.0f + Game_RandomInRange(launchPower);
-                Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
+                for (i32 k = 0; k < 10; ++k)
+                {
+                    //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
+                    Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
+                    f32 power = 10.0f + Game_RandomInRange(launchPower);
+                    Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
+                }
             }
         }
         else if (health->state.lastHitFrame == time->gameFrameNumber && health->state.damageThisFrame > health->state.stunThreshold)
         {
             //printf("Hit cube, hp: %d\n", health->hp);
-            EC_AIController* ai = EC_FindAIController(gs, &health->header.entId);
+            EC_AIController *ai = EC_FindAIController(gs, &health->header.entId);
             if (ai != NULL)
             {
                 AI_Stun(gs, ai, time);
@@ -213,10 +215,10 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
         health->state.damageThisFrame = 0;
     }
 }
-void GameUI_SetCentreMessage(char* text)
+void GameUI_SetCentreMessage(char *text)
 {
     sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, text);
-    #if 0
+#if 0
     for (i32 i = 0; i < UI_MAX_ENTITIES; ++i)
     {
         UIEntity* e = &g_ui_entities[i];
@@ -226,7 +228,7 @@ void GameUI_SetCentreMessage(char* text)
             COM_CopyStringLimited(text, )
         }
     }
-    #endif
+#endif
 }
 
 void Game_UpdateUI(UIEntity *ents, i32 maxEntities, GameTime *time)

@@ -201,4 +201,5 @@ internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* opti
 #include "game_state.h"
 #include "game_input.cpp"
 #include "game_server.h"
+#include "game_embedded_scenes.cpp"
 #include "game.cpp"
