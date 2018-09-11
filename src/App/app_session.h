@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////
 
 // Returns bytes written
-u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
+u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header, ByteBuffer* nextFrameInputBuffer)
 {
     StateSaveHeader h = {};
     h.magic[0] = 'S';
@@ -73,8 +73,18 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header)
 
 	/////////////////////////////////////////////////////////
 	// Write Command buffer
+	// Input that was pending for the next frame
+	// Placed here so that state restore is completed before
+	// these commands execute
 	/////////////////////////////////////////////////////////
-	ByteBuffer* input = g_appReadBuffer;
+	if (nextFrameInputBuffer != NULL)
+	{
+		u8* copyPos = nextFrameInputBuffer->ptrStart;
+		u32 bytes = nextFrameInputBuffer->ptrEnd - nextFrameInputBuffer->ptrStart;
+		printf("Appending %d bytes of next-frame data\n", bytes);
+		buf->ptrWrite += COM_COPY(copyPos, buf->ptrWrite, bytes);
+	}
+	
 
     u32 written = (u32)(buf->ptrWrite - buf->ptrStart);
 
@@ -108,7 +118,17 @@ i32 App_WriteStateToFile(char *fileName, u8 closeFileAfterWrite, StateSaveHeader
     platform.Platform_Malloc(&mem, capacity);
     ByteBuffer buf = Buf_FromMemoryBlock(mem);
 
-    u32 written = App_WriteSaveState(&g_gameState, &buf, header);
+    u32 written;
+	if (closeFileAfterWrite)
+	{
+		written = App_WriteSaveState(&g_gameState, &buf, header, g_appReadBuffer);
+	}
+	else
+	{
+		// Recording a demo. Input will be written to the frame buffer anyway,
+		// so skip appending next frame buffer
+		written = App_WriteSaveState(&g_gameState, &buf, header, NULL);
+	}
 
     // Write state to buffer
 

@@ -70,7 +70,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         printf("  TEXTURES - List App textures handles\n");
         printf("  GHOST - Toggle debug camera on/off\n");
         printf("  CLIENTS - List current client states\n");
-        printf("  DUMPHEAP - List Heap memory allocations\n");
+        printf("  DUMPHEAP - List Heap memory alallocations\n");
 		printf("  MENU - Open specific menu\n");
         return 1;
     }
@@ -137,6 +137,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("  No file name specified for save\n");
             return 1;
         }
+        printf("APP Buffered state op SAVE %s\n", tokens[1]);
 		COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
 		g_appStateOperation.op = APP_STATE_OP_SAVE;
         /*StateSaveHeader h = {};
@@ -147,6 +148,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         if (numTokens == 2)
         {
+            printf("APP Buffered state op LOAD %s\n", tokens[1]);
 			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
 			g_appStateOperation.op = APP_STATE_OP_LOAD;
             /*if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))

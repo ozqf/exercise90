@@ -81,6 +81,15 @@ void App_PhysicsErrorHandler(char* message)
 // App Interface
 ////////////////////////////////////////////////////////////////////////////
 
+void App_RunPostInitCommands()
+{
+	// TODO: This will EXEC straight away, which we don't want!
+	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+    //platform.Platform_WriteTextCommand("LOAD TEST");
+	//platform.Platform_WriteTextCommand("IMPULSE 1");
+	platform.Platform_WriteTextCommand("MENU CLOSE");
+}
+
 i32 App_Init()
 {
     App_Win32_AttachErrorHandlers();
@@ -153,13 +162,8 @@ i32 App_Init()
                  8);
     //
     App_InitInput(&g_inputActions);
-
     App_InitMenus();
-    
-    //App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
-    platform.Platform_WriteTextCommand("LOAD TEST");
-	//platform.Platform_WriteTextCommand("IMPULSE 1");
-	platform.Platform_WriteTextCommand("MENU CLOSE");
+    App_RunPostInitCommands();
     
     return 1;
 }
@@ -441,10 +445,6 @@ void App_Frame(GameTime *time)
 		u32 bytesWritten = g_appWriteBuffer->ptrWrite - g_appWriteBuffer->ptrStart;
 		printf("APP frame end. Read %d bytes, wrote %d bytes\n", bytesRead, bytesWritten);
 	}
-	///////////////////////////
-    // End of Frame.
-	///////////////////////////
-
 	
 	// Mark end of write buffer ready for reading next frame
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
@@ -466,24 +466,34 @@ void App_Frame(GameTime *time)
     // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
     COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
     //*g_appWriteBuffer->ptrWrite = NULL;
-
+	
+	///////////////////////////
+    // End of Frame.
+	///////////////////////////
 
 	// Perform state related operations
 	switch (g_appStateOperation.op)
 	{
-	case APP_STATE_OP_SAVE:
-	{
-		StateSaveHeader h = {};
-		App_WriteStateToFile(g_appStateOperation.fileName, true, &h);
-	} break;
-
-	case APP_STATE_OP_LOAD:
-	{
-		if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName))
+		case APP_STATE_OP_SAVE:
 		{
-			printf("Failed to load game\n");
-		}
-	} break;
+			StateSaveHeader h = {};
+			App_WriteStateToFile(g_appStateOperation.fileName, true, &h);
+		} break;
+		case APP_STATE_OP_LOAD:
+		{
+			if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName))
+			{
+				printf("Failed to load game\n");
+			}
+		} break;
+		case APP_STATE_OP_RECORD:
+		{
+			ILLEGAL_CODE_PATH
+		} break;
+		case APP_STATE_OP_PLAY:
+		{
+			ILLEGAL_CODE_PATH
+		} break;
 	}
 	g_appStateOperation.op = APP_STATE_OP_NONE;
 

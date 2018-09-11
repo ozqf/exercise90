@@ -323,6 +323,11 @@ inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
 		
 		case AI_STATE_REV_UP_CHARGE:
 		{
+			if (!AI_ValidateTargetById(gs, &ai->state.target, self->team))
+			{
+				AI_Reset(gs, ai);
+				break;
+			}
 			AITargetInfo info = {};
             AI_BuildThinkInfo(gs, ai, &info);
 			

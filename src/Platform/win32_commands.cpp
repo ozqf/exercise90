@@ -32,6 +32,16 @@ TEXT_COMMAND_HANDLER(Version)
     return 0;
 }
 
+TEXT_COMMAND_HANDLER(Mark)
+{
+    printf("/////////////////////////////////////////\n");
+    printf("// Kernal frame: %d game frame: %d\n",
+        g_gameTime.platformFrameNumber,
+        g_gameTime.gameFrameNumber);
+    printf("/////////////////////////////////////////\n");
+    return 1;
+}
+
 TEXT_COMMAND_HANDLER(Manifest)
 {
     Win32_DebugPrintDataManifest();
@@ -153,6 +163,7 @@ void Win32_BuildTextCommandList()
     Win32_AddTextCommand("BREAK", 1, 1, TextExec_Break);
     Win32_AddTextCommand("KEYCODES", 1, 1, TextExec_KeyCodes);
     Win32_AddTextCommand("LAPTOP", 1, 1, TextExec_Laptop);
+    Win32_AddTextCommand("MARK", 1, 1, TextExec_Mark);
 }
 
 /**********************************************************************
@@ -167,7 +178,7 @@ u8 Win32_ExecTextCommand(char* str, char** tokens, i32 numTokens)
         #if 1
         if (!COM_CompareStrings(tokens[0], h->name))
         {
-            printf("Matched cmd %s\n", h->name);
+            //printf("Matched cmd %s\n", h->name);
             if (numTokens < h->minTokens || numTokens > h->maxTokens)
             {
                 printf("Invalid token count. Got %d. Supports %d to %d\n",
@@ -197,7 +208,10 @@ void Win32_EnqueueTextCommand(char* command)
     );
 }
 
-void Win32_ExecuteTextCommand(char* command)
+#define TEXT_CMD_CONTINUE 0
+#define TEXT_CMD_WAIT 1
+
+i32 Win32_ExecuteTextCommand(char* command)
 {
     // Avoid executing on the original string
     char commandCopy[256];
@@ -209,25 +223,31 @@ void Win32_ExecuteTextCommand(char* command)
     COM_CopyString(command, commandCopy);
 
     i32 tokensCount = COM_ReadTokens(commandCopy, tokensBuffer, tokens);
-    if (tokensCount == 0) { return; }
-
+    if (tokensCount == 0) { return TEXT_CMD_CONTINUE; }
+	
+	if (!COM_CompareStrings(tokens[0], "WAIT"))
+	{
+		return TEXT_CMD_WAIT;
+	}
+	
     u8 handled;
     handled = Win32_ExecTextCommand(commandCopy, tokens, tokensCount);
-    if (handled) { return; }
+    if (handled) { return TEXT_CMD_CONTINUE; }
     
     if (g_app.isValid)
     {
         handled = g_app.AppParseCommandString(commandCopy, tokens, tokensCount);
-        if (handled) { return; }
+        if (handled) { return TEXT_CMD_CONTINUE; }
     }
 
     handled = g_sound.Snd_ParseCommandString(g_textCommandBuffer, tokens, tokensCount);
-    if (handled) { return; }
+    if (handled) { return TEXT_CMD_CONTINUE; }
 
     // Version is allowed to cascade down so each subsystem prints it's version
-    if (COM_CompareStrings(tokens[0], "VERSION") == 0) { return; }
+    if (COM_CompareStrings(tokens[0], "VERSION") == 0) { return TEXT_CMD_CONTINUE; }
 
     printf(" Unknown command %s\n", g_textCommandBuffer);
+	return TEXT_CMD_CONTINUE;
 }
 
 void Win32_ExecuteTextCommands()
@@ -246,7 +266,23 @@ void Win32_ExecuteTextCommands()
         {
             break;
         }
-        Win32_ExecuteTextCommand(executeBuffer);
+        printf("EXEC %s\n", executeBuffer);
+        i32 result = Win32_ExecuteTextCommand(executeBuffer);
+		if (result == TEXT_CMD_WAIT)
+		{
+			// Continue on next frame
+            i32 remaining = COM_StrLen(&g_textCommandBuffer[position]);
+			printf("PLATFORM Waiting at text buffer pos %d\n", g_textCommandBufferPosition);
+            //g_textCommandBufferPosition = position;
+            printf("  REMAINING: %d chars:\n%s\n", remaining, &g_textCommandBuffer[position]);
+            u8* source = (u8*)&g_textCommandBuffer[position];
+            u8* dest = (u8*)&g_textCommandBuffer[0];
+            printf("Copying from %d to %d\n", (u32)source, (u32)dest);
+            COM_CopyMemory(source, dest, remaining);
+            //COM_COPY(&g_textCommandBuffer[position], &g_textCommandBuffer[0], remaining);
+            break;
+			//return;
+		}
         executeCount++;
     }
     // if (executeCount > 0)
