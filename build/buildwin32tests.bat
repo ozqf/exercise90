@@ -24,15 +24,16 @@ set compilerDefines=/DPARANOID=1
 @rem set compilerInput=../src/Platform/win32_main.cpp
 
 @rem === Compile Testing Win32 Console application
+@rem Ws2_32.lib == winsock2
 set compilerInput=../src/tests/win32_consoleApp.cpp
-set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 @rem set linkStr=/link
 @rem set linkInputB=user32.lib opengl32.lib
 @rem set linkInputC=Gdi32.lib
+set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib Ws2_32.lib
 
-cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA% %linkInputB% %linkInputC%
+cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr%
 @if not %ERRORLEVEL% == 0 goto :FINISHED
 @rem Auto run if you like
 @call ../build/rtests.bat

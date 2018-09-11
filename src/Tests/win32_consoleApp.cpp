@@ -29,6 +29,8 @@
 #include "test_ecs2.h"
 #include "test_misc.h"
 
+#include "test_win32.h"
+
 
 void Test_StripTrailingInt(char* txt)
 {
@@ -59,10 +61,13 @@ void Test_ParseTestMapPath(char* path)
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
+    Test_Win32();
+    #if 0
 	Test_ParseTestMapPath("TEST_1");
 	Test_ParseTestMapPath("TEST_-1");
 	Test_ParseTestMapPath("TEST_37");
 	Test_ParseTestMapPath("LEVEL_15");
+    #endif
 	
 #if 0
     printf("*** Exercise 90 win32 tests ***\n");
