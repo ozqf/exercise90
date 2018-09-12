@@ -25,7 +25,6 @@ struct ActorInput;
 struct UIEntity;
 union EntId;
 global_variable RendObj g_debugLine = {};
-#include "app_ui.h"
 
 /////////////////////////////////////////////////////
 // App functions that game can access
@@ -39,6 +38,8 @@ inline u32 App_WriteCommandBytesToFrameOutput(u8* stream, u32 numBytes);
 inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize);
 
 GameTime* GetAppTime();
+
+UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 
 // Clients
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
@@ -72,8 +73,6 @@ inline Var* App_GetVar(char* name);
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"
 #include "app_globals.h"
-
-
 
 /////////////////////////////////////////////////////////
 // commands
@@ -120,6 +119,7 @@ internal void AppListTextures();
 /////////////////////////////////////////////////////////
 
 #include "app_debug.h"
+#include "app_ui.h"
 #include "app_menu.h"
 #include "app_session.h"
 #include "app_clients.h"

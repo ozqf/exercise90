@@ -368,7 +368,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     }
 
     #if 1
-    Game_UpdateUI(g_ui_entities, UI_MAX_ENTITIES, time);
+    Game_UpdateUI(gs, g_ui_entities, UI_MAX_ENTITIES, time);
     //App_BuildMenuRenderScene()
     UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);
 

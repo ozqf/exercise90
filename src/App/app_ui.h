@@ -32,4 +32,17 @@ void UI_BuildUIRenderScene(RenderScene* scene, UIEntity* ents, i32 maxEntities)
             RScene_AddRenderItem(scene, &t, &ent->debugRend);
         }
     }
+
+    Transform t;
+    Transform_SetToIdentity(&t);
+    t.pos.x = g_hudRingItem.screenPos.x;
+    t.pos.y = g_hudRingItem.screenPos.y;
+    t.pos.z = g_hudRingItem.screenPos.z;
+    t.scale.x = 0.1f;
+    t.scale.y = 0.1f;
+    t.scale.z = 0.1f;
+
+    RScene_AddRenderItem(scene, &t, &g_hudRingRend);
+
+    // g_hudRingRend
 }

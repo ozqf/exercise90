@@ -2,6 +2,9 @@
 
 #include "game.h"
 
+#define WALL_TEXTURE "textures\\brbrick2.bmp"
+#define SCIFI_TEXTURE "textures\\COMP03_1.bmp"
+
 internal void Game_AddTestSolid(GameState* gs,
 	f32 x, f32 y, f32 z,
 	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u8 isVisible)
@@ -54,7 +57,7 @@ internal void Game_AddTestSolid(GameState* gs,
     {
         EC_RendObjState r = {};
         COM_CopyStringLimited("Cube", r.meshName, EC_RENDERER_STRING_LENGTH);
-        COM_CopyStringLimited(("textures\\COMP03_1.bmp"), r.textureName, EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited((WALL_TEXTURE), r.textureName, EC_RENDERER_STRING_LENGTH);
         r.colourRGB[0] = 1;
         r.colourRGB[1] = 1;
         r.colourRGB[2] = 1;

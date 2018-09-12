@@ -174,9 +174,19 @@ global_variable char                g_hud_centreText[HUD_CENTRE_TEXT_LENGTH];
 global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 
 /////////////////////////////////////////////////////////////
-// Debug/
+// Debug
 ////////////////////////////////////////////////////////////
 Transform g_debugTransform = {};
+
+
+HudRingItem g_hudRingItem =
+{
+    0.5f,
+    90,
+    { 0, 0, 0 }
+};
+RendObj g_hudRingRend;
+
 
 // Interface
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
@@ -202,4 +212,5 @@ internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* opti
 #include "game_input.cpp"
 #include "game_server.h"
 #include "game_embedded_scenes.cpp"
+#include "game_ui.cpp"
 #include "game.cpp"

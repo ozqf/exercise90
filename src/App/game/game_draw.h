@@ -46,7 +46,7 @@ inline void Game_AddPowerUpOverlayMesh(
 /**
  * Load relevant entity renderers into rend object list
  */
-inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
+internal void Game_BuildRenderList(GameState* gs, RenderScene* scene)
 {
     u32 l = gs->singleRendObjList.max;
     // Draw Ent render components
