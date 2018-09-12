@@ -205,12 +205,22 @@ struct EC_Header
 #define EC_FLAG_THINKER (1 << 9)
 #define EC_FLAG_MULTI_RENDOBJ (1 << 10)
 
+// All entity component state should have a flags member
+// the first bit is always 0 for active, 1 for inactive
+#define EC_STATE_FLAG_INACTIVE (1 << 0)
+
 //#define EC_NUM_TYPES 9
+
+// TODO: Remove me, I'm here because of laziness
+struct EC_TransformState
+{
+	u32 flags;
+}; 
 
 struct EC_Transform
 {
     EC_Header header;
-
+	EC_TransformState state;
     Transform t;
 };
 
@@ -225,6 +235,7 @@ struct EC_Transform
 #if 1 // Single mesh renderer component
 struct EC_RendObjState
 {
+	u32 flags;
     char meshName[EC_RENDERER_STRING_LENGTH];
     char textureName[EC_RENDERER_STRING_LENGTH];
     f32 colourRGB[3];
@@ -250,6 +261,7 @@ struct EC_SingleRendObj
 #if 1
 struct EC_MultiRendObjState
 {
+	u32 flags;
     EC_RendObjState objStates[EC_MULTI_RENDERER_CAPACITY];
 
     EC_RendObjState* GetBaseRendObj() { return &this->objStates[EC_MULTI_RENDOBJ_BASE]; }
@@ -272,6 +284,7 @@ struct EC_MultiRendObj
 
 struct EC_ColliderState
 {
+	u32 flags;
     ZShapeDef def;
     
     Vec3 size;
@@ -292,6 +305,7 @@ struct EC_Collider
 
 struct EC_ActorMotorState
 {
+	u32 flags;
     ActorInput input;
     Vec3 move;
     f32 runAcceleration;
@@ -339,6 +353,7 @@ struct AI_AttackSettings
 
 struct EC_AIState
 {
+	u32 flags;
     EntId target;
     i32 state;
     i32 type;
@@ -362,6 +377,7 @@ struct EC_AIController
 
 struct EC_ProjectileState
 {
+	u32 flags;
     Vec3 move;
     f32 speed;
     Ticker ticker;
@@ -379,6 +395,7 @@ struct EC_Projectile
 #define EC_LABEL_LENGTH 32
 struct EC_LabelState
 {
+	u32 flags;
     char label[EC_LABEL_LENGTH];
 };
 
@@ -394,10 +411,10 @@ struct EC_Label
 
 struct EC_HealthState
 {
+	u32 flags;
     i32 hp;
     i32 maxHp;
     u32 team;
-    u32 flags;
     i32 damageThisFrame;
     i32 stunThreshold;
 	u32 lastHitFrame;
@@ -420,6 +437,7 @@ struct EC_Health
 
 struct EC_ThinkerState
 {
+	u32 flags;
     i32 type;
     Ticker ticker;
     i32 count;

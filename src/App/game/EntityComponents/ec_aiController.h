@@ -99,6 +99,9 @@ inline void AI_ReduceNextThink(EC_AIController* ai, GameTime* time, f32 newNextT
     ai->state.nextThink = time->sessionEllapsed + newNextThinkTime;
 }
 
+///////////////////////////////////////////////////////////////////////
+// THINK - not always run
+///////////////////////////////////////////////////////////////////////
 inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
@@ -245,6 +248,9 @@ inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
     return 1;
 }
 
+///////////////////////////////////////////////////////////////////////
+// TICK - Run every frame
+///////////////////////////////////////////////////////////////////////
 inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI tock. State: %d\n", ai->state.state);
@@ -305,37 +311,44 @@ inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
 		
 		case AI_STATE_ATTACKING:
 		{
-			if (!AI_ValidateTargetById(gs, &ai->state.target, self->team))
+			if ((ai->state.atkSettings.flags & ATTACK_FLAG_NO_TARGET_TRACK) == 0)
 			{
-				AI_Reset(gs, ai);
-				break;
+				if (!AI_ValidateTargetById(gs, &ai->state.target, self->team))
+				{
+					AI_Reset(gs, ai);
+					break;
+				}
+				EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+				Assert(motor);
+	
+				if ((ai->state.atkSettings.flags & ATTACK_FLAG_NO_TARGET_TRACK) == 0)
+				{
+					AITargetInfo info = {};
+					AI_BuildThinkInfo(gs, ai, &info);
+					AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
+				}
 			}
-			EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-            Assert(motor);
-
-            if ((ai->state.atkSettings.flags & ATTACK_FLAG_NO_TARGET_TRACK) == 0)
-            {
-                AITargetInfo info = {};
-                AI_BuildThinkInfo(gs, ai, &info);
-                AI_ApplyLookAngles(motor, info.yawRadians, info.pitchRadians);
-            }
 		} break;
 		
 		case AI_STATE_REV_UP_CHARGE:
 		{
 			if (!AI_ValidateTargetById(gs, &ai->state.target, self->team))
 			{
-				AI_Reset(gs, ai);
+				//AI_Reset(gs, ai);
 				break;
 			}
-			AITargetInfo info = {};
-            AI_BuildThinkInfo(gs, ai, &info);
+			else
+			{
+				AITargetInfo info = {};
+				AI_BuildThinkInfo(gs, ai, &info);
+				
+				EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
+				motor->state.input.degrees.x += -(600 * time->deltaTime);
+				motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
+				motor->state.input.degrees.y = info.yawRadians * RAD2DEG;
+				//printf("Pitch: %.4f\n", motor->state.input.degrees.x);
+			}
 			
-            EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
-			motor->state.input.degrees.x += -(600 * time->deltaTime);
-            motor->state.input.degrees.x = COM_CapAngleDegrees(motor->state.input.degrees.x);
-            motor->state.input.degrees.y = info.yawRadians * RAD2DEG;
-            //printf("Pitch: %.4f\n", motor->state.input.degrees.x);
 		} break;
 
         case AI_STATE_CHARGING:

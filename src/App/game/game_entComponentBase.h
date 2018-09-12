@@ -22,17 +22,24 @@ struct EC_##type##List \
 }; \
 
 //////////////////////////////////////////////////
-// Construct Component Add/Remove/Has functions.
+// Construct common component interface
 //////////////////////////////////////////////////
 /*
+type is prefixed with EC_
+GameState must have a matching list, EC_FooList
+
 Functions:
-EC_AddFoo
-Ent_HasFoo
-EC_FindFoo
-EC_RemoveFoo        -       Find component of specific type and if the entity has it, remove it
+u32		Ent_HasFoo			(Ent*);
+void	EC_AddFoo			(GameState*, Ent*);
+void	EC_SetFooInactive	(EC_Foo, u8);
+EC_Foo	EC_FindFoo			(GameState*, EntId*);
+EC_Foo	EC_FindFoo			(GameState*, Ent*);
+void	EC_RemoveFoo		(Ent*)
 */
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
+\
+static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
 \
 static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
 { \
@@ -52,7 +59,11 @@ static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
     return NULL; \
 }; \
 \
-static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
+static inline void EC_Set##type##Inactive(EC_##type##* comp, u8 isInActive) \
+{ \
+	if (isInActive) { comp->state.flags |= EC_STATE_FLAG_INACTIVE; } \
+	else { comp->state.flags &= ~EC_STATE_FLAG_INACTIVE; } \
+} \
 \
 static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
 { \
