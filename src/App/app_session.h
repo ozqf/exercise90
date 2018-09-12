@@ -303,7 +303,7 @@ u8 App_StartSinglePlayer(char *path)
     //App_StartRecording(&g_gameState);
 
     // Spawn local client if one hasn't been restored via file
-    Client *cl = App_FindLocalClient(&g_gameState.clientList);
+    Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
     if (cl == NULL)
     {
         // Assign local client id.

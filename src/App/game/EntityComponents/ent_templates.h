@@ -153,8 +153,14 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
     state->actorState.runSpeed = 12;
     state->actorState.runAcceleration = 100;
+
+    // shotgun
     state->actorState.attackType = ATTACK_INDEX_PROJECTILE_SHOTGUN;
     state->actorState.ticker.tickMax = 0.75f;
+
+    // Machine gun
+    //state->actorState.attackType = ATTACK_INDEX_FAST_PROJECTILE;
+    //state->actorState.ticker.tickMax = 0.05f;
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.SetHealthAndMax(100);

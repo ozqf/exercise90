@@ -49,7 +49,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 Client* App_FindClientById(i32 id, ClientList* cls);
 Client* App_FindClientByEntId(EntId entId, ClientList* cls);
 Client* App_FindOrCreateClient(i32 id, ClientList* cls);
-Client* App_FindLocalClient(ClientList* cls);
+Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying);
 void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 i32 App_NumPlayingClients(ClientList* cls);
 

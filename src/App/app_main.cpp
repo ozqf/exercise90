@@ -360,10 +360,10 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     //g_worldScene.settings.lightBits |= (1 << 0);
     platform.Platform_RenderScene(&g_worldScene);
 
-    Client* cl = App_FindLocalClient(&gs->clientList);
-    if (cl && cl->IsPlaying() && !g_debugCameraOn)
+    Client* cl = App_FindLocalClient(&gs->clientList, 1);
+    if (cl && !g_debugCameraOn)
     {
-        Game_BuildWeaponModelScene(&g_weaponModelScene);
+        Game_BuildWeaponModelScene(gs, &g_weaponModelScene);
         platform.Platform_RenderScene(&g_weaponModelScene);
     }
 

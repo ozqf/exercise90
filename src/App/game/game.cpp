@@ -278,8 +278,8 @@ internal i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verb
 
 internal Ent* Game_GetLocalClientEnt(GameState* gs)
 {
-    Client* localClient = App_FindLocalClient(&gs->clientList);
-    if (localClient && localClient->IsPlaying())
+    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
+    if (localClient)
     {
         Ent* ent = Ent_GetEntityById(&gs->entList, &localClient->entId);
         return ent;
@@ -365,8 +365,8 @@ internal void Game_Tick(
     // step forward
     Game_StepPhysics(gs, time);
 
-    Client* localClient = App_FindLocalClient(&gs->clientList);
-    if (localClient && localClient->IsPlaying())
+    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
+    if (localClient)
     {
         EntId id = localClient->entId;
         gs->cameraEntId = id;

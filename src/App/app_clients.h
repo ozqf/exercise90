@@ -21,13 +21,17 @@ void App_ClearClientGameLinks(ClientList* cls)
 	}
 }
 
-Client* App_FindLocalClient(ClientList* cls)
+Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
         if (cl->state != CLIENT_STATE_FREE && cl->isLocal)
         {
+            if (checkIfPlaying && cl->state != CLIENT_STATE_PLAYING)
+            {
+                return NULL;
+            }
             return cl;
         }
     }

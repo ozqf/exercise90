@@ -116,14 +116,30 @@ inline void Game_BuildRenderList(GameState* gs, RenderScene* scene)
     Game_AddLocalEntitiesToRender(scene);
 }
 
-inline void Game_BuildWeaponModelScene(RenderScene* scene)
-{
-    /* Weapon model 'hand' positions:
-    Right: 0.75, -1, -1.5
-    Left: -0.75, -1, -1.5
-    Centre: 0, -1, -1.5
+/* Weapon model 'hand' positions:
+Right: 0.75, -1, -1.5
+Left: -0.75, -1, -1.5
+Centre: 0, -1, -1.5
+*/
+Vec3 g_weaponModelOrigin = { 0.75f, -1, -1.5 };
+Vec3 g_weaponModalBack = { 0, -1, -0.6f };
+Vec3 g_weaponModalCurrent = { 0, -1, -1.5 };
 
-    */
+inline void Game_BuildWeaponModelScene(GameState* gs, RenderScene* scene)
+{
+    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
+    f32 z = g_weaponModelOrigin.z;
+    if (localClient && localClient->IsPlaying())
+    {
+        EC_ActorMotor* motor = EC_FindActorMotor(gs, &localClient->entId);
+        if (motor)
+        {
+            f32 max = motor->state.ticker.tickMax;
+            f32 step = motor->state.ticker.tick;
+            f32 change = g_weaponModalBack.z - g_weaponModelOrigin.z;
+            z = COM_LinearEase(step, -1.5f, change, max);
+        }
+    }
 
     Transform t;
     RendObj obj;
@@ -131,9 +147,10 @@ inline void Game_BuildWeaponModelScene(RenderScene* scene)
     Transform_SetToIdentity(&t);
     t.scale.x = 0.4f;
     t.scale.y = 0.4f;
-    //t.pos.x = 0.75;
-    t.pos.y = -1;
-    t.pos.z = -1.5;
+
+    t.pos.x = g_weaponModelOrigin.x;
+    t.pos.y = g_weaponModelOrigin.y;
+    t.pos.z = z;
     RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, AppGetTextureIndexByName("textures\\W33_5.bmp"));
     RScene_AddRenderItem(scene, &t, &obj);
 

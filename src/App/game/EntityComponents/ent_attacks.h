@@ -35,6 +35,7 @@ void SV_SpawnTestBullet(
     }
 }
 
+// Player rapid
 inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
@@ -57,6 +58,31 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
     }
 }
 
+// Enemy regular
+inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
+{
+    EntitySpawnOptions options = {};
+    EntityState state;
+    Ent_SetProjectileSpawnOptions(
+        &options,
+        info->source,
+        info->team,
+        info->origin,
+        info->yawDegrees,
+        info->pitchDegrees,
+        15);
+    if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    {
+        state.projectileState.ticker.tickMax = 2.0f;
+        state.projectileState.ticker.tick = 2.0f;
+        state.renderState.colourRGB[0] = 1;
+        state.renderState.colourRGB[1] = 1;
+        state.renderState.colourRGB[2] = 0;
+        Ent_WriteEntityStateCmd(NULL, &state);
+    }
+}
+
+// player shotgun
 inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
@@ -99,29 +125,6 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
             state.renderState.colourRGB[2] = 1;
             Ent_WriteEntityStateCmd(NULL, &state);
         }
-    }
-}
-
-inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
-{
-    EntitySpawnOptions options = {};
-    EntityState state;
-    Ent_SetProjectileSpawnOptions(
-        &options,
-        info->source,
-        info->team,
-        info->origin,
-        info->yawDegrees,
-        info->pitchDegrees,
-        17);
-    if (Game_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
-    {
-        state.projectileState.ticker.tickMax = 2.0f;
-        state.projectileState.ticker.tick = 2.0f;
-        state.renderState.colourRGB[0] = 1;
-        state.renderState.colourRGB[1] = 1;
-        state.renderState.colourRGB[2] = 0;
-        Ent_WriteEntityStateCmd(NULL, &state);
     }
 }
 
