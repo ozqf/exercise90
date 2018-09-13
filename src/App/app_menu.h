@@ -191,7 +191,7 @@ void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 	);
 	if (itemIndex == -1) { return; }
 	
-	if (Input_CheckActionToggledOff(inputs, "Attack 1", time->platformFrameNumber))
+	if (Input_CheckActionToggledOff(inputs, "Attack1", time->platformFrameNumber))
 	{
 		UIEntity *ent = &g_mainMenu.items[itemIndex];
 		if (!COM_CompareStrings(ent->name, "START"))

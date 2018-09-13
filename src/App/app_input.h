@@ -45,6 +45,6 @@ void App_InitInput(InputActionSet* actions)
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_POS_Y, "Mouse Pos Y");
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_MOVE_X, "Mouse Move X");
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_MOVE_Y, "Mouse Move Y");
-    Input_InitAction(actions, Z_INPUT_CODE_MOUSE_1, "Attack 1");
-    Input_InitAction(actions, Z_INPUT_CODE_MOUSE_2, "Attack 2");
+    Input_InitAction(actions, Z_INPUT_CODE_MOUSE_1, "Attack1");
+    Input_InitAction(actions, Z_INPUT_CODE_MOUSE_2, "Attack2");
 }

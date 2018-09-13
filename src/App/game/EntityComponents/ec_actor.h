@@ -124,6 +124,7 @@ inline void ApplyActorMotorInput(
     {
         if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
+			ticker->tickMax = motor->state.attack1Reload;
             ticker->tick = ticker->tickMax;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
@@ -133,7 +134,27 @@ inline void ApplyActorMotorInput(
             Ent* self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             
             AttackInfo info = {};
-            info.type = motor->state.attackType;
+            info.type = motor->state.attack1Type;
+            info.team = self->team;
+            info.origin = t->pos;
+            info.source = motor->header.entId;
+            info.yawDegrees = motor->state.input.degrees.y;
+            info.pitchDegrees = motor->state.input.degrees.x;
+            SV_FireAttack(gs, &info);
+        }
+		if (motor->state.input.buttons & ACTOR_INPUT_ATTACK2)
+        {
+			ticker->tickMax = motor->state.attack2Reload;
+            ticker->tick = ticker->tickMax;
+            //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+            EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
+            //Transform* t = &g_worldScene.cameraTransform;
+            //Transform* t = &ent->transform;
+            Transform* t = &ecTrans->t;
+            Ent* self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+            
+            AttackInfo info = {};
+            info.type = motor->state.attack2Type;
             info.team = self->team;
             info.origin = t->pos;
             info.source = motor->header.entId;

@@ -22,35 +22,37 @@ void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 camDegree
 {
     /*
     Cam to target angle
-
+	- lets learn some basic trigonometry
     */
-   f32 dz = camZ - item->worldPos.z;
-   f32 dx = camX - item->worldPos.x;
-   //f32 dz = item->worldPos.z - camZ;
-   //f32 dx = item->worldPos.x - camX;
-
-    // calcuate angle
-    f32 flatAngle = (f32)atan2(dz, dx);
+	
+	// Hardcoded for testing!
+	item->worldPos.x = 24;
+	item->worldPos.z = 24;
+	f32 dz = camZ - item->worldPos.z;
+	f32 dx = camX - item->worldPos.x;
+   
+    // calcuate angle - Careful about axis order in atan2
+	// a yaw of 0 == facing down Z axis, with the 'secondary' being the X
+	// so y == x, x == z
+    f32 flatAngle = (f32)atan2(dx, dz);
     flatAngle *= RAD2DEG;
     flatAngle = COM_CapAngleDegrees(flatAngle);
-    camDegrees += 90;
     camDegrees = COM_CapAngleDegrees(camDegrees);
-
-    //f32 diff = camDegrees - flatAngle;
-    f32 diff = flatAngle + camDegrees;
-
-    //item->degrees = flatAngle - camDegrees;
+	
+    f32 diff = flatAngle - camDegrees;
+	
+	// offset by 90 so that screen top == forward
     item->degrees = 90 + diff;
-    //item->degrees = flatAngle;
-    printf("World Pos %.2f/%.2f Cam Pos: %.2f/%.2f\n",
-        item->worldPos.x, item->worldPos.z,
-        camX, camZ
-    );
-    printf("Flat angle: %.2f. Camera: %.2f. Diff: %.2f. Result: %.2f\n",
+    
+	#if 0
+    printf("World Pos %.2f/%.2f Cam Pos: %.2f/%.2f. Flat angle: %.2f. Camera: %.2f. Diff: %.2f. Result: %.2f\n",
+		item->worldPos.x, item->worldPos.z,
+        camX, camZ,
         flatAngle,
         camDegrees,
         diff,
         item->degrees);
+	#endif
 
     // setup for drawing
     f32 vx = (f32)cos(item->degrees * DEG2RAD);

@@ -2,14 +2,34 @@
 
 #include "../common/com_module.h"
 
-#define LOCAL_ENT_STATUS_FREE 0
-#define LOCAL_ENT_STATUS_IN_USE 1
+////////////////////////////////////////////////////////////
+// ENTITY TEMPLATE TYPES
+////////////////////////////////////////////////////////////
+#define ENTITY_TYPE_NULL 0
+#define ENTITY_TYPE_WORLD_CUBE 1
+#define ENTITY_TYPE_RIGIDBODY_CUBE 2
+#define ENTITY_TYPE_ACTOR_GROUND 3
+#define ENTITY_TYPE_PROJECTILE 4
+#define ENTITY_TYPE_SPAWNER 5
+#define ENTITY_TYPE_ENEMY 6
+#define ENTITY_TYPE_BLOCKING_VOLUME 7
+#define ENTITY_TYPE_ENEMY_BRUTE 8
+#define ENTITY_TYPE_ENEMY_CHARGER 9
+#define ENTITY_TYPE_ENEMY_FODDER 10
+#define ENTITY_TYPE_ENEMY_SWARM 11
+#define ENTITY_TYPE_ENEMY_SPINNER 12
 
+////////////////////////////////////////////////////////////
+// LOCAL ENTITY IDS
+////////////////////////////////////////////////////////////
 #define LOCAL_ENT_TYPE_NULL 0
 #define LOCAL_ENT_TYPE_IMPACT 1
 #define LOCAL_ENT_TYPE_SPAWN 2
 #define LOCAL_ENT_TYPE_EXPLOSION 3
 #define LOCAL_ENT_TYPE_DEBRIS 4
+
+#define LOCAL_ENT_STATUS_FREE 0
+#define LOCAL_ENT_STATUS_IN_USE 1
 
 #define LOCAL_ENT_UPDATER_DEFAULT 0
 #define LOCAL_ENT_UPDATER_DYNAMIC 1
@@ -68,6 +88,7 @@ struct Actor;
 #define ACTOR_INPUT_MOVE_UP (1 << 4)
 #define ACTOR_INPUT_MOVE_DOWN (1 << 5)
 #define ACTOR_INPUT_ATTACK (1 << 6)
+#define ACTOR_INPUT_ATTACK2 (1 << 7)
 struct ActorInput
 {
     u32 buttons;
@@ -310,7 +331,14 @@ struct EC_ActorMotorState
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
-    i32 attackType;
+	
+    i32 attack1Type;
+	f32 attack1Reload;
+	f32 attack1AnimStyle;
+	
+	i32 attack2Type;
+	f32 attack2Reload;
+	f32 attack2AnimStyle;
     Ticker ticker;
 };
 

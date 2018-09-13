@@ -63,7 +63,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     state->actorState.runSpeed = 6;
     state->actorState.runAcceleration = 75;
     state->actorState.ticker.tickMax = 1.0f;
-    state->actorState.attackType = ATTACK_INDEX_SLOW_PROJECTILE;
+    state->actorState.attack1Type = ATTACK_INDEX_SLOW_PROJECTILE;
 
 
     state->componentBits |= EC_FLAG_HEALTH;

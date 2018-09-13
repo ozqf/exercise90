@@ -48,22 +48,6 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_VIA_TEMPLATE 112
 #define CMD_TYPE_SPAWN_GFX 113
 
-//////////////////////////////////////////////////
-// Spawning
-#define ENTITY_TYPE_NULL 0
-#define ENTITY_TYPE_WORLD_CUBE 1
-#define ENTITY_TYPE_RIGIDBODY_CUBE 2
-#define ENTITY_TYPE_ACTOR_GROUND 3
-#define ENTITY_TYPE_PROJECTILE 4
-#define ENTITY_TYPE_SPAWNER 5
-#define ENTITY_TYPE_ENEMY 6
-#define ENTITY_TYPE_BLOCKING_VOLUME 7
-#define ENTITY_TYPE_ENEMY_BRUTE 8
-#define ENTITY_TYPE_ENEMY_CHARGER 9
-#define ENTITY_TYPE_ENEMY_FODDER 10
-#define ENTITY_TYPE_ENEMY_SWARM 11
-#define ENTITY_TYPE_ENEMY_SPINNER 12
-
 // Define placeholder raw read/write functions for commands.
 #ifndef GAME_CMD_DEFAULT_INTERFACE
 #define GAME_CMD_DEFAULT_INTERFACE(structType)\
@@ -87,17 +71,17 @@ inline u16 Read(CmdHeader* h, u8* ptr)\
 
 // TODO: REMOVE THIS WHEN SECOND VERISON OF ECS IS WORKING?
 // 100
-struct Cmd_Spawn
-{
-    i32 factoryType;
-	EntId entityId;
-    Vec3 pos;
-    Vec3 rot;
-    Vec3 size;
-    u32 flags;
+// struct Cmd_Spawn
+// {
+    // i32 factoryType;
+	// EntId entityId;
+    // Vec3 pos;
+    // Vec3 rot;
+    // Vec3 size;
+    // u32 flags;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_Spawn)
-};
+	// GAME_CMD_DEFAULT_INTERFACE(Cmd_Spawn)
+// };
 
 //////////////////////////////////////////////////
 // 101
@@ -256,7 +240,7 @@ struct Cmd_EntitySpawn2
     EntitySpawnOptions options;
 };
 
-Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
+//Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
 
 struct Cmd_GameSessionState
 {

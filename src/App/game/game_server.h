@@ -28,10 +28,10 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             Assert(ent);
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &ent->entId);
             Assert(motor);
-            motor->state.attackType++;
-            if (motor->state.attackType >= 4)
+            motor->state.attack1Type++;
+            if (motor->state.attack1Type >= 4)
             {
-                motor->state.attackType = 1;
+                motor->state.attack1Type = 1;
             }
             return  1;
         } break;
@@ -113,12 +113,14 @@ internal void SV_IterateImportance(EntityLink* links, i32 numLinks)
 
     /*
     Network entity update priority queue:
-    > Calculate a priority based on the 
+    > Calculate a priority based on:
         > entity types' inherent priority
             (projectiles are higher than regular enemies etc)
         > Distance from this client
         > Are they targetting this client directly? This could 
             be used to cancel the distance effect
+		> direction of movement: Projectiles moving away are
+			not as important
     > Increase each entity link's importance by it's priority
     > Sort list by descending importance.
     > Iterate over sorted list, writing entity updates until

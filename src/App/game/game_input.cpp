@@ -351,9 +351,14 @@ void Game_CreateClientInput(InputActionSet* actions, ActorInput* input)
 	}
 	
 
-	if (Input_GetActionValue(actions, "Attack 1"))
+	if (Input_GetActionValue(actions, "Attack1"))
 	{
 		input->buttons = input->buttons | ACTOR_INPUT_ATTACK;
+	}
+	
+	if (Input_GetActionValue(actions, "Attack2"))
+	{
+		input->buttons = input->buttons | ACTOR_INPUT_ATTACK2;
 	}
 	
 	// Orientation
