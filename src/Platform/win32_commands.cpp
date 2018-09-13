@@ -35,7 +35,7 @@ TEXT_COMMAND_HANDLER(Version)
 TEXT_COMMAND_HANDLER(Mark)
 {
     printf("/////////////////////////////////////////\n");
-    printf("// Kernal frame: %d game frame: %d\n",
+    printf("// Kernel frame: %d game frame: %d\n",
         g_gameTime.platformFrameNumber,
         g_gameTime.gameFrameNumber);
     printf("/////////////////////////////////////////\n");
