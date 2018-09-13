@@ -62,7 +62,8 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
         printf("A hits B!\n");
         healthB->state.hp -= 10;
         healthB->state.damageThisFrame += 10;
-		healthB->state.lastHitFrame = ++time->gameFrameNumber;
+        // Add one to frame as it will be incremented before health reads it
+		healthB->state.lastHitFrame = time->gameFrameNumber + 1;
 		healthB->state.lastHitSource = a->entId;
     }
 
@@ -76,7 +77,8 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
         printf("B hits A!\n");
         healthA->state.hp -= 10;
         healthA->state.damageThisFrame += 10;
-		healthA->state.lastHitFrame = ++time->gameFrameNumber;
+        // Add one to frame as it will be incremented before health reads it
+		healthA->state.lastHitFrame = time->gameFrameNumber + 1;
 		healthA->state.lastHitSource = b->entId;
     }
 }
