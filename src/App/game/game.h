@@ -178,14 +178,8 @@ global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
 ////////////////////////////////////////////////////////////
 Transform g_debugTransform = {};
 
-
-HudRingItem g_hudRingItem =
-{
-    0.5f,
-    90,
-    { 0, 0, 0 }
-};
-RendObj g_hudRingRend;
+#define HUD_MAX_RING_ITEMS 16
+global_variable HudRingItem g_hudRingItems[HUD_MAX_RING_ITEMS];
 
 
 // Interface

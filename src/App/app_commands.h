@@ -210,6 +210,13 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         platform.Platform_LoadSound((u8*)ref.ptrMemory, ref.objectSize);
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "UIGFX"))
+    {
+        Cmd_SpawnHudItem cmd = {};
+        cmd.pos = Game_RandomSpawnOffset(24, 0, 24);
+        APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "DEBUG"))
     {
         if (numTokens == 1)

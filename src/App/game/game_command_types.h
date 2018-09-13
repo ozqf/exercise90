@@ -47,6 +47,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_GAME_CAMPAIGN_STATE 111
 #define CMD_TYPE_SPAWN_VIA_TEMPLATE 112
 #define CMD_TYPE_SPAWN_GFX 113
+#define CMD_TYPE_SPAWN_HUD_ITEM 114
 
 // Define placeholder raw read/write functions for commands.
 #ifndef GAME_CMD_DEFAULT_INTERFACE
@@ -262,4 +263,16 @@ struct Cmd_SpawnViaTemplate
 	EntitySpawnOptions options;
 	
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnViaTemplate)
+};
+
+// CMD_TYPE_SPAWN_HUD_ITEM
+
+struct Cmd_SpawnHudItem
+{
+    i32 type;
+    Vec3 pos;
+    EntId source;
+    EntId victim;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnHudItem)
 };

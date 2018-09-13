@@ -18,16 +18,65 @@ void GameUI_SetCentreMessage(char *text)
 #endif
 }
 
-void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 camDegrees)
+internal void Hud_RecycleRingItem(HudRingItem* item)
 {
+    item->state = 0;
+}
+
+internal void Hud_ClearAllHudRings()
+{
+    for (int i = 0; i < HUD_MAX_RING_ITEMS; ++i)
+    {
+        g_hudRingItems[i].state = 0;
+    }
+}
+
+internal HudRingItem* Hud_GetFreeHudRingItem()
+{
+    HudRingItem* item = NULL;
+    int oldestIndex = INT_MAX;
+    for (int i = 0; i < HUD_MAX_RING_ITEMS; ++i)
+    {
+        if (g_hudRingItems[i].state == 0)
+        {
+            g_hudRingItems[i].state = 1;
+            return &g_hudRingItems[i];
+        }
+        else
+        {
+            oldestIndex = i;
+        }
+    }
+    return &g_hudRingItems[oldestIndex];
+}
+
+internal void Exec_SpawnHudItem(GameState* gs, Cmd_SpawnHudItem* cmd)
+{
+    HudRingItem* r = Hud_GetFreeHudRingItem();
+    if (!r) { return; }
+    r->radius = 0.5f;
+    r->worldPos.x = cmd->pos.x;
+    r->worldPos.y = cmd->pos.y;
+    r->worldPos.z = cmd->pos.z;
+
+    r->tick = 0;
+    r->tickMax = 1.0f;
+    r->startScale = 1;
+    r->endScale = 0;
+}
+
+internal void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 camDegrees, f32 deltaTime)
+{
+    if (item->tick >= item->tickMax)
+    {
+        Hud_RecycleRingItem(item);
+    }
+    item->scale = COM_LinearEase(item->tick, item->startScale, item->endScale - item->startScale, item->tickMax);
     /*
     Cam to target angle
 	- lets learn some basic trigonometry
     */
 	
-	// Hardcoded for testing!
-	item->worldPos.x = 24;
-	item->worldPos.z = 24;
 	f32 dz = camZ - item->worldPos.z;
 	f32 dx = camX - item->worldPos.x;
    
@@ -59,15 +108,18 @@ void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 camDegree
     f32 vy = (f32)sin(item->degrees * DEG2RAD);
     item->screenPos.x = vx * item->radius;
     item->screenPos.y = vy * item->radius;
+
     RendObj_SetAsMesh(
-        &g_hudRingRend,
+        &item->rendObj,
         Assets_GetMeshDataByName("Cube"),
-        1, 1, 1,
+        1, 0.2f, 0.2f,
         AppGetTextureIndexByName("textures\\white_bordered.bmp")
     );
+
+    item->tick += deltaTime;
 }
 
-void Game_UpdateUI(GameState* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
+internal void Game_UpdateUI(GameState* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
 {
     Client* cl = App_FindLocalClient(&gs->clientList, 1);
     if (cl)
@@ -75,11 +127,22 @@ void Game_UpdateUI(GameState* gs, UIEntity *ents, i32 maxEntities, GameTime *tim
         //EC_Transform* trans = EC_FindTransform(gs, &cl->entId);
         //EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
         Vec3 angles = Transform_GetEulerAnglesDegrees(&gs->cameraTransform);
-        Game_UpdateHudRingItem(&g_hudRingItem, gs->cameraTransform.pos.x, gs->cameraTransform.pos.z, angles.y);
+        for (int i = 0; i < HUD_MAX_RING_ITEMS; ++i)
+        {
+            HudRingItem* item = &g_hudRingItems[i];
+            Game_UpdateHudRingItem(
+               item,
+               gs->cameraTransform.pos.x,
+               gs->cameraTransform.pos.z,
+               angles.y,
+               time->deltaTime
+        )   ;
+        }
+        
     }
     else
     {
-        Game_UpdateHudRingItem(&g_hudRingItem, 0, 0, 0);
+        Hud_ClearAllHudRings();
     }
 
     //printf("Hud ring item degrees: %.2f\n", g_hudRingItem.degrees);

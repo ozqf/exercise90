@@ -228,6 +228,14 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 			Exec_UpdateGameInstance(gs, &cmd);
 			return 1;
 		} break;
+
+        case CMD_TYPE_SPAWN_HUD_ITEM:
+        {
+            Cmd_SpawnHudItem cmd = {};
+            ptr += cmd.Read(header, ptr);
+            Exec_SpawnHudItem(gs, &cmd);
+            return 1;
+        } break;
     }
     return 0;
 }

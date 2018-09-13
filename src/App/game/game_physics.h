@@ -5,6 +5,19 @@
 /////////////////////////////////////////////////////////////////////////////
 // PHYSICS OUTPUT
 /////////////////////////////////////////////////////////////////////////////
+#if 0
+internal void Game_SpawnHitRing(Vec3 pos, EntId source, EntId victim)
+{
+    Cmd_SpawnHudItem cmd = {};
+    cmd.pos.x = pos.x;
+    cmd.pos.y = pos.y;
+    cmd.pos.z = pos.z;
+    cmd.source = source;
+    cmd.victim = victim;
+    APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+}
+#endif
+
 internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u32 id_B)
 {
     //EC_Collider* a = EC_ColliderGetByShapeId(&gs->colliderList, id_A);
@@ -14,10 +27,10 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
     Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
     Assert((a != NULL && b != NULL));
 
-    printf("Collision: %d/%d vs %d/%d\n",
-        a->entId.iteration, a->entId.index,
-        b->entId.iteration, b->entId.index
-    );
+    // printf("Collision: %d/%d vs %d/%d\n",
+    //     a->entId.iteration, a->entId.index,
+    //     b->entId.iteration, b->entId.index
+    // );
 
     //EC_Collider* colA = EC_FindCollider(gs, a);
     //EC_Collider* colB = EC_FindCollider(gs, b);
@@ -49,7 +62,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
         printf("A hits B!\n");
         healthB->state.hp -= 10;
         healthB->state.damageThisFrame += 10;
-		healthB->state.lastHitFrame = time->gameFrameNumber;
+		healthB->state.lastHitFrame = ++time->gameFrameNumber;
 		healthB->state.lastHitSource = a->entId;
     }
 
@@ -63,7 +76,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
         printf("B hits A!\n");
         healthA->state.hp -= 10;
         healthA->state.damageThisFrame += 10;
-		healthA->state.lastHitFrame = time->gameFrameNumber;
+		healthA->state.lastHitFrame = ++time->gameFrameNumber;
 		healthA->state.lastHitSource = b->entId;
     }
 }

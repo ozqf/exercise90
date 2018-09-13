@@ -21,9 +21,17 @@ struct UIEntity
 
 struct HudRingItem
 {
+    i32 state;
     f32 radius;
-    f32 degrees;
     Vec3 screenPos;
+    f32 scale;
+
+    f32 startScale;
+    f32 endScale;
+    f32 tick;
+    f32 tickMax;
+    
+    f32 degrees;
     Vec3 worldPos;
 
     RendObj rendObj;

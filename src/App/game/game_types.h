@@ -229,6 +229,7 @@ struct EC_Header
 // All entity component state should have a flags member
 // the first bit is always 0 for active, 1 for inactive
 #define EC_STATE_FLAG_INACTIVE (1 << 0)
+#define EC_STATE_FLAG_IS_PLAYER (1 << 1)
 
 //#define EC_NUM_TYPES 9
 

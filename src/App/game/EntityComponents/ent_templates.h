@@ -165,6 +165,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.SetHealthAndMax(100);
+    state->healthState.flags |= EC_STATE_FLAG_IS_PLAYER;
     
 
     Ent_ApplySpawnOptions(state, options);

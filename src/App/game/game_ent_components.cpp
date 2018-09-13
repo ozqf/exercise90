@@ -122,6 +122,22 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
 
                     health->state.lastHitFrame = time->gameFrameNumber;
                     health->state.lastHitSource = e->source;
+                    #if 0
+                    if (health->state.flags & EC_STATE_FLAG_IS_PLAYER)
+                    {
+                        EC_Transform* sourceTransform = EC_FindTransform(gs, &e->source);
+                        if (sourceTransform)
+                        {
+                            Cmd_SpawnHudItem cmd = {};
+                            cmd.pos.x = sourceTransform->t.pos.x;
+                            cmd.pos.y = sourceTransform->t.pos.y;
+                            cmd.pos.z = sourceTransform->t.pos.z;
+                            cmd.source = e->source;
+                            cmd.victim = health->header.entId;
+                            APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+                        }
+                    }
+                    #endif
                 }
 
                 // kill prj
@@ -197,20 +213,50 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
                     //printf("Launch dir %.2f %.2f %.2f\n", dir.x, dir.y, dir.z);
                     Vec3 offset = Game_RandomSpawnOffset(0.5f, 1.0f, 0.5f);
                     f32 power = 10.0f + Game_RandomInRange(launchPower);
-                    Game_SpawnLocalEntity(t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z, &dir, power, LOCAL_ENT_TYPE_DEBRIS);
+                    Game_SpawnLocalEntity(
+                        t->pos.x + offset.x, t->pos.y + offset.y, t->pos.z + offset.z,
+                        &dir, power, LOCAL_ENT_TYPE_DEBRIS);
                 }
             }
         }
-        else if (health->state.lastHitFrame == time->gameFrameNumber && health->state.damageThisFrame > health->state.stunThreshold)
+        else if (health->state.lastHitFrame == time->gameFrameNumber)
         {
-            //printf("Hit cube, hp: %d\n", health->hp);
-            EC_AIController *ai = EC_FindAIController(gs, &health->header.entId);
-            if (ai != NULL)
+            #if 1
+            if (health->state.flags & EC_STATE_FLAG_IS_PLAYER)
             {
-                AI_Stun(gs, ai, time);
+                Client* cl = App_FindLocalClient(&gs->clientList, 1);
+                if (health->header.entId.value == cl->entId.value)
+                {
+                    printf("Spawn hud ring\n");
+                    // Spawn hit gfx
+                    Cmd_SpawnHudItem cmd = {};
+                    EC_Transform* attackerXForm = EC_FindTransform(gs, &health->state.lastHitSource);
+                    if (attackerXForm)
+                    {
+                        cmd.pos = attackerXForm->t.pos;
+                        cmd.source = health->state.lastHitSource;
+                        cmd.victim = health->header.entId;
+                        APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+                    }
+                    else
+                    {
+                        printf("Attacked has no transform!\n");
+                    }
+                }
             }
-            //Prj_PushRigidBody(col);
+            #endif
+            if (health->state.damageThisFrame > health->state.stunThreshold)
+            {
+                //printf("Hit cube, hp: %d\n", health->hp);
+                EC_AIController *ai = EC_FindAIController(gs, &health->header.entId);
+                if (ai != NULL)
+                {
+                    AI_Stun(gs, ai, time);
+                }
+                //Prj_PushRigidBody(col);
+            }
         }
+        
 
         health->state.damageThisFrame = 0;
     }
