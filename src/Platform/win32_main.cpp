@@ -201,6 +201,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 		// F1 -> quick minimise
 		if (VKCode == 112)
 		{
+			printf("PLATFORM: Minimise\n");
 			/*
 			https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-showwindow
 			https://docs.microsoft.com/en-us/windows/desktop/api/shellapi/ns-shellapi-_notifyicondataa
@@ -223,6 +224,13 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 			ShowWindow(consoleHandle, SW_MINIMIZE);
 			//Win32_ExecuteTextCommand("MINIMISED");
 			break;
+		}
+		
+		// F1 -> quick minimise
+		if (VKCode == 113)
+		{
+			printf("PLATFORM: Instant exit\n");
+			globalRunning = false;
 		}
 
         // if (VKCode == 'P' && isDown)

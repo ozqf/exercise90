@@ -78,6 +78,18 @@ Linked as a .lib to the platform layer for compressing/decompressing files in .d
 
 ## Random todo list
 
+### State recording/Transfer
+Consider further splitting entity component state so that state data can be reduced
+* 'hot' data that is expected to change
+* 'cold' data should match the entity's factory template where possible, meaning it doesn't need to be stored/transferred unless it deviates from the template.
+Examples of Hot data:
+* An AI's current state, target, update timer etc.
+* A health component's current health value and debuff flags
+Examples of Cold Data:
+* An AI's attack statistics
+* A health component's maximum health
+
+
 ### ECS complexity
 Insanely fiddly steps to adding a new component:
 

@@ -165,13 +165,6 @@ struct EntityLink
 	// 16B + 4 + 1 + 1 = 22B
 };
 
-//////////////////////////////////////////////////
-// Define Components
-// All components required:
-//   EntId entId;
-//   u8 inUse;
-//////////////////////////////////////////////////
-
 #define ATTACK_INDEX_NULL 0
 #define ATTACK_INDEX_FAST_PROJECTILE 1
 #define ATTACK_INDEX_SLOW_PROJECTILE 2
@@ -202,9 +195,14 @@ struct Ticker
     //i32 tockMax;
 };
 
-// Max of 32 components per entity
+//////////////////////////////////////////////////
+// Define Components
+// All components required:
+//   EntId entId;
+//   u8 inUse;
+//////////////////////////////////////////////////
 
-//struct GameState;
+// Max of 32 component TYPES
 
 #define EC_GET_ID(ec) ( ec##->header.entId )
 
@@ -225,6 +223,7 @@ struct EC_Header
 #define EC_FLAG_HEALTH (1 << 8)
 #define EC_FLAG_THINKER (1 << 9)
 #define EC_FLAG_MULTI_RENDOBJ (1 << 10)
+#define EC_FLAG_VOLUME (1 << 11)
 
 // All entity component state should have a flags member
 // the first bit is always 0 for active, 1 for inactive
@@ -261,6 +260,7 @@ struct EC_RendObjState
     char meshName[EC_RENDERER_STRING_LENGTH];
     char textureName[EC_RENDERER_STRING_LENGTH];
     f32 colourRGB[3];
+	i32 flashFrames;
     f32 pitchDegrees;
     f32 yawDegrees;
     f32 heightOffset;
@@ -483,6 +483,24 @@ struct EC_Thinker
     EC_ThinkerState state;
 };
 
+#define EC_VOLUME_TYPE_NONE 0
+#define EC_VOLUME_TYPE_DAMAGE 1	// hurt teammates overlapping
+#define EC_VOLUME_TYPE_HEAL 2	// heal teammates overlapping
+
+struct EC_VolumeState
+{
+	u32 flags;
+	i32 type;
+	Vec3 halfSize;
+};
+
+struct EC_Volume
+{
+	EC_Header header;
+	
+	EC_VolumeState state;
+};
+
 /**
  * A master container for complete entity component state (spawning)
  * or pieces of component state (updating)
@@ -506,6 +524,7 @@ struct EntityState
     EC_LabelState labelState;
     EC_ThinkerState thinkerState;
     EC_MultiRendObjState multiRendState;
+	EC_VolumeState volumeState;
 };
 
 #define ENT_OPTION_FLAG_SCALE (1 << 1)

@@ -7,17 +7,64 @@
 #include "EntityComponents/ec_collider.h"
 #include "EntityComponents/ec_thinker.h"
 
-Ent *Game_FindEntityByLabel(GameState *gs, char *queryLabel)
+/*internal*/ EntId Game_FindEntIdByLabel(GameState *gs, char *queryLabel)
 {
     for (u32 i = 0; i < gs->labelList.max; ++i)
     {
         EC_Label *entLabel = &gs->labelList.items[i];
         if (!COM_CompareStrings(entLabel->state.label, queryLabel))
         {
-            return Ent_GetEntityById(&gs->entList, &entLabel->header.entId);
+            return entLabel->header.entId;
         }
     }
-    return NULL;
+    return {};
+}
+
+///////////////////////////////////////////////////////////////////
+// Render Objects
+///////////////////////////////////////////////////////////////////
+
+internal void Game_UpdateRenderObjects(GameState *gs, GameTime *time)
+{
+    for (u32 i = 0; i < gs->singleRendObjList.max; ++i)
+    {
+        EC_SingleRendObj *obj = &gs->singleRendObjList.items[i];
+        if (obj->header.inUse == 0)
+        {
+            continue;
+        }
+		if (obj->state.flashFrames > 0)
+		{
+			obj->rendObj.SetColour(1, 1, 1);
+			obj->state.flashFrames--;
+		}
+		else
+		{
+			f32* col = obj->state.colourRGB;
+			obj->rendObj.SetColour(col[0], col[1], col[2]);
+		}
+	}
+    for (u32 i = 0; i < gs->multiRendObjList.max; ++i)
+    {
+        EC_MultiRendObj *obj = &gs->multiRendObjList.items[i];
+        if (obj->header.inUse == 0)
+        {
+            continue;
+        }
+		if (obj->state.objStates[0].flashFrames > 0)
+		{
+			obj->rendObjs[0].SetColour(1, 1, 1);
+			obj->rendObjs[1].SetColour(1, 1, 1);
+			obj->state.objStates[0].flashFrames--;
+		}
+        else
+		{
+			f32* col0 = obj->state.objStates[0].colourRGB;
+			f32* col1 = obj->state.objStates[1].colourRGB;
+			obj->rendObjs[0].SetColour(col0[0], col0[1], col0[2]);
+			obj->rendObjs[1].SetColour(col1[0], col1[1], col1[2]);
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -28,7 +75,7 @@ inline void Prj_PushRigidBody(EC_Collider *col)
     PhysCmd_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
-void Game_UpdateProjectiles(GameState *gs, GameTime *time)
+internal void Game_UpdateProjectiles(GameState *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
     {
@@ -158,7 +205,10 @@ void Game_UpdateProjectiles(GameState *gs, GameTime *time)
     }
 }
 
-void Game_UpdateHealth(GameState *gs, GameTime *time)
+/////////////////////////////////////////////////////////////////////////
+// HEALTH
+/////////////////////////////////////////////////////////////////////////
+internal void Game_UpdateHealth(GameState *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->healthList.max; ++i)
     {
@@ -167,6 +217,8 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
         {
             continue;
         }
+		
+		EntId* selfId = &health->header.entId;
 
         if (health->state.hp <= 0)
         {
@@ -245,6 +297,16 @@ void Game_UpdateHealth(GameState *gs, GameTime *time)
                 }
             }
             #endif
+			EC_MultiRendObj* multiObj = EC_FindMultiRendObj(gs, selfId);
+			if (multiObj)
+			{
+				multiObj->state.objStates[0].flashFrames = 3;
+			}
+			EC_SingleRendObj* singleRend = EC_FindSingleRendObj(gs, selfId);
+			if (singleRend)
+			{
+				singleRend->state.flashFrames = 3;
+			}
             if (health->state.damageThisFrame > health->state.stunThreshold)
             {
                 //printf("Hit cube, hp: %d\n", health->hp);
