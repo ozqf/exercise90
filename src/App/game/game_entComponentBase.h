@@ -72,7 +72,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
         comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->header.inUse == 1 && EntId_Equals(&ent->entId, &comp->header.entId)) \
+        if (comp->header.inUse == 1 && ent->entId.value == comp->header.entId.value) \
         { \
             return comp; \
         } \
@@ -85,7 +85,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, EntId* id) \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
     { \
         comp = &gs->##typeCamelCase##List.items[i]; \
-        if (comp->header.inUse == 1 && EntId_Equals(id, &comp->header.entId)) \
+        if (comp->header.inUse == 1 && id->value == comp->header.entId.value) \
         { \
             return comp; \
         } \

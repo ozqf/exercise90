@@ -124,13 +124,6 @@ union EntId
 };
 #pragma pack(pop)
 
-// Is this necessary?
-// TODO: No it isn't. Compare via id.value is much easier
-inline u8 EntId_Equals(EntId* a, EntId* b)
-{
-    return (a->index == b->index && a->iteration == b->iteration);
-}
-
 // Entities are defined by the components grouped by ent id.
 // consider this struct as entity 'meta data'
 struct Ent
