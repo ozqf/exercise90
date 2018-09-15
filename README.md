@@ -132,7 +132,7 @@ Done Move the engine and game to using commands.
 
 ### Game
 * **Gameplay**
-    * **Enemy Attack Cycle** - pause, shoot, pause, continue
+    Done * **Enemy Attack Cycle** - pause, shoot, pause, continue
 * Done 2018/3/16 *Player movement* - Current player movement is messed up - rebuild.
     * Done 2018/6/10 *Improved movement* - Movement code uses adapted version of Quake's movement code.
 * Done 2018/5 *Basic Arena Level* - Something to stand on and contain the player!
@@ -154,11 +154,12 @@ Done Move the engine and game to using commands.
     * Done 2018/3/30 *Binary AABB vs AABB collision detection*
 
 ### Physics Wrapper
-* **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
-    * **Use command events to store factory settings** - 
+* Done **Convert Physics inputs to command buffer** - Buffer actions in the physics engine to be processed before stepping.
+    * Done **Use command events to store factory settings** - 
 * **Querying (Rays and spheres/cube volumes)** - for object searchs, explosions and projectiles
 * **Overlap detection (Rigidbodies, static and triggers)** - Kinda need this to make a game out of
     * Done 2018/5/5 *Basic detection of overlap pairs* - Inefficient and messy
+		* Improved 2018/9
     * **Overlap detection (triggers)**
 * **Teleportation** - directly setting object positions
 * **One way collisions** - Creating planes/very thin boxes that can only be moved through in one direction (forcefields)

@@ -415,8 +415,8 @@ int CALLBACK WinMain(
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
 
-    i32 windowWidth = 640;// 1280;
-    i32 windowHeight = 480;//720;
+    i32 windowWidth = 1280;
+    i32 windowHeight = 720;
 
     RECT r;
     r.top = r.left = 0;

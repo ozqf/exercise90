@@ -335,11 +335,13 @@ struct EC_ActorMotorState
 	
     i32 attack1Type;
 	f32 attack1Reload;
-	f32 attack1AnimStyle;
+	i32 attack1AnimStyle;
 	
 	i32 attack2Type;
 	f32 attack2Reload;
-	f32 attack2AnimStyle;
+	i32 attack2AnimStyle;
+    
+    i32 animStyle;
     Ticker ticker;
 };
 

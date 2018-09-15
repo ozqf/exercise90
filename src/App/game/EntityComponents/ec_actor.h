@@ -126,6 +126,7 @@ inline void ApplyActorMotorInput(
         {
 			ticker->tickMax = motor->state.attack1Reload;
             ticker->tick = ticker->tickMax;
+            motor->state.animStyle = motor->state.attack1AnimStyle;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
@@ -146,6 +147,7 @@ inline void ApplyActorMotorInput(
         {
 			ticker->tickMax = motor->state.attack2Reload;
             ticker->tick = ticker->tickMax;
+            motor->state.animStyle = motor->state.attack2AnimStyle;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
             EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;

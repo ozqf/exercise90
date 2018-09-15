@@ -161,7 +161,11 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     // shotgun
     state->actorState.attack2Type = ATTACK_INDEX_PROJECTILE_SHOTGUN;
 	state->actorState.attack2Reload = 0.75f;
-    //state->actorState.ticker.tickMax = 0.75f;
+    state->actorState.attack2AnimStyle = 1;
+
+    state->actorState.ticker.tickMax = 1;
+    state->actorState.ticker.tick = 0;
+    state->actorState.animStyle = 0;
 
     state->componentBits |= EC_FLAG_HEALTH;
     state->healthState.SetHealthAndMax(100);

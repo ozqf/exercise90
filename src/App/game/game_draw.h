@@ -123,6 +123,7 @@ Centre: 0, -1, -1.5
 */
 Vec3 g_weaponModelOrigin = { 0.75f, -1, -1.5 };
 Vec3 g_weaponModalBack = { 0, -1, -0.6f };
+Vec3 g_weaponModalBackMinor = { 0, -1, -1.2f };
 Vec3 g_weaponModalCurrent = { 0, -1, -1.5 };
 
 inline void Game_BuildWeaponModelScene(GameState* gs, RenderScene* scene)
@@ -134,9 +135,19 @@ inline void Game_BuildWeaponModelScene(GameState* gs, RenderScene* scene)
         EC_ActorMotor* motor = EC_FindActorMotor(gs, &localClient->entId);
         if (motor)
         {
+            Vec3 kickedBackPos;
+            if (motor->state.animStyle == 1)
+            {
+                kickedBackPos = g_weaponModalBack;
+            }
+            else
+            {
+                kickedBackPos = g_weaponModalBackMinor;
+            }
+
             f32 max = motor->state.ticker.tickMax;
             f32 step = motor->state.ticker.tick;
-            f32 change = g_weaponModalBack.z - g_weaponModelOrigin.z;
+            f32 change = kickedBackPos.z - g_weaponModelOrigin.z;
             z = COM_LinearEase(step, -1.5f, change, max);
         }
     }
