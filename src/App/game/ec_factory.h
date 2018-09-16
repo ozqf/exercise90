@@ -236,7 +236,7 @@ internal u8 Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* ta
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);
     
     u8 result = Game_WriteSpawnTemplate(factoryType, target, options);
-    target->entId = entId;
+    target->entId = entId; 
     return result;
 }
 

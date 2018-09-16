@@ -301,7 +301,7 @@ struct EC_MultiRendObj
 
 // #define EC_COLLIDER_HANDLER_NONE 0
 // #define EC_COLLIDER_HANDLER_AI 1
-// #define EC_COLLIDER_HANDLER_HEALTH 1
+// #define EC_COLLIDER_HANDLER_HEALTH 2
 
 struct EC_ColliderState
 {

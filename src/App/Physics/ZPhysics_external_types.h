@@ -96,6 +96,23 @@ struct ZShapeDef
     	data.box.halfSize[1] = halfSizeY;
     	data.box.halfSize[2] = halfSizeZ;
 	}
+
+	void SetScale(f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ)
+	{
+		switch (this->shapeType)
+		{
+			case ZCOLLIDER_TYPE_CUBOID:
+			{
+				this->data.box.halfSize[0] = halfSizeX;
+				this->data.box.halfSize[1] = halfSizeY;
+				this->data.box.halfSize[2] = halfSizeZ;
+			} break;
+			default:
+			{
+				ILLEGAL_CODE_PATH;
+			} break;
+		}
+	}
 };
 
 #endif

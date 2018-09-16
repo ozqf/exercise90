@@ -48,6 +48,28 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
         state->colliderState.def.pos[0] = options->pos.x;
         state->colliderState.def.pos[1] = options->pos.y;
         state->colliderState.def.pos[2] = options->pos.z;
+
+        if (state->componentBits & ENT_OPTION_FLAG_SCALE)
+        {
+            if (options->scale.x == 0 || options->scale.y == 0 || options->scale.z == 0)
+            {
+                printf("CANNOT APPLY SCALE TO %d/%d An axis is zero!\n",
+                    state->entId.iteration, state->entId.index
+                );
+            }
+            else
+            {
+                printf("APPLY SCALE %.2f/%.2f/%.2f to ent %d/%d\n",
+                    options->scale.x, options->scale.y, options->scale.z,
+                    state->entId.iteration, state->entId.index
+                );
+                state->colliderState.def.SetScale(
+                    options->scale.x * 0.5f,
+                    options->scale.y * 0.5f,
+                    options->scale.z * 0.5f
+                );
+            }
+        }
     }
 }
 
