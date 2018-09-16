@@ -46,6 +46,11 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
     // a wants to take damage
     // b wants to do damage
     // b wants to take damage
+
+
+    //////////////////////////////////////////////////////////////
+    // AI Hits
+    //////////////////////////////////////////////////////////////
     
     EC_Health* healthA = EC_FindHealth(gs, a);
     EC_Health* healthB = EC_FindHealth(gs, b);

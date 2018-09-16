@@ -212,6 +212,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
 			Phys_WriteCollisionEvent(&ev, pair);
             buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
+            printf("Collision %d vs %d start\n", pair->a.externalId, pair->b.externalId);
         }
         else if (pair->latestFrame != currentFrame)
         {
@@ -222,6 +223,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             pair->isActive = 0;
+            printf("Collision %d vs %d end\n", pair->a.externalId, pair->b.externalId);
         }
     }
     buf->ptrEnd = buf->ptrWrite;

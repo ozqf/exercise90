@@ -25,7 +25,7 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
-        ZCOLLIDER_FLAG_STATIC,
+        ZCOLLIDER_FLAG_STATIC | ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE,
         COLLISION_LAYER_WORLD,
         COL_MASK_DEFAULT,
         0

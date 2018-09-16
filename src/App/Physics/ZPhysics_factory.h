@@ -51,6 +51,11 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
         // Restrict motion to specific axes (in this case, only move on X/Z)
         //handle->rigidBody->setLinearFactor(btVector3(1, 0, 1));
     }
+    if (def->flags & ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE)
+    {
+        // disable collision respones for ghost objects, triggers etc.
+        btFlags |= CF_NO_CONTACT_RESPONSE;
+    }
     if (def->flags & ZCOLLIDER_FLAG_NO_ROTATION)
     {
         handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));

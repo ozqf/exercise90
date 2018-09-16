@@ -18,11 +18,12 @@ enum ZShapeType
 	mesh = 3
 };
 //#define ZCOLLIDER_TYPE_INFINITE_PLANE 99
-
+// TOOD: Kinematic doesn't do anything...?
 #define ZCOLLIDER_FLAG_STATIC (1 << 0)
 #define ZCOLLIDER_FLAG_KINEMATIC (1 << 1)
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
 #define ZCOLLIDER_FLAG_GROUNDCHECK (1 << 3)
+#define ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE (1 << 4)
 
 #if 1
 
