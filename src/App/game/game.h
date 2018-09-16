@@ -200,9 +200,9 @@ internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* opti
 #include "EntityComponents/ec_aiController.h"
 #include "game_players.h"
 
-#include "game_physics.h"
 #include "game_entityFactory.cpp"
 #include "game_ent_components.cpp"
+#include "game_physics.h"
 #include "game_state.h"
 #include "game_input.cpp"
 #include "game_server.h"

@@ -20,32 +20,9 @@ internal void Game_SpawnHitRing(Vec3 pos, EntId source, EntId victim)
 
 internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u32 id_B)
 {
-    //EC_Collider* a = EC_ColliderGetByShapeId(&gs->colliderList, id_A);
-    //EC_Collider* b = EC_ColliderGetByShapeId(&gs->colliderList, id_B);
-
     Ent* a = Ent_GetEntityByIdValue(&gs->entList, id_A);
     Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
     Assert((a != NULL && b != NULL));
-
-    // printf("Collision: %d/%d vs %d/%d\n",
-    //     a->entId.iteration, a->entId.index,
-    //     b->entId.iteration, b->entId.index
-    // );
-
-    //EC_Collider* colA = EC_FindCollider(gs, a);
-    //EC_Collider* colB = EC_FindCollider(gs, b);
-    //Assert((colA != NULL && colB != NULL));
-
-    //i32 tagA = colA->state.def.tag;
-    //i32 tagB = colA->state.def.tag;
-    //printf("Tags %d vs %d\n", tagA, tagB);
-
-    // How to figure out what to do with the collision pair?
-    // how to determine the situation:
-    // a wants to do damage
-    // a wants to take damage
-    // b wants to do damage
-    // b wants to take damage
 
     // Sensors
     EC_Sensor* sensorA = EC_FindSensor(gs, a);
@@ -56,6 +33,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
             a->entId.iteration, a->entId.index,
             b->entId.iteration, b->entId.index
         );
+        EC_SensorHandleHit(gs, time, sensorA, a, b);
     }
     if (sensorB)
     {
@@ -63,48 +41,8 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
             b->entId.iteration, b->entId.index,
             a->entId.iteration, a->entId.index
         );
+        EC_SensorHandleHit(gs, time, sensorB, b, a);
     }
-
-    #if 0
-    //////////////////////////////////////////////////////////////
-    // AI Hits
-    //////////////////////////////////////////////////////////////
-    
-    EC_Health* healthA = EC_FindHealth(gs, a);
-    EC_Health* healthB = EC_FindHealth(gs, b);
-    EC_AIController* aiA = EC_FindAIController(gs, a);
-    EC_AIController* aiB = EC_FindAIController(gs, b);
-
-    // A hits B
-    if (aiA != NULL &&
-        healthB != NULL &&
-        (aiA->state.state == AI_STATE_CHARGING) &&
-        Game_AttackIsValid(a->team, b->team)
-        )
-    {
-        printf("A hits B!\n");
-        healthB->state.hp -= 10;
-        healthB->state.damageThisFrame += 10;
-        // Add one to frame as it will be incremented before health reads it
-		healthB->state.lastHitFrame = time->gameFrameNumber + 1;
-		healthB->state.lastHitSource = a->entId;
-    }
-
-    // B hits A
-    if (aiB != NULL &&
-        healthA != NULL &&
-        (aiB->state.state == AI_STATE_CHARGING) &&
-        Game_AttackIsValid(b->team, a->team)
-        )
-    {
-        printf("B hits A!\n");
-        healthA->state.hp -= 10;
-        healthA->state.damageThisFrame += 10;
-        // Add one to frame as it will be incremented before health reads it
-		healthA->state.lastHitFrame = time->gameFrameNumber + 1;
-		healthA->state.lastHitSource = b->entId;
-    }
-    #endif
 }
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
