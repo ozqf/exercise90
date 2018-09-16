@@ -151,8 +151,8 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     #endif
 
     state->componentBits  |= EC_FLAG_ACTORMOTOR;
-    state->actorState.runSpeed = 12;
-    state->actorState.runAcceleration = 100;
+    state->actorState.runSpeed = 16;
+    state->actorState.runAcceleration = 150;
 
     // Machine gun
     state->actorState.attack1Type = ATTACK_INDEX_FAST_PROJECTILE;

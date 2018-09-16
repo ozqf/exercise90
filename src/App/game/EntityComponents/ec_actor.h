@@ -6,13 +6,46 @@
 f32 friction = 7;
 f32 accelerate = 100;
 
-Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleration, f32 maxVelocity, f32  deltaTime)
+internal Vec3 Game_CalcHorizontalMoveA(Vec3 *input, f32 yawDegrees)
+{
+    Vec3 moveForce = {};
+    // Not doing this REDUCES movement speed when holding forward + sideways
+    Vec3_Normalise(input);
+
+    f32 radiansForward = yawDegrees * DEG2RAD;
+    f32 radiansLeft = (yawDegrees + 90) * DEG2RAD;
+
+    Vec4 left = {};
+    Vec4 up = {};
+    Vec4 forward = {};
+    // Calculate forward and left vectors, multiple by input -1, 0 or +1
+    // to cancel out or flip direction if necessary
+
+    forward.x = sinf(radiansForward);
+    forward.y = 0;
+    forward.z = cosf(radiansForward);
+
+    left.x = sinf(radiansLeft);
+    left.y = 0;
+    left.z = cosf(radiansLeft);
+
+    moveForce.x = (forward.x * input->z) + (left.x * input->x);
+    moveForce.z = (forward.z * input->z) + (left.z * input->x);
+    return moveForce;
+}
+// Quake 1 style movement.
+Vec3 MoveGround(Vec3* accelDir,
+    Vec3* prevVelocity,
+    u8 onGround,
+    f32 acceleration,
+    f32 maxVelocity,
+    f32 deltaTime)
 {
     f32 speed = Vec3_Magnitude(prevVelocity);
     // Apply friction
     // TODO: Forcing onGround to true for now as bunny hop acceleration requires tweaking
-    onGround = 1;
-    #if 1
+    //onGround = 1;
+    
     if (onGround && speed != 0) // avoid divide by zero ninny
     {
         float drop = speed * friction * deltaTime;
@@ -21,9 +54,10 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
         prevVelocity->x *= frictionScalar;
         prevVelocity->z *= frictionScalar;
     }
-    #endif
-
-
+    else
+    {
+        acceleration *= 0.2f;
+    }
     // Accelerate
     float projectionVelocity = Vec3_DotProduct(prevVelocity, accelDir);
     float accelVel = acceleration * deltaTime;
@@ -48,12 +82,31 @@ Vec3 MoveGround(Vec3* accelDir, Vec3* prevVelocity, u8 onGround, f32 acceleratio
     return result;
 }
 
+// TODO: Doom style "incorrect" movement (ie strafe-running)
+#if 0
+Vec3 MoveGround(
+    Vec3 *accelDir,
+    Vec3 *prevVelocity,
+    u8 onGround,
+    f32 acceleration,
+    f32 maxVelocity,
+    f32 deltaTime)
+{
+    Vec3 result = {};
+    //f32 currentVelocity = Vec3_Magnitudef(prevVelocity->x, 0, prevVelocity->z);
+    //f32 current2FullRatio = 1 - (currentVelocity * maxVelocity);
+
+    result.x = accelDir->x * maxVelocity;
+    result.z = accelDir->z * maxVelocity;
+    return result;
+}
+#endif
+
 inline void ApplyActorMotorInput(
-    GameState* gs,
-    EC_ActorMotor* motor,
-    EC_Collider* col,
-    f32 deltaTime
-    )
+    GameState *gs,
+    EC_ActorMotor *motor,
+    EC_Collider *col,
+    f32 deltaTime)
 {
     Vec3 move = col->state.velocity;
 
@@ -82,58 +135,43 @@ inline void ApplyActorMotorInput(
         input.x += 1;
     }
 
-    Vec3_Normalise(&input);
+    moveForce = Game_CalcHorizontalMoveA(&input, motor->state.input.degrees.y);
+    Vec3 moveResult = MoveGround(
+    &moveForce,
+    &move,
+    col->isGrounded,
+    motor->state.runAcceleration,
+    motor->state.runSpeed,
+    deltaTime);
 
+    // jumping. weeeeeeeee
     if (motor->state.input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
     {
-        move.y = 7.5f;// * deltaTime;
+        move.y = 7.5f;
         //printf("Apply up force: %.2f\n", move.y);
     }
     
-	f32 radiansForward = motor->state.input.degrees.y * DEG2RAD;
-	f32 radiansLeft = (motor->state.input.degrees.y + 90) * DEG2RAD;
-
-    
-	Vec4 left = {};
-	Vec4 up = {};
-	Vec4 forward = {};
-    #if 1
-    forward.x = sinf(radiansForward);
-	forward.y = 0;
-	forward.z = cosf(radiansForward);
-
-	left.x = sinf(radiansLeft);
-	left.y = 0;
-	left.z = cosf(radiansLeft);
-
-    moveForce.x = (forward.x * input.z) + (left.x * input.x);
-    moveForce.z = (forward.z * input.z) + (left.z * input.x);
-
-    Vec3 moveResult = MoveGround(&moveForce, &move, col->isGrounded, motor->state.runAcceleration, motor->state.runSpeed, deltaTime);
     move.x = moveResult.x;
     move.z = moveResult.z;
     motor->debugCurrentSpeed = Vec3_Magnitude(&move);
-
-    //move = moveForce;
-    #endif
-
     PhysCmd_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
-    Ticker* ticker = &motor->state.ticker;
+
+    Ticker *ticker = &motor->state.ticker;
     // Attack
     if (ticker->tick <= 0)
     {
         if (motor->state.input.buttons & ACTOR_INPUT_ATTACK)
         {
-			ticker->tickMax = motor->state.attack1Reload;
+            ticker->tickMax = motor->state.attack1Reload;
             ticker->tick = ticker->tickMax;
             motor->state.animStyle = motor->state.attack1AnimStyle;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
-            EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
+            EC_Transform *ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
             //Transform* t = &ent->transform;
-            Transform* t = &ecTrans->t;
-            Ent* self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
-            
+            Transform *t = &ecTrans->t;
+            Ent *self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+
             AttackInfo info = {};
             info.type = motor->state.attack1Type;
             info.team = self->team;
@@ -143,18 +181,18 @@ inline void ApplyActorMotorInput(
             info.pitchDegrees = motor->state.input.degrees.x;
             SV_FireAttack(gs, &info);
         }
-		if (motor->state.input.buttons & ACTOR_INPUT_ATTACK2)
+        if (motor->state.input.buttons & ACTOR_INPUT_ATTACK2)
         {
-			ticker->tickMax = motor->state.attack2Reload;
+            ticker->tickMax = motor->state.attack2Reload;
             ticker->tick = ticker->tickMax;
             motor->state.animStyle = motor->state.attack2AnimStyle;
             //Ent* ent = Ent_GetEntityById(&gs->entList, &motor->header.entId);
-            EC_Transform* ecTrans = EC_FindTransform(gs, &motor->header.entId);
+            EC_Transform *ecTrans = EC_FindTransform(gs, &motor->header.entId);
             //Transform* t = &g_worldScene.cameraTransform;
             //Transform* t = &ent->transform;
-            Transform* t = &ecTrans->t;
-            Ent* self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
-            
+            Transform *t = &ecTrans->t;
+            Ent *self = Ent_GetEntityById(&gs->entList, &motor->header.entId);
+
             AttackInfo info = {};
             info.type = motor->state.attack2Type;
             info.team = self->team;
@@ -172,20 +210,23 @@ inline void ApplyActorMotorInput(
 }
 
 // returns num chars written
-i32 Game_DebugWriteActiveActorInput(GameState* gs, char* buf, i32 maxChars)
+i32 Game_DebugWriteActiveActorInput(GameState *gs, char *buf, i32 maxChars)
 {
     i32 wroteSomething = 0;
     i32 written = 0;
-    char* ptrWrite = buf;
+    char *ptrWrite = buf;
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
-        EC_ActorMotor* motor = &gs->actorMotorList.items[i];
-        if (motor->header.inUse == 0) { continue; }
+        EC_ActorMotor *motor = &gs->actorMotorList.items[i];
+        if (motor->header.inUse == 0)
+        {
+            continue;
+        }
         wroteSomething = 1;
         written += sprintf_s(
             ptrWrite,
             (maxChars - written),
-"Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R/U/D: %d/%d/%d/%d/%d/%d\n\
+            "Ent %d/%d. L: %.1f, %.1f, %.1f Mov F/B/L/R/U/D: %d/%d/%d/%d/%d/%d\n\
 ATK: %d TICK: %.2f SPEED: %.2f\n",
             motor->header.entId.iteration,
             motor->header.entId.index,
@@ -200,15 +241,12 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
             (motor->state.input.buttons & ACTOR_INPUT_MOVE_DOWN),
             (motor->state.input.buttons & ACTOR_INPUT_ATTACK),
             motor->state.ticker.tick,
-            motor->debugCurrentSpeed
-        );
+            motor->debugCurrentSpeed);
         ptrWrite = buf + written;
         //EC_Collider* col = EC_FindCollider(&motor->entId, gs);
         //Assert(col != NULL);
         //Ent* ent = Ent_GetEntityById(&gs->entList, &col->entId);
         //Assert(ent != NULL);
-        
-
     }
 
     if (!wroteSomething)
@@ -222,13 +260,16 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameState* gs, GameTime* time)
+void Game_UpdateActorMotors(GameState *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {
-        EC_ActorMotor* motor = &gs->actorMotorList.items[i];
-        if (motor->header.inUse == 0) { continue; }
-        EC_Collider* col = EC_FindCollider(gs, &motor->header.entId);
+        EC_ActorMotor *motor = &gs->actorMotorList.items[i];
+        if (motor->header.inUse == 0)
+        {
+            continue;
+        }
+        EC_Collider *col = EC_FindCollider(gs, &motor->header.entId);
         Assert(col != NULL);
         ApplyActorMotorInput(gs, motor, col, time->deltaTime);
     }

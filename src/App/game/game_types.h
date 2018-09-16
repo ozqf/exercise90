@@ -496,6 +496,7 @@ struct EC_Volume
 	EC_VolumeState state;
 };
 
+
 /**
  * A master container for complete entity component state (spawning)
  * or pieces of component state (updating)
