@@ -89,6 +89,7 @@ struct Actor;
 #define ACTOR_INPUT_MOVE_DOWN (1 << 5)
 #define ACTOR_INPUT_ATTACK (1 << 6)
 #define ACTOR_INPUT_ATTACK2 (1 << 7)
+#define ACTOR_INPUT_MOVE_SPECIAL1 (1 << 8)
 struct ActorInput
 {
     u32 buttons;
@@ -205,6 +206,7 @@ struct EC_Header
     u8 inUse;
 };
 
+// TODO: Rename to EC_BIT_FOO or something
 #define EC_FLAG_ENTITY (1 << 0)
 #define EC_FLAG_TRANSFORM (1 << 1)
 #define EC_FLAG_RENDERER (1 << 2)
@@ -220,6 +222,9 @@ struct EC_Header
 
 // All entity component state should have a flags member
 // the first bit is always 0 for active, 1 for inactive
+// IMPORTANT AND DODGY:
+// these bits are therefore RESERVED and must not be
+// override with the component's own settings
 #define EC_STATE_FLAG_INACTIVE (1 << 0)
 #define EC_STATE_FLAG_IS_PLAYER (1 << 1)
 
@@ -318,6 +323,8 @@ struct EC_Collider
     EC_ColliderState state;
 };
 
+#define EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED (1 << 31)
+
 struct EC_ActorMotorState
 {
 	u32 flags;
@@ -325,6 +332,9 @@ struct EC_ActorMotorState
     Vec3 move;
     f32 runAcceleration;
     f32 runSpeed;
+    i32 canUseMove;
+
+    f32 specialRechargeTime;
 	
     i32 attack1Type;
 	f32 attack1Reload;

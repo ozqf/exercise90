@@ -112,30 +112,33 @@ inline void ApplyActorMotorInput(
 
     Vec3 input = {};
     Vec3 moveForce = {};
+    Vec3 degrees = motor->state.input.degrees;
+
+    u32 buttons = motor->state.input.buttons;
 
     u8 applyingInput = 0;
-    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_FORWARD)
+    if (buttons & ACTOR_INPUT_MOVE_FORWARD)
     {
         applyingInput = 1;
         input.z -= 1;
     }
-    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
+    if (buttons & ACTOR_INPUT_MOVE_BACKWARD)
     {
         applyingInput = 1;
         input.z += 1;
     }
-    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_LEFT)
+    if (buttons & ACTOR_INPUT_MOVE_LEFT)
     {
         applyingInput = 1;
         input.x -= 1;
     }
-    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+    if (buttons & ACTOR_INPUT_MOVE_RIGHT)
     {
         applyingInput = 1;
         input.x += 1;
     }
 
-    moveForce = Game_CalcHorizontalMoveA(&input, motor->state.input.degrees.y);
+    moveForce = Game_CalcHorizontalMoveA(&input, degrees.y);
     Vec3 moveResult = MoveGround(
     &moveForce,
     &move,
@@ -145,15 +148,39 @@ inline void ApplyActorMotorInput(
     deltaTime);
 
     // jumping. weeeeeeeee
-    if (motor->state.input.buttons & ACTOR_INPUT_MOVE_UP && col->isGrounded)
+    if (col->isGrounded)
     {
-        move.y = 7.5f;
-        //printf("Apply up force: %.2f\n", move.y);
+        motor->state.flags &= ~EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED;
+
+        if (buttons & ACTOR_INPUT_MOVE_UP)
+        {
+            move.y = 7.5f;
+            //printf("Apply up force: %.2f\n", move.y);
+        }
     }
     
+
     move.x = moveResult.x;
     move.z = moveResult.z;
     motor->debugCurrentSpeed = Vec3_Magnitude(&move);
+
+    if (
+        (buttons & ACTOR_INPUT_MOVE_SPECIAL1)
+        && !col->isGrounded
+        && (motor->state.flags & EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED) == FALSE
+        )
+    {
+        motor->state.flags |= EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED;
+        Vec3 forward = Vec3_ForwardFromAngles(degrees.y, degrees.x, 16);
+        //move.x += forward.x;
+        //move.y += forward.y;
+        //move.z += forward.z;
+
+        move.x = forward.x;
+        move.y = forward.y;
+        move.z = forward.z;
+    }
+
     PhysCmd_ChangeVelocity(col->shapeId, move.x, move.y, move.z);
 
     Ticker *ticker = &motor->state.ticker;

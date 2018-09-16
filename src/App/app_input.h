@@ -33,6 +33,7 @@ void App_InitInput(InputActionSet* actions)
     Input_InitAction(actions, Z_INPUT_CODE_S, "Move Backward");
     Input_InitAction(actions, Z_INPUT_CODE_SPACE, "Move Up");
     Input_InitAction(actions, Z_INPUT_CODE_CONTROL, "Move Down");
+    Input_InitAction(actions, Z_INPUT_CODE_SHIFT, "MoveSpecial1");
     Input_InitAction(actions, Z_INPUT_CODE_Q, "Roll Left");
     Input_InitAction(actions, Z_INPUT_CODE_E, "Roll Right");
 
