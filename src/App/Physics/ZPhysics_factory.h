@@ -24,7 +24,8 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
     }
     
     handle->def = *def;
-
+    def = &handle->def;
+    
     btScalar mass;
     if (def->flags & ZCOLLIDER_FLAG_STATIC)
     {
@@ -55,6 +56,10 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
     {
         // disable collision respones for ghost objects, triggers etc.
         btFlags |= CF_NO_CONTACT_RESPONSE;
+    }
+    if (def->flags & ZCOLLIDER_FLAG_NO_ROTATION)
+    {
+        handle->rigidBody->setAngularFactor(btVector3(0, 0, 0));
     }
     if (def->flags & ZCOLLIDER_FLAG_NO_ROTATION)
     {

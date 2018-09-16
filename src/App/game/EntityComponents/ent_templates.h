@@ -157,7 +157,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         playerWidth / 2, playerHeight / 2, playerWidth / 2, 
-        ZCOLLIDER_FLAG_NO_ROTATION,
+        ZCOLLIDER_FLAG_NO_ROTATION | ZCOLLIDER_FLAG_INTERESTING,
         COLLISION_LAYER_ACTOR,
         COL_MASK_ACTOR,
         0

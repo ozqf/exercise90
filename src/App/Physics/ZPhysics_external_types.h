@@ -24,6 +24,8 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
 #define ZCOLLIDER_FLAG_GROUNDCHECK (1 << 3)
 #define ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE (1 << 4)
+#define ZCOLLIDER_FLAG_INTERESTING (1 << 5)
+#define ZCOLLIDER_FLAG_VERY_INTERESTING (1 << 6)
 
 #if 1
 
@@ -190,7 +192,8 @@ enum PhysEventType
 	RaycastResult = 2,
 	RaycastDebug = 3,
 	OverlapStarted = 4,
-	OverlapEnded = 5
+	OverlapEnded = 5,
+	OverlapInProgress = 6
 };
 #define PHYS_UPDATE_NULL 0
 #define PHYS_EVENT_TRANSFORM 1

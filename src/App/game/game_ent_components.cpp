@@ -329,9 +329,15 @@ internal void EC_SensorHandleHit(
     GameTime* time,
     EC_Sensor* sensor,
     Ent* self,
-    Ent* target)
+    Ent* target,
+    i32 collisionState)
 {
-
+    if (collisionState == 3) { return; }
+    if (collisionState == 2)
+    {
+        printf("OVERLAP\n");
+        return;
+    }
     if (sensor->state.damageSourceComponent & EC_FLAG_AICONTROLLER)
     {
         if (!Game_AttackIsValid(self->team, target->team)) { return; }

@@ -57,6 +57,7 @@ struct PhysOverlapPair
     i32 isActive;
     u32 startFrame;
     u32 latestFrame;
+    i32 reportLevel;
 	
     PhysOverlapItem a;
     PhysOverlapItem b;

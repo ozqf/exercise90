@@ -18,7 +18,12 @@ internal void Game_SpawnHitRing(Vec3 pos, EntId source, EntId victim)
 }
 #endif
 
-internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u32 id_B)
+internal void Game_EntVsEntCollision(
+    GameState* gs,
+    GameTime* time,
+    u32 id_A,
+    u32 id_B,
+    i32 collisionState)
 {
     Ent* a = Ent_GetEntityByIdValue(&gs->entList, id_A);
     Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
@@ -33,7 +38,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
             a->entId.iteration, a->entId.index,
             b->entId.iteration, b->entId.index
         );
-        EC_SensorHandleHit(gs, time, sensorA, a, b);
+        EC_SensorHandleHit(gs, time, sensorA, a, b, collisionState);
     }
     if (sensorB)
     {
@@ -41,7 +46,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
             b->entId.iteration, b->entId.index,
             a->entId.iteration, a->entId.index
         );
-        EC_SensorHandleHit(gs, time, sensorB, b, a);
+        EC_SensorHandleHit(gs, time, sensorB, b, a, collisionState);
     }
 }
 
@@ -168,7 +173,15 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
                 COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
                 if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
                 //printf("Overlap started: %d vs %d\n", ev.a.externalId, ev.b.externalId);
-                Game_EntVsEntCollision(gs, time, ev.a.externalId, ev.b.externalId);
+                Game_EntVsEntCollision(gs, time, ev.a.externalId, ev.b.externalId, 1);
+            } break;
+
+            case OverlapInProgress:
+            {
+                PhysEv_Collision ev = {};
+                COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
+                if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
+                Game_EntVsEntCollision(gs, time, ev.a.externalId, ev.b.externalId, 2);
             } break;
 
             case OverlapEnded:
@@ -176,7 +189,7 @@ void Game_StepPhysics(GameState* gs, GameTime* time)
                 PhysEv_Collision ev = {};
                 COM_COPY_STRUCT(copyPos, &ev, PhysEv_Collision);
                 if (ev.a.shapeTag == 1 || ev.b.shapeTag == 1) { continue; }
-                //printf("Overlap ended: %d vs %d\n", ev.a.externalId, ev.b.externalId);
+                Game_EntVsEntCollision(gs, time, ev.a.externalId, ev.b.externalId, 3);
             } break;
 
             case NULL:

@@ -20,12 +20,16 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_VOLUME;
     EC_VolumeState* s = &state->volumeState;
 
+    u32 flags = ZCOLLIDER_FLAG_STATIC |
+        ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE |
+        ZCOLLIDER_FLAG_VERY_INTERESTING;
         
     state->componentBits |= EC_FLAG_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
-        ZCOLLIDER_FLAG_STATIC | ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE,
+        flags,
+
         COLLISION_LAYER_WORLD,
         COL_MASK_DEFAULT,
         0

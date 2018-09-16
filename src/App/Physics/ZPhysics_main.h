@@ -98,7 +98,7 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
 		{
 			Phys_Error("Add overlap pair failed: Null handle\n");
 		}
-
+        
         *p = {};
         p->isActive = 1;
         p->startFrame = frame;
@@ -111,6 +111,21 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
         p->b.internalId = b;
         p->b.externalId = handleB->externalId;
         p->b.shapeTag = handleB->def.tag;
+
+        // never report
+        if ((handleA->def.flags & ZCOLLIDER_FLAG_INTERESTING) &&
+            (handleB->def.flags & ZCOLLIDER_FLAG_INTERESTING))
+        {
+            p->reportLevel = 1;
+        }
+
+        // report every frame
+        if ((handleA->def.flags & ZCOLLIDER_FLAG_VERY_INTERESTING) ||
+            (handleB->def.flags & ZCOLLIDER_FLAG_VERY_INTERESTING))
+        {
+            p->reportLevel = 2;
+        }
+
         return i;
     }
     return -1;
@@ -187,10 +202,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             else
             {
                 pairIndex = Phys_AddOverlapPair(w, indexA, indexB, currentFrame);
-                if (pairIndex < 0)
-                {
-                    ILLEGAL_CODE_PATH
-                }
+                Assert(pairIndex != -1);
             }
         }
     }
@@ -204,6 +216,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     {
         PhysOverlapPair* pair = &w->overlapPairs[i];
         if (!pair->isActive) { continue; }
+        if (pair->reportLevel == 0) { continue; } 
         if (pair->startFrame == currentFrame)
         {
             // collision began
@@ -224,6 +237,17 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             pair->isActive = 0;
             //printf("Collision %d vs %d end\n", pair->a.externalId, pair->b.externalId);
+        }
+        else
+        {
+            if (pair->reportLevel == 2)
+            {
+                h.size = sizeof(PhysEv_Collision);
+                h.type = OverlapInProgress;
+			    Phys_WriteCollisionEvent(&ev, pair);
+                buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+                buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
+            }
         }
     }
     buf->ptrEnd = buf->ptrWrite;
