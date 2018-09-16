@@ -42,7 +42,7 @@ internal void Game_AddTestSolid(GameState* gs,
     t.pos.y = y;
 	t.pos.z = z;
 	t.scale.x = halfSizeX * 2;
-	t.scale.y = halfSizeY * 2;
+	t.scale.y = halfSizeY * 2;  
 	t.scale.z = halfSizeZ * 2;
 
     size += App_WriteCommandBytesToFrameOutput((u8*)&t, sizeof(Transform));
@@ -92,6 +92,7 @@ internal void Game_AddTestSolid(GameState* gs,
 
 internal void Game_BuildTestScene_0(GameState* gs)
 {
+    printf("--- GAME LOAD SCENE 0 ---\n");
 	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
 	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 0);
 
@@ -100,6 +101,14 @@ internal void Game_BuildTestScene_0(GameState* gs)
 
     Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
+
+    
+    EntitySpawnOptions options;
+    options.flags |= ENT_OPTION_FLAG_SCALE;
+    options.scale.x = 1;
+    options.scale.y = 10;
+    options.scale.z = 1;
+    Game_WriteSpawnCmd(gs, ENTITY_TYPE_VOLUME, &options);
 }
 
 internal void Game_BuildTestScene_1(GameState* gs)

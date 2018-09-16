@@ -18,6 +18,7 @@
 #define ENTITY_TYPE_ENEMY_FODDER 10
 #define ENTITY_TYPE_ENEMY_SWARM 11
 #define ENTITY_TYPE_ENEMY_SPINNER 12
+#define ENTITY_TYPE_VOLUME 13
 
 ////////////////////////////////////////////////////////////
 // LOCAL ENTITY IDS
@@ -564,6 +565,7 @@ DEFINE_ENT_COMPONENT_LIST(Label)
 DEFINE_ENT_COMPONENT_LIST(Health)
 DEFINE_ENT_COMPONENT_LIST(Thinker)
 DEFINE_ENT_COMPONENT_LIST(MultiRendObj)
+DEFINE_ENT_COMPONENT_LIST(Volume)
 
 //////////////////////////////////////////////////
 // Clients and players
@@ -660,6 +662,7 @@ struct GameState
     EC_HealthList healthList;
     EC_ThinkerList thinkerList;
     EC_MultiRendObjList multiRendObjList;
+    EC_VolumeList volumeList;
     
     // view
     Transform cameraTransform;
@@ -687,3 +690,4 @@ DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)
 DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
 DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_FLAG_THINKER)
 DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_FLAG_MULTI_RENDOBJ)
+DEFINE_ENT_COMPONENT_BASE(Volume, volume, EC_FLAG_VOLUME)

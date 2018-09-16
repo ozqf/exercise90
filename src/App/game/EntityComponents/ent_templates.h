@@ -262,6 +262,7 @@ u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptio
        ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
        ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
        ENT_SET_TEMPLATE(ENTITY_TYPE_SPAWNER, Ent_SetTemplate_Spawner, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE_VOLUME, Ent_SetTemplate_Volume, state, options);
        //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
        default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
     }

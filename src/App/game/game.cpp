@@ -365,6 +365,7 @@ internal void Game_Tick(
     Game_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
+    Game_UpdateVolumes(gs, time);
     Game_UpdateThinkers(gs, time);
     Game_UpdateHealth(gs, time);
     Game_UpdateRenderObjects(gs, time);

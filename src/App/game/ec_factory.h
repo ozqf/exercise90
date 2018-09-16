@@ -28,6 +28,7 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
     if (state->componentBits & EC_FLAG_THINKER) { EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
     if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) { EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
+    if (state->componentBits & EC_FLAG_VOLUME) { EC_VolumeApplyState(gs, ent, &state->volumeState); }
 
 }
 
@@ -67,6 +68,7 @@ internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
     if (h.componentBits & EC_FLAG_LABEL) 			{ stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
     if (h.componentBits & EC_FLAG_THINKER) 			{ stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
     if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)	{ stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
+    if (h.componentBits & EC_FLAG_VOLUME)	        { stream += COM_COPY_STRUCT(stream, &state.volumeState, EC_VolumeState); }
 
     u32 read = (stream - origin);
     if (read != numBytes)
@@ -123,6 +125,8 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
     { stream += COM_COPY_STRUCT(&state->thinkerState, stream, EC_ThinkerState); }
     if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)
     { stream += COM_COPY_STRUCT(&state->multiRendState, stream, EC_MultiRendObjState); }
+    if (h.componentBits & EC_FLAG_VOLUME)
+    { stream += COM_COPY_STRUCT(&state->volumeState, stream, EC_VolumeState); }
 
     u16 bytesWritten = (u16)(stream - origin);
 
@@ -220,7 +224,10 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
 	if (ent->componentBits & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
     if (ent->componentBits & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
     if (ent->componentBits & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_MULTI_RENDOBJ)
+    { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
+    if (ent->componentBits & EC_FLAG_VOLUME)
+    { state->volumeState = (EC_FindVolume(gs, ent))->state; }
 }
 
 internal u8 Game_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)

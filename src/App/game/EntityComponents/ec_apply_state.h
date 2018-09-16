@@ -166,3 +166,13 @@ internal void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     ent->factoryType = entState->factoryType;
     ent->componentBits = entState->componentBits;
 }
+
+internal void EC_VolumeApplyState(GameState* gs, Ent* ent, EC_VolumeState* state)
+{
+    EC_Volume* vol = EC_FindVolume(gs, ent);
+    if (vol == NULL)
+    {
+        vol = EC_AddVolume(gs, ent);
+    }
+    vol->state = *state;
+}
