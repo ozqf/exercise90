@@ -157,7 +157,6 @@ struct EntityLink
     i32 importance;
     u8 priority;
     u8 relevant;
-	// 16B + 4 + 1 + 1 = 22B
 };
 
 #define ATTACK_INDEX_NULL 0
@@ -220,6 +219,7 @@ struct EC_Header
 #define EC_FLAG_THINKER (1 << 9)
 #define EC_FLAG_MULTI_RENDOBJ (1 << 10)
 #define EC_FLAG_VOLUME (1 << 11)
+#define EC_FLAG_SENSOR (1 << 12)
 
 // All entity component state should have a flags member
 // the first bit is always 0 for active, 1 for inactive
@@ -507,6 +507,20 @@ struct EC_Volume
 	EC_VolumeState state;
 };
 
+#define EC_SENSOR_FLAG_DOES_DAMAGE (1 << 31)
+
+struct EC_SensorState
+{
+    u32 flags;
+    u32 damageSourceComponent;
+};
+
+struct EC_Sensor
+{
+    EC_Header header;
+    EC_SensorState state;
+};
+
 
 /**
  * A master container for complete entity component state (spawning)
@@ -532,6 +546,7 @@ struct EntityState
     EC_ThinkerState thinkerState;
     EC_MultiRendObjState multiRendState;
 	EC_VolumeState volumeState;
+    EC_SensorState sensorState;
 };
 
 #define ENT_OPTION_FLAG_SCALE (1 << 1)
@@ -566,6 +581,7 @@ DEFINE_ENT_COMPONENT_LIST(Health)
 DEFINE_ENT_COMPONENT_LIST(Thinker)
 DEFINE_ENT_COMPONENT_LIST(MultiRendObj)
 DEFINE_ENT_COMPONENT_LIST(Volume)
+DEFINE_ENT_COMPONENT_LIST(Sensor)
 
 //////////////////////////////////////////////////
 // Clients and players
@@ -663,6 +679,7 @@ struct GameState
     EC_ThinkerList thinkerList;
     EC_MultiRendObjList multiRendObjList;
     EC_VolumeList volumeList;
+    EC_SensorList sensorList;
     
     // view
     Transform cameraTransform;
@@ -691,3 +708,4 @@ DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
 DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_FLAG_THINKER)
 DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_FLAG_MULTI_RENDOBJ)
 DEFINE_ENT_COMPONENT_BASE(Volume, volume, EC_FLAG_VOLUME)
+DEFINE_ENT_COMPONENT_BASE(Sensor, sensor, EC_FLAG_SENSOR)

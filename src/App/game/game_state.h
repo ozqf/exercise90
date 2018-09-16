@@ -73,6 +73,10 @@ internal void GS_Init(GameState *gs)
     gs->volumeList.count = GAME_MAX_ENTITIES;
     gs->volumeList.max = GAME_MAX_ENTITIES;
 
+    gs->sensorList.items = g_sensors;
+    gs->sensorList.count = GAME_MAX_ENTITIES;
+    gs->sensorList.max = GAME_MAX_ENTITIES;
+
     // Make sure ALL component arrays are completely cleared here.
     // TODO: Allocate these buffers on the Heap and realloc when restarted
     COM_ZeroMemory((u8*)gs->transformList.items, sizeof(EC_Transform) * gs->transformList.max);
@@ -86,6 +90,7 @@ internal void GS_Init(GameState *gs)
     COM_ZeroMemory((u8*)gs->thinkerList.items, sizeof(EC_Thinker) * gs->thinkerList.max);
     COM_ZeroMemory((u8*)gs->multiRendObjList.items, sizeof(EC_MultiRendObj) * gs->multiRendObjList.max);
     COM_ZeroMemory((u8*)gs->volumeList.items, sizeof(EC_Volume) * gs->volumeList.max);
+    COM_ZeroMemory((u8*)gs->sensorList.items, sizeof(EC_Sensor) * gs->sensorList.max);
     
     Game_InitEntityFactory();
 }

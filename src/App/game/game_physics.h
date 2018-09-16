@@ -47,7 +47,25 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
     // b wants to do damage
     // b wants to take damage
 
+    // Sensors
+    EC_Sensor* sensorA = EC_FindSensor(gs, a);
+    EC_Sensor* sensorB = EC_FindSensor(gs, b);
+    if (sensorA)
+    {
+        printf("SENSOR HIT: %d/%d vs %d/%d\n", 
+            a->entId.iteration, a->entId.index,
+            b->entId.iteration, b->entId.index
+        );
+    }
+    if (sensorB)
+    {
+        printf("SENSOR HIT: %d/%d vs %d/%d\n", 
+            b->entId.iteration, b->entId.index,
+            a->entId.iteration, a->entId.index
+        );
+    }
 
+    #if 0
     //////////////////////////////////////////////////////////////
     // AI Hits
     //////////////////////////////////////////////////////////////
@@ -86,6 +104,7 @@ internal void Game_EntVsEntCollision(GameState* gs, GameTime* time, u32 id_A, u3
 		healthA->state.lastHitFrame = time->gameFrameNumber + 1;
 		healthA->state.lastHitSource = b->entId;
     }
+    #endif
 }
 
 inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)

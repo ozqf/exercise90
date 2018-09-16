@@ -176,3 +176,13 @@ internal void EC_VolumeApplyState(GameState* gs, Ent* ent, EC_VolumeState* state
     }
     vol->state = *state;
 }
+
+internal void EC_SensorApplyState(GameState* gs, Ent* ent, EC_SensorState* state)
+{
+    EC_Sensor* sensor = EC_FindSensor(gs, ent);
+    if (sensor == NULL)
+    {
+        sensor = EC_AddSensor(gs, ent);
+    }
+    sensor->state = *state;
+}

@@ -361,14 +361,17 @@ internal void Game_Tick(
     
     // Game state update
     // Update all inputs, entity components and colliders/physics
+    // TODO: Bits of this are order sensitivity. eg projectiles etc hitting health.
+    // health must be updated last, so that other events can all affect them!
     Game_UpdateActorMotors(gs, time);
     Game_UpdateAIControllers(gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
     Game_UpdateVolumes(gs, time);
     Game_UpdateThinkers(gs, time);
-    Game_UpdateHealth(gs, time);
     Game_UpdateRenderObjects(gs, time);
+    Game_UpdateSensors(gs, time);
+    Game_UpdateHealth(gs, time);
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 

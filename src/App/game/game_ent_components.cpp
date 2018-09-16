@@ -323,3 +323,8 @@ internal void Game_UpdateHealth(GameState *gs, GameTime *time)
         health->state.damageThisFrame = 0;
     }
 }
+
+internal void Game_UpdateSensors(GameState* gs, GameTime* time)
+{
+
+}

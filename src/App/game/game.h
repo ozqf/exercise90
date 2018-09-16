@@ -134,8 +134,9 @@ global_variable BlockRef g_collisionEventBuffer;
 /////////////////////////////////////////////////////////////
 // Entity + Entity Components Memory
 /////////////////////////////////////////////////////////////
-// TODO: This stuff should be allocated on the heap so it can be scaled
-// Bah, to heck with it. Statics for everyone
+// TODO: This stuff should be allocated on the heap so it can be scaled,
+// and not globally accessible
+// Bah, to heck with it. Statics for everyone!!!
 
 global_variable Client g_clients[GAME_MAX_CLIENTS];
 
@@ -145,11 +146,8 @@ global_variable EntityLink g_clientEntityLinks[GAME_MAX_ENTITIES * GAME_MAX_CLIE
 // link struct is 22 Bytes.
 // total array: 16384 * 22 == 360,448 (352 KB, 0.34375 MB)
 
-// Game
-global_variable Ent g_gameEntities[GAME_MAX_ENTITIES];
-//global_variable Player              g_players[GAME_MAX_PLAYERS];
-
 // Entity Components
+global_variable Ent                 g_gameEntities[GAME_MAX_ENTITIES];
 global_variable EC_Transform        g_transforms[GAME_MAX_ENTITIES];
 global_variable EC_SingleRendObj    g_renderers[GAME_MAX_ENTITIES];
 global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
@@ -161,6 +159,7 @@ global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
 global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
 global_variable EC_MultiRendObj     g_multiRenderers[GAME_MAX_ENTITIES];
 global_variable EC_Volume           g_volumes[GAME_MAX_ENTITIES];
+global_variable EC_Sensor           g_sensors[GAME_MAX_ENTITIES];
 
 // UI
 //global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
