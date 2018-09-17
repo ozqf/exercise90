@@ -104,10 +104,12 @@ internal void Game_BuildTestScene_0(GameState* gs)
 
     
     EntitySpawnOptions options;
-    options.flags |= ENT_OPTION_FLAG_SCALE;
-    options.scale.x = 1;
-    options.scale.y = 10;
-    options.scale.z = 1;
+    options.flags = ENT_OPTION_FLAG_SCALE | ENT_OPTION_FLAG_TEAM;
+    options.team = TEAM_ENEMIES;
+    options.scale.x = 10;
+    options.scale.y = 1;
+    options.scale.z = 10;
+    options.pos.y = -5;
     Game_WriteSpawnCmd(gs, ENTITY_TYPE_VOLUME, &options);
 }
 

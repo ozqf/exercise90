@@ -11,8 +11,14 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
     state->componentBits |= EC_FLAG_TRANSFORM;
 
     state->componentBits |= EC_FLAG_RENDERER;
-    COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-    COM_CopyStringLimited("textures\\white.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited(
+        "Cube",
+        state->renderState.meshName,
+        EC_RENDERER_STRING_LENGTH);
+    COM_CopyStringLimited(
+        "textures\\white.bmp",
+        state->renderState.textureName,
+        EC_RENDERER_STRING_LENGTH);
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 1;
     state->renderState.colourRGB[2] = 0;
@@ -47,12 +53,14 @@ internal void EC_VolumeHandleOverlap(
 	Ent* self,
 	Ent* target)
 {
+    if (!Game_AttackIsValid(self->team, target->team)) { return; }
+    
 	EC_Health* hp = EC_FindHealth(gs, target);
 	if (hp)
 	{
 		hp->state.hp -= 1;
         hp->state.damageThisFrame += 1;
-        hp->state.lastHitFrame = time->gameFrameNumber;
+        hp->state.lastHitFrame = time->gameFrameNumber + 1;
         hp->state.lastHitSource = self->entId;
 	}
 }
