@@ -50,7 +50,7 @@ void Game_UpdateThinkers(GameState* gs, GameTime* time)
                 
                 );
                 thinker->state.count++;
-                Game_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
+                Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
             } break;
         }
     }

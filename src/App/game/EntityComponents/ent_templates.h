@@ -145,6 +145,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
     state->componentBits |= EC_FLAG_ENTITY;
     state->entMetaData.factoryType = ENTITY_TYPE_ACTOR_GROUND;
+    state->entMetaData.team = TEAM_PLAYERS;
     
     // apply defaults
     state->componentBits |= EC_FLAG_TRANSFORM;

@@ -57,7 +57,7 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
             options.pos.x = 0;
             options.pos.y = 0;
             options.pos.z = 7;
-            EntId entId = Game_WriteSpawnCmd(gs, ENTITY_TYPE_ACTOR_GROUND, &options);
+            EntId entId = Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ACTOR_GROUND, &options);
             
             printf("SV Spawning local client avatar %d/%d\n", entId.iteration, entId.index);
 

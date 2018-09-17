@@ -53,8 +53,9 @@ internal void EC_VolumeHandleOverlap(
 	Ent* self,
 	Ent* target)
 {
+    printf("Volume teams %d vs %d\n", self->team, target->team);
     if (!Game_AttackIsValid(self->team, target->team)) { return; }
-    
+
 	EC_Health* hp = EC_FindHealth(gs, target);
 	if (hp)
 	{
