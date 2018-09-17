@@ -332,32 +332,48 @@ internal void EC_SensorHandleHit(
     Ent* target,
     i32 collisionState)
 {
-    if (collisionState == 3) { return; }
-    if (collisionState == 2)
-    {
-        printf("OVERLAP\n");
-        return;
-    }
-    if (sensor->state.damageSourceComponent & EC_FLAG_AICONTROLLER)
-    {
-        if (!Game_AttackIsValid(self->team, target->team)) { return; }
-        EC_AIController* ai = EC_FindAIController(gs, &sensor->header.entId);
-        Assert(ai);
-        if (ai->state.state != AI_STATE_CHARGING) { return; }
-        EC_Health* health = EC_FindHealth(gs, target);
-        if (!health) { return; }
-        health->state.hp -= 10;
-        health->state.damageThisFrame += 10;
-        // Add one to the recorded frame as it will be incremented before health reads it
-		health->state.lastHitFrame = time->gameFrameNumber + 1;
-		health->state.lastHitSource = self->entId;
-    }
-    if (sensor->state.damageSourceComponent & EC_FLAG_VOLUME)
-    {
-        EC_Volume* vol = EC_FindVolume(gs, &sensor->header.entId);
-        Assert(vol);
-        
-    }
+	switch (collisionState)
+	{
+		case 1:
+		{
+			// touch start
+			if (sensor->state.listenerComponents & EC_FLAG_AICONTROLLER)
+			{
+				if (!Game_AttackIsValid(self->team, target->team)) { return; }
+				EC_AIController* ai = EC_FindAIController(gs, &sensor->header.entId);
+				Assert(ai);
+				if (ai->state.state != AI_STATE_CHARGING) { return; }
+				EC_Health* health = EC_FindHealth(gs, target);
+				if (!health) { return; }
+				health->state.hp -= 10;
+				health->state.damageThisFrame += 10;
+				// Add one to the recorded frame as it will be incremented before health reads it
+				health->state.lastHitFrame = time->gameFrameNumber + 1;
+				health->state.lastHitSource = self->entId;
+			}
+		} break;
+		
+		case 2:
+		{
+			// overlap
+			if (sensor->state.listenerComponents & EC_FLAG_VOLUME)
+			{
+				EC_Volume* vol = EC_FindVolume(gs, &sensor->header.entId);
+				Assert(vol);
+				EC_VolumeHandleOverlap(gs, time, vol, self, target);
+			}
+		} break;
+		
+		case 3:
+		{
+			// touch end
+		} break;
+		
+		default:
+		{
+			App_FatalError("Unknown collision state", "App fatal");
+		}
+	}
 }
 
 internal void Game_UpdateSensors(GameState* gs, GameTime* time)

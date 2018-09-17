@@ -27,25 +27,37 @@ internal void Game_EntVsEntCollision(
 {
     Ent* a = Ent_GetEntityByIdValue(&gs->entList, id_A);
     Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
-    Assert((a != NULL && b != NULL));
-
+	// entities could have been removed before an end collision
+	// event is called
+	if (collisionState == 3)
+	{
+		if (a == NULL || b == NULL)
+		{
+			return;
+		}
+	}
+	else
+	{
+		Assert((a != NULL && b != NULL));
+	}
+	
     // Sensors
     EC_Sensor* sensorA = EC_FindSensor(gs, a);
     EC_Sensor* sensorB = EC_FindSensor(gs, b);
     if (sensorA)
     {
-        printf("SENSOR HIT: %d/%d vs %d/%d\n", 
-            a->entId.iteration, a->entId.index,
-            b->entId.iteration, b->entId.index
-        );
+        // printf("SENSOR HIT: %d/%d vs %d/%d\n", 
+            // a->entId.iteration, a->entId.index,
+            // b->entId.iteration, b->entId.index
+        // );
         EC_SensorHandleHit(gs, time, sensorA, a, b, collisionState);
     }
     if (sensorB)
     {
-        printf("SENSOR HIT: %d/%d vs %d/%d\n", 
-            b->entId.iteration, b->entId.index,
-            a->entId.iteration, a->entId.index
-        );
+        // printf("SENSOR HIT: %d/%d vs %d/%d\n", 
+            // b->entId.iteration, b->entId.index,
+            // a->entId.iteration, a->entId.index
+        // );
         EC_SensorHandleHit(gs, time, sensorB, b, a, collisionState);
     }
 }

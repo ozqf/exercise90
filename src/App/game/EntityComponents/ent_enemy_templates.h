@@ -146,7 +146,7 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     state->renderState.colourRGB[2] = 1;
 
     state->componentBits |= EC_FLAG_SENSOR;
-    state->sensorState.damageSourceComponent |= EC_FLAG_AICONTROLLER;
+    state->sensorState.listenerComponents |= EC_FLAG_AICONTROLLER;
 
     Ent_ApplySpawnOptions(state, options);
 }

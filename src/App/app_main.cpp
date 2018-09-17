@@ -72,6 +72,11 @@ void App_SaveDataVariables(char* fileName)
     platform.Platform_CloseFileForWriting(fileId);
 }
 
+void App_FatalError(char* message, char* heading)
+{
+    platform.Platform_Error(message, heading);
+}
+
 void App_PhysicsErrorHandler(char* message)
 {
     platform.Platform_Error(message, "Physics Error");

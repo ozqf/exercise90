@@ -269,6 +269,7 @@ void PhysExt_ClearWorld()
     {
         printf("PHYS Clear world\n");
     }
+	Phys_ClearOverlapPairs(&g_world);
 	Buf_Clear(&g_input);
 	Buf_Clear(&g_output);
     for (int i = 0; i < g_world.bodies.capacity; ++i)

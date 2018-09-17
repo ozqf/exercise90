@@ -68,6 +68,15 @@ internal void Phys_RecycleHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 // OVERLAP RECORDS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+internal void Phys_ClearOverlapPairs(ZBulletWorld* world)
+{
+	for (int i = 0; i < world->numOverlaps; ++i)
+	{
+		PhysOverlapPair* p = &world->overlapPairs[i];
+		*p = {};
+	}
+}
+
 internal i32 Phys_FindOverlapPair(ZBulletWorld *world, i32 a, i32 b)
 {
     for (int i = 0; i < world->numOverlaps; ++i)

@@ -507,11 +507,11 @@ int CALLBACK WinMain(
                 {
                     if (g_windowActive == 0)
                     {
-                        Sleep(8);
+                        Sleep(16);
                     }
                     else
                     {
-                        Sleep(4);
+                        Sleep(6);
                     }
                 }
                 

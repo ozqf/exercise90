@@ -66,6 +66,7 @@ internal PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* de
 //PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def);
 internal void Phys_PreSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 internal void Phys_PostSolveCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+internal void Phys_ClearOverlapPairs(ZBulletWorld* world);
 internal void Phys_WriteDebugOutput(ZBulletWorld* world);
 internal void Phys_LockCommandBuffer(ByteBuffer* buffer);
 internal void Phys_ReadCommands(ZBulletWorld* world, ByteBuffer* output);

@@ -29,6 +29,9 @@ global_variable RendObj g_debugLine = {};
 /////////////////////////////////////////////////////
 // App functions that game can access
 /////////////////////////////////////////////////////
+
+void App_FatalError(char* message, char* heading);
+
 // cmd writing
 //void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
 char* App_GetBufferName(u8* bufferStartAddr);

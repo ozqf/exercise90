@@ -498,6 +498,7 @@ struct EC_VolumeState
 	u32 flags;
 	i32 type;
 	Vec3 halfSize;
+	i32 moveType;
 };
 
 struct EC_Volume
@@ -512,7 +513,8 @@ struct EC_Volume
 struct EC_SensorState
 {
     u32 flags;
-    u32 damageSourceComponent;
+	// bits for components that are interested in collisions
+    u32 listenerComponents;
 };
 
 struct EC_Sensor
