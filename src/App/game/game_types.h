@@ -5,20 +5,20 @@
 ////////////////////////////////////////////////////////////
 // ENTITY TEMPLATE TYPES
 ////////////////////////////////////////////////////////////
-#define ENTITY_TYPE_NULL 0
-#define ENTITY_TYPE_WORLD_CUBE 1
-#define ENTITY_TYPE_RIGIDBODY_CUBE 2
-#define ENTITY_TYPE_ACTOR_GROUND 3
-#define ENTITY_TYPE_PROJECTILE 4
-#define ENTITY_TYPE_SPAWNER 5
-#define ENTITY_TYPE_ENEMY 6
-#define ENTITY_TYPE_BLOCKING_VOLUME 7
-#define ENTITY_TYPE_ENEMY_BRUTE 8
-#define ENTITY_TYPE_ENEMY_CHARGER 9
-#define ENTITY_TYPE_ENEMY_FODDER 10
-#define ENTITY_TYPE_ENEMY_SWARM 11
-#define ENTITY_TYPE_ENEMY_SPINNER 12
-#define ENTITY_TYPE_VOLUME 13
+#define ENTITY_TYPE0_NULL 0
+#define ENTITY_TYPE1_WORLD_CUBE 1
+#define ENTITY_TYPE2_RIGIDBODY_CUBE 2
+#define ENTITY_TYPE3_ACTOR_GROUND 3
+#define ENTITY_TYPE4_PROJECTILE 4
+#define ENTITY_TYPE5_SPAWNER 5
+#define ENTITY_TYPE6_ENEMY 6
+#define ENTITY_TYPE7_BLOCKING_VOLUME 7
+#define ENTITY_TYPE8_ENEMY_BRUTE 8
+#define ENTITY_TYPE9_ENEMY_CHARGER 9
+#define ENTITY_TYPE10_ENEMY_FODDER 10
+#define ENTITY_TYPE11_ENEMY_SWARM 11
+#define ENTITY_TYPE12_ENEMY_SPINNER 12
+#define ENTITY_TYPE13_VOLUME 13
 
 ////////////////////////////////////////////////////////////
 // LOCAL ENTITY IDS
@@ -207,19 +207,19 @@ struct EC_Header
 };
 
 // TODO: Rename to EC_BIT_FOO or something
-#define EC_FLAG_ENTITY (1 << 0)
-#define EC_FLAG_TRANSFORM (1 << 1)
-#define EC_FLAG_RENDERER (1 << 2)
-#define EC_FLAG_COLLIDER (1 << 3)
-#define EC_FLAG_AICONTROLLER (1 << 4)
-#define EC_FLAG_ACTORMOTOR (1 << 5)
-#define EC_FLAG_PROJECTILE (1 << 6)
-#define EC_FLAG_LABEL (1 << 7)
-#define EC_FLAG_HEALTH (1 << 8)
-#define EC_FLAG_THINKER (1 << 9)
-#define EC_FLAG_MULTI_RENDOBJ (1 << 10)
-#define EC_FLAG_VOLUME (1 << 11)
-#define EC_FLAG_SENSOR (1 << 12)
+#define EC_BIT0_ENTITY (1 << 0)
+#define EC_BIT1_TRANSFORM (1 << 1)
+#define EC_BIT2_RENDERER (1 << 2)
+#define EC_BIT3_COLLIDER (1 << 3)
+#define EC_BIT4_AICONTROLLER (1 << 4)
+#define EC_BIT5_ACTORMOTOR (1 << 5)
+#define EC_BIT6_PROJECTILE (1 << 6)
+#define EC_BIT7_LABEL (1 << 7)
+#define EC_BIT8_HEALTH (1 << 8)
+#define EC_BIT9_THINKER (1 << 9)
+#define EC_BIT10_MULTI_RENDOBJ (1 << 10)
+#define EC_BIT11_VOLUME (1 << 11)
+#define EC_BIT12_SENSOR (1 << 12)
 
 // All entity component state should have a flags member
 // the first bit is always 0 for active, 1 for inactive
@@ -699,15 +699,15 @@ struct GameState
 // ...and Component Add/Remove/Has/Find functions.
 // Note: requires that GameState struct is defined!
 //////////////////////////////////////////////////
-DEFINE_ENT_COMPONENT_BASE(Transform, transform, EC_FLAG_TRANSFORM)
-DEFINE_ENT_COMPONENT_BASE(SingleRendObj, singleRendObj, EC_FLAG_RENDERER)
-DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_FLAG_COLLIDER)
-DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_FLAG_AICONTROLLER)
-DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_FLAG_ACTORMOTOR)
-DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_FLAG_PROJECTILE)
-DEFINE_ENT_COMPONENT_BASE(Label, label, EC_FLAG_LABEL)
-DEFINE_ENT_COMPONENT_BASE(Health, health, EC_FLAG_HEALTH)
-DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_FLAG_THINKER)
-DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_FLAG_MULTI_RENDOBJ)
-DEFINE_ENT_COMPONENT_BASE(Volume, volume, EC_FLAG_VOLUME)
-DEFINE_ENT_COMPONENT_BASE(Sensor, sensor, EC_FLAG_SENSOR)
+DEFINE_ENT_COMPONENT_BASE(Transform, transform, EC_BIT1_TRANSFORM)
+DEFINE_ENT_COMPONENT_BASE(SingleRendObj, singleRendObj, EC_BIT2_RENDERER)
+DEFINE_ENT_COMPONENT_BASE(Collider, collider, EC_BIT3_COLLIDER)
+DEFINE_ENT_COMPONENT_BASE(AIController, aiController, EC_BIT4_AICONTROLLER)
+DEFINE_ENT_COMPONENT_BASE(ActorMotor, actorMotor, EC_BIT5_ACTORMOTOR)
+DEFINE_ENT_COMPONENT_BASE(Projectile, projectile, EC_BIT6_PROJECTILE)
+DEFINE_ENT_COMPONENT_BASE(Label, label, EC_BIT7_LABEL)
+DEFINE_ENT_COMPONENT_BASE(Health, health, EC_BIT8_HEALTH)
+DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_BIT9_THINKER)
+DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_BIT10_MULTI_RENDOBJ)
+DEFINE_ENT_COMPONENT_BASE(Volume, volume, EC_BIT11_VOLUME)
+DEFINE_ENT_COMPONENT_BASE(Sensor, sensor, EC_BIT12_SENSOR)

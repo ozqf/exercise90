@@ -318,19 +318,19 @@ internal void Game_Tick(
     {
         EntitySpawnOptions options = {};
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
-        Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY, &options);
+        Ent_WriteSpawnCmd(gs, ENTITY_TYPE6_ENEMY, &options);
     }
     if (Input_CheckActionToggledOn(actions, "Spawn Test 2", time->platformFrameNumber))
     {
         EntitySpawnOptions options = {};
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
-        Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_BRUTE, &options);
+        Ent_WriteSpawnCmd(gs, ENTITY_TYPE8_ENEMY_BRUTE, &options);
     }
     if (Input_CheckActionToggledOn(actions, "Spawn Test 3", time->platformFrameNumber))
     {
         EntitySpawnOptions options = {};
         options.pos = Game_RandomSpawnOffset(10, 0, 10);
-        Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
+        Ent_WriteSpawnCmd(gs, ENTITY_TYPE9_ENEMY_CHARGER, &options);
     }
 	#endif
 	#if 0

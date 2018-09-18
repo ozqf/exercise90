@@ -19,19 +19,19 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
         }
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
     }
-    if (state->componentBits & EC_FLAG_ENTITY) 			{ EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
-    if (state->componentBits & EC_FLAG_TRANSFORM) 		{ EC_TransformApplyState(gs, ent, &state->transform); }
-    if (state->componentBits & EC_FLAG_RENDERER) 		{ EC_SingleRendObjApplyState(gs, ent, &state->renderState); }
-    if (state->componentBits & EC_FLAG_COLLIDER) 		{ EC_ColliderApplyState(gs, ent, &state->colliderState); }
-    if (state->componentBits & EC_FLAG_AICONTROLLER) 	{ EC_AIControllerApplyState(gs, ent, &state->aiState); }
-    if (state->componentBits & EC_FLAG_ACTORMOTOR) 		{ EC_ActorMotorApplyState(gs, ent, &state->actorState); }
-    if (state->componentBits & EC_FLAG_HEALTH) 			{ EC_HealthApplyState(gs, ent, &state->healthState); }
-    if (state->componentBits & EC_FLAG_PROJECTILE) 		{ EC_ProjectileApplyState(gs, ent, &state->projectileState); }
-    if (state->componentBits & EC_FLAG_LABEL) 			{ EC_LabelApplyState(gs, ent, &state->labelState); }
-    if (state->componentBits & EC_FLAG_THINKER) 		{ EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
-    if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) 	{ EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
-    if (state->componentBits & EC_FLAG_VOLUME) 			{ EC_VolumeApplyState(gs, ent, &state->volumeState); }
-    if (state->componentBits & EC_FLAG_SENSOR) 			{ EC_SensorApplyState(gs, ent, &state->sensorState); }
+    if (state->componentBits & EC_BIT0_ENTITY) 			{ EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
+    if (state->componentBits & EC_BIT1_TRANSFORM) 		{ EC_TransformApplyState(gs, ent, &state->transform); }
+    if (state->componentBits & EC_BIT2_RENDERER) 		{ EC_SingleRendObjApplyState(gs, ent, &state->renderState); }
+    if (state->componentBits & EC_BIT3_COLLIDER) 		{ EC_ColliderApplyState(gs, ent, &state->colliderState); }
+    if (state->componentBits & EC_BIT4_AICONTROLLER) 	{ EC_AIControllerApplyState(gs, ent, &state->aiState); }
+    if (state->componentBits & EC_BIT5_ACTORMOTOR) 		{ EC_ActorMotorApplyState(gs, ent, &state->actorState); }
+    if (state->componentBits & EC_BIT6_PROJECTILE) 		{ EC_ProjectileApplyState(gs, ent, &state->projectileState); }
+    if (state->componentBits & EC_BIT7_LABEL) 			{ EC_LabelApplyState(gs, ent, &state->labelState); }
+    if (state->componentBits & EC_BIT8_HEALTH) 			{ EC_HealthApplyState(gs, ent, &state->healthState); }
+    if (state->componentBits & EC_BIT9_THINKER) 		{ EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
+    if (state->componentBits & EC_BIT10_MULTI_RENDOBJ) 	{ EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
+    if (state->componentBits & EC_BIT11_VOLUME) 			{ EC_VolumeApplyState(gs, ent, &state->volumeState); }
+    if (state->componentBits & EC_BIT12_SENSOR) 			{ EC_SensorApplyState(gs, ent, &state->sensorState); }
 
 }
 
@@ -60,19 +60,19 @@ internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 	
 	// TODO: Replace raw struct copy with proper encoding functions!
     // WARNING: THIS IS ORDER DEPENDENT!
-    if (h.componentBits & EC_FLAG_ENTITY) 			{ stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
-    if (h.componentBits & EC_FLAG_TRANSFORM) 		{ stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
-    if (h.componentBits & EC_FLAG_RENDERER) 		{ stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendObjState); }
-    if (h.componentBits & EC_FLAG_COLLIDER) 		{ stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
-    if (h.componentBits & EC_FLAG_AICONTROLLER) 	{ stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
-    if (h.componentBits & EC_FLAG_ACTORMOTOR) 		{ stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
-    if (h.componentBits & EC_FLAG_HEALTH) 			{ stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
-    if (h.componentBits & EC_FLAG_PROJECTILE) 		{ stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
-    if (h.componentBits & EC_FLAG_LABEL) 			{ stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
-    if (h.componentBits & EC_FLAG_THINKER) 			{ stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
-    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)	{ stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
-    if (h.componentBits & EC_FLAG_VOLUME)	        { stream += COM_COPY_STRUCT(stream, &state.volumeState, EC_VolumeState); }
-    if (h.componentBits & EC_FLAG_SENSOR)	        { stream += COM_COPY_STRUCT(stream, &state.sensorState, EC_SensorState); }
+    if (h.componentBits & EC_BIT0_ENTITY) 			{ stream += COM_COPY_STRUCT(stream, &state.entMetaData, Ent); }
+    if (h.componentBits & EC_BIT1_TRANSFORM) 		{ stream += COM_COPY_STRUCT(stream, &state.transform, Transform); }
+    if (h.componentBits & EC_BIT2_RENDERER) 		{ stream += COM_COPY_STRUCT(stream, &state.renderState, EC_RendObjState); }
+    if (h.componentBits & EC_BIT3_COLLIDER) 		{ stream += COM_COPY_STRUCT(stream, &state.colliderState, EC_ColliderState); }
+    if (h.componentBits & EC_BIT4_AICONTROLLER) 	{ stream += COM_COPY_STRUCT(stream, &state.aiState, EC_AIState); }
+    if (h.componentBits & EC_BIT5_ACTORMOTOR) 		{ stream += COM_COPY_STRUCT(stream, &state.actorState, EC_ActorMotorState); }
+    if (h.componentBits & EC_BIT6_PROJECTILE) 		{ stream += COM_COPY_STRUCT(stream, &state.projectileState, EC_ProjectileState); }
+    if (h.componentBits & EC_BIT7_LABEL) 			{ stream += COM_COPY_STRUCT(stream, &state.labelState, EC_LabelState); }
+    if (h.componentBits & EC_BIT8_HEALTH) 			{ stream += COM_COPY_STRUCT(stream, &state.healthState, EC_HealthState); }
+    if (h.componentBits & EC_BIT9_THINKER) 			{ stream += COM_COPY_STRUCT(stream, &state.thinkerState, EC_ThinkerState); }
+    if (h.componentBits & EC_BIT10_MULTI_RENDOBJ)	{ stream += COM_COPY_STRUCT(stream, &state.multiRendState, EC_MultiRendObjState); }
+    if (h.componentBits & EC_BIT11_VOLUME)	        { stream += COM_COPY_STRUCT(stream, &state.volumeState, EC_VolumeState); }
+    if (h.componentBits & EC_BIT12_SENSOR)	        { stream += COM_COPY_STRUCT(stream, &state.sensorState, EC_SensorState); }
 
 
     u32 read = (stream - origin);
@@ -99,7 +99,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
     u8* stream = origin;
     
 	// TODO: Fix me! Force entity meta data flag. Loading will always read it
-	state->componentBits |= EC_FLAG_ENTITY;
+	state->componentBits |= EC_BIT0_ENTITY;
 
     // TODO: Replace raw struct copy with proper encoding functions!
     // WARNING: THIS IS ORDER DEPENDENT!    
@@ -108,31 +108,31 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
     h.componentBits = state->componentBits;
     stream += COM_COPY_STRUCT(&h, stream, Cmd_EntityStateHeader);
 
-    if (h.componentBits & EC_FLAG_ENTITY)
+    if (h.componentBits & EC_BIT0_ENTITY)
     { stream += COM_COPY_STRUCT(&state->entMetaData, stream, Ent); }
-    if (h.componentBits & EC_FLAG_TRANSFORM)
+    if (h.componentBits & EC_BIT1_TRANSFORM)
     { stream += COM_COPY_STRUCT(&state->transform, stream, Transform); }
-    if (h.componentBits & EC_FLAG_RENDERER)
+    if (h.componentBits & EC_BIT2_RENDERER)
     { stream += COM_COPY_STRUCT(&state->renderState, stream, EC_RendObjState); }
-    if (h.componentBits & EC_FLAG_COLLIDER)
+    if (h.componentBits & EC_BIT3_COLLIDER)
     { stream += COM_COPY_STRUCT(&state->colliderState, stream, EC_ColliderState); }
-    if (h.componentBits & EC_FLAG_AICONTROLLER)
+    if (h.componentBits & EC_BIT4_AICONTROLLER)
     { stream += COM_COPY_STRUCT(&state->aiState, stream, EC_AIState); }
-    if (h.componentBits & EC_FLAG_ACTORMOTOR)
+    if (h.componentBits & EC_BIT5_ACTORMOTOR)
     { stream += COM_COPY_STRUCT(&state->actorState, stream, EC_ActorMotorState); }
-    if (h.componentBits & EC_FLAG_HEALTH)
-    { stream += COM_COPY_STRUCT(&state->healthState, stream, EC_HealthState); }
-    if (h.componentBits & EC_FLAG_PROJECTILE)
+    if (h.componentBits & EC_BIT6_PROJECTILE)
     { stream += COM_COPY_STRUCT(&state->projectileState, stream, EC_ProjectileState); }
-    if (h.componentBits & EC_FLAG_LABEL)
+    if (h.componentBits & EC_BIT7_LABEL)
     { stream += COM_COPY_STRUCT(&state->labelState, stream, EC_LabelState); }
-    if (h.componentBits & EC_FLAG_THINKER)
+    if (h.componentBits & EC_BIT8_HEALTH)
+    { stream += COM_COPY_STRUCT(&state->healthState, stream, EC_HealthState); }
+    if (h.componentBits & EC_BIT9_THINKER)
     { stream += COM_COPY_STRUCT(&state->thinkerState, stream, EC_ThinkerState); }
-    if (h.componentBits & EC_FLAG_MULTI_RENDOBJ)
+    if (h.componentBits & EC_BIT10_MULTI_RENDOBJ)
     { stream += COM_COPY_STRUCT(&state->multiRendState, stream, EC_MultiRendObjState); }
-    if (h.componentBits & EC_FLAG_VOLUME)
+    if (h.componentBits & EC_BIT11_VOLUME)
     { stream += COM_COPY_STRUCT(&state->volumeState, stream, EC_VolumeState); }
-    if (h.componentBits & EC_FLAG_SENSOR)
+    if (h.componentBits & EC_BIT12_SENSOR)
     { stream += COM_COPY_STRUCT(&state->sensorState, stream, EC_SensorState); }
 
     u16 bytesWritten = (u16)(stream - origin);
@@ -201,17 +201,17 @@ internal void Ent_PrintComponents(Ent* ent)
 u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
 {
 	u32 diffBits = 0;
-	if ((a->componentBits & EC_FLAG_ENTITY)
+	if ((a->componentBits & EC_BIT0_ENTITY)
 		&& !COM_CompareMemory((u8*)&a->entMetaData, (u8*)&b->entMetaData, sizeof(Ent)))
-	{ diffBits |= EC_FLAG_ENTITY; }
+	{ diffBits |= EC_BIT0_ENTITY; }
 	
-	if ((a->componentBits & EC_FLAG_TRANSFORM)
+	if ((a->componentBits & EC_BIT1_TRANSFORM)
 		&& !COM_CompareMemory((u8*)&a->transform, (u8*)&b->transform, sizeof(EC_Transform)))
-	{ diffBits |= EC_FLAG_TRANSFORM; }
+	{ diffBits |= EC_BIT1_TRANSFORM; }
 	
-	if ((a->componentBits & EC_FLAG_RENDERER)
+	if ((a->componentBits & EC_BIT2_RENDERER)
 		&& !COM_CompareMemory((u8*)&a->renderState, (u8*)&b->renderState, sizeof(EC_SingleRendObj)))
-	{ diffBits |= EC_FLAG_RENDERER; }
+	{ diffBits |= EC_BIT2_RENDERER; }
 	
 	return diffBits;
 }
@@ -242,7 +242,7 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
     EC_Transform* ecT = EC_FindTransform(gs, ent);
 
 	if (ecT) { state->transform = ecT->t; }
-    if (ent->componentBits & EC_FLAG_RENDERER)
+    if (ent->componentBits & EC_BIT2_RENDERER)
     {
         EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
         state->renderState = r->state;
@@ -260,14 +260,15 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
         }
         state->colliderState = (EC_FindCollider(gs, ent))->state;
     }
-    if (ent->componentBits & EC_FLAG_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
-	if (ent->componentBits & EC_FLAG_AICONTROLLER) { state->aiState = (EC_FindAIController(gs, ent))->state; }
-	if (ent->componentBits & EC_FLAG_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_VOLUME) { state->volumeState = (EC_FindVolume(gs, ent))->state; }
-    if (ent->componentBits & EC_FLAG_SENSOR) { state->sensorState = (EC_FindSensor(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT5_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
+	if (ent->componentBits & EC_BIT4_AICONTROLLER) { state->aiState = (EC_FindAIController(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT6_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT7_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT8_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT9_THINKER) { state->thinkerState = (EC_FindThinker(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT10_MULTI_RENDOBJ) { state->multiRendState = (EC_FindMultiRendObj(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT11_VOLUME) { state->volumeState = (EC_FindVolume(gs, ent))->state; }
+    if (ent->componentBits & EC_BIT12_SENSOR) { state->sensorState = (EC_FindSensor(gs, ent))->state; }
 }
 
 internal u8 Ent_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)

@@ -337,7 +337,7 @@ internal void EC_SensorHandleHit(
 		case 1:
 		{
 			// touch start
-			if (sensor->state.listenerComponents & EC_FLAG_AICONTROLLER)
+			if (sensor->state.listenerComponents & EC_BIT4_AICONTROLLER)
 			{
 				if (!Game_AttackIsValid(self->team, target->team)) { return; }
 				EC_AIController* ai = EC_FindAIController(gs, &sensor->header.entId);
@@ -356,7 +356,7 @@ internal void EC_SensorHandleHit(
 		case 2:
 		{
 			// overlap
-			if (sensor->state.listenerComponents & EC_FLAG_VOLUME)
+			if (sensor->state.listenerComponents & EC_BIT11_VOLUME)
 			{
 				EC_Volume* vol = EC_FindVolume(gs, &sensor->header.entId);
 				Assert(vol);

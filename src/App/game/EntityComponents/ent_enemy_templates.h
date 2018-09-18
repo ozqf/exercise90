@@ -19,21 +19,21 @@ internal void EC_SetRendObjStateDefault(EC_RendObjState* rendObj, f32 red, f32 g
 
 internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOptions* options)
 {
-    state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_ENEMY;
+    state->componentBits |= EC_BIT0_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE6_ENEMY;
     state->entMetaData.team = TEAM_ENEMIES;
     printf("  TEMPLATES spawn enemy %d/%d\n", state->entId.iteration, state->entId.index);
 
     // apply defaults
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    state->componentBits |= EC_FLAG_AICONTROLLER;
+    state->componentBits |= EC_BIT4_AICONTROLLER;
     //state->aiState.ticker.tickMax = 0.033f;
     state->aiState.minApproachDistance = 25.0f;
     state->aiState.atkSettings.Set(2, 0.3f, 0.0f, 1, 1.0f, ATTACK_FLAG_NO_TARGET_TRACK);
     
-    //state->componentBits |= EC_FLAG_RENDERER;
+    //state->componentBits |= EC_BIT2_RENDERER;
     //COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
     //COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
     //state->renderState.colourRGB[0] = 1;
@@ -41,7 +41,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     //state->renderState.colourRGB[2] = 0;
 
     #if 1
-    state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
+    state->componentBits |= EC_BIT10_MULTI_RENDOBJ;
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_BASE], 1, 0, 0);
     state->multiRendState.GetBaseRendObj()->heightOffset = -0.5f;
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 1, 0, 0);
@@ -49,7 +49,7 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
     //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
     #endif
 
-    state->componentBits |= EC_FLAG_COLLIDER;
+    state->componentBits |= EC_BIT3_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 1.0f, 0.5f, 
@@ -59,14 +59,14 @@ internal void Ent_SetTemplate_GenericEnemy(EntityState* state, EntitySpawnOption
         0
     );
 
-    state->componentBits  |= EC_FLAG_ACTORMOTOR;
+    state->componentBits  |= EC_BIT5_ACTORMOTOR;
     state->actorState.runSpeed = 6;
     state->actorState.runAcceleration = 75;
     state->actorState.ticker.tickMax = 1.0f;
     state->actorState.attack1Type = ATTACK_INDEX_SLOW_PROJECTILE;
 
 
-    state->componentBits |= EC_FLAG_HEALTH;
+    state->componentBits |= EC_BIT8_HEALTH;
     state->healthState.SetHealthAndMax(100);
 
     //Ent_ApplySpawnOptions(state, options);
@@ -136,17 +136,17 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     state->aiState.atkSettings.Set(-1, 0.5f, 0.0f, 1, 1.0f, 0);
 
     // Disable multi-render component
-    state->componentBits &= ~EC_FLAG_MULTI_RENDOBJ;
+    state->componentBits &= ~EC_BIT10_MULTI_RENDOBJ;
 
-    state->componentBits |= EC_FLAG_RENDERER;
+    state->componentBits |= EC_BIT2_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
     state->renderState.colourRGB[0] = 0.2f;
     state->renderState.colourRGB[1] = 0.2f;
     state->renderState.colourRGB[2] = 1;
 
-    state->componentBits |= EC_FLAG_SENSOR;
-    state->sensorState.listenerComponents |= EC_FLAG_AICONTROLLER;
+    state->componentBits |= EC_BIT12_SENSOR;
+    state->sensorState.listenerComponents |= EC_BIT4_AICONTROLLER;
 
     Ent_ApplySpawnOptions(state, options);
 }
@@ -174,12 +174,12 @@ internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* option
 {
     switch(templateId)
     {
-        case ENTITY_TYPE_ENEMY: { Ent_SetTemplate_Grunt(state, options); } return 1;
-        case ENTITY_TYPE_ENEMY_BRUTE: { Ent_SetTemplate_Brute(state, options); } return 1;
-        case ENTITY_TYPE_ENEMY_CHARGER: { Ent_SetTemplate_Charger(state, options); } return 1;
-		case ENTITY_TYPE_ENEMY_SWARM: { Ent_SetTemplate_Swarm(state, options); } return 1;
-		case ENTITY_TYPE_ENEMY_FODDER: { Ent_SetTemplate_Fodder(state, options); } return 1;
-		case ENTITY_TYPE_ENEMY_SPINNER: { Ent_SetTemplate_Spinner(state, options); } return 1;
+        case ENTITY_TYPE6_ENEMY: { Ent_SetTemplate_Grunt(state, options); } return 1;
+        case ENTITY_TYPE8_ENEMY_BRUTE: { Ent_SetTemplate_Brute(state, options); } return 1;
+        case ENTITY_TYPE9_ENEMY_CHARGER: { Ent_SetTemplate_Charger(state, options); } return 1;
+        case ENTITY_TYPE10_ENEMY_FODDER: { Ent_SetTemplate_Fodder(state, options); } return 1;
+		case ENTITY_TYPE11_ENEMY_SWARM: { Ent_SetTemplate_Swarm(state, options); } return 1;
+		case ENTITY_TYPE12_ENEMY_SPINNER: { Ent_SetTemplate_Spinner(state, options); } return 1;
         default: return 0;
     }
 }

@@ -69,10 +69,10 @@ void Game_InitEntityFactory()
 {
     // Make sure these align with the defines for these types
     // defined in game_commands.h
-    // g_spawnFunctions[ENTITY_TYPE_NULL] = Spawn_Null;
-    // g_spawnFunctions[ENTITY_TYPE_WORLD_CUBE] = Spawn_WorldCube;
-    // g_spawnFunctions[ENTITY_TYPE_RIGIDBODY_CUBE] = Spawn_RigidbodyCube;
-    // g_spawnFunctions[ENTITY_TYPE_ACTOR_GROUND] = Spawn_GroundActor;
+    // g_spawnFunctions[ENTITY_TYPE0_NULL] = Spawn_Null;
+    // g_spawnFunctions[ENTITY_TYPE1_WORLD_CUBE] = Spawn_WorldCube;
+    // g_spawnFunctions[ENTITY_TYPE2_RIGIDBODY_CUBE] = Spawn_RigidbodyCube;
+    // g_spawnFunctions[ENTITY_TYPE3_ACTOR_GROUND] = Spawn_GroundActor;
     // g_numSpawnFunctions = ENTITY_TYPES_COUNT;
 }
 #if 0
@@ -93,7 +93,7 @@ Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
 
 Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
 {
-    if (cmd->factoryType == ENTITY_TYPE_WORLD_CUBE)
+    if (cmd->factoryType == ENTITY_TYPE1_WORLD_CUBE)
     {
         printf("Factory type %d cannot be dynamic!\n", cmd->factoryType);
         ILLEGAL_CODE_PATH

@@ -6,11 +6,11 @@
 void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
 {
     printf("SET TEMPLATE Volume\n");
-    state->entMetaData.factoryType = ENTITY_TYPE_VOLUME;
+    state->entMetaData.factoryType = ENTITY_TYPE13_VOLUME;
 
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
 
-    state->componentBits |= EC_FLAG_RENDERER;
+    state->componentBits |= EC_BIT2_RENDERER;
     COM_CopyStringLimited(
         "Cube",
         state->renderState.meshName,
@@ -23,14 +23,14 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
     state->renderState.colourRGB[1] = 1;
     state->renderState.colourRGB[2] = 0;
 
-    state->componentBits |= EC_FLAG_VOLUME;
+    state->componentBits |= EC_BIT11_VOLUME;
     EC_VolumeState* s = &state->volumeState;
 
     u32 flags = ZCOLLIDER_FLAG_STATIC |
         ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE |
         ZCOLLIDER_FLAG_VERY_INTERESTING;
         
-    state->componentBits |= EC_FLAG_COLLIDER;
+    state->componentBits |= EC_BIT3_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
@@ -40,8 +40,8 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
         0
     );
 	
-	state->componentBits |= EC_FLAG_SENSOR;
-	state->sensorState.listenerComponents |= EC_FLAG_VOLUME;
+	state->componentBits |= EC_BIT12_SENSOR;
+	state->sensorState.listenerComponents |= EC_BIT11_VOLUME;
     
     Ent_ApplySpawnOptions(state, options);
 }

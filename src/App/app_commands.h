@@ -113,7 +113,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
                 options.scale = { 1, 1, 1 };
                 options.pos.y = 0.75f;
                 options.rot.y = 45;
-                Ent_WriteSpawnCmd(&g_gameState, ENTITY_TYPE_ENEMY, &options);
+                Ent_WriteSpawnCmd(&g_gameState, ENTITY_TYPE6_ENEMY, &options);
             }
         }
         return 1;

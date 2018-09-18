@@ -26,7 +26,7 @@ inline u8 AI_ValidateTargetById(GameState* gs, EntId* id, i32 selfTeam)
     Ent* ent = Ent_GetEntityById(gs, id);
     if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
-    if ((ent->componentBits & EC_FLAG_TRANSFORM) == 0) { return 0; }
+    if ((ent->componentBits & EC_BIT1_TRANSFORM) == 0) { return 0; }
     if (!Game_AttackIsValid(selfTeam, ent->team)) { return 0; }
     return 1;
 }

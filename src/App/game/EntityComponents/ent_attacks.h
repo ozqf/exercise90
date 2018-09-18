@@ -24,9 +24,9 @@ void SV_SpawnTestBullet(
 
     options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
 
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &options);
+    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &options);
     static EntityState state;
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 1;
         state.renderState.colourRGB[1] = 0;
@@ -49,7 +49,7 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         250);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
@@ -71,7 +71,7 @@ inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         15);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
         state.projectileState.ticker.tickMax = 2.0f;
         state.projectileState.ticker.tick = 2.0f;
@@ -96,7 +96,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         250);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
@@ -118,7 +118,7 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
             info->yawDegrees + randOffsetX,
             info->pitchDegrees + randOffsetY,
             250);
-        if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_PROJECTILE, &state, &options))
+        if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
         {
             state.renderState.colourRGB[0] = 0.3f;
             state.renderState.colourRGB[1] = 0.3f;

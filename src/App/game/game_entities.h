@@ -54,7 +54,7 @@ void Ent_ResetEntityIds(EntList* ents)
 		ents->items[i].inUse = ENTITY_STATUS_FREE;
 		ents->items[i].entId.iteration = 1;
         ents->items[i].entId.index = i;
-        ents->items[i].componentBits = 0 | EC_FLAG_ENTITY;
+        ents->items[i].componentBits = 0 | EC_BIT0_ENTITY;
 	}
 }
 
@@ -108,7 +108,7 @@ inline void Ent_Free(GameState* gs, Ent* ent)
         ent->entId.iteration = 1;
     }
     ent->inUse = ENTITY_STATUS_FREE;
-    ent->componentBits = 0 | EC_FLAG_ENTITY;
+    ent->componentBits = 0 | EC_BIT0_ENTITY;
 }
 
 /**

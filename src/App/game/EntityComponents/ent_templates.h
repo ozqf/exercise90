@@ -2,7 +2,7 @@
 
 #include "../game.h"
 
-#if 0
+#if 1
 // Experiments with entity templating system
 
 u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
@@ -12,9 +12,19 @@ internal EntityState g_entTemplates[32];
 
 /*internal*/ void Game_CreateEntityTemplates()
 {
-	Game_WriteSpawnTemplate(ENTITY_TYPE_WORLD_CUBE, &g_entTemplates[ENTITY_TYPE_WORLD_CUBE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE_RIGIDBODY_CUBE, &g_entTemplates[ENTITY_TYPE_RIGIDBODY_CUBE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE_ACTOR_GROUND, &g_entTemplates[ENTITY_TYPE_ACTOR_GROUND], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE1_WORLD_CUBE, &g_entTemplates[ENTITY_TYPE1_WORLD_CUBE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE2_RIGIDBODY_CUBE, &g_entTemplates[ENTITY_TYPE2_RIGIDBODY_CUBE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE3_ACTOR_GROUND, &g_entTemplates[ENTITY_TYPE3_ACTOR_GROUND], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE4_PROJECTILE, &g_entTemplates[ENTITY_TYPE4_PROJECTILE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE5_SPAWNER, &g_entTemplates[ENTITY_TYPE5_SPAWNER], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE6_ENEMY, &g_entTemplates[ENTITY_TYPE6_ENEMY], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE7_BLOCKING_VOLUME, &g_entTemplates[ENTITY_TYPE7_BLOCKING_VOLUME], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE8_ENEMY_BRUTE, &g_entTemplates[ENTITY_TYPE8_ENEMY_BRUTE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE9_ENEMY_CHARGER, &g_entTemplates[ENTITY_TYPE9_ENEMY_CHARGER], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE10_ENEMY_FODDER, &g_entTemplates[ENTITY_TYPE10_ENEMY_FODDER], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE11_ENEMY_SWARM, &g_entTemplates[ENTITY_TYPE11_ENEMY_SWARM], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE12_ENEMY_SPINNER, &g_entTemplates[ENTITY_TYPE12_ENEMY_SPINNER], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE13_VOLUME, &g_entTemplates[ENTITY_TYPE13_VOLUME], NULL);
 }
 
 // Returns 0 if template Id isn't valid
@@ -63,7 +73,7 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
         state->entMetaData.team = options->team;
     }
 
-    if (state->componentBits & EC_FLAG_TRANSFORM)
+    if (state->componentBits & EC_BIT1_TRANSFORM)
     {
         //printf("  EC Apply transform options\n");
         Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
@@ -74,7 +84,7 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
         }
         
     }
-    if (state->componentBits & EC_FLAG_COLLIDER)
+    if (state->componentBits & EC_BIT3_COLLIDER)
     {
         state->colliderState.def.pos[0] = options->pos.x;
         state->colliderState.def.pos[1] = options->pos.y;
@@ -108,15 +118,15 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, 
 {
     printf("GAME Spawn world cube template\n");
     // apply defaults
-    state->componentBits |= EC_FLAG_ENTITY;
+    state->componentBits |= EC_BIT0_ENTITY;
     state->entMetaData.factoryType = factoryType;
 
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    if (factoryType == ENTITY_TYPE_WORLD_CUBE)
+    if (factoryType == ENTITY_TYPE1_WORLD_CUBE)
     {
-        state->componentBits |= EC_FLAG_RENDERER;
+        state->componentBits |= EC_BIT2_RENDERER;
         COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
         COM_CopyStringLimited("textures\\COMP03_1.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
         state->renderState.colourRGB[0] = 1;
@@ -124,7 +134,7 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, 
         state->renderState.colourRGB[2] = 1;
     }
     
-    state->componentBits |= EC_FLAG_COLLIDER;
+    state->componentBits |= EC_BIT3_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
@@ -139,13 +149,13 @@ void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, 
 
 void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* options)
 {
-    state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_RIGIDBODY_CUBE;
+    state->componentBits |= EC_BIT0_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE2_RIGIDBODY_CUBE;
     
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    state->componentBits |= EC_FLAG_RENDERER;
+    state->componentBits |= EC_BIT2_RENDERER;
     COM_CopyStringLimited("Cube", state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
     COM_CopyStringLimited("textures\\white_bordered.bmp", state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
     state->renderState.colourRGB[0] = 0;
@@ -153,7 +163,7 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
     state->renderState.colourRGB[2] = 1;
 
 
-    state->componentBits |= EC_FLAG_COLLIDER;
+    state->componentBits |= EC_BIT3_COLLIDER;
     state->colliderState.def.SetAsBox(
         state->transform.pos.x, state->transform.pos.y, state->transform.pos.z,
         0.5f, 0.5f, 0.5f, 
@@ -163,7 +173,7 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
         0
     );
 
-    state->componentBits |= EC_FLAG_HEALTH;
+    state->componentBits |= EC_BIT8_HEALTH;
     state->healthState.hp = 100;
 
     Ent_ApplySpawnOptions(state, options);
@@ -174,16 +184,16 @@ void Ent_SetTemplate_RigidbodyCube(EntityState* state, EntitySpawnOptions* optio
 //////////////////////////////////////////////////////////////////////////
 void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
 {
-    state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_ACTOR_GROUND;
+    state->componentBits |= EC_BIT0_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE3_ACTOR_GROUND;
     state->entMetaData.team = TEAM_PLAYERS;
     
     // apply defaults
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
 
-    state->componentBits |= EC_FLAG_COLLIDER;
+    state->componentBits |= EC_BIT3_COLLIDER;
     f32 playerHeight = 1.85f; // average male height in metres
 	f32 playerWidth = 0.8f; //0.46f; // reasonable shoulder width?
     state->colliderState.def.SetAsBox(
@@ -196,7 +206,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     );
 
     #if 1
-    state->componentBits |= EC_FLAG_MULTI_RENDOBJ;
+    state->componentBits |= EC_BIT10_MULTI_RENDOBJ;
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_BASE], 0, 0, 1);
     state->multiRendState.GetBaseRendObj()->heightOffset = -0.5f;
     EC_SetRendObjStateDefault(&state->multiRendState.objStates[EC_MULTI_RENDOBJ_HEAD], 0, 0, 1);
@@ -204,7 +214,7 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     //EC_SetRendObjStateDefault(&state->multiRendState.objStates[2]);
     #endif
 
-    state->componentBits  |= EC_FLAG_ACTORMOTOR;
+    state->componentBits  |= EC_BIT5_ACTORMOTOR;
     state->actorState.runSpeed = 16;
     state->actorState.runAcceleration = 150;
 
@@ -221,25 +231,25 @@ void Ent_SetTemplate_Actor(EntityState* state, EntitySpawnOptions* options)
     state->actorState.ticker.tick = 0;
     state->actorState.animStyle = 0;
 
-    state->componentBits |= EC_FLAG_HEALTH;
+    state->componentBits |= EC_BIT8_HEALTH;
     state->healthState.SetHealthAndMax(100);
     state->healthState.flags |= EC_STATE_FLAG_IS_PLAYER;
     
-    state->componentBits |= EC_FLAG_SENSOR;
+    state->componentBits |= EC_BIT12_SENSOR;
 
     Ent_ApplySpawnOptions(state, options);
 }
 
 void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
 {
-    state->componentBits |= EC_FLAG_ENTITY;
-    state->entMetaData.factoryType = ENTITY_TYPE_PROJECTILE;
+    state->componentBits |= EC_BIT0_ENTITY;
+    state->entMetaData.factoryType = ENTITY_TYPE4_PROJECTILE;
 
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
     Transform_SetScale(&state->transform, 0.45f, 0.45f, 0.45f);
 
-    state->componentBits |= EC_FLAG_RENDERER;
+    state->componentBits |= EC_BIT2_RENDERER;
     COM_CopyStringLimited(
         "Cube",
         state->renderState.meshName,
@@ -254,7 +264,7 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     state->renderState.colourRGB[1] = 1;
     state->renderState.colourRGB[2] = 0;
 
-    state->componentBits |= EC_FLAG_PROJECTILE;
+    state->componentBits |= EC_BIT6_PROJECTILE;
     state->projectileState = {};
     state->projectileState.damage.damage = 10;
     state->projectileState.speed = 150;
@@ -271,11 +281,11 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
 
 void Ent_SetTemplate_Spawner(EntityState* state, EntitySpawnOptions* options)
 {
-    state->entMetaData.factoryType = ENTITY_TYPE_SPAWNER;
-    state->componentBits |= EC_FLAG_TRANSFORM;
+    state->entMetaData.factoryType = ENTITY_TYPE5_SPAWNER;
+    state->componentBits |= EC_BIT1_TRANSFORM;
     Transform_SetToIdentity(&state->transform);
 
-    state->componentBits |= EC_FLAG_THINKER;
+    state->componentBits |= EC_BIT9_THINKER;
     EC_ThinkerState* s = &state->thinkerState;
     s->max = 4;
     s->type = EC_THINKER_SPAWNER;
@@ -311,14 +321,14 @@ u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptio
     }
     switch (factoryType)
     {
-       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
-       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_SPAWNER, Ent_SetTemplate_Spawner, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE_VOLUME, Ent_SetTemplate_Volume, state, options);
-       //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
+       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE1_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
+       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE7_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
+       ENT_SET_TEMPLATE(ENTITY_TYPE2_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE3_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE4_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE5_SPAWNER, Ent_SetTemplate_Spawner, state, options);
+       ENT_SET_TEMPLATE(ENTITY_TYPE13_VOLUME, Ent_SetTemplate_Volume, state, options);
+       //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE6_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
        default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
     }
     return 1;

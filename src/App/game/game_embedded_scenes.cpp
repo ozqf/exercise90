@@ -14,10 +14,10 @@ internal void Game_AddTestSolid(GameState* gs,
 	Cmd_EntityStateHeader h = {};
 	
 	h.entId = Ent_ReserveFreeEntity(&gs->entList);
-    h.componentBits |= EC_FLAG_ENTITY;
-	h.componentBits |= EC_FLAG_TRANSFORM;
-    if (isVisible) { h.componentBits |= EC_FLAG_RENDERER; }
-    h.componentBits |= EC_FLAG_COLLIDER;
+    h.componentBits |= EC_BIT0_ENTITY;
+	h.componentBits |= EC_BIT1_TRANSFORM;
+    if (isVisible) { h.componentBits |= EC_BIT2_RENDERER; }
+    h.componentBits |= EC_BIT3_COLLIDER;
 
 	size += App_WriteCommandBytesToFrameOutput((u8*)&h, sizeof(Cmd_EntityStateHeader));
 
@@ -26,11 +26,11 @@ internal void Game_AddTestSolid(GameState* gs,
     ent.inUse = ENTITY_STATUS_IN_USE;
     if (isVisible)
     {
-        ent.factoryType = ENTITY_TYPE_WORLD_CUBE;
+        ent.factoryType = ENTITY_TYPE1_WORLD_CUBE;
     }
     else
     {
-        ent.factoryType = ENTITY_TYPE_BLOCKING_VOLUME;
+        ent.factoryType = ENTITY_TYPE7_BLOCKING_VOLUME;
     }
     
     size += App_WriteCommandBytesToFrameOutput((u8*)&ent, sizeof(Ent));
@@ -110,9 +110,9 @@ internal void Game_BuildTestScene_0(GameState* gs)
     options.scale.y = 1;
     options.scale.z = 10;
     options.pos.y = -5;
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE_VOLUME, &options);
+    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &options);
     EntityState state = {};
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE_VOLUME, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, &options))
     {
         Ent_WriteEntityStateCmd(NULL, &state);
     }
@@ -150,39 +150,39 @@ internal void Game_BuildTestScene(GameState* gs, i32 sceneIndex)
     
     options = {};
     options.pos = { 20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { 10, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { -10, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { -20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     #endif
 
     #if 0
     EntitySpawnOptions options;
     options = {};
     options.pos = { 20, 0, 20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { -20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { -20, 0, 20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { 20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE_SPAWNER, &options);
+    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     #endif
 
     //EntitySpawnOptions options = {};
     //options = {};
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE_ENEMY_CHARGER, &options);
+    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE6_ENEMY_CHARGER, &options);
     
 }
