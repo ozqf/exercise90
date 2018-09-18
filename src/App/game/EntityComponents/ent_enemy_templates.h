@@ -128,9 +128,9 @@ internal void Ent_SetTemplate_Charger(EntityState* state, EntitySpawnOptions* op
     state->renderState.colourRGB[1] = 0;
     state->renderState.colourRGB[2] = 1;
     //options->scale = { 2, 2, 2 };
-	state->colliderState.def.data.box.halfSize[0] = 2;
-	state->colliderState.def.data.box.halfSize[1] = 2;
-	state->colliderState.def.data.box.halfSize[2] = 2;
+	state->colliderState.def.data.box.halfSize[0] = 1;
+	state->colliderState.def.data.box.halfSize[1] = 1;
+	state->colliderState.def.data.box.halfSize[2] = 1;
 
     state->healthState.SetHealthAndMax(250);
     state->healthState.stunThreshold = 1000;
