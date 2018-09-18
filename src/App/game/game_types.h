@@ -206,7 +206,6 @@ struct EC_Header
     u8 inUse;
 };
 
-// TODO: Rename to EC_BIT_FOO or something
 #define EC_BIT0_ENTITY (1 << 0)
 #define EC_BIT1_TRANSFORM (1 << 1)
 #define EC_BIT2_RENDERER (1 << 2)

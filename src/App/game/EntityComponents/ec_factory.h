@@ -260,8 +260,8 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
         }
         state->colliderState = (EC_FindCollider(gs, ent))->state;
     }
+    if (ent->componentBits & EC_BIT4_AICONTROLLER) { state->aiState = (EC_FindAIController(gs, ent))->state; }
     if (ent->componentBits & EC_BIT5_ACTORMOTOR) { state->actorState = (EC_FindActorMotor(gs, ent))->state; }
-	if (ent->componentBits & EC_BIT4_AICONTROLLER) { state->aiState = (EC_FindAIController(gs, ent))->state; }
     if (ent->componentBits & EC_BIT6_PROJECTILE) { state->projectileState = (EC_FindProjectile(gs, ent))->state; }
     if (ent->componentBits & EC_BIT7_LABEL) { state->labelState = (EC_FindLabel(gs, ent))->state; }
     if (ent->componentBits & EC_BIT8_HEALTH) { state->healthState = (EC_FindHealth(gs, ent))->state; }
