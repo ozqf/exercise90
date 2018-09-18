@@ -271,10 +271,12 @@ void Ent_SetTemplate_Projectile(EntityState* state, EntitySpawnOptions* options)
     f32 timeToLive = 0.5f;
     i32 tocks = 1;
     state->projectileState.ticker = { timeToLive, timeToLive };
-
-    state->projectileState.move.x = options->vel.x;
-    state->projectileState.move.y = options->vel.y;
-    state->projectileState.move.z = options->vel.z;
+	if (options)
+	{
+		state->projectileState.move.x = options->vel.x;
+		state->projectileState.move.y = options->vel.y;
+		state->projectileState.move.z = options->vel.z;
+	}
 
     Ent_ApplySpawnOptions(state, options);
 }
@@ -313,12 +315,9 @@ case caseValue##: \
     func##(##state##, options##, factoryType##); \
 } break;
 
-u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options)
+internal u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options)
 {
-    if (Ent_SetTemplate_Enemy(state, options, factoryType))
-    {
-        return 1;
-    }
+    if (Ent_SetTemplate_Enemy(state, options, factoryType)) { return 1; }
     switch (factoryType)
     {
        ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE1_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);

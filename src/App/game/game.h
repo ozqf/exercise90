@@ -147,6 +147,7 @@ global_variable EntityLink g_clientEntityLinks[GAME_MAX_ENTITIES * GAME_MAX_CLIE
 // total array: 16384 * 22 == 360,448 (352 KB, 0.34375 MB)
 
 // Entity Components
+// unlike everywhere else involving this ECS, this bit ISN'T order dependent (harhar)
 global_variable Ent                 g_gameEntities[GAME_MAX_ENTITIES];
 global_variable EC_Transform        g_transforms[GAME_MAX_ENTITIES];
 global_variable EC_SingleRendObj    g_renderers[GAME_MAX_ENTITIES];
@@ -162,8 +163,6 @@ global_variable EC_Volume           g_volumes[GAME_MAX_ENTITIES];
 global_variable EC_Sensor           g_sensors[GAME_MAX_ENTITIES];
 
 // UI
-//global_variable EC_Transform        g_ui_transforms[UI_MAX_ENTITIES];
-//global_variable EC_SingleRendObj         g_ui_renderers[UI_MAX_ENTITIES];
 global_variable UIEntity            g_ui_entities[UI_MAX_ENTITIES];
 #define PLAYER_STATUS_TEXT_LENGTH 256
 global_variable char                g_playerStatusText[PLAYER_STATUS_TEXT_LENGTH];

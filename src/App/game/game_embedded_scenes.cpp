@@ -114,9 +114,17 @@ internal void Game_BuildTestScene_0(GameState* gs)
     EntityState state = {};
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, &options))
     {
+        state.volumeState.type = EC_VOLUME_TYPE_ACID;
+        state.renderState.colourRGB[0] = 0;
+        state.renderState.colourRGB[1] = 0.5f;
+        state.renderState.colourRGB[2] = 0;
         Ent_WriteEntityStateCmd(NULL, &state);
     }
     
+    if (Ent_CopyTemplate(ENTITY_TYPE13_VOLUME, &state))
+    {
+        
+    }
 }
 
 internal void Game_BuildTestScene_1(GameState* gs)

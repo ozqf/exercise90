@@ -53,19 +53,49 @@ internal void EC_VolumeHandleOverlap(
 	Ent* self,
 	Ent* target)
 {
-    printf("Volume teams %d vs %d\n", self->team, target->team);
-    if (!Game_AttackIsValid(self->team, target->team)) { return; }
+    switch (vol->state.type)
+    {
+        case EC_VOLUME_TYPE_ACID:
+        {
+            if (!Game_AttackIsValid(self->team, target->team)) { return; }
 
-	EC_Health* hp = EC_FindHealth(gs, target);
-	if (hp)
-	{
-		hp->state.hp -= 1;
-        hp->state.damageThisFrame += 1;
-        hp->state.lastHitFrame = time->gameFrameNumber + 1;
-        hp->state.lastHitSource = self->entId;
-	}
+	        EC_Health* hp = EC_FindHealth(gs, target);
+	        if (hp)
+	        {
+	        	hp->state.hp -= 1;
+                hp->state.damageThisFrame += 1;
+                hp->state.lastHitFrame = time->gameFrameNumber + 1;
+                hp->state.lastHitSource = self->entId;
+	        }
+        } break;
+
+        case EC_VOLUME_TYPE_LAVA:
+        {
+            if (!Game_AttackIsValid(self->team, target->team)) { return; }
+
+	        EC_Health* hp = EC_FindHealth(gs, target);
+	        if (hp)
+	        {
+	        	hp->state.hp -= 5;
+                hp->state.damageThisFrame += 1;
+                hp->state.lastHitFrame = time->gameFrameNumber + 1;
+                hp->state.lastHitSource = self->entId;
+	        }
+        } break;
+        
+        case EC_VOLUME_TYPE_PROTECTION:
+        {
+            // flip attack check. we DON'T want to heal enemies!
+            if (Game_AttackIsValid(self->team, target->team)) { return; }
+
+	        EC_Health* hp = EC_FindHealth(gs, target);
+	        if (hp && hp->state.hp < hp->state.maxHp)
+	        {
+	        	hp->state.hp += 1;
+	        }
+        } break;
+    }
 }
-
 
 internal void Game_UpdateVolumes(GameState* gs, GameTime* time)
 {

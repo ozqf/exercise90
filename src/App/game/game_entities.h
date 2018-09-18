@@ -133,12 +133,6 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 	}
 }
 
-inline Ent* Ent_GetEntityByIndex(EntList* ents, u16 index)
-{
-    Assert(index < ents->max)
-    return &ents->items[index];
-}
-
 // Will NOT return entities that are free or merely reserved. Only ones that are active
 inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 {

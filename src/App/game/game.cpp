@@ -80,6 +80,7 @@ internal void Game_BuildTestMenu()
 internal void Game_Init()
 {
     GS_Init(&g_gameState);
+    Game_CreateEntityTemplates();
     Game_BuildTestHud();
     Game_BuildTestMenu();
 }

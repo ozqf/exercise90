@@ -488,9 +488,11 @@ struct EC_Thinker
     EC_ThinkerState state;
 };
 
-#define EC_VOLUME_TYPE_NONE 0
-#define EC_VOLUME_TYPE_DAMAGE 1	// hurt teammates overlapping
-#define EC_VOLUME_TYPE_HEAL 2	// heal teammates overlapping
+#define EC_VOLUME_TYPE_TRIGGER 0
+#define EC_VOLUME_TYPE_ACID 1
+#define EC_VOLUME_TYPE_LAVA 2
+#define EC_VOLUME_TYPE_PROTECTION 3
+#define EC_VOLUME_TYPE_POWER 4
 
 struct EC_VolumeState
 {
