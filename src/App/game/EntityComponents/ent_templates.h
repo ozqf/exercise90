@@ -2,11 +2,41 @@
 
 #include "../game.h"
 
-typedef void (*Fn_EntFromTemplate)(EntityState* state, EntitySpawnOptions* options, i32 factoryType);
-internal Fn_EntFromTemplate g_templates[32];
+#if 0
+// Experiments with entity templating system
+
+u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
+
+internal EntityState g_entTemplates[32];
+
+
+/*internal*/ void Game_CreateEntityTemplates()
+{
+	Game_WriteSpawnTemplate(ENTITY_TYPE_WORLD_CUBE, &g_entTemplates[ENTITY_TYPE_WORLD_CUBE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE_RIGIDBODY_CUBE, &g_entTemplates[ENTITY_TYPE_RIGIDBODY_CUBE], NULL);
+	Game_WriteSpawnTemplate(ENTITY_TYPE_ACTOR_GROUND, &g_entTemplates[ENTITY_TYPE_ACTOR_GROUND], NULL);
+}
+
+// Returns 0 if template Id isn't valid
+/*internal*/ i32 Ent_CopyTemplate(i32 templateId, EntityState* target)
+{
+	if (templateId < 0 || templateId >= 32)
+	{
+		printf("GAME TemplateId %d is out of bounds\n", templateId);
+		return 0;
+	}
+	*target = g_entTemplates[templateId];
+	return 1;
+}
+
+//typedef void (*Fn_EntFromTemplate)(EntityState* state, EntitySpawnOptions* options, i32 factoryType);
+//internal Fn_EntFromTemplate g_templates[32];
 
 // EntityState g_templates[64];
 // i32 g_numTemplates = 0;
+
+#endif
+
 /*
 Spawn sequence with templates:
 > Create a state struct.
@@ -17,6 +47,7 @@ Spawn sequence with templates:
 
 void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 {
+	if (options == NULL) { return; }
     // TODO: More tidy way to handle scale issues...?
     //if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
     //if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }

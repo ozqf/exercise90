@@ -45,7 +45,8 @@ void Test_Win32()
     printf("Winsock initialised\n");
     
     SOCKET s;
-    sockaddr_in server, si_other;
+    sockaddr_in server;
+	//sockaddr_in si_other;
 
     if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
     {
@@ -65,8 +66,8 @@ void Test_Win32()
     }
     printf("Socket bound\n");
 
-    i32 slen, recv_len;
-    char buf[UDP_BUFFER_LENGTH];
+    //i32 slen, recv_len;
+    //char buf[UDP_BUFFER_LENGTH];
 
 #if 0
     while(1)

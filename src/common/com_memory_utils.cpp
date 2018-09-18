@@ -91,7 +91,7 @@ static inline u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 }
 
 // returns 1 if two blocks of memory are identical. 0 if otherwise.
-static inline i32 COM_MemoryEquals(u8* ptrA, u8* ptrB, u32 numBytes)
+static inline i32 COM_CompareMemory(u8* ptrA, u8* ptrB, u32 numBytes)
 {
 	u8* end = ptrA + numBytes;
 	do

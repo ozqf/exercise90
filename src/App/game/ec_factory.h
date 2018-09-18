@@ -5,6 +5,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // APPLY ENTITY STATE
 ///////////////////////////////////////////////////////////////////////////////////
+
+// Central point of entity state creation/update
 internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &state->entId);
@@ -17,19 +19,19 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
         }
         ent = Ent_GetAndAssign(&gs->entList, &state->entId);
     }
-    if (state->componentBits & EC_FLAG_ENTITY) { EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
-    if (state->componentBits & EC_FLAG_TRANSFORM) { EC_TransformApplyState(gs, ent, &state->transform); }
-    if (state->componentBits & EC_FLAG_RENDERER) { EC_SingleRendObjApplyState(gs, ent, &state->renderState); }
-    if (state->componentBits & EC_FLAG_COLLIDER) { EC_ColliderApplyState(gs, ent, &state->colliderState); }
-    if (state->componentBits & EC_FLAG_AICONTROLLER) { EC_AIControllerApplyState(gs, ent, &state->aiState); }
-    if (state->componentBits & EC_FLAG_ACTORMOTOR) { EC_ActorMotorApplyState(gs, ent, &state->actorState); }
-    if (state->componentBits & EC_FLAG_HEALTH) { EC_HealthApplyState(gs, ent, &state->healthState); }
-    if (state->componentBits & EC_FLAG_PROJECTILE) { EC_ProjectileApplyState(gs, ent, &state->projectileState); }
-    if (state->componentBits & EC_FLAG_LABEL) { EC_LabelApplyState(gs, ent, &state->labelState); }
-    if (state->componentBits & EC_FLAG_THINKER) { EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
-    if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) { EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
-    if (state->componentBits & EC_FLAG_VOLUME) { EC_VolumeApplyState(gs, ent, &state->volumeState); }
-    if (state->componentBits & EC_FLAG_SENSOR) { EC_SensorApplyState(gs, ent, &state->sensorState); }
+    if (state->componentBits & EC_FLAG_ENTITY) 			{ EC_ApplyEntityMetaData(gs, ent, &state->entMetaData); }
+    if (state->componentBits & EC_FLAG_TRANSFORM) 		{ EC_TransformApplyState(gs, ent, &state->transform); }
+    if (state->componentBits & EC_FLAG_RENDERER) 		{ EC_SingleRendObjApplyState(gs, ent, &state->renderState); }
+    if (state->componentBits & EC_FLAG_COLLIDER) 		{ EC_ColliderApplyState(gs, ent, &state->colliderState); }
+    if (state->componentBits & EC_FLAG_AICONTROLLER) 	{ EC_AIControllerApplyState(gs, ent, &state->aiState); }
+    if (state->componentBits & EC_FLAG_ACTORMOTOR) 		{ EC_ActorMotorApplyState(gs, ent, &state->actorState); }
+    if (state->componentBits & EC_FLAG_HEALTH) 			{ EC_HealthApplyState(gs, ent, &state->healthState); }
+    if (state->componentBits & EC_FLAG_PROJECTILE) 		{ EC_ProjectileApplyState(gs, ent, &state->projectileState); }
+    if (state->componentBits & EC_FLAG_LABEL) 			{ EC_LabelApplyState(gs, ent, &state->labelState); }
+    if (state->componentBits & EC_FLAG_THINKER) 		{ EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
+    if (state->componentBits & EC_FLAG_MULTI_RENDOBJ) 	{ EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
+    if (state->componentBits & EC_FLAG_VOLUME) 			{ EC_VolumeApplyState(gs, ent, &state->volumeState); }
+    if (state->componentBits & EC_FLAG_SENSOR) 			{ EC_SensorApplyState(gs, ent, &state->sensorState); }
 
 }
 
@@ -194,6 +196,32 @@ internal void Ent_PrintComponents(Ent* ent)
 	{
 		printf("  Has Sensor\n");
 	}
+}
+
+u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
+{
+	u32 diffBits = 0;
+	if ((a->componentBits & EC_FLAG_ENTITY)
+		&& !COM_CompareMemory((u8*)&a->entMetaData, (u8*)&b->entMetaData, sizeof(Ent)))
+	{ diffBits |= EC_FLAG_ENTITY; }
+	
+	if ((a->componentBits & EC_FLAG_TRANSFORM)
+		&& !COM_CompareMemory((u8*)&a->transform, (u8*)&b->transform, sizeof(EC_Transform)))
+	{ diffBits |= EC_FLAG_TRANSFORM; }
+	
+	if ((a->componentBits & EC_FLAG_RENDERER)
+		&& !COM_CompareMemory((u8*)&a->renderState, (u8*)&b->renderState, sizeof(EC_SingleRendObj)))
+	{ diffBits |= EC_FLAG_RENDERER; }
+	
+	return diffBits;
+}
+
+/*internal*/ u32 Ent_CreateTemplateDiffBits(i32 templateId, EntityState* copy)
+{
+	u32 diffBits = 0;
+	EntityState temp;
+	Game_WriteSpawnTemplate(templateId, &temp, NULL);
+	return Ent_CalcDiffBits(&temp, copy);
 }
 
 /**

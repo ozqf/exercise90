@@ -61,7 +61,8 @@ void Test_ParseTestMapPath(char* path)
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-    Test_Win32();
+    //Test_Win32();
+	Test_EntityComponentSystem();
     #if 0
 	Test_ParseTestMapPath("TEST_1");
 	Test_ParseTestMapPath("TEST_-1");
