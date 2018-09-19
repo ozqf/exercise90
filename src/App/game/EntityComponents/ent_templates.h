@@ -2,53 +2,6 @@
 
 #include "../game.h"
 
-#if 1
-// Experiments with entity templating system
-
-u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
-
-internal EntityState g_entTemplates[32];
-
-
-/*internal*/ void Game_CreateEntityTemplates()
-{
-	Game_WriteSpawnTemplate(ENTITY_TYPE1_WORLD_CUBE, &g_entTemplates[ENTITY_TYPE1_WORLD_CUBE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE2_RIGIDBODY_CUBE, &g_entTemplates[ENTITY_TYPE2_RIGIDBODY_CUBE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE3_ACTOR_GROUND, &g_entTemplates[ENTITY_TYPE3_ACTOR_GROUND], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE4_PROJECTILE, &g_entTemplates[ENTITY_TYPE4_PROJECTILE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE5_SPAWNER, &g_entTemplates[ENTITY_TYPE5_SPAWNER], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE6_ENEMY, &g_entTemplates[ENTITY_TYPE6_ENEMY], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE7_BLOCKING_VOLUME, &g_entTemplates[ENTITY_TYPE7_BLOCKING_VOLUME], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE8_ENEMY_BRUTE, &g_entTemplates[ENTITY_TYPE8_ENEMY_BRUTE], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE9_ENEMY_CHARGER, &g_entTemplates[ENTITY_TYPE9_ENEMY_CHARGER], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE10_ENEMY_FODDER, &g_entTemplates[ENTITY_TYPE10_ENEMY_FODDER], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE11_ENEMY_SWARM, &g_entTemplates[ENTITY_TYPE11_ENEMY_SWARM], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE12_ENEMY_SPINNER, &g_entTemplates[ENTITY_TYPE12_ENEMY_SPINNER], NULL);
-	Game_WriteSpawnTemplate(ENTITY_TYPE13_VOLUME, &g_entTemplates[ENTITY_TYPE13_VOLUME], NULL);
-    Game_WriteSpawnTemplate(ENTITY_TYPE14_ACID, &g_entTemplates[ENTITY_TYPE14_VOLUME], NULL);
-    Game_WriteSpawnTemplate(ENTITY_TYPE15_LAVA, &g_entTemplates[ENTITY_TYPE15_VOLUME], NULL);
-}
-
-// Returns 0 if template Id isn't valid
-/*internal*/ i32 Ent_CopyTemplate(i32 templateId, EntityState* target)
-{
-	if (templateId < 0 || templateId >= 32)
-	{
-		printf("GAME TemplateId %d is out of bounds\n", templateId);
-		return 0;
-	}
-	*target = g_entTemplates[templateId];
-	return 1;
-}
-
-//typedef void (*Fn_EntFromTemplate)(EntityState* state, EntitySpawnOptions* options, i32 factoryType);
-//internal Fn_EntFromTemplate g_templates[32];
-
-// EntityState g_templates[64];
-// i32 g_numTemplates = 0;
-
-#endif
-
 /*
 Spawn sequence with templates:
 > Create a state struct.
@@ -56,65 +9,6 @@ Spawn sequence with templates:
 > Patch values via 'options' data
 > write spawn command to stream
 */ 
-
-void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
-{
-	if (options == NULL) { return; }
-    // TODO: More tidy way to handle scale issues...?
-    //if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
-    //if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }
-    //if (options->scale.z <= 0) { options->scale.z = 1; /*printf("  SpawnOptions had scaleZ <= 0, forced to 1\n");*/ }
-
-    state->entMetaData.source = options->source;
-    // if (state->source.value != 0)
-    // {
-    //     printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
-    // }
-    if (options->flags & ENT_OPTION_FLAG_TEAM)
-    {
-        state->entMetaData.team = options->team;
-    }
-
-    if (state->componentBits & EC_BIT1_TRANSFORM)
-    {
-        //printf("  EC Apply transform options\n");
-        Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
-        //if (options->scale.x != 0 && options->scale.y != 0 && options->scale.z != 0)
-        if (options->flags & ENT_OPTION_FLAG_SCALE)
-        {
-            Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
-        }
-        
-    }
-    if (state->componentBits & EC_BIT3_COLLIDER)
-    {
-        state->colliderState.def.pos[0] = options->pos.x;
-        state->colliderState.def.pos[1] = options->pos.y;
-        state->colliderState.def.pos[2] = options->pos.z;
-
-        if (state->componentBits & ENT_OPTION_FLAG_SCALE)
-        {
-            if (options->scale.x == 0 || options->scale.y == 0 || options->scale.z == 0)
-            {
-                printf("CANNOT APPLY SCALE TO %d/%d An axis is zero!\n",
-                    state->entId.iteration, state->entId.index
-                );
-            }
-            else
-            {
-                printf("APPLY SCALE %.2f/%.2f/%.2f to ent %d/%d\n",
-                    options->scale.x, options->scale.y, options->scale.z,
-                    state->entId.iteration, state->entId.index
-                );
-                state->colliderState.def.SetScale(
-                    options->scale.x * 0.5f,
-                    options->scale.y * 0.5f,
-                    options->scale.z * 0.5f
-                );
-            }
-        }
-    }
-}
 
 void Ent_SetTemplate_WorldCube(EntityState* state, EntitySpawnOptions* options, i32 factoryType)
 {
@@ -306,31 +200,44 @@ void Ent_SetTemplate_Spawner(EntityState* state, EntitySpawnOptions* options)
 
 }
 
-#define ENT_SET_TEMPLATE(caseValue, func, state, options) case caseValue##: \
-{ \
-    func##(##state##, options##); \
-} break;
+u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
 
-#define ENT_SET_TEMPLATE_WITH_SUB_TYPES(caseValue, func, state, options, factoryType) \
-case caseValue##: \
-{ \
-    func##(##state##, options##, factoryType##); \
-} break;
+internal EntityState g_entTemplates[32];
 
-internal u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options)
+
+internal void Game_CreateEntityTemplates()
 {
-    if (Ent_SetTemplate_Enemy(state, options, factoryType)) { return 1; }
-    switch (factoryType)
-    {
-       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE1_WORLD_CUBE, Ent_SetTemplate_WorldCube, state, options, factoryType);
-       ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE7_BLOCKING_VOLUME, Ent_SetTemplate_WorldCube, state, options, factoryType);
-       ENT_SET_TEMPLATE(ENTITY_TYPE2_RIGIDBODY_CUBE, Ent_SetTemplate_RigidbodyCube, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE3_ACTOR_GROUND, Ent_SetTemplate_Actor, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE4_PROJECTILE, Ent_SetTemplate_Projectile, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE5_SPAWNER, Ent_SetTemplate_Spawner, state, options);
-       ENT_SET_TEMPLATE(ENTITY_TYPE13_VOLUME, Ent_SetTemplate_Volume, state, options);
-       //ENT_SET_TEMPLATE_WITH_SUB_TYPES(ENTITY_TYPE6_ENEMY, Ent_SetTemplate_Enemy, state, options, factoryType);
-       default: { printf("GAME Unknown ent factory type %d\n", factoryType); return 0; }
-    }
-    return 1;
+    EntityState* arr = g_entTemplates;
+	Ent_SetTemplate_WorldCube(&arr[ENTITY_TYPE1_WORLD_CUBE], NULL, ENTITY_TYPE1_WORLD_CUBE);
+    Ent_SetTemplate_RigidbodyCube(&arr[ENTITY_TYPE2_RIGIDBODY_CUBE], NULL);
+    Ent_SetTemplate_Actor(&arr[ENTITY_TYPE3_ACTOR_GROUND], NULL);
+    Ent_SetTemplate_Projectile(&arr[ENTITY_TYPE4_PROJECTILE], NULL);
+    Ent_SetTemplate_Spawner(&arr[ENTITY_TYPE5_SPAWNER], NULL);
+    Ent_SetTemplate_Grunt(&arr[ENTITY_TYPE6_ENEMY], NULL);
+    Ent_SetTemplate_WorldCube(&arr[ENTITY_TYPE7_BLOCKING_VOLUME], NULL, ENTITY_TYPE7_BLOCKING_VOLUME);
+    Ent_SetTemplate_Brute(&arr[ENTITY_TYPE8_ENEMY_BRUTE], NULL);
+    Ent_SetTemplate_Charger(&arr[ENTITY_TYPE9_ENEMY_CHARGER], NULL);
+    Ent_SetTemplate_Fodder(&arr[ENTITY_TYPE10_ENEMY_FODDER], NULL);
+    Ent_SetTemplate_Swarm(&arr[ENTITY_TYPE11_ENEMY_SWARM], NULL);
+    Ent_SetTemplate_Spinner(&arr[ENTITY_TYPE12_ENEMY_SPINNER], NULL);
+    Ent_SetTemplate_Volume(&arr[ENTITY_TYPE13_VOLUME], NULL);
 }
+
+// Returns 0 if template Id isn't valid
+internal i32 Ent_CopyTemplate(i32 templateId, EntityState* target, EntitySpawnOptions* options)
+{
+	if (templateId < 0 || templateId >= 32)
+	{
+		printf("GAME TemplateId %d is out of bounds\n", templateId);
+		return 0;
+	}
+	*target = g_entTemplates[templateId];
+    Ent_ApplySpawnOptions(target, options);
+	return 1;
+}
+
+//typedef void (*Fn_EntFromTemplate)(EntityState* state, EntitySpawnOptions* options, i32 factoryType);
+//internal Fn_EntFromTemplate g_templates[32];
+
+// EntityState g_templates[64];
+// i32 g_numTemplates = 0;

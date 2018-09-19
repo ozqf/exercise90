@@ -556,6 +556,7 @@ struct EntityState
 
 #define ENT_OPTION_FLAG_SCALE (1 << 1)
 #define ENT_OPTION_FLAG_TEAM (1 << 2)
+#define ENT_OPTION_FLAG_VELOCITY (1 << 3)
 // Current things you can customise when you spawn an entity.
 struct EntitySpawnOptions
 {

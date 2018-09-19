@@ -220,7 +220,7 @@ u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
 {
 	u32 diffBits = 0;
 	EntityState temp;
-	Game_WriteSpawnTemplate(templateId, &temp, NULL);
+	Ent_CopyTemplate(templateId, &temp, NULL);
 	return Ent_CalcDiffBits(&temp, copy);
 }
 
@@ -276,18 +276,20 @@ internal u8 Ent_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* tar
     *target = {};
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);
     
-    u8 result = Game_WriteSpawnTemplate(factoryType, target, options);
-    target->entId = entId; 
-    return result;
+    i32 result = Ent_CopyTemplate(factoryType, target, options);
+    target->entId = entId;
+    Ent_ApplySpawnOptions(target, options);
+    return (u8)result;
 }
 
-internal EntId Ent_WriteSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
+internal EntId Ent_QuickSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
 {
     EntityState s = {};
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);
-    s.entId = entId;
-    if (Game_WriteSpawnTemplate(factoryType, &s, options))
+    if (Ent_CopyTemplate(factoryType, &s, options))
     {
+        s.entId = entId;
+        Ent_ApplySpawnOptions(&s, options);
         Ent_WriteEntityStateCmd(NULL, &s);
     }
     return entId;

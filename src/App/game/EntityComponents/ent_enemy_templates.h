@@ -175,7 +175,7 @@ internal void Ent_SetTemplate_Spinner(EntityState* state, EntitySpawnOptions* op
 	Ent_SetTemplate_GenericEnemy(state, options);
 	Ent_ApplySpawnOptions(state, options);
 }
-
+#if 0
 internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* options, i32 templateId)
 {
     switch(templateId)
@@ -189,3 +189,4 @@ internal u8 Ent_SetTemplate_Enemy(EntityState* state, EntitySpawnOptions* option
         default: return 0;
     }
 }
+#endif

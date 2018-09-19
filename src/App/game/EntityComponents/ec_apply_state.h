@@ -2,8 +2,76 @@
 
 #include "game.h"
 
+
+void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
+{
+	if (options == NULL) { return; }
+    // TODO: More tidy way to handle scale issues...?
+    //if (options->scale.x <= 0) { options->scale.x = 1; /*printf("  SpawnOptions had scaleX <= 0, forced to 1\n");*/ }
+    //if (options->scale.y <= 0) { options->scale.y = 1; /*printf("  SpawnOptions had scaleY <= 0, forced to 1\n");*/ }
+    //if (options->scale.z <= 0) { options->scale.z = 1; /*printf("  SpawnOptions had scaleZ <= 0, forced to 1\n");*/ }
+
+    state->entMetaData.source = options->source;
+    // if (state->source.value != 0)
+    // {
+    //     printf("  Ent source: %d/%d\n", state->source.iteration, state->source.index);
+    // }
+    if (options->flags & ENT_OPTION_FLAG_TEAM)
+    {
+        state->entMetaData.team = options->team;
+    }
+
+    if (state->componentBits & EC_BIT1_TRANSFORM)
+    {
+        //printf("  EC Apply transform options\n");
+        Transform_SetByPosAndDegrees(&state->transform, &options->pos, &options->rot);
+        //if (options->scale.x != 0 && options->scale.y != 0 && options->scale.z != 0)
+        if (options->flags & ENT_OPTION_FLAG_SCALE)
+        {
+            Transform_SetScale(&state->transform, options->scale.x, options->scale.y, options->scale.z);
+        }
+        
+    }
+    if (state->componentBits & EC_BIT3_COLLIDER)
+    {
+        state->colliderState.def.pos[0] = options->pos.x;
+        state->colliderState.def.pos[1] = options->pos.y;
+        state->colliderState.def.pos[2] = options->pos.z;
+
+        if (state->componentBits & ENT_OPTION_FLAG_SCALE)
+        {
+            if (options->scale.x == 0 || options->scale.y == 0 || options->scale.z == 0)
+            {
+                printf("CANNOT APPLY SCALE TO %d/%d An axis is zero!\n",
+                    state->entId.iteration, state->entId.index
+                );
+            }
+            else
+            {
+                printf("APPLY SCALE %.2f/%.2f/%.2f to ent %d/%d\n",
+                    options->scale.x, options->scale.y, options->scale.z,
+                    state->entId.iteration, state->entId.index
+                );
+                state->colliderState.def.SetScale(
+                    options->scale.x * 0.5f,
+                    options->scale.y * 0.5f,
+                    options->scale.z * 0.5f
+                );
+            }
+        }
+    }
+    if (state->componentBits & EC_BIT6_PROJECTILE &&
+        options->flags & ENT_OPTION_FLAG_VELOCITY)
+    {
+        state->projectileState.move = options->vel;
+        printf("PRJ Options Vel: %.2f, %.2f, %.2f\n",
+            state->projectileState.move.x, state->projectileState.move.y, state->projectileState.move.z
+    );
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
-// APPLY COMPONENT STATE
+// APPLY SPECIFIC COMPONENT STATE
 ///////////////////////////////////////////////////////////////////////////////////
 internal void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
 {
@@ -141,6 +209,9 @@ internal void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileStat
         prj = EC_AddProjectile(gs, ent);
     }
     prj->state = *state;
+    printf("EC PRJ Vel: %.2f, %.2f, %.2f\n",
+        prj->state.move.x, prj->state.move.y, prj->state.move.z
+    );
 }
 
 internal void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)

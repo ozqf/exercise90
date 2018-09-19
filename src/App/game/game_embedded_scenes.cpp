@@ -96,7 +96,7 @@ internal void Game_AddTestSolid(GameState* gs,
 internal void Game_AddAcidPool(GameState* gs, Vec3 pos, Vec3 scale)
 {
     EntityState state;
-    if (Ent_CopyTemplate(ENTITY_TYPE13_VOLUME, &state))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, NULL))
     {
         state.entId = Ent_ReserveFreeEntity(&gs->entList);
         state.entMetaData.team = TEAM_ENEMIES;
@@ -140,7 +140,7 @@ internal void Game_BuildTestScene_0(GameState* gs)
     options.scale.z = 10;
     options.pos.y = -5;
     options.pos.x = -19;
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &options);
+    //Ent_QuickSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &options);
     EntityState state = {};
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, &options))
     {
@@ -189,39 +189,39 @@ internal void Game_BuildTestScene(GameState* gs, i32 sceneIndex)
     
     options = {};
     options.pos = { 20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { 10, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { -10, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     options = {};
     options.pos = { -20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     #endif
 
     #if 0
     EntitySpawnOptions options;
     options = {};
     options.pos = { 20, 0, 20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { -20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { -20, 0, 20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
 
     options = {};
     options.pos = { 20, 0, -20 };
-    Ent_WriteSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
+    Ent_QuickSpawnCmd(gs, ENTITY_TYPE5_SPAWNER, &options);
     #endif
 
     //EntitySpawnOptions options = {};
     //options = {};
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE6_ENEMY_CHARGER, &options);
+    //Ent_QuickSpawnCmd(gs, ENTITY_TYPE6_ENEMY_CHARGER, &options);
     
 }

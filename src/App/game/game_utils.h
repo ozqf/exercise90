@@ -90,7 +90,7 @@ inline void Ent_SetProjectileSpawnOptions(
     *options = {};
     options->pos = pos;
     options->source = source;
-    options->flags |= ENT_OPTION_FLAG_TEAM;
+    options->flags = ENT_OPTION_FLAG_TEAM | ENT_OPTION_FLAG_VELOCITY;
     options->team = team;
     options->vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
 }

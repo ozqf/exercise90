@@ -2,39 +2,6 @@
 
 #include "../game.h"
 
-void SV_SpawnTestBullet(
-    GameState *gs,
-    EntId source,
-    i32 team,
-    f32 x,
-    f32 y,
-    f32 z,
-    f32 pitchDegrees,
-    f32 yawDegrees,
-    f32 speed)
-{
-    EntitySpawnOptions options = {};
-    options.pos.x = x;
-    options.pos.y = y;
-    options.pos.z = z;
-
-    options.source = source;
-    options.flags |= ENT_OPTION_FLAG_TEAM;
-    options.team = team;
-
-    options.vel = Vec3_ForwardFromAngles(yawDegrees, pitchDegrees, speed);
-
-    //Ent_WriteSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &options);
-    static EntityState state;
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
-    {
-        state.renderState.colourRGB[0] = 1;
-        state.renderState.colourRGB[1] = 0;
-        state.renderState.colourRGB[2] = 1;
-        Ent_WriteEntityStateCmd(NULL, &state);
-    }
-}
-
 // Player rapid
 inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
 {
@@ -51,6 +18,7 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
         250);
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
+        //state.projectileState.move = options.vel;
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
         state.renderState.colourRGB[2] = 1;
