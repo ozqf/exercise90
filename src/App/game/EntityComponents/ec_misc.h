@@ -279,7 +279,7 @@ internal void Game_UpdateHealth(GameState *gs, GameTime *time)
                 Client* cl = App_FindLocalClient(&gs->clientList, 1);
                 if (health->header.entId.value == cl->entId.value)
                 {
-                    printf("Spawn hud ring\n");
+                    //printf("Spawn hud ring\n");
                     // Spawn hit gfx
                     Cmd_SpawnHudItem cmd = {};
                     EC_Transform* attackerXForm = EC_FindTransform(gs, &health->state.lastHitSource);

@@ -129,7 +129,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 	{
 		char buf[128];
 		sprintf_s(buf, 128, "!ERROR Attempting to  assign to an in-use entity: %d/%d\n", ent->entId.iteration, ent->entId.index);
-		APP_ASSERT(0, buf, "FATAL");
+		APP_ASSERT(0, buf);
 		//ILLEGAL_CODE_PATH
 		return NULL;
 	}

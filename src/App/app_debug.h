@@ -235,7 +235,7 @@ Rotation:\n\
             for (i32 i = 0; i < g_inputActions.count; ++i)
             {
                 InputAction* action = &g_inputActions.actions[i];
-                APP_ASSERT((written < count), "Chars written >= count", "Debug Input");
+                APP_ASSERT((written < count), "Chars written >= count");
                 written += sprintf_s(writePtr, (count - written),
                     "%d: VAL %d CODE %d FRAME %d NAME: %s\n",
                     i,

@@ -99,11 +99,19 @@ internal void Game_AddAcidPool(GameState* gs, Vec3 pos, Vec3 scale)
     if (Ent_CopyTemplate(ENTITY_TYPE13_VOLUME, &state))
     {
         state.entId = Ent_ReserveFreeEntity(&gs->entList);
+        state.entMetaData.team = TEAM_ENEMIES;
         state.transform.pos = pos;
         state.transform.scale = scale;
+        state.renderState.colourRGB[0] = 0;
+        state.renderState.colourRGB[1] = 0.5f;
+        state.renderState.colourRGB[2] = 0;
         state.colliderState.def.data.box.halfSize[0] = scale.x * 0.5f;
         state.colliderState.def.data.box.halfSize[1] = scale.y * 0.5f;
         state.colliderState.def.data.box.halfSize[2] = scale.z * 0.5f;
+        state.colliderState.def.pos[0] = pos.x;
+        state.colliderState.def.pos[1] = pos.y;
+        state.colliderState.def.pos[2] = pos.z;
+        state.volumeState.type = EC_VOLUME_TYPE_ACID;
         printf("Add acid pool %.2f/%.2f/%.2f\n", pos.x, pos.y, pos.z);
         Ent_WriteEntityStateCmd(NULL, &state);
     }

@@ -25,6 +25,8 @@ internal EntityState g_entTemplates[32];
 	Game_WriteSpawnTemplate(ENTITY_TYPE11_ENEMY_SWARM, &g_entTemplates[ENTITY_TYPE11_ENEMY_SWARM], NULL);
 	Game_WriteSpawnTemplate(ENTITY_TYPE12_ENEMY_SPINNER, &g_entTemplates[ENTITY_TYPE12_ENEMY_SPINNER], NULL);
 	Game_WriteSpawnTemplate(ENTITY_TYPE13_VOLUME, &g_entTemplates[ENTITY_TYPE13_VOLUME], NULL);
+    Game_WriteSpawnTemplate(ENTITY_TYPE14_ACID, &g_entTemplates[ENTITY_TYPE14_VOLUME], NULL);
+    Game_WriteSpawnTemplate(ENTITY_TYPE15_LAVA, &g_entTemplates[ENTITY_TYPE15_VOLUME], NULL);
 }
 
 // Returns 0 if template Id isn't valid

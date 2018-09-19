@@ -21,7 +21,7 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
         EC_RENDERER_STRING_LENGTH);
     state->renderState.colourRGB[0] = 1;
     state->renderState.colourRGB[1] = 1;
-    state->renderState.colourRGB[2] = 0;
+    state->renderState.colourRGB[2] = 1;
 
     state->componentBits |= EC_BIT11_VOLUME;
     EC_VolumeState* s = &state->volumeState;

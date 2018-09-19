@@ -19,6 +19,8 @@
 #define ENTITY_TYPE11_ENEMY_SWARM 11
 #define ENTITY_TYPE12_ENEMY_SPINNER 12
 #define ENTITY_TYPE13_VOLUME 13
+#define ENTITY_TYPE14_ACID 14
+#define ENTITY_TYPE15_LAVA 15
 
 ////////////////////////////////////////////////////////////
 // LOCAL ENTITY IDS

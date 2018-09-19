@@ -320,6 +320,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	{
 		g_minimised = 0;
 	}
+    if (numTokens == 2 && !COM_CompareStrings(tokens[0], "APP") && !COM_CompareStrings(tokens[1], "CRASH"))
+	{
+		APP_ASSERT(0, "BOOOOOOM");
+        return 1;
+	}
     return 0;
 }
 
@@ -402,7 +407,7 @@ void App_ReadPlatformCommand(u32 type, u32 bytes, u8 *ptrRead)
     {
         case PLATFORM_EVENT_CODE_INPUT:
         {
-            APP_ASSERT((bytes == sizeof(InputEvent)), "Platform event cmd wrong size", "Bad Command");
+            APP_ASSERT((bytes == sizeof(InputEvent)), "Platform event cmd wrong size");
             InputEvent ev = {};
             ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
             Input_TestForAction(&g_inputActions, ev.value, ev.inputID, g_time.platformFrameNumber);
