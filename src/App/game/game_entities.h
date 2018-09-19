@@ -127,8 +127,10 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 	}
 	else
 	{
-		printf("!ERROR Attempting to  assign to an in-use entity: %d/%d\n", ent->entId.iteration, ent->entId.index);
-		ILLEGAL_CODE_PATH
+		char buf[128];
+		sprintf_s(buf, 128, "!ERROR Attempting to  assign to an in-use entity: %d/%d\n", ent->entId.iteration, ent->entId.index);
+		APP_ASSERT(0, buf, "FATAL");
+		//ILLEGAL_CODE_PATH
 		return NULL;
 	}
 }

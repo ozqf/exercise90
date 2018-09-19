@@ -5,6 +5,9 @@
 #define WALL_TEXTURE "textures\\brbrick2.bmp"
 #define SCIFI_TEXTURE "textures\\COMP03_1.bmp"
 
+/**
+ * TODO: Rewrite me I'm awful
+ */
 internal void Game_AddTestSolid(GameState* gs,
 	f32 x, f32 y, f32 z,
 	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u8 isVisible)
@@ -90,6 +93,22 @@ internal void Game_AddTestSolid(GameState* gs,
     printf("  Add test solid: cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
 }
 
+internal void Game_AddAcidPool(GameState* gs, Vec3 pos, Vec3 scale)
+{
+    EntityState state;
+    if (Ent_CopyTemplate(ENTITY_TYPE13_VOLUME, &state))
+    {
+        state.entId = Ent_ReserveFreeEntity(&gs->entList);
+        state.transform.pos = pos;
+        state.transform.scale = scale;
+        state.colliderState.def.data.box.halfSize[0] = scale.x * 0.5f;
+        state.colliderState.def.data.box.halfSize[1] = scale.y * 0.5f;
+        state.colliderState.def.data.box.halfSize[2] = scale.z * 0.5f;
+        printf("Add acid pool %.2f/%.2f/%.2f\n", pos.x, pos.y, pos.z);
+        Ent_WriteEntityStateCmd(NULL, &state);
+    }
+}
+
 internal void Game_BuildTestScene_0(GameState* gs)
 {
     printf("--- GAME LOAD SCENE 0 ---\n");
@@ -102,7 +121,9 @@ internal void Game_BuildTestScene_0(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, 24, 24, 12, 1, 0);
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 0);
 
+    Game_AddAcidPool(gs, { -19, -5, -19 }, { 10, 1, 10 });
     
+    #if 0
     EntitySpawnOptions options;
     options.flags = ENT_OPTION_FLAG_SCALE | ENT_OPTION_FLAG_TEAM;
     options.team = TEAM_ENEMIES;
@@ -110,6 +131,7 @@ internal void Game_BuildTestScene_0(GameState* gs)
     options.scale.y = 1;
     options.scale.z = 10;
     options.pos.y = -5;
+    options.pos.x = -19;
     //Ent_WriteSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &options);
     EntityState state = {};
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, &options))
@@ -125,6 +147,7 @@ internal void Game_BuildTestScene_0(GameState* gs)
     {
         
     }
+    #endif
 }
 
 internal void Game_BuildTestScene_1(GameState* gs)

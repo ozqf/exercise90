@@ -32,6 +32,15 @@ global_variable RendObj g_debugLine = {};
 
 void App_FatalError(char* message, char* heading);
 
+//#define APP_ASSERT(expression, msg, heading) if(!(expression)) { App_FatalError(msg, heading); }
+
+#define APP_ASSERT(expression, msg) if(!(expression)) \
+{ \
+    char assertBuf[512]; \
+    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
+    App_FatalError(assertBuf, "Fatal error"); \
+} \
+
 // cmd writing
 //void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
 char* App_GetBufferName(u8* bufferStartAddr);
