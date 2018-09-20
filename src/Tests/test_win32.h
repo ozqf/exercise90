@@ -119,11 +119,21 @@ void Test_Server(u16 port)
     sockaddr_in fromAddress;
     i32 fromAddressSize = sizeof(fromAddress);
 
-    sockaddr toAddress;
+    /*
+    struct sockaddr_in {
+        short   sin_family;
+        u_short sin_port;
+        struct  in_addr sin_addr;
+        char    sin_zero[8];
+    };
+    */
+    sockaddr_in toAddress;
+    toAddress.sin_port = DEFAULT_PORT_SERVER;
+    toAddress.sin_family = AF_INET;
+    toAddress.sin_addr.S_un.S_addr = InetPton(AF_INET, LOCALHOST_ADDRESS, &toAddress.sin_addr.S_un.S_addr);
+    
     i32 toAddressSize = sizeof(toAddress);
-    toAddress.sa_family = AF_INET;
-    // sa_data
-    COM_CopyString(LOCALHOST_ADDRESS, toAddress.sa_data);
+    
 
     i32 recv_len;
     char buf[UDP_BUFFER_LENGTH];
@@ -139,13 +149,16 @@ void Test_Server(u16 port)
         printf("------------------------------------------------------\nWaiting for data...\n");
         fflush(stdout);
 
+        ///////////////////////////////////////////////////////////////////////////
+        // Send
+
         printf("Send!\n");
         i32 sendResult = sendto(
             conn.socket,
             outboundMsg,
             sendLength,
             0,
-            &toAddress,
+            (sockaddr*)&toAddress,
             toAddressSize
         );
         if (sendResult == SOCKET_ERROR)
@@ -158,10 +171,15 @@ void Test_Server(u16 port)
             printf("Send Result: %d\n", sendResult);
         }
 
+        Sleep(50);
+        
+        ///////////////////////////////////////////////////////////////////////////
+        // Receive
+
         //clear the buffer by filling null, it might have previously received data
         memset(buf, '\0', UDP_BUFFER_LENGTH);
         i32 flags = 0;
-        
+
         recv_len = recvfrom(
             conn.socket,
             buf,
@@ -189,7 +207,6 @@ void Test_Server(u16 port)
                 {
                     running = false;
                 }
-                Sleep(1000);
             }
         }
     }
