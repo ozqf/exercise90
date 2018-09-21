@@ -47,8 +47,9 @@ void CloseSocket();
 Send();
 */
 
-struct Win32_Connection
+struct Win32_Socket
 {
+	i32 isActive;
     WSADATA wsaData;
     SOCKET socket;
     sockaddr_in server;
@@ -56,6 +57,207 @@ struct Win32_Connection
     u16 port;
 };
 
+#define MAX_SOCKETS 2
+internal Win32_Socket g_connections[MAX_SOCKETS];
+
+void Net_Send(Win32_Socket* winSock, char* address, u16 port, char* outboundMsg)
+{
+    printf("Sending %s to %s:%d\n", outboundMsg, address, port);
+	sockaddr_in toAddress;
+    toAddress.sin_port = DEFAULT_PORT_SERVER;
+    toAddress.sin_family = AF_INET;
+    toAddress.sin_addr.S_un.S_addr = InetPton(AF_INET, address, &toAddress.sin_addr.S_un.S_addr);
+    
+    i32 toAddressSize = sizeof(toAddress);
+    
+    i32 sendLength = COM_StrLen(outboundMsg) + 1;
+
+    i32 sendResult = sendto(
+        winSock->socket,
+        outboundMsg,
+        sendLength,
+        0,
+        (sockaddr*)&toAddress,
+        toAddressSize
+    );
+    if (sendResult == SOCKET_ERROR)
+    {
+        i32 errorCode = WSAGetLastError();
+        printf("Send error: %d\n", errorCode);
+    }
+    else
+    {
+        printf("Send Result: %d\n", sendResult);
+    }
+}
+
+i32 Net_ReadSocket(Win32_Socket* winSock)
+{
+    // optional struct to store the sender's address
+    sockaddr_in fromAddress;
+    i32 fromAddressSize = sizeof(fromAddress);
+
+    i32 recv_len;
+    char buf[UDP_BUFFER_LENGTH];
+    memset(buf, '\0', UDP_BUFFER_LENGTH);
+    i32 flags = 0;
+    recv_len = recvfrom(
+        winSock->socket,
+        buf,
+        UDP_BUFFER_LENGTH,
+        flags,
+        (struct sockaddr *) &fromAddress,
+        &fromAddressSize
+    );
+    
+    if (recv_len == SOCKET_ERROR)
+    {
+        i32 errorCode = WSAGetLastError();
+        if (errorCode != NET_NON_BLOCKING_ERROR)
+        {
+            printf("recvfrom() failed with error code %d\n", errorCode);
+            Net_PrintNetworkError(errorCode);
+        }
+        else
+        {
+            printf(".");
+        }
+    }
+    else
+    {
+        printf("\nReceived length: %d\n", recv_len);
+    }
+    return recv_len > 0 ? recv_len : 0;
+}
+
+// returns 0 on success, or error code
+i32 Net_OpenSocket(Win32_Socket* winSock, u16 port)
+{
+	Assert(!winSock->isActive)
+
+    winSock->port = port;
+
+    
+    int iResult;
+    iResult = WSAStartup(MAKEWORD(2, 2), &winSock->wsaData);
+    if (iResult != 0)
+    {
+        printf("WSAStartup failed: %d\n", iResult);
+        return iResult;
+    }
+    printf("Winsock initialised\n");
+    
+    if ((winSock->socket = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
+    {
+        i32 errorCode = WSAGetLastError();
+        printf("Could not create socket: %d\n", errorCode);
+        return errorCode;
+    }
+    printf("Socket Created\n");
+
+    winSock->server.sin_family = AF_INET;
+    winSock->server.sin_addr.s_addr = htons(INADDR_ANY);
+    winSock->server.sin_port = htons(winSock->port);
+
+    u_long mode = 1;  // 1 to enable non-blocking socket
+    ioctlsocket(winSock->socket, FIONBIO, &mode);
+
+    iResult = bind(winSock->socket, (sockaddr*)&winSock->server, sizeof(winSock->server));
+    if (iResult == SOCKET_ERROR)
+    {
+        i32 errorCode = WSAGetLastError();
+        printf("Failed to bind socket with code: %d\n", errorCode);
+        Net_PrintNetworkError(errorCode);
+        return errorCode;
+    }
+    printf("Socket bound on port %d\n", winSock->port);
+
+	winSock->isActive = 1;
+	return 0;
+}
+
+void Net_Shutdown()
+{
+    printf("\nShutting down...\n");
+    for (i32 i = 0; i < MAX_SOCKETS; ++i)
+    {
+        Win32_Socket* sock = &g_connections[i];
+        if (!sock->isActive) { continue; }
+
+        i32 result = closesocket(sock->socket);
+        printf("Closing socket %d result: %d\n", i, result);
+    }
+    WSACleanup();
+    printf("Done\n");
+}
+
+void Net_RunLoopbackTest()
+{
+    i32 errorCode;
+    errorCode = Net_OpenSocket(&g_connections[0], DEFAULT_PORT_SERVER);
+    if (errorCode)
+    {
+        printf("Failed to open socket: %d\n", errorCode);
+        return;
+    }
+    errorCode = Net_OpenSocket(&g_connections[1], DEFAULT_PORT_CLIENT);
+    if (errorCode)
+    {
+        printf("Failed to open socket: %d\n", errorCode);
+        return;
+    }
+
+    // This shit doesn't work... why?
+    Net_Send(&g_connections[1], LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo");
+    printf("Reading from socket: ");
+    i32 i = 0;
+    while (i++ < 100)
+    {
+        Net_ReadSocket(&g_connections[0]);
+        Sleep(100);
+    }
+    
+    Net_Shutdown();
+}
+
+void Net_RunServerTest()
+{
+    printf("Server test\n");
+    i32 errorCode = Net_OpenSocket(&g_connections[0], DEFAULT_PORT_SERVER);
+    if (errorCode)
+    {
+        printf("Failed to open socket: %d\n", errorCode);
+        return;
+    }
+    
+    for(;;)
+    {
+        i32 read = read = Net_ReadSocket(&g_connections[0]);
+        if (read > 0)
+        {
+            printf("Holy shit read %d bytes\n", read);
+            break;
+        }
+    }
+}
+
+void Net_RunClientTest()
+{
+    printf("Client test\n");
+    i32 errorCode = Net_OpenSocket(&g_connections[0], DEFAULT_PORT_CLIENT);
+    if (errorCode)
+    {
+        printf("Failed to open socket: %d\n", errorCode);
+        return;
+    }
+    i32 count = 10;
+    while (count-- > 0)
+    {
+        Net_Send(&g_connections[0], LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo");
+    }
+}
+
+#if 0
 void Test_Client(u16 port)
 {
     printf("Starting client\n");
@@ -78,7 +280,7 @@ void Test_Server(u16 port)
 {
     printf("Starting server\n");
 
-    Win32_Connection conn = {};
+    Win32_Socket conn = {};
     conn.port = port;
 
     int iResult;
@@ -141,7 +343,6 @@ void Test_Server(u16 port)
     char* outboundMsg = "Foo";
     i32 sendLength = COM_StrLen(outboundMsg);
     
-#if 1
     i32 running = 1;
     i32 iterations = 0;
     while(running)
@@ -210,13 +411,13 @@ void Test_Server(u16 port)
             }
         }
     }
-#endif
 
     printf("Shutting down... ");
     closesocket(conn.socket);
     WSACleanup();
     printf("Done\n");
 }
+#endif
 
 // Example from:
 // https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-recvfrom
@@ -225,6 +426,8 @@ void Test_Win32(i32 argc, char* argv[])
 {
     printf("Test winsock\n");
 
+    //Net_RunLoopbackTest();
+    #if 1
     if (argc != 2)
     {   
         printf("Arg count mismatch. Needed 2 got %d\n", argc);
@@ -233,15 +436,22 @@ void Test_Win32(i32 argc, char* argv[])
     char* mode = argv[1];
     if (!COM_CompareStrings(mode, "server"))
     {
-        Test_Server(DEFAULT_PORT_SERVER);
+        //Test_Server(DEFAULT_PORT_SERVER);
+        Net_RunServerTest();
     }
     else if (!COM_CompareStrings(mode, "client"))
     {
-        Test_Client(DEFAULT_PORT_CLIENT);
+        //Test_Client(DEFAULT_PORT_CLIENT);
+        Net_RunClientTest();
+    }
+    else if (!COM_CompareStrings(mode, "both"))
+    {
+        Net_RunLoopbackTest();
     }
     else
     {
         printf("Unknown mode %s\n", mode);
         return;
     }
+    #endif
 }

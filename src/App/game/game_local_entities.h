@@ -23,9 +23,9 @@ inline void Game_ResetLocalEntities()
 
 inline LocalEnt* Game_GetLocalEntByIndex(u32 index)
 {
-    AssertAlways(index < GAME_MAX_LOCAL_ENTITIES);
+    APP_ASSERT((index < GAME_MAX_LOCAL_ENTITIES), "local ent index out of bounds");
     LocalEnt* e = &g_localEntities[index];
-    AssertAlways(e->status == LOCAL_ENT_STATUS_IN_USE);
+    APP_ASSERT((index < GAME_MAX_LOCAL_ENTITIES), "local ent is in use");
     return e;
 }
 

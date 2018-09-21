@@ -64,9 +64,9 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
         options->flags & ENT_OPTION_FLAG_VELOCITY)
     {
         state->projectileState.move = options->vel;
-        printf("PRJ Options Vel: %.2f, %.2f, %.2f\n",
-            state->projectileState.move.x, state->projectileState.move.y, state->projectileState.move.z
-    );
+        // printf("PRJ Options Vel: %.2f, %.2f, %.2f\n",
+        //     state->projectileState.move.x, state->projectileState.move.y, state->projectileState.move.z
+        // );
     }
 }
 
@@ -209,9 +209,6 @@ internal void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileStat
         prj = EC_AddProjectile(gs, ent);
     }
     prj->state = *state;
-    printf("EC PRJ Vel: %.2f, %.2f, %.2f\n",
-        prj->state.move.x, prj->state.move.y, prj->state.move.z
-    );
 }
 
 internal void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
