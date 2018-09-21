@@ -64,9 +64,10 @@ void Net_Send(Win32_Socket* winSock, char* address, u16 port, char* outboundMsg)
 {
     printf("Sending %s to %s:%d\n", outboundMsg, address, port);
 	sockaddr_in toAddress;
-    toAddress.sin_port = DEFAULT_PORT_SERVER;
+    toAddress.sin_port = htons(DEFAULT_PORT_SERVER);
     toAddress.sin_family = AF_INET;
-    toAddress.sin_addr.S_un.S_addr = InetPton(AF_INET, address, &toAddress.sin_addr.S_un.S_addr);
+    //toAddress.sin_addr.S_un.S_addr = 
+    InetPton(AF_INET, address, &toAddress.sin_addr.S_un.S_addr);
     
     i32 toAddressSize = sizeof(toAddress);
     
@@ -147,7 +148,7 @@ i32 Net_OpenSocket(Win32_Socket* winSock, u16 port)
     }
     printf("Winsock initialised\n");
     
-    if ((winSock->socket = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
+    if ((winSock->socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET)
     {
         i32 errorCode = WSAGetLastError();
         printf("Could not create socket: %d\n", errorCode);
@@ -160,7 +161,13 @@ i32 Net_OpenSocket(Win32_Socket* winSock, u16 port)
     winSock->server.sin_port = htons(winSock->port);
 
     u_long mode = 1;  // 1 to enable non-blocking socket
-    ioctlsocket(winSock->socket, FIONBIO, &mode);
+    iResult = ioctlsocket(winSock->socket, FIONBIO, &mode);
+    if (iResult == SOCKET_ERROR)
+    {
+        i32 errorCode = WSAGetLastError();
+        printf("Error setting socket to unblockable %d\n", errorCode);
+        return errorCode;
+    }
 
     iResult = bind(winSock->socket, (sockaddr*)&winSock->server, sizeof(winSock->server));
     if (iResult == SOCKET_ERROR)
@@ -213,7 +220,12 @@ void Net_RunLoopbackTest()
     i32 i = 0;
     while (i++ < 100)
     {
-        Net_ReadSocket(&g_connections[0]);
+        i32 bytes = Net_ReadSocket(&g_connections[0]);
+        if (bytes > 0)
+        {
+            printf("READ %d bytes... holy shit!\n", bytes);
+            break;
+        }
         Sleep(100);
     }
     
