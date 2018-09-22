@@ -2,7 +2,7 @@
 
 #include "win32_system_include.h"
 
-#include "win32_main.h"
+#include "win32_module.cpp"
 
 
 f32 Win32_InitFloatTime()

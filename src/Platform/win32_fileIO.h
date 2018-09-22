@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32_main.h"
+#include "win32_module.cpp"
 
 #include "../common/com_defines.h"
 #include "../common/com_memory_utils.h"

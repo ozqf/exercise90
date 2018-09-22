@@ -4,6 +4,9 @@
 
 #include "../common/com_module.h"
 
+#include "../platform/win32_net/win32_net_interface.h"
+#include "../platform/win32_net/win32_net_module.cpp"
+
 #if 0
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
@@ -11,227 +14,7 @@
 #include <windows.h>
 #endif
 
-// https://beej.us/guide/bgnet/html/single/bgnet.html
-// https://docs.microsoft.com/en-us/windows/desktop/WinSock/getting-started-with-winsock
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iphlpapi.h>
-
-#define NET_NON_BLOCKING_ERROR 10035
-#define DEFAULT_PORT_SERVER 23232
-#define DEFAULT_PORT_CLIENT 23233
-#define UDP_BUFFER_LENGTH 4096
-#define LOCALHOST_ADDRESS "127.0.0.1"
-
-#define NET_ERROR_CASE(errorCode, msg) case errorCode##: printf(##msg##); break;
-
-// Add new error codes as you run into them!
-// https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
-void Net_PrintNetworkError(i32 code)
-{
-    switch (code)
-    {
-        NET_ERROR_CASE(10014, "Bad Address\n");
-        NET_ERROR_CASE(10022, "Invalid parameter\n");
-        NET_ERROR_CASE(10035, "Non-blocking socket had nothing available\n");
-        NET_ERROR_CASE(10047, "Address family not supported by protocol family.\n");
-        NET_ERROR_CASE(10048, "Address in use\n");
-        default: printf("Unknown error code... Sorry\n"); break;
-    }
-}
-
-/*
-- Network IO interface -
-void OpenSocket(int port);
-void CloseSocket();
-Send();
-*/
-
-struct Win32_Socket
-{
-	i32 isActive;
-    WSADATA wsaData;
-    SOCKET socket;
-    sockaddr_in server;
-    i32 slen;
-    u16 port;
-};
-
-#define MAX_SOCKETS 2
-internal Win32_Socket g_connections[MAX_SOCKETS];
-
-void Net_Send(Win32_Socket* winSock, char* address, u16 port, char* outboundMsg)
-{
-    printf("Sending %s to %s:%d\n", outboundMsg, address, port);
-	sockaddr_in toAddress;
-    toAddress.sin_port = htons(DEFAULT_PORT_SERVER);
-    toAddress.sin_family = AF_INET;
-    //toAddress.sin_addr.S_un.S_addr = 
-    InetPton(AF_INET, address, &toAddress.sin_addr.S_un.S_addr);
-    
-    i32 toAddressSize = sizeof(toAddress);
-    
-    i32 sendLength = COM_StrLen(outboundMsg) + 1;
-
-    i32 sendResult = sendto(
-        winSock->socket,
-        outboundMsg,
-        sendLength,
-        0,
-        (sockaddr*)&toAddress,
-        toAddressSize
-    );
-    if (sendResult == SOCKET_ERROR)
-    {
-        i32 errorCode = WSAGetLastError();
-        printf("Send error: %d\n", errorCode);
-    }
-    else
-    {
-        printf("Send Result: %d\n", sendResult);
-    }
-}
-
-i32 Net_ReadSocket(Win32_Socket* winSock)
-{
-    // optional struct to store the sender's address
-    sockaddr_in fromAddress;
-    i32 fromAddressSize = sizeof(fromAddress);
-
-    i32 recv_len;
-    char buf[UDP_BUFFER_LENGTH];
-    memset(buf, '\0', UDP_BUFFER_LENGTH);
-    i32 flags = 0;
-    recv_len = recvfrom(
-        winSock->socket,
-        buf,
-        UDP_BUFFER_LENGTH,
-        flags,
-        (struct sockaddr *) &fromAddress,
-        &fromAddressSize
-    );
-    
-    if (recv_len == SOCKET_ERROR)
-    {
-        i32 errorCode = WSAGetLastError();
-        if (errorCode != NET_NON_BLOCKING_ERROR)
-        {
-            printf("recvfrom() failed with error code %d\n", errorCode);
-            Net_PrintNetworkError(errorCode);
-        }
-        else
-        {
-            printf(".");
-        }
-    }
-    else
-    {
-        printf("\nReceived length: %d\n", recv_len);
-    }
-    return recv_len > 0 ? recv_len : 0;
-}
-
-// returns 0 on success, or error code
-i32 Net_OpenSocket(Win32_Socket* winSock, u16 port)
-{
-	Assert(!winSock->isActive)
-
-    winSock->port = port;
-
-    
-    int iResult;
-    iResult = WSAStartup(MAKEWORD(2, 2), &winSock->wsaData);
-    if (iResult != 0)
-    {
-        printf("WSAStartup failed: %d\n", iResult);
-        return iResult;
-    }
-    printf("Winsock initialised\n");
-    
-    if ((winSock->socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET)
-    {
-        i32 errorCode = WSAGetLastError();
-        printf("Could not create socket: %d\n", errorCode);
-        return errorCode;
-    }
-    printf("Socket Created\n");
-
-    winSock->server.sin_family = AF_INET;
-    winSock->server.sin_addr.s_addr = htons(INADDR_ANY);
-    winSock->server.sin_port = htons(winSock->port);
-
-    u_long mode = 1;  // 1 to enable non-blocking socket
-    iResult = ioctlsocket(winSock->socket, FIONBIO, &mode);
-    if (iResult == SOCKET_ERROR)
-    {
-        i32 errorCode = WSAGetLastError();
-        printf("Error setting socket to unblockable %d\n", errorCode);
-        return errorCode;
-    }
-
-    iResult = bind(winSock->socket, (sockaddr*)&winSock->server, sizeof(winSock->server));
-    if (iResult == SOCKET_ERROR)
-    {
-        i32 errorCode = WSAGetLastError();
-        printf("Failed to bind socket with code: %d\n", errorCode);
-        Net_PrintNetworkError(errorCode);
-        return errorCode;
-    }
-    printf("Socket bound on port %d\n", winSock->port);
-
-	winSock->isActive = 1;
-	return 0;
-}
-
-void Net_Shutdown()
-{
-    printf("\nShutting down...\n");
-    for (i32 i = 0; i < MAX_SOCKETS; ++i)
-    {
-        Win32_Socket* sock = &g_connections[i];
-        if (!sock->isActive) { continue; }
-
-        i32 result = closesocket(sock->socket);
-        printf("Closing socket %d result: %d\n", i, result);
-    }
-    WSACleanup();
-    printf("Done\n");
-}
-
-void Net_RunLoopbackTest()
-{
-    i32 errorCode;
-    errorCode = Net_OpenSocket(&g_connections[0], DEFAULT_PORT_SERVER);
-    if (errorCode)
-    {
-        printf("Failed to open socket: %d\n", errorCode);
-        return;
-    }
-    errorCode = Net_OpenSocket(&g_connections[1], DEFAULT_PORT_CLIENT);
-    if (errorCode)
-    {
-        printf("Failed to open socket: %d\n", errorCode);
-        return;
-    }
-
-    // This shit doesn't work... why?
-    Net_Send(&g_connections[1], LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo");
-    printf("Reading from socket: ");
-    i32 i = 0;
-    while (i++ < 100)
-    {
-        i32 bytes = Net_ReadSocket(&g_connections[0]);
-        if (bytes > 0)
-        {
-            printf("READ %d bytes... holy shit!\n", bytes);
-            break;
-        }
-        Sleep(100);
-    }
-    
-    Net_Shutdown();
-}
-
+#if 0
 void Net_RunServerTest()
 {
     printf("Server test\n");
@@ -268,6 +51,7 @@ void Net_RunClientTest()
         Net_Send(&g_connections[0], LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo");
     }
 }
+#endif
 
 #if 0
 void Test_Client(u16 port)
@@ -438,8 +222,10 @@ void Test_Win32(i32 argc, char* argv[])
 {
     printf("Test winsock\n");
 
+    Net_RunLoopbackTest();
+
     //Net_RunLoopbackTest();
-    #if 1
+    #if 0
     if (argc != 2)
     {   
         printf("Arg count mismatch. Needed 2 got %d\n", argc);

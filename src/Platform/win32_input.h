@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32_main.h"
+#include "win32_module.cpp"
 
 enum ZMouseMode mouseMode = Free;
 enum ZMouseMode mouseState = Free;
