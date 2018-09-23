@@ -145,6 +145,17 @@ void Win32_InitPlatformInterface()
     platInterface.Platform_GetDateTime = Platform_GetDateTime;
 
     platInterface.Platform_WriteTextCommand = Win32_EnqueueTextCommand;
+
+    // Network setup
+    #if 1
+    platInterface.Net_Init = Net_Init;
+    platInterface.Net_OpenSocket = Net_OpenSocket;
+    platInterface.Net_Shutdown = Net_Shutdown;
+    platInterface.Net_CloseSocket = Net_CloseSocket;
+    platInterface.Net_RunLoopbackTest = Net_RunLoopbackTest;
+    platInterface.Net_SendTo = Net_SendTo;
+    platInterface.Net_Read = Net_Read;
+    #endif
 }
 
 void Win32_CloseAppLink()

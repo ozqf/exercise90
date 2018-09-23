@@ -5,19 +5,19 @@
 
 enum ZSoundEventType
 {
-    PlaySound,
-    MoveSound
+    zPlaySound,
+    zMoveSound
 };
 
 union ZSoundEventUnion
 {
-    struct PlaySound
+    struct ZPlaySound
     {
         u8 spatial;
 	    f32 pos[3];
     };
 
-    struct MoveSound
+    struct ZMoveSound
     {
         f32 pos[3];
     };
@@ -33,7 +33,7 @@ struct ZSoundEvent
 
 void SND_SetPlaySoundEvent(ZSoundEvent* ev, i32 soundId, u8 spatial)
 {
-    ev->type = PlaySound;
+    ev->type = zPlaySound;
 }
 
 void SND_SetMoveSoundEvent(ZSoundEvent* ev)

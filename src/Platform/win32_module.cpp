@@ -9,11 +9,13 @@
 
 void Win32_Shutdown();
 
-#include "../common/com_module.h"
+// modules
+#include "../common/com_module.cpp"
+#include "win32_net/win32_net_module.cpp"
+
 
 #include "win32_types.h"
 #include "win32_globals.h"
-
 #include "win32_timing.h"
 #include "win32_input.h"
 #include "win32_draw.h"

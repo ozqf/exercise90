@@ -4,7 +4,9 @@
 // Win32 Network compile module
 ///////////////////////////////////////
 
-#include "../common/com_module.h"
+#include <stdio.h>
+
+#include "../../common/com_module.cpp"
 
 #include "win32_net_interface.h"
 
@@ -83,10 +85,14 @@ Win32_Socket* WNet_GetFreeSocket(i32* socketIndexResult)
     return NULL;
 }
 
-i32 Net_SendTo(i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize)
+i32 Net_SendTo(
+    i32 transmittingSocketIndex,
+    char* address,
+    u16 port, char* data,
+    i32 dataSize)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(transmittingSocketIndex);
-    printf("Sending %s to %s:%d\n", data, address, port);
+    printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
 	sockaddr_in toAddress;
     toAddress.sin_port = htons(DEFAULT_PORT_SERVER);
     toAddress.sin_family = AF_INET;
@@ -158,6 +164,11 @@ i32 WNet_ReadSocket(i32 socketIndex)
     return recv_len > 0 ? recv_len : 0;
 }
 
+i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
+{
+    return 0;
+}
+
 // returns 0 on success, or error code
 i32 Net_OpenSocket(u16 port)
 {
@@ -216,7 +227,21 @@ i32 Net_OpenSocket(u16 port)
 	return sockIndex;
 }
 
-void WNet_Shutdown()
+i32 Net_CloseSocket(i32 socketIndex)
+{
+    Assert((socketIndex > 0 && socketIndex < MAX_SOCKETS))
+    Win32_Socket* sock = &g_connections[socketIndex];
+    i32 result = -1;
+    if (sock->isActive)
+    {
+        sock->isActive = 0;
+        result = closesocket(sock->socket);
+        printf("Closing socket %d result: %d\n", socketIndex, result);
+    }
+    return result;
+}
+
+i32 Net_Shutdown()
 {
     printf("\nShutting down...\n");
     for (i32 i = 0; i < MAX_SOCKETS; ++i)
@@ -229,6 +254,12 @@ void WNet_Shutdown()
     }
     WSACleanup();
     printf("Done\n");
+    return 0;
+}
+
+i32 Net_Init()
+{
+    return 0;
 }
 
 void Net_RunLoopbackTest()
@@ -248,7 +279,8 @@ void Net_RunLoopbackTest()
         return;
     }
 
-    Net_SendTo(clientSocket, LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo", COM_StrLen("foo"));
+    //Net_SendTo(clientSocket, LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo", COM_StrLen("foo"));
+    Net_SendTo(serverSocket, LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo", COM_StrLen("foo"));
     printf("Reading from socket: ");
     i32 i = 0;
     while (i++ < 100)
@@ -262,5 +294,5 @@ void Net_RunLoopbackTest()
         Sleep(100);
     }
     
-    WNet_Shutdown();
+    Net_Shutdown();
 }

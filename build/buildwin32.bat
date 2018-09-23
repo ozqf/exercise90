@@ -26,7 +26,7 @@ set compilerInput=../src/Platform/win32_module.cpp
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 set linkStr=/link
-set linkInputA=user32.lib opengl32.lib Gdi32.lib
+set linkInputA=user32.lib opengl32.lib Gdi32.lib  Ws2_32.lib
 @echo on
 @cl %compilerFlags% %compilerDefines% %outputExe% %compilerInput% %linkStr% %linkInputA%
 @echo off

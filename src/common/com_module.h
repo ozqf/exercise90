@@ -3,6 +3,7 @@
 #include "com_defines.h"
 #include "com_types.h"
 #include "com_render_types.h"
+#include "com_net_types.h"
 #include "com_bitpack.h"
 #include "com_random.h"
 #include "com_maths.h"
