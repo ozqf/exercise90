@@ -130,6 +130,7 @@ internal void AppListTextures();
 // Implementations
 /////////////////////////////////////////////////////////
 
+#include "app_network.h"
 #include "app_debug.h"
 #include "app_ui.h"
 #include "app_menu.h"

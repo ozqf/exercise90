@@ -181,6 +181,7 @@ i32 App_Shutdown()
 	
     GS_Clear(&g_gameState);
     PhysExt_Shutdown();
+    AppNet_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};

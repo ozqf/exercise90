@@ -195,18 +195,26 @@ void App_StartRecording(GameState *gs)
     g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
 }
 
+void App_ClearLevel()
+{
+    GS_Clear(&g_gameState);
+    PhysExt_ClearWorld();
+    App_ClearClientGameLinks(&g_gameState.clientList);
+    App_ClearIOBuffers();
+}
+
+void App_LoadLevel()
+{
+    App_ClearLevel();
+}
+
 void App_EndSession()
 {
     printf("APP Ending session\n");
 
     App_StopRecording();
-
-    GS_Clear(&g_gameState);
-    PhysExt_ClearWorld();
-    // Clear command buffer
-    //App_ClearClients();
-    // Break client links
-    App_ClearClientGameLinks(&g_gameState.clientList);
+    App_ClearLevel();
+    AppNet_Shutdown();
     COM_ZeroMemory((u8 *)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }
 
@@ -270,13 +278,10 @@ u8 App_StartReplay(char *path)
     return 1;
 }
 
-u8 App_StartSinglePlayer(char *path)
+u8 App_LoadScene(char *path)
 {
     printf(">>> APP Start single player session: %s <<<\n", path);
 
-    App_EndSession();
-#if 1
-	
 	if (!COM_CompareStrings(path, "TEST"))
 	{
 		Game_BuildTestScene(&g_gameState, 0);
@@ -294,46 +299,49 @@ u8 App_StartSinglePlayer(char *path)
         }
     }
 
-#endif
-#if 0
-    Game_BuildTestScene(&g_gameState);
-#endif
     COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 
     //App_StartRecording(&g_gameState);
 
-    // Spawn local client if one hasn't been restored via file
-    Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
-    if (cl == NULL)
-    {
-        // Assign local client id.
-        Cmd_ClientUpdate spawnClient = {};
-        // assign local id directly...
-        // TODO: Do local client Id assignment via network command
-        g_localClientId = -1;
-        spawnClient.clientId = g_localClientId;
-        spawnClient.state = CLIENT_STATE_OBSERVER;
-        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
-        //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
-        //platform.Platform_WriteTextCommand("SPAWN ENEMY");
-    }
+    
 
     return 1;
 }
 
 i32 App_StartSession(u8 netMode, char *path)
 {
+    App_EndSession();
     printf("\n**** APP START SESSION ****\n");
-	App_ClearIOBuffers();
     switch (netMode)
     {
     case NETMODE_SINGLE_PLAYER:
     {
-        if (App_StartSinglePlayer(path))
+        AppNet_Start(netMode);
+        if (!App_LoadScene(path))
         {
-            g_gameState.netMode = NETMODE_SINGLE_PLAYER;
-            return 1;
+            return 0;
         }
+        g_gameState.netMode = NETMODE_SINGLE_PLAYER;
+
+        // Spawn local client if one hasn't been restored via file
+        Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
+        if (cl == NULL)
+        {
+            // Create a connection
+            g_gameState.localClientConnId = AppNet_CreateClientConnection({}, 1);
+            // Assign local client id.
+            Cmd_ClientUpdate spawnClient = {};
+            // assign local id directly...
+            // TODO: Do local client Id assignment via network command
+            g_localClientId = -1;
+            spawnClient.clientId = g_localClientId;
+            spawnClient.state = CLIENT_STATE_OBSERVER;
+            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+            //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+            //platform.Platform_WriteTextCommand("SPAWN ENEMY");
+        }
+
+        return 1;
     }
     break;
 

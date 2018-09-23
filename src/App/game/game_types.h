@@ -669,6 +669,7 @@ struct GameState
     
     ClientList clientList;
     GameStateLocal local;
+    u32 localClientConnId;
 
     // Entities
     //i32 nextEntityID;
