@@ -98,11 +98,6 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address)
     net->netMode = netMode;
 }
 
-void ZNet_SetErrorHandler(ZNet_ErrorHandler handler)
-{
-    g_errorHandler = handler;
-}
-
 void ZNet_EndSession()
 {
 

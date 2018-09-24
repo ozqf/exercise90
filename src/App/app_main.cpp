@@ -162,6 +162,7 @@ i32 App_Init()
     netFuncs.CloseSocket = platform.Net_CloseSocket;
     netFuncs.Read = platform.Net_Read;
     netFuncs.SendTo = platform.Net_SendTo;
+    netFuncs.FatalError = App_FatalError;
 	ZNet_Init(netFuncs);
     
     

@@ -30,6 +30,8 @@ struct ZNetPlatformFunctions
     i32  (*CloseSocket)     (i32 socketIndex);
     i32  (*Read)            (i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr);
     i32  (*SendTo)          (i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize);
+
+    void (*FatalError)      (char* msg, char* heading);
 };
 
 typedef void (*ZNet_ErrorHandler)(char* msg, char* heading);

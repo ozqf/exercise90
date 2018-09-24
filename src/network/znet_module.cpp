@@ -17,26 +17,11 @@ App Network layer functionality:
 
 */
 
-internal ZNet_ErrorHandler g_errorHandler = NULL;
-
-internal void Net_FatalError(char* message, char* heading)
-{
-    if (g_errorHandler)
-    {
-        g_errorHandler(message, heading);
-    }
-    else
-    {
-        printf("NET FATAL: %s\n", message);
-        ILLEGAL_CODE_PATH
-    }
-}
-
 #define NET_ASSERT(expression, msg) if(!(expression)) \
 { \
     char assertBuf[512]; \
     sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
-    Net_FatalError(assertBuf, "Fatal error"); \
+    Net_FatalError(assertBuf, "Fatal Net Error"); \
 } \
 
 #define ZNET_DEFAULT_PORT 23232
@@ -67,23 +52,42 @@ struct ZNet
     i32 netMode;
 };
 
-
 /////////////////////////////////////////////////////
 // GLOBALS
 /////////////////////////////////////////////////////
 internal ZNetPlatformFunctions g_netPlatform;
 internal ZNet g_net;
 
+internal ZNet_ErrorHandler g_errorHandler = NULL;
+
+internal void Net_FatalError(char* message, char* heading)
+{
+    if (g_netPlatform.FatalError)
+    {
+        g_netPlatform.FatalError(message, heading);
+    }
+    else
+    {
+        printf("NET FATAL: %s\n", message);
+        ILLEGAL_CODE_PATH
+    }
+}
+
 #include "znet_network.h"
 
+///////////////////////////////////////////////////
 // system lifetime
+///////////////////////////////////////////////////
 void ZNet_Init(ZNetPlatformFunctions platform)
 {
+    printf("ZNet Initialising... ");
     g_netPlatform = platform;
+    printf("Done\n");
 }
 
 void ZNet_Shutdown()
 {
+    printf("ZNet shutting down... ");
     ZNet* net = &g_net;
     net->netMode = 0;
     if (net->socketIndex != -1)
@@ -91,6 +95,7 @@ void ZNet_Shutdown()
         g_netPlatform.CloseSocket(net->socketIndex);
         net->socketIndex = -1;
     }
+    printf("Done\n");
 }
 
 // ZNET_MODULE_CPP
