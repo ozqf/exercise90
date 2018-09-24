@@ -229,7 +229,7 @@ i32 Net_OpenSocket(u16 port)
 
 i32 Net_CloseSocket(i32 socketIndex)
 {
-    Assert((socketIndex > 0 && socketIndex < MAX_SOCKETS))
+    Assert((socketIndex >= 0 && socketIndex < MAX_SOCKETS))
     Win32_Socket* sock = &g_connections[socketIndex];
     i32 result = -1;
     if (sock->isActive)

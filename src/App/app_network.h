@@ -1,5 +1,6 @@
 #pragma once
-
+// TODO: DELETE ME
+#if 0
 #include "app_module.cpp"
 
 /*
@@ -15,16 +16,35 @@ App Network layer functionality:
 
 */
 
+#define APPNET_PROTOCOL 1953863
 #define APPNET_DEFAULT_PORT 23232
 #define APPNET_CONNECTION_FLAG_LOCAL (1 << 0)
+
+#define APPNET_CLIENT_STATE_DISCONNECTED 0
+#define APPNET_CLIENT_STATE_CONNECTING 1
+#define APPNET_CLIENT_STATE_CHALLENGED 2
+#define APPNET_CLIENT_STATE_CONNECTED 3
+
+#define APPNET_CONNECTION_STATE_NONE 0
+#define APPNET_CONNECTION_STATE_CHALLENGED 1
+#define APPNET_CONNECTION_STATE_NONE 
 
 // id of 0 == unassigned.
 struct ZNetConnection
 {
     u32 id;
+    i32 state;
     u32 sequence;
+    u32 challenge;
     ZNetAddress address;
     u32 flags;
+};
+
+struct PacketHeader
+{
+    u32 protocol;
+    u32 checkSum;
+    u16 dataSize;
 };
 
 #define MAX_CONNECTIONS 16
@@ -123,3 +143,4 @@ void AppNet_Shutdown()
         g_socketIndex = -1;
     }
 }
+#endif

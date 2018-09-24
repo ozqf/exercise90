@@ -214,7 +214,7 @@ void App_EndSession()
 
     App_StopRecording();
     App_ClearLevel();
-    AppNet_Shutdown();
+    ZNet_Shutdown();
     COM_ZeroMemory((u8 *)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }
 
@@ -316,7 +316,7 @@ i32 App_StartSession(u8 netMode, char *path)
     {
     case NETMODE_SINGLE_PLAYER:
     {
-        AppNet_Start(netMode);
+        ZNet_StartSession(netMode, NULL);
         if (!App_LoadScene(path))
         {
             return 0;
@@ -328,7 +328,8 @@ i32 App_StartSession(u8 netMode, char *path)
         if (cl == NULL)
         {
             // Create a connection
-            g_gameState.localClientConnId = AppNet_CreateClientConnection({}, 1);
+            //g_gameState.localClientConnId = ZNet_CreateClientConnection({}, 1);
+
             // Assign local client id.
             Cmd_ClientUpdate spawnClient = {};
             // assign local id directly...

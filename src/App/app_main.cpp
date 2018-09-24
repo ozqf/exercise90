@@ -152,6 +152,17 @@ i32 App_Init()
         g_collisionEventBuffer.objectSize,
         App_PhysicsErrorHandler
         );
+		
+	// Init network function pointers
+	ZNetPlatformFunctions netFuncs = {};
+	
+	netFuncs.Init = platform.Net_Init;
+    netFuncs.Shutdown = platform.Net_Shutdown;
+    netFuncs.OpenSocket = platform.Net_OpenSocket;
+    netFuncs.CloseSocket = platform.Net_CloseSocket;
+    netFuncs.Read = platform.Net_Read;
+    netFuncs.SendTo = platform.Net_SendTo;
+	ZNet_Init(netFuncs);
     
     
     Game_Init();
@@ -181,7 +192,7 @@ i32 App_Shutdown()
 	
     GS_Clear(&g_gameState);
     PhysExt_Shutdown();
-    AppNet_Shutdown();
+    ZNet_Shutdown();
 
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};
