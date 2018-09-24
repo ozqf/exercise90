@@ -2,10 +2,6 @@
 
 #include "znet_module.cpp"
 
-//internal ZNetConnection g_connections[MAX_CONNECTIONS];
-//internal i32 g_socketIndex = -1;
-//internal i32 g_netMode = 0;
-
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
 {
     if (id == 0) { return NULL; }
@@ -16,7 +12,7 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
     return NULL;
 }
 
- void ZNet_CloseConnection(ZNet* net, u32 id)
+void ZNet_CloseConnection(ZNet* net, u32 id)
 {
     ZNetConnection* conn = ZNet_GetConnectionById(net, id);
     if (conn == NULL)
@@ -26,7 +22,7 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
     conn->id = 0;
 }
 
- ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
+ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
 {
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
     {
@@ -49,7 +45,7 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
     return NULL;
 }
 
- u32 ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
+u32 ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
 {
     ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
     NET_ASSERT(conn, "ZNet failed to find free connection\n");
@@ -69,33 +65,41 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
 //////////////////////////////////////////////////////
 // External
 //////////////////////////////////////////////////////
-void ZNet_StartSession(u8 netMode, ZNetAddress* address)
+void ZNet_StartSession(u8 netMode, ZNetAddress address)
 {
     ZNet* net = &g_net;
-    NET_ASSERT((net->netMode == 0), "Net starting but not shutdown!");
+    NET_ASSERT((net->state == 0), "Net session was not ended!");
     switch (netMode)
     {
         case NETMODE_SINGLE_PLAYER:
         {
             printf("ZNet - single player, no socket\n");
+            net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            net->socketIndex = g_netPlatform.OpenSocket(23232);
+            printf("ZNet - dedicated server\n");
+            net->serverPort = address.port;
+            net->socketIndex = g_netPlatform.OpenSocket(net->serverPort);
+            net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_CLIENT:
         {
-            net->socketIndex = g_netPlatform.OpenSocket(23232);
+            printf("ZNet - client\n");
+            net->socketIndex = g_netPlatform.OpenSocket(address.port);
+            ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
+            net->state = ZNET_STATE_CONNECTING;
+            conn->address = address;
+
         } break;
 
         default:
         {
             NET_ASSERT(0, "Unsupported netmode\n");
-        }
+        } break;
     }
-    net->netMode = netMode;
 }
 
 void ZNet_EndSession()
@@ -105,12 +109,33 @@ void ZNet_EndSession()
 
 void ZNet_Tick()
 {
+    printf("Tick\n");
     ZNet* net = &g_net;
-    switch(net->netMode)
+    switch(net->state)
     {
-        case NETMODE_CLIENT:
+        case ZNET_STATE_SERVER:
         {
+            // read packets
+        } break;
+        
+        case ZNET_STATE_CONNECTED:
+        {
+            // read packets
+        } break;
 
+        case ZNET_STATE_CONNECTING:
+        {
+            // periodically send connection request to server
+        } break;
+
+        case ZNET_STATE_RESPONDING:
+        {
+            // periodically send challenge response to server
+        } break;
+
+        default:
+        {
+            printf("Unknown net state %d\n", net->state);
         } break;
     }
 }

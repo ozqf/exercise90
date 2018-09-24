@@ -27,6 +27,7 @@ set compilerDefines=/DPARANOID=1
 @rem Ws2_32.lib == winsock2
 set compInput_0=../src/tests/win32_consoleApp.cpp
 set compInput_1=../src/platform/win32_net/win32_net_module.cpp
+set compInput_2=../src/network/znet_module.cpp
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
 @rem set linkStr=/link
@@ -34,7 +35,7 @@ set compInput_1=../src/platform/win32_net/win32_net_module.cpp
 @rem set linkInputC=Gdi32.lib
 set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib Ws2_32.lib
 
-cl %compilerFlags% %compilerDefines% %outputExe% %compInput_0% %compInput_1% %linkStr%
+cl %compilerFlags% %compilerDefines% %outputExe% %compInput_0% %compInput_1% %compInput_2% %linkStr%
 @if not %ERRORLEVEL% == 0 goto :FINISHED
 @rem Auto run if you like
 @rem @call ../build/rtests.bat

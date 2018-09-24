@@ -1,7 +1,6 @@
 #ifndef ZNET_INTERFACE_H
 #define ZNET_INTERFACE_H
 
-#include <stdio.h>
 #include "../common/com_module.cpp"
 
 // TODO: Also in game.h at the moment, move this to a single location!
@@ -21,7 +20,10 @@
 #define NETMODE_DEDICATED_SERVER 4
 #define NETMODE_REPLAY 5
 
+#define ZNET_LOCAL_ADDRESS "127.0.0.1"
+
 // Required external OS interface
+// These are NOT CHECKED when used. Make sure you're sending a valid struct
 struct ZNetPlatformFunctions
 {
     i32  (*Init)            ();
@@ -41,7 +43,7 @@ void ZNet_Init(ZNetPlatformFunctions functions);
 void ZNet_Shutdown();
 
 // connection lifetime
-void ZNet_StartSession(u8 netMode, ZNetAddress* address);
+void ZNet_StartSession(u8 netMode, ZNetAddress address);
 void ZNet_EndSession();
 
 void ZNet_Tick();

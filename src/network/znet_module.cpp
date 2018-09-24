@@ -1,8 +1,8 @@
 #ifndef ZNET_MODULE_CPP
 #define ZNET_MODULE_CPP
 
+#include <stdio.h>
 #include "znet_interface.h"
-
 
 /*
 App Network layer functionality:
@@ -27,9 +27,14 @@ App Network layer functionality:
 #define ZNET_DEFAULT_PORT 23232
 #define ZNET_CONNECTION_FLAG_LOCAL (1 << 0)
 
-#define ZNET_SV2C_STATE_DISCONNECTED 0
-#define ZNET_SV2C_STATE_CHALLENGED 1
-#define ZNET_SV2C_STATE_CONNECTED 2
+#define ZNET_STATE_DISCONNECTED 0
+// client side
+#define ZNET_STATE_CONNECTING 1
+#define ZNET_STATE_RESPONDING 2
+#define ZNET_STATE_CONNECTED 3
+// server side
+#define ZNET_STATE_CHALLENGED 4
+#define ZNET_STATE_SERVER 5
 
 // id of 0 == unassigned.
 struct ZNetConnection
@@ -37,7 +42,7 @@ struct ZNetConnection
     u32 id;
     u32 sequence;
     u32 challenge;
-    i32 state;
+    //i32 state;
     ZNetAddress address;
     u32 flags;
     f32 tick;
@@ -49,7 +54,8 @@ struct ZNet
     ZNetConnection connections[MAX_CONNECTIONS];
     i32 maxConnections = MAX_CONNECTIONS;
     i32 socketIndex;
-    i32 netMode;
+    i32 state;
+    u16 serverPort;
 };
 
 /////////////////////////////////////////////////////
@@ -89,7 +95,7 @@ void ZNet_Shutdown()
 {
     printf("ZNet shutting down... ");
     ZNet* net = &g_net;
-    net->netMode = 0;
+    net->state = 0;
     if (net->socketIndex != -1)
     {
         g_netPlatform.CloseSocket(net->socketIndex);

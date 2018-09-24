@@ -5,23 +5,59 @@
 #include "../common/com_module.h"
 
 #include "../platform/win32_net/win32_net_interface.h"
-//#include "../platform/win32_net/win32_net_module.cpp"
-
-#if 0
+#include "../network/znet_interface.h"
+#if 1
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 
 #include <windows.h>
 #endif
 
+ZNetPlatformFunctions TNet_CreateNetFunctions()
+{
+    ZNetPlatformFunctions x = {};
+    x.Init = Net_Init;
+    x.Shutdown = Net_Shutdown;
+    x.OpenSocket = Net_OpenSocket;
+    x.CloseSocket = Net_CloseSocket;
+    x.Read = Net_Read;
+    x.SendTo = Net_SendTo;
+    return x;
+}
+
 void Test_Server(u16 port)
 {
+    printf("Server\n");
+    ZNet_Init(TNet_CreateNetFunctions());
 
+    ZNetAddress addr = {};
+    addr.port = 23232;
+    ZNet_StartSession(NETMODE_DEDICATED_SERVER, addr);
+    for(;;)
+    {
+        ZNet_Tick();
+        Sleep(1000);
+    }
+    //getc(stdin);
 }
 
 void Test_Client(u16 port)
 {
-    
+    printf("Client\n");
+    ZNet_Init(TNet_CreateNetFunctions());
+    ZNetAddress addr = {};
+    addr.ip4Bytes[0] = 127;
+    addr.ip4Bytes[1] = 0;
+    addr.ip4Bytes[2] = 0;
+    addr.ip4Bytes[3] = 1;
+    addr.port = 23234;
+    ZNet_StartSession(NETMODE_CLIENT, addr);
+    for(;;)
+    {
+        ZNet_Tick();
+        Sleep(1000);
+    }
+    //getc(stdin);
 }
 
 // Example from:
