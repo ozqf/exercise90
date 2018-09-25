@@ -33,6 +33,7 @@ void Net_PrintNetworkError(i32 code)
         NET_ERROR_CASE(10014, "Bad Address\n");
         NET_ERROR_CASE(10022, "Invalid parameter\n");
         NET_ERROR_CASE(10035, "Non-blocking socket had nothing available\n");
+        NET_ERROR_CASE(10040, "Message too long.\n");
         NET_ERROR_CASE(10047, "Address family not supported by protocol family.\n");
         NET_ERROR_CASE(10048, "Address in use\n");
         default: printf("Unknown error code... Sorry\n"); break;
@@ -85,6 +86,9 @@ Win32_Socket* WNet_GetFreeSocket(i32* socketIndexResult)
     return NULL;
 }
 
+//////////////////////////////////////////////////////////////////////////
+// SEND
+//////////////////////////////////////////////////////////////////////////
 i32 Net_SendTo(
     i32 transmittingSocketIndex,
     char* address,
@@ -123,7 +127,7 @@ i32 Net_SendTo(
     return sendResult;
 }
 
-i32 WNet_ReadSocket(i32 socketIndex)
+i32 WNet_ReadSocket_OldTest(i32 socketIndex)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(socketIndex);
     Assert(winSock);
@@ -164,9 +168,55 @@ i32 WNet_ReadSocket(i32 socketIndex)
     return recv_len > 0 ? recv_len : 0;
 }
 
-i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
+//////////////////////////////////////////////////////////////////////////
+// READ
+//////////////////////////////////////////////////////////////////////////
+i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 {
-    return 0;
+    Win32_Socket* winSock = WNet_GetActiveSocket(socketIndex);
+    Assert(winSock);
+    // optional struct to store the sender's address
+    sockaddr_in fromAddress;
+    i32 fromAddressSize = sizeof(fromAddress);
+
+    i32 recv_len;
+    //char buf[UDP_BUFFER_LENGTH];
+    //memset(buf, '\0', UDP_BUFFER_LENGTH);
+    i32 flags = 0;
+    recv_len = recvfrom(
+        winSock->socket,
+        (char*)buffer->ptrMemory,
+        buffer->size,
+        flags,
+        (struct sockaddr *) &fromAddress,
+        &fromAddressSize
+    );
+    
+    if (recv_len == SOCKET_ERROR)
+    {
+        i32 errorCode = WSAGetLastError();
+        if (errorCode != NET_NON_BLOCKING_ERROR)
+        {
+            printf("recvfrom() failed with error code %d\n", errorCode);
+            Net_PrintNetworkError(errorCode);
+        }
+        else
+        {
+            printf(".");
+        }
+    }
+    else
+    {
+        printf("\nWin32 net Received %d bytes\n", recv_len);
+    }
+
+    // translate address
+    if (sender)
+    {
+        sender->port = winSock->port;
+    }
+
+    return recv_len > 0 ? recv_len : 0;
 }
 
 // returns 0 on success, or error code
@@ -282,10 +332,13 @@ void Net_RunLoopbackTest()
     //Net_SendTo(clientSocket, LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo", COM_StrLen("foo"));
     Net_SendTo(serverSocket, LOCALHOST_ADDRESS, DEFAULT_PORT_SERVER, "foo", COM_StrLen("foo"));
     printf("Reading from socket: ");
+    
+    u8 dataBuffer[1024];
+    MemoryBlock mem = { dataBuffer, 1024 };
     i32 i = 0;
     while (i++ < 100)
     {
-        i32 bytes = WNet_ReadSocket(serverSocket);
+        i32 bytes = Net_Read(serverSocket, NULL, &mem);
         if (bytes > 0)
         {
             printf("READ %d bytes... holy shit!\n", bytes);

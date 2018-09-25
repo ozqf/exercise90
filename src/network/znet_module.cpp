@@ -43,12 +43,40 @@ struct ZNetConnection
     u32 sequence;
     u32 challenge;
     //i32 state;
-    ZNetAddress address;
+    ZNetAddress remoteAddress;
     u32 flags;
     f32 tick;
 };
 
+#define ZNET_PROTOCOL 90
+
+struct ZNetPacketHeader
+{
+    u32 protocol;
+    i32 dataChecksum;   // TODO implement this
+};
+
+#define ZNET_MSG_TYPE_NONE 0
+#define ZNET_MSG_TYPE_CONNECTION_REQUEST 1111
+#define ZNET_MSG_TYPE_CHALLENGE 2
+#define ZNET_MSG_TYPE_CHALLENGE_RESPONSE 3
+#define ZNET_MSG_TYPE_CONNECTION_APPROVED 4
+
+
+struct ZNetConnectionStatus
+{
+    i32 type;
+    u32 challenge;
+};
+
+struct ZNetPendingConnection
+{
+    ZNetAddress address;
+    u32 challenge;
+};
+
 #define MAX_CONNECTIONS 16
+#define MAX_PENDING_CONNECTIONS 32
 struct ZNet
 {
     ZNetConnection connections[MAX_CONNECTIONS];
@@ -56,11 +84,27 @@ struct ZNet
     i32 socketIndex;
     i32 state;
     u16 serverPort;
+    i32 client2ServerId;
+    u32 tickCount;
+
+    ZNetPendingConnection pendingConnections[MAX_PENDING_CONNECTIONS];
 };
 
 /////////////////////////////////////////////////////
 // GLOBALS
 /////////////////////////////////////////////////////
+
+#define ZNET_DATA_WRITE_SIZE 1024   // >= size of data for this packet
+#define ZNET_PACKET_WRITE_SIZE 1400 // >= size of data + packet header
+#define ZNET_PACKET_READ_SIZE 1400 // >= size of data + packet header
+// Buffers
+// write data to this:
+internal u8 g_dataWriteBuffer[ZNET_DATA_WRITE_SIZE];
+// final write buffer before call to platform send
+internal u8 g_packetWriteBuffer[ZNET_PACKET_WRITE_SIZE];
+
+internal u8 g_packetReadBuffer[ZNET_PACKET_READ_SIZE];
+
 internal ZNetPlatformFunctions g_netPlatform;
 internal ZNet g_net;
 
@@ -79,6 +123,7 @@ internal void Net_FatalError(char* message, char* heading)
     }
 }
 
+#include "znet_connection.h"
 #include "znet_network.h"
 
 ///////////////////////////////////////////////////

@@ -12,6 +12,16 @@ struct ByteBuffer
     i32 count;
 };
 
+static inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
+{
+    ByteBuffer b = {};
+    b.ptrStart = ptr;
+    b.ptrWrite = ptr;
+    b.ptrEnd = ptr;
+    b.capacity = numBytes;
+    return b;
+}
+
 static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
 {
     ByteBuffer b = {};

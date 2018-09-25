@@ -64,3 +64,8 @@ COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, numBytes##)
 #define COM_COPY_STRUCT(ptrSource, ptrDestination, structType) \
 COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType##))
 #endif
+
+#ifndef COM_COMPARE
+#define COM_COMPARE(ptrA, ptrB, numBytes) \
+COM_CompareMemory((u8*)##ptrA##, (u8*)##ptrB##, numBytes##)
+#endif
