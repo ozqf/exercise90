@@ -35,10 +35,22 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 	return 0;
 }
 
-/*internal*/ void ZNet_BuildPacket(u8* dataBytes, i32 numBytes, ZNetAddress* dest, i32 salt)
+/*internal*/ void ZNet_BuildPacket(
+    ByteBuffer* packetBuffer,
+    u8* dataBytes,
+    i32 numBytes,
+    ZNetAddress* dest,
+    i32 salt)
 {
+    i32 totalSize = sizeof(ZNetPacketHeader) + numBytes;
+    NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");
 	// header
 	ZNetPacketHeader h = {};
 	h.protocol = ZNET_PROTOCOL;
 	h.dataChecksum = COM_SimpleHash(dataBytes, numBytes);
+
+    packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
+    packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numBytes);
+
+
 }

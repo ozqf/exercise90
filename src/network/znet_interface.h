@@ -36,8 +36,6 @@ struct ZNetPlatformFunctions
     void (*FatalError)      (char* msg, char* heading);
 };
 
-typedef void (*ZNet_ErrorHandler)(char* msg, char* heading);
-
 // system lifetime
 void ZNet_Init(ZNetPlatformFunctions functions);
 void ZNet_Shutdown();
@@ -47,7 +45,6 @@ void ZNet_StartSession(u8 netMode, ZNetAddress address);
 void ZNet_EndSession();
 
 void ZNet_Tick();
-void ZNet_SetErrorHandler(ZNet_ErrorHandler handler);
 
 // ZNET_INTERFACE_H
 #endif

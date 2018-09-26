@@ -118,8 +118,6 @@ internal u8 g_packetReadBuffer[ZNET_PACKET_READ_SIZE];
 internal ZNetPlatformFunctions g_netPlatform;
 internal ZNet g_net;
 
-internal ZNet_ErrorHandler g_errorHandler = NULL;
-
 internal void Net_FatalError(char* message, char* heading)
 {
     if (g_netPlatform.FatalError)
