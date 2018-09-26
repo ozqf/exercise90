@@ -42,7 +42,7 @@ struct ZNetConnection
     u32 id;
     u32 sequence;
     u32 challenge;
-    //i32 state;
+    i32 salt;
     ZNetAddress remoteAddress;
     u32 flags;
     f32 tick;
@@ -54,6 +54,14 @@ struct ZNetPacketHeader
 {
     u32 protocol;
     i32 dataChecksum;   // TODO implement this
+};
+
+struct ZNetPacket
+{
+    ZNetPacketHeader header;
+    ZNetAddress address;
+    u8* bytes;
+    i32 numBytes;
 };
 
 #define ZNET_MSG_TYPE_NONE 0
@@ -69,9 +77,10 @@ struct ZNetConnectionStatus
     u32 challenge;
 };
 
-struct ZNetPendingConnection
+struct ZNetPending
 {
     ZNetAddress address;
+    u32 clientSalt;
     u32 challenge;
 };
 
@@ -87,7 +96,7 @@ struct ZNet
     i32 client2ServerId;
     u32 tickCount;
 
-    ZNetPendingConnection pendingConnections[MAX_PENDING_CONNECTIONS];
+    ZNetPending pendingConnections[MAX_PENDING_CONNECTIONS];
 };
 
 /////////////////////////////////////////////////////
@@ -100,6 +109,7 @@ struct ZNet
 // Buffers
 // write data to this:
 internal u8 g_dataWriteBuffer[ZNET_DATA_WRITE_SIZE];
+
 // final write buffer before call to platform send
 internal u8 g_packetWriteBuffer[ZNET_PACKET_WRITE_SIZE];
 
@@ -124,7 +134,9 @@ internal void Net_FatalError(char* message, char* heading)
 }
 
 #include "znet_connection.h"
-#include "znet_network.h"
+#include "znet_packet.h"
+#include "znet_pending.h"
+#include "znet_main.h"
 
 ///////////////////////////////////////////////////
 // system lifetime

@@ -177,8 +177,9 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
     Assert(winSock);
     // optional struct to store the sender's address
     sockaddr_in fromAddress;
-    i32 fromAddressSize = sizeof(fromAddress);
 
+    i32 fromAddressSize = sizeof(fromAddress);
+	
     i32 recv_len;
     //char buf[UDP_BUFFER_LENGTH];
     //memset(buf, '\0', UDP_BUFFER_LENGTH);
@@ -200,20 +201,63 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
             printf("recvfrom() failed with error code %d\n", errorCode);
             Net_PrintNetworkError(errorCode);
         }
-        else
-        {
-            printf(".");
-        }
     }
     else
     {
-        printf("\nWin32 net Received %d bytes\n", recv_len);
+        printf("Win32 net Received %d bytes\n", recv_len);
     }
 
     // translate address
     if (sender)
     {
+		/*
+		struct in_addr {
+
+			union {
+			
+			struct
+			{
+				
+				unsigned char s_b1,
+				
+				s_b2,
+				
+				s_b3,
+				
+				s_b4;
+				
+			} S_un_b;
+			
+			struct
+			{
+			
+				unsigned short s_w1,
+				
+				s_w2;
+			
+			} S_un_w;
+			
+			unsigned long S_addr;
+			
+			} S_un;
+			
+		};
+		sockaddr_in struct:
+		https://msdn.microsoft.com/en-us/library/zx63b042.aspx
+		struct sockaddr_in {
+			short   sin_family;
+			u_short sin_port;
+			struct  in_addr sin_addr;
+			char    sin_zero[8];
+		};
+		*/
+		// Grab individual bytes of address
+		sender->ip4Bytes[0] = fromAddress.sin_addr.S_un.S_un_b.s_b1;
+		sender->ip4Bytes[1] = fromAddress.sin_addr.S_un.S_un_b.s_b2;
+		sender->ip4Bytes[2] = fromAddress.sin_addr.S_un.S_un_b.s_b3;
+		sender->ip4Bytes[3] = fromAddress.sin_addr.S_un.S_un_b.s_b4;
         sender->port = winSock->port;
+		//printf("addr_in chars: %s\n", fromAddress.sa_data);
     }
 
     return recv_len > 0 ? recv_len : 0;

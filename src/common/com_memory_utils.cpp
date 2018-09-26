@@ -164,6 +164,17 @@ static inline u32 COM_AlignSize(u32 value, u32 alignment)
     return value + remainder;
 }
 
+static inline i32 COM_SimpleHash(u8* ptr, i32 numBytes)
+{
+    i32 hash = 49105278;
+    u8* end = ptr + numBytes;
+    while (ptr++ < end)
+    {
+        hash += *ptr + (hash << 6) + (hash << 16) - hash;
+    }
+    return hash;
+}
+
 /**
  * if strings are equal, return 0
  * if a is first alphabetically, return -1
