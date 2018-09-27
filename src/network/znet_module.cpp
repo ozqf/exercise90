@@ -69,6 +69,7 @@ struct ZNetPacket
 #define ZNET_MSG_TYPE_CHALLENGE 2
 #define ZNET_MSG_TYPE_CHALLENGE_RESPONSE 3
 #define ZNET_MSG_TYPE_CONNECTION_APPROVED 4
+#define ZNET_MSG_TYPE_DATA 5555
 
 
 struct ZNetConnectionStatus
@@ -81,11 +82,15 @@ struct ZNetPending
 {
     ZNetAddress address;
     u32 clientSalt;
-    u32 challenge;
+    u32 challenge;          // if challenge is 0 then connection is considered free
+    i32 ticks;
 };
 
 #define MAX_CONNECTIONS 16
 #define MAX_PENDING_CONNECTIONS 32
+// assuming tick rate of 60, timeout after 30 seconds
+// TODO: Switch to delta time so tick rate can vary!
+#define MAX_PENDING_CONNECTION_TICKS 1800
 struct ZNet
 {
     ZNetConnection connections[MAX_CONNECTIONS];
@@ -131,6 +136,26 @@ internal void Net_FatalError(char* message, char* heading)
     }
 }
 
+internal i32 ZNet_CreateSalt()
+{
+    i32 result = 0;
+    do
+    {
+        result = (i32)(COM_STDRandf32() * INT_MAX);
+    } while (result == 0);
+    return result;
+}
+
+// if anything is async in future this will pull a free buffer from a list
+internal inline ByteBuffer ZNet_GetDataWriteBuffer()
+{
+	return Buf_FromBytes(g_dataWriteBuffer, ZNET_DATA_WRITE_SIZE);
+}
+internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
+{
+	return Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
+}
+
 #include "znet_connection.h"
 #include "znet_packet.h"
 #include "znet_pending.h"
@@ -143,6 +168,7 @@ void ZNet_Init(ZNetPlatformFunctions platform)
 {
     printf("ZNet Initialising... ");
     g_netPlatform = platform;
+    COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
     printf("Done\n");
 }
 

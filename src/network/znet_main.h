@@ -34,7 +34,7 @@ void ZNet_StartSession(u8 netMode, ZNetAddress address)
             conn->remoteAddress = address;
             // Random salt to tell apart different connections made
             // on the same address and port
-            conn->salt = (i32)(COM_STDRandf32() * INT_MAX);
+            conn->salt = ZNet_CreateSalt();
             g_net.client2ServerId = conn->id;
 
         } break;
@@ -48,7 +48,8 @@ void ZNet_StartSession(u8 netMode, ZNetAddress address)
 
 void ZNet_EndSession()
 {
-
+    ZNet* net = &g_net;
+    NET_ASSERT((net->state != 0), "Net session shutdown but not running\n");
 }
 
 internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
@@ -83,12 +84,18 @@ internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
             // look for a client matching the given address
             // > if not found, create
             // > send challenge
+            ZNetPending* pending = ZNet_AddPendingConnection(net, &packet->address, clientSalt);
+			
+			ByteBuffer data = ZNet_GetDataWriteBuffer();
+			
+			
+			ByteBuffer output = ZNet_GetPacketWriteBuffer();
+			//ZNet_BuildPacket();
+        } break;
 
+        case ZNET_MSG_TYPE_DATA:
+        {
             ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
-            if (conn == NULL)
-            {
-
-            }
         } break;
     }
 }
@@ -147,7 +154,7 @@ internal void ZNet_ReadSocket(ZNet* net)
         bytesRead = g_netPlatform.Read(g_net.socketIndex, &address, &mem);
         if (bytesRead == 0)
         {
-            printf("Read %d packets\n", packetsRead);
+            //printf("Read %d packets\n", packetsRead);
             return;
         }
         packetsRead++;
@@ -182,7 +189,7 @@ void ZNet_Tick()
 {
     ZNet* net = &g_net;
 
-    printf("Tick %d\n", net->tickCount);
+    //printf("Tick %d\n", net->tickCount);
 
     // input
     ZNet_ReadSocket(net);
@@ -213,25 +220,13 @@ void ZNet_Tick()
             data.ptrWrite += COM_WriteI32(conn->salt, data.ptrWrite);
             i32 numBytes = data.ptrWrite - data.ptrStart;
 
-            // header
-            ZNetPacketHeader h = {};
-            h.protocol = ZNET_PROTOCOL;
-            h.dataChecksum = COM_SimpleHash(data.ptrStart, data.ptrWrite - data.ptrStart);
-
-            
-            printf("Client sending type %d, salt %d, bytes %d checksum %d\n",
-                ZNET_MSG_TYPE_CONNECTION_REQUEST, conn->salt, numBytes, h.dataChecksum
-            );
-
-            
-            // construct packet
-            ByteBuffer packet = Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
-            packet.ptrWrite += COM_COPY(&h, packet.ptrWrite, sizeof(ZNetPacketHeader));
-            packet.ptrWrite += COM_COPY(data.ptrStart, packet.ptrWrite, numBytes);
-            i32 packetSize = packet.ptrWrite - packet.ptrStart;
+            // g_packetWriteBuffer
+            // ZNET_PACKET_WRITE_SIZE
+            ByteBuffer packetBuffer = Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
+            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress, conn->salt);
 
             // send!
-            ZNet_Send(&conn->remoteAddress, packet.ptrStart, packetSize);
+            ZNet_Send(&conn->remoteAddress, packetBuffer.ptrStart, packetSize);
         } break;
 
         case ZNET_STATE_RESPONDING:

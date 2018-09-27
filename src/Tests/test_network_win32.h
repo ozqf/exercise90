@@ -36,7 +36,7 @@ void Test_Server(u16 port)
     for(;;)
     {
         ZNet_Tick();
-        Sleep(1000);
+        Sleep(2000);
     }
     //getc(stdin);
 }
@@ -55,7 +55,7 @@ void Test_Client(u16 port)
     for(;;)
     {
         ZNet_Tick();
-        Sleep(500);
+        Sleep(2000);
     }
     //getc(stdin);
 }

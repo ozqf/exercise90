@@ -36,6 +36,7 @@ void Net_PrintNetworkError(i32 code)
         NET_ERROR_CASE(10040, "Message too long.\n");
         NET_ERROR_CASE(10047, "Address family not supported by protocol family.\n");
         NET_ERROR_CASE(10048, "Address in use\n");
+        NET_ERROR_CASE(10054, "Connection reset by peer\n");
         default: printf("Unknown error code... Sorry\n"); break;
     }
 }

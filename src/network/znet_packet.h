@@ -35,7 +35,7 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 	return 0;
 }
 
-/*internal*/ void ZNet_BuildPacket(
+/*internal*/ i32 ZNet_BuildPacket(
     ByteBuffer* packetBuffer,
     u8* dataBytes,
     i32 numBytes,
@@ -51,6 +51,5 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 
     packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
     packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numBytes);
-
-
+    return (packetBuffer->ptrWrite - packetBuffer->ptrStart);
 }
