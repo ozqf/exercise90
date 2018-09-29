@@ -87,7 +87,8 @@ internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
             ZNetPending* pending = ZNet_AddPendingConnection(net, &packet->address, clientSalt);
 			
 			ByteBuffer data = ZNet_GetDataWriteBuffer();
-			
+			data.ptrWrite += COM_WriteI32(clientSalt, data.ptrWrite);
+			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
 			
 			ByteBuffer output = ZNet_GetPacketWriteBuffer();
 			//ZNet_BuildPacket();

@@ -316,7 +316,7 @@ i32 App_StartSession(u8 netMode, char *path)
     {
     case NETMODE_SINGLE_PLAYER:
     {
-        ZNet_StartSession(netMode, NULL);
+        //ZNet_StartSession(netMode, NULL);
         if (!App_LoadScene(path))
         {
             return 0;

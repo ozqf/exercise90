@@ -127,7 +127,7 @@ i32 Net_SendTo(
     }
     return sendResult;
 }
-
+#if 0
 i32 WNet_ReadSocket_OldTest(i32 socketIndex)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(socketIndex);
@@ -168,7 +168,7 @@ i32 WNet_ReadSocket_OldTest(i32 socketIndex)
     }
     return recv_len > 0 ? recv_len : 0;
 }
-
+#endif
 //////////////////////////////////////////////////////////////////////////
 // READ
 //////////////////////////////////////////////////////////////////////////

@@ -12,8 +12,9 @@ App Network layer functionality:
 > Handle connection persistence
 
 > System will open one unreliable UDP socket
-> connections are managed via randomly assigned ids.
-> connections store the 
+> connections are identified by ids which are xors of random numbers generated on
+	either connection side.
+
 
 */
 
@@ -53,7 +54,35 @@ struct ZNetConnection
 struct ZNetPacketHeader
 {
     u32 protocol;
-    i32 dataChecksum;   // TODO implement this
+    i32 dataChecksum;
+	u32 sequence;
+	u32 ack;
+	u32 ackBits;
+
+    void Read(u8** ptr)
+    {
+        *ptr += COM_COPY(this, *ptr, sizeof(ZNetPacketHeader));
+    }
+    
+    i32 Read(u8* ptr)
+    {
+        return COM_COPY(this, ptr, sizeof(ZNetPacketHeader));
+    }
+
+    void Write(u8** ptr)
+    {
+        *ptr += COM_COPY(*ptr, this, sizeof(ZNetPacketHeader));
+    }
+
+    i32 Write(u8* ptr)
+    {
+        return COM_COPY(ptr, this, sizeof(ZNetPacketHeader));
+    }
+
+    i32 Measure()
+    {
+        return sizeof(ZNetPacketHeader);
+    }
 };
 
 struct ZNetPacket
@@ -65,11 +94,12 @@ struct ZNetPacket
 };
 
 #define ZNET_MSG_TYPE_NONE 0
-#define ZNET_MSG_TYPE_CONNECTION_REQUEST 1111
+#define ZNET_MSG_TYPE_CONNECTION_REQUEST 1
 #define ZNET_MSG_TYPE_CHALLENGE 2
 #define ZNET_MSG_TYPE_CHALLENGE_RESPONSE 3
 #define ZNET_MSG_TYPE_CONNECTION_APPROVED 4
-#define ZNET_MSG_TYPE_DATA 5555
+#define ZNET_MSG_TYPE_CONNECTION_DENIED 5
+#define ZNET_MSG_TYPE_DATA 6
 
 
 struct ZNetConnectionStatus

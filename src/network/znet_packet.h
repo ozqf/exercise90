@@ -49,7 +49,8 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 	h.protocol = ZNET_PROTOCOL;
 	h.dataChecksum = COM_SimpleHash(dataBytes, numBytes);
 
-    packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
+    //packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
+    packetBuffer->ptrWrite += h.Write(packetBuffer->ptrWrite);
     packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numBytes);
     return (packetBuffer->ptrWrite - packetBuffer->ptrStart);
 }
