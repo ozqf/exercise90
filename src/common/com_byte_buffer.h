@@ -12,6 +12,11 @@ struct ByteBuffer
     i32 count;
 };
 
+static inline i32 Buf_BytesWritten(ByteBuffer* b)
+{
+    return (b->ptrWrite - b->ptrStart);
+}
+
 static inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
 {
     ByteBuffer b = {};

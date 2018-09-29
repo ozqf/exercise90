@@ -64,7 +64,7 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
         address->ip4Bytes[2],
         address->ip4Bytes[3]
     );
-    printf("Sending %d bytes to %s\n", numBytes, asciAddress);
+    printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -91,7 +91,8 @@ internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
 			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
 			
 			ByteBuffer output = ZNet_GetPacketWriteBuffer();
-			//ZNet_BuildPacket();
+			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address);
+            ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
         } break;
 
         case ZNET_MSG_TYPE_DATA:
@@ -103,7 +104,28 @@ internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
 
 internal void ZNet_ClientReadPacket(ZNet* net, ZNetPacket* packet)
 {
-	
+    u8* read = packet->bytes;
+    i32 i;
+    read += COM_COPY(read, &i, sizeof(i));
+	switch (net->state)
+    {
+        case ZNET_STATE_CONNECTING:
+        {
+            if (i == net->client2ServerId)
+            {
+                printf("CL: Received response\n");
+            }
+            else
+            {
+                printf("CL: Unknown connection response %d\n", i);
+            }
+        } break;
+
+        default:
+        {
+            printf("CL No read mode for state %d\n", net->state);
+        } break;
+    }
 }
 
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
@@ -190,7 +212,7 @@ void ZNet_Tick()
 {
     ZNet* net = &g_net;
 
-    //printf("Tick %d\n", net->tickCount);
+    printf("***** Tick %d *****\n", net->tickCount);
 
     // input
     ZNet_ReadSocket(net);
@@ -202,7 +224,7 @@ void ZNet_Tick()
         case ZNET_STATE_SERVER:
         {
             // transmit client messages ()
-    } break;
+        } break;
         
         case ZNET_STATE_CONNECTED:
         {
@@ -224,7 +246,7 @@ void ZNet_Tick()
             // g_packetWriteBuffer
             // ZNET_PACKET_WRITE_SIZE
             ByteBuffer packetBuffer = Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
-            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress, conn->salt);
+            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress);
 
             // send!
             ZNet_Send(&conn->remoteAddress, packetBuffer.ptrStart, packetSize);

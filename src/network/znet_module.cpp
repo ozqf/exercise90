@@ -55,28 +55,25 @@ struct ZNetPacketHeader
 {
     u32 protocol;
     i32 dataChecksum;
-	u32 sequence;
-	u32 ack;
-	u32 ackBits;
 
-    void Read(u8** ptr)
-    {
-        *ptr += COM_COPY(this, *ptr, sizeof(ZNetPacketHeader));
-    }
-    
-    i32 Read(u8* ptr)
-    {
-        return COM_COPY(this, ptr, sizeof(ZNetPacketHeader));
-    }
-
-    void Write(u8** ptr)
+    inline void Read(u8** ptr)
     {
         *ptr += COM_COPY(*ptr, this, sizeof(ZNetPacketHeader));
     }
-
-    i32 Write(u8* ptr)
+    
+    inline i32 Read(u8* ptr)
     {
         return COM_COPY(ptr, this, sizeof(ZNetPacketHeader));
+    }
+
+    inline void Write(u8** ptr)
+    {
+        *ptr += COM_COPY(this, *ptr, sizeof(ZNetPacketHeader));
+    }
+
+    inline i32 Write(u8* ptr)
+    {
+        return COM_COPY(this, ptr, sizeof(ZNetPacketHeader));
     }
 
     i32 Measure()

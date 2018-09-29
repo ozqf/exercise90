@@ -15,6 +15,9 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 	read += COM_COPY(read, &result->header, sizeof(ZNetPacketHeader));
 	if (result->header.protocol != ZNET_PROTOCOL)
 	{
+        printf("SV protocol expected %d but got %d\n",
+            ZNET_PROTOCOL, result->header.protocol
+        );
 		return 1;
 	}
 
@@ -39,8 +42,7 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
     ByteBuffer* packetBuffer,
     u8* dataBytes,
     i32 numBytes,
-    ZNetAddress* dest,
-    i32 salt)
+    ZNetAddress* dest)
 {
     i32 totalSize = sizeof(ZNetPacketHeader) + numBytes;
     NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");

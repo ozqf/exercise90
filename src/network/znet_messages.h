@@ -20,6 +20,13 @@ Data
 
 */
 
+struct ZNetDataHeader
+{
+	u32 type;
+    u32 saltXor;
+	u32 sequence;
+};
+
 // Client2Server
 struct ZNet_ConnectionRequest
 {
