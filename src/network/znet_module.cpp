@@ -48,7 +48,8 @@ struct ZNetConnection
     ZNetAddress remoteAddress;
     u32 flags;
     f32 tick;
-    i32 ticksSinceLastPacket;
+    i32 pendingKeepAlive;
+    i32 keepAliveTicks;
 };
 
 #define ZNET_PROTOCOL 90
@@ -114,7 +115,9 @@ struct ZNetPacket
 #define ZNET_MSG_TYPE_CHALLENGE_RESPONSE 3
 #define ZNET_MSG_TYPE_CONNECTION_APPROVED 4
 #define ZNET_MSG_TYPE_CONNECTION_DENIED 5
-#define ZNET_MSG_TYPE_DATA 6
+#define ZNET_MSG_TYPE_KEEP_ALIVE 6
+#define ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE 7
+#define ZNET_MSG_TYPE_DATA 8
 
 
 struct ZNetConnectionStatus

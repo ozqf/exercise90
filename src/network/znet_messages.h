@@ -79,3 +79,13 @@ void ZNet_SendConnectionApproved(ZNet* net, ZNetConnection* conn)
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }
+
+void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
+{
+	ByteBuffer b = ZNet_GetDataWriteBuffer();
+	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_APPROVED, b.ptrWrite);
+	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
+	ByteBuffer p = ZNet_GetPacketWriteBuffer();
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+}

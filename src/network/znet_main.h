@@ -158,6 +158,21 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             if (net->state != ZNET_STATE_RESPONDING) { return; }
 
             printf("CL Conn approved!\n");
+            net->state = ZNET_STATE_CONNECTED;
+        } break;
+
+        case ZNET_MSG_TYPE_KEEP_ALIVE:
+        {
+            i32 xor = COM_ReadI32(&read);
+            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            conn->keepAliveTicks = 0;
+        } break;
+
+        case ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE:
+        {
+            i32 xor = COM_ReadI32(&read);
+            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            conn->keepAliveTicks = 0;
         } break;
 
         case ZNET_MSG_TYPE_DATA:
@@ -232,11 +247,25 @@ void ZNet_Tick()
         case ZNET_STATE_SERVER:
         {
             // transmit client messages ()
+            for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
+            {
+                ZNetConnection* conn = &net->connections[i];
+                if (conn->id == 0) { continue; }
+
+                
+                ByteBuffer b = ZNet_GetDataWriteBuffer();
+                
+            }
         } break;
         
         case ZNET_STATE_CONNECTED:
         {
             // Transmit server messages
+            for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
+            {
+                ZNetConnection* conn = &net->connections[i];
+                if (conn->id == 0) { continue; }
+            }
         } break;
 
         case ZNET_STATE_CONNECTING:
