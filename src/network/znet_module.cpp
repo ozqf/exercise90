@@ -48,6 +48,7 @@ struct ZNetConnection
     ZNetAddress remoteAddress;
     u32 flags;
     f32 tick;
+    i32 ticksSinceLastPacket;
 };
 
 #define ZNET_PROTOCOL 90
@@ -200,9 +201,12 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 	return Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
 }
 
+// Internal interface
+internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
+
+#include "znet_packet.h"
 #include "znet_messages.h"
 #include "znet_connection.h"
-#include "znet_packet.h"
 #include "znet_pending.h"
 #include "znet_main.h"
 

@@ -66,9 +66,9 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
     return p;
 }
 
-void ZNet_ClosePendingConnection(ZNet* net)
+void ZNet_ClosePendingConnection(ZNet* net, ZNetPending* p)
 {
-
+	p->challenge = 0;
 }
 
 void ZNet_CheckPendingConnections(ZNet* net)

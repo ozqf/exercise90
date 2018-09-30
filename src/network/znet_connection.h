@@ -52,7 +52,7 @@ ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
     return NULL;
 }
 
-u32 ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
+ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
 {
     ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
     NET_ASSERT(conn, "ZNet failed to find free connection\n");
@@ -64,7 +64,8 @@ u32 ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
     }
     else
     {
+        conn->remoteAddress = address;
         printf("NET Creating remote connection id %d\n", conn->id);
     }
-    return conn->id;
+    return conn;
 }

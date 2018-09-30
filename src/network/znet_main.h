@@ -139,7 +139,25 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             i32 response = COM_ReadI32(&read);
             printf("SV Response received: %d\n", response);
 
-            ZNet_FindPendingConnection(net, response);
+            
+            ZNetPending* p = ZNet_FindPendingConnection(net, response);
+            if (!p)
+            {
+                printf("SV Found no pending connection for %d\n", response);
+                return;
+            }
+            ZNetConnection* conn = ZNet_CreateClientConnection(p->address, 0);
+            conn->id = response;
+            ZNet_ClosePendingConnection(net, p);
+            
+            ZNet_SendConnectionApproved(net, conn);
+        } break;
+
+        case ZNET_MSG_TYPE_CONNECTION_APPROVED:
+        {
+            if (net->state != ZNET_STATE_RESPONDING) { return; }
+
+            printf("CL Conn approved!\n");
         } break;
 
         case ZNET_MSG_TYPE_DATA:
