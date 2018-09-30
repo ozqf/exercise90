@@ -72,73 +72,13 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
     printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
-#if 0
-internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
-{
-    u8* read = packet->bytes;
-    i32 i;
-    read += COM_COPY(read, &i, sizeof(i));
-    printf("Server read packet type %d\n", i);
-    switch (i)
-    {
-        case ZNET_MSG_TYPE_CONNECTION_REQUEST:
-        {
-            i32 clientSalt;
-            read += COM_COPY(read, &clientSalt, sizeof(clientSalt));
-            printf("Client Salt %d\n", clientSalt);
-            // look for a client matching the given address
-            // > if not found, create
-            // > send challenge
-            ZNetPending* pending = ZNet_AddPendingConnection(net, &packet->address, clientSalt);
-			
-			ByteBuffer data = ZNet_GetDataWriteBuffer();
-			data.ptrWrite += COM_WriteI32(clientSalt, data.ptrWrite);
-			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
-			
-			ByteBuffer output = ZNet_GetPacketWriteBuffer();
-			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address);
-            ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
-        } break;
 
-        case ZNET_MSG_TYPE_DATA:
-        {
-            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
-        } break;
-    }
-}
-
-internal void ZNet_ClientReadPacket(ZNet* net, ZNetPacket* packet)
-{
-    u8* read = packet->bytes;
-    i32 i;
-    read += COM_COPY(read, &i, sizeof(i));
-	switch (net->state)
-    {
-        case ZNET_STATE_CONNECTING:
-        {
-            if (i == net->client2ServerId)
-            {
-                printf("CL: Received response\n");
-            }
-            else
-            {
-                printf("CL: Unknown connection response %d\n", i);
-            }
-        } break;
-
-        default:
-        {
-            printf("CL No read mode for state %d\n", net->state);
-        } break;
-    }
-}
-#endif
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 {
     u8* read = packet->bytes;
     u8 msgType;
     msgType = COM_ReadByte(&read);
-    printf(">> Read packet type %d\n", msgType);
+    printf(">> Read packet type %d from remote port %d\n", msgType, packet->address.port);
     switch (msgType)
     {
         case ZNET_MSG_TYPE_CONNECTION_REQUEST:
@@ -169,7 +109,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
             if (!conn)
             {
-                printf("CL Not connection client2Server id %d\n", net->client2ServerId);
+                printf("CL No conn for client2Server id %d\n", net->client2ServerId);
             }
             #if 0
             NET_ASSERT(conn, "No connection for challenge response\n");
