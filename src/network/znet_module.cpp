@@ -2,6 +2,7 @@
 #define ZNET_MODULE_CPP
 
 #include <stdio.h>
+#include <ctime>
 #include "znet_interface.h"
 
 /*
@@ -40,7 +41,7 @@ App Network layer functionality:
 // id of 0 == unassigned.
 struct ZNetConnection
 {
-    u32 id;
+    i32 id;
     u32 sequence;
     u32 challenge;
     //i32 salt;

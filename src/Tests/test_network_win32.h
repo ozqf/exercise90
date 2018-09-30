@@ -67,6 +67,8 @@ void Test_Client(u16 serverPort, u16 clientPort)
 void Test_Win32(i32 argc, char* argv[])
 {
     printf("Test winsock\n");
+    srand((u32)argv);
+    printf("SEED: %d\n", rand());
 
     #if 1
     if (argc != 2)

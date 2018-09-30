@@ -2,6 +2,22 @@
 
 #include "znet_module.cpp"
 
+ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
+{
+	ZNetPending* p = NULL;
+	for (i32 i = 0; i < MAX_PENDING_CONNECTIONS; ++i)
+	{
+		p = &net->pendingConnections[i];
+		i32 pXor = p->clientSalt ^ p->challenge;
+		printf("XOR %d vs %d\n", xor, pXor);
+		if (pXor == xor)
+		{
+			return p;
+		}
+	}
+	return NULL;
+}
+
 /*internal*/ ZNetPending* ZNet_AddPendingConnection(ZNet* net, ZNetAddress* address, u32 clientSalt)
 {
     i32 firstFree = -1;

@@ -60,3 +60,12 @@ i32 ZNet_WriteConnRequest(ByteBuffer* b, i32 clientSalt)
 	b->ptrWrite += COM_WriteI32(clientSalt, b->ptrWrite);
 	return b->ptrWrite - ptr;
 }
+
+// returns number of bytes written
+i32 ZNet_WriteChallengeResponse(ByteBuffer* b, i32 clientSalt, i32 challenge)
+{
+	u8* ptr = b->ptrWrite;
+	b->ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CHALLENGE_RESPONSE, b->ptrWrite);
+	b->ptrWrite += COM_WriteI32(clientSalt ^ challenge, b->ptrWrite);
+	return b->ptrWrite - ptr;
+}

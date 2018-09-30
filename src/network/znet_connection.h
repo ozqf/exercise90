@@ -1,7 +1,7 @@
 #pragma once
 
 
-internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, u32 id)
+internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id)
 {
     if (id == 0) { return NULL; }
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
