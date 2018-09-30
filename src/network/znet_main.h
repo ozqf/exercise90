@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////
 // External
 //////////////////////////////////////////////////////
-void ZNet_StartSession(u8 netMode, ZNetAddress address)
+void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 {
     ZNet* net = &g_net;
     NET_ASSERT((net->state == 0), "Net session was not ended!");
@@ -20,23 +20,28 @@ void ZNet_StartSession(u8 netMode, ZNetAddress address)
         case NETMODE_DEDICATED_SERVER:
         {
             printf("ZNet - dedicated server\n");
-            net->serverPort = address.port;
-            net->socketIndex = g_netPlatform.OpenSocket(net->serverPort);
+            net->selfPort = selfPort;
+            net->socketIndex = g_netPlatform.OpenSocket(net->selfPort);
             net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_CLIENT:
         {
             printf("ZNet - client\n");
-            net->socketIndex = g_netPlatform.OpenSocket(address.port);
+            net->selfPort = selfPort;
+            net->socketIndex = g_netPlatform.OpenSocket(selfPort);
             ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
             net->state = ZNET_STATE_CONNECTING;
-            conn->remoteAddress = address;
-            // Random salt to tell apart different connections made
-            // on the same address and port
-            conn->salt = ZNet_CreateSalt();
+            conn->remoteAddress = *address;
             g_net.client2ServerId = conn->id;
-
+            printf("CL on port %d connecting to \"%d.%d.%d.%d:%d\"\n",
+                selfPort,
+                conn->remoteAddress.ip4Bytes[0],
+                conn->remoteAddress.ip4Bytes[1],
+                conn->remoteAddress.ip4Bytes[2],
+                conn->remoteAddress.ip4Bytes[3],
+                conn->remoteAddress.port
+            );
         } break;
 
         default:
@@ -67,7 +72,7 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
     printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
-
+#if 0
 internal void ZNet_ServerReadPacket(ZNet* net, ZNetPacket* packet)
 {
     u8* read = packet->bytes;
@@ -127,9 +132,65 @@ internal void ZNet_ClientReadPacket(ZNet* net, ZNetPacket* packet)
         } break;
     }
 }
-
+#endif
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 {
+    u8* read = packet->bytes;
+    u8 msgType;
+    msgType = COM_ReadByte(&read);
+    printf(">> Read packet type %d\n", msgType);
+    switch (msgType)
+    {
+        case ZNET_MSG_TYPE_CONNECTION_REQUEST:
+        {
+            i32 clientSalt;
+            read += COM_COPY(read, &clientSalt, sizeof(clientSalt));
+            //printf("Client Salt %d\n", clientSalt);
+            // look for a client matching the given address
+            // > if not found, create
+            // > send challenge
+            ZNetPending* pending = ZNet_AddPendingConnection(net, &packet->address, clientSalt);
+			
+			ByteBuffer data = ZNet_GetDataWriteBuffer();
+            data.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CHALLENGE, data.ptrWrite);
+			data.ptrWrite += COM_WriteI32(clientSalt, data.ptrWrite);
+			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
+			
+			ByteBuffer output = ZNet_GetPacketWriteBuffer();
+			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address);
+            ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
+
+            printf("SV Challenging client %d with %d\n", clientSalt, pending->challenge);
+        } break;
+
+        case ZNET_MSG_TYPE_CHALLENGE:
+        {
+            i32 clientSalt = COM_ReadI32(&read);
+            ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
+            if (!conn)
+            {
+                printf("CL Not connection client2Server id %d\n", net->client2ServerId);
+            }
+            #if 0
+            NET_ASSERT(conn, "No connection for challenge response\n");
+            if (clientSalt != conn->salt)
+            {
+                printf("CL: Challenge client Salt %d does not match %d\n", clientSalt, conn->salt);
+                return;
+            }
+            #endif
+            i32 challenge = COM_ReadI32(&read);
+            printf("CL: Challenged: %d\n", challenge);
+        } break;
+
+        case ZNET_MSG_TYPE_DATA:
+        {
+            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+
+        } break;
+    }
+
+    #if 0
     switch(net->state)
     {
         case ZNET_STATE_SERVER:
@@ -158,6 +219,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             printf("Unknown net state %d\n", net->state);
         } break;
     }
+    #endif
 }
 
 internal void ZNet_ReadSocket(ZNet* net)
@@ -212,7 +274,7 @@ void ZNet_Tick()
 {
     ZNet* net = &g_net;
 
-    printf("***** Tick %d *****\n", net->tickCount);
+    printf("\n***** Tick %d *****\n", net->tickCount);
 
     // input
     ZNet_ReadSocket(net);
@@ -236,12 +298,21 @@ void ZNet_Tick()
             // Get conn for address and salt
             ZNetConnection* conn = ZNet_GetConnectionById(&g_net, g_net.client2ServerId);
             NET_ASSERT(conn, "Client 2 Server connection is null");
-
+            printf("CL SENDING CONN REQUEST\n");
+            #if 0
             // Prepare data buffer
             ByteBuffer data = Buf_FromBytes(g_dataWriteBuffer, ZNET_DATA_WRITE_SIZE);
-            data.ptrWrite += COM_WriteI32(ZNET_MSG_TYPE_CONNECTION_REQUEST, data.ptrWrite);
-            data.ptrWrite += COM_WriteI32(conn->salt, data.ptrWrite);
+            //data.ptrWrite += COM_WriteI32(ZNET_MSG_TYPE_CONNECTION_REQUEST, data.ptrWrite);
+            data.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_REQUEST, data.ptrWrite);
+            data.ptrWrite += COM_WriteI32(conn->id, data.ptrWrite);
+            printf("CL Sending type %d\n", ZNET_MSG_TYPE_CONNECTION_REQUEST);
             i32 numBytes = data.ptrWrite - data.ptrStart;
+            #endif
+
+            // Prepare data buffer
+            ByteBuffer data = ZNet_GetDataWriteBuffer();
+            ZNet_WriteConnRequest(&data, conn->id);
+            i32 numBytes = data.Written();
 
             // g_packetWriteBuffer
             // ZNET_PACKET_WRITE_SIZE

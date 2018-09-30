@@ -20,13 +20,6 @@ Data
 
 */
 
-struct ZNetDataHeader
-{
-	u32 type;
-    u32 saltXor;
-	u32 sequence;
-};
-
 // Client2Server
 struct ZNet_ConnectionRequest
 {
@@ -58,3 +51,12 @@ struct ZNet_StandardPacketHeader_Thing_This_Name_Should_Be_Replaced
 {
 	u32 saltXOR;
 };
+
+// returns number of bytes written
+i32 ZNet_WriteConnRequest(ByteBuffer* b, i32 clientSalt)
+{
+	u8* ptr = b->ptrWrite;
+	b->ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_REQUEST, b->ptrWrite);
+	b->ptrWrite += COM_WriteI32(clientSalt, b->ptrWrite);
+	return b->ptrWrite - ptr;
+}

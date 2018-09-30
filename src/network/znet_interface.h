@@ -41,7 +41,7 @@ void ZNet_Init(ZNetPlatformFunctions functions);
 void ZNet_Shutdown();
 
 // connection lifetime
-void ZNet_StartSession(u8 netMode, ZNetAddress address);
+void ZNet_StartSession(u8 netMode, ZNetAddress* serverAddress, u16 localPort);
 void ZNet_EndSession();
 
 void ZNet_Tick();

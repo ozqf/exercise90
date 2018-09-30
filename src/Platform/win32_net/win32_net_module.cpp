@@ -199,17 +199,13 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
         i32 errorCode = WSAGetLastError();
         if (errorCode != NET_NON_BLOCKING_ERROR)
         {
-            printf("recvfrom() failed with error code %d\n", errorCode);
+            printf("recvfrom() on port %d failed with error code %d\n", winSock->port, errorCode);
             Net_PrintNetworkError(errorCode);
         }
     }
-    else
-    {
-        printf("Win32 net Received %d bytes\n", recv_len);
-    }
 
     // translate address
-    if (sender)
+    if (sender && recv_len > 0)
     {
 		/*
 		struct in_addr {
@@ -257,7 +253,13 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 		sender->ip4Bytes[1] = fromAddress.sin_addr.S_un.S_un_b.s_b2;
 		sender->ip4Bytes[2] = fromAddress.sin_addr.S_un.S_un_b.s_b3;
 		sender->ip4Bytes[3] = fromAddress.sin_addr.S_un.S_un_b.s_b4;
-        sender->port = winSock->port;
+        sender->port = ntohs(fromAddress.sin_port);
+        printf("Win32 net %d bytes from \"%d.%d.%d.%d:%d\"\n",
+             recv_len,
+             sender->ip4Bytes[0], sender->ip4Bytes[1], sender->ip4Bytes[2], sender->ip4Bytes[3],
+             sender->port
+             
+             );
 		//printf("addr_in chars: %s\n", fromAddress.sa_data);
     }
 

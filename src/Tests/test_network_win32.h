@@ -25,23 +25,21 @@ ZNetPlatformFunctions TNet_CreateNetFunctions()
     return x;
 }
 
-void Test_Server(u16 port)
+void Test_Server(u16 serverPort)
 {
     printf("Server\n");
     ZNet_Init(TNet_CreateNetFunctions());
 
-    ZNetAddress addr = {};
-    addr.port = 23232;
-    ZNet_StartSession(NETMODE_DEDICATED_SERVER, addr);
+    ZNet_StartSession(NETMODE_DEDICATED_SERVER, NULL, serverPort);
     for(;;)
     {
         ZNet_Tick();
-        Sleep(2000);
+        Sleep(4000);
     }
     //getc(stdin);
 }
 
-void Test_Client(u16 port)
+void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
     ZNet_Init(TNet_CreateNetFunctions());
@@ -50,15 +48,18 @@ void Test_Client(u16 port)
     addr.ip4Bytes[1] = 0;
     addr.ip4Bytes[2] = 0;
     addr.ip4Bytes[3] = 1;
-    addr.port = 23234;
-    ZNet_StartSession(NETMODE_CLIENT, addr);
+    addr.port = serverPort;
+    ZNet_StartSession(NETMODE_CLIENT, &addr, clientPort);
     for(;;)
     {
         ZNet_Tick();
-        Sleep(2000);
+        Sleep(4000);
     }
     //getc(stdin);
 }
+
+#define TEST_SERVER_PORT 23232
+#define TEST_CLIENT_PORT 61200
 
 // Example from:
 // https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-recvfrom
@@ -76,11 +77,11 @@ void Test_Win32(i32 argc, char* argv[])
     char* mode = argv[1];
     if (!COM_CompareStrings(mode, "server"))
     {
-        Test_Server(23232);
+        Test_Server(TEST_SERVER_PORT);
     }
     else if (!COM_CompareStrings(mode, "client"))
     {
-        Test_Client(23233);
+        Test_Client(TEST_SERVER_PORT, TEST_CLIENT_PORT);
     }
     else if (!COM_CompareStrings(mode, "both"))
     {

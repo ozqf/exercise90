@@ -10,6 +10,11 @@ struct ByteBuffer
     u8* ptrWrite;
     i32 capacity;
     i32 count;
+
+    inline u32 Written()
+    {
+        return this->ptrWrite - this->ptrStart;
+    }
 };
 
 static inline i32 Buf_BytesWritten(ByteBuffer* b)

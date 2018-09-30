@@ -21,8 +21,8 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 		return 1;
 	}
 
-    i32 packetBytes = numBytes - sizeof(ZNetPacketHeader);
-    i32 checkSum = COM_SimpleHash(read, packetBytes);
+    i32 payloadBytes = numBytes - sizeof(ZNetPacketHeader);
+    i32 checkSum = COM_SimpleHash(read, payloadBytes);
     if (result->header.dataChecksum != checkSum)
     {
         printf("SV read checksum %d but calculated %d\n",
@@ -41,18 +41,19 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 /*internal*/ i32 ZNet_BuildPacket(
     ByteBuffer* packetBuffer,
     u8* dataBytes,
-    i32 numBytes,
+    i32 numDataBytes,
     ZNetAddress* dest)
 {
-    i32 totalSize = sizeof(ZNetPacketHeader) + numBytes;
+    i32 totalSize = sizeof(ZNetPacketHeader) + numDataBytes;
     NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");
 	// header
 	ZNetPacketHeader h = {};
 	h.protocol = ZNET_PROTOCOL;
-	h.dataChecksum = COM_SimpleHash(dataBytes, numBytes);
+	h.dataChecksum = COM_SimpleHash(dataBytes, numDataBytes);
+    printf(" Outgoing Packet checksum: %d\n", h.dataChecksum);
 
     //packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
     packetBuffer->ptrWrite += h.Write(packetBuffer->ptrWrite);
-    packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numBytes);
+    packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numDataBytes);
     return (packetBuffer->ptrWrite - packetBuffer->ptrStart);
 }

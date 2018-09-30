@@ -20,6 +20,13 @@ static inline u32 COM_WriteByte(u8 value, u8* target)
     return 1;
 }
 
+static inline void COM_WriteByte(u8 value, u8** target)
+{
+	Assert(target != NULL);
+    **target = value;
+    *target++;
+}
+
 /**
  * Returns number of bytes written
  */

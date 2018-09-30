@@ -25,7 +25,7 @@ App Network layer functionality:
     Net_FatalError(assertBuf, "Fatal Net Error"); \
 } \
 
-#define ZNET_DEFAULT_PORT 23232
+//#define ZNET_DEFAULT_PORT 23232
 #define ZNET_CONNECTION_FLAG_LOCAL (1 << 0)
 
 #define ZNET_STATE_DISCONNECTED 0
@@ -43,13 +43,22 @@ struct ZNetConnection
     u32 id;
     u32 sequence;
     u32 challenge;
-    i32 salt;
+    //i32 salt;
     ZNetAddress remoteAddress;
     u32 flags;
     f32 tick;
 };
 
 #define ZNET_PROTOCOL 90
+/*
+Packet structure:
+> Packet header:
+    > u32 protocol magic number
+    > i32 payload checksum
+> Payload
+    > u8 type
+    > data...
+*/
 
 struct ZNetPacketHeader
 {
@@ -80,6 +89,13 @@ struct ZNetPacketHeader
     {
         return sizeof(ZNetPacketHeader);
     }
+};
+
+struct ZNetPayloadHeader
+{
+	u32 type;
+    u32 salt;
+	u32 sequence;
 };
 
 struct ZNetPacket
@@ -124,7 +140,7 @@ struct ZNet
     i32 maxConnections = MAX_CONNECTIONS;
     i32 socketIndex;
     i32 state;
-    u16 serverPort;
+    u16 selfPort;
     i32 client2ServerId;
     u32 tickCount;
 
@@ -183,6 +199,7 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 	return Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
 }
 
+#include "znet_messages.h"
 #include "znet_connection.h"
 #include "znet_packet.h"
 #include "znet_pending.h"

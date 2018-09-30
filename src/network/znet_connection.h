@@ -44,12 +44,7 @@ ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
         {
             u32 newId = 0;
             ZNetConnection* other = NULL;
-            // make sure id is unique ;)
-            do
-            {
-                newId = (u32)(COM_STDRandf32() * UINT_MAX);
-                other = ZNet_GetConnectionById(net, newId);
-            } while (other);
+            newId = ZNet_CreateSalt();
             conn->id = newId;
             return conn;
         }
