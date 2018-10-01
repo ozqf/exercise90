@@ -7,33 +7,42 @@
 //////////////////////////////////////////////////////
 void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 {
-    // mix up random numbers!
-    printf("ZNet Random Seed: %d\n", rand());
+    // TODO: Make sure rand is somehow mixed up by this point
+    // or server and client random numbers can exactly align!
+    // Currently done by seeding it from the address of argv, but bleh.
     ZNet* net = &g_net;
     NET_ASSERT((net->state == 0), "Net session was not ended!");
+    net->isListening = 0;
+	u16 sockedOpened = 1;
     switch (netMode)
     {
         case NETMODE_SINGLE_PLAYER:
         {
             printf("ZNet - single player, no socket\n");
+            net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            printf("ZNet - dedicated server\n");
+            printf("ZNet - dedicated server on port %d\n", selfPort);
             net->selfPort = selfPort;
-            net->socketIndex = g_netPlatform.OpenSocket(net->selfPort);
+            net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
+			printf("Dedicated server requested port %d opened port %d\n", selfPort, sockedOpened);
+            net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_CLIENT:
         {
             printf("ZNet - client\n");
-            net->selfPort = selfPort;
-            net->socketIndex = g_netPlatform.OpenSocket(selfPort);
+            
+            net->socketIndex = g_netPlatform.OpenSocket(0, &sockedOpened);
+			net->selfPort = sockedOpened;
+			
             ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
             net->state = ZNET_STATE_CONNECTING;
+            conn->type = ZNET_CONN_TYPE_CLIENT2SERVER;
             conn->remoteAddress = *address;
             g_net.client2ServerId = conn->id;
             printf("CL on port %d connecting to \"%d.%d.%d.%d:%d\"\n",
@@ -71,7 +80,7 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
         address->ip4Bytes[2],
         address->ip4Bytes[3]
     );
-    printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
+    //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -80,12 +89,12 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
     u8* read = packet->bytes;
     u8 msgType;
     msgType = COM_ReadByte(&read);
-    printf(">> Read packet type %d from remote port %d\n", msgType, packet->address.port);
+    //printf(">> Read packet type %d from remote port %d\n", msgType, packet->address.port);
     switch (msgType)
     {
         case ZNET_MSG_TYPE_CONNECTION_REQUEST:
         {
-            if (net->state != ZNET_STATE_SERVER) { return; }
+            if (!net->isListening) { return; }
 
             i32 clientSalt;
             read += COM_COPY(read, &clientSalt, sizeof(clientSalt));
@@ -110,7 +119,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         case ZNET_MSG_TYPE_CHALLENGE:
         {
             if (net->state != ZNET_STATE_CONNECTING) { return; }
-            net->state =ZNET_STATE_RESPONDING;
+            net->state = ZNET_STATE_RESPONDING;
             i32 clientSalt = COM_ReadI32(&read);
             ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
             if (!conn)
@@ -125,8 +134,15 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
             i32 challenge = COM_ReadI32(&read);
             printf("CL: Challenged: %d\n", challenge);
+            
+            // the conn->id is actually (clientSalt ^ challenge)
+            // the conn id must therefore be changed to that here or 
+            // the client will loose it's own connection
+            i32 response = (clientSalt ^ challenge);
+            conn->id = response;
+
             ByteBuffer b = ZNet_GetDataWriteBuffer();
-            i32 numBytes = ZNet_WriteChallengeResponse(&b, clientSalt, challenge);
+            i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
             ByteBuffer p = ZNet_GetPacketWriteBuffer();
             ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress);
             ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
@@ -134,11 +150,9 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CHALLENGE_RESPONSE:
         {
-            if (net->state != ZNET_STATE_SERVER) { return; }
+            if (!net->isListening) { return; }
 
             i32 response = COM_ReadI32(&read);
-            printf("SV Response received: %d\n", response);
-
             
             ZNetPending* p = ZNet_FindPendingConnection(net, response);
             if (!p)
@@ -151,30 +165,35 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNet_ClosePendingConnection(net, p);
             
             ZNet_SendConnectionApproved(net, conn);
+
+            printf("SV Response received: %d Accepted connection\n", response);
         } break;
 
         case ZNET_MSG_TYPE_CONNECTION_APPROVED:
         {
             if (net->state != ZNET_STATE_RESPONDING) { return; }
 
-            printf("CL Conn approved!\n");
+            printf("CL Conn approval received!\n");
             net->state = ZNET_STATE_CONNECTED;
         } break;
-
+        #if 1
         case ZNET_MSG_TYPE_KEEP_ALIVE:
         {
             i32 xor = COM_ReadI32(&read);
             ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
-            conn->keepAliveTicks = 0;
+            if (conn)
+            {
+                conn->ticksSinceLastMessage = 0;
+                printf("NET type %d received Keep alive from %d\n", net->state, xor);
+            }
         } break;
 
         case ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE:
         {
             i32 xor = COM_ReadI32(&read);
             ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
-            conn->keepAliveTicks = 0;
         } break;
-
+        #endif
         case ZNET_MSG_TYPE_DATA:
         {
             ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
@@ -220,13 +239,15 @@ internal void ZNet_ReadSocket(ZNet* net)
 	    	}
 	    	return;
 	    }
+		#if 0
 	    printf("Reading %d bytes from \"%d.%d.%d.%d:%d\"\n",
 	    	bytesRead,
 	    	address.ip4Bytes[0], address.ip4Bytes[1],
 	    	address.ip4Bytes[2], address.ip4Bytes[3],
 	    	address.port
 	    );
-
+		#endif
+		
         ZNet_ReadPacket(net, &packet);
     }
 }
@@ -234,8 +255,17 @@ internal void ZNet_ReadSocket(ZNet* net)
 void ZNet_Tick()
 {
     ZNet* net = &g_net;
-
-    printf("\n***** Tick %d *****\n", net->tickCount);
+	
+	//system("cls");
+    if (net->state == ZNET_STATE_SERVER)
+    {
+        printf("\n***** Server Tick %d *****\n", net->tickCount);
+    }
+    else
+    {
+        printf("\n***** Client Tick %d *****\n", net->tickCount);
+    }
+    
 
     // input
     ZNet_ReadSocket(net);
@@ -252,9 +282,16 @@ void ZNet_Tick()
                 ZNetConnection* conn = &net->connections[i];
                 if (conn->id == 0) { continue; }
 
-                
-                ByteBuffer b = ZNet_GetDataWriteBuffer();
-                
+                conn->keepAliveSendTicks++;
+				conn->ticksSinceLastMessage++;
+                if (conn->ticksSinceLastMessage > ZNET_CONNECTION_TIMEOUT_TICKS)
+                {
+                    printf("  Conn to port %d lost\n", conn->remoteAddress.port);
+                    ZNet_CloseConnection(net, conn);
+                    return;
+                }
+
+                ZNet_SendKeepAlive(net, conn);
             }
         } break;
         
@@ -265,6 +302,8 @@ void ZNet_Tick()
             {
                 ZNetConnection* conn = &net->connections[i];
                 if (conn->id == 0) { continue; }
+
+                ZNet_SendKeepAlive(net, conn);
             }
         } break;
 

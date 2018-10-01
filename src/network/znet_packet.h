@@ -50,7 +50,7 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 	ZNetPacketHeader h = {};
 	h.protocol = ZNET_PROTOCOL;
 	h.dataChecksum = COM_SimpleHash(dataBytes, numDataBytes);
-    printf(" Outgoing Packet checksum: %d\n", h.dataChecksum);
+    //printf(" Outgoing Packet checksum: %d\n", h.dataChecksum);
 
     //packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
     packetBuffer->ptrWrite += h.Write(packetBuffer->ptrWrite);

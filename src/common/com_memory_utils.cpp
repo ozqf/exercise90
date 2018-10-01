@@ -173,13 +173,16 @@ static inline u32 COM_AlignSize(u32 value, u32 alignment)
 
 static inline i32 COM_SimpleHash(u8* ptr, i32 numBytes)
 {
+    #if 0
     printf("Hashing %d bytes: ", numBytes);
     for (i32 i = 0; i < numBytes; ++i)
     {
         printf("%d, ", ptr[i]);
     }
     printf("\n");
-    i32 hash = 49105278;
+    #endif
+	i32 hash = 0xDEADBEEF;
+    //i32 hash = 49105278;
     u8* end = ptr + numBytes;
     while (ptr++ < end)
     {

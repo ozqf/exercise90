@@ -1,5 +1,6 @@
 #pragma once
 
+#include "znet_module.cpp"
 
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id)
 {
@@ -25,13 +26,10 @@ internal ZNetConnection* ZNet_GetConnectionByAddress(ZNet* net, ZNetAddress* add
     return NULL;
 }
 
-void ZNet_CloseConnection(ZNet* net, u32 id)
+void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
 {
-    ZNetConnection* conn = ZNet_GetConnectionById(net, id);
-    if (conn == NULL)
-    {
-        NET_ASSERT(0, "App Net cannot close a non-existant connection\n");
-    }
+    NET_ASSERT(net, "Close connection: Net is null\n");
+    NET_ASSERT(conn, "Close conncetion: conn is null\n");
     conn->id = 0;
 }
 

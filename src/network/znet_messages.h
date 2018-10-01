@@ -62,11 +62,11 @@ i32 ZNet_WriteConnRequest(ByteBuffer* b, i32 clientSalt)
 }
 
 // returns number of bytes written
-i32 ZNet_WriteChallengeResponse(ByteBuffer* b, i32 clientSalt, i32 challenge)
+i32 ZNet_WriteChallengeResponse(ByteBuffer* b, i32 response)
 {
 	u8* ptr = b->ptrWrite;
 	b->ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CHALLENGE_RESPONSE, b->ptrWrite);
-	b->ptrWrite += COM_WriteI32(clientSalt ^ challenge, b->ptrWrite);
+	b->ptrWrite += COM_WriteI32(response, b->ptrWrite);
 	return b->ptrWrite - ptr;
 }
 
@@ -83,7 +83,7 @@ void ZNet_SendConnectionApproved(ZNet* net, ZNetConnection* conn)
 void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 {
 	ByteBuffer b = ZNet_GetDataWriteBuffer();
-	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_APPROVED, b.ptrWrite);
+	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_KEEP_ALIVE, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);

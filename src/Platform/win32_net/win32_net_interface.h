@@ -7,7 +7,7 @@
 ///////////////////////////////////////
 
 i32 Net_Init();
-i32 Net_OpenSocket(u16 port);
+i32 Net_OpenSocket(u16 port, u16* portOpened);
 i32 Net_CloseSocket(i32 socketIndex);
 i32 Net_Shutdown();
 

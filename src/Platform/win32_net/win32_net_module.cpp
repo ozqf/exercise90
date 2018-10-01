@@ -17,8 +17,6 @@
 #include <iphlpapi.h>
 
 #define NET_NON_BLOCKING_ERROR 10035
-#define DEFAULT_PORT_SERVER 23232
-#define DEFAULT_PORT_CLIENT 23233
 #define UDP_BUFFER_LENGTH 4096
 #define LOCALHOST_ADDRESS "127.0.0.1"
 
@@ -97,7 +95,7 @@ i32 Net_SendTo(
     i32 dataSize)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(transmittingSocketIndex);
-    printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
+    //printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
 	sockaddr_in toAddress;
     toAddress.sin_port = htons(port);
     toAddress.sin_family = AF_INET;
@@ -120,10 +118,6 @@ i32 Net_SendTo(
     {
         i32 errorCode = WSAGetLastError();
         printf("Send error: %d\n", errorCode);
-    }
-    else
-    {
-        printf("Send Result: %d\n", sendResult);
     }
     return sendResult;
 }
@@ -254,12 +248,14 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 		sender->ip4Bytes[2] = fromAddress.sin_addr.S_un.S_un_b.s_b3;
 		sender->ip4Bytes[3] = fromAddress.sin_addr.S_un.S_un_b.s_b4;
         sender->port = ntohs(fromAddress.sin_port);
+        #if 0
         printf("Win32 net %d bytes from \"%d.%d.%d.%d:%d\"\n",
              recv_len,
              sender->ip4Bytes[0], sender->ip4Bytes[1], sender->ip4Bytes[2], sender->ip4Bytes[3],
              sender->port
              
              );
+        #endif
 		//printf("addr_in chars: %s\n", fromAddress.sa_data);
     }
 
@@ -267,7 +263,7 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 }
 
 // returns 0 on success, or error code
-i32 Net_OpenSocket(u16 port)
+i32 Net_OpenSocket(u16 port, u16* portResult)
 {
     i32 sockIndex;
     Win32_Socket* winSock = WNet_GetFreeSocket(&sockIndex);
@@ -295,7 +291,6 @@ i32 Net_OpenSocket(u16 port)
         printf("Could not create socket: %d\n", errorCode);
         return -1;
     }
-    printf("Socket Created\n");
 
     winSock->server.sin_family = AF_INET;
     winSock->server.sin_addr.s_addr = htons(INADDR_ANY);
@@ -318,7 +313,29 @@ i32 Net_OpenSocket(u16 port)
         Net_PrintNetworkError(errorCode);
         return -1;
     }
-    printf("Socket bound on port %d\n", winSock->port);
+    
+	// Retreive socket port number
+	struct sockaddr_in sin;
+	int addrLen = sizeof(sin);
+	u16 portNumber = 0;
+	if (getsockname(winSock->socket, (struct sockaddr*)&sin, &addrLen) == 0 &&
+		sin.sin_family == AF_INET &&
+		addrLen == sizeof(sin))
+	{
+		portNumber = ntohs(sin.sin_port);
+	}
+	else
+	{
+		printf("FAILED TO ACQUIRE SOCKET NAME!\n");
+		return -1;
+	}
+	
+	if (portResult)
+	{
+		*portResult = portNumber;
+	}
+	winSock->port = portNumber;
+	printf("Socket bound on port %d\n", portNumber);
 
 	winSock->isActive = 1;
 	return sockIndex;
@@ -358,9 +375,12 @@ i32 Net_Init()
 {
     return 0;
 }
-
+#if 0
 void Net_RunLoopbackTest()
 {
+	//#define DEFAULT_PORT_SERVER 23232
+	//#define DEFAULT_PORT_CLIENT 23233
+	
     i32 serverSocket;
     i32 clientSocket;
     serverSocket = Net_OpenSocket(DEFAULT_PORT_SERVER);
@@ -396,3 +416,4 @@ void Net_RunLoopbackTest()
     
     Net_Shutdown();
 }
+#endif

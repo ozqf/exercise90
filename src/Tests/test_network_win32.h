@@ -34,7 +34,7 @@ void Test_Server(u16 serverPort)
     for(;;)
     {
         ZNet_Tick();
-        Sleep(4000);
+        Sleep(2000);
     }
     //getc(stdin);
 }
@@ -53,7 +53,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
     for(;;)
     {
         ZNet_Tick();
-        Sleep(4000);
+        Sleep(2000);
     }
     //getc(stdin);
 }
@@ -87,7 +87,7 @@ void Test_Win32(i32 argc, char* argv[])
     }
     else if (!COM_CompareStrings(mode, "both"))
     {
-        Net_RunLoopbackTest();
+        //Net_RunLoopbackTest();
     }
     else
     {

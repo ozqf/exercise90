@@ -28,7 +28,7 @@ struct ZNetPlatformFunctions
 {
     i32  (*Init)            ();
     i32  (*Shutdown)        ();
-    i32  (*OpenSocket)      (u16 port);
+    i32  (*OpenSocket)      (u16 port, u16* portOpened);
     i32  (*CloseSocket)     (i32 socketIndex);
     i32  (*Read)            (i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr);
     i32  (*SendTo)          (i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize);

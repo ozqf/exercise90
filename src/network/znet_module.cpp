@@ -29,6 +29,8 @@ App Network layer functionality:
 //#define ZNET_DEFAULT_PORT 23232
 #define ZNET_CONNECTION_FLAG_LOCAL (1 << 0)
 
+#define ZNET_CONNECTION_TIMEOUT_TICKS 4
+
 #define ZNET_STATE_DISCONNECTED 0
 // client side
 #define ZNET_STATE_CONNECTING 1
@@ -38,10 +40,15 @@ App Network layer functionality:
 #define ZNET_STATE_CHALLENGED 4
 #define ZNET_STATE_SERVER 5
 
+#define ZNET_CONN_TYPE_NONE 0
+#define ZNET_CONN_TYPE_CLIENT2SERVER 1
+#define ZNET_CONN_TYPE_SERVER2CLIENT 2
+
 // id of 0 == unassigned.
 struct ZNetConnection
 {
     i32 id;
+    i32 type;
     u32 sequence;
     u32 challenge;
     //i32 salt;
@@ -49,7 +56,8 @@ struct ZNetConnection
     u32 flags;
     f32 tick;
     i32 pendingKeepAlive;
-    i32 keepAliveTicks;
+    i32 keepAliveSendTicks;
+	i32 ticksSinceLastMessage;
 };
 
 #define ZNET_PROTOCOL 90
@@ -61,6 +69,10 @@ Packet structure:
 > Payload
     > u8 type
     > data...
+
+Data layout is different for each packet type
+for most:
+> client/server xor - IDs the connection.
 */
 
 struct ZNetPacketHeader
@@ -142,6 +154,7 @@ struct ZNetPending
 struct ZNet
 {
     ZNetConnection connections[MAX_CONNECTIONS];
+	i32 isListening;
     i32 maxConnections = MAX_CONNECTIONS;
     i32 socketIndex;
     i32 state;
