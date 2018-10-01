@@ -152,7 +152,7 @@ void Win32_InitPlatformInterface()
     platInterface.Net_OpenSocket = Net_OpenSocket;
     platInterface.Net_Shutdown = Net_Shutdown;
     platInterface.Net_CloseSocket = Net_CloseSocket;
-    platInterface.Net_RunLoopbackTest = Net_RunLoopbackTest;
+    //platInterface.Net_RunLoopbackTest = Net_RunLoopbackTest;
     platInterface.Net_SendTo = Net_SendTo;
     platInterface.Net_Read = Net_Read;
     #endif
