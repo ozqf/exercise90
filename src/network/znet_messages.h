@@ -113,3 +113,22 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 	printf("done\n");
 }
+
+void ZNet_SendData(ZNet* net, ZNetConnection* conn, u8* data, u16 numBytes)
+{
+	i32 dataHeaderSize = 1 + 4 + 2;
+	NET_ASSERT((numBytes < (ZNET_DATA_WRITE_SIZE + dataHeaderSize)), "Packet data too large\n");
+	ByteBuffer b = ZNet_GetDataWriteBuffer();
+	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_DATA, b.ptrWrite);
+	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
+	b.ptrWrite += COM_WriteI32(conn->sequence, b.ptrWrite);
+	conn->sequence++;
+	b.ptrWrite += COM_WriteU16(numBytes, b.ptrWrite);
+	do
+	{
+		*b.ptrWrite = *data;
+		b.ptrWrite++;
+		data++;
+		numBytes--;
+	} while (numBytes > 0);
+}

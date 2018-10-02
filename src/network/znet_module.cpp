@@ -50,6 +50,7 @@ struct ZNetConnection
     i32 id;
     i32 type;
     u32 sequence;
+    u32 remoteSequence;
     u32 challenge;
     //i32 salt;
     ZNetAddress remoteAddress;
@@ -108,7 +109,7 @@ struct ZNetPacketHeader
 
 struct ZNetPayloadHeader
 {
-	u32 type;
+	u8 type;
     u32 salt;
 	u32 sequence;
 };
