@@ -29,12 +29,26 @@ void Test_Server(u16 serverPort)
 {
     printf("Server\n");
     ZNet_Init(TNet_CreateNetFunctions());
+    i32 tickRateMS = 500;
+    f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 
     ZNet_StartSession(NETMODE_DEDICATED_SERVER, NULL, serverPort);
     for(;;)
     {
-        ZNet_Tick();
-        Sleep(2000);
+        i32 error = ZNet_Tick(tickRateSeconds);
+        if (error)
+        {
+            if (error == 1)
+            {
+                printf("Tests: network closed down\n");
+            }
+            else if (error == 2)
+            {
+                printf("Tests: network test completed\n");
+            }
+            return;
+        }
+        Sleep(tickRateMS);
     }
     //getc(stdin);
 }
@@ -43,6 +57,9 @@ void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
     ZNet_Init(TNet_CreateNetFunctions());
+    i32 tickRateMS = 500;
+    f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
+
     ZNetAddress addr = {};
     addr.ip4Bytes[0] = 127;
     addr.ip4Bytes[1] = 0;
@@ -52,8 +69,20 @@ void Test_Client(u16 serverPort, u16 clientPort)
     ZNet_StartSession(NETMODE_CLIENT, &addr, clientPort);
     for(;;)
     {
-        ZNet_Tick();
-        Sleep(2000);
+        i32 error = ZNet_Tick(tickRateSeconds);
+        if (error)
+        {
+            if (error == 1)
+            {
+                printf("Tests: network closed down\n");
+            }
+            else if (error == 2)
+            {
+                printf("Tests: network test completed\n");
+            }
+            return;
+        }
+        Sleep(tickRateMS);
     }
     //getc(stdin);
 }

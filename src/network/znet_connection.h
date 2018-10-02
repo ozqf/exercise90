@@ -33,6 +33,14 @@ void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
     conn->id = 0;
 }
 
+void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
+{
+    NET_ASSERT(net, "Disconnect peer: Net is null\n");
+    NET_ASSERT(conn, "Disconnect peer: conn is null\n");
+    ZNet_SendDisconnectCommand(net, conn, msg);
+    ZNet_CloseConnection(net, conn);
+}
+
 ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
 {
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)

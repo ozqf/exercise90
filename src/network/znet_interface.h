@@ -40,11 +40,10 @@ struct ZNetPlatformFunctions
 void ZNet_Init(ZNetPlatformFunctions functions);
 void ZNet_Shutdown();
 
-// connection lifetime
+// session lifetime
 void ZNet_StartSession(u8 netMode, ZNetAddress* serverAddress, u16 localPort);
 void ZNet_EndSession();
-
-void ZNet_Tick();
+i32 ZNet_Tick(f32 deltaTime);
 
 // ZNET_INTERFACE_H
 #endif

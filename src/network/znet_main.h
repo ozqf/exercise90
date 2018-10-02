@@ -176,6 +176,29 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             printf("CL Conn approval received!\n");
             net->state = ZNET_STATE_CONNECTED;
         } break;
+
+        case ZNET_MSG_TYPE_CONNECTION_DENIED:
+        {
+            i32 xor = COM_ReadI32(&read);
+            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            if (!conn)
+            {
+                printf("No conn with xor %d!\n", xor);
+                return;
+            }
+            // TODO: Currently not copying this string to a safe buffer but trusting
+            // to find a zero terminator!
+            i32 numChars = COM_ReadI32(&read);
+            char* msg = (char*)read;
+            printf("Connection denied, msg: %s\n", msg);
+            ZNet_CloseConnection(net, conn);
+            if (net->state != ZNET_STATE_SERVER)
+            {
+                net->state = ZNET_STATE_DISCONNECTED;
+                return;
+            }
+        } break;
+
         #if 1
         case ZNET_MSG_TYPE_KEEP_ALIVE:
         {
@@ -252,7 +275,8 @@ internal void ZNet_ReadSocket(ZNet* net)
     }
 }
 
-void ZNet_Tick()
+// returns 0 if all is well
+i32 ZNet_Tick(f32 deltaTime)
 {
     ZNet* net = &g_net;
 	
@@ -287,8 +311,15 @@ void ZNet_Tick()
                 if (conn->ticksSinceLastMessage > ZNET_CONNECTION_TIMEOUT_TICKS)
                 {
                     printf("  Conn to port %d lost\n", conn->remoteAddress.port);
-                    ZNet_CloseConnection(net, conn);
-                    return;
+                    ZNet_DisconnectPeer(net, conn, "Connection lost");
+                    continue;
+                }
+
+                if (conn->keepAliveSendTicks > 8)
+                {
+                    printf("  Disconnecting conn to port %d\n", conn->remoteAddress.port);
+                    ZNet_DisconnectPeer(net, conn, "Kicked");
+                    continue;
                 }
 
                 ZNet_SendKeepAlive(net, conn);
@@ -342,10 +373,20 @@ void ZNet_Tick()
             // periodically send challenge response to server
         } break;
 
+        case ZNET_STATE_DISCONNECTED:
+        {
+            return 1;
+        } break;
+
         default:
         {
             printf("Unknown net state %d\n", net->state);
         } break;
     }
     net->tickCount++;
+    if (net->tickCount > 30)
+    {
+        return 2;
+    }
+    return 0;
 }

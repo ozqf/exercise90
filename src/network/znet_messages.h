@@ -89,3 +89,27 @@ void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }
+
+void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
+{
+	ByteBuffer b = ZNet_GetDataWriteBuffer();
+	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_DENIED, b.ptrWrite);
+	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
+	i32 len = COM_StrLen(msg);
+	printf("Writing disconnect msg: \"%s\" (%d chars)\n", msg, len);
+	b.ptrWrite += COM_WriteI32(len, b.ptrWrite);
+	do
+	{
+		char c = *msg;
+		printf("%c, ", c);
+		*b.ptrWrite = (u8)c;
+		msg++;
+		len--;
+		b.ptrWrite++;
+	} while (len);
+	printf("\nWrote msg bytes: %d...", b.Written());
+	ByteBuffer p = ZNet_GetPacketWriteBuffer();
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+	printf("done\n");
+}
