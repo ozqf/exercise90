@@ -22,8 +22,28 @@
 
 #define ZNET_LOCAL_ADDRESS "127.0.0.1"
 
-// Required external OS interface
+/////////////////////////////////////////////////////////////////
+// Data types
+/////////////////////////////////////////////////////////////////
+struct ZNetConnectionInfo
+{
+	ZNetAddress address;
+	u32 id;
+};
+
+struct ZNetPacketInfo
+{
+	ZNetConnectionInfo sender;
+	u32 remoteSequence;
+};
+
+
+/////////////////////////////////////////////////////////////////
+// Interfaces
 // These are NOT CHECKED when used. Make sure you're sending a valid struct
+/////////////////////////////////////////////////////////////////
+
+// Required external OS interface
 struct ZNetPlatformFunctions
 {
     i32  (*Init)            ();
@@ -36,8 +56,20 @@ struct ZNetPlatformFunctions
     void (*FatalError)      (char* msg, char* heading);
 };
 
+// Event callbacks
+struct ZNetOutputInterface
+{
+	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
+	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
+	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
+	void (*DeliveryConfirmed)		(u32 packetNumber);
+};
+
+// info
+void ZNet_Info();
+
 // system lifetime
-void ZNet_Init(ZNetPlatformFunctions functions);
+void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output);
 void ZNet_Shutdown();
 
 // session lifetime

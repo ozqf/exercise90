@@ -140,6 +140,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             // the client will loose it's own connection
             i32 response = (clientSalt ^ challenge);
             conn->id = response;
+			net->client2ServerId = response;
 
             ByteBuffer b = ZNet_GetDataWriteBuffer();
             i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
@@ -165,7 +166,12 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNet_ClosePendingConnection(net, p);
             
             ZNet_SendConnectionApproved(net, conn);
-
+			
+			ZNetConnectionInfo info = {};
+			info.address = conn->remoteAddress;
+			info.id = conn->id;
+			g_output.ConnectionAccepted(&info);
+			
             printf("SV Response received: %d Accepted connection\n", response);
         } break;
 
@@ -173,8 +179,17 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         {
             if (net->state != ZNET_STATE_RESPONDING) { return; }
 
+			i32 response = 
+			// TODO: Not validating XOR!
+			
             printf("CL Conn approval received!\n");
             net->state = ZNET_STATE_CONNECTED;
+			
+			ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
+			ZNetConnectionInfo info = {};
+			info.address = conn->remoteAddress;
+			info.id = conn->id;
+			g_output.ConnectionAccepted(&info);
         } break;
 
         case ZNET_MSG_TYPE_CONNECTION_DENIED:

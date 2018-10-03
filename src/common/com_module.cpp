@@ -3,6 +3,8 @@
 
 // Implementation of structs/code found in:
 
+#include <stdio.h>
+
 #include "com_module.h"
 
 #include "com_types.cpp"

@@ -183,6 +183,7 @@ internal u8 g_packetWriteBuffer[ZNET_PACKET_WRITE_SIZE];
 internal u8 g_packetReadBuffer[ZNET_PACKET_READ_SIZE];
 
 internal ZNetPlatformFunctions g_netPlatform;
+internal ZNetOutputInterface g_output;
 internal ZNet g_net;
 
 internal void Net_FatalError(char* message, char* heading)
@@ -230,10 +231,11 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
 ///////////////////////////////////////////////////
 // system lifetime
 ///////////////////////////////////////////////////
-void ZNet_Init(ZNetPlatformFunctions platform)
+void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface)
 {
     printf("ZNet Initialising... ");
     g_netPlatform = platform;
+	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
     printf("Done\n");
 }

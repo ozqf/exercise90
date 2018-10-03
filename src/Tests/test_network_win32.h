@@ -13,6 +13,23 @@
 #include <windows.h>
 #endif
 
+void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
+{
+	printf("TNET: Conn %d accepted\n", conn->id);
+}
+void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
+{
+	printf("TNET: Conn %d dropped\n", conn->id);
+}
+void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
+{
+	printf("TNET: Received %d bytes from %d\n", numBytes, info->sender.id);
+}
+void TNet_DeliveryConfirmed(u32 packetNumber)
+{
+	printf("TNET: Delivery of %d confirmed\n", packetNumber);
+}
+
 ZNetPlatformFunctions TNet_CreateNetFunctions()
 {
     ZNetPlatformFunctions x = {};
@@ -25,17 +42,41 @@ ZNetPlatformFunctions TNet_CreateNetFunctions()
     return x;
 }
 
+ZNetOutputInterface TNet_CreateOutputInterface()
+{
+	/*
+	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
+	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
+	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
+	void (*DeliveryConfirmed)		(u32 packetNumber);
+	*/
+	ZNetOutputInterface x = {};
+	x.ConnectionAccepted = TNet_ConnectionAccepted;
+	x.ConnectionDropped = TNet_ConnectionDropped;
+	x.DataPacketReceived = TNet_DataPacketReceived;
+	x.DeliveryConfirmed = TNet_DeliveryConfirmed;
+	return x;
+}
+
 void Test_Server(u16 serverPort)
 {
     printf("Server\n");
-    ZNet_Init(TNet_CreateNetFunctions());
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
     i32 tickRateMS = 500;
     f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
-
+	
+	/*
+	Notes:
+	> How to transfer a arbitrary list of connections out of ZNet?
+	> How to write packets, retreiving the packet sequence number
+		and storing it for future delivery status recording?
+	>
+	*/
     ZNet_StartSession(NETMODE_DEDICATED_SERVER, NULL, serverPort);
     for(;;)
     {
         i32 error = ZNet_Tick(tickRateSeconds);
+		
         if (error)
         {
             if (error == 1)
@@ -56,7 +97,7 @@ void Test_Server(u16 serverPort)
 void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
-    ZNet_Init(TNet_CreateNetFunctions());
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
     i32 tickRateMS = 500;
     f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 
