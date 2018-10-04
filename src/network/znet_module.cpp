@@ -164,6 +164,7 @@ struct ZNet
     u16 selfPort;
     i32 client2ServerId;
     u32 tickCount;
+    f32 secondsEllapsed;
 
     ZNetPending pendingConnections[MAX_PENDING_CONNECTIONS];
 };

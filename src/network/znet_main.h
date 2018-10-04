@@ -426,7 +426,7 @@ i32 ZNet_Tick(f32 deltaTime)
         } break;
     }
     net->tickCount++;
-    if (net->tickCount > 30)
+    if (net->tickCount > 18)
     {
         return 2;
     }

@@ -2,6 +2,9 @@
 
 #pragma comment(lib, "ws2_32.lib") // winsock lib
 
+//#include <conoi.h>
+#include <stdio.h>
+
 #include "../../common/com_module.h"
 
 #include "../../platform/win32_net/win32_net_interface.h"
@@ -43,7 +46,16 @@ void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
 }
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-	printf("TNET: Received %d bytes from %d\n", numBytes, info->sender.id);
+    u8* read = bytes;
+    u8 type = COM_ReadByte(&read);
+    printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
+    switch (type)
+    {
+        case 1:
+        {
+            printf("TYPE ONE OMG\n");
+        } break;
+    }
 }
 void TNet_DeliveryConfirmed(u32 packetNumber)
 {
@@ -127,11 +139,11 @@ void Test_Server(u16 serverPort)
             {
                 printf("Tests: network test completed\n");
             }
-            return;
+            break;
         }
         Sleep(tickRateMS);
     }
-    //getc(stdin);
+    getc(stdin);
 }
 
 void Test_Client(u16 serverPort, u16 clientPort)
@@ -162,11 +174,11 @@ void Test_Client(u16 serverPort, u16 clientPort)
             {
                 printf("Tests: network test completed\n");
             }
-            return;
+            break;
         }
         Sleep(tickRateMS);
     }
-    //getc(stdin);
+    getc(stdin);
 }
 
 #define TEST_SERVER_PORT 23232
@@ -200,6 +212,17 @@ void Test_Win32(i32 argc, char* argv[])
     {
         //Net_RunLoopbackTest();
     }
+    #if 0
+    else if (!COM_CompareStrings(mode, "live"))
+    {
+        printf("Waiting for key:\n");
+        while (!_kbhit())
+        {
+            printf(".");
+        }
+        printf("\nYou pressed %c\n", _getch());
+    }
+    #endif
     else
     {
         printf("Win32 Net test: Unknown mode %s\n", mode);
