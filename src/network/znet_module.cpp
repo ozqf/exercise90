@@ -119,7 +119,7 @@ struct ZNetPacket
     ZNetPacketHeader header;
     ZNetAddress address;
     u8* bytes;
-    i32 numBytes;
+    u16 numBytes;
 };
 
 #define ZNET_MSG_TYPE_NONE 0
@@ -130,6 +130,8 @@ struct ZNetPacket
 #define ZNET_MSG_TYPE_CONNECTION_DENIED 5
 #define ZNET_MSG_TYPE_KEEP_ALIVE 6
 #define ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE 7
+
+// Data messages are anything external to ZNet
 #define ZNET_MSG_TYPE_DATA 8
 
 
@@ -221,6 +223,7 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 
 // Internal interface
 internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
+internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
 
 #include "znet_packet.h"
 #include "znet_messages.h"

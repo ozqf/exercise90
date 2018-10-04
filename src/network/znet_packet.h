@@ -4,7 +4,7 @@
 
 
 // Returns 0 if all is okay
-internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* address, ZNetPacket* result)
+internal i32 ZNet_ParsePacketHeader(u8* bytes, u16 numBytes, ZNetAddress* address, ZNetPacket* result)
 {
     *result = {};
 
@@ -21,7 +21,7 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 		return 1;
 	}
 
-    i32 payloadBytes = numBytes - sizeof(ZNetPacketHeader);
+    u16 payloadBytes = numBytes - sizeof(ZNetPacketHeader);
     i32 checkSum = COM_SimpleHash(read, payloadBytes);
     if (result->header.dataChecksum != checkSum)
     {
@@ -33,7 +33,8 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, i32 numBytes, ZNetAddress* addres
 
     result->address = *address;
     result->bytes = dataStart;
-    result->numBytes = numBytes;
+    //result->numBytes = numBytes;
+    result->numBytes = payloadBytes;
 
 	return 0;
 }

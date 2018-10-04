@@ -2,10 +2,13 @@
 
 #pragma comment(lib, "ws2_32.lib") // winsock lib
 
-#include "../common/com_module.h"
+#include "../../common/com_module.h"
 
-#include "../platform/win32_net/win32_net_interface.h"
-#include "../network/znet_interface.h"
+#include "../../platform/win32_net/win32_net_interface.h"
+#include "../../network/znet_interface.h"
+
+#include "test_network_types.h"
+
 #if 1
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
@@ -13,13 +16,30 @@
 #include <windows.h>
 #endif
 
+global_variable TestGameNetwork g_network = {};
+
+#define DATA_BUFFER_SIZE 1024
+global_variable u8 g_dataBuffer[DATA_BUFFER_SIZE];
+
 void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
-	printf("TNET: Conn %d accepted\n", conn->id);
+    if (g_network.isServer)
+    {
+        printf("TNET: Client Conn %d accepted\n", conn->id);
+        g_network.AssignNewClient(conn->id, 0);
+    }
+	else
+    {
+        printf("TNET: Server Conn %d accepted\n", conn->id);
+        g_network.SetServer(conn->id);
+    }
+    g_network.PrintfDebug();
 }
 void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
 {
 	printf("TNET: Conn %d dropped\n", conn->id);
+    g_network.DeleteClient(conn->id);
+    g_network.PrintfDebug();
 }
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
@@ -58,6 +78,21 @@ ZNetOutputInterface TNet_CreateOutputInterface()
 	return x;
 }
 
+void TNet_ServerSendState()
+{
+    for (i32 i = 0; i < g_network.capacity; ++i)
+    {
+        TestClient* cl = &g_network.clients[i];
+        if (!cl->inUse) { continue; }
+
+        // build packet
+        COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
+        ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+        b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
+        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+    }
+}
+
 void Test_Server(u16 serverPort)
 {
     printf("Server\n");
@@ -70,12 +105,17 @@ void Test_Server(u16 serverPort)
 	> How to transfer a arbitrary list of connections out of ZNet?
 	> How to write packets, retreiving the packet sequence number
 		and storing it for future delivery status recording?
-	>
+    
+    Testbed features:
+    > Maintain list of 'clients'
+    > Parse over connection list, 
 	*/
+    g_network.isServer = 1;
     ZNet_StartSession(NETMODE_DEDICATED_SERVER, NULL, serverPort);
     for(;;)
     {
         i32 error = ZNet_Tick(tickRateSeconds);
+        TNet_ServerSendState();
 		
         if (error)
         {
@@ -107,6 +147,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
     addr.ip4Bytes[2] = 0;
     addr.ip4Bytes[3] = 1;
     addr.port = serverPort;
+    g_network.isServer = 0;
     ZNet_StartSession(NETMODE_CLIENT, &addr, clientPort);
     for(;;)
     {

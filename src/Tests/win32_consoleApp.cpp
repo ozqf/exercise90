@@ -29,7 +29,7 @@
 #include "test_ecs2.h"
 #include "test_misc.h"
 
-#include "test_network_win32.h"
+#include "network_test/test_network_win32.h"
 
 
 void Test_StripTrailingInt(char* txt)

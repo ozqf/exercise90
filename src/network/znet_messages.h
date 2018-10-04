@@ -92,6 +92,11 @@ void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 
 void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 {
+	ZNetConnectionInfo info = {};
+	info.address = conn->remoteAddress;
+	info.id = conn->id;
+	g_output.ConnectionDropped(&info);
+
 	ByteBuffer b = ZNet_GetDataWriteBuffer();
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_DENIED, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
@@ -109,26 +114,38 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	} while (len);
 	printf("\nWrote msg bytes: %d...", b.Written());
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);\
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 	printf("done\n");
 }
 
-void ZNet_SendData(ZNet* net, ZNetConnection* conn, u8* data, u16 numBytes)
+void ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 {
+	ZNet* net = &g_net;
+	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
+	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
+	NET_ASSERT(conn, "No connection found for data transmission\n");
 	i32 dataHeaderSize = 1 + 4 + 2;
 	NET_ASSERT((numBytes < (ZNET_DATA_WRITE_SIZE + dataHeaderSize)), "Packet data too large\n");
+
+	// TODO: Teehee well this is a lot of unnecessary copying.
+	// external data buffer -> internal data buffer -> packet buffer -> send
+	printf("  Sending %d byte data packet to conn %d\n", numBytes, connId);
+
 	ByteBuffer b = ZNet_GetDataWriteBuffer();
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_DATA, b.ptrWrite);
-	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->sequence, b.ptrWrite);
 	conn->sequence++;
-	b.ptrWrite += COM_WriteU16(numBytes, b.ptrWrite);
-	do
-	{
-		*b.ptrWrite = *data;
-		b.ptrWrite++;
-		data++;
-		numBytes--;
-	} while (numBytes > 0);
+	b.ptrWrite += COM_COPY(data, b.ptrWrite, numBytes);
+	/*
+	- Test data packet contents -
+	1 byte for type
+	4 bytes for sequence
+	1 byte of data
+	*/
+	
+	ByteBuffer p = ZNet_GetPacketWriteBuffer();
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+
+	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }

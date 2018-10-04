@@ -5,6 +5,12 @@
 //////////////////////////////////////////////////////
 // External
 //////////////////////////////////////////////////////
+
+i32 ZNet_IsServer()
+{
+    return (g_net.state == ZNET_STATE_SERVER);
+}
+
 void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 {
     // TODO: Make sure rand is somehow mixed up by this point
@@ -87,11 +93,26 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 {
     u8* read = packet->bytes;
+    u8* end = packet->bytes + packet->numBytes;
     u8 msgType;
     msgType = COM_ReadByte(&read);
     //printf(">> Read packet type %d from remote port %d\n", msgType, packet->address.port);
     switch (msgType)
     {
+        case ZNET_MSG_TYPE_DATA:
+        {
+            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+            NET_ASSERT(conn, "No connection found for data packet\n");
+            ZNetPacketInfo info = {};
+            info.sender.address = conn->remoteAddress;
+            info.sender.id = conn->id;
+            info.remoteSequence = COM_ReadI32(&read);
+
+            // TODO: Nicer way to calculate remaining bytes:
+            u16 dataSize = (u16)(end - read);
+            g_output.DataPacketReceived(&info, read, dataSize);
+        } break;
+
         case ZNET_MSG_TYPE_CONNECTION_REQUEST:
         {
             if (!net->isListening) { return; }
@@ -232,10 +253,16 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
         } break;
         #endif
-        case ZNET_MSG_TYPE_DATA:
-        {
-            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
 
+        default:
+        {
+            ZNetAddress* addr = &packet->address;
+            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+            printf("Unknown msg type %d from \"%d.%d.%d.%d:%d\"\n",
+                msgType,
+                addr->ip4Bytes[0], addr->ip4Bytes[1], addr->ip4Bytes[2], addr->ip4Bytes[3],
+                addr->port
+            );
         } break;
     }
 }
@@ -245,7 +272,7 @@ internal void ZNet_ReadSocket(ZNet* net)
     // Platform read function:
     // i32  (*Read)
     // (i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr);
-    i32 bytesRead;
+    u16 bytesRead;
     i32 packetsRead = 0;
     for(;;)
     {
@@ -254,7 +281,7 @@ internal void ZNet_ReadSocket(ZNet* net)
         mem.ptrMemory = g_packetReadBuffer;
         mem.size = ZNET_PACKET_READ_SIZE;
 	
-        bytesRead = g_netPlatform.Read(g_net.socketIndex, &address, &mem);
+        bytesRead = (u16)g_netPlatform.Read(g_net.socketIndex, &address, &mem);
         if (bytesRead == 0)
         {
             //printf("Read %d packets\n", packetsRead);
