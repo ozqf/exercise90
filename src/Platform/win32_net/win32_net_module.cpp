@@ -198,10 +198,16 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
         }
     }
 
-    // translate address
-    if (sender && recv_len > 0)
+    if (recv_len > 0)
     {
-		/*
+        // debug
+        //printf("RECV: ");
+        //COM_PrintBytes(buffer->ptrMemory, buffer->size, 16);
+
+        // translate address
+        if (sender)
+        {
+            /*
 		struct in_addr {
 
 			union {
@@ -257,8 +263,8 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
              );
         #endif
 		//printf("addr_in chars: %s\n", fromAddress.sa_data);
+        }
     }
-
     return recv_len > 0 ? recv_len : 0;
 }
 

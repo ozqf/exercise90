@@ -2,37 +2,56 @@
 
 #include "znet_module.cpp"
 
+internal void ZNet_DebugPacket(u8* packetStart, u16 packetSize)
+{
+    i32 packetHeaderSize = sizeof(ZNetPacketHeader);
+    u8* payloadBytes = packetStart + packetHeaderSize;
+    u16 payloadSize = (u16)(packetSize - packetHeaderSize);
+
+    ZNetPacketHeader h = {};
+    COM_COPY(packetStart, &h, sizeof(ZNetPacketHeader));
+
+    printf("Packet size: %d (%d header, %d payload)\n", packetSize, sizeof(ZNetPacketHeader), payloadSize);
+
+    printf("Protocol (%d) Bytes: ", h.protocol);
+    COM_PrintBytes(packetStart, 4, 8);
+    printf("Checksum (%d) Bytes: ", h.dataChecksum);
+    COM_PrintBytes(packetStart + 4, 4, 8);
+    i32 checkSum = COM_SimpleHash(payloadBytes, payloadSize);
+    printf("Payload Hash (calc %d): ", checkSum);
+    COM_PrintBytes((u8*)&checkSum, 4, 8);
+}
 
 // Returns 0 if all is okay
 internal i32 ZNet_ParsePacketHeader(u8* bytes, u16 numBytes, ZNetAddress* address, ZNetPacket* result)
 {
     *result = {};
-
-    u8* dataStart = bytes + sizeof(ZNetPacketHeader);
 	u8* read = bytes;
 	
     // TODO: Pulling out bytes directly. Replace me
 	read += COM_COPY(read, &result->header, sizeof(ZNetPacketHeader));
 	if (result->header.protocol != ZNET_PROTOCOL)
 	{
-        printf("SV protocol expected %d but got %d\n",
+        printf("ZNET protocol expected %d but got %d\n",
             ZNET_PROTOCOL, result->header.protocol
         );
 		return 1;
 	}
 
+    u8* payloadStart = bytes + sizeof(ZNetPacketHeader);
     u16 payloadBytes = numBytes - sizeof(ZNetPacketHeader);
-    i32 checkSum = COM_SimpleHash(read, payloadBytes);
+    i32 checkSum = COM_SimpleHash(payloadStart, payloadBytes);
     if (result->header.dataChecksum != checkSum)
     {
-        printf("SV read checksum %d but calculated %d\n",
+        printf("ZNET read checksum %d but calculated %d\n",
             result->header.dataChecksum, checkSum
         );
+        ZNet_DebugPacket(bytes, numBytes);
         return 2;
     }
 
     result->address = *address;
-    result->bytes = dataStart;
+    result->bytes = payloadStart;
     //result->numBytes = numBytes;
     result->numBytes = payloadBytes;
 

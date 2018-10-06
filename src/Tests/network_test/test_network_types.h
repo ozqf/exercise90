@@ -2,6 +2,7 @@
 
 #include "../../common/com_module.h"
 
+#define MAX_TEST_CLIENT_NAME_LENGTH 32
 struct TestClient
 {
     // should be kept private between this specific client and server
@@ -11,6 +12,7 @@ struct TestClient
     // this will require a 'game info' packet to tell the client what there specific public id is.
     i32 publicClientId;
     i32 inUse;
+	char* name[MAX_TEST_CLIENT_NAME_LENGTH];
 };
 
 struct TestServer
@@ -34,6 +36,18 @@ struct TestGameNetwork
     {
         this->server.connId = id;
         this->server.inUse = 0;
+    }
+
+    TestClient* GetClientByPublicId(i32 publicId)
+    {
+        for (i32 i = 0; i < this->capacity; ++i)
+        {
+            if (this->clients[i].publicClientId == publicId)
+            {
+                return &this->clients[i];
+            }
+        }
+        return NULL;
     }
 
     TestClient* GetClient(i32 id)

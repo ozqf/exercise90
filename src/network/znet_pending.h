@@ -89,3 +89,22 @@ void ZNet_CheckPendingConnections(ZNet* net)
 		}
 	}
 }
+
+void ZNet_PrintPendingConnections(ZNet* net)
+{
+	printf("- Pending Connections -\n");
+	for (i32 i = 0; i < MAX_PENDING_CONNECTIONS; ++i)
+	{
+		ZNetPending* p = &net->pendingConnections[i];
+		i32 c = p->challenge;
+		if (c)
+		{
+			printf("%d Active: %d\n", i, c);
+		}
+		else
+		{
+			printf("%d Open: %d\n", i, c);
+		}
+	}
+	//printf("")
+}

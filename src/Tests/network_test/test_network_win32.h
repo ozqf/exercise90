@@ -2,7 +2,7 @@
 
 #pragma comment(lib, "ws2_32.lib") // winsock lib
 
-//#include <conoi.h>
+#include <conio.h>
 #include <stdio.h>
 
 #include "../../common/com_module.h"
@@ -212,7 +212,7 @@ void Test_Win32(i32 argc, char* argv[])
     {
         //Net_RunLoopbackTest();
     }
-    #if 0
+    #if 1
     else if (!COM_CompareStrings(mode, "live"))
     {
         printf("Waiting for key:\n");

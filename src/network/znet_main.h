@@ -87,6 +87,8 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
         address->ip4Bytes[3]
     );
     //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
+    printf("SEND: ");
+    COM_PrintBytes(bytes, (u16)numBytes, 16);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -101,16 +103,24 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
     {
         case ZNET_MSG_TYPE_DATA:
         {
-            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
-            NET_ASSERT(conn, "No connection found for data packet\n");
-            ZNetPacketInfo info = {};
-            info.sender.address = conn->remoteAddress;
-            info.sender.id = conn->id;
-            info.remoteSequence = COM_ReadI32(&read);
-
-            // TODO: Nicer way to calculate remaining bytes:
-            u16 dataSize = (u16)(end - read);
-            g_output.DataPacketReceived(&info, read, dataSize);
+			if (net->state == ZNET_STATE_SERVER || net->state == ZNET_STATE_CONNECTED)
+			{
+				ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+				NET_ASSERT(conn, "No connection found for data packet\n");
+				ZNetPacketInfo info = {};
+				info.sender.address = conn->remoteAddress;
+				info.sender.id = conn->id;
+				info.remoteSequence = COM_ReadI32(&read);
+	
+				// TODO: Nicer way to calculate remaining bytes:
+				u16 dataSize = (u16)(end - read);
+				g_output.DataPacketReceived(&info, read, dataSize);
+			}
+			else
+			{
+				printf("ZNET Received data packet but not connected!\n");
+			}
+            
         } break;
 
         case ZNET_MSG_TYPE_CONNECTION_REQUEST:
@@ -290,6 +300,8 @@ internal void ZNet_ReadSocket(ZNet* net)
         packetsRead++;
 
         ZNetPacket packet;
+        printf("RECV: ");
+        COM_PrintBytes((u8*)mem.ptrMemory, bytesRead, 16);
         // careful to send bytes read NOT full buffer size here you ninny.
 	    i32 packetError = ZNet_ParsePacketHeader((u8*)mem.ptrMemory, bytesRead, &address, &packet);
 	    if (packetError)
@@ -325,7 +337,8 @@ i32 ZNet_Tick(f32 deltaTime)
 	//system("cls");
     if (net->state == ZNET_STATE_SERVER)
     {
-        printf("\n***** Server Tick %d *****\n", net->tickCount);
+        //printf("\n***** Server Tick %d *****\n", net->tickCount);
+        printf(".");
     }
     else
     {
@@ -426,7 +439,7 @@ i32 ZNet_Tick(f32 deltaTime)
         } break;
     }
     net->tickCount++;
-    if (net->tickCount > 18)
+    if (net->tickCount > 18 && net->state != ZNET_STATE_SERVER)
     {
         return 2;
     }
