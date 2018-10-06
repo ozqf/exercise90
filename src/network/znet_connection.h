@@ -48,6 +48,7 @@ ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
         ZNetConnection* conn = &net->connections[i];
         if (conn->id == 0)
         {
+            *conn = {};
             u32 newId = 0;
             ZNetConnection* other = NULL;
             newId = ZNet_CreateSalt();

@@ -62,7 +62,8 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, u16 numBytes, ZNetAddress* addres
     ByteBuffer* packetBuffer,
     u8* dataBytes,
     i32 numDataBytes,
-    ZNetAddress* dest)
+    ZNetAddress* dest,
+    i32 debug)
 {
     i32 totalSize = sizeof(ZNetPacketHeader) + numDataBytes;
     NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");
@@ -75,5 +76,11 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, u16 numBytes, ZNetAddress* addres
     //packetBuffer->ptrWrite += COM_COPY(&h, packetBuffer->ptrWrite, sizeof(ZNetPacketHeader));
     packetBuffer->ptrWrite += h.Write(packetBuffer->ptrWrite);
     packetBuffer->ptrWrite += COM_COPY(dataBytes, packetBuffer->ptrWrite, numDataBytes);
+
+    if (debug)
+    {
+        ZNet_DebugPacket(packetBuffer->ptrStart, (u16)packetBuffer->Written());
+    }
+
     return (packetBuffer->ptrWrite - packetBuffer->ptrStart);
 }

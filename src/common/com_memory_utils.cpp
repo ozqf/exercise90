@@ -194,9 +194,10 @@ static inline i32 COM_SimpleHash(u8* ptr, i32 numBytes)
 	i32 hash = 0xDEADBEEF;
     //i32 hash = 49105278;
     u8* end = ptr + numBytes;
-    while (ptr++ < end)
+    while (ptr < end)
     {
         hash += *ptr + (hash << 6) + (hash << 16) - hash;
+        ptr++;
     }
     return hash;
 }

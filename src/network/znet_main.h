@@ -141,7 +141,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
 			
 			ByteBuffer output = ZNet_GetPacketWriteBuffer();
-			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address);
+			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address, 1);
             ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
 
             printf("SV Challenging client %d with %d\n", clientSalt, pending->challenge);
@@ -176,7 +176,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ByteBuffer b = ZNet_GetDataWriteBuffer();
             i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
             ByteBuffer p = ZNet_GetPacketWriteBuffer();
-            ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress);
+            ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
             ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
         } break;
 
@@ -370,12 +370,15 @@ i32 ZNet_Tick(f32 deltaTime)
                     continue;
                 }
 
+                // timed dropping of clients for testing
+                #if 0
                 if (conn->keepAliveSendTicks > 8)
                 {
                     printf("  Disconnecting conn to port %d\n", conn->remoteAddress.port);
                     ZNet_DisconnectPeer(net, conn, "Kicked");
                     continue;
                 }
+                #endif
 
                 ZNet_SendKeepAlive(net, conn);
             }
@@ -417,7 +420,7 @@ i32 ZNet_Tick(f32 deltaTime)
             // g_packetWriteBuffer
             // ZNET_PACKET_WRITE_SIZE
             ByteBuffer packetBuffer = Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
-            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress);
+            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress, 0);
 
             // send!
             ZNet_Send(&conn->remoteAddress, packetBuffer.ptrStart, packetSize);

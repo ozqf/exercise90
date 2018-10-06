@@ -76,7 +76,7 @@ void ZNet_SendConnectionApproved(ZNet* net, ZNetConnection* conn)
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_APPROVED, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }
 
@@ -86,7 +86,7 @@ void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_KEEP_ALIVE, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }
 
@@ -114,7 +114,7 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	} while (len);
 	printf("\nWrote msg bytes: %d...", b.Written());
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);\
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 	printf("done\n");
 }
@@ -145,7 +145,7 @@ void ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 	*/
 	
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL);
+	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
 
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
 }
