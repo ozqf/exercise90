@@ -146,6 +146,12 @@ void Test_Server(u16 serverPort)
     getc(stdin);
 }
 
+// Keep seeing 83... wtf is keycode 83?
+#define KEYCODE_ENTER 13
+#define KEYCODE_BACKSPACE 8
+#define KEYCODE_DELETE 224
+#define KEYCODE_ESCAPE 27
+
 void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
@@ -161,6 +167,57 @@ void Test_Client(u16 serverPort, u16 clientPort)
     addr.port = serverPort;
     g_network.isServer = 0;
     ZNet_StartSession(NETMODE_CLIENT, &addr, clientPort);
+
+    // basic chat interface
+
+    char chatMsg[256];
+    COM_ZeroMemory((u8*)chatMsg, 256);
+    i32 position = 0;
+    
+    i32 running = 1;
+    u32 ticks = 0;
+    while(running)
+    {
+        //printf("Waiting for key:\n");
+        while (!_kbhit())
+        {
+            i32 error = ZNet_Tick(tickRateSeconds);
+            //printf("\r%d", ticks++);
+            printf("\r%s", chatMsg);
+            Sleep(250);
+        }
+        int c = _getch();
+        if (c == KEYCODE_ESCAPE)
+        {
+            running = false;
+            printf("Exit");
+            continue;
+        }
+        else if (c == KEYCODE_ENTER)
+        {
+            printf("\rSAY: %s\n", chatMsg);
+            COM_ZeroMemory((u8*)chatMsg, 256);
+            position = 0;
+        }
+        else if (c == KEYCODE_BACKSPACE)
+        {
+            if (position > 0)
+            {
+                position--;
+            }
+            chatMsg[position] = '\0';
+        }
+        else
+        {
+            chatMsg[position] = (char)c;
+            if (position < (256 - 1))
+            {
+                position++;
+            }
+        }
+        //printf("\nYou pressed %c (keycode %d)\n", c, c);
+    }
+    #if 0
     for(;;)
     {
         i32 error = ZNet_Tick(tickRateSeconds);
@@ -179,6 +236,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
         Sleep(tickRateMS);
     }
     getc(stdin);
+    #endif
 }
 
 #define TEST_SERVER_PORT 23232
@@ -212,15 +270,31 @@ void Test_Win32(i32 argc, char* argv[])
     {
         //Net_RunLoopbackTest();
     }
+    
     #if 1
     else if (!COM_CompareStrings(mode, "live"))
     {
-        printf("Waiting for key:\n");
-        while (!_kbhit())
+        i32 running = 1;
+        u32 ticks = 0;
+        while(running)
         {
-            printf(".");
+            Sleep(100);
+            printf("Waiting for key:\n");
+            while (!_kbhit())
+            {
+                printf("\r%d", ticks++);
+                //printf(".");
+            }
+            int c = _getch();
+            if (c == KEYCODE_ESCAPE)
+            {
+                running = false;
+                printf("Exit");
+                continue;
+            }
+            printf("\nYou pressed %c (keycode %d)\n", c, c);
         }
-        printf("\nYou pressed %c\n", _getch());
+        
     }
     #endif
     else

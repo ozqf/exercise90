@@ -26,14 +26,14 @@ internal ZNetConnection* ZNet_GetConnectionByAddress(ZNet* net, ZNetAddress* add
     return NULL;
 }
 
-void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
+internal void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
 {
     NET_ASSERT(net, "Close connection: Net is null\n");
     NET_ASSERT(conn, "Close conncetion: conn is null\n");
     conn->id = 0;
 }
 
-void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
+internal void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
 {
     NET_ASSERT(net, "Disconnect peer: Net is null\n");
     NET_ASSERT(conn, "Disconnect peer: conn is null\n");
@@ -41,7 +41,7 @@ void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
     ZNet_CloseConnection(net, conn);
 }
 
-ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
+internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
 {
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
     {
@@ -59,7 +59,7 @@ ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
     return NULL;
 }
 
-ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
+internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
 {
     ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
     NET_ASSERT(conn, "ZNet failed to find free connection\n");

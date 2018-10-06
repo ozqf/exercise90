@@ -130,7 +130,7 @@ void ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 
 	// TODO: Teehee well this is a lot of unnecessary copying.
 	// external data buffer -> internal data buffer -> packet buffer -> send
-	printf("  Sending %d byte data packet to conn %d\n", numBytes, connId);
+	//printf("  Sending %d byte data packet to conn %d\n", numBytes, connId);
 
 	ByteBuffer b = ZNet_GetDataWriteBuffer();
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_DATA, b.ptrWrite);

@@ -58,7 +58,7 @@ internal i32 ZNet_ParsePacketHeader(u8* bytes, u16 numBytes, ZNetAddress* addres
 	return 0;
 }
 
-/*internal*/ i32 ZNet_BuildPacket(
+internal i32 ZNet_BuildPacket(
     ByteBuffer* packetBuffer,
     u8* dataBytes,
     i32 numDataBytes,

@@ -87,8 +87,8 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
         address->ip4Bytes[3]
     );
     //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
-    printf("SEND: ");
-    COM_PrintBytes(bytes, (u16)numBytes, 16);
+    //printf("SEND: ");
+    //COM_PrintBytes(bytes, (u16)numBytes, 16);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -141,7 +141,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 			data.ptrWrite += COM_WriteI32(pending->challenge, data.ptrWrite);
 			
 			ByteBuffer output = ZNet_GetPacketWriteBuffer();
-			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address, 1);
+			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address, 0);
             ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
 
             printf("SV Challenging client %d with %d\n", clientSalt, pending->challenge);
@@ -300,8 +300,8 @@ internal void ZNet_ReadSocket(ZNet* net)
         packetsRead++;
 
         ZNetPacket packet;
-        printf("RECV: ");
-        COM_PrintBytes((u8*)mem.ptrMemory, bytesRead, 16);
+        //printf("RECV: ");
+        //COM_PrintBytes((u8*)mem.ptrMemory, bytesRead, 16);
         // careful to send bytes read NOT full buffer size here you ninny.
 	    i32 packetError = ZNet_ParsePacketHeader((u8*)mem.ptrMemory, bytesRead, &address, &packet);
 	    if (packetError)
@@ -340,10 +340,10 @@ i32 ZNet_Tick(f32 deltaTime)
         //printf("\n***** Server Tick %d *****\n", net->tickCount);
         printf(".");
     }
-    else
-    {
-        printf("\n***** Client Tick %d *****\n", net->tickCount);
-    }
+    // else
+    // {
+    //     printf("\n***** Client Tick %d *****\n", net->tickCount);
+    // }
     
 
     // input
@@ -401,7 +401,7 @@ i32 ZNet_Tick(f32 deltaTime)
             // Get conn for address and salt
             ZNetConnection* conn = ZNet_GetConnectionById(&g_net, g_net.client2ServerId);
             NET_ASSERT(conn, "Client 2 Server connection is null");
-            printf("CL SENDING CONN REQUEST\n");
+            //printf("CL SENDING CONN REQUEST\n");
             #if 0
             // Prepare data buffer
             ByteBuffer data = Buf_FromBytes(g_dataWriteBuffer, ZNET_DATA_WRITE_SIZE);
