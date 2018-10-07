@@ -24,6 +24,9 @@ global_variable TestGameNetwork g_network = {};
 #define DATA_BUFFER_SIZE 1024
 global_variable u8 g_dataBuffer[DATA_BUFFER_SIZE];
 
+#define TNET_MSG_TYPE_TEST 1
+#define TNET_MSG_TYPE_CHAT 2
+
 void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     if (g_network.isServer)
@@ -53,7 +56,18 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     {
         case 1:
         {
-            printf("TYPE ONE OMG\n");
+            printf("TNET TYPE %d\n", type);
+        } break;
+
+        case 2:
+        {
+            //printf("TNET TYPE %d\n", type);
+            char buf[256];
+            u16 numChars = COM_ReadU16(&read);
+            if (numChars > 256) { numChars = 256; }
+            COM_ZeroMemory((u8*)buf, 256);
+            COM_COPY(read, buf, numChars);
+            printf("SAY: %s\n", buf);
         } break;
     }
 }
@@ -74,6 +88,12 @@ ZNetPlatformFunctions TNet_CreateNetFunctions()
     return x;
 }
 
+ByteBuffer TNET_GetWriteBuffer()
+{
+    COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
+    return Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+}
+
 ZNetOutputInterface TNet_CreateOutputInterface()
 {
 	/*
@@ -90,6 +110,9 @@ ZNetOutputInterface TNet_CreateOutputInterface()
 	return x;
 }
 
+//////////////////////////////////////////////////////////////////////
+// SERVER
+//////////////////////////////////////////////////////////////////////
 void TNet_ServerSendState()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -98,8 +121,9 @@ void TNet_ServerSendState()
         if (!cl->inUse) { continue; }
 
         // build packet
-        COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
-        ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+        //COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
+        //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+        ByteBuffer b = TNET_GetWriteBuffer();
         b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
         ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
     }
@@ -146,6 +170,26 @@ void Test_Server(u16 serverPort)
     getc(stdin);
 }
 
+//////////////////////////////////////////////////////////////////////
+// CLIENT
+//////////////////////////////////////////////////////////////////////
+void Test_ClientSendChatMessage(char* buf, u32 length)
+{
+    printf("SAY: %s\n", buf);
+    ByteBuffer b = TNET_GetWriteBuffer();
+    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_CHAT, b.ptrWrite);
+    b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
+    u32 pos = 0;
+    while (pos < length)
+    {
+        *b.ptrWrite = (u8)buf[pos];
+        b.ptrWrite += sizeof(u8);
+        pos++;
+    }
+    
+    ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written());
+}
+
 // Keep seeing 83... wtf is keycode 83?
 #define KEYCODE_ENTER 13
 #define KEYCODE_BACKSPACE 8
@@ -181,10 +225,11 @@ void Test_Client(u16 serverPort, u16 clientPort)
         //printf("Waiting for key:\n");
         while (!_kbhit())
         {
+            //system("cls");
             i32 error = ZNet_Tick(tickRateSeconds);
             //printf("\r%d", ticks++);
             printf("\r%s", chatMsg);
-            Sleep(250);
+            Sleep(tickRateMS);
         }
         int c = _getch();
         if (c == KEYCODE_ESCAPE)
@@ -195,9 +240,24 @@ void Test_Client(u16 serverPort, u16 clientPort)
         }
         else if (c == KEYCODE_ENTER)
         {
-            printf("\rSAY: %s\n", chatMsg);
-            COM_ZeroMemory((u8*)chatMsg, 256);
-            position = 0;
+            //printf("\rSAY: %s\n", chatMsg);
+            
+            if (position > 0)
+            {
+                if (chatMsg[0] == '/')
+                {
+                    // exec command
+                    printf("EXEC COMMAND\n");
+                }
+                else
+                {
+                    // send chat
+                    // + 1 to position to include null terminator
+                    Test_ClientSendChatMessage(chatMsg, position + 1);
+                }
+                COM_ZeroMemory((u8*)chatMsg, 256);
+                position = 0;
+            }
         }
         else if (c == KEYCODE_BACKSPACE)
         {
@@ -235,8 +295,11 @@ void Test_Client(u16 serverPort, u16 clientPort)
         }
         Sleep(tickRateMS);
     }
-    getc(stdin);
+    
     #endif
+
+    // keep window open
+    getc(stdin);
 }
 
 #define TEST_SERVER_PORT 23232

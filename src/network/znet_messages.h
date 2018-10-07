@@ -145,7 +145,7 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 	b.ptrWrite += COM_COPY(data, b.ptrWrite, numBytes);
 	u32 payloadSize = b.ptrWrite - payloadStart;
 	COM_WriteI32(COM_SimpleHash(payloadStart, payloadSize), ptrCheckSum);
-	printf("ZNET Send data payload of %d bytes to %d\n", numBytes, conn->id);
+	//printf("ZNET Send data payload of %d bytes to %d\n", numBytes, conn->id);
 
 	ZNet_Send(&conn->remoteAddress, b.ptrStart, b.Written());
 

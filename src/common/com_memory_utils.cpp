@@ -50,10 +50,20 @@ static inline u32 COM_WriteU32(u32 value, u8* target)
 /**
  * Returns number of bytes written
  */
+static inline u32 COM_WriteI16(i16 value, u8* target)
+{
+	Assert(target != NULL);
+    *(i16*)target = value;
+    return sizeof(u16);
+}
+
+/**
+ * Returns number of bytes written
+ */
 static inline u32 COM_WriteU16(u16 value, u8* target)
 {
 	Assert(target != NULL);
-    *(i32*)target = value;
+    *(u16*)target = value;
     return sizeof(u16);
 }
 
@@ -86,6 +96,14 @@ static inline i32 COM_ReadI32(u8** target)
 	Assert(target != NULL);
     i32 result = *(i32*)*target;
     *target += sizeof(i32);
+    return result;
+}
+
+static inline u16 COM_ReadU16(u8** target)
+{
+	Assert(target != NULL);
+    u16 result = *(u16*)*target;
+    *target += sizeof(u16);
     return result;
 }
 
