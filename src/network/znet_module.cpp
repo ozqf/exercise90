@@ -67,14 +67,19 @@ Packet structure:
 > Packet header:
     > u32 protocol magic number
     > i32 payload checksum
-> Payload
+> Payload header
     > u8 type
+    > i32 sender Id
+    > u16 sequence
+    > 
     > data...
 
 Data layout is different for each packet type
 for most:
 > client/server xor - IDs the connection.
 */
+
+#define ZNET_PACKET_HEADER_SIZE sizeof(ZNetPacketHeader)
 
 struct ZNetPacketHeader
 {
@@ -130,7 +135,6 @@ struct ZNetPacket
 #define ZNET_MSG_TYPE_CONNECTION_DENIED 5
 #define ZNET_MSG_TYPE_KEEP_ALIVE 6
 #define ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE 7
-
 // Data messages are anything external to ZNet
 #define ZNET_MSG_TYPE_DATA 8
 

@@ -119,33 +119,35 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	printf("done\n");
 }
 
-void ZNet_SendData(i32 connId, u8* data, u16 numBytes)
+u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 {
 	ZNet* net = &g_net;
 	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
 	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
-	NET_ASSERT(conn, "No connection found for data transmission\n");
-	i32 dataHeaderSize = 1 + 4 + 2;
-	NET_ASSERT((numBytes < (ZNET_DATA_WRITE_SIZE + dataHeaderSize)), "Packet data too large\n");
+	NET_ASSERT(conn, "No connection found for packet start\n");
 
-	// TODO: Teehee well this is a lot of unnecessary copying.
-	// external data buffer -> internal data buffer -> packet buffer -> send
-	//printf("  Sending %d byte data packet to conn %d\n", numBytes, connId);
+	ByteBuffer b = ZNet_GetPacketWriteBuffer();
+	b.ptrWrite += COM_WriteI32(ZNET_PROTOCOL, b.ptrWrite);
 
-	ByteBuffer b = ZNet_GetDataWriteBuffer();
+	// step over space for checksum, it must be done when packet is finished
+	// checksum is of payload header + payload itself
+	u8* ptrCheckSum = b.ptrWrite;
+	b.ptrWrite += sizeof(i32);
+	u8* payloadStart = b.ptrWrite;
+
+	// write payload header
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_DATA, b.ptrWrite);
-	b.ptrWrite += COM_WriteI32(conn->sequence, b.ptrWrite);
-	conn->sequence++;
-	b.ptrWrite += COM_COPY(data, b.ptrWrite, numBytes);
-	/*
-	- Test data packet contents -
-	1 byte for type
-	4 bytes for sequence
-	1 byte of data
-	*/
+	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
+	u32 packetNumber = conn->sequence++;
+	b.ptrWrite += COM_WriteU32(packetNumber, b.ptrWrite);
 	
-	ByteBuffer p = ZNet_GetPacketWriteBuffer();
-	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
+	// copy payload, write checksum, send, return sequence for external tracking
+	b.ptrWrite += COM_COPY(data, b.ptrWrite, numBytes);
+	u32 payloadSize = b.ptrWrite - payloadStart;
+	COM_WriteI32(COM_SimpleHash(payloadStart, payloadSize), ptrCheckSum);
+	printf("ZNET Send data payload of %d bytes to %d\n", numBytes, conn->id);
 
-	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+	ZNet_Send(&conn->remoteAddress, b.ptrStart, b.Written());
+
+	return packetNumber;
 }

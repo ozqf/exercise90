@@ -109,9 +109,17 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 				NET_ASSERT(conn, "No connection found for data packet\n");
 				ZNetPacketInfo info = {};
 				info.sender.address = conn->remoteAddress;
-				info.sender.id = conn->id;
+                
+                // read payload header
+                i32 xor = COM_ReadI32(&read);
 				info.remoteSequence = COM_ReadI32(&read);
-	
+                if (xor != conn->id)
+                {
+                    printf("ZNET data packet connId mismatch: got %d expected %d\n", xor, conn->id);
+                    return;
+                }
+                info.sender.id = xor;
+                
 				// TODO: Nicer way to calculate remaining bytes:
 				u16 dataSize = (u16)(end - read);
 				g_output.DataPacketReceived(&info, read, dataSize);

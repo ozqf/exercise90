@@ -37,7 +37,6 @@ struct ZNetPacketInfo
 	u32 remoteSequence;
 };
 
-
 /////////////////////////////////////////////////////////////////
 // Interfaces
 // These are NOT CHECKED when used. Make sure you're sending a valid struct
@@ -65,7 +64,7 @@ struct ZNetOutputInterface
 	void (*DeliveryConfirmed)		(u32 packetNumber);
 };
 
-void ZNet_SendData(i32 connId, u8* bytes, u16 numBytes);
+u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes);
 
 // info
 void ZNet_Info();
