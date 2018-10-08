@@ -19,74 +19,18 @@
 #include <windows.h>
 #endif
 
+// interface
+ZNetPlatformFunctions TNet_CreateNetFunctions();
+ZNetOutputInterface TNet_CreateOutputInterface();
+
 global_variable TestGameNetwork g_network = {};
 
 #define DATA_BUFFER_SIZE 1024
 global_variable u8 g_dataBuffer[DATA_BUFFER_SIZE];
 
 #define TNET_MSG_TYPE_TEST 1
-#define TNET_MSG_TYPE_CHAT 2
-
-void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
-{
-    if (g_network.isServer)
-    {
-        printf("TNET: Client Conn %d accepted\n", conn->id);
-        g_network.AssignNewClient(conn->id, 0);
-    }
-	else
-    {
-        printf("TNET: Server Conn %d accepted\n", conn->id);
-        g_network.SetServer(conn->id);
-    }
-    g_network.PrintfDebug();
-}
-void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
-{
-	printf("TNET: Conn %d dropped\n", conn->id);
-    g_network.DeleteClient(conn->id);
-    g_network.PrintfDebug();
-}
-void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
-{
-    u8* read = bytes;
-    u8 type = COM_ReadByte(&read);
-    printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
-    switch (type)
-    {
-        case 1:
-        {
-            printf("TNET TYPE %d\n", type);
-        } break;
-
-        case 2:
-        {
-            //printf("TNET TYPE %d\n", type);
-            char buf[256];
-            u16 numChars = COM_ReadU16(&read);
-            if (numChars > 256) { numChars = 256; }
-            COM_ZeroMemory((u8*)buf, 256);
-            COM_COPY(read, buf, numChars);
-            printf("SAY: %s\n", buf);
-        } break;
-    }
-}
-void TNet_DeliveryConfirmed(u32 packetNumber)
-{
-	printf("TNET: Delivery of %d confirmed\n", packetNumber);
-}
-
-ZNetPlatformFunctions TNet_CreateNetFunctions()
-{
-    ZNetPlatformFunctions x = {};
-    x.Init = Net_Init;
-    x.Shutdown = Net_Shutdown;
-    x.OpenSocket = Net_OpenSocket;
-    x.CloseSocket = Net_CloseSocket;
-    x.Read = Net_Read;
-    x.SendTo = Net_SendTo;
-    return x;
-}
+#define TNET_MSG_TYPE_C2S_CHAT 2
+#define TNET_MSG_TYPE_S2C_CHAT 3
 
 ByteBuffer TNET_GetWriteBuffer()
 {
@@ -94,25 +38,27 @@ ByteBuffer TNET_GetWriteBuffer()
     return Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
 }
 
-ZNetOutputInterface TNet_CreateOutputInterface()
-{
-	/*
-	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
-	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
-	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
-	void (*DeliveryConfirmed)		(u32 packetNumber);
-	*/
-	ZNetOutputInterface x = {};
-	x.ConnectionAccepted = TNet_ConnectionAccepted;
-	x.ConnectionDropped = TNet_ConnectionDropped;
-	x.DataPacketReceived = TNet_DataPacketReceived;
-	x.DeliveryConfirmed = TNet_DeliveryConfirmed;
-	return x;
-}
-
 //////////////////////////////////////////////////////////////////////
 // SERVER
 //////////////////////////////////////////////////////////////////////
+void TNet_ServerSendChatMsg(i32 senderPublicId, char* msg, u16 numChars)
+{
+    ByteBuffer b = TNET_GetWriteBuffer();
+    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_S2C_CHAT, b.ptrWrite);
+    b.ptrWrite += COM_WriteI32(senderPublicId, b.ptrWrite);
+    b.ptrWrite += COM_WriteU16(numChars, b.ptrWrite);
+    b.ptrWrite += COM_COPY(msg, b.ptrWrite, numChars);
+
+    for (i32 i = 0; i < g_network.capacity; ++i)
+    {
+        TestClient* cl = &g_network.clients[i];
+        if (!cl->inUse) { continue; }
+
+        // build packet
+        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+    }
+}
+
 void TNet_ServerSendState()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -177,7 +123,7 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
 {
     printf("SAY: %s\n", buf);
     ByteBuffer b = TNET_GetWriteBuffer();
-    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_CHAT, b.ptrWrite);
+    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
     u32 pos = 0;
     while (pos < length)
@@ -200,7 +146,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
     ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
-    i32 tickRateMS = 500;
+    i32 tickRateMS = 200;
     f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 
     ZNetAddress addr = {};
@@ -222,7 +168,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
     u32 ticks = 0;
     while(running)
     {
-        //printf("Waiting for key:\n");
+        //printf("Waiting for key at pos %d:\n", position);
         while (!_kbhit())
         {
             //system("cls");
@@ -267,7 +213,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
             }
             chatMsg[position] = '\0';
         }
-        else
+        else if (c != '\0')
         {
             chatMsg[position] = (char)c;
             if (position < (256 - 1))
@@ -302,6 +248,116 @@ void Test_Client(u16 serverPort, u16 clientPort)
     getc(stdin);
 }
 
+/////////////////////////////////////////////////////////////////////
+// Network callbacks
+/////////////////////////////////////////////////////////////////////
+void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
+{
+    if (g_network.isServer)
+    {
+        printf("TNET: Client Conn %d accepted\n", conn->id);
+        g_network.AssignNewClient(conn->id, 0);
+    }
+	else
+    {
+        printf("TNET: Server Conn %d accepted\n", conn->id);
+        g_network.SetServer(conn->id);
+    }
+    g_network.PrintfDebug();
+}
+void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
+{
+	printf("TNET: Conn %d dropped\n", conn->id);
+    g_network.DeleteClient(conn->id);
+    g_network.PrintfDebug();
+}
+void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
+{
+    u8* read = bytes;
+    u8 type = COM_ReadByte(&read);
+    //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
+    switch (type)
+    {
+        case 1:
+        {
+            //printf("TNET TYPE %d\n", type);
+        } break;
+
+        case TNET_MSG_TYPE_C2S_CHAT:
+        {
+            if (g_network.isServer)
+            {
+                //printf("TNET TYPE %d\n", type);
+                // sanitise a little
+                char buf[256];
+                u16 numChars = COM_ReadU16(&read);
+                if (numChars > 256) { numChars = 256; }
+
+                COM_ZeroMemory((u8*)buf, 256);
+                COM_COPY(read, buf, numChars);
+                TestClient* cl = g_network.GetClient(info->sender.id);
+                if (!cl)
+                {
+                    printf("SV Not client %d on server\n", info->sender.id);
+                    break;
+                }
+                printf("%d (%d) says: %s\n", cl->publicClientId, info->sender.id, buf);
+                TNet_ServerSendChatMsg(cl->publicClientId, buf, numChars);
+            }
+            
+        } break;
+
+        case TNET_MSG_TYPE_S2C_CHAT:
+        {
+            char buf[256];
+            i32 senderPublicId = COM_ReadI32(&read);
+            u16 numChars = COM_ReadU16(&read);
+            if (numChars > 256) { numChars = 256; }
+            COM_ZeroMemory((u8*)buf, 256);
+            COM_COPY(read, buf, numChars);
+            printf("%d says: %s\n", senderPublicId, buf);
+        } break;
+    }
+}
+void TNet_DeliveryConfirmed(u32 packetNumber)
+{
+	printf("TNET: Delivery of %d confirmed\n", packetNumber);
+}
+
+/////////////////////////////////////////////////////////////////
+// Network init
+/////////////////////////////////////////////////////////////////
+ZNetPlatformFunctions TNet_CreateNetFunctions()
+{
+    ZNetPlatformFunctions x = {};
+    x.Init = Net_Init;
+    x.Shutdown = Net_Shutdown;
+    x.OpenSocket = Net_OpenSocket;
+    x.CloseSocket = Net_CloseSocket;
+    x.Read = Net_Read;
+    x.SendTo = Net_SendTo;
+    return x;
+}
+
+ZNetOutputInterface TNet_CreateOutputInterface()
+{
+	/*
+	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
+	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
+	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
+	void (*DeliveryConfirmed)		(u32 packetNumber);
+	*/
+	ZNetOutputInterface x = {};
+	x.ConnectionAccepted = TNet_ConnectionAccepted;
+	x.ConnectionDropped = TNet_ConnectionDropped;
+	x.DataPacketReceived = TNet_DataPacketReceived;
+	x.DeliveryConfirmed = TNet_DeliveryConfirmed;
+	return x;
+}
+
+/////////////////////////////////////////////////////////////////
+// Entry point
+/////////////////////////////////////////////////////////////////
 #define TEST_SERVER_PORT 23232
 #define TEST_CLIENT_PORT 61200
 

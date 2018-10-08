@@ -148,6 +148,6 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 	//printf("ZNET Send data payload of %d bytes to %d\n", numBytes, conn->id);
 
 	ZNet_Send(&conn->remoteAddress, b.ptrStart, b.Written());
-
+	
 	return packetNumber;
 }

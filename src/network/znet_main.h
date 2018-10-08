@@ -261,7 +261,11 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             if (conn)
             {
                 conn->ticksSinceLastMessage = 0;
-                printf("NET type %d received Keep alive from %d\n", net->state, xor);
+                //printf("NET type %d received Keep alive from %d\n", net->state, xor);
+            }
+            else
+            {
+                printf("NET No conn %d found for keep alive\n", xor);
             }
         } break;
 
