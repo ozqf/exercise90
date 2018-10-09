@@ -25,7 +25,7 @@ set compilerDefines=/DPARANOID=1
 
 @rem === Compile Testing Win32 Console application
 @rem Ws2_32.lib == winsock2
-set compInput_0=../src/tools/win32_consoleApp.cpp
+set compInput_0=../src/tools/win32_consoleApp.cpp ../src/tools/tests/tests_module.cpp
 set compInput_1=../src/platform/win32_net/win32_net_module.cpp
 set compInput_2=../src/network/znet_module.cpp
 

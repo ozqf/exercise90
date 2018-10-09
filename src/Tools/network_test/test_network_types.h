@@ -20,7 +20,7 @@ struct TestServer
     i32 connId;
     i32 inUse;
 };
-#if 0
+#if 1
 struct MsgClientListHeader
 {
     i32 clientPublicId;
@@ -35,15 +35,15 @@ struct MsgClientInfo
 
     i32 Read(u8* ptr)
     {
-        this->colourRGB[0] = COM_ReadByte(&read);
-        this->colourRGB[1] = COM_ReadByte(&read);
-        this->colourRGB[2] = COM_ReadByte(&read);
-        this->nameLength = COM_ReadByte(&read);
+        this->colourRGB[0] = COM_ReadByte(&ptr);
+        this->colourRGB[1] = COM_ReadByte(&ptr);
+        this->colourRGB[2] = COM_ReadByte(&ptr);
+        this->nameLength = COM_ReadByte(&ptr);
         if (nameLength > 32)
         {
             nameLength = 32;
         }
-        ptr += COM_CopyStringLimited_Safe((char*)ptr, this->name, 32);
+        ptr += COM_CopyStringLimited((char*)ptr, this->name, 32);
     }
 
     i32 Write(u8* ptr)
@@ -51,7 +51,7 @@ struct MsgClientInfo
         ptr += COM_WriteByte(this->colourRGB[0], ptr);
         ptr += COM_WriteByte(this->colourRGB[1], ptr);
         ptr += COM_WriteByte(this->colourRGB[2], ptr);
-        i32 chars = COM_StrLenPlusTerminator(this->name);
+        u8 chars = (u8)COM_StrLen(this->name) + 1; // + 1 for terminator;
         this->nameLength = chars;
         ptr += COM_WriteByte(chars, ptr);
         ptr += COM_COPY(this->name, ptr, chars);

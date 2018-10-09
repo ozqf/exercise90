@@ -163,6 +163,7 @@ i32 App_Init()
     netFuncs.Read = platform.Net_Read;
     netFuncs.SendTo = platform.Net_SendTo;
     netFuncs.FatalError = App_FatalError;
+    // TODO: Init net callbacks here
 	ZNet_Init(netFuncs);
     
     
