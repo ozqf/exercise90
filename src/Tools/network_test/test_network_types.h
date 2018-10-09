@@ -20,7 +20,44 @@ struct TestServer
     i32 connId;
     i32 inUse;
 };
+#if 0
+struct MsgClientListHeader
+{
+    i32 clientPublicId;
 
+};
+
+struct MsgClientInfo
+{
+    u8 colourRGB[3];
+    u8 nameLength;
+    char name[32];
+
+    i32 Read(u8* ptr)
+    {
+        this->colourRGB[0] = COM_ReadByte(&read);
+        this->colourRGB[1] = COM_ReadByte(&read);
+        this->colourRGB[2] = COM_ReadByte(&read);
+        this->nameLength = COM_ReadByte(&read);
+        if (nameLength > 32)
+        {
+            nameLength = 32;
+        }
+        ptr += COM_CopyStringLimited_Safe((char*)ptr, this->name, 32);
+    }
+
+    i32 Write(u8* ptr)
+    {
+        ptr += COM_WriteByte(this->colourRGB[0], ptr);
+        ptr += COM_WriteByte(this->colourRGB[1], ptr);
+        ptr += COM_WriteByte(this->colourRGB[2], ptr);
+        i32 chars = COM_StrLenPlusTerminator(this->name);
+        this->nameLength = chars;
+        ptr += COM_WriteByte(chars, ptr);
+        ptr += COM_COPY(this->name, ptr, chars);
+    }
+};
+#endif
 #define MAX_TEST_CLIENTS 32
 struct TestGameNetwork
 {

@@ -30,7 +30,10 @@ global_variable u8 g_dataBuffer[DATA_BUFFER_SIZE];
 
 #define TNET_MSG_TYPE_TEST 1
 #define TNET_MSG_TYPE_C2S_CHAT 2
-#define TNET_MSG_TYPE_S2C_CHAT 3
+#define TNET_MSG_TYPE_C2S_INFO 3
+#define TNET_MSG_TYPE_S2C_CHAT 4
+#define TNET_MSG_TYPE_S2C_CLIENT_LIST 5
+
 
 ByteBuffer TNET_GetWriteBuffer()
 {
@@ -42,6 +45,24 @@ ByteBuffer TNET_GetWriteBuffer()
 // SERVER
 //////////////////////////////////////////////////////////////////////
 void TNet_ServerSendChatMsg(i32 senderPublicId, char* msg, u16 numChars)
+{
+    ByteBuffer b = TNET_GetWriteBuffer();
+    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_S2C_CHAT, b.ptrWrite);
+    b.ptrWrite += COM_WriteI32(senderPublicId, b.ptrWrite);
+    b.ptrWrite += COM_WriteU16(numChars, b.ptrWrite);
+    b.ptrWrite += COM_COPY(msg, b.ptrWrite, numChars);
+
+    for (i32 i = 0; i < g_network.capacity; ++i)
+    {
+        TestClient* cl = &g_network.clients[i];
+        if (!cl->inUse) { continue; }
+
+        // build packet
+        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+    }
+}
+
+void TNet_ServerSendClientList(i32 senderPublicId, char* msg, u16 numChars)
 {
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_S2C_CHAT, b.ptrWrite);
