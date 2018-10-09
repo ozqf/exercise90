@@ -121,7 +121,6 @@ void Test_Server(u16 serverPort)
 //////////////////////////////////////////////////////////////////////
 void Test_ClientSendChatMessage(char* buf, u32 length)
 {
-    printf("SAY: %s\n", buf);
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
@@ -132,7 +131,7 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
         b.ptrWrite += sizeof(u8);
         pos++;
     }
-    
+    printf("\nSent %d chars\n", length);
     ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written());
 }
 
@@ -163,6 +162,10 @@ void Test_Client(u16 serverPort, u16 clientPort)
     char chatMsg[256];
     COM_ZeroMemory((u8*)chatMsg, 256);
     i32 position = 0;
+
+    char lineClearBuf[80];
+    COM_SetMemory((u8*)lineClearBuf, 80, (u8)' ');
+    lineClearBuf[79] = '\0';
     
     i32 running = 1;
     u32 ticks = 0;
@@ -174,6 +177,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
             //system("cls");
             i32 error = ZNet_Tick(tickRateSeconds);
             //printf("\r%d", ticks++);
+            printf("\r%s", lineClearBuf);
             printf("\r%s", chatMsg);
             Sleep(tickRateMS);
         }
@@ -207,11 +211,12 @@ void Test_Client(u16 serverPort, u16 clientPort)
         }
         else if (c == KEYCODE_BACKSPACE)
         {
+            //printf("Delete char at %d\n", position);
+            chatMsg[position] = '\0';
             if (position > 0)
             {
                 position--;
             }
-            chatMsg[position] = '\0';
         }
         else if (c != '\0')
         {
