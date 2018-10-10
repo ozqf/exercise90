@@ -52,7 +52,7 @@ inline u8 COM_ValidateTextCommandHandler(char* name, i32 minTokens, i32 maxToken
 // eg spawn enemy 3 5 7 would be ttnnn\0
 inline u8 COM_CheckTokenPattern(char** tokens, i32 numTokens, char* pattern)
 {
-	i32 patternLength = COM_StrLenA(pattern);
+	i32 patternLength = COM_StrLen(pattern);
 	
 	if (patternLength != numTokens)
 	{

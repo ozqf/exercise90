@@ -393,7 +393,6 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
 
 
     // Render debug string
-    //ZSTR_WriteChars(&g_debugStr, "Test testy\ntest test", 21);
     //App_WriteCameraDebug(time);
 
     g_debugStr = App_WriteDebugString(gs, time);

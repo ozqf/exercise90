@@ -3,6 +3,10 @@
 
 #include "../../common/com_module.cpp"
 
+#define TEST_ASSERT(expression, msg) \
+if (!(expression)) { printf("Failed: %s\n", msg##); } \
+else { printf("Passed: %s\n", msg##); }
+
 #include "test_strings.h"
 
 void Tests_Run(i32 argc, char* argv[])

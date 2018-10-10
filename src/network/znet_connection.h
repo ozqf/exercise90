@@ -41,6 +41,16 @@ internal void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
     ZNet_CloseConnection(net, conn);
 }
 
+internal i32 ZNet_ConnectionIdIsInUse(ZNet* net, i32 queryId)
+{
+    for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
+    {
+        ZNetConnection* conn = &net->connections[i];
+        if (conn->id == queryId) { return 1; }
+    }
+    return 0;
+}
+
 internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
 {
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)
@@ -51,14 +61,21 @@ internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
             *conn = {};
             u32 newId = 0;
             ZNetConnection* other = NULL;
-            newId = ZNet_CreateSalt();
+            do
+            {
+                newId = ZNet_CreateSalt();
+            } while (ZNet_ConnectionIdIsInUse(net, newId));
+            
             conn->id = newId;
+            conn->publicId = net->nextPublicClientId++;
             return conn;
         }
     }
     return NULL;
 }
 
+// TODO: check server connection response... is conn id xor used here or is a new one generated
+// by the server...?
 internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
 {
     ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
@@ -67,12 +84,12 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
     if (isLocal)
     {
         conn->flags |= ZNET_CONNECTION_FLAG_LOCAL;
-        printf("NET Creating local connection id %d\n", conn->id);
+        printf("ZNET Creating local connection id %d\n", conn->id);
     }
     else
     {
         conn->remoteAddress = address;
-        printf("NET Creating remote connection id %d\n", conn->id);
+        printf("ZNET Creating remote connection id %d\n", conn->id);
     }
     return conn;
 }

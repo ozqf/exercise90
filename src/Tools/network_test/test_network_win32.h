@@ -19,6 +19,23 @@
 #include <windows.h>
 #endif
 
+/*
+Notes:
+Clients have two states
+> the state of their connection (connected, pending, etc)
+> the state of their client (loading or in session)
+Connection state is handled by ZNet layer
+Client state is handled outside the network layer, and is data related
+
+Current 'state' + the client's public Id must be transferred to them before
+they can be considered 'inPlay'
+
+Steps to sync client and server:
+Server requires client's 'info'
+Client requires current server state (right now, clients in chatroom)
+*/
+
+
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
 ZNetOutputInterface TNet_CreateOutputInterface();
@@ -100,7 +117,7 @@ void Test_Server(u16 serverPort)
 {
     printf("Server\n");
     ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
-    i32 tickRateMS = 500;
+    i32 tickRateMS = 250;
     f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 	
 	/*
@@ -142,6 +159,7 @@ void Test_Server(u16 serverPort)
 //////////////////////////////////////////////////////////////////////
 void Test_ClientSendChatMessage(char* buf, u32 length)
 {
+    if (!g_network.isActive) { printf("Cannot send, network not active\n"); return; }
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
@@ -156,6 +174,11 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
     ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written());
 }
 
+void Test_ClientSendInfo()
+{
+
+}
+
 // Keep seeing 83... wtf is keycode 83?
 #define KEYCODE_ENTER 13
 #define KEYCODE_BACKSPACE 8
@@ -166,7 +189,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
     ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
-    i32 tickRateMS = 200;
+    i32 tickRateMS = 100;
     f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 
     ZNetAddress addr = {};
@@ -281,13 +304,15 @@ void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     if (g_network.isServer)
     {
-        printf("TNET: Client Conn %d accepted\n", conn->id);
-        g_network.AssignNewClient(conn->id, 0);
+        printf("TNET: Server accepted client %d (public %d)\n", conn->id, conn->publicId);
+        g_network.AssignNewClient(conn->id, conn->publicId);
     }
 	else
     {
-        printf("TNET: Server Conn %d accepted\n", conn->id);
+        printf("TNET: Client: Server approved connection %d (public %d)\n", conn->id, conn->publicId);
+        g_network.isActive = 1;
         g_network.SetServer(conn->id);
+        // TODO: Record local public and private ids here!
     }
     g_network.PrintfDebug();
 }
@@ -296,6 +321,7 @@ void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
 	printf("TNET: Conn %d dropped\n", conn->id);
     g_network.DeleteClient(conn->id);
     g_network.PrintfDebug();
+    if (!g_network.isServer) { g_network.isActive = 0; }
 }
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {

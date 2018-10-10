@@ -48,6 +48,8 @@ App Network layer functionality:
 struct ZNetConnection
 {
     i32 id;
+    i32 publicId;
+
     i32 type;
     u32 sequence;
     u32 remoteSequence;
@@ -169,6 +171,11 @@ struct ZNet
     i32 client2ServerId;
     u32 tickCount;
     f32 secondsEllapsed;
+
+    // incremented with each client
+    // TODO: public and not used for any client <-> server commands but
+    // should still be randomly selected?
+    i32 nextPublicClientId;
 
     ZNetPending pendingConnections[MAX_PENDING_CONNECTIONS];
 };

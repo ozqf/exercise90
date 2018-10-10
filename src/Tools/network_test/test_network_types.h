@@ -2,24 +2,12 @@
 
 #include "../../common/com_module.h"
 
-#define MAX_TEST_CLIENT_NAME_LENGTH 32
-struct TestClient
-{
-    // should be kept private between this specific client and server
-    i32 connId; 
-    // public client id is how the game and other clients can refer to each other.
-    // eg players 0, 1, 2. but their actual *connection* ids are not exposed to other clients.
-    // this will require a 'game info' packet to tell the client what there specific public id is.
-    i32 publicClientId;
-    i32 inUse;
-	char* name[MAX_TEST_CLIENT_NAME_LENGTH];
-};
+#define CLIENT_APP_STATE_NULL 0
+#define CLIENT_APP_STATE_LOADING 1
+#define CLIENT_APP_STATE_IN_PLAY 2
 
-struct TestServer
-{
-    i32 connId;
-    i32 inUse;
-};
+#define MAX_TEST_CLIENT_NAME_LENGTH 32
+
 #if 1
 struct MsgClientListHeader
 {
@@ -27,11 +15,11 @@ struct MsgClientListHeader
 
 };
 
-struct MsgClientInfo
+struct ClientInfo
 {
     u8 colourRGB[3];
     u8 nameLength;
-    char name[32];
+    char name[MAX_TEST_CLIENT_NAME_LENGTH];
 
     i32 Read(u8* ptr)
     {
@@ -39,11 +27,11 @@ struct MsgClientInfo
         this->colourRGB[1] = COM_ReadByte(&ptr);
         this->colourRGB[2] = COM_ReadByte(&ptr);
         this->nameLength = COM_ReadByte(&ptr);
-        if (nameLength > 32)
+        if (nameLength > MAX_TEST_CLIENT_NAME_LENGTH)
         {
-            nameLength = 32;
+            nameLength = MAX_TEST_CLIENT_NAME_LENGTH;
         }
-        ptr += COM_CopyStringLimited((char*)ptr, this->name, 32);
+        ptr += COM_CopyStringLimited((char*)ptr, this->name, MAX_TEST_CLIENT_NAME_LENGTH);
     }
 
     i32 Write(u8* ptr)
@@ -58,9 +46,31 @@ struct MsgClientInfo
     }
 };
 #endif
+struct TestClient
+{
+    // Ids are taken from ZNet layer
+    i32 connId; 
+    i32 publicClientId;
+
+    i32 inUse;
+    // client application state not involving
+    // raw connection state. eg 'loading, inPlay' etc
+    // or game related (alive, dead etc)
+    i32 clientAppState;
+    // name etc
+	ClientInfo info;
+};
+
+struct TestServer
+{
+    i32 connId;
+    i32 inUse;
+};
+
 #define MAX_TEST_CLIENTS 32
 struct TestGameNetwork
 {
+    i32 isActive = 0;
     i32 isServer;
     TestServer server;
     // Clients still maintain the clients list as they want to know info about other players etc
@@ -113,15 +123,7 @@ struct TestGameNetwork
             {
                 cl->inUse = 1;
                 cl->connId = id;
-                if (this->isServer)
-                {
-                    cl->publicClientId = this->nextClientId++;
-                }
-                else
-                {
-                    cl->publicClientId = newPublicId;
-                }
-                
+                cl->publicClientId = newPublicId;
                 
                 return cl;
             }

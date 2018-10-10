@@ -201,6 +201,8 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 return;
             }
             ZNetConnection* conn = ZNet_CreateClientConnection(p->address, 0);
+            // TODO: Is id response assigned here or a new one generated
+            // when a free connection is assigned...?
             conn->id = response;
             ZNet_ClosePendingConnection(net, p);
             

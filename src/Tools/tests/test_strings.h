@@ -1,46 +1,42 @@
 #pragma once
+
+#include "../../common/com_module.h"
+
 //////////////////////////////////////////////////////////////
 // String tests
 //////////////////////////////////////////////////////////////
 
-void Test_StripTrailingInt(char* txt)
-{
-	i32 val = COM_StripTrailingInteger(txt, '_', -1);
-	printf("%s val: %d\n", txt, val);
-}
-
-void Test_MatchStringStart(char* a, char* b)
-{
-	i32 result = COM_MatchStringStart(a, b);
-	printf("%s starts with %s? %d\n", a, b, result);
-}
-
-void Test_ParseTestMapPath(char* path)
+i32 Test_ParseTestMapPath(char* path, i32 failureDefault)
 {
 	char* header = "TEST_";
 	if (COM_MatchStringStart(path, header))
     {
-		i32 index = COM_StripTrailingInteger(path, '_', 0);
-        printf("Path %s index: %d\n", path, index);
+		i32 index = COM_StripTrailingInteger(path, '_', failureDefault);
+		return index;
     }
     else
     {
-        printf("Path %s does not start with %s\n", path, header);
+		return failureDefault;
     }
 }
 
 void Test_Strings()
 {
     printf("String tests\n");
-    Test_ParseTestMapPath("TEST_1");
-	Test_ParseTestMapPath("TEST_-1");
-	Test_ParseTestMapPath("TEST_37");
-	Test_ParseTestMapPath("LEVEL_15");
+	i32 failureDefault = -2;
+    TEST_ASSERT(Test_ParseTestMapPath("TEST_1", failureDefault) == 1, "Parse Map Path");
+	TEST_ASSERT(Test_ParseTestMapPath("TEST_-1", failureDefault) == -1, "Parse Map Path == -1");
+	TEST_ASSERT(Test_ParseTestMapPath("TEST_37", failureDefault) == 37, "Parse Map Path == 37");
+	TEST_ASSERT(Test_ParseTestMapPath("LEVEL_15", failureDefault) == failureDefault, "Parse Map Path fails");
+	
     char* thisStringShouldOverflow = "12345678901234567890";
-    char buf[8];
+    
+	char buf8[8];
+    COM_CopyStringLimited(thisStringShouldOverflow, buf8, 8);
+	TEST_ASSERT(!COM_CompareStrings(buf8, "1234567"), "Copy string limited");
 
-    COM_CopyStringLimited(thisStringShouldOverflow, buf, 8);
-	printf("Copy limited by 8: ");
-    printf("%s -> %s\n", thisStringShouldOverflow, buf);
+	char buf10[10];
+	COM_CopyStringLimited(thisStringShouldOverflow, buf10, 10);
+	TEST_ASSERT(!COM_CompareStrings(buf10, "123456789"), "Copy string limited");
     
 }
