@@ -300,6 +300,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
 /////////////////////////////////////////////////////////////////////
 // Network callbacks
 /////////////////////////////////////////////////////////////////////
+
 void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     if (g_network.isServer)
@@ -316,6 +317,7 @@ void TNet_ConnectionAccepted(ZNetConnectionInfo* conn)
     }
     g_network.PrintfDebug();
 }
+
 void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
 {
 	printf("TNET: Conn %d dropped\n", conn->id);
@@ -323,6 +325,7 @@ void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
     g_network.PrintfDebug();
     if (!g_network.isServer) { g_network.isActive = 0; }
 }
+
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     u8* read = bytes;
@@ -371,6 +374,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         } break;
     }
 }
+
 void TNet_DeliveryConfirmed(u32 packetNumber)
 {
 	printf("TNET: Delivery of %d confirmed\n", packetNumber);

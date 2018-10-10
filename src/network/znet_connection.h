@@ -67,7 +67,9 @@ internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
             } while (ZNet_ConnectionIdIsInUse(net, newId));
             
             conn->id = newId;
-            conn->publicId = net->nextPublicClientId++;
+            conn->publicId = net->nextPublicClientId;
+            net->nextPublicClientId++;
+            printf("ZNet got free conn for public Id %d\n", conn->publicId);
             return conn;
         }
     }
