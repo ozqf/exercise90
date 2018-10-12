@@ -11,6 +11,7 @@
 #include "../../network/znet_interface.h"
 
 #include "test_network_types.h"
+#include "test_network_reliability.h"
 
 #if 1
 #define WIN32_LEAN_AND_MEAN
@@ -33,6 +34,23 @@ they can be considered 'inPlay'
 Steps to sync client and server:
 Server requires client's 'info'
 Client requires current server state (right now, clients in chatroom)
+
+--- Reliability ---
+
+Transmission:
+> When sending, save message in 'reliableOutput' buffer, with it's sequence number.
+> Periodically resend items in reliableOutput.
+	(Record packet ids the message was sent in? Can't just record one id if it is resent)
+> When an ack is received, check 
+
+Reception:
+> Start with 'remoteSequence' of 0. The first reliable message sent must be sequence of 1.
+> When receiving reliable messages, place them in a 'reliableInput' buffer.
+> On Read, look in reliableInput for messages with 'remoteSequence + 1'
+	> If a message is found, read it and increment remoteSequence by 1.
+	> Repeat until the buffer is empty or no message of remoteSequence + 1 is found.
+> Every outbound packet is marked with the remoteSequence. The sender can then discard
+	all messages before that number.
 */
 
 
@@ -445,6 +463,10 @@ void Test_Win32(i32 argc, char* argv[])
     {
         //Net_RunLoopbackTest();
     }
+	else if (!COM_CompareStrings(mode, "rel"))
+	{
+		TNet_TestReliability();
+	}
     
     #if 1
     else if (!COM_CompareStrings(mode, "live"))

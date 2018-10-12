@@ -11,6 +11,11 @@ i32 ZNet_IsServer()
     return (g_net.state == ZNET_STATE_SERVER);
 }
 
+void ZNet_EnableQualitySimulation(i32 minMilliSeconds, i32 maxMilliSeconds, f32 packetLossPercentage)
+{
+    
+}
+
 void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 {
     // TODO: Make sure rand is somehow mixed up by this point
@@ -74,7 +79,7 @@ void ZNet_EndSession()
     NET_ASSERT((net->state != 0), "Net session shutdown but not running\n");
 }
 
-internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
+internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)
 {
     // Platform read function:
     //i32  (*SendTo)
@@ -90,6 +95,11 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
     //printf("SEND: ");
     //COM_PrintBytes(bytes, (u16)numBytes, 16);
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
+}
+
+internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
+{
+    g_store.SendPacket
 }
 
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
@@ -358,7 +368,7 @@ i32 ZNet_Tick(f32 deltaTime)
     // {
     //     printf("\n***** Client Tick %d *****\n", net->tickCount);
     // }
-    
+    g_store.Tick(deltaTime);
 
     // input
     ZNet_ReadSocket(net);

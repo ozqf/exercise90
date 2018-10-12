@@ -199,6 +199,7 @@ internal u8 g_packetReadBuffer[ZNET_PACKET_READ_SIZE];
 internal ZNetPlatformFunctions g_netPlatform;
 internal ZNetOutputInterface g_output;
 internal ZNet g_net;
+internal ZNetDelayedPacketStore g_store;
 
 internal void Net_FatalError(char* message, char* heading)
 {
@@ -235,9 +236,11 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 
 // Internal interface
 internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
+u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes);
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
 
 #include "znet_packet.h"
+#include "znet_simulation.h"
 #include "znet_messages.h"
 #include "znet_connection.h"
 #include "znet_pending.h"
@@ -252,6 +255,7 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
     g_netPlatform = platform;
 	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
+    g_store.Init();
     printf("Done\n");
 }
 
