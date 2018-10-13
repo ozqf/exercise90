@@ -180,6 +180,16 @@ struct ZNet
     ZNetPending pendingConnections[MAX_PENDING_CONNECTIONS];
 };
 
+//////////////////////////////////////////////////////////////
+// Internal interface
+//////////////////////////////////////////////////////////////
+internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
+internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes);
+u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes);
+internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
+
+#include "znet_simulation.h"
+
 /////////////////////////////////////////////////////
 // GLOBALS
 /////////////////////////////////////////////////////
@@ -234,13 +244,8 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 	return Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
 }
 
-// Internal interface
-internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
-u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes);
-internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
 
 #include "znet_packet.h"
-#include "znet_simulation.h"
 #include "znet_messages.h"
 #include "znet_connection.h"
 #include "znet_pending.h"

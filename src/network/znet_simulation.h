@@ -12,6 +12,7 @@ struct ZNetLagSimInfo
     i32 RollDropPacket()
     {
         f32 num = COM_Randf32(&this->randomIndex);
+        //printf("Drop? %.2f vs %.2f\n", num, this->lossNormal);
         return (num < lossNormal);
     }
 
@@ -24,7 +25,8 @@ struct ZNetLagSimInfo
 
 struct ZNetDelayedPacketHeader
 {
-    i32 connId;
+	i32 inUse = 0;
+    ZNetAddress address;
     i32 size;
     f32 tick;
 };
@@ -37,6 +39,9 @@ struct ZNetDelayedPacketStore
     void Init()
     {
         COM_ZeroMemory((u8*)this, sizeof(ZNetDelayedPacketStore));
+        info.minMS = 200;
+        info.maxMS = 500;
+        info.lossNormal = 0.2f;
     }
 
     i32 GetFreeHandleIndex()
@@ -69,19 +74,25 @@ struct ZNetDelayedPacketStore
 
     void SendPacket(ZNetAddress* address, u8* data, u16 numBytes)
     {
-        if (this->info.RollDropPacket()) { return; }
+        if (this->info.RollDropPacket())
+        {
+            printf("ZNet Sim: Packet dropped\n");
+            return;
+        }
         i32 i = this->GetFreeHandleIndex();
         if (i == -1)
         {
-            ZNet_SendData(connId, data, numBytes);
+            printf("ZNet Sim: Slots full, sending directly\n");
+            ZNet_Send(address, data, numBytes);
             return;
         }
 
         i32 space = sizeof(ZNetDelayedPacketHeader) + numBytes;
         ZNetDelayedPacketHeader* h = (ZNetDelayedPacketHeader*)malloc(space);
-        h->connId = connId;
+        h->address = *address;
         h->size = numBytes;
         h->tick = (f32)this->info.RollDelay() / 1000.0f;
+        //printf("ZNet Sim: Packet delay: %.2f\n", h->tick);
         handles[i] = h;
         u8* ptr = (u8*)h + sizeof(ZNetDelayedPacketHeader);
         COM_COPY(data, ptr, numBytes);
@@ -92,11 +103,11 @@ struct ZNetDelayedPacketStore
         for (i32 i = 0; i < 256; ++i)
         {
             ZNetDelayedPacketHeader* h = this->handles[i];
-            if (h->connId == 0) { continue; }
+            if (h == NULL) { continue; }
             h->tick -= deltaTime;
             if (h->tick > 0) { continue; }
             u8* ptr = (u8*)h + sizeof(ZNetDelayedPacketHeader);
-            ZNet_SendData(h->connId, ptr, (u16)h->size);
+            ZNet_SendActual(&h->address, ptr, (u16)h->size);
             this->FreeHandle(i);
         }
     }

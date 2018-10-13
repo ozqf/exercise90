@@ -99,7 +99,7 @@ internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)
 
 internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
 {
-    g_store.SendPacket
+    g_store.SendPacket(address, bytes, (u16)numBytes);
 }
 
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
@@ -195,6 +195,8 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
             ByteBuffer p = ZNet_GetPacketWriteBuffer();
             ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
+
+            // TODO: This is unreliable 
             ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
         } break;
 
