@@ -53,6 +53,8 @@ Reception:
 	all messages before that number.
 */
 
+#define SERVER_TICK_RATE 2
+#define CLIENT_TICK_RATE 2
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -135,8 +137,12 @@ void Test_Server(u16 serverPort)
 {
     printf("Server\n");
     ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
-    i32 tickRateMS = 250;
-    f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
+
+    f32 tickRateSeconds = SERVER_TICK_RATE;
+    i32 tickRateMS = (i32)(1000.0f / tickRateSeconds);
+
+    //i32 tickRateMS = 250;
+    //f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 	
 	/*
 	Notes:
@@ -207,8 +213,11 @@ void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
     ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
-    i32 tickRateMS = 100;
-    f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
+
+    f32 tickRateSeconds = SERVER_TICK_RATE;
+    i32 tickRateMS = (i32)(1000.0f / tickRateSeconds);
+    //i32 tickRateMS = 100;
+    //f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
 
     ZNetAddress addr = {};
     addr.ip4Bytes[0] = 127;

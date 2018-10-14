@@ -168,6 +168,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         case ZNET_MSG_TYPE_CHALLENGE:
         {
             if (net->state != ZNET_STATE_CONNECTING) { return; }
+
             net->state = ZNET_STATE_RESPONDING;
             i32 clientSalt = COM_ReadI32(&read);
             ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
@@ -191,13 +192,14 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             conn->id = response;
 			net->client2ServerId = response;
 
-            ByteBuffer b = ZNet_GetDataWriteBuffer();
-            i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
-            ByteBuffer p = ZNet_GetPacketWriteBuffer();
-            ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
+            // Replies 
+            //ByteBuffer b = ZNet_GetDataWriteBuffer();
+            //i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
+            //ByteBuffer p = ZNet_GetPacketWriteBuffer();
+            //ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
 
-            // TODO: This is unreliable 
-            ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+            // TODO: This is unreliable
+            //ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
         } break;
 
         case ZNET_MSG_TYPE_CHALLENGE_RESPONSE:
@@ -455,6 +457,20 @@ i32 ZNet_Tick(f32 deltaTime)
         case ZNET_STATE_RESPONDING:
         {
             // periodically send challenge response to server
+
+            ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
+            if (conn == NULL)
+            {
+                printf("  In respond state but no connection!\n");
+                net->state = ZNET_STATE_DISCONNECTED;
+                break;
+            }
+
+            ByteBuffer b = ZNet_GetDataWriteBuffer();
+            i32 numBytes = ZNet_WriteChallengeResponse(&b, conn->id);
+            ByteBuffer p = ZNet_GetPacketWriteBuffer();
+            ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
+            ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
         } break;
 
         case ZNET_STATE_DISCONNECTED:

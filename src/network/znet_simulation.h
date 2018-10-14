@@ -36,8 +36,14 @@ struct ZNetDelayedPacketStore
     ZNetLagSimInfo info;
     ZNetDelayedPacketHeader* handles[256];
 
-    void Init()
+    void Init(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
     {
+        if (minLagMS > maxLagMS) { minLagMS = maxLagMS; }
+
+        COM_ClampF32(&normalisedPacketLossChance, 0, 0.9f);
+        COM_ClampI32(&minLagMS, 0, 500);
+        COM_ClampI32(&maxLagMS, 0, 1000);
+
         COM_ZeroMemory((u8*)this, sizeof(ZNetDelayedPacketStore));
         info.minMS = 200;
         info.maxMS = 500;

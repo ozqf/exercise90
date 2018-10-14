@@ -260,7 +260,7 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
     g_netPlatform = platform;
 	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
-    g_store.Init();
+    g_store.Init(200, 500, 0.2f);
     printf("Done\n");
 }
 

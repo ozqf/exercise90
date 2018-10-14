@@ -10,6 +10,17 @@ inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
 internal i32 g_z_nan = 0x7F800001;
 inline f32 ZNaN() { return *(float*)&g_z_nan; }
 
+static inline void COM_ClampF32(f32* val, f32 min, f32 max)
+{
+    if (*val < min) { *val = min; }
+    if (*val > max) { *val = max; }
+}
+
+static inline void COM_ClampI32(i32* val, i32 min, i32 max)
+{
+    if (*val < min) { *val = min; }
+    if (*val > max) { *val = max; }
+}
 
 static inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
 {
