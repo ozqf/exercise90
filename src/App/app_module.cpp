@@ -6,7 +6,7 @@
 #include "../Platform/win32_system_include.h"
 #include <stdio.h>
 
-#include "../common/com_module.h"
+#include "../common/com_module.cpp"
 
 // Types/Defines etc
 #include "app_defines.h"

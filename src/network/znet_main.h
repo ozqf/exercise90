@@ -102,6 +102,9 @@ internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes)
     g_store.SendPacket(address, bytes, (u16)numBytes);
 }
 
+/**
+ * Important: Must make sure that the reader is in the correct state for the given message type
+ */
 internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 {
     u8* read = packet->bytes;
@@ -122,13 +125,22 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 
                 // read payload header
                 i32 xor = COM_ReadI32(&read);
-				info.remoteSequence = COM_ReadI32(&read);
+				
                 if (xor != conn->id)
                 {
                     printf("ZNET data packet connId mismatch: got %d expected %d\n", xor, conn->id);
                     return;
                 }
                 info.sender.id = xor;
+                
+                // sequence
+                info.remoteSequence = COM_ReadI32(&read);
+                
+                if (info.remoteSequence > conn->remoteSequence)
+                {
+                    conn->remoteSequence = info.remoteSequence;
+                }
+                //printf("Received seq %d\n", info.remoteSequence);
                 
 				// TODO: Nicer way to calculate remaining bytes:
 				u16 dataSize = (u16)(end - read);
@@ -180,6 +192,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             if (conn->id != clientSalt)
             {
                 printf("CL Client salt mismatch got %d expected %d\n", clientSalt, conn->id);
+                return;
             }
 
             i32 challenge = COM_ReadI32(&read);
@@ -191,15 +204,6 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             i32 response = (clientSalt ^ challenge);
             conn->id = response;
 			net->client2ServerId = response;
-
-            // Replies 
-            //ByteBuffer b = ZNet_GetDataWriteBuffer();
-            //i32 numBytes = ZNet_WriteChallengeResponse(&b, response);
-            //ByteBuffer p = ZNet_GetPacketWriteBuffer();
-            //ZNet_BuildPacket(&p, b.ptrStart, b.Written(), &conn->remoteAddress, 0);
-
-            // TODO: This is unreliable
-            //ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
         } break;
 
         case ZNET_MSG_TYPE_CHALLENGE_RESPONSE:
@@ -207,6 +211,13 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             if (!net->isListening) { return; }
 
             i32 response = COM_ReadI32(&read);
+			
+			ZNetConnection* conn = ZNet_GetConnectionById(net, response);
+			if (conn)
+			{
+				printf("Ignoring outdated connection response from %d\n", response);
+				return;
+			}
             
             ZNetPending* p = ZNet_FindPendingConnection(net, response);
             if (!p)
@@ -214,7 +225,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 printf("SV Found no pending connection for %d\n", response);
                 return;
             }
-            ZNetConnection* conn = ZNet_CreateClientConnection(p->address, 0);
+            conn = ZNet_CreateClientConnection(p->address, 0);
             // TODO: Is id response assigned here or a new one generated
             // when a free connection is assigned...?
             conn->id = response;
@@ -234,7 +245,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         {
             if (net->state != ZNET_STATE_RESPONDING) { return; }
 
-			i32 response = 
+			//i32 response = 
 			// TODO: Not validating XOR!
 			
             printf("CL Conn approval received!\n");
@@ -390,8 +401,8 @@ i32 ZNet_Tick(f32 deltaTime)
                 if (conn->id == 0) { continue; }
 
                 conn->keepAliveSendTicks++;
-				conn->ticksSinceLastMessage++;
-                if (conn->ticksSinceLastMessage > ZNET_CONNECTION_TIMEOUT_TICKS)
+				conn->timeSinceLastMessage += deltaTime;
+                if (conn->ticksSinceLastMessage > ZNET_CONNECTION_TIMEOUT_SECONDS)
                 {
                     printf("  Conn to port %d lost\n", conn->remoteAddress.port);
                     ZNet_DisconnectPeer(net, conn, "Connection lost");

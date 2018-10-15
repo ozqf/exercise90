@@ -11,7 +11,8 @@ struct ZNetLagSimInfo
 
     i32 RollDropPacket()
     {
-        f32 num = COM_Randf32(&this->randomIndex);
+        //f32 num = COM_Randf32(&this->randomIndex);
+        f32 num = COM_STDRandf32();
         //printf("Drop? %.2f vs %.2f\n", num, this->lossNormal);
         return (num < lossNormal);
     }
@@ -82,7 +83,6 @@ struct ZNetDelayedPacketStore
     {
         if (this->info.RollDropPacket())
         {
-            printf("ZNet Sim: Packet dropped\n");
             return;
         }
         i32 i = this->GetFreeHandleIndex();

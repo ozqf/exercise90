@@ -163,8 +163,12 @@ i32 App_Init()
     netFuncs.Read = platform.Net_Read;
     netFuncs.SendTo = platform.Net_SendTo;
     netFuncs.FatalError = App_FatalError;
+
+    ZNetOutputInterface netOutput = {};
+    // TODO: Configure callbacks here!
+
     // TODO: Init net callbacks here
-	ZNet_Init(netFuncs);
+	ZNet_Init(netFuncs, netOutput);
     
     
     Game_Init();
