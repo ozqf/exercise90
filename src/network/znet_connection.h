@@ -95,3 +95,39 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
     }
     return conn;
 }
+
+internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence)
+{
+    u32 index = sequence % ZNET_AWAITING_ACK_CAPACITY;
+    printf("Ack sequence: %d. index: %d\n", sequence, index);
+    conn->awaitingAck[index].sequence = sequence;
+    conn->awaitingAck[index].acked = 0;
+}
+
+internal void ZNet_BuildAcksForPacket(ZNetConnection* conn, u32* ack, u32* ackBits)
+{
+
+}
+
+internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn)
+{
+    for (i32 i = 0; i < ZNET_AWAITING_ACK_CAPACITY; ++i)
+    {
+        printf("%d, ", conn->awaitingAck[i].sequence);
+    }
+    #if 0
+    i32 count = ZNET_AWAITING_ACK_CAPACITY;
+    i32 sequence = conn->remoteSequence;
+    do
+    {
+        i32 index = sequence % ZNET_AWAITING_ACK_CAPACITY;
+        if (!conn->awaitingAck[index].acked)
+        {
+            printf("%d, ", conn->awaitingAck[index].sequence);
+        }
+        
+        --sequence;
+        --count;
+    } while (count);
+    #endif
+}

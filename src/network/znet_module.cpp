@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 #include <ctime>
+
+//////////////////////////////////////////////////////////////
+// External interface
+//////////////////////////////////////////////////////////////
 #include "znet_interface.h"
 
 /*
@@ -45,6 +49,15 @@ App Network layer functionality:
 #define ZNET_CONN_TYPE_CLIENT2SERVER 1
 #define ZNET_CONN_TYPE_SERVER2CLIENT 2
 
+#define ZNET_AWAITING_ACK_CAPACITY 33
+
+struct ZNetAckRecord
+{
+    u32 sequence;
+    i32 acked;
+};
+
+
 // id of 0 == unassigned.
 struct ZNetConnection
 {
@@ -54,7 +67,7 @@ struct ZNetConnection
     i32 type;
     u32 sequence;
     u32 challenge;
-    u32 remoteSequence;
+    u32 remoteSequence; // also next ack
     //i32 salt;
     ZNetAddress remoteAddress;
     u32 flags;
@@ -62,6 +75,14 @@ struct ZNetConnection
     i32 pendingKeepAlive;
     i32 keepAliveSendTicks;
 	i32 ticksSinceLastMessage;
+
+    // Rolling buffer, constantly overwrites old entries
+    // access with sequence % capacity
+    // packet sequences that fall out of this buffer before
+    // ack are considered lost
+    ZNetAckRecord awaitingAck[ZNET_AWAITING_ACK_CAPACITY];
+
+    
 };
 
 #define ZNET_PROTOCOL 90
@@ -186,8 +207,10 @@ struct ZNet
 //////////////////////////////////////////////////////////////
 internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
 internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes);
-u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes);
+internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence);
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
+
+internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn);
 
 #include "znet_simulation.h"
 
