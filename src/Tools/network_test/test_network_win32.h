@@ -36,25 +36,34 @@ Server requires client's 'info'
 Client requires current server state (right now, clients in chatroom)
 
 --- Reliability ---
+> ZNet layer will report packet delivery confirmations but cannot be certain that a
+    packet WASN'T delivered.
+> ZNet only understands packet sequences, and has no concept of individual messages.
+> Application layer works with individual message Ids. Packet ids are used to acknowledge
+    message delivery
+> Application splits data loads into reliable and unreliable messages. Reliable messages first,
+    unreliable second. Unreliable messages have no messageId and are no acked.
 
 Transmission:
-> When sending, save message in 'reliableOutput' buffer, with it's sequence number.
-> Periodically resend items in reliableOutput.
-	(Record packet ids the message was sent in? Can't just record one id if it is resent)
-> When an ack is received, check 
+> Each reliable message increments a messageId.
+> Buffer reliable messages in a 'reliableOutput' buffer.
+> When sending packets, record the packet sequence and an array of all reliable messages in
+    that packet (eg packet 1, messages 1,2,3,4,5 etc)
+> When ZNet confirms a packet was received, all messages in that packet can be removed from
+    the reliable output buffer and the transmission record cleared.
 
 Reception:
-> Start with 'remoteSequence' of 0. The first reliable message sent must be sequence of 1.
+> Start with 'remoteMessageId' of 0. The first reliable message sent must be messageId of 1.
 > When receiving reliable messages, place them in a 'reliableInput' buffer.
-> On Read, look in reliableInput for messages with 'remoteSequence + 1'
+> On Read, look in reliableInput for messages with 'remoteMessageId + 1'
 	> If a message is found, read it and increment remoteSequence by 1.
 	> Repeat until the buffer is empty or no message of remoteSequence + 1 is found.
 > Every outbound packet is marked with the remoteSequence. The sender can then discard
 	all messages before that number.
 */
 
-#define SERVER_TICK_RATE 2
-#define CLIENT_TICK_RATE 2
+#define SERVER_TICK_RATE 0.5f
+#define CLIENT_TICK_RATE 0.5f
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -95,7 +104,7 @@ void TNet_ServerSendChatMsg(i32 senderPublicId, char* msg, u16 numChars)
         if (!cl->inUse) { continue; }
 
         // build packet
-        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
     }
 }
 
@@ -113,7 +122,7 @@ void TNet_ServerSendClientList(i32 senderPublicId, char* msg, u16 numChars)
         if (!cl->inUse) { continue; }
 
         // build packet
-        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
     }
 }
 
@@ -129,7 +138,8 @@ void TNet_ServerSendState()
         //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
         ByteBuffer b = TNET_GetWriteBuffer();
         b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
-        ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written());
+        u32 sendSequence = ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 1);
+        //printf("Sent sequence %d\n", sendSequence);
     }
 }
 
@@ -195,7 +205,15 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
         pos++;
     }
     printf("\nSent %d chars\n", length);
-    ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written());
+    ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written(), 0);
+}
+
+void Test_ClientSendState(i32 connId)
+{
+    ByteBuffer b = TNET_GetWriteBuffer();
+    b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
+    u32 sendSequence = ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 1);
+    //printf("Sent sequence %d\n", sendSequence);
 }
 
 void Test_ClientSendInfo()
@@ -247,6 +265,11 @@ void Test_Client(u16 serverPort, u16 clientPort)
         {
             //system("cls");
             i32 error = ZNet_Tick(tickRateSeconds);
+            if (g_network.server.connId != 0)
+            {
+                Test_ClientSendState(g_network.server.connId);
+            }
+            
             //printf("\r%d", ticks++);
             printf("\r%s", lineClearBuf);
             printf("\r%s", chatMsg);

@@ -50,6 +50,7 @@ App Network layer functionality:
 #define ZNET_CONN_TYPE_SERVER2CLIENT 2
 
 #define ZNET_AWAITING_ACK_CAPACITY 33
+#define ZNET_RECEIVED_CAPACITY 33
 
 struct ZNetAckRecord
 {
@@ -82,7 +83,7 @@ struct ZNetConnection
     // ack are considered lost
     ZNetAckRecord awaitingAck[ZNET_AWAITING_ACK_CAPACITY];
 
-    
+    ZNetAckRecord received[ZNET_RECEIVED_CAPACITY];
 };
 
 #define ZNET_PROTOCOL 90
@@ -211,6 +212,7 @@ internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence);
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
 
 internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn);
+internal void ZNet_BuildAcksForPacket(ZNetConnection* conn, u32* ack, u32* ackBits);
 
 #include "znet_simulation.h"
 
@@ -284,7 +286,12 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
     g_netPlatform = platform;
 	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
-    g_store.Init(200, 500, 0.2f);
+    // testing conditions:
+    //g_store.Init(200, 500, 0.2f);
+    // no lag, no packet loss
+    g_store.Init(0, 0, 0);
+    // no lag, packet loss
+    //g_store.Init(0, 0, 0.2f);
     printf("Done\n");
 }
 

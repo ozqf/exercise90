@@ -68,7 +68,7 @@ struct ZNetOutputInterface
 	void (*DeliveryConfirmed)		(u32 packetNumber);
 };
 
-u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes);
+u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes, i32 printSendInfo);
 
 // info
 void ZNet_Info();

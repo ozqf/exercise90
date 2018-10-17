@@ -99,6 +99,14 @@ static inline i32 COM_ReadI32(u8** target)
     return result;
 }
 
+static inline u32 COM_ReadU32(u8** target)
+{
+	Assert(target != NULL);
+    u32 result = *(u32*)*target;
+    *target += sizeof(u32);
+    return result;
+}
+
 static inline u16 COM_ReadU16(u8** target)
 {
 	Assert(target != NULL);

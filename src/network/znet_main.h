@@ -134,13 +134,16 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 info.sender.id = xor;
                 
                 // sequence
-                info.remoteSequence = COM_ReadI32(&read);
+                info.remoteSequence = COM_ReadU32(&read);
                 
                 if (info.remoteSequence > conn->remoteSequence)
                 {
                     conn->remoteSequence = info.remoteSequence;
                 }
-                //printf("Received seq %d\n", info.remoteSequence);
+                u32 ack = COM_ReadU32(&read);
+                u32 ackBits = COM_ReadU32(&read);
+                printf("Received seq %d. Ack %d, ackBits %d\n",
+                    info.remoteSequence, ack, ackBits);
                 
 				// TODO: Nicer way to calculate remaining bytes:
 				u16 dataSize = (u16)(end - read);

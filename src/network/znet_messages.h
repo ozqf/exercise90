@@ -119,7 +119,7 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	printf("done\n");
 }
 
-u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
+u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 {
 	ZNet* net = &g_net;
 	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
@@ -140,6 +140,11 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	u32 packetNumber = conn->sequence++;
 	b.ptrWrite += COM_WriteU32(packetNumber, b.ptrWrite);
+	u32 ack;
+	u32 ackBits;
+	ZNet_BuildAcksForPacket(conn, &ack, &ackBits);
+	b.ptrWrite += COM_WriteU32(ack, b.ptrWrite);
+	b.ptrWrite += COM_WriteU32(ackBits, b.ptrWrite);
 	
 	// copy payload, write checksum, send, return sequence for external tracking
 	b.ptrWrite += COM_COPY(data, b.ptrWrite, numBytes);
@@ -149,9 +154,16 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes)
 
 	ZNet_Send(&conn->remoteAddress, b.ptrStart, b.Written());
 	ZNet_RecordPacketTransmission(conn, packetNumber);
-	printf("\n");
-	ZNet_PrintAwaitingAcks(conn);
-	printf("\n");
+	switch (printSendInfo)
+	{
+		case 1:
+		{
+			printf("Sent seq %d, ack %d, ackBits %d\n", conn->sequence - 1, ack, ackBits);
+		} break;
+	}
+	//printf("\n");
+	//ZNet_PrintAwaitingAcks(conn);
+	//printf("\n");
 	
 	return packetNumber;
 }

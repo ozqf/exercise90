@@ -46,9 +46,9 @@ struct ZNetDelayedPacketStore
         COM_ClampI32(&maxLagMS, 0, 1000);
 
         COM_ZeroMemory((u8*)this, sizeof(ZNetDelayedPacketStore));
-        info.minMS = 200;
-        info.maxMS = 500;
-        info.lossNormal = 0.2f;
+        info.minMS = minLagMS;
+        info.maxMS = maxLagMS;
+        info.lossNormal = normalisedPacketLossChance;
     }
 
     i32 GetFreeHandleIndex()
