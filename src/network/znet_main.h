@@ -128,7 +128,8 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 				
                 if (xor != conn->id)
                 {
-                    printf("ZNET data packet connId mismatch: got %d expected %d\n", xor, conn->id);
+                    printf("ZNET data packet connId mismatch: got %d expected %d\n",
+                        xor, conn->id);
                     return;
                 }
                 info.sender.id = xor;
@@ -142,9 +143,10 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 }
                 u32 ack = COM_ReadU32(&read);
                 u32 ackBits = COM_ReadU32(&read);
-                printf("Received seq %d. Ack %d, ackBits %d\n",
+                printf("Received seq %u. Ack %u, ackBits %u\n",
                     info.remoteSequence, ack, ackBits);
-                
+                ZNet_CheckAcks(conn, ack, ackBits);
+                ZNet_RecordPacketForAck(conn, info.remoteSequence);
 				// TODO: Nicer way to calculate remaining bytes:
 				u16 dataSize = (u16)(end - read);
 				g_output.DataPacketReceived(&info, read, dataSize);
@@ -216,31 +218,34 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             i32 response = COM_ReadI32(&read);
 			
 			ZNetConnection* conn = ZNet_GetConnectionById(net, response);
-			if (conn)
+			if (!conn)
 			{
-				printf("Ignoring outdated connection response from %d\n", response);
-				return;
+                // close pending connection
+                ZNetPending* p = ZNet_FindPendingConnection(net, response);
+                if (!p)
+                {
+                    printf("SV Found no pending connection for %d\n", response);
+                    return;
+                }
+                conn = ZNet_CreateClientConnection(p->address, 0);
+                // TODO: Is id response assigned here or a new one generated
+                // when a free connection is assigned...?
+                conn->id = response;
+                ZNet_ClosePendingConnection(net, p);
+
+                ZNet_SendConnectionApproved(net, conn);
+			
+			    ZNetConnectionInfo info = {};
+			    info.address = conn->remoteAddress;
+			    info.id = conn->id;
+			    g_output.ConnectionAccepted(&info);
 			}
-            
-            ZNetPending* p = ZNet_FindPendingConnection(net, response);
-            if (!p)
+            else
             {
-                printf("SV Found no pending connection for %d\n", response);
-                return;
+                // resend join confirmation
+                ZNet_SendConnectionApproved(net, conn);
             }
-            conn = ZNet_CreateClientConnection(p->address, 0);
-            // TODO: Is id response assigned here or a new one generated
-            // when a free connection is assigned...?
-            conn->id = response;
-            ZNet_ClosePendingConnection(net, p);
             
-            ZNet_SendConnectionApproved(net, conn);
-			
-			ZNetConnectionInfo info = {};
-			info.address = conn->remoteAddress;
-			info.id = conn->id;
-			g_output.ConnectionAccepted(&info);
-			
             printf("SV Response received: %d Accepted connection\n", response);
         } break;
 

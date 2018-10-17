@@ -73,6 +73,7 @@ u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes, i32 printSendInfo);
 // info
 void ZNet_Info();
 i32 ZNet_IsServer();
+void ZNet_RunTests();
 
 // system lifetime
 void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output);

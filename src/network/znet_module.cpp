@@ -83,7 +83,8 @@ struct ZNetConnection
     // ack are considered lost
     ZNetAckRecord awaitingAck[ZNET_AWAITING_ACK_CAPACITY];
 
-    ZNetAckRecord received[ZNET_RECEIVED_CAPACITY];
+    // packets received for constructing ack bits
+    u32 received[ZNET_RECEIVED_CAPACITY];
 };
 
 #define ZNET_PROTOCOL 90
@@ -212,7 +213,8 @@ internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence);
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
 
 internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn);
-internal void ZNet_BuildAcksForPacket(ZNetConnection* conn, u32* ack, u32* ackBits);
+internal u32 ZNet_BuildAckBits(ZNetConnection* conn, u32 remoteSequence);
+internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits);
 
 #include "znet_simulation.h"
 
@@ -276,6 +278,7 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 #include "znet_connection.h"
 #include "znet_pending.h"
 #include "znet_main.h"
+#include "znet_tests.h"
 
 ///////////////////////////////////////////////////
 // system lifetime
@@ -289,9 +292,9 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
     // testing conditions:
     //g_store.Init(200, 500, 0.2f);
     // no lag, no packet loss
-    g_store.Init(0, 0, 0);
-    // no lag, packet loss
-    //g_store.Init(0, 0, 0.2f);
+    //g_store.Init(0, 0, 0);
+    // no lag, biblical packet loss
+    g_store.Init(0, 0, 0.9f);
     printf("Done\n");
 }
 

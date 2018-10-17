@@ -68,6 +68,7 @@ internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
             
             conn->id = newId;
             conn->publicId = net->nextPublicClientId;
+            conn->sequence = 1;
             net->nextPublicClientId++;
             printf("ZNet got free conn for public Id %d\n", conn->publicId);
             return conn;
@@ -104,17 +105,76 @@ internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence)
     conn->awaitingAck[index].acked = 0;
 }
 
-internal void ZNet_BuildAcksForPacket(ZNetConnection* conn, u32* ack, u32* ackBits)
+internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
 {
-    *ack = conn->remoteSequence;
-    *ackBits = 0xFFFFFFFF;
+    //printf("Checking ack %u and ackBits %u\n", ack, ackBits);
+    u32 index = ack % ZNET_AWAITING_ACK_CAPACITY;
+    if (conn->awaitingAck[index].sequence == ack
+        && conn->awaitingAck[index].acked == 0)
+    {
+        conn->awaitingAck[index].acked = 1;
+        // boardcast ack received!
+        printf("  %d acked!\n", ack);
+    }
+    // Run through awaiting acks. If ack is on matching sequence, check ack'd is true
+    u32 bit = 0;
+    ack -= 1;
+    while (bit < 32)
+    {
+        if (ackBits & (1 << bit))
+        {
+            index = ack % ZNET_RECEIVED_CAPACITY;
+            //printf("Checking bit %d at index %d\n", bit, index);
+            //printf("  seq %u acked %d",
+            //    conn->awaitingAck[index].sequence, conn->awaitingAck[index].acked);
+            if (conn->awaitingAck[index].sequence == ack
+                && conn->awaitingAck[index].acked == 0)
+            {
+                conn->awaitingAck[index].acked = 1;
+                // boardcast ack received!
+                printf("  %d acked!\n", ack);
+            }
+        }
+        ack--;
+        bit++;
+
+    }
+}
+
+internal void ZNet_RecordPacketForAck(ZNetConnection* conn, u32 remoteSequence)
+{
+    u32 index = remoteSequence % ZNET_RECEIVED_CAPACITY;
+    conn->received[index] = remoteSequence;
+}
+
+internal u32 ZNet_BuildAckBits(ZNetConnection* conn, u32 remoteSequence)
+{
+    #if 1
+    u32 ackBits = 0;
+    i32 bit = 0;
+    u32 expectedSequence = remoteSequence - 1;
+    while (bit < 32)
+    {
+        i32 index = expectedSequence % ZNET_RECEIVED_CAPACITY;
+        
+        if (conn->received[index] == expectedSequence
+            && expectedSequence != 0)
+        {
+            ackBits |= (1 << bit);
+            //printf("Sequence %u Index: %d bit %d\n", expectedSequence, index, bit);
+        }
+        bit++;
+        expectedSequence--;
+    }
+    return ackBits;
+    #endif
 }
 
 internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn)
 {
     for (i32 i = 0; i < ZNET_AWAITING_ACK_CAPACITY; ++i)
     {
-        printf("%d, ", conn->awaitingAck[i].sequence);
+        printf("%u, ", conn->awaitingAck[i].sequence);
     }
     #if 0
     i32 count = ZNET_AWAITING_ACK_CAPACITY;
@@ -131,6 +191,14 @@ internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn)
         --count;
     } while (count);
     #endif
+}
+
+internal void ZNet_PrintReceived(ZNetConnection* conn)
+{
+    for (i32 i = 0; i < ZNET_RECEIVED_CAPACITY; ++i)
+    {
+        printf("%u, ", conn->received[i]);
+    }
 }
 
 void DeleteMe()

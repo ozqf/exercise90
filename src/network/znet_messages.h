@@ -140,9 +140,9 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	u32 packetNumber = conn->sequence++;
 	b.ptrWrite += COM_WriteU32(packetNumber, b.ptrWrite);
-	u32 ack;
-	u32 ackBits;
-	ZNet_BuildAcksForPacket(conn, &ack, &ackBits);
+	u32 ack = conn->remoteSequence;
+	u32 ackBits = ZNet_BuildAckBits(conn, ack);
+	
 	b.ptrWrite += COM_WriteU32(ack, b.ptrWrite);
 	b.ptrWrite += COM_WriteU32(ackBits, b.ptrWrite);
 	
@@ -158,7 +158,7 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 	{
 		case 1:
 		{
-			printf("Sent seq %d, ack %d, ackBits %d\n", conn->sequence - 1, ack, ackBits);
+			printf("Attempting send of seq %u, ack %u, ackBits %u\n", conn->sequence - 1, ack, ackBits);
 		} break;
 	}
 	//printf("\n");

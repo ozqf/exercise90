@@ -62,8 +62,8 @@ Reception:
 	all messages before that number.
 */
 
-#define SERVER_TICK_RATE 0.5f
-#define CLIENT_TICK_RATE 0.5f
+#define SERVER_TICK_RATE 2
+#define CLIENT_TICK_RATE 2
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -138,7 +138,7 @@ void TNet_ServerSendState()
         //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
         ByteBuffer b = TNET_GetWriteBuffer();
         b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
-        u32 sendSequence = ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 1);
+        u32 sendSequence = ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
         //printf("Sent sequence %d\n", sendSequence);
     }
 }
@@ -212,7 +212,7 @@ void Test_ClientSendState(i32 connId)
 {
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
-    u32 sendSequence = ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 1);
+    u32 sendSequence = ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 0);
     //printf("Sent sequence %d\n", sendSequence);
 }
 
@@ -498,6 +498,10 @@ void Test_Win32(i32 argc, char* argv[])
 	else if (!COM_CompareStrings(mode, "rel"))
 	{
 		TNet_TestReliability();
+	}
+    else if (!COM_CompareStrings(mode, "znet"))
+	{
+		ZNet_RunTests();
 	}
     
     #if 1
