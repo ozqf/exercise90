@@ -143,8 +143,8 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 }
                 u32 ack = COM_ReadU32(&read);
                 u32 ackBits = COM_ReadU32(&read);
-                printf("Received seq %u. Ack %u, ackBits %u\n",
-                    info.remoteSequence, ack, ackBits);
+                //printf("Received seq %u. Ack %u, ackBits %u\n",
+                //    info.remoteSequence, ack, ackBits);
                 ZNet_CheckAcks(conn, ack, ackBits);
                 ZNet_RecordPacketForAck(conn, info.remoteSequence);
 				// TODO: Nicer way to calculate remaining bytes:

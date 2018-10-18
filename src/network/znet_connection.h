@@ -114,7 +114,8 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
     {
         conn->awaitingAck[index].acked = 1;
         // boardcast ack received!
-        printf("  %d acked!\n", ack);
+        //printf("  %d acked!\n", ack);
+        g_output.DeliveryConfirmed(ack);
     }
     // Run through awaiting acks. If ack is on matching sequence, check ack'd is true
     u32 bit = 0;
@@ -132,7 +133,8 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
             {
                 conn->awaitingAck[index].acked = 1;
                 // boardcast ack received!
-                printf("  %d acked!\n", ack);
+                //printf("  %d acked!\n", ack);
+                g_output.DeliveryConfirmed(ack);
             }
         }
         ack--;

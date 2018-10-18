@@ -164,7 +164,7 @@ void TNet_TestReliability()
 	i32 count = g_reliableOutput.ClearItemAndAllPrevious(4);
 	printf("Cleared %d sent item\n", count);
 	g_reliableOutput.Print("Output");
-
+	#if 0
 	printf("--- Ackbits test ---\n");
 	i32 ack = 16;
 	u32 bits = 0;
@@ -179,4 +179,5 @@ void TNet_TestReliability()
 	printf("Ack result: %d\n", result);
 	result = TNet_CheckForAck(ack, bits, 13);
 	printf("Ack result: %d\n", result);
+	#endif
 }

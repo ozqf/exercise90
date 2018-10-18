@@ -290,11 +290,11 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
 	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
     // testing conditions:
-    //g_store.Init(200, 500, 0.2f);
+    g_store.Init(200, 400, 0.2f);
     // no lag, no packet loss
     //g_store.Init(0, 0, 0);
     // no lag, biblical packet loss
-    g_store.Init(0, 0, 0.9f);
+    //g_store.Init(0, 0, 0.1f);
     printf("Done\n");
 }
 

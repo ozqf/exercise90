@@ -12,6 +12,7 @@
 
 #include "test_network_types.h"
 #include "test_network_reliability.h"
+#include "test_network_buffer.h"
 
 #if 1
 #define WIN32_LEAN_AND_MEAN
@@ -60,6 +61,11 @@ Reception:
 	> Repeat until the buffer is empty or no message of remoteSequence + 1 is found.
 > Every outbound packet is marked with the remoteSequence. The sender can then discard
 	all messages before that number.
+
+Storage:
+Application layer requires a mechanism to buffer reliable network messages both for
+retransmission and in-order execution.
+
 */
 
 #define SERVER_TICK_RATE 2
@@ -380,6 +386,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     u8* read = bytes;
     u8 type = COM_ReadByte(&read);
+    printf("TNET: Received sequence %d\n", info->remoteSequence);
     //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
     switch (type)
     {
