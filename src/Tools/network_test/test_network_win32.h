@@ -11,8 +11,8 @@
 #include "../../network/znet_interface.h"
 
 #include "test_network_types.h"
-#include "test_network_reliability.h"
 #include "test_network_buffer.h"
+#include "test_network_reliability.h"
 
 #if 1
 #define WIN32_LEAN_AND_MEAN

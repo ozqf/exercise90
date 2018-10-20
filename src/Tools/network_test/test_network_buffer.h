@@ -2,76 +2,132 @@
 
 #include "../../common/com_module.h"
 
-/*
-Required functions for storing messages
-> Push a pending message into the buffer
-> Scan buffer and copy out selected messages
-> Pop from the buffer, collapsing the space down
-> Errors if no space is left
-
-> NULL where a header should be is the end of the buffer
-*/
-
-u8 g_buffer[2048];
-
 struct MessageHeader
 {
     u32 id;
     u32 size;
 };
 
-struct MessageBuffer
+// Test data objects to store
+struct TestMsg1
 {
-    u8* start;
-    u32 capacity;
-    u8* write;
-
-    void Clear()
-    {
-        COM_ZeroMemory(this->start, this->capacity);
-    }
-
-    u32 Space()
-    {
-        u32 written = this->write - this->start;
-        return capacity - written;
-    }
-
-    void Add(u32 id, u8* bytes, u32 size)
-    {
-        Assert(this->Space() > size + sizeof(MessageHeader));
-        this->write += COM_WriteU32(id, this->write);
-        this->write += COM_WriteU32(size, this->write);
-        this->write += COM_COPY(bytes, this->write, size);
-    }
-
-    void Remove(u32 id)
-    {
-        u8* read = this->start;
-        u8 reading = true;
-        while (reading)
-        {
-            MessageHeader h = {};
-            if (h.id == 0) { return; }
-            read += COM_COPY_STRUCT(read, &h, MessageHeader);
-            if (h.id == id)
-            {
-                // Delete and collapse!
-            }
-            // Jump to next message if there is one
-            read += h.size;
-        }
-    }
+    i32 member1;
+    i32 member2;
+    i32 member3;
 };
 
-void Test_BufferMessage(u32 messageId, u8* bytes, u16 numBytes)
+struct TestMsg2
 {
-    // Write into buffer
+    i32 member1;
+    i32 member2;
+    f32 pos[3];
+};
+
+struct TestMsg3
+{
+    i32 member1;
+    i32 member2;
+};
+
+void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
+{
+    Assert(b->Space() > numBytes)
+    MessageHeader h;
+    h.id = msgId;
+    h.size = numBytes;
+    b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(MessageHeader));
+    b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
-//void Test_CopyMessages(u8* buffer, )
 
-void Test_PopMessage()
+i32 Buf_InspectionCallback(u32 type, u8* bytes, u32 numBytes)
 {
+    if (type == 0)
+    {
+        return 0;
+    }
+    printf("Object type %d bytes %d at %d\n", type, numBytes, (u32)bytes);
+    return 1;
+}
 
+i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
+{
+    if (type == 2)
+    {
+        printf("Collapse type %d (%d bytes\n", type, numBytes);
+        return 2;
+    }
+    else if (type == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        printf("No collapse\n");
+        return 1;
+    }
+}
+
+// callback function must have the signature (i32)(*)(u32 type, u8* bytes, u32 numBytes);
+#define PARSE_BUFFER(bytes, numBytes, Callback) \
+{ \
+    u8* read = bytes; \
+    u8* end = read + numBytes; \
+    while (read < end) \
+    { \
+        MessageHeader h; \
+        read += COM_COPY_STRUCT(read, &h, MessageHeader); \
+        i32 result = Callback##(h.id, read, h.size); \
+        if (result == 0) \
+        { \
+            printf("  End of Buffer\n"); \
+            break; \
+        } \
+        else if (result == 2) \
+        { \
+            u32 space = sizeof(MessageHeader) + h.size; \
+            u8* copySrc = read + h.size; \
+            u8* copyDest = read - sizeof(MessageHeader); \
+            u32 bytesToCopy = (end - copySrc); \
+            printf("Copy back %d bytes by %d\n", bytesToCopy, space); \
+            COM_COPY(copySrc, copyDest, bytesToCopy); \
+            read = copyDest; \
+        } \
+        else \
+        { \
+            read += h.size; \
+        } \
+    } \
+}
+
+MessageHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }
+
+global_variable u8 g_msgBuffer[1024];
+
+void Test_NetBuffer()
+{
+    TestMsg1 t1 = {};
+    TestMsg2 t2 = {};
+    TestMsg3 t3 = {};
+
+    // Fill buffer with random stuff
+    ByteBuffer b = Buf_FromBytes(g_msgBuffer, 1024);
+    Buf_WriteMessage(&b, 1, (u8*)&t1, sizeof(t1));
+    Buf_WriteMessage(&b, 2, (u8*)&t2, sizeof(t2));
+    Buf_WriteMessage(&b, 3, (u8*)&t2, sizeof(t3));
+    Buf_WriteMessage(&b, 1, (u8*)&t1, sizeof(t1));
+    Buf_WriteMessage(&b, 2, (u8*)&t2, sizeof(t2));
+    Buf_WriteMessage(&b, 3, (u8*)&t2, sizeof(t3));
+    Buf_WriteMessage(&b, 1, (u8*)&t1, sizeof(t1));
+    printf("Wrote %d bytes\n", b.Written());
+    //Buf_InspectCommands(b.ptrStart, b.Written());
+    // scan, collapse all '2' messages, scan again
+    printf("=== SCAN ===\n");
+    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_InspectionCallback);
+    printf("  Space: %d\n", b.Space());
+    printf("=== COLLAPSE ===\n");
+    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_CollapseCallback);
+    printf("=== SCAN AGAIN ===\n");
+    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_InspectionCallback);
+    printf("  Space: %d\n", b.Space());
 }

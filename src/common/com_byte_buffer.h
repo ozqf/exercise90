@@ -15,6 +15,10 @@ struct ByteBuffer
     {
         return this->ptrWrite - this->ptrStart;
     }
+    inline u32 Space()
+    {
+        return capacity - (ptrWrite - ptrStart);
+    }
 };
 
 static inline i32 Buf_BytesWritten(ByteBuffer* b)

@@ -131,6 +131,8 @@ i32 TNet_CheckForAck(u32 ack, u32 ackBits, u32 sequence)
 
 void TNet_TestReliability()
 {
+	Test_NetBuffer();
+	#if 0
 	// Parse input tests:
 	// - advance reliable input buffer until a gap or the end of the buffer
 	printf("--- Input Test 1 ---\n");
@@ -179,5 +181,7 @@ void TNet_TestReliability()
 	printf("Ack result: %d\n", result);
 	result = TNet_CheckForAck(ack, bits, 13);
 	printf("Ack result: %d\n", result);
+	#endif
+
 	#endif
 }
