@@ -57,10 +57,10 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
         printf("Collapse type %d (%d bytes\n", type, numBytes);
         return 2;
     }
-    else if (type == 0)
-    {
-        return 0;
-    }
+    // else if (type == 0)
+    // {
+    //     return 0;
+    // }
     else
     {
         printf("No collapse\n");
@@ -69,10 +69,10 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
 }
 
 // callback function must have the signature (i32)(*)(u32 type, u8* bytes, u32 numBytes);
-#define PARSE_BUFFER(bytes, numBytes, Callback) \
+#define PARSE_BUFFER(ptr2ptrStart, ptr2ptrEnd, Callback) \
 { \
-    u8* read = bytes; \
-    u8* end = read + numBytes; \
+    u8* read = *ptr2ptrStart; \
+    u8* end = *ptr2ptrEnd; \
     while (read < end) \
     { \
         MessageHeader h; \
@@ -92,12 +92,14 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
             printf("Copy back %d bytes by %d\n", bytesToCopy, space); \
             COM_COPY(copySrc, copyDest, bytesToCopy); \
             read = copyDest; \
+            end -= space; \
         } \
         else \
         { \
             read += h.size; \
         } \
     } \
+    *ptr2ptrEnd = end; \
 }
 
 MessageHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }
@@ -123,11 +125,11 @@ void Test_NetBuffer()
     //Buf_InspectCommands(b.ptrStart, b.Written());
     // scan, collapse all '2' messages, scan again
     printf("=== SCAN ===\n");
-    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_InspectionCallback);
-    printf("  Space: %d\n", b.Space());
+    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
+    printf("  Written %d, Space: %d\n", b.Written(), b.Space());
     printf("=== COLLAPSE ===\n");
-    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_CollapseCallback);
+    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_CollapseCallback);
     printf("=== SCAN AGAIN ===\n");
-    PARSE_BUFFER(b.ptrStart, b.Written(), Buf_InspectionCallback);
-    printf("  Space: %d\n", b.Space());
+    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
+    printf("  Written %d, Space: %d\n", b.Written(), b.Space());
 }
