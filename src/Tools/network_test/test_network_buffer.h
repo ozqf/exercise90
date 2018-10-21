@@ -39,6 +39,59 @@ void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
+u8* Buf_SearchForMessageId(u32 messsu8* bytes, u16 numBytes)
+{
+    u8* read = bytes;
+    u8* end = read + numBytes;
+    while (read < end)
+    {
+        MessageHeader h;
+        read += COM_COPY_STRUCT(read, &h, MessageHeader);
+        if ()
+    }
+}
+
+void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
+{
+    // iterate for messages
+    // > if messageId <= stream input sequence ignore
+    // > if messageId > input sequence, copy to input buffer
+    u8* read = ptr;
+    u8* end = read + numBytes;
+    while(read < end)
+    {
+        u32 messageId = COM_ReadU32(&read);
+        u8 msgType = COM_ReadByte(&read);
+        //u32 message = COM_ReadU32(&read);
+        // Must get msg size regardless of whether command will be read
+        // as it must be skipped over in either case
+        u16 size = Net_MeasureMessageBytes(msgType, read);
+        printf(" Id: %d type %d size: %d\n", messageId, msgType, size);
+        if (messageId <= s->inputSequence)
+        {
+            read += size;
+            continue;
+        }
+        else
+        {
+            // step back to include type byte
+            u8* msg = read - 1;
+            Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
+            read += size;
+        }
+    }
+}
+
+i32 Buf_InspectionCallback2(u32 type, u8* bytes, u32 numBytes)
+{
+    if (type == 0)
+    {
+        return 0;
+    }
+    printf("Object type %d bytes %d at %d\n", type, numBytes, (u32)bytes);
+    return 1;
+}
+
 i32 Buf_InspectionCallback(u32 type, u8* bytes, u32 numBytes)
 {
     if (type == 0)
@@ -100,6 +153,8 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
     } \
     *ptr2ptrEnd = end; \
 }
+
+//u32 Stream_Find
 
 void Stream_WriteToOutput(ReliableStream* stream, u8* bytes, u32 numBytes)
 {

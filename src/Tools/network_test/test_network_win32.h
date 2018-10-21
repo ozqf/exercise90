@@ -11,6 +11,7 @@
 #include "../../network/znet_interface.h"
 
 #include "test_network_types.h"
+#include "test_network_messages.h"
 #include "test_network_buffer.h"
 #include "test_network_reliability.h"
 
@@ -66,6 +67,12 @@ Storage:
 Application layer requires a mechanism to buffer reliable network messages both for
 retransmission and in-order execution.
 
+Stream
+> WriteToInput
+> WriteToOutput
+> ReadInput
+> WriteOutput
+
 Packet structure
 > (u16) bytes of reliable messages
 > (u16) bytes of unreliable messages
@@ -93,12 +100,6 @@ global_variable TestGameNetwork g_network = {};
 
 #define DATA_BUFFER_SIZE 1024
 global_variable u8 g_dataBuffer[DATA_BUFFER_SIZE];
-
-#define TNET_MSG_TYPE_TEST 1
-#define TNET_MSG_TYPE_C2S_CHAT 2
-#define TNET_MSG_TYPE_C2S_INFO 3
-#define TNET_MSG_TYPE_S2C_CHAT 4
-#define TNET_MSG_TYPE_S2C_CLIENT_LIST 5
 
 
 ByteBuffer TNET_GetWriteBuffer()
@@ -183,7 +184,12 @@ void TNet_ServerSendState()
         b.ptrWrite += COM_WriteU32(message2Id, b.ptrWrite);
         b.ptrWrite += COM_WriteU32(message2, b.ptrWrite);
 
-        u32 sendSequence = ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
+        u32 sendSequence = ZNet_SendData(
+            cl->connId,
+            b.ptrStart,
+            (u16)b.Written(),
+            0
+        );
 
         //printf("Sent sequence %d\n", sendSequence);
     }
@@ -349,7 +355,10 @@ void Test_Client(u16 serverPort, u16 clientPort)
         while (!_kbhit())
         {
             //system("cls");
+            // update connections
             i32 error = ZNet_Tick(tickRateSeconds);
+            // read
+            
             if (g_network.server.connId != 0)
             {
                 Test_ClientSendState(g_network.server.connId);
@@ -461,8 +470,24 @@ void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
     if (!g_network.isServer) { g_network.isActive = 0; }
 }
 
+
+
+/*
+For reliable messages this is where they are copied into their respective input buffers
+*/
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
+    ReliableStream* stream;
+    if (g_network.isServer)
+    {
+        TestClient* cl = g_network.GetClient(info->sender.id);
+        stream = &cl->reliableStream;
+    }
+    else
+    {
+        stream = &g_network.server.reliableStream;
+    }
+
     u8* read = bytes;
     u16 reliableBytes = COM_ReadU16(&read);
     u16 unreliableBytes = COM_ReadU16(&read);
@@ -471,13 +496,18 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         "TNET: Received sequence %d bytes - reliable: %d unreliable %d\n",
         info->remoteSequence, reliableBytes, unreliableBytes);
     //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
+    Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
+    #if 0
+    // Reliable messages
     u8* end = bytes + sizeof(u32) + reliableBytes;
     while (read < end)
     {
         u32 messageId = COM_ReadU32(&read);
         u32 message = COM_ReadU32(&read);
         printf(" Id: %d Message: %X\n", messageId, message);
+        // Copy into reliable input buffer
     }
+    #endif
     #if 0
     switch (type)
     {
