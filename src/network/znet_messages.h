@@ -119,6 +119,18 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	printf("done\n");
 }
 
+// TODO: This is probably bad! We are assuming the packet sequence retrieved
+// here will be the next one sent!
+// Chicken-and-egg problem: to retrieve the transmission record to fill in
+// We need the sequence number of the packet. But ZNet only tells the caller
+// AFTER the caller has invoked ZNet_SendData
+u32 ZNet_GetNextSequenceNumber(i32 connId)
+{
+	ZNetConnection* conn = ZNet_GetConnectionById(&g_net, connId);
+	NET_ASSERT(conn, "Found no conn for next sequence\n");
+	return conn->sequence;
+}
+
 u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 {
 	ZNet* net = &g_net;

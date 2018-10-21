@@ -109,7 +109,7 @@ void Stream_WriteToOutput(ReliableStream* stream, u8* bytes, u32 numBytes)
 }
 
 // Write each message: output = messageId + data (no size recorded here)
-u32 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
+u16 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
 {
     u8* write = buffer;
     u8* read = stream->outputBuffer.ptrStart;
@@ -126,7 +126,7 @@ u32 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
         // data
         write += COM_COPY(src, write, h.size);
     }
-    return write - buffer;
+    return (u16)(write - buffer);
 }
 
 MessageHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }

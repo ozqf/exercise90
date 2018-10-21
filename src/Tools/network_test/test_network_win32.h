@@ -66,8 +66,20 @@ Storage:
 Application layer requires a mechanism to buffer reliable network messages both for
 retransmission and in-order execution.
 
-On send:
-
+Packet structure
+> (u16) bytes of reliable messages
+> (u16) bytes of unreliable messages
+> Reliable messages:
+    > messageId (u32)
+    > Message
+    > messageId (u32)
+    > Message
+    > ...etc
+> Unreliable Messages
+    > Message
+    > Message
+    > Message
+    > ..etc
 */
 
 #define SERVER_TICK_RATE 10
@@ -100,6 +112,8 @@ ByteBuffer TNET_GetWriteBuffer()
 //////////////////////////////////////////////////////////////////////
 void TNet_ServerSendChatMsg(i32 senderPublicId, char* msg, u16 numChars)
 {
+    // TODO: Buffer chat message into client output.
+    #if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_S2C_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteI32(senderPublicId, b.ptrWrite);
@@ -114,10 +128,12 @@ void TNet_ServerSendChatMsg(i32 senderPublicId, char* msg, u16 numChars)
         // build packet
         ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
     }
+    #endif
 }
 
 void TNet_ServerSendClientList(i32 senderPublicId, char* msg, u16 numChars)
 {
+    #if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_S2C_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteI32(senderPublicId, b.ptrWrite);
@@ -132,6 +148,12 @@ void TNet_ServerSendClientList(i32 senderPublicId, char* msg, u16 numChars)
         // build packet
         ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
     }
+    #endif
+}
+
+void TNet_SendKeepAlivePacket(i32 connId)
+{
+    
 }
 
 void TNet_ServerSendState()
@@ -144,9 +166,25 @@ void TNet_ServerSendState()
         // build packet
         //COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
         //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+        //u32 messageId = 0xABCDABCD;
+        u32 message1 = 0xDEADBEEF;
+        u32 message2 = 0xABCDDCBA;
+        u32 message1Id = cl->reliableStream.outputSequence++;
+        u32 message2Id = cl->reliableStream.outputSequence++;
+        
+        u16 messageBytes = 4 * sizeof(u32);
         ByteBuffer b = TNET_GetWriteBuffer();
-        b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
+        // packet header
+        b.ptrWrite += COM_WriteU16(messageBytes, b.ptrWrite);
+        b.ptrWrite += COM_WriteU16(0, b.ptrWrite);
+        // message sequence + message itself
+        b.ptrWrite += COM_WriteU32(message1Id, b.ptrWrite);
+        b.ptrWrite += COM_WriteU32(message1, b.ptrWrite);
+        b.ptrWrite += COM_WriteU32(message2Id, b.ptrWrite);
+        b.ptrWrite += COM_WriteU32(message2, b.ptrWrite);
+
         u32 sendSequence = ZNet_SendData(cl->connId, b.ptrStart, (u16)b.Written(), 0);
+
         //printf("Sent sequence %d\n", sendSequence);
     }
 }
@@ -222,13 +260,36 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
     //Stream_WriteToOutput(&g_network.server.reliableStream, b.ptrStart, b.Written());
 }
 
+/*
+Writing a packet:
+> Requires packet sequence number to create transmission record
+> WriteReliable messages, filling in transmission record message ids.
+> Set reliable message bytes written in packet header.
+> Write unreliable messages
+> Set unreliable message bytes written in packet header
+*/
 void Client_Transmit()
 {
     ByteBuffer b = TNET_GetWriteBuffer();
+    u32 sequence = ZNet_GetNextSequenceNumber(g_network.server.connId);
+    Net_FindTransmissionRecord(g_transmissions, sequence);
+
+    // step forward over header
+    u16 reliableBytes = 0, unreliableBytes = 0;
+    u8* headerWrite = b.ptrWrite;
+    b.ptrWrite += sizeof(u16) * 2;
+
     // Write reliable messages
-    b
+    reliableBytes = Stream_WriteReliableOutput(&g_network.server.reliableStream, b.ptrWrite, b.Space());
+    b.ptrWrite += reliableBytes;
 
     // Write unreliable messages
+
+    // Fill in header, send
+    headerWrite += COM_WriteU16(reliableBytes, headerWrite);
+    headerWrite += COM_WriteU16(unreliableBytes, headerWrite);
+    u32 bytesWritten = b.Written();
+    
 }
 
 void Test_ClientSendState(i32 connId)
@@ -403,9 +464,21 @@ void TNet_ConnectionDropped(ZNetConnectionInfo* conn)
 void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     u8* read = bytes;
-    u8 type = COM_ReadByte(&read);
-    //printf("TNET: Received sequence %d\n", info->remoteSequence);
+    u16 reliableBytes = COM_ReadU16(&read);
+    u16 unreliableBytes = COM_ReadU16(&read);
+    //u8 type = COM_ReadByte(&read);
+    printf(
+        "TNET: Received sequence %d bytes - reliable: %d unreliable %d\n",
+        info->remoteSequence, reliableBytes, unreliableBytes);
     //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
+    u8* end = bytes + sizeof(u32) + reliableBytes;
+    while (read < end)
+    {
+        u32 messageId = COM_ReadU32(&read);
+        u32 message = COM_ReadU32(&read);
+        printf(" Id: %d Message: %X\n", messageId, message);
+    }
+    #if 0
     switch (type)
     {
         case 1:
@@ -448,6 +521,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             printf("%d says: %s\n", senderPublicId, buf);
         } break;
     }
+    #endif
 }
 
 void TNet_DeliveryConfirmed(u32 packetNumber)

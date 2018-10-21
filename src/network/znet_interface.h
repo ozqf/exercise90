@@ -74,6 +74,7 @@ struct ZNetOutputInterface
 };
 
 u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes, i32 printSendInfo);
+u32 ZNet_GetNextSequenceNumber(i32 connId);
 
 // info
 void ZNet_Info();
