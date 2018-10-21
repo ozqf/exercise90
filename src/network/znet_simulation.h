@@ -4,6 +4,7 @@
 
 struct ZNetLagSimInfo
 {
+    i32 mode;
     i32 minMS;
     i32 maxMS;
     f32 lossNormal;

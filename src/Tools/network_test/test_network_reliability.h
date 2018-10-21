@@ -2,7 +2,7 @@
 
 #include "../../common/com_module.h"
 
-#define MAX_PACKET_TRANSMISSION_MESSAGES 255
+#define MAX_PACKET_TRANSMISSION_MESSAGES 32
 struct PacketTransmissionRecord
 {
 	u32 sequence;
@@ -10,6 +10,27 @@ struct PacketTransmissionRecord
 	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
 };
 
+#define MAX_TRANSMISSION_RECORDS 33 
+PacketTransmissionRecord g_transmissions[MAX_TRANSMISSION_RECORDS];
+
+PacketTransmissionRecord* Net_FindTransmissionRecord(PacketTransmissionRecord* records, u32 sequence)
+{
+	PacketTransmissionRecord* result = &records[sequence % MAX_TRANSMISSION_RECORDS];
+	if (result->sequence == sequence)
+	{
+		result->sequence = 0;
+		return result;
+	}
+	return NULL;
+}
+
+void Net_PacketAcked()
+{
+	// > Fetch Transmission record
+	// > iterate messageIds, deleting them from the output buffer
+}
+
+#if 0
 #define MAX_BUFFERED_MESSAGES 64
 struct MessageQueue
 {
@@ -128,60 +149,8 @@ i32 TNet_CheckForAck(u32 ack, u32 ackBits, u32 sequence)
 	}
 	return 0;
 }
-
+#endif
 void TNet_TestReliability()
 {
 	Test_NetBuffer();
-	#if 0
-	// Parse input tests:
-	// - advance reliable input buffer until a gap or the end of the buffer
-	printf("--- Input Test 1 ---\n");
-	g_reliableInput.Reset();
-	g_reliableInput.InsertNewItem(1);
-	g_reliableInput.InsertNewItem(2);
-	g_reliableInput.InsertNewItem(3);
-	g_reliableInput.InsertNewItem(5);
-	g_reliableInput.InsertNewItem(6);
-	TNet_ReadInput();
-	
-	printf("--- Input Test 2 ---\n");
-	g_reliableInput.Reset();
-	g_reliableInput.InsertNewItem(2);
-	g_reliableInput.InsertNewItem(3);
-	g_reliableInput.InsertNewItem(4);
-	TNet_ReadInput();
-
-	// Output tests
-	// - Remove all pending items before the queue's sequence
-	//		they are assumed delivered.
-	printf("--- Output Test 1 ---\n");
-	g_reliableOutput.Reset();
-	g_reliableOutput.InsertNewItem(1);
-	g_reliableOutput.InsertNewItem(2);
-	g_reliableOutput.InsertNewItem(3);
-	g_reliableOutput.InsertNewItem(4);
-	g_reliableOutput.InsertNewItem(5);
-	g_reliableOutput.InsertNewItem(6);
-	g_reliableOutput.Print("Output");
-	i32 count = g_reliableOutput.ClearItemAndAllPrevious(4);
-	printf("Cleared %d sent item\n", count);
-	g_reliableOutput.Print("Output");
-	#if 0
-	printf("--- Ackbits test ---\n");
-	i32 ack = 16;
-	u32 bits = 0;
-	bits |= (1 << 0);
-	bits |= (1 << 2);
-	i32 result;
-	result = TNet_CheckForAck(ack, bits, 16);
-	printf("Ack result for %d: %d\n", 16, result);
-	result = TNet_CheckForAck(ack, bits, 15);
-	printf("Ack result: %d\n", result);
-	result = TNet_CheckForAck(ack, bits, 14);
-	printf("Ack result: %d\n", result);
-	result = TNet_CheckForAck(ack, bits, 13);
-	printf("Ack result: %d\n", result);
-	#endif
-
-	#endif
 }

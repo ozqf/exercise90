@@ -283,18 +283,43 @@ internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 ///////////////////////////////////////////////////
 // system lifetime
 ///////////////////////////////////////////////////
-void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface)
+void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface, i32 simMode)
 {
     printf("ZNet Initialising... ");
     g_netPlatform = platform;
 	g_output = outputInterface;
     COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
     // testing conditions:
-    g_store.Init(200, 400, 0.2f);
+    switch (simMode)
+    {
+        case ZNET_SIM_MODE_REALISTIC:
+        {
+            g_store.Init(75, 125, 0.01f);
+            printf("Sim conditions: realistic\n");
+        } break;
+
+        case ZNET_SIM_MODE_BAD:
+        {
+            g_store.Init(200, 400, 0.2f);
+            printf("Sim conditions: bad\n");
+        } break;
+
+        case ZNET_SIM_MODE_TERRIBLE:
+        {
+            // biblical packet loss
+            g_store.Init(500, 1000, 0.6f);
+            printf("Sim conditions: terrible\n");
+        } break;
+
+        default:
+        {
+            g_store.Init(0, 0, 0);
+            printf("No sim delay\n");
+        } break;
+    }
     // no lag, no packet loss
-    //g_store.Init(0, 0, 0);
-    // no lag, biblical packet loss
-    //g_store.Init(0, 0, 0.1f);
+    
+    
     printf("Done\n");
 }
 

@@ -66,10 +66,12 @@ Storage:
 Application layer requires a mechanism to buffer reliable network messages both for
 retransmission and in-order execution.
 
+On send:
+
 */
 
-#define SERVER_TICK_RATE 2
-#define CLIENT_TICK_RATE 2
+#define SERVER_TICK_RATE 10
+#define CLIENT_TICK_RATE 10
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -152,7 +154,8 @@ void TNet_ServerSendState()
 void Test_Server(u16 serverPort)
 {
     printf("Server\n");
-    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_NONE);
+    g_network.Init();
 
     f32 tickRateSeconds = SERVER_TICK_RATE;
     i32 tickRateMS = (i32)(1000.0f / tickRateSeconds);
@@ -210,8 +213,22 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
         b.ptrWrite += sizeof(u8);
         pos++;
     }
+
+    // Unreliable direct send in single packet:
     printf("\nSent %d chars\n", length);
     ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written(), 0);
+
+    // Buffer into reliable output:
+    //Stream_WriteToOutput(&g_network.server.reliableStream, b.ptrStart, b.Written());
+}
+
+void Client_Transmit()
+{
+    ByteBuffer b = TNET_GetWriteBuffer();
+    // Write reliable messages
+    b
+
+    // Write unreliable messages
 }
 
 void Test_ClientSendState(i32 connId)
@@ -236,7 +253,8 @@ void Test_ClientSendInfo()
 void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
-    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface());
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_TERRIBLE);
+    g_network.Init();
 
     f32 tickRateSeconds = SERVER_TICK_RATE;
     i32 tickRateMS = (i32)(1000.0f / tickRateSeconds);
@@ -386,7 +404,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     u8* read = bytes;
     u8 type = COM_ReadByte(&read);
-    printf("TNET: Received sequence %d\n", info->remoteSequence);
+    //printf("TNET: Received sequence %d\n", info->remoteSequence);
     //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
     switch (type)
     {
@@ -434,7 +452,8 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 
 void TNet_DeliveryConfirmed(u32 packetNumber)
 {
-	printf("TNET: Delivery of %d confirmed\n", packetNumber);
+	//printf("TNET: Delivery of %d confirmed\n", packetNumber);
+    // Search for and remove packet record
 }
 
 /////////////////////////////////////////////////////////////////

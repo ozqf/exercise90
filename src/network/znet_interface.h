@@ -22,6 +22,11 @@
 
 #define ZNET_LOCAL_ADDRESS "127.0.0.1"
 
+#define ZNET_SIM_MODE_NONE 0
+#define ZNET_SIM_MODE_REALISTIC 1
+#define ZNET_SIM_MODE_BAD 2				// dev to this most of the time
+#define ZNET_SIM_MODE_TERRIBLE 3		// for easier checking of reliability robustness only
+
 /////////////////////////////////////////////////////////////////
 // Data types
 /////////////////////////////////////////////////////////////////
@@ -76,7 +81,7 @@ i32 ZNet_IsServer();
 void ZNet_RunTests();
 
 // system lifetime
-void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output);
+void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output, i32 simMode);
 void ZNet_Shutdown();
 
 // session lifetime

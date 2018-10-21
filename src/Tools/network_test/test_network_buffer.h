@@ -39,7 +39,6 @@ void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
-
 i32 Buf_InspectionCallback(u32 type, u8* bytes, u32 numBytes)
 {
     if (type == 0)
@@ -102,11 +101,45 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
     *ptr2ptrEnd = end; \
 }
 
+void Stream_WriteToOutput(ReliableStream* stream, u8* bytes, u32 numBytes)
+{
+    u32 messageId = stream->outputSequence;
+    stream->outputSequence += 1;
+    Buf_WriteMessage(&stream->outputBuffer, messageId, bytes, numBytes);
+}
+
+// Write each message: output = messageId + data (no size recorded here)
+u32 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
+{
+    u8* write = buffer;
+    u8* read = stream->outputBuffer.ptrStart;
+    u8* end = (u8*)(stream->outputBuffer.ptrWrite - stream->outputBuffer.ptrStart);
+    while (read < end)
+    {
+        MessageHeader h;
+        COM_COPY_STRUCT(read, &h, MessageHeader);
+        u8* src = read + sizeof(MessageHeader);
+        read += sizeof(MessageHeader) + h.size;
+        printf("Writing output sequence %d\n", h.id);
+        // header (messageId)
+        write += COM_COPY(&h.id, write, sizeof(h.id));
+        // data
+        write += COM_COPY(src, write, h.size);
+    }
+    return write - buffer;
+}
+
 MessageHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }
 
 global_variable u8 g_msgBuffer[1024];
+global_variable u8 g_testPacket[1024];
 
-void Test_NetBuffer()
+void Test_CopyOutputToPacket()
+{
+
+}
+
+void Test_BufferWriteAndCollapse()
 {
     TestMsg1 t1 = {};
     TestMsg2 t2 = {};
@@ -132,4 +165,9 @@ void Test_NetBuffer()
     printf("=== SCAN AGAIN ===\n");
     PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
     printf("  Written %d, Space: %d\n", b.Written(), b.Space());
+}
+
+void Test_NetBuffer()
+{
+    Test_BufferWriteAndCollapse();
 }

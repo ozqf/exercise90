@@ -36,6 +36,16 @@ static inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
     return b;
 }
 
+static inline ByteBuffer Buf_FromMalloc(void* ptr, i32 size)
+{
+    ByteBuffer b = {};
+    b.ptrStart = (u8*)ptr;
+    b.ptrWrite = b.ptrStart;
+    b.ptrEnd = b.ptrStart;
+    b.capacity = size;
+    return b;
+}
+
 static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
 {
     ByteBuffer b = {};

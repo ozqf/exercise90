@@ -46,6 +46,15 @@ struct ClientInfo
     }
 };
 #endif
+
+struct ReliableStream
+{
+    u32 inputSequence;
+    u32 outputSequence;
+    ByteBuffer inputBuffer;
+    ByteBuffer outputBuffer;
+};
+
 struct TestClient
 {
     // Ids are taken from ZNet layer
@@ -59,12 +68,14 @@ struct TestClient
     i32 clientAppState;
     // name etc
 	ClientInfo info;
+    ReliableStream reliableStream;
 };
 
 struct TestServer
 {
     i32 connId;
     i32 inUse;
+    ReliableStream reliableStream;
 };
 
 #define MAX_TEST_CLIENTS 32
@@ -78,6 +89,38 @@ struct TestGameNetwork
     TestClient clients[MAX_TEST_CLIENTS];
     i32 capacity = MAX_TEST_CLIENTS;
     i32 nextClientId = 0;
+    i32 initialised = 0;
+
+    void Init()
+    {
+        if (initialised != 0) { return; }
+        initialised = 1;
+        i32 bytesPerBuffer = KiloBytes(64);
+        // Allocate stream buffers
+        printf("Allocating server stream buffers\n");
+        server.reliableStream = {};
+        server.reliableStream.inputBuffer = Buf_FromMalloc(malloc(bytesPerBuffer), bytesPerBuffer);
+        server.reliableStream.outputBuffer = Buf_FromMalloc(malloc(bytesPerBuffer), bytesPerBuffer);
+        COM_ZeroMemory(server.reliableStream.inputBuffer.ptrStart, bytesPerBuffer);
+        COM_ZeroMemory(server.reliableStream.outputBuffer.ptrStart, bytesPerBuffer);
+
+        printf("Allocating %d client stream buffers\n", MAX_TEST_CLIENTS);
+        for (i32 i = 0; i < MAX_TEST_CLIENTS; ++i)
+        {
+            TestClient* cl = &clients[i];
+            cl->reliableStream = {};
+            cl->reliableStream.inputBuffer = Buf_FromMalloc(malloc(bytesPerBuffer), bytesPerBuffer);
+            cl->reliableStream.outputBuffer = Buf_FromMalloc(malloc(bytesPerBuffer), bytesPerBuffer);
+            COM_ZeroMemory(cl->reliableStream.inputBuffer.ptrStart, bytesPerBuffer);
+            COM_ZeroMemory(cl->reliableStream.outputBuffer.ptrStart, bytesPerBuffer);
+        }
+    }
+
+    void Destroy()
+    {
+        if (!initialised) { return; }
+        initialised = 0;
+    }
 
     void SetServer(i32 id)
     {
