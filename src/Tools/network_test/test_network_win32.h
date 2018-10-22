@@ -13,7 +13,7 @@
 #include "test_network_types.h"
 #include "test_network_messages.h"
 #include "test_network_buffer.h"
-#include "test_network_reliability.h"
+#include "test_reliable_stream.h"
 
 #if 1
 #define WIN32_LEAN_AND_MEAN
@@ -278,7 +278,7 @@ void Client_Transmit()
 {
     ByteBuffer b = TNET_GetWriteBuffer();
     u32 sequence = ZNet_GetNextSequenceNumber(g_network.server.connId);
-    Net_FindTransmissionRecord(g_transmissions, sequence);
+    Stream_FindTransmissionRecord(g_transmissions, sequence);
 
     // step forward over header
     u16 reliableBytes = 0, unreliableBytes = 0;
@@ -602,6 +602,8 @@ ZNetOutputInterface TNet_CreateOutputInterface()
 // https://www.binarytides.com/udp-socket-programming-in-winsock/
 void Test_Win32(i32 argc, char* argv[])
 {
+    TNet_TestReliability();
+    #if 0
     printf("Test winsock\n");
     srand((u32)argv);
     printf("SEED: %d\n", rand());
@@ -665,5 +667,6 @@ void Test_Win32(i32 argc, char* argv[])
         printf("Win32 Net test: Unknown mode %s\n", mode);
         return;
     }
+    #endif
     #endif
 }

@@ -8,6 +8,116 @@
 
 #define MAX_TEST_CLIENT_NAME_LENGTH 32
 
+struct MessageHeader
+{
+    u32 id;
+    u32 size;
+
+    i32 Write(u8* bytes)
+    {
+        u8* write = bytes;
+        write += COM_WriteU32(id, write);
+        write += COM_WriteU32(size, write);
+        return (i32)(write - bytes);
+    }
+    
+    i32 Read(u8* bytes)
+    {
+        u8* read = bytes;
+        id = COM_ReadU32(&read);
+        size = COM_ReadU32(&read);
+        return read - bytes;
+    }
+};
+
+#define TEST_MSG_TYPE_NULL 0
+#define TEST_MSG_TYPE_1 1
+#define TEST_MSG_TYPE_2 2
+#define TEST_MSG_TYPE_3 3
+
+// 1 byte for type, 2 bytes for size
+#define MSG_TYPE_SIZE 1
+
+// Test data objects to store
+struct TestMsg1
+{
+    i32 member1;
+    i32 member2;
+    i32 member3;
+
+    u16 Measure()
+    {
+        return 3 * sizeof(i32) + MSG_TYPE_SIZE;
+    }
+    
+    u16 Write(u8* bytes)
+    {
+        u8* write = bytes;
+        write += COM_WriteByte(TEST_MSG_TYPE_1, write);
+        write += COM_WriteI32(member1, write);
+        write += COM_WriteI32(member2, write);
+        write += COM_WriteI32(member3, write);
+        return (u16)(write - bytes);
+    }
+
+    u16 Read(u8* bytes)
+    {
+        u8* read = bytes;
+        u8 type = COM_ReadByte(&read);
+        Assert(type == TEST_MSG_TYPE_1);
+        member1 = COM_ReadI32(&read);
+        member2 = COM_ReadI32(&read);
+        member3 = COM_ReadI32(&read);
+        return (u16)(read - bytes);
+    }
+};
+
+struct TestMsg2
+{
+    i32 member1;
+    i32 member2;
+    i32 pos[3];
+    
+    u16 Measure()
+    {
+        return (5 * sizeof(i32)) + MSG_TYPE_SIZE;
+    }
+    
+    u16 Write(u8* bytes)
+    {
+        u8* write = bytes;
+        printf("Write type %d\n", TEST_MSG_TYPE_2);
+        write += COM_WriteByte(TEST_MSG_TYPE_2, write);
+        write += COM_WriteI32(member1, write);
+        write += COM_WriteI32(member2, write);
+
+        write += COM_WriteI32(pos[0], write);
+        write += COM_WriteI32(pos[1], write);
+        write += COM_WriteI32(pos[2], write);
+        return (u16)(write - bytes);
+    }
+
+    u16 Read(u8* bytes)
+    {
+        u8* read = bytes;
+        u8 type = COM_ReadByte(&read);
+        Assert(type == TEST_MSG_TYPE_2);
+        member1 = COM_ReadI32(&read);
+        member2 = COM_ReadI32(&read);
+
+        pos[0] = COM_ReadI32(&read);
+        pos[1] = COM_ReadI32(&read);
+        pos[2] = COM_ReadI32(&read);
+        return (u16)(read - bytes);
+    }
+};
+
+struct TestMsg3
+{
+    i32 member1;
+    i32 member2;
+};
+
 #if 1
 struct MsgClientListHeader
 {
