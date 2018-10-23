@@ -50,6 +50,9 @@ struct TestMsg1
         return 3 * sizeof(i32) + MSG_TYPE_SIZE;
     }
     
+    // TODO: Change Read/Write to Pack/Unpack. Copy raw struct once it has been
+    // copied out of an incoming network message and into internal buffers
+    // This will also make the message patchable when in the output buffer!
     u16 Write(u8* bytes)
     {
         u8* write = bytes;
