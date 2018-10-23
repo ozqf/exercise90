@@ -76,15 +76,15 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
 }
 
 // callback function must have the signature (i32)(*)(u32 type, u8* bytes, u32 numBytes);
-#define PARSE_BUFFER(ptr2ptrStart, ptr2ptrEnd, Callback) \
+#define PARSE_MSG_BUFFER(ptr2ptrStart, ptr2ptrEnd, Callback) \
 { \
-    u8* read = *ptr2ptrStart; \
-    u8* end = *ptr2ptrEnd; \
-    while (read < end) \
+    u8* parseBufPtrRead = *ptr2ptrStart; \
+    u8* parseBufPtrEnd = *ptr2ptrEnd; \
+    while (parseBufPtrRead < parseBufPtrEnd) \
     { \
         MessageHeader h; \
-        read += COM_COPY_STRUCT(read, &h, MessageHeader); \
-        i32 result = Callback##(h.id, read, h.size); \
+        parseBufPtrRead += COM_COPY_STRUCT(parseBufPtrRead, &h, MessageHeader); \
+        i32 result = Callback##(h.id, parseBufPtrRead, h.size); \
         if (result == 0) \
         { \
             printf("  End of Buffer\n"); \
@@ -93,20 +93,20 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
         else if (result == 2) \
         { \
             u32 space = sizeof(MessageHeader) + h.size; \
-            u8* copySrc = read + h.size; \
-            u8* copyDest = read - sizeof(MessageHeader); \
-            u32 bytesToCopy = (end - copySrc); \
+            u8* copySrc = parseBufPtrRead + h.size; \
+            u8* copyDest = parseBufPtrRead - sizeof(MessageHeader); \
+            u32 bytesToCopy = (parseBufPtrEnd - copySrc); \
             printf("Copy back %d bytes by %d\n", bytesToCopy, space); \
             COM_COPY(copySrc, copyDest, bytesToCopy); \
-            read = copyDest; \
-            end -= space; \
+            parseBufPtrRead = copyDest; \
+            parseBufPtrEnd -= space; \
         } \
         else \
         { \
-            read += h.size; \
+            parseBufPtrRead += h.size; \
         } \
     } \
-    *ptr2ptrEnd = end; \
+    *ptr2ptrEnd = parseBufPtrEnd; \
 }
 
 void Stream_WriteToOutput(ReliableStream* stream, u8* bytes, u32 numBytes)
@@ -166,11 +166,11 @@ void Test_BufferWriteAndCollapse()
     //Buf_InspectCommands(b.ptrStart, b.Written());
     // scan, collapse all '2' messages, scan again
     printf("=== SCAN ===\n");
-    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
+    PARSE_MSG_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
     printf("  Written %d, Space: %d\n", b.Written(), b.Space());
     printf("=== COLLAPSE ===\n");
-    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_CollapseCallback);
+    PARSE_MSG_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_CollapseCallback);
     printf("=== SCAN AGAIN ===\n");
-    PARSE_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
+    PARSE_MSG_BUFFER(&b.ptrStart, &b.ptrWrite, Buf_InspectionCallback);
     printf("  Written %d, Space: %d\n", b.Written(), b.Space());
 }

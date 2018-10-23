@@ -55,9 +55,21 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
     }
 }
 
+void Stream_ReadInput(u8* read, u8* end, u32 currentSequence)
+{
+    printf("Reading %d bytes of input from sequence %d\n", (end - read), currentSequence);
+    while (read < end)
+    {
+        MessageHeader h;
+        read += COM_COPY_STRUCT(read, &h, MessageHeader);
+        printf("Input: type %d size %d\n", h.id, h.size);
+        read += h.size;
+    }
+}
+
 void Stream_RunTests()
 {
-    printf("=== RELIABLE STREAM TESTS ===\n");
+    printf("\n=== RELIABLE STREAM TESTS ===\n");
     /*
 	1> Adding to stream buffer (input or output)
 	2> stream buffer to packet (output)
@@ -95,6 +107,7 @@ void Stream_RunTests()
     u32 outgoingSequence = 200;
 
     // 1
+    printf("\n------ 1: Copy to pending output ------\n");
     TestMsg1 m1 = {};
 	m1.member1 = 256;
 	m1.member2 = 512;
@@ -118,15 +131,18 @@ void Stream_RunTests()
     Buf_WriteMessageHeader(&output, outgoingSequence++, m2.Measure());
     output.ptrWrite += m2.Write(output.ptrWrite);
     printf("  output done. Wrote %d bytes\n", output.Written());
-    PARSE_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
+    PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
     
     // 8 + 8 + 13 + 21
 
     // 2 load into packet
-    printf("2: Copy to packet\n");
+    printf("\n------ 2: Copy to packet ------\n");
     // step over packet header
     packet.ptrWrite += sizeof(u16) * 2;
     u8* reliableStart = packet.ptrWrite;
+
+    PacketTransmissionRecord rec = {};
+    rec.sequence = 127;
 
     u8* read = output.ptrStart;
     u8* end = output.ptrWrite;
@@ -137,13 +153,24 @@ void Stream_RunTests()
         printf("  writing %d (%d bytes)\n", h.id, h.size);
         packet.ptrWrite += COM_WriteU32(h.id, packet.ptrWrite);
         packet.ptrWrite += COM_COPY(read, packet.ptrWrite, h.size);
+        rec.reliableMessageIds[rec.numReliableMessages] = h.id;
+        rec.numReliableMessages++;
         read += h.size;
     }
     u16 reliableBytes = (u16)(packet.ptrWrite - reliableStart);
     printf("Wrote %d reliable bytes\n", reliableBytes);
+    // Patch in packet header
     read = packet.ptrStart;
     read += COM_WriteU16(reliableBytes, read);
     COM_WriteU16(0, read);
+
+    // Inspect transmission record:
+    printf("Transmission, sequence %d, %d messages: ", rec.sequence, rec.numReliableMessages);
+    for (u32 i = 0; i < rec.numReliableMessages; ++i)
+    {
+        printf("%d, ", rec.reliableMessageIds[i]);
+    }
+    printf("\n");
 
     // parse packet
     printf("Parse Packet\n");
@@ -181,13 +208,63 @@ void Stream_RunTests()
             default:
             {
                 printf("UNKNOWN MSG TYPE %d\n", type);
+                return;
             } break;
         }
     }
+    printf("  Done\n");
+    printf("\n------ 3: Packet to Input Buffer ------\n");
+    read = packet.ptrStart;
+    reliableBytes = COM_ReadU16(&read);
+    unreliableBytes = COM_ReadU16(&read);
+    end = read + reliableBytes;
+    while (read < end)
+    {
+        u32 sequence = COM_ReadU32(&read);
+        u8 type = *read;
+        u16 bytesRead;
+        printf("Read sequence %d type %d\n", sequence, type);
+        switch (type)
+        {
+            case TEST_MSG_TYPE_1:
+            {
+                TestMsg1 msg;
+                // Reading... ideally would just measure here
+                bytesRead = msg.Read(read);
+                input.ptrWrite += COM_WriteU32(sequence, input.ptrWrite);
+                input.ptrWrite += COM_WriteU32(bytesRead, input.ptrWrite);
+                input.ptrWrite += COM_COPY(read, input.ptrWrite, bytesRead);
+                read += bytesRead;
+            } break;
+
+            case TEST_MSG_TYPE_2:
+            {
+                TestMsg2 msg;
+                bytesRead = msg.Read(read);
+                input.ptrWrite += COM_WriteU32(sequence, input.ptrWrite);
+                input.ptrWrite += COM_WriteU32(bytesRead, input.ptrWrite);
+                input.ptrWrite += COM_COPY(read, input.ptrWrite, bytesRead);
+                read += bytesRead;
+            } break;
+
+            default:
+            {
+                printf("UNKNOWN MSG TYPE %d\n", type);
+                return;
+            } break;
+        }
+    }
+    printf("Reading Input buffer:\n");
+    PARSE_MSG_BUFFER(&input.ptrStart, &input.ptrWrite, Buf_InspectionCallback);
+
+    printf("\n------ 4: Parse Input ------\n");
+    read = input.ptrStart;
+    end = input.ptrWrite;
+    Stream_ReadInput(read, end, 200);
 }
 
 void TNet_TestReliability()
 {
-	Test_BufferWriteAndCollapse();
+	//Test_BufferWriteAndCollapse();
     Stream_RunTests();
 }
