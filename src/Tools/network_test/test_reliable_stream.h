@@ -55,16 +55,93 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
     }
 }
 
-void Stream_ReadInput(u8* read, u8* end, u32 currentSequence)
+// dest* --- space |---- rest of buffer ----| bufferEnd*
+// Returns new buffer end
+u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 {
-    printf("Reading %d bytes of input from sequence %d\n", (end - read), currentSequence);
+    u8* copySrc = blockStart + blockSpace;
+    u32 bytesToCopy = bufferEnd - copySrc;
+    COM_COPY(copySrc, blockStart, bytesToCopy);
+    return copySrc + bytesToCopy;
+}
+
+MessageHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
+{
     while (read < end)
     {
+        MessageHeader* h = (MessageHeader*)read;
+        if (h->id == id)
+        {
+            return h;
+        }
+        read += (sizeof(MessageHeader) + h->size);
+    }
+    return NULL;
+}
+
+/**
+ * Iterate over pending input. Load into application update buffer
+ * messages next in sequence
+ * Returns bytes removed
+ */
+u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
+{
+    printf("Reading %d bytes of input from sequence %d\n", (end - read), currentSequence);
+    i32 reading = 1;
+    i32 removed = 0;
+    for (;;)
+    {
+        u32 nextSequence = currentSequence + 1;
+        MessageHeader* h = Stream_FindMessageById(read, end, nextSequence);
+        if (h == NULL)
+        {
+            break;
+        }
+        currentSequence = nextSequence;
+        printf("Exec msg %d\n", currentSequence);
+
+        // Collapse buffer
+        i32 blockSize = (sizeof(MessageHeader) + h->size);
+        end = Stream_CollapseBlock((u8*)h, blockSize, end);
+        removed += blockSize;
+    }
+    return removed;
+    #if 0
+    while (read < end)
+    {
+        u32 nextSequence = currentSequence + 1;
         MessageHeader h;
         read += COM_COPY_STRUCT(read, &h, MessageHeader);
         printf("Input: type %d size %d\n", h.id, h.size);
         read += h.size;
+        if (h.id == nextSequence)
+        {
+            // exec + clear
+        }
     }
+    #endif
+}
+
+u32 Stream_ClearReceivedMessages(PacketTransmissionRecord* rec, ByteBuffer* b)
+{
+    u8* read = b->ptrStart;
+    u8* end = b->ptrWrite;
+    u32 removed = 0;
+    for (u32 i = 0; i < rec->numReliableMessages; ++i)
+    {
+        u32 id = rec->reliableMessageIds[i];
+        MessageHeader* h = Stream_FindMessageById(read, end, id);
+        if (h == NULL)
+        {
+            continue;
+        }
+        // clear and collapse
+        printf("  Delete %d from output\n", id);
+        i32 blockSize = sizeof(MessageHeader) + h->size;
+        end = Stream_CollapseBlock((u8*)h, blockSize, end);
+        removed += blockSize;
+    }
+    return removed;
 }
 
 void Stream_RunTests()
@@ -99,10 +176,12 @@ void Stream_RunTests()
 	u8 inputBytes[BUFFER_SIZE];
     u8 outputBytes[BUFFER_SIZE];
     u8 packetBytes[BUFFER_SIZE];
+    u8 gameBytes[BUFFER_SIZE];
 
     ByteBuffer input = Buf_FromBytes(inputBytes, BUFFER_SIZE);
     ByteBuffer output = Buf_FromBytes(outputBytes, BUFFER_SIZE);
     ByteBuffer packet = Buf_FromBytes(packetBytes, BUFFER_SIZE);
+    ByteBuffer gameBuffer = Buf_FromBytes(gameBytes, BUFFER_SIZE);
 
     u32 outgoingSequence = 200;
 
@@ -126,10 +205,15 @@ void Stream_RunTests()
     // Messages know how many bytes they will use.
     // Number of bytes used is recorded in input/output buffers to allow
 
-    Buf_WriteMessageHeader(&output, outgoingSequence++, m1.Measure());
+    Buf_WriteMessageHeader(&output, 201, m1.Measure());
     output.ptrWrite += m1.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, outgoingSequence++, m2.Measure());
+    Buf_WriteMessageHeader(&output, 200, m2.Measure());
     output.ptrWrite += m2.Write(output.ptrWrite);
+    Buf_WriteMessageHeader(&output, 202, m2.Measure());
+    output.ptrWrite += m2.Write(output.ptrWrite);
+    Buf_WriteMessageHeader(&output, 204, m1.Measure());
+    output.ptrWrite += m1.Write(output.ptrWrite);
+
     printf("  output done. Wrote %d bytes\n", output.Written());
     PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
     
@@ -260,7 +344,13 @@ void Stream_RunTests()
     printf("\n------ 4: Parse Input ------\n");
     read = input.ptrStart;
     end = input.ptrWrite;
-    Stream_ReadInput(read, end, 200);
+    input.ptrWrite -= Stream_ReadInput(read, end, 199, &gameBuffer);
+    printf("Contents of input:\n");
+    PARSE_MSG_BUFFER(&input.ptrStart, &input.ptrWrite, Buf_InspectionCallback);
+
+    printf("\n------ 5: Clear Output ------\n");
+    output.ptrWrite -= Stream_ClearReceivedMessages(&rec, &output);
+    PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
 }
 
 void TNet_TestReliability()

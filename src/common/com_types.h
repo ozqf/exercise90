@@ -193,6 +193,12 @@ struct MemoryBlock
     i32 size;
 };
 
+struct ByteBlock
+{
+    u8 *start;
+    u8* end;
+};
+
 struct ZStringHeader
 {
     char* chars;
