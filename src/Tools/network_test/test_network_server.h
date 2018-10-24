@@ -53,6 +53,8 @@ void TNet_SendKeepAlivePacket(i32 connId)
 }
 
 // Load client outputs into a packet and transmit
+// This should be the ONLY place that deals with writing packets, all the rest
+// should be messages loaded into the client's output buffer
 void SV_SendOutput()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -62,13 +64,60 @@ void SV_SendOutput()
         
         ReliableStream* stream = &cl->reliableStream;
 
-        //PacketTransmissionRecord rec = 
+        u32 packetSequence = ZNet_GetNextSequenceNumber(cl->connId);
+
+        //u32 sequence = ++stream->outputSequence;
+
+        TransmissionRecord* rec = Stream_AssignTransmissionRecord(
+            stream->transmissions, packetSequence);
+        
+        COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
+        ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
+        b.ptrWrite += sizeof(u16) * 2;
+        u8* reliableStart = b.ptrWrite;
+        u8* read = stream->outputBuffer.ptrStart;
+        u8* end = stream->outputBuffer.ptrWrite;
+		printf("Sending %d bytes of reliable msgs\n", (end - read));
+        while (read < end)
+        {
+            u32 id = COM_ReadU32(&read);
+			//if (id == 0) { break; }
+            u32 size = COM_ReadU32(&read);
+			u32 space = b.Space();
+			if (b.Space() < size)
+			{
+				printf("Packet full!\n");
+				break;
+			}
+			//printf("Writing msg %d (%d bytes)\n", id, size);
+            b.ptrWrite += COM_WriteU32(id, b.ptrWrite);
+            b.ptrWrite += COM_COPY(read, b.ptrWrite, size);
+            rec->reliableMessageIds[rec->numReliableMessages] = id;
+            rec->numReliableMessages++;
+			if (rec->numReliableMessages == MAX_PACKET_TRANSMISSION_MESSAGES)
+			{
+				printf("Max messages per packet!\n");
+				break;
+			}
+            read += size;
+        }
+        u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
+        u8* write = b.ptrStart;
+        write += COM_WriteU16(reliableBytes, write);
+        // unreliable bytes could be written here
+        write += COM_WriteU16(reliableBytes, write);
+		printf("Wrote %d packet bytes", (b.Written()));
+
+        u32 sendSequence = ZNet_SendData(
+            cl->connId,
+            b.ptrStart,
+            (u16)b.Written(),
+            0
+        );
     }
 }
 
-// Load frame based messages into client outputs
-// This should be the ONLY place that deals with writing packets, all the rest
-// should be messages loaded into the client's output buffer
+// Load frame based messages into client 
 void SV_ServerTickFrameOutput()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -84,8 +133,11 @@ void SV_ServerTickFrameOutput()
 	    m1.member2 = 512;
 	    m1.member3 = 768;
 
-        Buf_WriteMessageHeader(&stream->outputBuffer, stream->outputSequence, m1.Measure());
+
+        Buf_WriteMessageHeader(&stream->outputBuffer, ++stream->outputSequence, m1.Measure());
         stream->outputBuffer.ptrWrite += m1.Write(stream->outputBuffer.ptrWrite);
+		u32 written = stream->outputBuffer.Written();
+		printf("W: %d\n", written);
 
         //COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
         //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);

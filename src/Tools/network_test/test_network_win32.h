@@ -283,6 +283,7 @@ void Test_Win32(i32 argc, char* argv[])
     if (argc != 2)
     {   
         printf("Arg count mismatch. Needed 2 got %d\n", argc);
+        Test_Server(TEST_SERVER_PORT);
         return;
     }
     char* mode = argv[1];

@@ -38,6 +38,7 @@ Writing a packet:
 */
 void Client_Transmit()
 {
+    #if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     u32 sequence = ZNet_GetNextSequenceNumber(g_network.server.connId);
     Stream_FindTransmissionRecord(g_transmissions, sequence);
@@ -57,7 +58,7 @@ void Client_Transmit()
     headerWrite += COM_WriteU16(reliableBytes, headerWrite);
     headerWrite += COM_WriteU16(unreliableBytes, headerWrite);
     u32 bytesWritten = b.Written();
-    
+    #endif
 }
 
 void Test_ClientSendState(i32 connId)

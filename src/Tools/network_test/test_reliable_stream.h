@@ -2,20 +2,25 @@
 
 #include "test_network_win32.h"
 
-#define MAX_PACKET_TRANSMISSION_MESSAGES 32
-struct PacketTransmissionRecord
+/**
+ * Select and overwrite a previous transmission record
+ */
+TransmissionRecord* Stream_AssignTransmissionRecord(TransmissionRecord* records, u32 sequence)
 {
-	u32 sequence;
-	u32 numReliableMessages;
-	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
-};
+	TransmissionRecord* result = &records[sequence % MAX_TRANSMISSION_RECORDS];
+    result->sequence = sequence;
+    result->numReliableMessages = 0;
+	return result;
+}
 
-#define MAX_TRANSMISSION_RECORDS 33 
-PacketTransmissionRecord g_transmissions[MAX_TRANSMISSION_RECORDS];
-
-PacketTransmissionRecord* Stream_FindTransmissionRecord(PacketTransmissionRecord* records, u32 sequence)
+/**
+ * Search for a transmission record matching a specific sequence.
+ * Returns null if one is not found (this may happen for very old packets
+ * that have fallen out of the current ack window)
+ */
+TransmissionRecord* Stream_FindTransmissionRecord(TransmissionRecord* records, u32 sequence)
 {
-	PacketTransmissionRecord* result = &records[sequence % MAX_TRANSMISSION_RECORDS];
+	TransmissionRecord* result = &records[sequence % MAX_TRANSMISSION_RECORDS];
 	if (result->sequence == sequence)
 	{
 		result->sequence = 0;
@@ -124,7 +129,7 @@ u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
     return removed;
 }
 
-u32 Stream_ClearReceivedMessages(PacketTransmissionRecord* rec, ByteBuffer* b)
+u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
 {
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
@@ -229,7 +234,7 @@ void Stream_RunTests()
     packet.ptrWrite += sizeof(u16) * 2;
     u8* reliableStart = packet.ptrWrite;
 
-    PacketTransmissionRecord rec = {};
+    TransmissionRecord rec = {};
     rec.sequence = 127;
 
     u8* read = output.ptrStart;

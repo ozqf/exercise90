@@ -41,12 +41,22 @@ struct ClientInfo
 };
 #endif
 
+#define MAX_PACKET_TRANSMISSION_MESSAGES 64
+struct TransmissionRecord
+{
+	u32 sequence;
+	u32 numReliableMessages;
+	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
+};
+
+#define MAX_TRANSMISSION_RECORDS 33
 struct ReliableStream
 {
     u32 inputSequence;
     u32 outputSequence;
     ByteBuffer inputBuffer;
     ByteBuffer outputBuffer;
+    TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
 };
 
 struct TestClient
