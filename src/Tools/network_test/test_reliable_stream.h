@@ -26,6 +26,7 @@ PacketTransmissionRecord* Stream_FindTransmissionRecord(PacketTransmissionRecord
 
 void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
 {
+    printf("Copy reliable packet (%d bytes) to input... ", numBytes);
     // iterate for messages
     // > if messageId <= stream input sequence ignore
     // > if messageId > input sequence, copy to input buffer
@@ -38,7 +39,7 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         //u32 message = COM_ReadU32(&read);
         // Must get msg size regardless of whether command will be read
         // as it must be skipped over in either case
-        u16 size = Net_MeasureMessageBytes(msgType, read);
+        u16 size = Msg_MeasureMessageBytes(msgType, read);
         printf(" Id: %d type %d size: %d\n", messageId, msgType, size);
         if (messageId <= s->inputSequence)
         {
@@ -53,7 +54,22 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
             read += size;
         }
     }
+    printf("Done\n");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // dest* --- space |---- rest of buffer ----| bufferEnd*
 // Returns new buffer end
@@ -106,20 +122,6 @@ u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
         removed += blockSize;
     }
     return removed;
-    #if 0
-    while (read < end)
-    {
-        u32 nextSequence = currentSequence + 1;
-        MessageHeader h;
-        read += COM_COPY_STRUCT(read, &h, MessageHeader);
-        printf("Input: type %d size %d\n", h.id, h.size);
-        read += h.size;
-        if (h.id == nextSequence)
-        {
-            // exec + clear
-        }
-    }
-    #endif
 }
 
 u32 Stream_ClearReceivedMessages(PacketTransmissionRecord* rec, ByteBuffer* b)
@@ -185,8 +187,9 @@ void Stream_RunTests()
 
     u32 outgoingSequence = 200;
 
-    // 1
+    //////////////////////////////////////////////////////////////////////////
     printf("\n------ 1: Copy to pending output ------\n");
+    //////////////////////////////////////////////////////////////////////////
     TestMsg1 m1 = {};
 	m1.member1 = 256;
 	m1.member2 = 512;
@@ -219,8 +222,9 @@ void Stream_RunTests()
     
     // 8 + 8 + 13 + 21
 
-    // 2 load into packet
+    //////////////////////////////////////////////////////////////////////////
     printf("\n------ 2: Copy to packet ------\n");
+    //////////////////////////////////////////////////////////////////////////
     // step over packet header
     packet.ptrWrite += sizeof(u16) * 2;
     u8* reliableStart = packet.ptrWrite;
@@ -236,11 +240,14 @@ void Stream_RunTests()
         read += h.Read(read);
         printf("  writing %d (%d bytes)\n", h.id, h.size);
         packet.ptrWrite += COM_WriteU32(h.id, packet.ptrWrite);
+        // This is a raw bytes copy. It should really be the point where
+        // the message is Packed!
         packet.ptrWrite += COM_COPY(read, packet.ptrWrite, h.size);
         rec.reliableMessageIds[rec.numReliableMessages] = h.id;
         rec.numReliableMessages++;
         read += h.size;
     }
+
     u16 reliableBytes = (u16)(packet.ptrWrite - reliableStart);
     printf("Wrote %d reliable bytes\n", reliableBytes);
     // Patch in packet header
@@ -297,7 +304,10 @@ void Stream_RunTests()
         }
     }
     printf("  Done\n");
+
+    //////////////////////////////////////////////////////////////////////////
     printf("\n------ 3: Packet to Input Buffer ------\n");
+    //////////////////////////////////////////////////////////////////////////
     read = packet.ptrStart;
     reliableBytes = COM_ReadU16(&read);
     unreliableBytes = COM_ReadU16(&read);
@@ -341,14 +351,18 @@ void Stream_RunTests()
     printf("Reading Input buffer:\n");
     PARSE_MSG_BUFFER(&input.ptrStart, &input.ptrWrite, Buf_InspectionCallback);
 
+    //////////////////////////////////////////////////////////////////////////
     printf("\n------ 4: Parse Input ------\n");
+    //////////////////////////////////////////////////////////////////////////
     read = input.ptrStart;
     end = input.ptrWrite;
     input.ptrWrite -= Stream_ReadInput(read, end, 199, &gameBuffer);
     printf("Contents of input:\n");
     PARSE_MSG_BUFFER(&input.ptrStart, &input.ptrWrite, Buf_InspectionCallback);
 
+    //////////////////////////////////////////////////////////////////////////
     printf("\n------ 5: Clear Output ------\n");
+    //////////////////////////////////////////////////////////////////////////
     output.ptrWrite -= Stream_ClearReceivedMessages(&rec, &output);
     PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
 }
