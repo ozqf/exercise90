@@ -225,15 +225,31 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     #endif
 }
 
-void TNet_DeliveryConfirmed(u32 packetNumber)
+void TNet_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
+    // need the connId!
+
 	//printf("TNET: Delivery of %d confirmed\n", packetNumber);
     // Search for and remove packet record
+    if (g_network.isServer)
+    {
+        printf("ACK server confirming delivery of %d from conn %d\n", packetNumber, conn->id);
+        TestClient* cl = g_network.GetClient(conn->id);
+        
+        TransmissionRecord* rec =  Stream_FindTransmissionRecord(
+            cl->reliableStream.transmissions, packetNumber
+        );
+        if (rec)
+        {
+            Stream_PrintTransmissionRecord(rec);
+            Stream_ClearReceivedMessages(rec, &cl->reliableStream.outputBuffer);
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////
 // Network init
-/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 ZNetPlatformFunctions TNet_CreateNetFunctions()
 {
     ZNetPlatformFunctions x = {};

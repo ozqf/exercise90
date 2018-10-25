@@ -70,7 +70,7 @@ struct ZNetOutputInterface
 	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
 	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
 	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
-	void (*DeliveryConfirmed)		(u32 packetNumber);
+	void (*DeliveryConfirmed)		(ZNetConnectionInfo* info, u32 packetNumber);
 };
 
 u32 ZNet_SendData(i32 connId, u8* bytes, u16 numBytes, i32 printSendInfo);

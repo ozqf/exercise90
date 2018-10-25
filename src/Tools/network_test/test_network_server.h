@@ -101,12 +101,13 @@ void SV_SendOutput()
 			}
             read += size;
         }
+        Stream_PrintTransmissionRecord(rec);
         u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
         u8* write = b.ptrStart;
         write += COM_WriteU16(reliableBytes, write);
         // unreliable bytes could be written here
-        write += COM_WriteU16(reliableBytes, write);
-		printf("Wrote %d packet bytes", (b.Written()));
+        write += COM_WriteU16(0, write);
+		printf("Wrote %d packet bytes (%d messages)\n", b.Written(), rec->numReliableMessages);
 
         u32 sendSequence = ZNet_SendData(
             cl->connId,
@@ -174,7 +175,7 @@ void SV_ServerTickFrameOutput()
 void Test_Server(u16 serverPort)
 {
     printf("Server\n");
-    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_NONE);
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_REALISTIC);
     g_network.Init();
 
     f32 tickRateSeconds = SERVER_TICK_RATE;

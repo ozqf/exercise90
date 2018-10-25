@@ -23,17 +23,26 @@ TransmissionRecord* Stream_FindTransmissionRecord(TransmissionRecord* records, u
 	TransmissionRecord* result = &records[sequence % MAX_TRANSMISSION_RECORDS];
 	if (result->sequence == sequence)
 	{
-		result->sequence = 0;
 		return result;
 	}
 	return NULL;
+}
+
+void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
+{
+    printf("RECORD: %d MSGS: ", rec->sequence);
+    for (u32 i = 0; i < rec->numReliableMessages; ++i)
+    {
+        printf("%d, ", rec->reliableMessageIds[i]);
+    }
+    printf("\n");
 }
 
 void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
 {
     printf("Copy reliable packet (%d bytes) to input... ", numBytes);
     // iterate for messages
-    // > if messageId <= stream input sequence ignore
+    // > if messageId <= streamput in sequence ignore
     // > if messageId > input sequence, copy to input buffer
     u8* read = ptr;
     u8* end = read + numBytes;
@@ -83,7 +92,7 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
     u8* copySrc = blockStart + blockSpace;
     u32 bytesToCopy = bufferEnd - copySrc;
     COM_COPY(copySrc, blockStart, bytesToCopy);
-    return copySrc + bytesToCopy;
+    return blockStart + bytesToCopy;
 }
 
 MessageHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
@@ -131,6 +140,7 @@ u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
 
 u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
 {
+    u32 currentSize = b->Written();
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
     u32 removed = 0;
@@ -146,8 +156,10 @@ u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
         printf("  Delete %d from output\n", id);
         i32 blockSize = sizeof(MessageHeader) + h->size;
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
+        b->ptrWrite = end;
         removed += blockSize;
     }
+    printf("  Removed %d bytes. Reduced %d to %d\n", removed, currentSize, b->Written());
     return removed;
 }
 

@@ -2,6 +2,15 @@
 
 #include "znet_module.cpp"
 
+internal inline ZNetConnectionInfo ZNet_CreateConnInfo(ZNetConnection* conn)
+{
+    ZNetConnectionInfo info;
+    info.address = conn->remoteAddress;
+    info.id = conn->id;
+    info.publicId = conn->publicId;
+    return info;
+}
+
 internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id)
 {
     if (id == 0) { return NULL; }
@@ -115,7 +124,8 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
         conn->awaitingAck[index].acked = 1;
         // boardcast ack received!
         //printf("  %d acked!\n", ack);
-        g_output.DeliveryConfirmed(ack);
+        ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
+        g_output.DeliveryConfirmed(&info, ack);
     }
     // Run through awaiting acks. If ack is on matching sequence, check ack'd is true
     u32 bit = 0;
@@ -134,7 +144,8 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
                 conn->awaitingAck[index].acked = 1;
                 // boardcast ack received!
                 //printf("  %d acked!\n", ack);
-                g_output.DeliveryConfirmed(ack);
+                ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
+                g_output.DeliveryConfirmed(&info, ack);
             }
         }
         ack--;
