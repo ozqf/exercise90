@@ -2,6 +2,60 @@
 
 #include "test_network_win32.h"
 
+void Client_ExecuteMessage(u8* ptr, u16 numBytes)
+{
+    u8 type = *ptr;
+    switch (type)
+    {
+        case TEST_MSG_TYPE_1:
+        {
+            TestMsg1 msg = {};
+            u16 msgSize = msg.Measure();
+            if (numBytes != msgSize)
+            {
+                printf("  MSG TYPE 1 size mismatch: got %d but measured %d\n", numBytes, msgSize);
+                ILLEGAL_CODE_PATH
+            }
+        } break;
+
+        default:
+        {
+            printf("  Unknown MSG type %d\n", type);
+            ILLEGAL_CODE_PATH
+        } break;
+    }
+}
+
+void Client_ExecuteInputStream(ReliableStream* stream)
+{
+    //i32 reading = 1;
+    ByteBuffer* b = &stream->inputBuffer;
+    //COM_PrintBytes(b->ptrStart, (u16)b->Written(), 64);
+    for(;;)
+    {
+        u32 nextMsg = stream->inputSequence + 1;
+        if (nextMsg == 0)
+        {
+            printf("ERROR: Next msg is 0!\n");
+        }
+        MessageHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
+        if (!h) { return; }
+
+        // Execute input, advance sequence, Collapse buffer
+        stream->inputSequence = nextMsg;
+
+        printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
+		u8* msg = (u8*)h;
+		msg += sizeof(MessageHeader);
+        Client_ExecuteMessage(msg, (u16)h->size);
+
+        // Clear
+        u8* blockStart = (u8*)h;
+        u32 blockSize = sizeof(MessageHeader) + h->size;
+        //printf("Clearing %d bytes\n", blockSize);
+        b->ptrWrite = Stream_CollapseBlock(blockStart, blockSize, b->ptrWrite);
+    }
+}
 
 //////////////////////////////////////////////////////////////////////
 // CLIENT
@@ -83,7 +137,7 @@ void Test_ClientSendInfo()
 void Test_Client(u16 serverPort, u16 clientPort)
 {
     printf("Client\n");
-    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_TERRIBLE);
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_BAD);
     g_network.Init();
 
     f32 tickRateSeconds = SERVER_TICK_RATE;
@@ -119,6 +173,7 @@ void Test_Client(u16 serverPort, u16 clientPort)
             // update connections
             i32 error = ZNet_Tick(tickRateSeconds);
             // read
+            Client_ExecuteInputStream(&g_network.server.reliableStream);
             
             if (g_network.server.connId != 0)
             {

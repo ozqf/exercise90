@@ -30,7 +30,7 @@ TransmissionRecord* Stream_FindTransmissionRecord(TransmissionRecord* records, u
 
 void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
 {
-    printf("RECORD: %d MSGS: ", rec->sequence);
+    //printf("RECORD: %d MSGS: ", rec->sequence);
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
         printf("%d, ", rec->reliableMessageIds[i]);
@@ -64,7 +64,7 @@ MessageHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
 
 void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
 {
-    printf("Copy reliable packet (%d bytes) to input... ", numBytes);
+    //printf("Copy reliable packet (%d bytes) to input... ", numBytes);
     // iterate for messages
     // > if messageId <= streamput in sequence ignore
     // > if messageId > input sequence, copy to input buffer
@@ -100,13 +100,13 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         else
         {
             // step back to include type byte
-            printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
-            u8* msg = read - 1;
+            //printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
+            u8* msg = read;
             Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
             read += size;
         }
     }
-    printf("Done\n");
+    //printf("Done\n");
 }
 
 
@@ -129,7 +129,7 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
  */
 u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
 {
-    printf("Reading %d bytes of input from sequence %d\n", (end - read), currentSequence);
+    //printf("Reading %d bytes of input from sequence %d\n", (end - read), currentSequence);
     i32 reading = 1;
     i32 removed = 0;
     for (;;)

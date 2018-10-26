@@ -161,6 +161,16 @@ static inline void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
     while ((u32)ptr < endPoint) { *ptr++ = val; }
 }
 
+static inline u32 COM_GetI32Sentinel()
+{
+	u32_union u;
+	u.bytes[0] = 'D';
+	u.bytes[1] = 'E';
+	u.bytes[2] = 'A';
+	u.bytes[3] = 'D';
+	return u.value;
+}
+
 /**
  * Repeatedly write the given pattern into ptr
  * Pattern size must fit exactly into numBytes!

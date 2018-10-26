@@ -170,6 +170,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     //    type, numBytes, info->remoteSequence, info->sender.id);
     Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
     printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+    
     // PARSE_MSG_BUFFER(
     //     &stream->inputBuffer.ptrStart,
     //     &stream->inputBuffer.ptrWrite,

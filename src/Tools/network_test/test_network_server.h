@@ -77,7 +77,7 @@ void SV_SendOutput()
         u8* reliableStart = b.ptrWrite;
         u8* read = stream->outputBuffer.ptrStart;
         u8* end = stream->outputBuffer.ptrWrite;
-		printf("Sending %d bytes of reliable msgs\n", (end - read));
+		//printf("Sending %d bytes of reliable msgs\n", (end - read));
         while (read < end)
         {
             u32 id = COM_ReadU32(&read);
@@ -107,7 +107,7 @@ void SV_SendOutput()
         write += COM_WriteU16(reliableBytes, write);
         // unreliable bytes could be written here
         write += COM_WriteU16(0, write);
-		printf("Wrote %d packet bytes (%d messages)\n", b.Written(), rec->numReliableMessages);
+		//printf("Wrote %d packet bytes (%d messages)\n", b.Written(), rec->numReliableMessages);
 
         u32 sendSequence = ZNet_SendData(
             cl->connId,
@@ -118,7 +118,7 @@ void SV_SendOutput()
     }
 }
 
-// Load frame based messages into client 
+// Load frame based messages into client
 void SV_ServerTickFrameOutput()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -130,15 +130,15 @@ void SV_ServerTickFrameOutput()
 
         // Write to output buffer
         TestMsg1 m1 = {};
-	    m1.member1 = 256;
-	    m1.member2 = 512;
-	    m1.member3 = 768;
+	    m1.member1 = COM_GetI32Sentinel();
+	    m1.member2 = COM_GetI32Sentinel();
+	    m1.member3 = COM_GetI32Sentinel();
 
 
         Buf_WriteMessageHeader(&stream->outputBuffer, ++stream->outputSequence, m1.Measure());
         stream->outputBuffer.ptrWrite += m1.Write(stream->outputBuffer.ptrWrite);
 		u32 written = stream->outputBuffer.Written();
-		printf("W: %d\n", written);
+		//printf("W: %d\n", written);
 
         //COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
         //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
@@ -175,7 +175,7 @@ void SV_ServerTickFrameOutput()
 void Test_Server(u16 serverPort)
 {
     printf("Server\n");
-    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_REALISTIC);
+    ZNet_Init(TNet_CreateNetFunctions(), TNet_CreateOutputInterface(), ZNET_SIM_MODE_BAD);
     g_network.Init();
 
     f32 tickRateSeconds = SERVER_TICK_RATE;
