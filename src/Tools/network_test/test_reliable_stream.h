@@ -38,53 +38,6 @@ void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
     printf("\n");
 }
 
-void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
-{
-    printf("Copy reliable packet (%d bytes) to input... ", numBytes);
-    // iterate for messages
-    // > if messageId <= streamput in sequence ignore
-    // > if messageId > input sequence, copy to input buffer
-    u8* read = ptr;
-    u8* end = read + numBytes;
-    while(read < end)
-    {
-        u32 messageId = COM_ReadU32(&read);
-        u8 msgType = COM_ReadByte(&read);
-        //u32 message = COM_ReadU32(&read);
-        // Must get msg size regardless of whether command will be read
-        // as it must be skipped over in either case
-        u16 size = Msg_MeasureMessageBytes(msgType, read);
-        printf(" Id: %d type %d size: %d\n", messageId, msgType, size);
-        if (messageId <= s->inputSequence)
-        {
-            read += size;
-            continue;
-        }
-        else
-        {
-            // step back to include type byte
-            u8* msg = read - 1;
-            Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
-            read += size;
-        }
-    }
-    printf("Done\n");
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // dest* --- space |---- rest of buffer ----| bufferEnd*
 // Returns new buffer end
 u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
@@ -108,6 +61,66 @@ MessageHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
     }
     return NULL;
 }
+
+void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
+{
+    printf("Copy reliable packet (%d bytes) to input... ", numBytes);
+    // iterate for messages
+    // > if messageId <= streamput in sequence ignore
+    // > if messageId > input sequence, copy to input buffer
+    u8* read = ptr;
+    u8* end = read + numBytes;
+    while(read < end)
+    {
+        u32 messageId = COM_ReadU32(&read);
+
+        u8 msgType = *read;
+        if (msgType == 0)
+        {
+            printf("ABORTED input copy: read msgType 0!\n");
+            break;
+        }
+        //u32 message = COM_ReadU32(&read);
+        // Must get msg size regardless of whether command will be read
+        // as it must be skipped over in either case
+        u16 size = Msg_MeasureMessageBytes(msgType, read);
+        if (messageId <= s->inputSequence)
+        {
+            read += size;
+            continue;
+        }
+        else if (Stream_FindMessageById(
+            s->inputBuffer.ptrStart,
+            s->inputBuffer.ptrWrite,
+            messageId))
+        {
+            read += size;
+            continue;
+        }
+        else
+        {
+            // step back to include type byte
+            printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
+            u8* msg = read - 1;
+            Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
+            read += size;
+        }
+    }
+    printf("Done\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Iterate over pending input. Load into application update buffer

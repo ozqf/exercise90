@@ -89,8 +89,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 4
-#define CLIENT_TICK_RATE 4
+#define SERVER_TICK_RATE 1
+#define CLIENT_TICK_RATE 1
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -166,8 +166,15 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     printf(
         "TNET: Received sequence %d bytes - reliable: %d unreliable %d\n",
         info->remoteSequence, reliableBytes, unreliableBytes);
-    //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n", type, numBytes, info->remoteSequence, info->sender.id);
-    //Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
+    //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
+    //    type, numBytes, info->remoteSequence, info->sender.id);
+    Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
+    printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+    // PARSE_MSG_BUFFER(
+    //     &stream->inputBuffer.ptrStart,
+    //     &stream->inputBuffer.ptrWrite,
+    //     Buf_InspectionCallback
+    // );
     #if 0
     // Reliable messages
     u8* end = bytes + sizeof(u32) + reliableBytes;
@@ -299,7 +306,8 @@ void Test_Win32(i32 argc, char* argv[])
     if (argc != 2)
     {   
         printf("Arg count mismatch. Needed 2 got %d\n", argc);
-        Test_Server(TEST_SERVER_PORT);
+        //Test_Server(TEST_SERVER_PORT);
+        Test_Client(TEST_SERVER_PORT, TEST_CLIENT_PORT);
         return;
     }
     char* mode = argv[1];

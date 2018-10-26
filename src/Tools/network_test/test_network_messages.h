@@ -158,9 +158,23 @@ u16 Msg_MeasureMessageBytes(u8 type, u8* bytes)
 {
     switch (type)
     {
-        case TEST_MSG_TYPE_1: { return 0; }
-        case TEST_MSG_TYPE_2: { return 0; }
-        case TEST_MSG_TYPE_3: { return 0; }
+        case TEST_MSG_TYPE_1:
+		{
+			// bleh, this is just meh
+			TestMsg1 m;
+			return m.Measure();
+		}
+        case TEST_MSG_TYPE_2:
+		{
+			TestMsg2 m;
+			return m.Measure();
+		}
+        case TEST_MSG_TYPE_3:
+		{
+			ILLEGAL_CODE_PATH
+			TestMsg1 m;
+			return m.Measure();
+		}
         
         case TNET_MSG_TYPE_C2S_CHAT:
         {
