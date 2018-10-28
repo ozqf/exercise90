@@ -83,7 +83,7 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         //u32 message = COM_ReadU32(&read);
         // Must get msg size regardless of whether command will be read
         // as it must be skipped over in either case
-        u16 size = Msg_MeasureMessageBytes(msgType, read);
+        u16 size = Msg_MeasureForReading(msgType, read);
         if (messageId <= s->inputSequence)
         {
             read += size;
@@ -232,19 +232,19 @@ void Stream_RunTests()
 	m2.pos[0] = 2048;
     //TestMsg1 m3 = {};
     printf("Measure msg sizes:\n");
-    printf("  Type1: %d bytes\n", m1.Measure());
-    printf("  Type2: %d bytes\n", m2.Measure());
+    printf("  Type1: %d bytes\n", m1.MeasureForWriting());
+    printf("  Type2: %d bytes\n", m2.MeasureForWriting());
     
     // Messages know how many bytes they will use.
     // Number of bytes used is recorded in input/output buffers to allow
 
-    Buf_WriteMessageHeader(&output, 201, m1.Measure());
+    Buf_WriteMessageHeader(&output, 201, m1.MeasureForWriting());
     output.ptrWrite += m1.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 200, m2.Measure());
+    Buf_WriteMessageHeader(&output, 200, m2.MeasureForWriting());
     output.ptrWrite += m2.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 202, m2.Measure());
+    Buf_WriteMessageHeader(&output, 202, m2.MeasureForWriting());
     output.ptrWrite += m2.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 204, m1.Measure());
+    Buf_WriteMessageHeader(&output, 204, m1.MeasureForWriting());
     output.ptrWrite += m1.Write(output.ptrWrite);
 
     printf("  output done. Wrote %d bytes\n", output.Written());

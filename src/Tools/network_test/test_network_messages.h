@@ -60,7 +60,7 @@ struct TestMsg1
     i32 member2;
     i32 member3;
 
-    u16 Measure()
+    u16 MeasureForWriting()
     {
         return 3 * sizeof(i32) + MSG_TYPE_SIZE;
     }
@@ -96,7 +96,7 @@ struct TestMsg2
     i32 member2;
     i32 pos[3];
     
-    u16 Measure()
+    u16 MeasureForWriting()
     {
         return (5 * sizeof(i32)) + MSG_TYPE_SIZE;
     }
@@ -154,7 +154,7 @@ struct MsgS2CChat
 
 };
 
-u16 Msg_MeasureMessageBytes(u8 type, u8* bytes)
+u16 Msg_MeasureForReading(u8 type, u8* bytes)
 {
     switch (type)
     {
@@ -162,18 +162,18 @@ u16 Msg_MeasureMessageBytes(u8 type, u8* bytes)
 		{
 			// bleh, this is just meh
 			TestMsg1 m;
-			return m.Measure();
+			return m.MeasureForWriting();
 		}
         case TEST_MSG_TYPE_2:
 		{
 			TestMsg2 m;
-			return m.Measure();
+			return m.MeasureForWriting();
 		}
         case TEST_MSG_TYPE_3:
 		{
 			ILLEGAL_CODE_PATH
 			TestMsg1 m;
-			return m.Measure();
+			return m.MeasureForWriting();
 		}
         
         case TNET_MSG_TYPE_C2S_CHAT:

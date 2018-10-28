@@ -10,7 +10,7 @@ void Client_ExecuteMessage(u8* ptr, u16 numBytes)
         case TEST_MSG_TYPE_1:
         {
             TestMsg1 msg = {};
-            u16 msgSize = msg.Measure();
+            u16 msgSize = Msg_MeasureForReading(TEST_MSG_TYPE_1, ptr);
             if (numBytes != msgSize)
             {
                 printf("  MSG TYPE 1 size mismatch: got %d but measured %d\n", numBytes, msgSize);

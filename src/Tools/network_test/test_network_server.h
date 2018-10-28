@@ -135,7 +135,10 @@ void SV_ServerTickFrameOutput()
 	    m1.member3 = COM_GetI32Sentinel();
 
 
-        Buf_WriteMessageHeader(&stream->outputBuffer, ++stream->outputSequence, m1.Measure());
+        Buf_WriteMessageHeader(
+            &stream->outputBuffer,
+            ++stream->outputSequence,
+            m1.MeasureForWriting());
         stream->outputBuffer.ptrWrite += m1.Write(stream->outputBuffer.ptrWrite);
 		u32 written = stream->outputBuffer.Written();
 		//printf("W: %d\n", written);
