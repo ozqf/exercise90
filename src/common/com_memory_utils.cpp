@@ -10,6 +10,11 @@ static inline u32 SafeTruncateUInt64(u64 value)
 	return result;
 }
 
+////////////////////////////////////////////////////////////
+// TODO: None of this handles eddianness!
+// Implement via compile time flag, #define BIG_ENDIAN
+////////////////////////////////////////////////////////////
+
 /**
  * Returns number of bytes written
  */

@@ -1,6 +1,6 @@
 # Exercise 90 To do
 
-## Currnet
+## Current
 
 ### ECS complexity
 Insanely fiddly steps to adding a new component:

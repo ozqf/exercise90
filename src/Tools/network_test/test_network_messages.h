@@ -7,7 +7,7 @@
 // the streams they are read from/written to
 ///////////////////////////////////////////////////////////
 
-struct MessageHeader
+struct StreamMsgHeader
 {
     u32 id;
     u32 size;
@@ -27,6 +27,13 @@ struct MessageHeader
         size = COM_ReadU32(&read);
         return read - bytes;
     }
+};
+
+struct PacketMsgHeader
+{
+    u32 id;
+    u8 type;
+    u16 size;
 };
 
 #define TEST_MSG_TYPE_NULL 0

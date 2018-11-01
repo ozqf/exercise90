@@ -89,8 +89,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 1
-#define CLIENT_TICK_RATE 1
+#define SERVER_TICK_RATE 20
+#define CLIENT_TICK_RATE 20
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();

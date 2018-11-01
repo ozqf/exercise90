@@ -48,16 +48,16 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
     return blockStart + bytesToCopy;
 }
 
-MessageHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
+StreamMsgHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
 {
     while (read < end)
     {
-        MessageHeader* h = (MessageHeader*)read;
+        StreamMsgHeader* h = (StreamMsgHeader*)read;
         if (h->id == id)
         {
             return h;
         }
-        read += (sizeof(MessageHeader) + h->size);
+        read += (sizeof(StreamMsgHeader) + h->size);
     }
     return NULL;
 }
@@ -135,7 +135,7 @@ u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
     for (;;)
     {
         u32 nextSequence = currentSequence + 1;
-        MessageHeader* h = Stream_FindMessageById(read, end, nextSequence);
+        StreamMsgHeader* h = Stream_FindMessageById(read, end, nextSequence);
         if (h == NULL)
         {
             break;
@@ -144,7 +144,7 @@ u32 Stream_ReadInput(u8* read, u8* end, u32 currentSequence, ByteBuffer* b)
         printf("Exec msg %d\n", currentSequence);
 
         // Collapse buffer
-        i32 blockSize = (sizeof(MessageHeader) + h->size);
+        i32 blockSize = (sizeof(StreamMsgHeader) + h->size);
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         removed += blockSize;
     }
@@ -160,14 +160,14 @@ u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
         u32 id = rec->reliableMessageIds[i];
-        MessageHeader* h = Stream_FindMessageById(read, end, id);
+        StreamMsgHeader* h = Stream_FindMessageById(read, end, id);
         if (h == NULL)
         {
             continue;
         }
         // clear and collapse
         printf("  Delete %d from output\n", id);
-        i32 blockSize = sizeof(MessageHeader) + h->size;
+        i32 blockSize = sizeof(StreamMsgHeader) + h->size;
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         b->ptrWrite = end;
         removed += blockSize;
@@ -193,7 +193,7 @@ void Stream_RunTests()
 		> Iterate Output, removing acked messages and collapsing the buffer
 
     Buffer layout:
-    MessageHeader
+    StreamMsgHeader
         (u32) Sequence
         (u32) Size (omitted in packet)
     Message
@@ -238,13 +238,13 @@ void Stream_RunTests()
     // Messages know how many bytes they will use.
     // Number of bytes used is recorded in input/output buffers to allow
 
-    Buf_WriteMessageHeader(&output, 201, m1.MeasureForWriting());
+    Buf_WriteStreamMsgHeader(&output, 201, m1.MeasureForWriting());
     output.ptrWrite += m1.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 200, m2.MeasureForWriting());
+    Buf_WriteStreamMsgHeader(&output, 200, m2.MeasureForWriting());
     output.ptrWrite += m2.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 202, m2.MeasureForWriting());
+    Buf_WriteStreamMsgHeader(&output, 202, m2.MeasureForWriting());
     output.ptrWrite += m2.Write(output.ptrWrite);
-    Buf_WriteMessageHeader(&output, 204, m1.MeasureForWriting());
+    Buf_WriteStreamMsgHeader(&output, 204, m1.MeasureForWriting());
     output.ptrWrite += m1.Write(output.ptrWrite);
 
     printf("  output done. Wrote %d bytes\n", output.Written());
@@ -266,7 +266,7 @@ void Stream_RunTests()
     u8* end = output.ptrWrite;
     while (read < end)
     {
-        MessageHeader h;
+        StreamMsgHeader h;
         read += h.Read(read);
         printf("  writing %d (%d bytes)\n", h.id, h.size);
         packet.ptrWrite += COM_WriteU32(h.id, packet.ptrWrite);
@@ -397,8 +397,41 @@ void Stream_RunTests()
     PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
 }
 
+inline u16 Stream_PackMessageHeader(u8 sequenceOffset, u16 size)
+{
+    sequenceOffset = sequenceOffset & SIX_BIT_MASK;
+    size = size & TEN_BIT_MASK;
+    return ((sequenceOffset << 10) | size);
+}
+
+inline void Stream_UnpackMessageHeader(u16 header, u8* sequenceOffset, u16* size)
+{
+    *sequenceOffset = (header >> 10) & SIX_BIT_MASK;
+    *size = header & TEN_BIT_MASK;
+}
+
+void TNet_TestMsgHeaderPacking(u8 offset, u16 size)
+{
+    // sequence offset 6 bits, so 0 to 64
+    //u8 offset = 29;
+    // size, 10 bits, 0 to 1024
+    //u16 size = 576;
+
+    offset = offset & SIX_BIT_MASK;
+    size = size & TEN_BIT_MASK;
+    u16 packed = (offset << 10) | size;
+    printf("Packing offset %d and size %d to: %d\n", offset, size, packed);
+
+    u8 offset2 = (packed >> 10) & SIX_BIT_MASK;
+    u16 size2 = packed & TEN_BIT_MASK;
+    printf("Unpacked: offset %d and size %d\n", offset2, size2);
+}
+
 void TNet_TestReliability()
 {
 	//Test_BufferWriteAndCollapse();
-    Stream_RunTests();
+    //Stream_RunTests();
+    TNet_TestMsgHeaderPacking(29, 576);
+    TNet_TestMsgHeaderPacking(56, 184);
+    TNet_TestMsgHeaderPacking(127, 1023);
 }

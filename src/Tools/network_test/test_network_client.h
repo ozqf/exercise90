@@ -38,7 +38,7 @@ void Client_ExecuteInputStream(ReliableStream* stream)
         {
             printf("ERROR: Next msg is 0!\n");
         }
-        MessageHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
+        StreamMsgHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
         if (!h) { return; }
 
         // Execute input, advance sequence, Collapse buffer
@@ -46,12 +46,12 @@ void Client_ExecuteInputStream(ReliableStream* stream)
 
         printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
 		u8* msg = (u8*)h;
-		msg += sizeof(MessageHeader);
+		msg += sizeof(StreamMsgHeader);
         Client_ExecuteMessage(msg, (u16)h->size);
 
         // Clear
         u8* blockStart = (u8*)h;
-        u32 blockSize = sizeof(MessageHeader) + h->size;
+        u32 blockSize = sizeof(StreamMsgHeader) + h->size;
         //printf("Clearing %d bytes\n", blockSize);
         b->ptrWrite = Stream_CollapseBlock(blockStart, blockSize, b->ptrWrite);
     }

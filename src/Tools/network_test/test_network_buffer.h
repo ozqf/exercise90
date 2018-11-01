@@ -5,14 +5,14 @@
 void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
 {
     Assert(b->Space() > numBytes)
-    MessageHeader h;
+    StreamMsgHeader h;
     h.id = msgId;
     h.size = numBytes;
-    b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(MessageHeader));
+    b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
-void Buf_WriteMessageHeader(ByteBuffer* b, u32 msgId, u32 numBytes)
+void Buf_WriteStreamMsgHeader(ByteBuffer* b, u32 msgId, u32 numBytes)
 {
     Assert(b->Space() > numBytes)
     b->ptrWrite += COM_WriteU32(msgId, b->ptrWrite);
@@ -25,12 +25,12 @@ u8* Buf_SearchForMessageId(u32 messageId, u8* bytes, u16 numBytes)
     u8* end = read + numBytes;
     while (read < end)
     {
-        MessageHeader h;
+        StreamMsgHeader h;
 		
-        read += COM_COPY_STRUCT(read, &h, MessageHeader);
+        read += COM_COPY_STRUCT(read, &h, StreamMsgHeader);
         if (h.id == messageId)
 		{
-			return read - sizeof(MessageHeader);
+			return read - sizeof(StreamMsgHeader);
 		}
 		read += h.size;
     }
@@ -82,8 +82,8 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
     u8* parseBufPtrEnd = *ptr2ptrEnd; \
     while (parseBufPtrRead < parseBufPtrEnd) \
     { \
-        MessageHeader h; \
-        parseBufPtrRead += COM_COPY_STRUCT(parseBufPtrRead, &h, MessageHeader); \
+        StreamMsgHeader h; \
+        parseBufPtrRead += COM_COPY_STRUCT(parseBufPtrRead, &h, StreamMsgHeader); \
         i32 result = Callback##(h.id, parseBufPtrRead, h.size); \
         if (result == 0) \
         { \
@@ -92,9 +92,9 @@ i32 Buf_CollapseCallback(u32 type, u8* bytes, u32 numBytes)
         } \
         else if (result == 2) \
         { \
-            u32 space = sizeof(MessageHeader) + h.size; \
+            u32 space = sizeof(StreamMsgHeader) + h.size; \
             u8* copySrc = parseBufPtrRead + h.size; \
-            u8* copyDest = parseBufPtrRead - sizeof(MessageHeader); \
+            u8* copyDest = parseBufPtrRead - sizeof(StreamMsgHeader); \
             u32 bytesToCopy = (parseBufPtrEnd - copySrc); \
             printf("Copy back %d bytes by %d\n", bytesToCopy, space); \
             COM_COPY(copySrc, copyDest, bytesToCopy); \
@@ -124,10 +124,10 @@ u16 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
     u8* end = (u8*)(stream->outputBuffer.ptrWrite - stream->outputBuffer.ptrStart);
     while (read < end)
     {
-        MessageHeader h;
-        COM_COPY_STRUCT(read, &h, MessageHeader);
-        u8* src = read + sizeof(MessageHeader);
-        read += sizeof(MessageHeader) + h.size;
+        StreamMsgHeader h;
+        COM_COPY_STRUCT(read, &h, StreamMsgHeader);
+        u8* src = read + sizeof(StreamMsgHeader);
+        read += sizeof(StreamMsgHeader) + h.size;
         printf("Writing output sequence %d\n", h.id);
         // header (messageId)
         write += COM_COPY(&h.id, write, sizeof(h.id));
@@ -137,7 +137,7 @@ u16 Stream_WriteReliableOutput(ReliableStream* stream, u8* buffer, u32 capacity)
     return (u16)(write - buffer);
 }
 
-MessageHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }
+StreamMsgHeader Buf_FindMessage(u8* bytes, u32 numBytes) { return {}; }
 
 global_variable u8 g_msgBuffer[1024];
 global_variable u8 g_testPacket[1024];

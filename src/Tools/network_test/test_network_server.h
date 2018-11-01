@@ -135,7 +135,7 @@ void SV_ServerTickFrameOutput()
 	    m1.member3 = COM_GetI32Sentinel();
 
 
-        Buf_WriteMessageHeader(
+        Buf_WriteStreamMsgHeader(
             &stream->outputBuffer,
             ++stream->outputSequence,
             m1.MeasureForWriting());

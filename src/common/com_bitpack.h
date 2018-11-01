@@ -2,6 +2,8 @@
 
 #include "com_module.h"
 
+// 2 to the power of N bits - 1:
+#define SIX_BIT_MASK 63
 #define TEN_BIT_MASK 1023
 #define SIXTEEN_BIT_MASK 65535
 #define TWENTY_FOUR_BIT_MASK 16777215
