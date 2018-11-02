@@ -89,8 +89,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 20
-#define CLIENT_TICK_RATE 20
+#define SERVER_TICK_RATE 60
+#define CLIENT_TICK_RATE 60
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -162,14 +162,18 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     u8* read = bytes;
     u16 reliableBytes = COM_ReadU16(&read);
     u16 unreliableBytes = COM_ReadU16(&read);
-    //u8 type = COM_ReadByte(&read);
-    printf(
+    if (reliableBytes != 0)
+    {
+        printf(
         "TNET: Received sequence %d bytes - reliable: %d unreliable %d\n",
         info->remoteSequence, reliableBytes, unreliableBytes);
-    //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
-    //    type, numBytes, info->remoteSequence, info->sender.id);
-    Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
-    printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+        //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
+        //    type, numBytes, info->remoteSequence, info->sender.id);
+        Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
+        printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+    }
+    //u8 type = COM_ReadByte(&read);
+    
     
     // PARSE_MSG_BUFFER(
     //     &stream->inputBuffer.ptrStart,

@@ -29,13 +29,6 @@ struct StreamMsgHeader
     }
 };
 
-struct PacketMsgHeader
-{
-    u32 id;
-    u8 type;
-    u16 size;
-};
-
 #define TEST_MSG_TYPE_NULL 0
 #define TEST_MSG_TYPE_1 1
 #define TEST_MSG_TYPE_2 2

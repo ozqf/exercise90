@@ -73,10 +73,20 @@ void SV_SendOutput()
         
         COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
         ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
-        b.ptrWrite += sizeof(u16) * 2;
+        // step over header
+        // u16 num reliable bytes
+        // u16 num unreliable bytes
+        // u32 reliable sequence
+        b.ptrWrite += sizeof(u16) + sizeof(u16) + sizeof(u32);
         u8* reliableStart = b.ptrWrite;
+
+        // iterate output buffer
         u8* read = stream->outputBuffer.ptrStart;
         u8* end = stream->outputBuffer.ptrWrite;
+
+        // messages will store the offset of their sequence from this number, which
+        // is read from the first message
+        u32 firstReliableId = 0;
 		//printf("Sending %d bytes of reliable msgs\n", (end - read));
         while (read < end)
         {
@@ -89,10 +99,20 @@ void SV_SendOutput()
 				printf("Packet full!\n");
 				break;
 			}
+
+            if (rec->numReliableMessages == 0)
+            {
+                firstReliableId = id;
+            }
+            u32 idOffset = id - firstReliableId;
+            u16 msgHeader = Stream_PackMessageHeader((u8)idOffset, (u16)size);
+            printf("First id %d offset %d size %d\n", firstReliableId, idOffset, size);
+            b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
 			//printf("Writing msg %d (%d bytes)\n", id, size);
-            b.ptrWrite += COM_WriteU32(id, b.ptrWrite);
+            //b.ptrWrite += COM_WriteU32(id, b.ptrWrite);
             b.ptrWrite += COM_COPY(read, b.ptrWrite, size);
             rec->reliableMessageIds[rec->numReliableMessages] = id;
+            
             rec->numReliableMessages++;
 			if (rec->numReliableMessages == MAX_PACKET_TRANSMISSION_MESSAGES)
 			{
@@ -107,6 +127,7 @@ void SV_SendOutput()
         write += COM_WriteU16(reliableBytes, write);
         // unreliable bytes could be written here
         write += COM_WriteU16(0, write);
+        write += COM_WriteU32(firstReliableId, write);
 		//printf("Wrote %d packet bytes (%d messages)\n", b.Written(), rec->numReliableMessages);
 
         u32 sendSequence = ZNet_SendData(

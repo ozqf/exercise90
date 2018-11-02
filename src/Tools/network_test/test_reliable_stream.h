@@ -2,6 +2,19 @@
 
 #include "test_network_win32.h"
 
+inline u16 Stream_PackMessageHeader(u8 sequenceOffset, u16 size)
+{
+    sequenceOffset = sequenceOffset & SIX_BIT_MASK;
+    size = size & TEN_BIT_MASK;
+    return ((sequenceOffset << 10) | size);
+}
+
+inline void Stream_UnpackMessageHeader(u16 header, u8* sequenceOffset, u16* size)
+{
+    *sequenceOffset = (header >> 10) & SIX_BIT_MASK;
+    *size = header & TEN_BIT_MASK;
+}
+
 /**
  * Select and overwrite a previous transmission record
  */
@@ -70,9 +83,16 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
     // > if messageId > input sequence, copy to input buffer
     u8* read = ptr;
     u8* end = read + numBytes;
+    u32 reliableSequence = COM_ReadU32(&read);
     while(read < end)
     {
-        u32 messageId = COM_ReadU32(&read);
+        //u32 messageId = COM_ReadU32(&read);
+        u16 packedHeader = COM_ReadU16(&read);
+        u8 offset;
+        u16 size;
+        Stream_UnpackMessageHeader(packedHeader, &offset, &size);
+        u32 messageId = reliableSequence + offset;
+        printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
 
         u8 msgType = *read;
         if (msgType == 0)
@@ -83,7 +103,7 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         //u32 message = COM_ReadU32(&read);
         // Must get msg size regardless of whether command will be read
         // as it must be skipped over in either case
-        u16 size = Msg_MeasureForReading(msgType, read);
+        //u16 size = Msg_MeasureForReading(msgType, read);
         if (messageId <= s->inputSequence)
         {
             read += size;
@@ -99,7 +119,6 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         }
         else
         {
-            // step back to include type byte
             //printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
             u8* msg = read;
             Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
@@ -397,26 +416,13 @@ void Stream_RunTests()
     PARSE_MSG_BUFFER(&output.ptrStart, &output.ptrWrite, Buf_InspectionCallback);
 }
 
-inline u16 Stream_PackMessageHeader(u8 sequenceOffset, u16 size)
-{
-    sequenceOffset = sequenceOffset & SIX_BIT_MASK;
-    size = size & TEN_BIT_MASK;
-    return ((sequenceOffset << 10) | size);
-}
-
-inline void Stream_UnpackMessageHeader(u16 header, u8* sequenceOffset, u16* size)
-{
-    *sequenceOffset = (header >> 10) & SIX_BIT_MASK;
-    *size = header & TEN_BIT_MASK;
-}
-
 void TNet_TestMsgHeaderPacking(u8 offset, u16 size)
 {
     // sequence offset 6 bits, so 0 to 64
     //u8 offset = 29;
     // size, 10 bits, 0 to 1024
     //u16 size = 576;
-
+    /*
     offset = offset & SIX_BIT_MASK;
     size = size & TEN_BIT_MASK;
     u16 packed = (offset << 10) | size;
@@ -425,6 +431,13 @@ void TNet_TestMsgHeaderPacking(u8 offset, u16 size)
     u8 offset2 = (packed >> 10) & SIX_BIT_MASK;
     u16 size2 = packed & TEN_BIT_MASK;
     printf("Unpacked: offset %d and size %d\n", offset2, size2);
+    */
+   u16 packed = Stream_PackMessageHeader(offset, size);
+   printf("Packing offset %d and size %d to: %d\n", offset, size, packed);
+   u8 unpackedOffset;
+   u16 unpackedSize;
+   Stream_UnpackMessageHeader(packed, &unpackedOffset, &unpackedSize);
+   printf("Unpacked: offset %d and size %d\n", unpackedOffset, unpackedSize);
 }
 
 void TNet_TestReliability()
