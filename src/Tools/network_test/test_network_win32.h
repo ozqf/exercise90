@@ -76,10 +76,11 @@ Stream
 Packet structure
 > (u16) bytes of reliable messages
 > (u16) bytes of unreliable messages
+> (u32) reliableSequence
 > Reliable messages:
-    > messageId (u32)
-    > Message
-    > messageId (u32)
+    > messageHeader (u16) - 6 bits offset from reliableSequence, 10 bits of size in bytes
+    > Message - (size specified in messageHeader, first byte == type)
+    > messageId (u16)
     > Message
     > ...etc
 > Unreliable Messages
@@ -89,8 +90,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 60
-#define CLIENT_TICK_RATE 60
+#define SERVER_TICK_RATE 10
+#define CLIENT_TICK_RATE 10
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -164,77 +165,14 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     u16 unreliableBytes = COM_ReadU16(&read);
     if (reliableBytes != 0)
     {
-        printf(
-        "TNET: Received sequence %d bytes - reliable: %d unreliable %d\n",
-        info->remoteSequence, reliableBytes, unreliableBytes);
+        //printf(
+        //    "TNET: Received sequence %d. %d Reliable, %d  unreliable bytes\n",
+        //    info->remoteSequence, reliableBytes, unreliableBytes);
         //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
         //    type, numBytes, info->remoteSequence, info->sender.id);
         Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
-        printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+        //printf("> %d bytes in Input\n", stream->inputBuffer.Written());
     }
-    //u8 type = COM_ReadByte(&read);
-    
-    
-    // PARSE_MSG_BUFFER(
-    //     &stream->inputBuffer.ptrStart,
-    //     &stream->inputBuffer.ptrWrite,
-    //     Buf_InspectionCallback
-    // );
-    #if 0
-    // Reliable messages
-    u8* end = bytes + sizeof(u32) + reliableBytes;
-    while (read < end)
-    {
-        u32 messageId = COM_ReadU32(&read);
-        u32 message = COM_ReadU32(&read);
-        printf(" Id: %d Message: %X\n", messageId, message);
-        // Copy into reliable input buffer
-    }
-    #endif
-    #if 0
-    switch (type)
-    {
-        case 1:
-        {
-            //printf("TNET TYPE %d\n", type);
-        } break;
-
-        case TNET_MSG_TYPE_C2S_CHAT:
-        {
-            if (g_network.isServer)
-            {
-                //printf("TNET TYPE %d\n", type);
-                // sanitise a little
-                char buf[256];
-                u16 numChars = COM_ReadU16(&read);
-                if (numChars > 256) { numChars = 256; }
-
-                COM_ZeroMemory((u8*)buf, 256);
-                COM_COPY(read, buf, numChars);
-                TestClient* cl = g_network.GetClient(info->sender.id);
-                if (!cl)
-                {
-                    printf("SV Not client %d on server\n", info->sender.id);
-                    break;
-                }
-                printf("%d (%d) says: %s\n", cl->publicClientId, info->sender.id, buf);
-                TNet_ServerSendChatMsg(cl->publicClientId, buf, numChars);
-            }
-            
-        } break;
-
-        case TNET_MSG_TYPE_S2C_CHAT:
-        {
-            char buf[256];
-            i32 senderPublicId = COM_ReadI32(&read);
-            u16 numChars = COM_ReadU16(&read);
-            if (numChars > 256) { numChars = 256; }
-            COM_ZeroMemory((u8*)buf, 256);
-            COM_COPY(read, buf, numChars);
-            printf("%d says: %s\n", senderPublicId, buf);
-        } break;
-    }
-    #endif
 }
 
 void TNet_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
@@ -245,7 +183,7 @@ void TNet_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
     // Search for and remove packet record
     if (g_network.isServer)
     {
-        printf("ACK server confirming delivery of %d from conn %d\n", packetNumber, conn->id);
+        //printf("ACK server confirming delivery of %d from conn %d\n", packetNumber, conn->id);
         TestClient* cl = g_network.GetClient(conn->id);
         
         TransmissionRecord* rec =  Stream_FindTransmissionRecord(
@@ -253,7 +191,7 @@ void TNet_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
         );
         if (rec)
         {
-            Stream_PrintTransmissionRecord(rec);
+            //Stream_PrintTransmissionRecord(rec);
             Stream_ClearReceivedMessages(rec, &cl->reliableStream.outputBuffer);
         }
     }
@@ -276,12 +214,6 @@ ZNetPlatformFunctions TNet_CreateNetFunctions()
 
 ZNetOutputInterface TNet_CreateOutputInterface()
 {
-	/*
-	void (*ConnectionAccepted)		(ZNetConnectionInfo* conn);
-	void (*ConnectionDropped)		(ZNetConnectionInfo* conn);
-	void (*DataPacketReceived)		(ZNetPacketInfo* info, u8* bytes, u16 numBytes);
-	void (*DeliveryConfirmed)		(u32 packetNumber);
-	*/
 	ZNetOutputInterface x = {};
 	x.ConnectionAccepted = TNet_ConnectionAccepted;
 	x.ConnectionDropped = TNet_ConnectionDropped;

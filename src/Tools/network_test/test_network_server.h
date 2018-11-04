@@ -52,16 +52,77 @@ void TNet_SendKeepAlivePacket(i32 connId)
     
 }
 
-// Load client outputs into a packet and transmit
-// This should be the ONLY place that deals with writing packets, all the rest
-// should be messages loaded into the client's output buffer
+void SV_ExecuteClientMessage(TestGameNetwork* net, TestClient* cl, u8* bytes)
+{
+    u8 type = *bytes;
+    printf("SV exec type %d for client %d\n", type, cl->publicClientId);
+    switch (type)
+    {
+        case TNET_MSG_TYPE_C2S_CHAT:
+        {
+
+        } break;
+
+    }
+}
+
+/**
+ * Iterate clients and read their inputs
+ */
+void SV_ReadInput(TestGameNetwork* net)
+{
+    for (i32 i = 0; i < net->capacity; ++i)
+    {
+        TestClient* cl = &net->clients[i];
+        if (!cl->inUse) { continue; }
+
+        ReliableStream* stream = &cl->reliableStream;
+        ByteBuffer* b = &stream->inputBuffer;
+
+        // Read buffer
+        u32 nextMsg = stream->inputSequence + 1;
+        // TODO: This necessary? Figure out what might happen with a 16 bit
+        // sequence number
+        if (nextMsg == 0)
+        {
+            printf("ERROR: Next msg is 0!\n");
+        }
+        StreamMsgHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
+        // No pending message?
+        if (!h) { continue; }
+        // update input sequence number
+        stream->inputSequence = nextMsg;
+
+        u8* msg = (u8*)h + sizeof(StreamMsgHeader);
+        SV_ExecuteClientMessage(net, cl, msg);
+        // Clear message
+        u8* blockStart = (u8*)h;
+        u32 blockSize = sizeof(StreamMsgHeader) + h->size;
+        b->ptrWrite = Stream_CollapseBlock(blockStart, blockSize, b->ptrWrite);
+
+    }
+}
+
+/**
+ * Load client outputs into a packet and transmit
+ * This should be the ONLY place that deals with writing packets, all the rest
+ * should be messages loaded into the client's output buffer
+ */
 void SV_SendOutput()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
     {
         TestClient* cl = &g_network.clients[i];
         if (!cl->inUse) { continue; }
-        
+
+        Stream_OutputToPacket(
+            &g_network,
+            cl->connId,
+            &cl->reliableStream,
+            g_dataBuffer,
+            DATA_BUFFER_SIZE
+        );
+        #if 0
         ReliableStream* stream = &cl->reliableStream;
 
         u32 packetSequence = ZNet_GetNextSequenceNumber(cl->connId);
@@ -106,7 +167,7 @@ void SV_SendOutput()
             }
             u32 idOffset = id - firstReliableId;
             u16 msgHeader = Stream_PackMessageHeader((u8)idOffset, (u16)size);
-            printf("First id %d offset %d size %d\n", firstReliableId, idOffset, size);
+            //printf("First id %d offset %d size %d\n", firstReliableId, idOffset, size);
             b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
 			//printf("Writing msg %d (%d bytes)\n", id, size);
             //b.ptrWrite += COM_WriteU32(id, b.ptrWrite);
@@ -121,7 +182,7 @@ void SV_SendOutput()
 			}
             read += size;
         }
-        Stream_PrintTransmissionRecord(rec);
+        //Stream_PrintTransmissionRecord(rec);
         u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
         u8* write = b.ptrStart;
         write += COM_WriteU16(reliableBytes, write);
@@ -136,10 +197,11 @@ void SV_SendOutput()
             (u16)b.Written(),
             0
         );
+        #endif
     }
 }
 
-// Load frame based messages into client
+// Load frame based messages into client output streams
 void SV_ServerTickFrameOutput()
 {
     for (i32 i = 0; i < g_network.capacity; ++i)
@@ -162,37 +224,6 @@ void SV_ServerTickFrameOutput()
             m1.MeasureForWriting());
         stream->outputBuffer.ptrWrite += m1.Write(stream->outputBuffer.ptrWrite);
 		u32 written = stream->outputBuffer.Written();
-		//printf("W: %d\n", written);
-
-        //COM_ZeroMemory(g_dataBuffer, DATA_BUFFER_SIZE);
-        //ByteBuffer b = Buf_FromBytes(g_dataBuffer, DATA_BUFFER_SIZE);
-
-        //u32 messageId = 0xABCDABCD;
-        /*
-        u32 message1 = 0xDEADBEEF;
-        u32 message2 = 0xABCDDCBA;
-        u32 message1Id = cl->reliableStream.outputSequence++;
-        u32 message2Id = cl->reliableStream.outputSequence++;
-        
-        u16 messageBytes = 4 * sizeof(u32);
-        ByteBuffer b = TNET_GetWriteBuffer();
-        // packet header
-        b.ptrWrite += COM_WriteU16(messageBytes, b.ptrWrite);
-        b.ptrWrite += COM_WriteU16(0, b.ptrWrite);
-        // message sequence + message itself
-        b.ptrWrite += COM_WriteU32(message1Id, b.ptrWrite);
-        b.ptrWrite += COM_WriteU32(message1, b.ptrWrite);
-        b.ptrWrite += COM_WriteU32(message2Id, b.ptrWrite);
-        b.ptrWrite += COM_WriteU32(message2, b.ptrWrite);
-
-        u32 sendSequence = ZNet_SendData(
-            cl->connId,
-            b.ptrStart,
-            (u16)b.Written(),
-            0
-        );
-        */
-        //printf("Sent sequence %d\n", sendSequence);
     }
 }
 
@@ -205,9 +236,6 @@ void Test_Server(u16 serverPort)
     f32 tickRateSeconds = SERVER_TICK_RATE;
     i32 tickRateMS = (i32)(1000.0f / tickRateSeconds);
 
-    //i32 tickRateMS = 250;
-    //f32 tickRateSeconds = 1.0f / (f32)(1000 / tickRateMS);
-	
 	/*
 	Notes:
 	> How to transfer a arbitrary list of connections out of ZNet?
@@ -243,6 +271,7 @@ void Test_Server(u16 serverPort)
             }
             break;
         }
+        SV_ReadInput(&g_network);
         SV_ServerTickFrameOutput();
         SV_SendOutput();
         Sleep(tickRateMS);

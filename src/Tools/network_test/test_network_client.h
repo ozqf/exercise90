@@ -16,6 +16,7 @@ void Client_ExecuteMessage(u8* ptr, u16 numBytes)
                 printf("  MSG TYPE 1 size mismatch: got %d but measured %d\n", numBytes, msgSize);
                 ILLEGAL_CODE_PATH
             }
+            printf("CL exec 1: %d, %d, %d\n", msg.member1, msg.member2, msg.member3);
         } break;
 
         default:
@@ -26,7 +27,7 @@ void Client_ExecuteMessage(u8* ptr, u16 numBytes)
     }
 }
 
-void Client_ExecuteInputStream(ReliableStream* stream)
+void Client_ReadInput(ReliableStream* stream)
 {
     //i32 reading = 1;
     ByteBuffer* b = &stream->inputBuffer;
@@ -39,12 +40,13 @@ void Client_ExecuteInputStream(ReliableStream* stream)
             printf("ERROR: Next msg is 0!\n");
         }
         StreamMsgHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
+        // No pending message?
         if (!h) { return; }
 
         // Execute input, advance sequence, Collapse buffer
         stream->inputSequence = nextMsg;
 
-        printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
+        //printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
 		u8* msg = (u8*)h;
 		msg += sizeof(StreamMsgHeader);
         Client_ExecuteMessage(msg, (u16)h->size);
@@ -63,6 +65,22 @@ void Client_ExecuteInputStream(ReliableStream* stream)
 void Test_ClientSendChatMessage(char* buf, u32 length)
 {
     if (!g_network.isActive) { printf("Cannot send, network not active\n"); return; }
+
+    ByteBuffer* b = &g_network.server.reliableStream.outputBuffer;
+
+    u8* ptrHeader = b->ptrWrite;
+    b->ptrWrite += sizeof(StreamMsgHeader);
+
+    
+    MsgC2SChat msg = {};
+    msg.numChars = (u16)COM_CopyStringLimited(buf, msg.message, 256);
+    u32 size = msg.Write(b->ptrWrite);
+    b->ptrWrite += size;
+    Buf_WriteStreamMsgHeader(b, TNET_MSG_TYPE_C2S_CHAT, size);
+
+
+
+#if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, b.ptrWrite);
     b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
@@ -78,6 +96,7 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
     printf("\nSent %d chars\n", length);
     ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written(), 0);
 
+#endif
     // Buffer into reliable output:
     //Stream_WriteToOutput(&g_network.server.reliableStream, b.ptrStart, b.Written());
 }
@@ -90,8 +109,15 @@ Writing a packet:
 > Write unreliable messages
 > Set unreliable message bytes written in packet header
 */
-void Client_Transmit()
+void CL_TransmitOutput(TestGameNetwork* net)
 {
+    Stream_OutputToPacket(
+        net,
+        net->server.connId,
+        &net->server.reliableStream,
+        g_dataBuffer,
+        DATA_BUFFER_SIZE
+    );
     #if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     u32 sequence = ZNet_GetNextSequenceNumber(g_network.server.connId);
@@ -115,12 +141,32 @@ void Client_Transmit()
     #endif
 }
 
-void Test_ClientSendState(i32 connId)
+/**
+ * Write frame messages to output buffer
+ */
+void CL_WriteOutput(ReliableStream* stream)
 {
+    printf("CL Send\n");
+
+    TestMsg1 m1 = {};
+	    m1.member1 = COM_GetI32Sentinel();
+	    m1.member2 = COM_GetI32Sentinel();
+	    m1.member3 = COM_GetI32Sentinel();
+    
+    Buf_WriteStreamMsgHeader(
+        &stream->outputBuffer,
+        ++stream->outputSequence,
+        m1.MeasureForWriting());
+    stream->outputBuffer.ptrWrite += m1.Write(stream->outputBuffer.ptrWrite);
+
+    
+    
+    #if 0
     ByteBuffer b = TNET_GetWriteBuffer();
     b.ptrWrite += COM_WriteByte(1, b.ptrWrite);
     u32 sendSequence = ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 0);
     //printf("Sent sequence %d\n", sendSequence);
+    #endif
 }
 
 void Test_ClientSendInfo()
@@ -173,11 +219,12 @@ void Test_Client(u16 serverPort, u16 clientPort)
             // update connections
             i32 error = ZNet_Tick(tickRateSeconds);
             // read
-            Client_ExecuteInputStream(&g_network.server.reliableStream);
+            Client_ReadInput(&g_network.server.reliableStream);
             
             if (g_network.server.connId != 0)
             {
-                Test_ClientSendState(g_network.server.connId);
+                CL_WriteOutput(&g_network.server.reliableStream);
+                CL_TransmitOutput(&g_network);
             }
             
             //printf("\r%d", ticks++);

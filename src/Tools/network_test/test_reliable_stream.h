@@ -75,6 +75,73 @@ StreamMsgHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
     return NULL;
 }
 
+void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, ReliableStream* s, u8* packet, u16 numBytes)
+{
+    // Do we even need to send anything reliable?
+    if (s->outputBuffer.Written() == 0) { return; }
+
+    // Open a packet
+    u32 packetSequence = ZNet_GetNextSequenceNumber(connId);
+    TransmissionRecord* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
+
+    // sanitise packet
+    COM_ZeroMemory(packet, numBytes);
+    ByteBuffer b = Buf_FromBytes(packet, numBytes);
+    // step over header
+    // > u16 num reliable bytes
+    // > u16 num unreliable bytes
+    // > u32 first reliable sequence
+    b.ptrWrite += sizeof(u16) + sizeof(u16) + sizeof(u32);
+    u8* reliableStart = b.ptrWrite;
+
+    // iterate output buffer
+    u8* read = s->outputBuffer.ptrStart;
+    u8* end = s->outputBuffer.ptrWrite;
+
+    // set to zero to avoid compiler warning. should be set to the sequence of the 
+    // first reliable message
+    u32 firstReliableId = 0;
+
+    while (read < end)
+    {
+        StreamMsgHeader* h = (StreamMsgHeader*)read;
+        read += sizeof(StreamMsgHeader);
+        //u32 messageId = COM_ReadU32(&read);
+        if (b.Space() < h->size)
+        {
+            printf("Packet full! Space %d size required %d\n", b.Space(), h->size);
+            break;
+        }
+
+        if (rec->numReliableMessages == 0) { firstReliableId = h->id; }
+        
+        u32 offset = h->id - firstReliableId;
+        u16 msgHeader = Stream_PackMessageHeader((u8)offset, (u16)h->size);
+        b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
+        b.ptrWrite += COM_COPY(read, b.ptrWrite, h->size);
+        rec->reliableMessageIds[rec->numReliableMessages] = h->id;
+        rec->numReliableMessages++;
+        if (rec->numReliableMessages == MAX_PACKET_TRANSMISSION_MESSAGES)
+        {
+            printf("Max messages in packet!\n");
+            break;
+        }
+        read += h->size;
+    }
+
+    Stream_PrintTransmissionRecord(rec);
+
+    // Step back and write header
+    u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
+    u8* write = b.ptrStart;
+    write += COM_WriteU16(reliableBytes, write);
+    write += COM_WriteU16(0, write);
+    write += COM_WriteU32(firstReliableId, write);
+
+    // Send!
+    ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 0);
+}
+
 void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
 {
     //printf("Copy reliable packet (%d bytes) to input... ", numBytes);
@@ -92,7 +159,7 @@ void Stream_CopyReliablePacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         u16 size;
         Stream_UnpackMessageHeader(packedHeader, &offset, &size);
         u32 messageId = reliableSequence + offset;
-        printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
+        //printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
 
         u8 msgType = *read;
         if (msgType == 0)
@@ -185,16 +252,16 @@ u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
             continue;
         }
         // clear and collapse
-        printf("  Delete %d from output\n", id);
+        //printf("  Delete %d from output\n", id);
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         b->ptrWrite = end;
         removed += blockSize;
     }
-    printf("  Removed %d bytes. Reduced %d to %d\n", removed, currentSize, b->Written());
+    //printf("  Removed %d bytes. Reduced %d to %d\n", removed, currentSize, b->Written());
     return removed;
 }
-
+#if 0
 void Stream_RunTests()
 {
     printf("\n=== RELIABLE STREAM TESTS ===\n");
@@ -439,12 +506,12 @@ void TNet_TestMsgHeaderPacking(u8 offset, u16 size)
    Stream_UnpackMessageHeader(packed, &unpackedOffset, &unpackedSize);
    printf("Unpacked: offset %d and size %d\n", unpackedOffset, unpackedSize);
 }
-
+#endif
 void TNet_TestReliability()
 {
 	//Test_BufferWriteAndCollapse();
     //Stream_RunTests();
-    TNet_TestMsgHeaderPacking(29, 576);
-    TNet_TestMsgHeaderPacking(56, 184);
-    TNet_TestMsgHeaderPacking(127, 1023);
+    //TNet_TestMsgHeaderPacking(29, 576);
+    //TNet_TestMsgHeaderPacking(56, 184);
+    //TNet_TestMsgHeaderPacking(127, 1023);
 }

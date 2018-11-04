@@ -143,10 +143,31 @@ struct MsgClientListHeader
 
 };
 
+#define TNET_STRING_LIMIT 256
+
 struct MsgC2SChat
 {
     u16 numChars;
-    char message[256];
+    char message[TNET_STRING_LIMIT];
+
+    u32 Write(u8* ptr)
+    {
+        u8* start = ptr;
+        ptr += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, ptr);
+        ptr += COM_WriteU16(numChars, ptr);
+        ptr += COM_CopyStringLimited(message, (char*)ptr, TNET_STRING_LIMIT);
+        return (ptr - start);
+    }
+
+    u16 Read(u8* ptr)
+    {
+        u8* start = ptr;
+        u8 type = COM_ReadByte(&ptr);
+        Assert(type == TNET_MSG_TYPE_C2S_CHAT);
+        numChars = COM_ReadU16(&ptr);
+        Assert(numChars <= TNET_STRING_LIMIT);
+        ptr += COM_CopyStringLimited((char*)ptr, message, TNET_STRING_LIMIT);
+    }
 };
 
 struct MsgS2CChat
