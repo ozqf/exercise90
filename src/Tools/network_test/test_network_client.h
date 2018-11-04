@@ -78,28 +78,6 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
     u32 size = msg.Write(b->ptrWrite);
     b->ptrWrite += size;
     Buf_WriteStreamMsgHeader(b, TNET_MSG_TYPE_C2S_CHAT, size);
-
-
-
-#if 0
-    ByteBuffer b = TNET_GetWriteBuffer();
-    b.ptrWrite += COM_WriteByte(TNET_MSG_TYPE_C2S_CHAT, b.ptrWrite);
-    b.ptrWrite += COM_WriteU16((u16)length, b.ptrWrite);
-    u32 pos = 0;
-    while (pos < length)
-    {
-        *b.ptrWrite = (u8)buf[pos];
-        b.ptrWrite += sizeof(u8);
-        pos++;
-    }
-
-    // Unreliable direct send in single packet:
-    printf("\nSent %d chars\n", length);
-    ZNet_SendData(g_network.server.connId, b.ptrStart, (u16)b.Written(), 0);
-
-#endif
-    // Buffer into reliable output:
-    //Stream_WriteToOutput(&g_network.server.reliableStream, b.ptrStart, b.Written());
 }
 
 /*
@@ -119,27 +97,6 @@ void CL_TransmitOutput(TestGameNetwork* net)
         g_dataBuffer,
         DATA_BUFFER_SIZE
     );
-    #if 0
-    ByteBuffer b = TNET_GetWriteBuffer();
-    u32 sequence = ZNet_GetNextSequenceNumber(g_network.server.connId);
-    Stream_FindTransmissionRecord(g_transmissions, sequence);
-
-    // step forward over header
-    u16 reliableBytes = 0, unreliableBytes = 0;
-    u8* headerWrite = b.ptrWrite;
-    b.ptrWrite += sizeof(u16) * 2;
-
-    // Write reliable messages
-    reliableBytes = Stream_WriteReliableOutput(&g_network.server.reliableStream, b.ptrWrite, b.Space());
-    b.ptrWrite += reliableBytes;
-
-    // Write unreliable messages
-
-    // Fill in header, send
-    headerWrite += COM_WriteU16(reliableBytes, headerWrite);
-    headerWrite += COM_WriteU16(unreliableBytes, headerWrite);
-    u32 bytesWritten = b.Written();
-    #endif
 }
 
 /**

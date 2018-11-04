@@ -39,12 +39,13 @@ Client requires current server state (right now, clients in chatroom)
 
 --- Reliability ---
 > ZNet layer will report packet delivery confirmations but cannot be certain that a
-    packet WASN'T delivered.
+    packet WASN'T delivered (though it will be forced to conclude this if the packet's
+    sequence falls outside the moving ack window)
 > ZNet only understands packet sequences, and has no concept of individual messages.
 > Application layer works with individual message Ids. Packet ids are used to acknowledge
     message delivery
 > Application splits data loads into reliable and unreliable messages. Reliable messages first,
-    unreliable second. Unreliable messages have no messageId and are no acked.
+    unreliable second. Unreliable messages have no messageId and are not acked.
 
 Transmission:
 > Each reliable message increments a messageId.
@@ -170,7 +171,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         //    info->remoteSequence, reliableBytes, unreliableBytes);
         //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
         //    type, numBytes, info->remoteSequence, info->sender.id);
-        Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
+        Stream_PacketToInput(stream, read, reliableBytes);
         printf("> %d bytes in Input\n", stream->inputBuffer.Written());
     }
 }
