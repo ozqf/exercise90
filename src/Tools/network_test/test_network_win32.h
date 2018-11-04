@@ -90,8 +90,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 10
-#define CLIENT_TICK_RATE 10
+#define SERVER_TICK_RATE 1
+#define CLIENT_TICK_RATE 1
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -171,7 +171,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
         //    type, numBytes, info->remoteSequence, info->sender.id);
         Stream_CopyReliablePacketToInput(stream, read, reliableBytes);
-        //printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+        printf("> %d bytes in Input\n", stream->inputBuffer.Written());
     }
 }
 
@@ -187,12 +187,21 @@ void TNet_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
         TestClient* cl = g_network.GetClient(conn->id);
         
         TransmissionRecord* rec =  Stream_FindTransmissionRecord(
-            cl->reliableStream.transmissions, packetNumber
-        );
+            cl->reliableStream.transmissions, packetNumber);
         if (rec)
         {
             //Stream_PrintTransmissionRecord(rec);
             Stream_ClearReceivedMessages(rec, &cl->reliableStream.outputBuffer);
+        }
+    }
+    else
+    {
+        ReliableStream* s = &g_network.server.reliableStream;
+        TransmissionRecord* rec = Stream_FindTransmissionRecord(
+            s->transmissions, packetNumber);
+        if (rec)
+        {
+            Stream_ClearReceivedMessages(rec, &s->outputBuffer);
         }
     }
 }

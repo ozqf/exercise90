@@ -54,7 +54,7 @@ void TNet_SendKeepAlivePacket(i32 connId)
 
 void SV_ExecuteClientMessage(TestGameNetwork* net, TestClient* cl, u8* bytes)
 {
-    u8 type = *bytes;
+    /*u8 type = *bytes;
     printf("SV exec type %d for client %d\n", type, cl->publicClientId);
     switch (type)
     {
@@ -63,7 +63,7 @@ void SV_ExecuteClientMessage(TestGameNetwork* net, TestClient* cl, u8* bytes)
 
         } break;
 
-    }
+    }*/
 }
 
 /**
@@ -94,6 +94,7 @@ void SV_ReadInput(TestGameNetwork* net)
         stream->inputSequence = nextMsg;
 
         u8* msg = (u8*)h + sizeof(StreamMsgHeader);
+        printf("SV exec msg %d from CL %d\n", nextMsg, cl->connId);
         SV_ExecuteClientMessage(net, cl, msg);
         // Clear message
         u8* blockStart = (u8*)h;

@@ -129,6 +129,7 @@ void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, ReliableStream* s, 
         read += h->size;
     }
 
+    printf("Sending packet %d. Contents: ", packetSequence);
     Stream_PrintTransmissionRecord(rec);
 
     // Step back and write header

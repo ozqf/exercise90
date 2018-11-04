@@ -16,7 +16,7 @@ void Client_ExecuteMessage(u8* ptr, u16 numBytes)
                 printf("  MSG TYPE 1 size mismatch: got %d but measured %d\n", numBytes, msgSize);
                 ILLEGAL_CODE_PATH
             }
-            printf("CL exec 1: %d, %d, %d\n", msg.member1, msg.member2, msg.member3);
+            //printf("CL exec 1: %d, %d, %d\n", msg.member1, msg.member2, msg.member3);
         } break;
 
         default:
@@ -49,6 +49,7 @@ void Client_ReadInput(ReliableStream* stream)
         //printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
 		u8* msg = (u8*)h;
 		msg += sizeof(StreamMsgHeader);
+        printf("CL exec msg %d from SV\n", nextMsg);
         Client_ExecuteMessage(msg, (u16)h->size);
 
         // Clear
@@ -146,7 +147,7 @@ void CL_TransmitOutput(TestGameNetwork* net)
  */
 void CL_WriteOutput(ReliableStream* stream)
 {
-    printf("CL Send\n");
+    //printf("CL Send\n");
 
     TestMsg1 m1 = {};
 	    m1.member1 = COM_GetI32Sentinel();
