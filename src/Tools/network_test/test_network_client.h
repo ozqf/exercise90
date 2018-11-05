@@ -16,6 +16,7 @@ void Client_ExecuteMessage(u8* ptr, u16 numBytes)
                 printf("  MSG TYPE 1 size mismatch: got %d but measured %d\n", numBytes, msgSize);
                 ILLEGAL_CODE_PATH
             }
+            msg.Read(ptr);
             //printf("CL exec 1: %d, %d, %d\n", msg.member1, msg.member2, msg.member3);
         } break;
 
@@ -49,7 +50,7 @@ void Client_ReadInput(ReliableStream* stream)
         //printf("Client Exec message %d (%d bytes)\n", nextMsg, h->size);
 		u8* msg = (u8*)h;
 		msg += sizeof(StreamMsgHeader);
-        printf("CL exec msg %d from SV\n", nextMsg);
+        //printf("CL exec msg %d from SV\n", nextMsg);
         Client_ExecuteMessage(msg, (u16)h->size);
 
         // Clear
@@ -67,17 +68,22 @@ void Test_ClientSendChatMessage(char* buf, u32 length)
 {
     if (!g_network.isActive) { printf("Cannot send, network not active\n"); return; }
 
-    ByteBuffer* b = &g_network.server.reliableStream.outputBuffer;
+    ReliableStream* stream = &g_network.server.reliableStream;
+    ByteBuffer* b = &stream->outputBuffer;
 
-    u8* ptrHeader = b->ptrWrite;
-    b->ptrWrite += sizeof(StreamMsgHeader);
-
-    
     MsgC2SChat msg = {};
     msg.numChars = (u16)COM_CopyStringLimited(buf, msg.message, 256);
-    u32 size = msg.Write(b->ptrWrite);
-    b->ptrWrite += size;
-    Buf_WriteStreamMsgHeader(b, TNET_MSG_TYPE_C2S_CHAT, size);
+    //u32 size = msg.Write(b->ptrWrite);
+    //b->ptrWrite += size;
+    //Buf_WriteStreamMsgHeader(b, TNET_MSG_TYPE_C2S_CHAT, size);
+    
+    u16 msgSize = msg.MeasureForWriting();
+    printf("CL Adding msg (%d bytes) to output: \"%s\"\n", msgSize, msg.message);
+    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, ++stream->outputSequence, msgSize);
+    b->ptrWrite += msg.Write(b->ptrWrite);
+
+    //printf("Manifest with chat msg:\n");
+    //Stream_PrintBufferManifest(b);
 }
 
 /*

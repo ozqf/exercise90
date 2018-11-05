@@ -159,7 +159,7 @@ struct MsgC2SChat
         return (ptr - start);
     }
 
-    u16 Read(u8* ptr)
+    u32 Read(u8* ptr)
     {
         u8* start = ptr;
         u8 type = COM_ReadByte(&ptr);
@@ -167,6 +167,12 @@ struct MsgC2SChat
         numChars = COM_ReadU16(&ptr);
         Assert(numChars <= TNET_STRING_LIMIT);
         ptr += COM_CopyStringLimited((char*)ptr, message, TNET_STRING_LIMIT);
+        return (ptr - start);
+    }
+
+    u16 MeasureForWriting()
+    {
+        return sizeof(u8) + sizeof(numChars) + numChars;
     }
 };
 

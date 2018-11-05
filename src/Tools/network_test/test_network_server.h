@@ -54,16 +54,19 @@ void TNet_SendKeepAlivePacket(i32 connId)
 
 void SV_ExecuteClientMessage(TestGameNetwork* net, TestClient* cl, u8* bytes)
 {
-    /*u8 type = *bytes;
-    printf("SV exec type %d for client %d\n", type, cl->publicClientId);
+    u8 type = *bytes;
+    //printf("SV exec type %d for client %d\n", type, cl->publicClientId);
     switch (type)
     {
         case TNET_MSG_TYPE_C2S_CHAT:
         {
-
+            MsgC2SChat msg = {};
+			COM_ZeroMemory((u8*)&msg, sizeof(msg));
+            msg.Read(bytes);
+            printf("%d says: %s\n", cl->publicClientId, msg.message);
         } break;
 
-    }*/
+    }
 }
 
 /**
@@ -94,7 +97,7 @@ void SV_ReadInput(TestGameNetwork* net)
         stream->inputSequence = nextMsg;
 
         u8* msg = (u8*)h + sizeof(StreamMsgHeader);
-        printf("SV exec msg %d from CL %d\n", nextMsg, cl->connId);
+        //printf("SV exec msg %d from CL %d\n", nextMsg, cl->connId);
         SV_ExecuteClientMessage(net, cl, msg);
         // Clear message
         u8* blockStart = (u8*)h;

@@ -22,11 +22,18 @@ void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
+u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes)
+{
+    u8* start = ptr;
+    ptr += COM_WriteU32(msgId, ptr);
+    ptr += COM_WriteU32(numBytes, ptr);
+    return (ptr - start);
+}
+
 void Buf_WriteStreamMsgHeader(ByteBuffer* b, u32 msgId, u32 numBytes)
 {
     Assert(b->Space() > numBytes)
-    b->ptrWrite += COM_WriteU32(msgId, b->ptrWrite);
-    b->ptrWrite += COM_WriteU32(numBytes, b->ptrWrite);
+    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes);
 }
 
 inline u16 Stream_PackMessageHeader(u8 sequenceOffset, u16 size)
@@ -68,6 +75,27 @@ TransmissionRecord* Stream_FindTransmissionRecord(
 		return result;
 	}
 	return NULL;
+}
+
+void Stream_PrintBufferManifest(ByteBuffer* b)
+{
+    printf("-- Buffer Manifest --\n");
+    if (b->Written() == 0)
+    {
+        printf("Buffer is empty\n");
+        return;
+    }
+    u8* read = b->ptrStart;
+    u8* end = b->ptrWrite;
+    while (read < end)
+    {
+        StreamMsgHeader* msg = (StreamMsgHeader*)read;
+        if (msg->id == 0) { break; }
+        u8 type = *(read + sizeof(StreamMsgHeader));
+        printf("Msg Id: %d, type: %d, size: %d\n", msg->id, type, msg->size);
+        read += sizeof(StreamMsgHeader) + msg->size;
+    }
+    printf("---------------------------------\n");
 }
 
 void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
@@ -171,6 +199,7 @@ void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, ReliableStream* s, 
         if (b.Space() < h->size)
         {
             printf("Packet full! Space %d size required %d\n", b.Space(), h->size);
+            Stream_PrintBufferManifest(&s->outputBuffer);
             break;
         }
 
@@ -190,8 +219,8 @@ void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, ReliableStream* s, 
         read += h->size;
     }
 
-    printf("Sending packet %d. Contents: ", packetSequence);
-    Stream_PrintTransmissionRecord(rec);
+    //printf("Sending packet %d. Contents: ", packetSequence);
+    //Stream_PrintTransmissionRecord(rec);
 
     // Step back and write header
     u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);

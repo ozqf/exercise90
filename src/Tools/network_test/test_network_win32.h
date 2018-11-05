@@ -91,8 +91,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 1
-#define CLIENT_TICK_RATE 1
+#define SERVER_TICK_RATE 20
+#define CLIENT_TICK_RATE 20
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();
@@ -172,7 +172,7 @@ void TNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         //printf("TNET: Received type %d (bytes: %d, sequence: %d) from %d\n",
         //    type, numBytes, info->remoteSequence, info->sender.id);
         Stream_PacketToInput(stream, read, reliableBytes);
-        printf("> %d bytes in Input\n", stream->inputBuffer.Written());
+        //printf("> %d bytes in Input\n", stream->inputBuffer.Written());
     }
 }
 
