@@ -603,6 +603,8 @@ struct Client
     i32 isLocal;
     ActorInput input;
 
+    NetStream stream;
+
     u8 IsPlaying() { return (this->state == CLIENT_STATE_PLAYING); }
 };
 

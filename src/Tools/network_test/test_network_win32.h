@@ -40,10 +40,11 @@ Client requires current server state (right now, clients in chatroom)
 --- Reliability ---
 > ZNet layer will report packet delivery confirmations but cannot be certain that a
     packet WASN'T delivered (though it will be forced to conclude this if the packet's
-    sequence falls outside the moving ack window)
+    sequence falls outside the moving ack window, this still doesn't mean it wasn't
+    *eventually* delivered somehow)
 > ZNet only understands packet sequences, and has no concept of individual messages.
 > Application layer works with individual message Ids. Packet ids are used to acknowledge
-    message delivery
+    message delivery by logging the message ids stored in each packet.
 > Application splits data loads into reliable and unreliable messages. Reliable messages first,
     unreliable second. Unreliable messages have no messageId and are not acked.
 
@@ -91,8 +92,8 @@ Packet structure
     > ..etc
 */
 
-#define SERVER_TICK_RATE 20
-#define CLIENT_TICK_RATE 20
+#define SERVER_TICK_RATE 60
+#define CLIENT_TICK_RATE 60
 
 // interface
 ZNetPlatformFunctions TNet_CreateNetFunctions();

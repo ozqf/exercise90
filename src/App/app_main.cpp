@@ -152,23 +152,12 @@ i32 App_Init()
         g_collisionEventBuffer.objectSize,
         App_PhysicsErrorHandler
         );
-		
-	// Init network function pointers
-	ZNetPlatformFunctions netFuncs = {};
 	
-	netFuncs.Init = platform.Net_Init;
-    netFuncs.Shutdown = platform.Net_Shutdown;
-    netFuncs.OpenSocket = platform.Net_OpenSocket;
-    netFuncs.CloseSocket = platform.Net_CloseSocket;
-    netFuncs.Read = platform.Net_Read;
-    netFuncs.SendTo = platform.Net_SendTo;
-    netFuncs.FatalError = App_FatalError;
-
-    ZNetOutputInterface netOutput = {};
-    // TODO: Configure callbacks here!
-
-    // TODO: Init net callbacks here
-	ZNet_Init(netFuncs, netOutput);
+    // Init network functions
+	ZNet_Init(
+        Net_CreateNetworkPlatformFunctions(),
+        Net_CreateOutputInterface(),
+        ZNET_SIM_MODE_REALISTIC);
     
     
     Game_Init();

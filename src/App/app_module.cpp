@@ -138,6 +138,7 @@ internal void AppListTextures();
 #include "app_clients.h"
 #include "app_commands.h"
 #include "app_input.h"
+#include "network/app_network.h"
 #include "assets/app_textures.cpp"
 #include "assets/app_meshes.cpp"
 #include "app_main.cpp"
