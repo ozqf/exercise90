@@ -106,6 +106,11 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
     return conn;
 }
 
+ZNetConnectionInfo* ZNet_CreateLocalClient()
+{
+    return NULL;
+}
+
 internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence)
 {
     u32 index = sequence % ZNET_AWAITING_ACK_CAPACITY;

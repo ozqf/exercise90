@@ -2,12 +2,6 @@
 
 #include "../app_module.cpp"
 
-struct StreamMsgHeader
-{
-    u32 id;
-    u32 size;
-};
-
 #define CLIENT_APP_STATE_NULL 0
 #define CLIENT_APP_STATE_LOADING 1
 #define CLIENT_APP_STATE_IN_PLAY 2
@@ -46,24 +40,6 @@ struct ClientInfo
     }
 };
 #endif
-
-#define MAX_PACKET_TRANSMISSION_MESSAGES 64
-struct TransmissionRecord
-{
-	u32 sequence;
-	u32 numReliableMessages;
-	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
-};
-
-#define MAX_TRANSMISSION_RECORDS 33
-struct NetStream
-{
-    u32 inputSequence;
-    u32 outputSequence;
-    ByteBuffer inputBuffer;
-    ByteBuffer outputBuffer;
-    TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
-};
 
 #if 0
 struct TestClient

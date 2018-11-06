@@ -4,6 +4,7 @@
 
 // TODO: STILL USING WINDOWS INCLUDE FOR DEBUGGING. NOT PLATFORM AGNOSTIC!
 #include "../Platform/win32_system_include.h"
+#pragma message(">> APP Compiling with windows <<")
 #include <stdio.h>
 
 #include "../common/com_module.cpp"

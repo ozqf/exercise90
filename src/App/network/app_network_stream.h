@@ -165,7 +165,7 @@ u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b)
     return removed;
 }
 
-void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, NetStream* s, u8* packet, u16 numBytes)
+void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
 {
     // Do we even need to send anything reliable?
     if (s->outputBuffer.Written() == 0) { return; }

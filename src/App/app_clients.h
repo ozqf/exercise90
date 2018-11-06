@@ -197,4 +197,3 @@ void App_UpdateLocalClients(GameTime* time, ClientList* cls)
         }
     }
 }
-

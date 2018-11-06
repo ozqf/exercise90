@@ -235,7 +235,7 @@ void App_UpdateGameState(GameTime* time)
     g_debugStr.length = 0;
 
     GameState *gs = &g_gameState;
-    
+    #if 0
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
     collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
@@ -245,7 +245,7 @@ void App_UpdateGameState(GameTime* time)
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionCommandBuffer);
     commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
     commandBuffer.size = g_collisionCommandBuffer.objectSize;
-
+    #endif
     // Prepare input buffer
 	ByteBuffer* input = g_appReadBuffer;
 	
@@ -447,6 +447,8 @@ void App_Frame(GameTime *time)
 	if (g_paused || g_minimised) { return; }
 	
     g_time = *time;
+
+    Net_Tick(&g_gameState);
 	
 	App_UpdateGameState(time);
 	
@@ -461,7 +463,8 @@ void App_Frame(GameTime *time)
 	g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrWrite;
 	if (time->singleFrame)
 	{
-		printf("Marked end of write buffer, %d bytes\n", (g_appWriteBuffer->ptrEnd - g_appWriteBuffer->ptrStart));
+		printf("Marked end of write buffer, %d bytes\n",
+            (g_appWriteBuffer->ptrEnd - g_appWriteBuffer->ptrStart));
 	}
 
 

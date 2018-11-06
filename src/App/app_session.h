@@ -316,7 +316,7 @@ i32 App_StartSession(u8 netMode, char *path)
     {
     case NETMODE_SINGLE_PLAYER:
     {
-        //ZNet_StartSession(netMode, NULL);
+        ZNet_StartSession(netMode, NULL, 0);
         if (!App_LoadScene(path))
         {
             return 0;
@@ -328,8 +328,11 @@ i32 App_StartSession(u8 netMode, char *path)
         if (cl == NULL)
         {
             // Create a connection
-            //g_gameState.localClientConnId = ZNet_CreateClientConnection({}, 1);
-
+            ZNetConnectionInfo* info = ZNet_CreateLocalClient(); 
+            if (info)
+            {
+                g_gameState.localClientConnId = info->id;
+            }
             // Assign local client id.
             Cmd_ClientUpdate spawnClient = {};
             // assign local id directly...
