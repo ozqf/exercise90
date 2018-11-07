@@ -99,12 +99,15 @@ void App_InitMenus()
 	UI_InitEntAsButton(ent, "START", "START", 0, 1);
 
 	ent = &g_mainMenu.items[2];
-	UI_InitEntAsButton(ent, "OPTIONS", "OPTIONS", 0, -1);
+	UI_InitEntAsButton(ent, "JOIN", "JOIN", 0, -1);
 
 	ent = &g_mainMenu.items[3];
-	UI_InitEntAsButton(ent, "QUIT", "QUIT", 0, -3);
+	UI_InitEntAsButton(ent, "OPTIONS", "OPTIONS", 0, -3);
 
-	g_mainMenu.numItems = 4;
+	ent = &g_mainMenu.items[4];
+	UI_InitEntAsButton(ent, "QUIT", "QUIT", 0, -5);
+
+	g_mainMenu.numItems = 5;
 }
 
 void App_BuildMenuRenderScene()
@@ -198,6 +201,10 @@ void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 		{
 			platform.Platform_WriteTextCommand("MENU START");
 		}
+		if (!COM_CompareStrings(ent->name, "JOIN"))
+		{
+			platform.Platform_WriteTextCommand("MENU JOIN");
+		}
 		if (!COM_CompareStrings(ent->name, "OPTIONS"))
 		{
 			platform.Platform_WriteTextCommand("MENU OPTIONS");
@@ -236,6 +243,14 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		if (!COM_CompareStrings(tokens[1], "OPTIONS"))
 		{
 			printf("  Goto options\n");
+		}
+		if (!COM_CompareStrings(tokens[1], "JOIN"))
+		{
+			printf("  Join game\n");
+			platform.Platform_WriteTextCommand("MARK");
+			platform.Platform_WriteTextCommand("JOIN TEST");
+			platform.Platform_WriteTextCommand("WAIT");
+			platform.Platform_WriteTextCommand("MENU CLOSE");
 		}
 	}
 	return 1;

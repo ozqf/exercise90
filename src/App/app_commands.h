@@ -162,6 +162,24 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "JOIN"))
+    {
+        if (numTokens == 2)
+        {
+            printf("APP Buffered state op JOIN %s\n", tokens[1]);
+			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+			g_appStateOperation.op = APP_STATE_OP_JOIN;
+            /*if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
+            {
+                printf("Failed to load game\n");
+            }*/
+        }
+        else
+        {
+            printf(" JOIN: connect to a multiplaye game at the given ip address and port\n");
+        }
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "PLAY"))
     {
         // playback the given replay file

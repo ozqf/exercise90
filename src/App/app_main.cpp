@@ -500,6 +500,14 @@ void App_Frame(GameTime *time)
 				printf("Failed to load game\n");
 			}
 		} break;
+        case APP_STATE_OP_JOIN:
+		{
+            printf("APP JOINING GAME AT %s\n", g_appStateOperation.fileName);
+			// if (!App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName))
+			// {
+			// 	printf("Failed to load game\n");
+			// }
+		} break;
 		case APP_STATE_OP_RECORD:
 		{
 			ILLEGAL_CODE_PATH

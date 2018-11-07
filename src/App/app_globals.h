@@ -68,6 +68,7 @@ global_variable u8* g_replayPtr = NULL;
 #define APP_STATE_OP_LOAD 2
 #define APP_STATE_OP_RECORD 3
 #define APP_STATE_OP_PLAY 4
+#define APP_STATE_OP_JOIN 5
 
 struct AppStateOperation
 {
