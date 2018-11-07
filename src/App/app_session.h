@@ -281,7 +281,7 @@ u8 App_StartReplay(char *path)
 
 u8 App_LoadScene(char *path)
 {
-    printf(">>> APP Start single player session: %s <<<\n", path);
+    printf(">>> APP load scene: %s <<<\n", path);
 
 	if (!COM_CompareStrings(path, "TEST"))
 	{
@@ -315,14 +315,15 @@ i32 App_StartSession(u8 netMode, char *path)
     printf("\n**** APP START SESSION ****\n");
     switch (netMode)
     {
-    case NETMODE_SINGLE_PLAYER:
+    //case NETMODE_SINGLE_PLAYER:
+    case NETMODE_LISTEN_SERVER:
     {
-        ZNet_StartSession(netMode, NULL, 0);
+        ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
         if (!App_LoadScene(path))
         {
             return 0;
         }
-        g_gameState.netMode = NETMODE_SINGLE_PLAYER;
+        g_gameState.netMode = NETMODE_LISTEN_SERVER;
 
         // Spawn local client if one hasn't been restored via file
         Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
@@ -350,6 +351,35 @@ i32 App_StartSession(u8 netMode, char *path)
 			printf("Found local client %d for session start\n", cl->clientId);
 		}
 
+        return 1;
+    }
+    break;
+    
+    case NETMODE_DEDICATED_SERVER:
+    {
+        u16 port = ZNET_DEFAULT_SERVER_PORT;
+        printf("SESSION dedicated server on port %d\n", port);
+        ZNet_StartSession(netMode, NULL, port);
+        if (!App_LoadScene("TEST"))
+        {
+            APP_ASSERT(0, "Failed to init network session\n");
+        }
+        g_gameState.netMode = NETMODE_DEDICATED_SERVER;
+        return 1;
+    }
+    break;
+
+    case NETMODE_CLIENT:
+    {
+        ZNetAddress addr = COM_LocalHost(ZNET_DEFAULT_SERVER_PORT);
+        printf("SESSION join %d.%d.%d.%d:%d\n",
+            addr.ip4Bytes[0], addr.ip4Bytes[1], addr.ip4Bytes[2], addr.ip4Bytes[3], addr.port);
+        ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
+        if (!App_LoadScene("TEST"))
+        {
+            APP_ASSERT(0, "Failed to init network session\n");
+        }
+        g_gameState.netMode = NETMODE_CLIENT;
         return 1;
     }
     break;

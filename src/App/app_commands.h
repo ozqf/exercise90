@@ -148,13 +148,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         if (numTokens == 2)
         {
-            printf("APP Buffered state op LOAD %s\n", tokens[1]);
-			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+            COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
 			g_appStateOperation.op = APP_STATE_OP_LOAD;
-            /*if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
-            {
-                printf("Failed to load game\n");
-            }*/
         }
         else
         {
@@ -162,17 +157,26 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "HOST"))
+    {
+        if (numTokens == 2)
+        {
+            // TODO Specifying port and other settings here too!
+			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+			g_appStateOperation.op = APP_STATE_OP_HOST;
+        }
+        else
+        {
+            printf(" HOST: Start a multiplayer game on the given level, eg HOST testbox.lvl\n");
+        }
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "JOIN"))
     {
         if (numTokens == 2)
         {
-            printf("APP Buffered state op JOIN %s\n", tokens[1]);
-			COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+            COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
 			g_appStateOperation.op = APP_STATE_OP_JOIN;
-            /*if (!App_StartSession(NETMODE_SINGLE_PLAYER, tokens[1]))
-            {
-                printf("Failed to load game\n");
-            }*/
         }
         else
         {

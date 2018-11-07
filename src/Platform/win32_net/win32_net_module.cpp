@@ -20,6 +20,8 @@
 #define UDP_BUFFER_LENGTH 4096
 #define LOCALHOST_ADDRESS "127.0.0.1"
 
+#define NET_ERROR_RESET_BY_PEER 10054
+
 #define NET_ERROR_CASE(errorCode, msg) case errorCode##: printf(##msg##); break;
 
 // Add new error codes as you run into them!
@@ -34,9 +36,15 @@ void Net_PrintNetworkError(i32 code)
         NET_ERROR_CASE(10040, "Message too long.\n");
         NET_ERROR_CASE(10047, "Address family not supported by protocol family.\n");
         NET_ERROR_CASE(10048, "Address in use\n");
-        NET_ERROR_CASE(10054, "Connection reset by peer\n");
+        NET_ERROR_CASE(NET_ERROR_RESET_BY_PEER, "Connection reset by peer\n");
         default: printf("Unknown error code... Sorry\n"); break;
     }
+}
+
+internal i32 Net_IsErrorIgnorable(i32 code)
+{
+    return (code == NET_NON_BLOCKING_ERROR
+        || code == NET_ERROR_RESET_BY_PEER);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +103,7 @@ i32 Net_SendTo(
     i32 dataSize)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(transmittingSocketIndex);
-    //printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
+    printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
 	sockaddr_in toAddress;
     toAddress.sin_port = htons(port);
     toAddress.sin_family = AF_INET;
@@ -191,7 +199,7 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
     if (recv_len == SOCKET_ERROR)
     {
         i32 errorCode = WSAGetLastError();
-        if (errorCode != NET_NON_BLOCKING_ERROR)
+        if (!Net_IsErrorIgnorable(errorCode))
         {
             printf("recvfrom() on port %d failed with error code %d\n", winSock->port, errorCode);
             Net_PrintNetworkError(errorCode);

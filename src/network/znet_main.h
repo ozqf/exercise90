@@ -44,6 +44,16 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
             net->state = ZNET_STATE_SERVER;
         } break;
 
+        case NETMODE_LISTEN_SERVER:
+        {
+            printf("ZNet - list server on port %d\n", selfPort);
+            net->selfPort = selfPort;
+            net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
+			printf("List server requested port %d opened port %d\n", selfPort, sockedOpened);
+            net->isListening = 1;
+            net->state = ZNET_STATE_SERVER;
+        } break;
+
         case NETMODE_CLIENT:
         {
             printf("ZNet - client\n");
@@ -407,6 +417,7 @@ i32 ZNet_Tick(f32 deltaTime)
             {
                 ZNetConnection* conn = &net->connections[i];
                 if (conn->id == 0) { continue; }
+                if(conn->flags & ZNET_CONNECTION_FLAG_LOCAL) { continue; }
 
                 conn->keepAliveSendTicks++;
 				conn->timeSinceLastMessage += deltaTime;

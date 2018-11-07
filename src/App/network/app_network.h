@@ -74,7 +74,7 @@ ZNetOutputInterface Net_CreateOutputInterface()
 }
 
 
-internal void Net_Tick(GameState* gs)
+internal void Net_Tick(GameState* gs, GameTime* time)
 {
     switch (gs->netMode)
     {
@@ -83,9 +83,22 @@ internal void Net_Tick(GameState* gs)
             return;
         } break;
 
-        case NETMODE_SINGLE_PLAYER:
+        case NETMODE_LISTEN_SERVER:
         {
+            printf(".");
+            ZNet_Tick(time->deltaTime);
+        } break;
 
+        case NETMODE_DEDICATED_SERVER:
+        {
+            printf(".");
+            ZNet_Tick(time->deltaTime);
+        } break;
+
+        case NETMODE_CLIENT:
+        {
+            printf(".");
+            ZNet_Tick(time->deltaTime);
         } break;
 
         default:
