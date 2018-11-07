@@ -7,7 +7,11 @@
 ////////////////////////////////////////////////////////////
 
 // Returns bytes written
-u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header, ByteBuffer* nextFrameInputBuffer)
+u32 App_WriteSaveState(
+    GameState *gs,
+    ByteBuffer *buf,
+    StateSaveHeader *header,
+    ByteBuffer* nextFrameInputBuffer)
 {
     StateSaveHeader h = {};
     h.magic[0] = 'S';
@@ -109,7 +113,8 @@ u32 App_WriteSaveState(GameState *gs, ByteBuffer *buf, StateSaveHeader *header, 
 ////////////////////////////////////////////////////////////
 
 // Returns id of the file opened to (if it is left open natch)
-i32 App_WriteStateToFile(char *fileName, u8 closeFileAfterWrite, StateSaveHeader *header)
+i32 App_WriteStateToFile(
+    char *fileName, u8 closeFileAfterWrite, StateSaveHeader *header)
 {
     printf("APP Writing state to %s\n", fileName);
     i32 capacity = MegaBytes(10);
@@ -328,22 +333,26 @@ i32 App_StartSession(u8 netMode, char *path)
         if (cl == NULL)
         {
             // Create a connection
-            ZNetConnectionInfo* info = ZNet_CreateLocalClient(); 
-            if (info)
+            ZNetConnectionInfo info = {};
+            if (ZNet_CreateLocalConnection(&info))
             {
-                g_gameState.localClientConnId = info->id;
+                g_gameState.localClientConnId = info.publicId;
+				g_localClientId = info.publicId;
+
+				Cmd_ClientUpdate spawnClient = {};
+				spawnClient.clientId = g_localClientId;
+				spawnClient.state = CLIENT_STATE_OBSERVER;
+				APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
             }
-            // Assign local client id.
-            Cmd_ClientUpdate spawnClient = {};
-            // assign local id directly...
-            // TODO: Do local client Id assignment via network command
-            g_localClientId = -1;
-            spawnClient.clientId = g_localClientId;
-            spawnClient.state = CLIENT_STATE_OBSERVER;
-            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
-            //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
-            //platform.Platform_WriteTextCommand("SPAWN ENEMY");
+			else
+			{
+				ILLEGAL_CODE_PATH
+			}
         }
+		else
+		{
+			printf("Found local client %d for session start\n", cl->clientId);
+		}
 
         return 1;
     }

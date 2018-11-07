@@ -26,7 +26,7 @@ Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
-        if (cl->state != CLIENT_STATE_FREE && cl->isLocal)
+        if (cl->state != CLIENT_STATE_FREE && cl->clientId == g_localClientId)
         {
             if (checkIfPlaying && cl->state != CLIENT_STATE_PLAYING)
             {
@@ -188,9 +188,9 @@ void App_UpdateLocalClients(GameTime* time, ClientList* cls)
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
-        if (cl->clientId == 0) { continue; }
+        //if (cl->clientId == 0) { continue; }
         if (cl->state == CLIENT_STATE_FREE) { continue; }
-        if (cl->clientId == -1)
+        if (cl->clientId == g_localClientId)
         {
             // Process input
             App_UpdateLocalClient(cl, &g_inputActions, time->gameFrameNumber);

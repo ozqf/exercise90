@@ -41,7 +41,7 @@ internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
 		{
 			// How to assign player Id at this point
             Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
-            Assert(cl);
+			APP_ASSERT(cl, "Client for join game impulse could not be found");
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
                 printf("SV Cannot spawn - client is free or playing already\n");

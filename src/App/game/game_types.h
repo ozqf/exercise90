@@ -597,6 +597,9 @@ DEFINE_ENT_COMPONENT_LIST(Sensor)
 #define CLIENT_STATE_PLAYING 2
 struct Client
 {
+    // private between client and server
+    i32 connectionId;
+    // public identity for client to client and local application
     i32 clientId;
     i32 state;
     EntId entId;

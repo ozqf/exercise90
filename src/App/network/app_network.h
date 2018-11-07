@@ -17,11 +17,24 @@
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     printf("Connection %d accepted\n", conn->id);
+#if 0
+    // Create client
+    // Assign local client id.
+    Cmd_ClientUpdate spawnClient = {};
+    // assign local id directly...
+    // TODO: Do local client Id assignment via network command
+    spawnClient.clientId = g_localClientId;
+    spawnClient.state = CLIENT_STATE_OBSERVER;
+    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+    //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
+    //platform.Platform_WriteTextCommand("SPAWN ENEMY");
+#endif
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 {
     printf("Connection %d dropped\n", conn->id);
+    // Delete client
 }
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)

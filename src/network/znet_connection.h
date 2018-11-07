@@ -106,9 +106,18 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
     return conn;
 }
 
-ZNetConnectionInfo* ZNet_CreateLocalClient()
+/**
+ * For creating fake connections for local players
+ */
+i32 ZNet_CreateLocalConnection(ZNetConnectionInfo* result)
 {
-    return NULL;
+    ZNetConnection* conn = ZNet_CreateClientConnection({}, 1);
+    result->address = conn->remoteAddress;
+    result->id = conn->id;
+    // DON'T send callback in this case. Confuses control flow.
+    // caller already knows
+    //g_output.ConnectionAccepted(&info);
+    return 1;
 }
 
 internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence)
