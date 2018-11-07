@@ -8,6 +8,11 @@
 #define SIXTEEN_BIT_MASK 65535
 #define TWENTY_FOUR_BIT_MASK 16777215
 
+inline u8 COM_IsFlagDifferent(u32 flagsA, u32 flagsB, u32 flag)
+{
+    return ((flagsA & flag) != (flagsB & flag));
+}
+
 inline void COM_DisableBits(u32* flags, u32 mask)
 {
     // bitwise AND and bitwise NOT to disable bit

@@ -7,7 +7,7 @@ internal inline ZNetConnectionInfo ZNet_CreateConnInfo(ZNetConnection* conn)
     ZNetConnectionInfo info;
     info.address = conn->remoteAddress;
     info.id = conn->id;
-    info.publicId = conn->publicId;
+    //info.publicId = conn->publicId;
     return info;
 }
 
@@ -76,10 +76,12 @@ internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
             } while (ZNet_ConnectionIdIsInUse(net, newId));
             
             conn->id = newId;
-            conn->publicId = net->nextPublicClientId;
+            //conn->publicId = net->nextPublicClientId;
+            // Make sure sequence starts at 1 as remote will start at 0
+            // and they must start off mismatched
             conn->sequence = 1;
-            net->nextPublicClientId++;
-            printf("ZNet got free conn for public Id %d\n", conn->publicId);
+            //net->nextPublicClientId++;
+            //printf("ZNet got free conn for public Id %d\n", conn->publicId);
             return conn;
         }
     }

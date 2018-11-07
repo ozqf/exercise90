@@ -65,11 +65,7 @@ u32 App_WriteSaveState(
     {
         Client *cl = &cls->items[i];
         Cmd_ClientUpdate cmd = {};
-        cmd.clientId = cl->clientId;
-        cmd.state = cl->state;
-        cmd.entId = cl->entId;
-        cmd.input = cl->input;
-        
+        cmd.Set(cl);
         COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
 
         h.dynamicCommands.count++;
@@ -332,13 +328,13 @@ i32 App_StartSession(u8 netMode, char *path)
         Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
         if (cl == NULL)
         {
+            printf("SESSION: No local client loaded, creating\n");
             // Create a connection
             ZNetConnectionInfo info = {};
             if (ZNet_CreateLocalConnection(&info))
             {
-                g_gameState.localClientConnId = info.publicId;
-				g_localClientId = info.publicId;
-
+                g_localClientId = App_GetNextClientId(&g_gameState.clientList);
+				
 				Cmd_ClientUpdate spawnClient = {};
 				spawnClient.clientId = g_localClientId;
 				spawnClient.state = CLIENT_STATE_OBSERVER;

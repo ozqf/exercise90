@@ -60,6 +60,7 @@ void App_EndAllClients(ClientList* cls);
 void App_ClearClientGameLinks(ClientList* cls);
 void App_AddLocalClient();
 void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
+i32 App_GetNextClientId(ClientList* cls);
 Client* App_FindClientById(i32 id, ClientList* cls);
 Client* App_FindClientByEntId(EntId entId, ClientList* cls);
 Client* App_FindOrCreateClient(i32 id, ClientList* cls);

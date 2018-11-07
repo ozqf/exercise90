@@ -70,11 +70,21 @@ void AllocateDebugStrings(Heap *heap)
     // Buffer used for live stat output
     Heap_AllocString(&g_heap, &g_debugBuffer, 1024);
     char *writeStart = (char *)g_debugBuffer.ptrMemory;
-    i32 charsWritten = sprintf_s(writeStart, g_debugBuffer.objectSize, "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n", __LINE__, __FILE__, __DATE__);
-    sprintf_s(writeStart + charsWritten, g_debugBuffer.objectSize - charsWritten, "This text is appended to the previous line and\ncontains a 10 here: %d", 10);
+    i32 charsWritten = sprintf_s(
+        writeStart,
+        g_debugBuffer.objectSize,
+        "Debug Test string alloc from\nline %d\nIn file %s\nOn %s\n",
+        __LINE__,
+        __FILE__,
+        __DATE__);
+    sprintf_s(
+        writeStart + charsWritten,
+        g_debugBuffer.objectSize - charsWritten,
+        "This text is appended to the previous line and\ncontains a 10 here: %d",
+        10);
     printf("APP Allocated debug string\n");
 }
-
+#if 0
 i32 AllocateTestStrings(Heap *heap)
 {
     BlockRef ref = {};
@@ -88,8 +98,7 @@ i32 AllocateTestStrings(Heap *heap)
     COM_CopyStringLimited(testStr2, (char *)ref.ptrMemory, ref.objectSize);
     return 1;
 }
-
-
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Write Debug String
@@ -149,6 +158,9 @@ ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
 
         case GAME_DEBUG_MODE_TRANSFORM:
         {
+            // TODO: Repair
+            h.length = sprintf_s(gs->debugString, gs->debugStringCapacity, "Debug Transform N/A");
+            #if 0
             Ent *ent = Ent_GetEntityByTag(&gs->entList, 10);
             EC_Transform* ecT = EC_FindTransform(gs, ent);
             M3x3 rotation = {};
@@ -206,7 +218,7 @@ Rotation:\n\
                                      rotation.xAxisZ, rotation.yAxisZ, rotation.zAxisZ
                                      );
             //
-
+            #endif
         }
         break;
 

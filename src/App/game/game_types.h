@@ -595,6 +595,8 @@ DEFINE_ENT_COMPONENT_LIST(Sensor)
 #define CLIENT_STATE_FREE 0
 #define CLIENT_STATE_OBSERVER 1
 #define CLIENT_STATE_PLAYING 2
+
+#define CLIENT_FLAG_LOCAL (1 << 0)
 struct Client
 {
     // private between client and server
@@ -602,6 +604,7 @@ struct Client
     // public identity for client to client and local application
     i32 clientId;
     i32 state;
+	u32 flags;
     EntId entId;
     i32 isLocal;
     ActorInput input;
@@ -616,6 +619,7 @@ struct ClientList
     Client* items;
     i32 count;
     i32 max;
+    i32 nextId;
 };
 
 
@@ -631,6 +635,7 @@ struct GameCampaign
 {
     char mapName[64];
     i32 levelsCompleted = 0;
+    i32 localClientId = 0;
 };
 
 #define GAME_SESSION_STATE_WARMUP 0
@@ -674,7 +679,6 @@ struct GameState
     
     ClientList clientList;
     GameStateLocal local;
-    u32 localClientConnId;
 
     // Entities
     //i32 nextEntityID;

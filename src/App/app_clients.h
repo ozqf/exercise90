@@ -2,6 +2,14 @@
 
 #include "app_module.cpp"
 
+i32 App_GetNextClientId(ClientList* cls)
+{
+    // The first ID given out must be 1
+    // 0 == no client
+    i32 id = ++cls->nextId;
+    return id;
+}
+
 void App_EndAllClients(ClientList* cls)
 {
 	for (i32 i = 0; i < cls->max; ++i)
@@ -23,6 +31,7 @@ void App_ClearClientGameLinks(ClientList* cls)
 
 Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
+    if (g_localClientId == 0) { return NULL; }
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
@@ -185,6 +194,7 @@ Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 
 void App_UpdateLocalClients(GameTime* time, ClientList* cls)
 {
+    if (g_localClientId == 0) { return; }
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];

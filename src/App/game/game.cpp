@@ -106,6 +106,17 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
         // death!
         SV_ProcessClientDeath(gs, cl);
     }
+    if (cl->flags != cmd->flags)
+    {
+        // Find changes
+        if (COM_IsFlagDifferent(cmd->flags, cl->flags, CLIENT_FLAG_LOCAL))
+        {
+            // This won't work, remote clients will replicate this and break things!
+            //g_localClientId = cmd->clientId;
+            printf("GAME Client flag %d changed\n", CLIENT_FLAG_LOCAL);
+        }
+    }
+    cl->flags = cmd->flags;
 }
 
 internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameSessionState* cmd)

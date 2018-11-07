@@ -63,7 +63,7 @@ struct ZNetAckRecord
 struct ZNetConnection
 {
     i32 id;
-    i32 publicId;
+    //i32 publicId; // Handle public ids outside of the connection
 
     i32 type;
     u32 sequence;

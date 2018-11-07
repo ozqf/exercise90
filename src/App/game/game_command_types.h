@@ -77,20 +77,6 @@ inline u16 Read(CmdHeader* h, u8* ptr)\
 }
 #endif
 
-// TODO: REMOVE THIS WHEN SECOND VERISON OF ECS IS WORKING?
-// 100
-// struct Cmd_Spawn
-// {
-    // i32 factoryType;
-	// EntId entityId;
-    // Vec3 pos;
-    // Vec3 rot;
-    // Vec3 size;
-    // u32 flags;
-	
-	// GAME_CMD_DEFAULT_INTERFACE(Cmd_Spawn)
-// };
-
 //////////////////////////////////////////////////
 // 101
 // Super simple one-off commands
@@ -134,11 +120,23 @@ struct Cmd_PlayerInput
 // Client management
 struct Cmd_ClientUpdate
 {
-    i32 clientId;
+	i32 clientId;
+	i32 connectionId;
     i32 state;
+	u32 flags;
     EntId entId;
     ActorInput input;
     //i32 playerId;
+
+    void Set(Client* cl)
+    {
+        clientId = cl->clientId;
+        state = cl->state;
+        connectionId = cl->connectionId;
+        flags = cl->flags;
+        entId = cl->entId;
+        input = cl->input;
+    }
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_ClientUpdate)
 };

@@ -35,9 +35,12 @@ struct ZNetConnectionInfo
 	ZNetAddress address;
 	// should be kept private between this specific client and server
 	i32 id;
+
+	// NOTE: It is not the business of this layer to deal with public stuff.
+	// handle this in the layer below
 	// public client id is how the game and other clients can refer to each other.
     // eg players 0, 1, 2. but their actual *connection* ids are not exposed to other clients.
-	i32 publicId;
+	// i32 publicId;
 };
 
 struct ZNetPacketInfo

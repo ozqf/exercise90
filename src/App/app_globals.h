@@ -17,6 +17,7 @@ global_variable InputActionSet g_inputActions = {
 };
 
 // id of the client this exe represents
+// 0 == no local client
 global_variable i32 g_localClientId = 0;
 
 // Interface to the external world
