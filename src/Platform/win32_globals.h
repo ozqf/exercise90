@@ -122,8 +122,8 @@ global_variable u8 g_singleFrameRun = 0;
 // Command Line
 // Nice array of pointers to the start of each token in the launch param string
 #define MAX_LAUNCH_PARAMS 50
-global_variable char *launchParams[MAX_LAUNCH_PARAMS];
-global_variable i32 numLaunchParams = 0;
+global_variable char* g_launchParams[MAX_LAUNCH_PARAMS];
+global_variable i32 g_numLaunchParams = 0;
 
 #define TEXT_COMMAND_BUFFER_SIZE 2048
 global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];

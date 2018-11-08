@@ -191,7 +191,8 @@ u8 Win32_LinkToApplication()
                 Win32_Error("Init App failed", "Error");
                 return 1;
             }
-			// Open data file links
+			// Execute command line
+			Win32_ExecuteCommandLine(g_numLaunchParams, g_launchParams);
             return 1;
         }
         else

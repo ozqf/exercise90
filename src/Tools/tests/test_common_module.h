@@ -89,11 +89,28 @@ void Test_COM_PrintVector3(Vec3 v)
     printf("array:%.2f, %.2f, %.2f\n", v.parts[0], v.parts[1], v.parts[2]);
 }
 
-void Test_Com_Run()
+void Test_ConcatStrings(i32 argc, char* argv[])
 {
-    Test_Com_StringCompareTests();
-    Test_Com_StringCopyTests();
-    Test_Com_AsciToInt32_Series();
-    Test_Com_StringLength();
+	printf("** String concat test **\n");
+	printf("Concat ");
+	for (i32 i = 0; i < argc; ++i)
+	{
+		printf("\"%s\", ", argv[i]);
+	}
+	printf("\n");
+	char buf[64];
+	i32 wrote = COM_ConcatonateTokens(buf, 64, argv, argc, 1);
+	printf(" FINISHED Wrote %d, result: \"%s\"\n", wrote, buf);
+	
+}
+
+void Test_Com_Run(i32 argc, char* argv[])
+{
+    //Test_Com_StringCompareTests();
+    //Test_Com_StringCopyTests();
+    //Test_Com_AsciToInt32_Series();
+    //Test_Com_StringLength();
+	Test_ConcatStrings(argc, argv);
     //Test_COM_Maths();
+	printf("Tests complete\n");
 }

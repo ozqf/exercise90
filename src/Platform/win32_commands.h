@@ -294,3 +294,16 @@ void Win32_ExecuteTextCommands()
     // TODO: Allow commands to wait for next frame...?
     g_textCommandBufferPosition = 0;
 }
+
+/**********************************************************************
+ * PARSE COMMAND LINE
+ *********************************************************************/
+ void Win32_ExecuteCommandLine(i32 argc, char** argv)
+ {
+	 char buf[256];
+	 COM_ZeroMemory((u8*)buf, 256);
+	 i32 written = COM_ConcatonateTokens(buf, 256, argv, argc, 0);
+	 printf("PLATFORM exec launch string %s\n", buf);
+	 Win32_EnqueueTextCommand(buf);
+ }
+ 

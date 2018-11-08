@@ -103,7 +103,7 @@ i32 Net_SendTo(
     i32 dataSize)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(transmittingSocketIndex);
-    printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
+    //printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
 	sockaddr_in toAddress;
     toAddress.sin_port = htons(port);
     toAddress.sin_family = AF_INET;

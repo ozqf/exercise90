@@ -13,7 +13,7 @@
 
 // #include "../Platform/win32_system_include.h"
 
-// #include "test_common_module.h"
+#include "tests/test_common_module.h"
 
 // #include "test_heap.h"
 // #include "test_zlib.h"
@@ -31,12 +31,13 @@
 // #include "test_ecs2.h"
 // #include "test_misc.h"
 
-#include "network_test/test_network_win32.h"
+//#include "network_test/test_network_win32.h"
 
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-    Test_Win32(argc, argv);
+	Test_Com_Run(argc, argv);
+    //Test_Win32(argc, argv);
     //Tests_Run(argc, argv);
 	//Test_EntityComponentSystem();
     

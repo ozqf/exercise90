@@ -8,7 +8,7 @@ Command line
 
 void Win32_ReadCommandLine(LPSTR lpCmdLine)
 {
-    while (*lpCmdLine && (numLaunchParams < MAX_LAUNCH_PARAMS))
+    while (*lpCmdLine && (g_numLaunchParams < MAX_LAUNCH_PARAMS))
     {
         // While not null && If not a valid ascii character (spaces etc) move until a printable character is hit
         while (*lpCmdLine && ((*lpCmdLine <= 32) && (*lpCmdLine > 126)))
@@ -19,8 +19,8 @@ void Win32_ReadCommandLine(LPSTR lpCmdLine)
         if (*lpCmdLine)
         {
             // Mark a new token start
-            launchParams[numLaunchParams] = lpCmdLine;
-            numLaunchParams++;
+            g_launchParams[g_numLaunchParams] = lpCmdLine;
+            g_numLaunchParams++;
 
             // Subdivide the string up by changing the character at the end of a valid section to NULL
 
@@ -40,7 +40,7 @@ void Win32_ReadCommandLine(LPSTR lpCmdLine)
     }
 
     // Set final character to NULL
-    launchParams[numLaunchParams] = NULL;
+    g_launchParams[g_numLaunchParams] = NULL;
 }
 
 void Win32_Shutdown()

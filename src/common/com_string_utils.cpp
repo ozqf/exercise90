@@ -333,3 +333,32 @@ static inline u8 COM_CheckForFileExtension(const char* filePath, const char* ext
     }
     return 1;
 }
+
+static inline i32 COM_ConcatonateTokens(
+	char* buffer,
+	i32 bufferSize,
+	char** strings,
+	i32 numStrings,
+	i32 firstString)
+{
+	i32 totalWritten = 0;
+	i32 pos = 0;
+	i32 remaining = bufferSize;
+	i32 written = 0;
+	char* dest = buffer;
+	printf("Concatonating %d strings, buf size %d\n", numStrings, bufferSize);
+	for (int i = firstString; i < numStrings; ++i)
+	{
+		printf("Copying %s to %d, with %d remaining\n", strings[i], pos, remaining);
+		dest = buffer + pos;
+		written = COM_CopyStringLimited(strings[i], dest, remaining);
+		*(dest + (written -1 )) = ' ';
+		totalWritten += written;
+		pos += written;
+		remaining -= written;
+		printf("Wrote %d result %s. Remaining %d\n", written, buffer, remaining);
+		if (remaining <= 0) { break; }
+	}
+	*(dest + (written -1 )) = '\0';
+	return totalWritten;
+}

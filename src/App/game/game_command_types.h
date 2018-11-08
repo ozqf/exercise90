@@ -120,6 +120,10 @@ struct Cmd_PlayerInput
 // Client management
 struct Cmd_ClientUpdate
 {
+    // If a client receives an update and the connId matches theres, it identifies
+    // their client for them.
+    // connId must be 0 for all other clients or it isn't private!
+    i32 connId;
 	i32 clientId;
 	i32 connectionId;
     i32 state;

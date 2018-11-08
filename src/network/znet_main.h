@@ -392,11 +392,13 @@ i32 ZNet_Tick(f32 deltaTime)
     ZNet* net = &g_net;
 	
 	//system("cls");
+    /*
     if (net->state == ZNET_STATE_SERVER)
     {
         //printf("\n***** Server Tick %d *****\n", net->tickCount);
         printf(".");
     }
+    */
     // else
     // {
     //     printf("\n***** Client Tick %d *****\n", net->tickCount);
