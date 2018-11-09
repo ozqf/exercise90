@@ -17,19 +17,14 @@
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d accepted\n", conn->id);
-#if 1
-    // Create client
-    Cmd_ClientUpdate spawnClient = {};
-    spawnClient.clientId = App_GetNextClientId(&g_gameState.clientList);
-    spawnClient.state = CLIENT_STATE_OBSERVER;
-    APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
-
-    // TODO: Client needs to be specifically told what their client ID is, so that they know
-    // this state identifies them!
-
-    //App_WriteGameCmd((u8*)&spawnClient, CMD_TYPE_CLIENT_UPDATE, sizeof(Cmd_ClientUpdate));
-    //platform.Platform_WriteTextCommand("SPAWN ENEMY");
-#endif
+    if (IsRunningServer(g_gameState.netMode))
+    {
+        // Create client
+        Cmd_ClientUpdate spawnClient = {};
+        spawnClient.clientId = App_GetNextClientId(&g_gameState.clientList);
+        spawnClient.state = CLIENT_STATE_OBSERVER;
+        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+    }
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)

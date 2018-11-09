@@ -74,6 +74,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		printf("  MENU - Open specific menu\n");
         return 1;
     }
+    if (!COM_CompareStrings(tokens[0], "SAY"))
+    {
+        printf("APP Client say...\n");
+        return 1;
+    }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
     {
         Game_BuildTestScene(&g_gameState, 0);

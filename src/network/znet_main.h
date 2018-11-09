@@ -29,14 +29,14 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
     {
         case NETMODE_SINGLE_PLAYER:
         {
-            printf("ZNet - single player, no socket\n");
+            printf("ZNet - SINGLE PLAYER, no socket\n");
             net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            printf("ZNet - dedicated server on port %d\n", selfPort);
+            printf("ZNet - DEDICATED SERVER on port %d\n", selfPort);
             net->selfPort = selfPort;
             net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
 			printf("Dedicated server requested port %d opened port %d\n", selfPort, sockedOpened);
@@ -46,7 +46,7 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 
         case NETMODE_LISTEN_SERVER:
         {
-            printf("ZNet - list server on port %d\n", selfPort);
+            printf("ZNet - LISTEN SERVER on port %d\n", selfPort);
             net->selfPort = selfPort;
             net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
 			printf("List server requested port %d opened port %d\n", selfPort, sockedOpened);
@@ -56,7 +56,7 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 
         case NETMODE_CLIENT:
         {
-            printf("ZNet - client\n");
+            printf("ZNet - CLIENT\n");
             
             net->socketIndex = g_netPlatform.OpenSocket(0, &sockedOpened);
 			net->selfPort = sockedOpened;
