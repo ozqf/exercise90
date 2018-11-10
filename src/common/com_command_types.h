@@ -87,17 +87,17 @@ struct CmdHeader_ProtocolZero
 #ifndef COM_WRITE_CMD_TO_BUFFER
 #define COM_WRITE_CMD_TO_BUFFER(u8ptr2ptr_write, u8_cmdType, u8_cmdFlags, cmdObject) \
 { \
-u8* ptrOrigin = *u8ptr2ptr_write##; \
- \
-*u8ptr2ptr_write += sizeof(CmdHeader); \
- \
-u16 cmdBytesWritten = cmdObject##.WriteRaw(*##u8ptr2ptr_write##); \
- \
-*u8ptr2ptr_write += cmdBytesWritten; \
-CmdHeader newCmdHeader = {}; \
-newCmdHeader.SetType(##u8_cmdType##); \
-newCmdHeader.SetSize(cmdBytesWritten); \
-newCmdHeader.Write(ptrOrigin); \
+    u8* ptrOrigin = *u8ptr2ptr_write##; \
+     \
+    *u8ptr2ptr_write += sizeof(CmdHeader); \
+     \
+    u16 cmdBytesWritten = cmdObject##.Write(*##u8ptr2ptr_write##); \
+     \
+    *u8ptr2ptr_write += cmdBytesWritten; \
+    CmdHeader newCmdHeader = {}; \
+    newCmdHeader.SetType(##u8_cmdType##); \
+    newCmdHeader.SetSize(cmdBytesWritten); \
+    newCmdHeader.Write(ptrOrigin); \
 }
 #endif
 

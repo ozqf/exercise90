@@ -21,6 +21,7 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
     {
         // Create client
         Cmd_ClientUpdate spawnClient = {};
+		spawnClient.connectionId = conn->id;
         spawnClient.clientId = App_GetNextClientId(&g_gameState.clientList);
         spawnClient.state = CLIENT_STATE_OBSERVER;
         APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
@@ -30,7 +31,15 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d dropped\n", conn->id);
-    // Delete client
+	if (IsRunningServer(g_gameState.netMode))
+    {
+		Client* cl = App_FindClientByConnectionId(&g_gameState.clientList, conn->id);
+        // Delete client
+        Cmd_ClientUpdate spawnClient = {};
+        spawnClient.clientId = cl->connectionId;
+        spawnClient.state = CLIENT_STATE_FREE;
+        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+    }
 }
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)

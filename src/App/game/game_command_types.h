@@ -57,10 +57,14 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_HUD_ITEM 114
 
 // Define placeholder raw read/write functions for commands.
+
 #ifndef GAME_CMD_DEFAULT_INTERFACE
+//#define GAME_CMD_DEFAULT_INTERFACE(structType)
+//#endif
+
 #define GAME_CMD_DEFAULT_INTERFACE(structType)\
 \
-inline u16 WriteRaw(u8* ptr)\
+inline u16 Write(u8* ptr)\
 {\
     u32 structSize = sizeof(structType); \
     return (u16)COM_COPY(this, ptr, structSize);\

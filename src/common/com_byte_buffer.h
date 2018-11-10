@@ -9,7 +9,6 @@ struct ByteBuffer
     u8* ptrEnd;
     u8* ptrWrite;
     i32 capacity;
-    i32 count;
 
     inline u32 Written()
     {
@@ -61,5 +60,4 @@ static inline void Buf_Clear(ByteBuffer* b)
 	COM_ZeroMemory(b->ptrStart, b->capacity);
 	b->ptrEnd = b->ptrStart;
 	b->ptrWrite = b->ptrStart;
-	b->count = 0;
 }

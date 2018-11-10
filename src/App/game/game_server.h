@@ -145,28 +145,36 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
-internal void SV_ProcessClientSpawn(GameState* gs, Client* cl)
+internal void SV_ProcessClientSpawn(GameState* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }
     if (gs->session.state == 0)
     {
+		// TODO: Replicate client state change to all connected clients
+		// Make sure connection Id is NOT replicated!
+		cmd->connectionId = 0;
+		
         printf("SV: GAME START\n");
-        Cmd_GameSessionState cmd = {};
-        cmd.state = GAME_SESSION_STATE_PLAYING;
-        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, cmd);
+        Cmd_GameSessionState sessionCmd = {};
+        sessionCmd.state = GAME_SESSION_STATE_PLAYING;
+        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, sessionCmd);
         //sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "");
     }
 }
 
-internal void SV_ProcessClientDeath(GameState* gs, Client* cl)
+internal void SV_ProcessClientDeath(GameState* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }
     if (App_NumPlayingClients(&gs->clientList) == 0)
     {
+        // TODO: Replicate client state change to all connected clients
+		// Make sure connection Id is NOT replicated!
+		cmd->connectionId = 0;
+		
         printf("SV: GAME OVER\n");
-        Cmd_GameSessionState cmd = {};
-        cmd.state = GAME_SESSION_STATE_FAILED;
-        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, cmd);
+        Cmd_GameSessionState sessionCmd = {};
+        sessionCmd.state = GAME_SESSION_STATE_FAILED;
+        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, sessionCmd);
     }
 }
 

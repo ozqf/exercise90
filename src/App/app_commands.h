@@ -382,7 +382,6 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
     ByteBuffer sub = {};
     sub.ptrStart = buf->ptrStart + h.staticCommands.offset;
     sub.capacity = h.staticCommands.size;
-    sub.count = h.staticCommands.count;
     sub.ptrEnd = buf->ptrStart + buf->capacity;
     
 	if (sub.capacity != 0) {
@@ -398,7 +397,6 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
 	// Read Dynamic
 	sub.ptrStart = buf->ptrStart + h.dynamicCommands.offset;
 	sub.capacity = h.dynamicCommands.size;
-	sub.count = h.dynamicCommands.count;
 	sub.ptrEnd = buf->ptrStart + buf->capacity;
 	if (sub.capacity > 0)
 	{
