@@ -236,8 +236,7 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			platform.Platform_WriteTextCommand("MARK");
 			platform.Platform_WriteTextCommand("HOST TEST");
 			platform.Platform_WriteTextCommand("WAIT");
-			platform.Platform_WriteTextCommand("WAIT");
-			platform.Platform_WriteTextCommand("IMPULSE 1");
+			//platform.Platform_WriteTextCommand("IMPULSE 1");
 			platform.Platform_WriteTextCommand("MENU CLOSE");
 		}
 		if (!COM_CompareStrings(tokens[1], "OPTIONS"))

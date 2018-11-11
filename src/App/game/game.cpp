@@ -14,7 +14,11 @@ internal void Game_BuildTestHud()
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     ent->transform.pos.z = 0;
     ent->transform.scale = { 0.04f, 0.04f, 0.04f };
-    RendObj_SetAsSprite(&ent->rendObj, SPRITE_MODE_UI, AppGetTextureIndexByName("textures\\charset.bmp"), 1, 1);
+    RendObj_SetAsSprite(
+        &ent->rendObj,
+        SPRITE_MODE_UI,
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        1, 1);
     RendObj_CalculateSpriteAsciUVs(&ent->rendObj.data.sprite, '+');
 
 
@@ -96,7 +100,8 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     u8 death = (cl->entId.value != 0 && cmd->entId.value == 0);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
-    printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n", cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
+    printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n",
+        cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
     if (spawn)
     {
         SV_ProcessClientSpawn(gs, cl, cmd);
@@ -177,7 +182,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 		case CMD_TYPE_SPAWN_VIA_TEMPLATE:
 		{
 			Cmd_SpawnViaTemplate cmd = {};
-			ptr += cmd.Read(header, ptr);
+			ptr += cmd.Read(ptr);
 			Exec_SpawnViaTemplate(gs, &cmd);
 			return 1;
 		} break;
@@ -186,7 +191,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         {
             printf("GAME: Defunct static state call\n");
             //Cmd_Spawn cmd = {};
-            //ptr += cmd.Read(header, ptr);
+            //ptr += cmd.Read(ptr);
             //Exec_StaticEntityState(gs, &cmd);
             return 1;
         } break;
@@ -194,7 +199,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         case CMD_TYPE_REMOVE_ENT:
         {
             Cmd_RemoveEntity cmd = {};
-            ptr += cmd.Read(header, ptr);
+            ptr += cmd.Read(ptr);
             Game_RemoveEntity(gs, &cmd);
             return 1;
         } break;
@@ -202,7 +207,9 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 		case CMD_TYPE_PLAYER_INPUT:
 		{
             Cmd_PlayerInput cmd;
-            ptr += cmd.Read(header, ptr);
+            u16 measuredSize = cmd.MeasureForReading(ptr);
+            APP_ASSERT(measuredSize == header->GetSize(), "Command read size mismatch");
+            ptr += cmd.Read(ptr);
             Client* cl = App_FindClientById(cmd.clientId, &gs->clientList);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
@@ -221,14 +228,14 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
-            ptr += cmd.Read(header, ptr);
+            ptr += cmd.Read(ptr);
 			return SV_ReadImpulse(gs, &cmd);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
             Cmd_ClientUpdate cmd = {};
-            ptr += cmd.Read(header, ptr);
+            ptr += cmd.Read(ptr);
             Exec_UpdateClient(gs, &cmd);
             return 1;
         } break;
@@ -236,7 +243,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
 		case CMD_TYPE_GAME_SESSION_STATE:
 		{
 			Cmd_GameSessionState cmd = {};
-			ptr += cmd.Read(header, ptr);
+			ptr += cmd.Read(ptr);
 			Exec_UpdateGameInstance(gs, &cmd);
 			return 1;
 		} break;
@@ -244,7 +251,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
         case CMD_TYPE_SPAWN_HUD_ITEM:
         {
             Cmd_SpawnHudItem cmd = {};
-            ptr += cmd.Read(header, ptr);
+            ptr += cmd.Read(ptr);
             Exec_SpawnHudItem(gs, &cmd);
             return 1;
         } break;

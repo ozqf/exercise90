@@ -26,7 +26,7 @@ u32 App_WriteSaveState(
     //platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(StateSaveHeader));
 
     printf("APP sizeof(StateSaveHeader): %d\n", sizeof(StateSaveHeader));
-    printf("APP sizeof(EntityState): %d\n", sizeof(Cmd_EntityState));
+    printf("APP sizeof(EntityState): %d\n", sizeof(EntityState));
 
     ///////////////////////////////
     // Write commands

@@ -595,6 +595,7 @@ DEFINE_ENT_COMPONENT_LIST(Sensor)
 #define CLIENT_STATE_FREE 0
 #define CLIENT_STATE_OBSERVER 1
 #define CLIENT_STATE_PLAYING 2
+#define CLIENT_STATE_SYNC 3
 
 #define CLIENT_FLAG_LOCAL (1 << 0)
 struct Client
@@ -610,6 +611,12 @@ struct Client
     ActorInput input;
 
     NetStream stream;
+    // Clients are considered in sync mode until their acknowledged
+    // reliable message queue Id is >= to this.
+    // Set to u32 max value when client first connects.
+    // Set properly after all sync messages have been buffered for 
+    // transmission.
+    u32 syncCompleteMessageId;
 
     u8 IsPlaying() { return (this->state == CLIENT_STATE_PLAYING); }
 };

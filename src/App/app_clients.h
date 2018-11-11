@@ -93,13 +93,16 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             {
                 cl->input.buttons = 0;
             }
-            // Always copy input (and other vars) even if it hasn't been affected or
-            // the players orientation will be reset! (and everything else, including state)
+            // Always copy input (and other vars) even if it hasn't
+            //mbeen affected or the players orientation will be reset!
+            // (and everything else, including state)
             Cmd_PlayerInput cmd = {};
             cmd.state = CLIENT_STATE_PLAYING;
 			cmd.clientId = cl->clientId;
             cmd.input = cl->input;
-            APP_WRITE_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_PLAYER_INPUT, 0, cmd);
+            APP_WRITE_CMD(
+                &g_appWriteBuffer->ptrWrite,
+                CMD_TYPE_PLAYER_INPUT, 0, cmd);
             //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 

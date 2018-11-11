@@ -313,6 +313,12 @@ void App_UpdateGameState(GameTime* time)
 	//////////////////////////////////////////////
 #endif
 
+	if (time->singleFrame)
+	{
+		printf("-- GAME INPUT --\n");
+		App_PrintCommandBufferManifest(input->ptrStart, (u16)input->Written());
+	}
+		
     // Game state update
     Game_Tick(gs,
               input,
@@ -465,11 +471,10 @@ void App_Frame(GameTime *time)
 	{
 		printf("Marked end of write buffer, %d bytes\n",
             (g_appWriteBuffer->ptrEnd - g_appWriteBuffer->ptrStart));
+		App_PrintCommandBufferManifest(g_appWriteBuffer->ptrStart, (u16)g_appWriteBuffer->Written());
 	}
 
 
-
-	
 	//Swap Command Buffers.
     ByteBuffer* temp = g_appReadBuffer;
     g_appReadBuffer = g_appWriteBuffer;

@@ -21,7 +21,8 @@ internal void Game_AddTestSolid(GameState* gs,
 	h.componentBits |= EC_BIT1_TRANSFORM;
     if (isVisible) { h.componentBits |= EC_BIT2_RENDERER; }
     h.componentBits |= EC_BIT3_COLLIDER;
-
+    u8 type = CMD_TYPE_ENTITY_STATE_2;
+    size += App_WriteCommandBytesToFrameOutput(&type, sizeof(type));
 	size += App_WriteCommandBytesToFrameOutput((u8*)&h, sizeof(Cmd_EntityStateHeader));
 
     Ent ent = {};

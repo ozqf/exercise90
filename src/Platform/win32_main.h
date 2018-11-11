@@ -322,14 +322,12 @@ void Win32_SendAppInput()
         g_input.ptrStart = g_commandBufferB;
         g_input.ptrWrite = g_commandBufferB;
         g_input.ptrEnd = g_commandBufferB;
-        g_input.count = 0;
     }
     else if (g_input.ptrStart == g_commandBufferB)
     {
         g_input.ptrStart = g_commandBufferA;
         g_input.ptrWrite = g_commandBufferA;
         g_input.ptrEnd = g_commandBufferA;
-        g_input.count = 0;
     }
     else
     {

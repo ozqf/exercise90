@@ -144,7 +144,6 @@ inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, 
 
     b->ptrWrite += COM_COPY(&header, b->ptrWrite, numHeaderBytes);
     b->ptrWrite += COM_COPY(source, b->ptrWrite, itemSize);
-    b->count++;
 
 	// Trap to catch specific items being written
 	//Assert(itemType != 2);

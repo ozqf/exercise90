@@ -92,6 +92,7 @@ struct CmdHeader_ProtocolZero
     *u8ptr2ptr_write += sizeof(CmdHeader); \
      \
     u16 cmdBytesWritten = cmdObject##.Write(*##u8ptr2ptr_write##); \
+    printf(" COM Wrote %d (expected %d)\n", cmdBytesWritten, cmdObject##.MeasureForWriting()); \
      \
     *u8ptr2ptr_write += cmdBytesWritten; \
     CmdHeader newCmdHeader = {}; \

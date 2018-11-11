@@ -36,9 +36,15 @@ struct TransmissionRecord
 #define MAX_TRANSMISSION_RECORDS 33
 struct NetStream
 {
+    // latest reliable command from remote executed here
     u32 inputSequence;
+    // id of next reliable message sent to remote
     u32 outputSequence;
+    // the most recented acknowledged message Id
+    u32 ackSequence;
+
     ByteBuffer inputBuffer;
     ByteBuffer outputBuffer;
+    
     TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
 };

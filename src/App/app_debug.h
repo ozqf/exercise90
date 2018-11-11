@@ -2,6 +2,27 @@
 
 #include "app_module.cpp"
 
+void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
+{
+    printf("-- Buffer of %d manifest --\n", numBytes);
+    u8* end = ptr + numBytes;
+    u8* read = ptr;
+    while (read < end)
+    {
+        CmdHeader* h = (CmdHeader*)read;
+        if (h->GetType() == 0)
+        {
+            printf("  End of Buffer\n");
+            return;
+        }
+        read += sizeof(CmdHeader);
+        u8 dataType = *read;
+        printf("ID %d. Size %d. Type %d\n", h->GetType(), h->GetSize(), dataType);
+        read += h->GetSize();
+    }
+    printf("  Read over-ran end\n");
+}
+
 #if 1
 void App_DebugPrintEntities(GameState* gs)
 {

@@ -30,16 +30,20 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_BIT8_HEALTH) 			{ EC_HealthApplyState(gs, ent, &state->healthState); }
     if (state->componentBits & EC_BIT9_THINKER) 		{ EC_ThinkerApplyState(gs, ent, &state->thinkerState); }
     if (state->componentBits & EC_BIT10_MULTI_RENDOBJ) 	{ EC_MultiRendObjApplyState(gs, ent, &state->multiRendState); }
-    if (state->componentBits & EC_BIT11_VOLUME) 			{ EC_VolumeApplyState(gs, ent, &state->volumeState); }
-    if (state->componentBits & EC_BIT12_SENSOR) 			{ EC_SensorApplyState(gs, ent, &state->sensorState); }
-
+    if (state->componentBits & EC_BIT11_VOLUME) 		{ EC_VolumeApplyState(gs, ent, &state->volumeState); }
+    if (state->componentBits & EC_BIT12_SENSOR) 		{ EC_SensorApplyState(gs, ent, &state->sensorState); }
 }
 
 internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 {
+	printf("Reading %d bytes of ent state\n", numBytes);
     u8* origin = stream;
     Cmd_EntityStateHeader h = {};
+    u8 type = COM_ReadByte(&stream);
+	u8 expected = CMD_TYPE_ENTITY_STATE_2;
+    
     stream += COM_COPY_STRUCT(stream, &h, Cmd_EntityStateHeader);
+	APP_ASSERT(type == CMD_TYPE_ENTITY_STATE_2, "Read ent state cmd type mismatch")
     #if 1
     if (gs->verbose)
     {
@@ -106,6 +110,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
     Cmd_EntityStateHeader h = {};
     h.entId = state->entId;
     h.componentBits = state->componentBits;
+    stream += COM_WriteByte(CMD_TYPE_ENTITY_STATE_2, stream);
     stream += COM_COPY_STRUCT(&h, stream, Cmd_EntityStateHeader);
 
     if (h.componentBits & EC_BIT0_ENTITY)
@@ -143,6 +148,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
         u8* cmdOrigin = App_StartCommandStream();
         App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
         App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
+		printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten;
     }
     else
@@ -152,6 +158,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
         cmdHeader.SetSize(bytesWritten);
         optionalOutputStream += cmdHeader.Write(optionalOutputStream);
         optionalOutputStream += COM_COPY(origin, optionalOutputStream, bytesWritten);
+		printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten + sizeof(CmdHeader);
     }
 }
@@ -246,8 +253,14 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
     {
         EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
         state->renderState = r->state;
-        COM_CopyStringLimited(r->state.meshName, state->renderState.meshName, EC_RENDERER_STRING_LENGTH);
-        COM_CopyStringLimited(r->state.textureName, state->renderState.textureName, EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited(
+            r->state.meshName,
+            state->renderState.meshName,
+            EC_RENDERER_STRING_LENGTH);
+        COM_CopyStringLimited(
+            r->state.textureName,
+            state->renderState.textureName,
+            EC_RENDERER_STRING_LENGTH);
     }
     EC_Collider* collider = EC_FindCollider(gs, ent);
     if (collider)

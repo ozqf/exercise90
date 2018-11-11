@@ -38,6 +38,9 @@ internal u16 COL_MASK_PROJECTILE =
 
 //////////////////////////////////////////////////
 // Game Commands
+// First byte of any command or message should
+// be the type. Read should check this byte is
+// correct
 //////////////////////////////////////////////////
 
 #define CMD_TYPE_STATIC_STATE 100
@@ -62,22 +65,36 @@ internal u16 COL_MASK_PROJECTILE =
 //#define GAME_CMD_DEFAULT_INTERFACE(structType)
 //#endif
 
-#define GAME_CMD_DEFAULT_INTERFACE(structType)\
+#define GAME_CMD_DEFAULT_INTERFACE(structType, u8_cmdType)\
 \
-inline u16 Write(u8* ptr)\
+inline u16 MeasureForReading(u8* ptr) \
+{ \
+    u16 size = sizeof(structType) + sizeof(u8); \
+    return size; \
+} \
+\
+inline u16 MeasureForWriting() \
+{ \
+    u16 size = sizeof(structType) + sizeof(u8); \
+    return size; \
+} \
+\
+inline u16 Write(u8* ptr) \
 {\
+    u8* start = ptr; \
+    ptr += COM_WriteByte(u8_cmdType, ptr); \
     u32 structSize = sizeof(structType); \
-    return (u16)COM_COPY(this, ptr, structSize);\
-}\
+    ptr += COM_COPY(this, ptr, structSize); \
+    return (u16)(ptr - start); \
+} \
 \
-inline u16 Read(CmdHeader* h, u8* ptr)\
-{\
-    if (h->GetSize() != sizeof(structType))\
-    {\
-        printf("!GAME Read Raw size mismatch for cmd type %d\n", h->GetType());\
-        ILLEGAL_CODE_PATH \
-    } \
-    return (u16)COM_COPY(ptr, this, sizeof(structType));\
+inline u16 Read(u8* ptr) \
+{ \
+    u8* start = ptr; \
+    u8 commandType = COM_ReadByte(&ptr); \
+    APP_ASSERT((commandType == u8_cmdType), "CMD read: type mismatched\n"); \
+    ptr += COM_COPY(ptr, this, sizeof(structType)); \
+    return (u16)(ptr - start); \
 }
 #endif
 
@@ -93,7 +110,7 @@ struct Cmd_ServerImpulse
     i32 clientId;
     i32 impulse;
     
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_ServerImpulse)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_ServerImpulse, CMD_TYPE_IMPULSE)
     // inline u16 WriteRaw(u8* ptr)
     // {
     //     printf("Copying Impulse cmd\n");
@@ -116,7 +133,7 @@ struct Cmd_PlayerInput
     i32 state;
     ActorInput input;
 
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerInput)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerInput, CMD_TYPE_PLAYER_INPUT)
 };
 #endif
 //////////////////////////////////////////////////
@@ -146,7 +163,7 @@ struct Cmd_ClientUpdate
         input = cl->input;
     }
 
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_ClientUpdate)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_ClientUpdate, CMD_TYPE_CLIENT_UPDATE)
 };
 
 // 104
@@ -174,7 +191,7 @@ struct Cmd_Text
 
 // State save/load
 // 105 - Complete entity restore
-
+#if 0
 // TODO: REMOVE THIS WHEN SECOND VERISON OF ECS IS WORKING
 /*
 TODO: This state update object is cramming every component's possible
@@ -208,14 +225,14 @@ struct Cmd_EntityState
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_EntityState)
 };
-
+#endif
 // 106
 struct Cmd_RemoveEntity
 {
     EntId entId;
     i32 gfxNormal;
 
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_RemoveEntity)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_RemoveEntity, CMD_TYPE_REMOVE_ENT)
 };
 
 // 107 - Entity delta contains a list of fields to update
@@ -236,7 +253,7 @@ struct Cmd_PlayerState
     i32 state;
     EntId avatarId;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerState)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerState, CMD_TYPE_PLAYER_STATE)
 };
 
 // 109 CMD_TYPE_ENTITY_STATE_2
@@ -260,14 +277,14 @@ struct Cmd_GameSessionState
 {
 	i32 state;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameSessionState)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameSessionState, CMD_TYPE_GAME_SESSION_STATE)
 };
 
 struct Cmd_GameCampaignState
 {
 	i32 state;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState, CMD_TYPE_GAME_CAMPAIGN_STATE)
 };
 
 struct Cmd_SpawnViaTemplate
@@ -275,7 +292,7 @@ struct Cmd_SpawnViaTemplate
 	i32 factoryType;
 	EntitySpawnOptions options;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnViaTemplate)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnViaTemplate, CMD_TYPE_SPAWN_VIA_TEMPLATE)
 };
 
 // CMD_TYPE_SPAWN_HUD_ITEM
@@ -287,5 +304,5 @@ struct Cmd_SpawnHudItem
     EntId source;
     EntId victim;
 
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnHudItem)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnHudItem, CMD_TYPE_SPAWN_HUD_ITEM)
 };
