@@ -29,6 +29,23 @@ void App_ClearClientGameLinks(ClientList* cls)
 	}
 }
 
+void App_DeleteClients(ClientList* cls)
+{
+    for (i32 i = 0; i < cls->max; ++i)
+	{
+		Client* cl = &cls->items[i];
+        if (cl->stream.inputBuffer.ptrStart)
+        {
+            free((void*)cl->stream.inputBuffer.ptrStart);
+        }
+        if (cl->stream.outputBuffer.ptrStart)
+        {
+            free((void*)cl->stream.outputBuffer.ptrStart);
+        }
+        *cl = {};
+	}
+}
+
 Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
     if (g_localClientId == 0) { return NULL; }
@@ -198,6 +215,13 @@ Client* App_FindOrCreateClient(i32 id, ClientList* cls)
         else
         {
             result = free;
+            NetStream* stream = &result->stream;
+            stream->inputBuffer = Buf_FromMalloc(
+                malloc(KiloBytes(64)), KiloBytes(64)
+            );
+            stream->outputBuffer = Buf_FromMalloc(
+                malloc(KiloBytes(64)), KiloBytes(64)
+            );
         }
     }
     result->clientId = id;

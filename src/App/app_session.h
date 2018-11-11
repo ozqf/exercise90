@@ -215,6 +215,7 @@ void App_EndSession()
 
     App_StopRecording();
     App_ClearLevel();
+    App_DeleteClients(&g_gameState.clientList);
     ZNet_Shutdown();
     COM_ZeroMemory((u8 *)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }

@@ -58,6 +58,7 @@ UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 void App_EndAllClients(ClientList* cls);
 void App_ClearClientGameLinks(ClientList* cls);
+void App_DeleteClients(ClientList* cls);
 void App_AddLocalClient();
 void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
 i32 App_GetNextClientId(ClientList* cls);
