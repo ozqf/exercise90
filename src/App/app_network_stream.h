@@ -10,7 +10,7 @@
  * output buffer is continuously sent until successful ack
  * input is buffered and only executed in sequence
  */
-#include "../app_module.cpp"
+#include "app_module.cpp"
 
 
 void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)

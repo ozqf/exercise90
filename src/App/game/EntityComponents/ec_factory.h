@@ -36,7 +36,6 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
 
 internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
 {
-	printf("Reading %d bytes of ent state\n", numBytes);
     u8* origin = stream;
     Cmd_EntityStateHeader h = {};
     u8 type = COM_ReadByte(&stream);
@@ -148,7 +147,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
         u8* cmdOrigin = App_StartCommandStream();
         App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
         App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
-		printf("Wrote %d bytes of entity state\n", bytesWritten);
+		//printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten;
     }
     else
@@ -158,7 +157,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
         cmdHeader.SetSize(bytesWritten);
         optionalOutputStream += cmdHeader.Write(optionalOutputStream);
         optionalOutputStream += COM_COPY(origin, optionalOutputStream, bytesWritten);
-		printf("Wrote %d bytes of entity state\n", bytesWritten);
+		//printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten + sizeof(CmdHeader);
     }
 }

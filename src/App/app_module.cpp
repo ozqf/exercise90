@@ -54,6 +54,8 @@ GameTime* GetAppTime();
 
 UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 
+u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes);
+
 // Clients
 void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 void App_EndAllClients(ClientList* cls);
@@ -141,7 +143,7 @@ internal void AppListTextures();
 #include "app_clients.h"
 #include "app_commands.h"
 #include "app_input.h"
-#include "network/app_network.h"
+#include "app_network.h"
 #include "assets/app_textures.cpp"
 #include "assets/app_meshes.cpp"
 #include "app_main.cpp"

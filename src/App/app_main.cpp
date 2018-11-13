@@ -457,6 +457,8 @@ void App_Frame(GameTime *time)
     Net_Tick(&g_gameState, time);
 	
 	App_UpdateGameState(time);
+
+    Net_Transmit(&g_gameState, time);
 	
     if (time->singleFrame)
 	{

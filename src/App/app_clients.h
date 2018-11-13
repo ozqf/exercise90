@@ -34,6 +34,7 @@ void App_DeleteClients(ClientList* cls)
     for (i32 i = 0; i < cls->max; ++i)
 	{
 		Client* cl = &cls->items[i];
+        printf("APP Deleting client %d I/O Streams\n", cl->clientId);
         if (cl->stream.inputBuffer.ptrStart)
         {
             free((void*)cl->stream.inputBuffer.ptrStart);
@@ -216,11 +217,13 @@ Client* App_FindOrCreateClient(i32 id, ClientList* cls)
         {
             result = free;
             NetStream* stream = &result->stream;
+            printf("APP Allocating I/O streams for client %d\n", id);
+            u32 bytes = KiloBytes(64);
             stream->inputBuffer = Buf_FromMalloc(
-                malloc(KiloBytes(64)), KiloBytes(64)
+                malloc(bytes), bytes
             );
             stream->outputBuffer = Buf_FromMalloc(
-                malloc(KiloBytes(64)), KiloBytes(64)
+                malloc(bytes), bytes
             );
         }
     }

@@ -145,6 +145,25 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
+internal void SV_OutputToAllClients(GameState* gs, Cmd_ClientUpdate* cmd)
+{
+    if(!IS_SERVER(gs)) { return; }
+
+    for (i32 i = 0; i < gs->clientList.count; ++i)
+    {
+        Client* cl = &gs->clientList.items[i];
+
+        if (cl->state == CLIENT_STATE_FREE) { continue; }
+        ByteBuffer* b = &cl->stream.outputBuffer;
+        u32 msgId = ++cl->stream.outputSequence;
+        u16 size = cmd->MeasureForWriting();
+        printf("Writing client update id %d size %d to client %d output\n",
+            msgId, size, cl->clientId);
+        b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, size);
+        b->ptrWrite += cmd->Write(b->ptrWrite);
+    }
+}
+
 internal void SV_ProcessClientSpawn(GameState* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }

@@ -9,7 +9,7 @@
 #include "app_network_types.h"
 #include "app_network_stream.h"
 
-#include "../app_module.cpp"
+#include "app_module.cpp"
 
 /////////////////////////////////////////////////////////////////
 // Network callbacks
@@ -78,6 +78,21 @@ ZNetOutputInterface Net_CreateOutputInterface()
 	return x;
 }
 
+internal void Net_TransmitClientPackets(GameState* gs)
+{
+    if(!IS_SERVER(gs)) { return; }
+
+    for (i32 i = 0; i < gs->clientList.count; ++i)
+    {
+        Client* cl = &gs->clientList.items[i];
+        if (cl->state == CLIENT_STATE_FREE) { continue; }
+
+        // TODO: Sending once per frame regardless here
+        ByteBuffer* b = &cl->stream.outputBuffer;
+
+
+    }
+}
 
 internal void Net_Tick(GameState* gs, GameTime* time)
 {
@@ -101,6 +116,37 @@ internal void Net_Tick(GameState* gs, GameTime* time)
         case NETMODE_CLIENT:
         {
             ZNet_Tick(time->deltaTime);
+        } break;
+
+        default:
+        {
+            APP_ASSERT(0, "Unknown netmode\n");
+        } break;
+    }
+}
+
+internal void Net_Transmit(GameState* gs, GameTime* time)
+{
+    switch (gs->netMode)
+    {
+        case NETMODE_NONE:
+        {
+            return;
+        } break;
+
+        case NETMODE_LISTEN_SERVER:
+        {
+            Net_TransmitClientPackets(gs);
+        } break;
+
+        case NETMODE_DEDICATED_SERVER:
+        {
+            Net_TransmitClientPackets(gs);
+        } break;
+
+        case NETMODE_CLIENT:
+        {
+            
         } break;
 
         default:

@@ -102,13 +102,15 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     cl->entId = cmd->entId;
     printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n",
         cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
+    
+    // Changes that server should act on
     if (spawn)
     {
         SV_ProcessClientSpawn(gs, cl, cmd);
     }
     if (death)
     {
-        // death!
+        // deth!
         SV_ProcessClientDeath(gs, cl, cmd);
     }
     if (cl->flags != cmd->flags)
@@ -122,6 +124,8 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
         }
     }
     cl->flags = cmd->flags;
+
+    SV_OutputToAllClients(gs, cmd);
 }
 
 internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameSessionState* cmd)
