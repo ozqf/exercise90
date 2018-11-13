@@ -100,8 +100,9 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     u8 death = (cl->entId.value != 0 && cmd->entId.value == 0);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
-    printf("GAME EXEC Client %d State: %d Avatar id %d/%d\n",
-        cl->clientId, cl->state, cl->entId.iteration, cl->entId.index);
+    cl->connectionId = cmd->connectionId;
+    printf("GAME EXEC Client %d conn %d, State: %d Avatar id %d/%d\n",
+        cl->clientId, cl->connectionId, cl->state, cl->entId.iteration, cl->entId.index);
     
     // Changes that server should act on
     if (spawn)

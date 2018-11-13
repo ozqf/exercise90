@@ -317,8 +317,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		for (i32 i = 0; i < g_gameState.clientList.max; ++i)
 		{
 			Client* cl = &g_gameState.clientList.items[i];
-			printf("%d: IsLocal %d, State %d, Avatar: %d/%d\n",
-				cl->clientId,
+			printf("%d: ConnId %d, IsLocal %d, State %d, Avatar: %d/%d\n",
+				cl->clientId, cl->connectionId,
 				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
 			);
 

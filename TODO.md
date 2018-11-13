@@ -4,13 +4,14 @@
 
 ### Network Integration
 
-1. Integrating the rudimentary network code into the app.
-2. Refactor game command buffers to better match network buffers.
-3. Allocate memory and any other resources for client network streams
-4. Write into network output from server
-5. Read network input on client
-6. Write into output from client
-7. Read network input on server
+* *Done* Integrating the rudimentary network code into the app.
+* *Done* Refactor game command buffers to better match network buffers.
+* Allocate memory and any other resources for server side client network streams
+* Allocate memory and any other resources for client side server I/O
+* *Done* Write into network output from server
+* Read network input on client
+* Write into output from client
+* Read network input on server
 
 
 ### ECS complexity

@@ -171,6 +171,9 @@ i32 App_MouseTestMenu(UIEntity *items, i32 numItems, f32 mouseX, f32 mouseY)
 	return result;
 }
 
+#include <shellapi.h>
+#pragma comment(lib, "Shell32.lib")
+
 void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 {
 	// translate mouse pos to 0, 0 in centre, 50% either side
@@ -208,6 +211,8 @@ void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 		if (!COM_CompareStrings(ent->name, "OPTIONS"))
 		{
 			platform.Platform_WriteTextCommand("MENU OPTIONS");
+			//platform.Platform_WriteTextCommand("QUIT");
+			ShellExecute(NULL, "open", "https://en.wikipedia.org/wiki/Bridge_to_nowhere", NULL, NULL, SW_SHOWNORMAL);
 		}
 		if (!COM_CompareStrings(ent->name, "QUIT"))
 		{

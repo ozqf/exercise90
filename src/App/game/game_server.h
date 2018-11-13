@@ -149,11 +149,26 @@ internal void SV_OutputToAllClients(GameState* gs, Cmd_ClientUpdate* cmd)
 {
     if(!IS_SERVER(gs)) { return; }
 
-    for (i32 i = 0; i < gs->clientList.count; ++i)
+    // correct conn id is only sent to the client to which it belongs
+    i32 updateConnectionId = cmd->connectionId;
+
+    printf("SV Transmitting client state update to all clients\n");
+    for (i32 i = 0; i < gs->clientList.max; ++i)
     {
         Client* cl = &gs->clientList.items[i];
 
         if (cl->state == CLIENT_STATE_FREE) { continue; }
+
+        if (cl->connectionId == 0)
+        {
+            // local client
+            continue;
+        }
+
+        if (cl->connectionId == updateConnectionId)
+        { cmd->connectionId = updateConnectionId; }
+        else { cmd->connectionId = 0; }
+
         ByteBuffer* b = &cl->stream.outputBuffer;
         u32 msgId = ++cl->stream.outputSequence;
         u16 size = cmd->MeasureForWriting();

@@ -127,7 +127,8 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 u32 ZNet_GetNextSequenceNumber(i32 connId)
 {
 	ZNetConnection* conn = ZNet_GetConnectionById(&g_net, connId);
-	NET_ASSERT(conn, "Found no conn for next sequence\n");
+	NET_ASSERT((connId != 0), "Get Next Packet Sequence: Connection Id is zero");
+	NET_ASSERT(conn, "Get Next Packet Sequence: Connection could not be found\n");
 	return conn->sequence;
 }
 

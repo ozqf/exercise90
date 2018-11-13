@@ -687,6 +687,9 @@ struct GameState
     ClientList clientList;
     GameStateLocal local;
 
+    i32 remoteConnectionId;
+    NetStream serverStream;
+
     // Entities
     //i32 nextEntityID;
     EntList entList;

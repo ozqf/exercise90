@@ -26,6 +26,11 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
         spawnClient.state = CLIENT_STATE_OBSERVER;
         APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
     }
+    else
+    {
+        printf("CL Connected to server with conn id %d\n", conn->id);
+        g_gameState.remoteConnectionId = conn->id;
+    }
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
@@ -44,7 +49,14 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-    printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
+    //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
+    switch (g_gameState.netMode)
+    {
+        case NETMODE_CLIENT:
+        {
+
+        } break;
+    }
 }
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
@@ -82,15 +94,25 @@ internal void Net_TransmitClientPackets(GameState* gs)
 {
     if(!IS_SERVER(gs)) { return; }
 
-    for (i32 i = 0; i < gs->clientList.count; ++i)
+    const i32 packetSize = 1024;
+    u8 packetBuffer[packetSize];
+
+    for (i32 i = 0; i < gs->clientList.max; ++i)
     {
         Client* cl = &gs->clientList.items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
 
-        // TODO: Sending once per frame regardless here
+        // TODO: Sending once per tick regardless of framerate at the moment
         ByteBuffer* b = &cl->stream.outputBuffer;
-
-
+        
+        i32 pendingBytes = b->Written();
+        if (pendingBytes == 0)
+        {
+            continue;
+        }
+        //printf("%dB, ", pendingBytes);
+        
+        Stream_OutputToPacket(cl->connectionId, &cl->stream, packetBuffer, packetSize);
     }
 }
 
