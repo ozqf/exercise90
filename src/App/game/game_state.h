@@ -18,7 +18,6 @@ internal void GS_Init(GameState *gs)
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
     
     // Don't wanna forget to assign all these.
-    
     gs->clientList.items = g_clients;
     gs->clientList.count = 0;
     gs->clientList.max = GAME_MAX_CLIENTS;

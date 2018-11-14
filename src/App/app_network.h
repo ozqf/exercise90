@@ -54,7 +54,18 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     {
         case NETMODE_CLIENT:
         {
+            printf("Received %d bytes from %d\n", numBytes, info->sender.id);
+            APP_ASSERT(
+                (info->sender.id == g_gameState.remoteConnectionId),
+                "Received packet from unknown source");
 
+            u8* read = bytes;
+            u16 reliableBytes = COM_ReadU16(&read);
+            u16 unreliableBytes = COM_ReadU16(&read);
+            if (reliableBytes > 0)
+            {
+                Stream_PacketToInput(&g_serverStream, read, reliableBytes);
+            }
         } break;
     }
 }

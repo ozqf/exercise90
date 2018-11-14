@@ -127,6 +127,13 @@ global_variable BlockRef g_appBufferA_Ref;
 global_variable ByteBuffer g_appBufferB;
 global_variable BlockRef g_appBufferB_Ref;
 
+
+global_variable NetStream g_serverStream;
+global_variable BlockRef g_serverStreamInputRef;
+global_variable BlockRef g_serverStreamOutputRef;
+global_variable ByteBuffer g_serverStreamInput;
+global_variable ByteBuffer g_serverStreamOutput;
+
 // Physics engine buffer handles
 global_variable BlockRef g_collisionCommandBuffer;
 global_variable BlockRef g_collisionEventBuffer;

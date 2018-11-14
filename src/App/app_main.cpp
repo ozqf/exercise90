@@ -129,6 +129,13 @@ i32 App_Init()
     Heap_Allocate(&g_heap, &g_appBufferB_Ref, MegaBytes(4), "App Buffer B", 1);
     g_appBufferB = Heap_RefToByteBuffer(&g_heap, &g_appBufferB_Ref);
 
+    Heap_Allocate(&g_heap, &g_serverStreamInputRef, KiloBytes(64), "Server Input", 1);
+    Heap_Allocate(&g_heap, &g_serverStreamOutputRef, KiloBytes(64), "Server Output", 1);
+    g_serverStreamInput = Heap_RefToByteBuffer(&g_heap, &g_serverStreamInputRef);
+    g_serverStreamOutput = Heap_RefToByteBuffer(&g_heap, &g_serverStreamOutputRef);
+    g_serverStream.inputBuffer = g_serverStreamInput;
+    g_serverStream.outputBuffer = g_serverStreamOutput;
+
     g_appWriteBuffer = &g_appBufferA;
     g_appReadBuffer = &g_appBufferB;
 
