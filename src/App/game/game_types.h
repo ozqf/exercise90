@@ -671,6 +671,7 @@ struct GameStateLocal
 };
 
 #define IS_SERVER(ptrGameState) (IsRunningServer(##ptrGameState##->netMode))
+#define IS_CLIENT(ptrGameState) (IsRunningClient(##ptrGameState##->netMode))
 
 //////////////////////////////////////////////////
 // GameState God Object

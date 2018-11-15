@@ -462,9 +462,11 @@ void App_Frame(GameTime *time)
     g_time = *time;
 
     Net_Tick(&g_gameState, time);
-	
 	App_UpdateGameState(time);
-
+    Net_WriteClient2ServerOutput(
+        &g_gameState,
+        App_FindLocalClient(&g_gameState.clientList, 0),
+        &g_serverStream);
     Net_Transmit(&g_gameState, time);
 	
     if (time->singleFrame)

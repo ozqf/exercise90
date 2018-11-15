@@ -2,17 +2,36 @@
 
 ## Current
 
-### Network Integration
+### Split Persistent/Level based data
+Persistent data (eg client list or server stream) are in the GameState struct.
+This struct should ONLY hold the state of the current entity scene!
 
+* Split into 'Persistent' and 'Scene' data
+    * Persistent data is initialised on session start and kept between scenes until
+    a new scene is started (ending a scene means start a single player game on a start scene).
+        * All Network streams.
+        * Client data
+        * Player avatar data carried between scenes (eg items)
+    * Scene data is...as described. Purged and loaded when a 'LoadScene' command is executed.
+        * Entity data
+        * Scene I/O buffers
+
+### Network Integration
 * *Done* Integrating the rudimentary network code into the app.
 * *Done* Refactor game command buffers to better match network buffers.
-* Allocate memory and any other resources for server side client network streams
-* Allocate memory and any other resources for client side server I/O
+* *Done* Allocate memory and any other resources for server side client network streams
+* *Done* Allocate memory and any other resources for client side server I/O
 * *Done* Write into network output from server
 * Read network input on client
 * Write into output from client
 * Read network input on server
 
+#### Network Frame Loop
+* Tick Network (reads socket, packets to client input message stream)
+* Read Input Streams (execute and collapse input buffer)
+* Tick Simulation
+* Write Output (Load events into client output streams)
+* Transmit Output (stream messages to packets)
 
 ### ECS complexity
 Insanely fiddly steps to adding a new component:

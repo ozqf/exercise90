@@ -54,7 +54,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     {
         case NETMODE_CLIENT:
         {
-            printf("Received %d bytes from %d\n", numBytes, info->sender.id);
+            //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
             APP_ASSERT(
                 (info->sender.id == g_gameState.remoteConnectionId),
                 "Received packet from unknown source");
@@ -101,7 +101,35 @@ ZNetOutputInterface Net_CreateOutputInterface()
 	return x;
 }
 
-internal void Net_TransmitClientPackets(GameState* gs)
+void Net_ClientExecuteMessage(u8* bytes, u16 numBytes)
+{
+    printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+}
+
+void Net_ClientReadInput(NetStream* stream)
+{
+    ByteBuffer* b = &stream->inputBuffer;
+    for(;;)
+    {
+        u32 nextMsg = stream->inputSequence + 1;
+        APP_ASSERT(nextMsg != 0, "CL Read input: nextMsg ID is 0");
+
+        StreamMsgHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
+        if (!h) { return; }
+
+        stream->inputSequence = nextMsg;
+
+        u8* msg = (u8*)h + sizeof(StreamMsgHeader);
+        Net_ClientExecuteMessage(msg, (u16)h->size);
+
+        // Clear
+        u8* blockStart = (u8*)h;
+        u32 blockSize = sizeof(StreamMsgHeader) + h->size;
+        b->ptrWrite = Stream_CollapseBlock(blockStart, blockSize, b->ptrWrite);
+    }
+}
+
+internal void Net_TransmitToClients(GameState* gs)
 {
     if(!IS_SERVER(gs)) { return; }
 
@@ -127,6 +155,31 @@ internal void Net_TransmitClientPackets(GameState* gs)
     }
 }
 
+/**
+ * Load local client inputs into a server packet
+ * TODO: These messages should be UNRELIABLE but only the reliable stream exists atm so change later
+ */
+internal void Net_WriteClient2ServerOutput(GameState* gs, Client* cl, NetStream* server)
+{
+    if(!IS_CLIENT(gs)) { return; }
+}
+
+internal void Net_TransmitToServer(GameState* gs)
+{
+    if(!IS_CLIENT(gs)) { return; }
+    const i32 packetSize = 1024;
+    u8 packetBuffer[packetSize];
+
+    ByteBuffer* b = &g_serverStream.outputBuffer;
+    i32 pendingBytes = b->Written();
+    if (pendingBytes == 0)
+    {
+        // nothing to transmit
+        return;
+    }
+    Stream_OutputToPacket(gs->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
+}
+
 internal void Net_Tick(GameState* gs, GameTime* time)
 {
     switch (gs->netMode)
@@ -149,6 +202,7 @@ internal void Net_Tick(GameState* gs, GameTime* time)
         case NETMODE_CLIENT:
         {
             ZNet_Tick(time->deltaTime);
+            Net_ClientReadInput(&g_serverStream);
         } break;
 
         default:
@@ -169,17 +223,18 @@ internal void Net_Transmit(GameState* gs, GameTime* time)
 
         case NETMODE_LISTEN_SERVER:
         {
-            Net_TransmitClientPackets(gs);
+            Net_TransmitToClients(gs);
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            Net_TransmitClientPackets(gs);
+            Net_TransmitToClients(gs);
         } break;
 
         case NETMODE_CLIENT:
         {
-            
+            // Transmit input
+            Net_TransmitToServer(gs);
         } break;
 
         default:
