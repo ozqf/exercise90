@@ -245,7 +245,7 @@ void Stream_PacketToInput(NetStream* s, u8* ptr, u16 numBytes)
     //printf("Copy reliable packet (%d bytes) to input... ", numBytes);
     // iterate for messages
     // > if messageId <= stream input sequence ignore
-    // > if messageId > input sequence, copy to input buffer
+    // > if messageId > input sequence, copy to input buffer (if it isn't already there)
     u8* read = ptr;
     u8* end = read + numBytes;
     u32 reliableSequence = COM_ReadU32(&read);

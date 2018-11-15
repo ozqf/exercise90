@@ -215,7 +215,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
             u16 measuredSize = cmd.MeasureForReading(ptr);
             APP_ASSERT(measuredSize == header->GetSize(), "Command read size mismatch");
             ptr += cmd.Read(ptr);
-            Client* cl = App_FindClientById(cmd.clientId, &gs->clientList);
+            Client* cl = App_FindClientByConnectionId(&gs->clientList, cmd.connectionId);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);

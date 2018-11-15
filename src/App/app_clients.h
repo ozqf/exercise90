@@ -2,7 +2,7 @@
 
 #include "app_module.cpp"
 
-i32 App_GetNextClientId(ClientList* cls)
+internal i32 App_GetNextClientId(ClientList* cls)
 {
     // The first ID given out must be 1
     // 0 == no client
@@ -10,7 +10,7 @@ i32 App_GetNextClientId(ClientList* cls)
     return id;
 }
 
-void App_EndAllClients(ClientList* cls)
+/*internal*/ void App_EndAllClients(ClientList* cls)
 {
 	for (i32 i = 0; i < cls->max; ++i)
 	{
@@ -18,7 +18,7 @@ void App_EndAllClients(ClientList* cls)
 	}
 }
 
-void App_ClearClientGameLinks(ClientList* cls)
+internal void App_ClearClientGameLinks(ClientList* cls)
 {
 	for (i32 i = 0; i < cls->max; ++i)
 	{
@@ -29,7 +29,7 @@ void App_ClearClientGameLinks(ClientList* cls)
 	}
 }
 
-void App_DeleteClients(ClientList* cls)
+internal void App_DeleteClients(ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
 	{
@@ -47,7 +47,7 @@ void App_DeleteClients(ClientList* cls)
 	}
 }
 
-Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
+internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
     if (g_localClientId == 0) { return NULL; }
     for (i32 i = 0; i < cls->max; ++i)
@@ -65,12 +65,12 @@ Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
     return NULL;
 }
 
-void App_BuildClientUpdate(GameState* gs, Client* cl)
+/*internal*/ void App_BuildClientUpdate(GameState* gs, Client* cl)
 {
 
 }
 
-void App_AddLocalClient()
+/*internal*/ void App_AddLocalClient()
 {
 
 }
@@ -78,7 +78,7 @@ void App_AddLocalClient()
 /////////////////////////////////////////////////////
 // UPDATE CLIENTS
 /////////////////////////////////////////////////////
-void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
+internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
 {
     switch (cl->state)
     {
@@ -115,8 +115,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
             //mbeen affected or the players orientation will be reset!
             // (and everything else, including state)
             Cmd_PlayerInput cmd = {};
-            cmd.state = CLIENT_STATE_PLAYING;
-			cmd.clientId = cl->clientId;
+			cmd.connectionId = cl->connectionId;
             cmd.input = cl->input;
             APP_WRITE_CMD(
                 &g_appWriteBuffer->ptrWrite,
@@ -138,7 +137,7 @@ void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber)
     }
 }
 
-Client* App_FindClientById(i32 id, ClientList* cls)
+internal Client* App_FindClientById(i32 id, ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
@@ -164,7 +163,7 @@ i32 App_NumPlayingClients(ClientList* cls)
     return count;
 }
 
-Client* App_FindClientByEntId(EntId entId, ClientList* cls)
+internal Client* App_FindClientByEntId(EntId entId, ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
@@ -177,7 +176,7 @@ Client* App_FindClientByEntId(EntId entId, ClientList* cls)
     return NULL;
 }
 
-Client* App_FindClientByConnectionId(ClientList* cls, i32 connId)
+internal Client* App_FindClientByConnectionId(ClientList* cls, i32 connId)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
@@ -190,7 +189,7 @@ Client* App_FindClientByConnectionId(ClientList* cls, i32 connId)
     return NULL;
 }
 
-Client* App_FindOrCreateClient(i32 id, ClientList* cls)
+internal Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 {
     Client* free = NULL;
     Client* result = NULL;
@@ -235,7 +234,7 @@ Client* App_FindOrCreateClient(i32 id, ClientList* cls)
     return result;
 }
 
-void App_UpdateLocalClients(GameTime* time, ClientList* cls)
+internal void App_UpdateLocalClients(GameTime* time, ClientList* cls)
 {
     if (g_localClientId == 0) { return; }
     for (i32 i = 0; i < cls->max; ++i)

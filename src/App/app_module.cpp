@@ -57,19 +57,20 @@ UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes);
 
 // Clients
-void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
-void App_EndAllClients(ClientList* cls);
-void App_ClearClientGameLinks(ClientList* cls);
-void App_DeleteClients(ClientList* cls);
-void App_AddLocalClient();
-void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
-i32 App_GetNextClientId(ClientList* cls);
-Client* App_FindClientById(i32 id, ClientList* cls);
-Client* App_FindClientByEntId(EntId entId, ClientList* cls);
-Client* App_FindOrCreateClient(i32 id, ClientList* cls);
-Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying);
-void App_UpdateLocalClients(GameTime* time, ClientList* cls);
-i32 App_NumPlayingClients(ClientList* cls);
+internal void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
+/*internal*/ void App_EndAllClients(ClientList* cls);
+internal void App_ClearClientGameLinks(ClientList* cls);
+internal void App_DeleteClients(ClientList* cls);
+/*internal*/ void App_AddLocalClient();
+internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 frameNumber);
+internal i32 App_GetNextClientId(ClientList* cls);
+internal Client* App_FindClientById(i32 id, ClientList* cls);
+internal Client* App_FindClientByConnectionId(ClientList* cls, i32 connId);
+internal Client* App_FindClientByEntId(EntId entId, ClientList* cls);
+internal Client* App_FindOrCreateClient(i32 id, ClientList* cls);
+internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying);
+internal void App_UpdateLocalClients(GameTime* time, ClientList* cls);
+internal i32 App_NumPlayingClients(ClientList* cls);
 
 // assets and data
 internal i32 AppGetTextureIndexByName(char* textureName);

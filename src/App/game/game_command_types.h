@@ -128,10 +128,9 @@ struct Cmd_ServerImpulse
 // 102
 struct Cmd_PlayerInput
 {
-	i32 clientId;
-    i32 playerId;
-    i32 state;
+	i32 connectionId;       // Use private id so player input must come from the correct client
     ActorInput input;
+    Vec3 avatarPosition;    // Have to sanity check this on server
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerInput, CMD_TYPE_PLAYER_INPUT)
 };
