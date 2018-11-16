@@ -287,17 +287,17 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameScene *gs, GameTime *time)
+void Game_UpdateActorMotors(GameScene* scene, GameTime *time)
 {
-    for (u32 i = 0; i < gs->actorMotorList.max; ++i)
+    for (u32 i = 0; i < scene->actorMotorList.max; ++i)
     {
-        EC_ActorMotor *motor = &gs->actorMotorList.items[i];
+        EC_ActorMotor *motor = &scene->actorMotorList.items[i];
         if (motor->header.inUse == 0)
         {
             continue;
         }
-        EC_Collider *col = EC_FindCollider(gs, &motor->header.entId);
+        EC_Collider *col = EC_FindCollider(scene, &motor->header.entId);
         Assert(col != NULL);
-        ApplyActorMotorInput(gs, motor, col, time->deltaTime);
+        ApplyActorMotorInput(scene, motor, col, time->deltaTime);
     }
 }

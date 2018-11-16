@@ -20,7 +20,7 @@ inline u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)
     #endif
 }
 
-void Game_UpdateThinkers(GameScene* gs, GameTime* time)
+void Game_UpdateThinkers(ClientList* clients, GameScene* gs, GameTime* time)
 {
     #if 1
     for (u32 i = 0; i < gs->thinkerList.max; ++i)
@@ -35,7 +35,7 @@ void Game_UpdateThinkers(GameScene* gs, GameTime* time)
                 if (!Game_TockThinker(thinker, time->deltaTime)) { continue; }
                 if (thinker->state.count >= thinker->state.max) { continue; }
                 // Stop spawning if no players are around
-                EntId id = AI_FindNearestPlayer(gs, { 0, 0, 0 });
+                EntId id = AI_FindNearestPlayer(clients, gs, { 0, 0, 0 });
                 if (id.value == 0)
                 {
                     return;

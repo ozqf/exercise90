@@ -241,7 +241,10 @@ void App_UpdateGameScene(GameTime* time)
     // clear debug buffer
     g_debugStr.length = 0;
 
-    GameScene *gs = &g_gameScene;
+    //GameScene *gs = &g_gameScene;
+    Game game;
+    game.scene = &g_gameScene;
+    game.session = &g_session;
     #if 0
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
@@ -327,7 +330,7 @@ void App_UpdateGameScene(GameTime* time)
 	}
 		
     // Game state update
-    Game_Tick(gs,
+    Game_Tick(&game,
               input,
               g_appWriteBuffer,
               time,

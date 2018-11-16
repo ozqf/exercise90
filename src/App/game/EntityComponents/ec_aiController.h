@@ -21,9 +21,9 @@ struct AITargetInfo
     f32 flatMagnitude;
 };
 
-inline u8 AI_ValidateTargetById(GameScene* gs, EntId* id, i32 selfTeam)
+inline u8 AI_ValidateTargetById(GameScene* scene, EntId* id, i32 selfTeam)
 {
-    Ent* ent = Ent_GetEntityById(gs, id);
+    Ent* ent = Ent_GetEntityById(scene, id);
     if (!ent) { return 0; }
     if (ent->inUse != ENTITY_STATUS_IN_USE) { return 0; }
     if ((ent->componentBits & EC_BIT1_TRANSFORM) == 0) { return 0; }
@@ -31,18 +31,18 @@ inline u8 AI_ValidateTargetById(GameScene* gs, EntId* id, i32 selfTeam)
     return 1;
 }
 
-inline u8 AI_AcquireAndValidateTarget(GameScene *gs, i32 selfTeam, Vec3 selfPos, EntId* id)
+inline u8 AI_AcquireAndValidateTarget(ClientList* clients, GameScene *scene, i32 selfTeam, Vec3 selfPos, EntId* id)
 {
-    Ent* ent = Ent_GetEntityById(gs, id);
+    Ent* ent = Ent_GetEntityById(scene, id);
     if (!ent)
     {
         id->value = 0;
-        *id = AI_FindNearestPlayer(gs, { selfPos.x, selfPos.y, selfPos.z });
+        *id = AI_FindNearestPlayer(clients, scene, { selfPos.x, selfPos.y, selfPos.z });
     }
     if (id->value == 0) { return 0; }
     //  printf("AI Acquired %d/%d\n", id->iteration, id->index);
-    ent = Ent_GetEntityById(gs, id);
-	return AI_ValidateTargetById(gs, id, selfTeam);
+    ent = Ent_GetEntityById(scene, id);
+	return AI_ValidateTargetById(scene, id, selfTeam);
 }
 
 inline void AI_BuildThinkInfo(GameScene* gs, EC_AIController* ai, AITargetInfo* info)
@@ -102,14 +102,14 @@ inline void AI_ReduceNextThink(EC_AIController* ai, GameTime* time, f32 newNextT
 ///////////////////////////////////////////////////////////////////////
 // THINK - not always run
 ///////////////////////////////////////////////////////////////////////
-inline i32 AI_Think(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
+inline i32 AI_Think(ClientList* clients, GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
     switch (ai->state.state)
     {
         case AI_STATE_NULL:
         {
-            if (AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
+            if (AI_AcquireAndValidateTarget(clients, gs, self->team, { 0, 0, 0 }, &ai->state.target))
             {
                 ai->state.state = AI_STATE_TRACKING;
                 //printf("Acquired target. State: %d\n", ai->state.state);
@@ -133,7 +133,7 @@ inline i32 AI_Think(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* tim
         case AI_STATE_TRACKING:
         {
 			AITargetInfo info = {};
-			if (!AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
+			if (!AI_AcquireAndValidateTarget(clients, gs, self->team, { 0, 0, 0 }, &ai->state.target))
 			{
 				AI_Reset(gs, ai);
 				return 1;
@@ -249,14 +249,14 @@ inline i32 AI_Think(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* tim
 }
 
 ///////////////////////////////////////////////////////////////////////
-// TICK - Run every frame
+// TICK - Run every frame 
 ///////////////////////////////////////////////////////////////////////
-inline void AI_Tick(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
+inline void AI_Tick(ClientList* clients, GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI tock. State: %d\n", ai->state.state);
     if (ai->state.nextThink <= time->sessionEllapsed)
     {
-        if (!AI_Think(gs, self, ai, time))
+        if (!AI_Think(clients, gs, self, ai, time))
         {
             return;
         }
@@ -266,7 +266,7 @@ inline void AI_Tick(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* tim
     {
         case AI_STATE_TRACKING:
         {
-            if (!AI_AcquireAndValidateTarget(gs, self->team, { 0, 0, 0 }, &ai->state.target))
+            if (!AI_AcquireAndValidateTarget(clients, gs, self->team, { 0, 0, 0 }, &ai->state.target))
             {
                 AI_Reset(gs, ai);
                 return;
@@ -411,7 +411,7 @@ inline void AI_Tick(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* tim
     #endif
 }
 
-static void Game_UpdateAIControllers(GameScene *gs, GameTime *time)
+static void Game_UpdateAIControllers(ClientList* clients, GameScene *gs, GameTime *time)
 {
     u32 max = gs->aiControllerList.max;
     for (u32 i = 0; i < max; ++i)
@@ -423,6 +423,6 @@ static void Game_UpdateAIControllers(GameScene *gs, GameTime *time)
         }
         Ent* self = Ent_GetEntityById(&gs->entList, &ai->header.entId);
         EC_AIState *s = &ai->state;
-        AI_Tick(gs, self, ai, time);
+        AI_Tick(clients, gs, self, ai, time);
     }
 }

@@ -326,12 +326,13 @@ internal Ent* Game_GetLocalClientEnt(GameScene* gs)
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
 internal void Game_Tick(
-    GameScene *gs,
+    Game *game,
     ByteBuffer* input,
     ByteBuffer* output,
     GameTime *time,
     InputActionSet* actions)
 {
+    GameScene* gs = game->scene;
     gs->verbose = (u8)time->singleFrame;
     if (time->singleFrame)
     {
@@ -384,17 +385,19 @@ internal void Game_Tick(
     Game_ReadCommandBuffer(gs, input, (time->singleFrame != 0));
     
     g_debugTransform = gs->cameraTransform;
+
+    //GameScene* gs = &game->scene;
     
     // Game state update
     // Update all inputs, entity components and colliders/physics
     // TODO: Bits of this are order sensitivity. eg projectiles etc hitting health.
     // health must be updated last, so that other events can all affect them!
     Game_UpdateActorMotors(gs, time);
-    Game_UpdateAIControllers(gs, time);
+    Game_UpdateAIControllers(&gs->clientList, gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
     Game_UpdateVolumes(gs, time);
-    Game_UpdateThinkers(gs, time);
+    Game_UpdateThinkers(&gs->clientList, gs, time);
     Game_UpdateRenderObjects(gs, time);
     Game_UpdateSensors(gs, time);
     Game_UpdateHealth(gs, time);

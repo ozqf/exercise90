@@ -64,14 +64,15 @@ inline Vec3 Vec3_ForwardFromAngles(f32 yawDegrees, f32 pitchDegrees, f32 magnitu
     return v;
 }
 
-inline EntId AI_FindNearestPlayer(GameScene* gs, Vec3 pos)
+inline EntId AI_FindNearestPlayer(ClientList* clients, GameScene* scene, Vec3 pos)
 {
     EntId result = {};
 	Client* cl = NULL;
-    for (i32 i = 0; i < gs->clientList.max; ++i)
+    for (i32 i = 0; i < clients->max; ++i)
     {
-        cl = &gs->clientList.items[0];
+        cl = &clients->items[0];
         if (cl->state != CLIENT_STATE_PLAYING) { continue; }
+        // TODO: Scan scene for closest client avatar
         //printf("GUTIL Found nearest player ent %d/%d\n", cl->entId.iteration, cl->entId.index);
         return cl->entId;
     }

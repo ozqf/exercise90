@@ -735,3 +735,9 @@ DEFINE_ENT_COMPONENT_BASE(Thinker, thinker, EC_BIT9_THINKER)
 DEFINE_ENT_COMPONENT_BASE(MultiRendObj, multiRendObj, EC_BIT10_MULTI_RENDOBJ)
 DEFINE_ENT_COMPONENT_BASE(Volume, volume, EC_BIT11_VOLUME)
 DEFINE_ENT_COMPONENT_BASE(Sensor, sensor, EC_BIT12_SENSOR)
+
+struct Game
+{
+    GameSession* session;
+    GameScene* scene;
+};

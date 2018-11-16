@@ -112,6 +112,7 @@ internal void Game_SetDebugStringRender()
 // Game
 #define MAX_SCENE_NAME_CHARS 64
 global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
+global_variable GameSession g_session;
 global_variable GameScene g_gameScene;
 
 // Game Command I/O buffer handles
