@@ -131,9 +131,9 @@ internal void Exec_UpdateClient(GameScene* gs, Cmd_ClientUpdate* cmd)
 
 internal void Exec_UpdateGameInstance(GameScene* gs, Cmd_GameSessionState* cmd)
 {
-    if (gs->session.state == cmd->state) { return; }
-	printf("GAME Session state changing. %d to %d\n", gs->session.state, cmd->state);
-	gs->session.state = cmd->state;
+    if (gs->state == cmd->state) { return; }
+	printf("GAME Session state changing. %d to %d\n", gs->state, cmd->state);
+	gs->state = cmd->state;
     if (cmd->state == GAME_SESSION_STATE_PLAYING)
     {
         sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "");
@@ -234,7 +234,7 @@ internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
         {
             Cmd_ServerImpulse cmd = {};
             ptr += cmd.Read(ptr);
-			return SV_ReadImpulse(gs, &cmd);
+			return SV_ReadImpulse(gs->netMode, gs, &cmd);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:

@@ -638,12 +638,10 @@ struct ClientList
 // Stores the starting conditions of the current game session and
 // results of previous sessions
 // From hitting start in the main menu to game over
-struct GameCampaign
-{
-    char mapName[64];
-    i32 levelsCompleted = 0;
-    i32 localClientId = 0;
-};
+// struct GameCampaign
+// {
+    
+// };
 
 #define GAME_SESSION_STATE_WARMUP 0
 #define GAME_SESSION_STATE_PLAYING 1
@@ -653,14 +651,11 @@ struct GameCampaign
 // overall game information in the current instance (eg progress, wave count, scores etc)
 struct GameSession
 {
-    i32 score;
-    i32 state;
-	
-	u8 AllowPlayerSpawning()
-	{
-		return (this->state == GAME_SESSION_STATE_PLAYING
-		|| this->state == GAME_SESSION_STATE_WARMUP);
-	}
+    //i32 score;
+    //i32 state;
+    char mapName[64];
+    i32 levelsCompleted = 0;
+    i32 localClientId = 0;
 };
 
 // Specific local settings on this machine
@@ -681,12 +676,13 @@ struct GameSceneLocal
 struct GameScene
 {
     u8 netMode; // 0 == server, 1 == client
+    i32 state;
     
-    GameCampaign campaign;
-    GameSession session;
+    //GameCampaign campaign;
+    //GameSession session;
     
     ClientList clientList;
-    GameSceneLocal local;
+    //GameSceneLocal local;
 
     i32 remoteConnectionId;
 
@@ -717,6 +713,12 @@ struct GameScene
     u32 debugStringCapacity = 2048;
 
     u8 verbose;
+
+    u8 AllowPlayerSpawning()
+	{
+		return (this->state == GAME_SESSION_STATE_PLAYING
+		|| this->state == GAME_SESSION_STATE_WARMUP);
+	}
 };
 
 //////////////////////////////////////////////////

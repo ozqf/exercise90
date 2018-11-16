@@ -9,9 +9,9 @@ internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
 
 }
 
-internal u8 SV_ReadImpulse(GameScene* gs, Cmd_ServerImpulse* cmd)
+internal u8 SV_ReadImpulse(u8 netMode, GameScene* gs, Cmd_ServerImpulse* cmd)
 {
-    if (!IsRunningServer(gs->netMode))
+    if (!IsRunningServer(netMode))
 	{
 		printf("GAME Cannot impulse if not hosting the server!\n");
 		return 1;
@@ -47,7 +47,7 @@ internal u8 SV_ReadImpulse(GameScene* gs, Cmd_ServerImpulse* cmd)
                 printf("SV Cannot spawn - client is free or playing already\n");
                 return 1;
             }
-			if (!gs->session.AllowPlayerSpawning())
+			if (!gs->AllowPlayerSpawning())
 			{
 				printf("SV: Instance disallows player spawning\n");
 				return 1;
@@ -182,7 +182,7 @@ internal void SV_OutputToAllClients(GameScene* gs, Cmd_ClientUpdate* cmd)
 internal void SV_ProcessClientSpawn(GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }
-    if (gs->session.state == 0)
+    if (gs->state == 0)
     {
 		// TODO: Replicate client state change to all connected clients
 		// Make sure connection Id is NOT replicated!
