@@ -7,7 +7,7 @@
 #include "EntityComponents/ec_collider.h"
 #include "EntityComponents/ec_thinker.h"
 
-/*internal*/ EntId Game_FindEntIdByLabel(GameState *gs, char *queryLabel)
+/*internal*/ EntId Game_FindEntIdByLabel(GameScene *gs, char *queryLabel)
 {
     for (u32 i = 0; i < gs->labelList.max; ++i)
     {
@@ -24,7 +24,7 @@
 // Render Objects
 ///////////////////////////////////////////////////////////////////
 
-internal void Game_UpdateRenderObjects(GameState *gs, GameTime *time)
+internal void Game_UpdateRenderObjects(GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->singleRendObjList.max; ++i)
     {
@@ -75,7 +75,7 @@ inline void Prj_PushRigidBody(EC_Collider *col)
     PhysCmd_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
-internal void Game_UpdateProjectiles(GameState *gs, GameTime *time)
+internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
     {
@@ -208,7 +208,7 @@ internal void Game_UpdateProjectiles(GameState *gs, GameTime *time)
 /////////////////////////////////////////////////////////////////////////
 // HEALTH
 /////////////////////////////////////////////////////////////////////////
-internal void Game_UpdateHealth(GameState *gs, GameTime *time)
+internal void Game_UpdateHealth(GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->healthList.max; ++i)
     {
@@ -325,7 +325,7 @@ internal void Game_UpdateHealth(GameState *gs, GameTime *time)
 }
 
 internal void EC_SensorHandleHit(
-    GameState* gs,
+    GameScene* gs,
     GameTime* time,
     EC_Sensor* sensor,
     Ent* self,
@@ -376,7 +376,7 @@ internal void EC_SensorHandleHit(
 	}
 }
 
-internal void Game_UpdateSensors(GameState* gs, GameTime* time)
+internal void Game_UpdateSensors(GameScene* gs, GameTime* time)
 {
 
 }

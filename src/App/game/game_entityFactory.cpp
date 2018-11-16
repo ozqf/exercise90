@@ -5,14 +5,14 @@
 #if 1
 // typedeffing a function of signature: i32* Foo(i32* param1);
 //typedef i32* (Foo)(i32* param1);
-//typedef Ent* (Ent_ReadStaticState)(GameState* gs, Cmd_Spawn* cmd);
-//typedef Ent* (Ent_ReadDynamicState)(GameState* gs, Cmd_EntityState* cmd);
+//typedef Ent* (Ent_ReadStaticState)(GameScene* gs, Cmd_Spawn* cmd);
+//typedef Ent* (Ent_ReadDynamicState)(GameScene* gs, Cmd_EntityState* cmd);
 
 //Ent_ReadDynamicState* g_spawnFunctions[12];
 i32 g_numSpawnFunctions = 0;
 #endif
 #if 0
-Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
+Ent* Spawn_WorldCube(GameScene* gs, Cmd_Spawn* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
     if (ent != NULL)
@@ -58,7 +58,7 @@ Ent* Spawn_WorldCube(GameState* gs, Cmd_Spawn* cmd)
 }
 #endif
 #if 0
-Ent* Spawn_Null(GameState* gs, Cmd_Spawn* cmd)
+Ent* Spawn_Null(GameScene* gs, Cmd_Spawn* cmd)
 {
     ILLEGAL_CODE_PATH
     return NULL;
@@ -76,7 +76,7 @@ void Game_InitEntityFactory()
     // g_numSpawnFunctions = ENTITY_TYPES_COUNT;
 }
 #if 0
-Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
+Ent* Ent_ReadThinkerState(GameScene* gs, Cmd_EntityState* cmd)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &cmd->entityId);
 
@@ -91,7 +91,7 @@ Ent* Ent_ReadThinkerState(GameState* gs, Cmd_EntityState* cmd)
     return ent;
 }
 
-Ent* Exec_DynamicEntityState(GameState* gs, Cmd_EntityState* cmd)
+Ent* Exec_DynamicEntityState(GameScene* gs, Cmd_EntityState* cmd)
 {
     if (cmd->factoryType == ENTITY_TYPE1_WORLD_CUBE)
     {

@@ -3,12 +3,12 @@
 #include "app_module.cpp"
 
 ////////////////////////////////////////////////////////////
-// Save GameState
+// Save GameScene
 ////////////////////////////////////////////////////////////
 
 // Returns bytes written
 u32 App_WriteSaveState(
-    GameState *gs,
+    GameScene *gs,
     ByteBuffer *buf,
     StateSaveHeader *header,
     ByteBuffer* nextFrameInputBuffer)
@@ -122,13 +122,13 @@ i32 App_WriteStateToFile(
     u32 written;
 	if (closeFileAfterWrite)
 	{
-		written = App_WriteSaveState(&g_gameState, &buf, header, g_appReadBuffer);
+		written = App_WriteSaveState(&g_gameScene, &buf, header, g_appReadBuffer);
 	}
 	else
 	{
 		// Recording a demo. Input will be written to the frame buffer anyway,
 		// so skip appending next frame buffer
-		written = App_WriteSaveState(&g_gameState, &buf, header, NULL);
+		written = App_WriteSaveState(&g_gameScene, &buf, header, NULL);
 	}
 
     // Write state to buffer
@@ -171,7 +171,7 @@ void App_StopRecording()
     }
 }
 
-void App_StartRecording(GameState *gs)
+void App_StartRecording(GameScene *gs)
 {
     char fileName[128];
 
@@ -198,9 +198,9 @@ void App_StartRecording(GameState *gs)
 
 void App_ClearLevel()
 {
-    GS_Clear(&g_gameState);
+    GS_Clear(&g_gameScene);
     PhysExt_ClearWorld();
-    App_ClearClientGameLinks(&g_gameState.clientList);
+    App_ClearClientGameLinks(&g_gameScene.clientList);
     App_ClearIOBuffers();
 }
 
@@ -215,7 +215,7 @@ void App_EndSession()
 
     App_StopRecording();
     App_ClearLevel();
-    App_DeleteClients(&g_gameState.clientList);
+    App_DeleteClients(&g_gameScene.clientList);
     ZNet_Shutdown();
     COM_ZeroMemory((u8 *)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
 }
@@ -255,7 +255,7 @@ u8 App_StartReplay(char *path)
            g_replayHeader.frames.count,
            g_replayHeader.frames.size);
 
-    App_ReadStateBuffer(&g_gameState, &g_replayReadBuffer);
+    App_ReadStateBuffer(&g_gameScene, &g_replayReadBuffer);
 
     ///////////////////////////////////////////
     // Prepare frame reading
@@ -286,16 +286,16 @@ u8 App_LoadScene(char *path)
 
 	if (!COM_CompareStrings(path, "TEST"))
 	{
-		Game_BuildTestScene(&g_gameState, 0);
+		Game_BuildTestScene(&g_gameScene, 0);
 	}
     else if (COM_MatchStringStart(path, "TEST_"))
     {
 		i32 index = COM_StripTrailingInteger(path, '_', 0);
-        Game_BuildTestScene(&g_gameState, index);
+        Game_BuildTestScene(&g_gameScene, index);
     }
     else
     {
-        if (!App_LoadStateFromFile(&g_gameState, path))
+        if (!App_LoadStateFromFile(&g_gameScene, path))
         {
             return 0;
         }
@@ -303,7 +303,7 @@ u8 App_LoadScene(char *path)
 
     COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 
-    //App_StartRecording(&g_gameState);
+    //App_StartRecording(&g_gameScene);
 
     
 
@@ -324,10 +324,10 @@ i32 App_StartSession(u8 netMode, char *path)
         {
             return 0;
         }
-        g_gameState.netMode = NETMODE_LISTEN_SERVER;
+        g_gameScene.netMode = NETMODE_LISTEN_SERVER;
 
         // Spawn local client if one hasn't been restored via file
-        Client *cl = App_FindLocalClient(&g_gameState.clientList, 0);
+        Client *cl = App_FindLocalClient(&g_gameScene.clientList, 0);
         if (cl == NULL)
         {
             printf("SESSION: No local client loaded, creating\n");
@@ -335,7 +335,7 @@ i32 App_StartSession(u8 netMode, char *path)
             ZNetConnectionInfo info = {};
             if (ZNet_CreateLocalConnection(&info))
             {
-                g_localClientId = App_GetNextClientId(&g_gameState.clientList);
+                g_localClientId = App_GetNextClientId(&g_gameScene.clientList);
 				
 				Cmd_ClientUpdate spawnClient = {};
 				spawnClient.clientId = g_localClientId;
@@ -365,7 +365,7 @@ i32 App_StartSession(u8 netMode, char *path)
         {
             APP_ASSERT(0, "Failed to init network session\n");
         }
-        g_gameState.netMode = NETMODE_DEDICATED_SERVER;
+        g_gameScene.netMode = NETMODE_DEDICATED_SERVER;
         return 1;
     }
     break;
@@ -380,7 +380,7 @@ i32 App_StartSession(u8 netMode, char *path)
         {
             APP_ASSERT(0, "Failed to init network session\n");
         }
-        g_gameState.netMode = NETMODE_CLIENT;
+        g_gameScene.netMode = NETMODE_CLIENT;
         return 1;
     }
     break;
@@ -389,7 +389,7 @@ i32 App_StartSession(u8 netMode, char *path)
     {
         if (App_StartReplay(path))
         {
-            g_gameState.netMode = NETMODE_REPLAY;
+            g_gameScene.netMode = NETMODE_REPLAY;
             return 1;
         }
     }

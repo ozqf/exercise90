@@ -47,7 +47,7 @@ void Ent_SetTemplate_Volume(EntityState* state, EntitySpawnOptions* options)
 }
 
 internal void EC_VolumeHandleOverlap(
-	GameState* gs,
+	GameScene* gs,
 	GameTime* time,
 	EC_Volume* vol,
 	Ent* self,
@@ -97,7 +97,7 @@ internal void EC_VolumeHandleOverlap(
     }
 }
 
-internal void Game_UpdateVolumes(GameState* gs, GameTime* time)
+internal void Game_UpdateVolumes(GameScene* gs, GameTime* time)
 {
     for (i32 i = 0; i < GAME_MAX_ENTITIES; ++i)
     {

@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Central point of entity state creation/update
-internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
+internal void Ent_ApplyStateData(GameScene* gs, EntityState* state)
 {
     Ent* ent = Ent_GetEntityById(&gs->entList, &state->entId);
     if (ent == NULL)
@@ -34,7 +34,7 @@ internal void Ent_ApplyStateData(GameState* gs, EntityState* state)
     if (state->componentBits & EC_BIT12_SENSOR) 		{ EC_SensorApplyState(gs, ent, &state->sensorState); }
 }
 
-internal u32 Ent_ReadStateData(GameState* gs, u8* stream, u32 numBytes)
+internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes)
 {
     u8* origin = stream;
     Cmd_EntityStateHeader h = {};
@@ -233,7 +233,7 @@ u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
 /**
  * Fill out a state struct for the given entity
  */
-internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* state)
+internal void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* state)
 {
 	if (gs->verbose)
 	{
@@ -283,7 +283,7 @@ internal void Ent_CopyFullEntityState(GameState* gs, Ent* ent, EntityState* stat
     if (ent->componentBits & EC_BIT12_SENSOR) { state->sensorState = (EC_FindSensor(gs, ent))->state; }
 }
 
-internal u8 Ent_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)
+internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)
 {
     *target = {};
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);
@@ -294,7 +294,7 @@ internal u8 Ent_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* tar
     return (u8)result;
 }
 
-internal EntId Ent_QuickSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options)
+internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, EntitySpawnOptions* options)
 {
     EntityState s = {};
     EntId entId = Ent_ReserveFreeEntity(&gs->entList);

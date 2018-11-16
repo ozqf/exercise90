@@ -215,7 +215,7 @@ void Game_IntersectionTest_3D(RenderScene* scene, Vec3* origin, Vec3* dest)
     );
 }
 
-void DEBUG_AngleTestEntity(GameState* gs, RenderScene* scene)
+void DEBUG_AngleTestEntity(GameScene* gs, RenderScene* scene)
 {
 #if 0
     Ent* testEnt = Ent_GetEntityByTag(&gs->entList, 1);
@@ -236,7 +236,7 @@ void DEBUG_AngleTestEntity(GameState* gs, RenderScene* scene)
 #endif
 }
 
-void Game_IntersectionTest(GameState* gs, RenderScene* scene)
+void Game_IntersectionTest(GameScene* gs, RenderScene* scene)
 {
 #if 0
     //Game_IntersectionTest_2D(scene);

@@ -58,7 +58,7 @@ void Ent_ResetEntityIds(EntList* ents)
 	}
 }
 
-void Ent_ClearComponents(GameState* gs, Ent* ent)
+void Ent_ClearComponents(GameScene* gs, Ent* ent)
 {
     EC_RemoveTransform(gs, ent);
     EC_RemoveSingleRendObj(gs, ent);
@@ -98,7 +98,7 @@ inline void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
     //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
 }
 
-inline void Ent_Free(GameState* gs, Ent* ent)
+inline void Ent_Free(GameScene* gs, Ent* ent)
 {
     Ent_ClearComponents(gs, ent);
 	ent->entId.iteration += 1;
@@ -157,7 +157,7 @@ inline Ent* Ent_GetEntityByIdValue(EntList* ents, u32 entIdValue)
     return Ent_GetEntityById(ents, &id);
 }
 
-inline Ent* Ent_GetEntityById(GameState* gs, EntId* id)
+inline Ent* Ent_GetEntityById(GameScene* gs, EntId* id)
 {
     return Ent_GetEntityById(&gs->entList, id);
 }

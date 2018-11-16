@@ -99,8 +99,8 @@ inline Var* App_GetVar(char* name);
 void App_ClearIOBuffers();
 void App_SendToServer(u8* ptr, u8 type, u16 size);
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens);
-void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf);
-u8 App_LoadStateFromFile(GameState *gs, char *fileName);
+void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf);
+u8 App_LoadStateFromFile(GameScene *gs, char *fileName);
 i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite, StateSaveHeader* header);
 void App_SaveDataVariables(char* fileName);
 

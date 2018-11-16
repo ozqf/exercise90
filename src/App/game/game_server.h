@@ -4,12 +4,12 @@ Server only functions
 */
 #include "app_module.cpp"
 
-internal void SV_UpdateLocalPlayers(GameState* gs, GameTime* time)
+internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
 {
 
 }
 
-internal u8 SV_ReadImpulse(GameState* gs, Cmd_ServerImpulse* cmd)
+internal u8 SV_ReadImpulse(GameScene* gs, Cmd_ServerImpulse* cmd)
 {
     if (!IsRunningServer(gs->netMode))
 	{
@@ -145,7 +145,7 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
-internal void SV_OutputToAllClients(GameState* gs, Cmd_ClientUpdate* cmd)
+internal void SV_OutputToAllClients(GameScene* gs, Cmd_ClientUpdate* cmd)
 {
     if(!IS_SERVER(gs)) { return; }
 
@@ -179,7 +179,7 @@ internal void SV_OutputToAllClients(GameState* gs, Cmd_ClientUpdate* cmd)
     }
 }
 
-internal void SV_ProcessClientSpawn(GameState* gs, Client* cl, Cmd_ClientUpdate* cmd)
+internal void SV_ProcessClientSpawn(GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }
     if (gs->session.state == 0)
@@ -196,7 +196,7 @@ internal void SV_ProcessClientSpawn(GameState* gs, Client* cl, Cmd_ClientUpdate*
     }
 }
 
-internal void SV_ProcessClientDeath(GameState* gs, Client* cl, Cmd_ClientUpdate* cmd)
+internal void SV_ProcessClientDeath(GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
 	if(!IS_SERVER(gs)) { return; }
     if (App_NumPlayingClients(&gs->clientList) == 0)
@@ -212,7 +212,7 @@ internal void SV_ProcessClientDeath(GameState* gs, Client* cl, Cmd_ClientUpdate*
     }
 }
 
-internal void SV_ProcessEntityDeath(GameState* gs, Ent* ent)
+internal void SV_ProcessEntityDeath(GameScene* gs, Ent* ent)
 {
     if(!IS_SERVER(gs)) { return; }
     // is the entity a player?
@@ -238,7 +238,7 @@ internal void SV_ProcessEntityDeath(GameState* gs, Ent* ent)
 }
 
 // TODO: MOVE ME: This isn't a server only function!
-internal void Game_RemoveEntity(GameState* gs, Cmd_RemoveEntity* cmd)
+internal void Game_RemoveEntity(GameScene* gs, Cmd_RemoveEntity* cmd)
 {
     if (g_verbose)
     {

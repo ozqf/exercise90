@@ -3,7 +3,7 @@
 #include "../game.h"
 
 // Player rapid
-inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
+inline void SV_FireAttack_01(GameScene *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
 
@@ -27,7 +27,7 @@ inline void SV_FireAttack_01(GameState *gs, AttackInfo *info)
 }
 
 // Enemy regular
-inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
+inline void SV_FireAttack_02(GameScene *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
     EntityState state;
@@ -51,7 +51,7 @@ inline void SV_FireAttack_02(GameState *gs, AttackInfo *info)
 }
 
 // player shotgun
-inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
+inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
 {
     EntitySpawnOptions options = {};
 
@@ -96,12 +96,12 @@ inline void SV_FireAttack_03(GameState *gs, AttackInfo *info)
     }
 }
 
-inline void SV_FireAttack_04(GameState *gs, AttackInfo *info)
+inline void SV_FireAttack_04(GameScene *gs, AttackInfo *info)
 {
     
 }
 
-void SV_FireAttack(GameState *gs, AttackInfo *info)
+void SV_FireAttack(GameScene *gs, AttackInfo *info)
 {
     switch (info->type)
     {

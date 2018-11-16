@@ -64,7 +64,7 @@ Player* Game_FindPlayerById(PlayerList* plyrs, i32 id)
     return NULL;
 }
 
-void Exec_PlayerState(GameState* gs, Cmd_PlayerState* cmd)
+void Exec_PlayerState(GameScene* gs, Cmd_PlayerState* cmd)
 {
     printf("GAME Exec player %d state %d\n", cmd->playerId, cmd->state);
     

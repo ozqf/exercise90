@@ -50,7 +50,7 @@ internal HudRingItem* Hud_GetFreeHudRingItem()
     return &g_hudRingItems[oldestIndex];
 }
 
-internal void Exec_SpawnHudItem(GameState* gs, Cmd_SpawnHudItem* cmd)
+internal void Exec_SpawnHudItem(GameScene* gs, Cmd_SpawnHudItem* cmd)
 {
     HudRingItem* r = Hud_GetFreeHudRingItem();
     if (!r) { return; }
@@ -119,7 +119,7 @@ internal void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 
     item->tick += deltaTime;
 }
 
-internal void Game_UpdateUI(GameState* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
+internal void Game_UpdateUI(GameScene* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
 {
     Client* cl = App_FindLocalClient(&gs->clientList, 1);
     if (cl)

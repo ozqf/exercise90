@@ -572,9 +572,9 @@ struct EntitySpawnOptions
 };
 
 //////////////////////////////////////////////////
-// Define component list structs and GameState objects...
+// Define component list structs and GameScene objects...
 //////////////////////////////////////////////////
-// GameState will require component lists to be defined already!
+// GameScene will require component lists to be defined already!
 #include "game_entComponentBase.h"
 DEFINE_ENT_COMPONENT_LIST(Transform)
 DEFINE_ENT_COMPONENT_LIST(SingleRendObj)
@@ -664,21 +664,21 @@ struct GameSession
 };
 
 // Specific local settings on this machine
-struct GameStateLocal
+struct GameSceneLocal
 {
     u8 localPlayerHasEnt = 0;
     EntId localPlayerEntId;
 };
 
-#define IS_SERVER(ptrGameState) (IsRunningServer(##ptrGameState##->netMode))
-#define IS_CLIENT(ptrGameState) (IsRunningClient(##ptrGameState##->netMode))
+#define IS_SERVER(ptrGameScene) (IsRunningServer(##ptrGameScene##->netMode))
+#define IS_CLIENT(ptrGameScene) (IsRunningClient(##ptrGameScene##->netMode))
 
 //////////////////////////////////////////////////
-// GameState God Object
+// GameScene God Object
 // This is a very carefully implemented god object and you should all piss off
 // Phil Bonneau (team Chef) 2018/6/26
 //////////////////////////////////////////////////
-struct GameState
+struct GameScene
 {
     u8 netMode; // 0 == server, 1 == client
     
@@ -686,7 +686,7 @@ struct GameState
     GameSession session;
     
     ClientList clientList;
-    GameStateLocal local;
+    GameSceneLocal local;
 
     i32 remoteConnectionId;
 
@@ -721,7 +721,7 @@ struct GameState
 
 //////////////////////////////////////////////////
 // ...and Component Add/Remove/Has/Find functions.
-// Note: requires that GameState struct is defined!
+// Note: requires that GameScene struct is defined!
 //////////////////////////////////////////////////
 DEFINE_ENT_COMPONENT_BASE(Transform, transform, EC_BIT1_TRANSFORM)
 DEFINE_ENT_COMPONENT_BASE(SingleRendObj, singleRendObj, EC_BIT2_RENDERER)

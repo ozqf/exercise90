@@ -21,7 +21,7 @@ struct AITargetInfo
     f32 flatMagnitude;
 };
 
-inline u8 AI_ValidateTargetById(GameState* gs, EntId* id, i32 selfTeam)
+inline u8 AI_ValidateTargetById(GameScene* gs, EntId* id, i32 selfTeam)
 {
     Ent* ent = Ent_GetEntityById(gs, id);
     if (!ent) { return 0; }
@@ -31,7 +31,7 @@ inline u8 AI_ValidateTargetById(GameState* gs, EntId* id, i32 selfTeam)
     return 1;
 }
 
-inline u8 AI_AcquireAndValidateTarget(GameState *gs, i32 selfTeam, Vec3 selfPos, EntId* id)
+inline u8 AI_AcquireAndValidateTarget(GameScene *gs, i32 selfTeam, Vec3 selfPos, EntId* id)
 {
     Ent* ent = Ent_GetEntityById(gs, id);
     if (!ent)
@@ -45,7 +45,7 @@ inline u8 AI_AcquireAndValidateTarget(GameState *gs, i32 selfTeam, Vec3 selfPos,
 	return AI_ValidateTargetById(gs, id, selfTeam);
 }
 
-inline void AI_BuildThinkInfo(GameState* gs, EC_AIController* ai, AITargetInfo* info)
+inline void AI_BuildThinkInfo(GameScene* gs, EC_AIController* ai, AITargetInfo* info)
 {
     EC_Transform* selfTrans = EC_FindTransform(gs, &ai->header.entId);
     EC_Transform* targetTrans = EC_FindTransform(gs, &ai->state.target);
@@ -67,19 +67,19 @@ inline void AI_BuildThinkInfo(GameState* gs, EC_AIController* ai, AITargetInfo* 
     info->pitchRadians = atan2f(info->dy, info->flatMagnitude);
 }
 
-inline void AI_ClearInput(GameState* gs, EC_AIController* ai)
+inline void AI_ClearInput(GameScene* gs, EC_AIController* ai)
 {
     EC_ActorMotor* motor = EC_FindActorMotor(gs, &EC_GET_ID(ai));
     motor->state.input.buttons = 0;
 }
 
-inline void AI_Reset(GameState* gs, EC_AIController* ai)
+inline void AI_Reset(GameScene* gs, EC_AIController* ai)
 {
     AI_ClearInput(gs, ai);
     ai->state.state = AI_STATE_NULL;
 }
 
-inline void AI_Stun(GameState* gs, EC_AIController* ai, GameTime* time)
+inline void AI_Stun(GameScene* gs, EC_AIController* ai, GameTime* time)
 {
     AI_ClearInput(gs, ai);
     ai->state.state = AI_STATE_STUNNED;
@@ -102,7 +102,7 @@ inline void AI_ReduceNextThink(EC_AIController* ai, GameTime* time, f32 newNextT
 ///////////////////////////////////////////////////////////////////////
 // THINK - not always run
 ///////////////////////////////////////////////////////////////////////
-inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
+inline i32 AI_Think(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI Think %d\n", ai->state.state);
     switch (ai->state.state)
@@ -251,7 +251,7 @@ inline i32 AI_Think(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
 ///////////////////////////////////////////////////////////////////////
 // TICK - Run every frame
 ///////////////////////////////////////////////////////////////////////
-inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* time)
+inline void AI_Tick(GameScene* gs, Ent* self, EC_AIController* ai, GameTime* time)
 {
     //printf("AI tock. State: %d\n", ai->state.state);
     if (ai->state.nextThink <= time->sessionEllapsed)
@@ -411,7 +411,7 @@ inline void AI_Tick(GameState* gs, Ent* self, EC_AIController* ai, GameTime* tim
     #endif
 }
 
-static void Game_UpdateAIControllers(GameState *gs, GameTime *time)
+static void Game_UpdateAIControllers(GameScene *gs, GameTime *time)
 {
     u32 max = gs->aiControllerList.max;
     for (u32 i = 0; i < max; ++i)

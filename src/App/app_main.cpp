@@ -192,7 +192,7 @@ i32 App_Shutdown()
 
     App_StopRecording();
 	
-    GS_Clear(&g_gameState);
+    GS_Clear(&g_gameScene);
     PhysExt_Shutdown();
     ZNet_Shutdown();
 
@@ -230,10 +230,10 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
 ///////////////////////////////////////////////////////////////////////////////
 // GAME TICK
  //////////////////////////////////////////////////////////////////////////////
-void App_UpdateGameState(GameTime* time)
+void App_UpdateGameScene(GameTime* time)
 {
     // Update local client input
-    App_UpdateLocalClients(time, &g_gameState.clientList);
+    App_UpdateLocalClients(time, &g_gameScene.clientList);
     
     // Read game output from last frame + internally issued commands
     //App_ReadCommandBuffer(g_appReadBuffer);
@@ -241,7 +241,7 @@ void App_UpdateGameState(GameTime* time)
     // clear debug buffer
     g_debugStr.length = 0;
 
-    GameState *gs = &g_gameState;
+    GameScene *gs = &g_gameScene;
     #if 0
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
@@ -347,7 +347,7 @@ void App_UpdateGameState(GameTime* time)
 ///////////////////////////////////////////////////////////////////////////////
 void App_Render(GameTime* time, ScreenInfo screenInfo)
 {
-    GameState *gs = &g_gameState;
+    GameScene *gs = &g_gameScene;
     g_screenInfo = screenInfo;
     
     // Make sure  render lists have been cleared or bad stuff will happen
@@ -461,13 +461,13 @@ void App_Frame(GameTime *time)
 	
     g_time = *time;
 
-    Net_Tick(&g_gameState, time);
-	App_UpdateGameState(time);
+    Net_Tick(&g_gameScene, time);
+	App_UpdateGameScene(time);
     Net_WriteClient2ServerOutput(
-        &g_gameState,
-        App_FindLocalClient(&g_gameState.clientList, 0),
+        &g_gameScene,
+        App_FindLocalClient(&g_gameScene.clientList, 0),
         &g_serverStream);
-    Net_Transmit(&g_gameState, time);
+    Net_Transmit(&g_gameScene, time);
 	
     if (time->singleFrame)
 	{

@@ -270,7 +270,7 @@ struct Cmd_EntitySpawn2
     EntitySpawnOptions options;
 };
 
-//Ent* Exec_Spawn(GameState* gs, Cmd_Spawn* cmd);
+//Ent* Exec_Spawn(GameScene* gs, Cmd_Spawn* cmd);
 
 struct Cmd_GameSessionState
 {

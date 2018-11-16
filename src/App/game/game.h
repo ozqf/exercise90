@@ -112,7 +112,7 @@ internal void Game_SetDebugStringRender()
 // Game
 #define MAX_SCENE_NAME_CHARS 64
 global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
-global_variable GameState g_gameState;
+global_variable GameScene g_gameScene;
 
 // Game Command I/O buffer handles
 
@@ -191,8 +191,8 @@ global_variable HudRingItem g_hudRingItems[HUD_MAX_RING_ITEMS];
 // Interface
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state);
-internal u8 Ent_PrepareSpawnCmd(GameState* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options);
-internal EntId Ent_QuickSpawnCmd(GameState* gs, i32 factoryType, EntitySpawnOptions* options);
+internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options);
+internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, EntitySpawnOptions* options);
 
 //internal u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
 internal i32 Ent_CopyTemplate(i32 templateId, EntityState* target, EntitySpawnOptions* options);

@@ -83,13 +83,13 @@ internal void Game_BuildTestMenu()
 
 internal void Game_Init()
 {
-    GS_Init(&g_gameState);
+    GS_Init(&g_gameScene);
     Game_CreateEntityTemplates();
     Game_BuildTestHud();
     Game_BuildTestMenu();
 }
 
-internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
+internal void Exec_UpdateClient(GameScene* gs, Cmd_ClientUpdate* cmd)
 {
     Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
     printf("Client avatar was %d/%d now %d/%d\n",
@@ -129,7 +129,7 @@ internal void Exec_UpdateClient(GameState* gs, Cmd_ClientUpdate* cmd)
     SV_OutputToAllClients(gs, cmd);
 }
 
-internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameSessionState* cmd)
+internal void Exec_UpdateGameInstance(GameScene* gs, Cmd_GameSessionState* cmd)
 {
     if (gs->session.state == cmd->state) { return; }
 	printf("GAME Session state changing. %d to %d\n", gs->session.state, cmd->state);
@@ -148,12 +148,12 @@ internal void Exec_UpdateGameInstance(GameState* gs, Cmd_GameSessionState* cmd)
     }
 }
 
-internal void Exec_SpawnViaTemplate(GameState* gs, Cmd_SpawnViaTemplate* cmd)
+internal void Exec_SpawnViaTemplate(GameScene* gs, Cmd_SpawnViaTemplate* cmd)
 {
 	
 }
 
-internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
+internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
 {
     switch (header->GetType())
     {
@@ -264,7 +264,7 @@ internal u8 Game_ReadCmd(GameState* gs, CmdHeader* header, u8* ptr)
     return 0;
 }
 
-internal i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verbose)
+internal i32 Game_ReadCommandBuffer(GameScene* gs, ByteBuffer* commands, u8 verbose)
 {
     i32 numExecuted = 0;
     u8* ptrRead = commands->ptrStart;
@@ -308,7 +308,7 @@ internal i32 Game_ReadCommandBuffer(GameState* gs, ByteBuffer* commands, u8 verb
     return numExecuted;
 }
 
-internal Ent* Game_GetLocalClientEnt(GameState* gs)
+internal Ent* Game_GetLocalClientEnt(GameScene* gs)
 {
     Client* localClient = App_FindLocalClient(&gs->clientList, 1);
     if (localClient)
@@ -326,7 +326,7 @@ internal Ent* Game_GetLocalClientEnt(GameState* gs)
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
 internal void Game_Tick(
-    GameState *gs,
+    GameScene *gs,
     ByteBuffer* input,
     ByteBuffer* output,
     GameTime *time,

@@ -19,7 +19,7 @@ internal void Game_SpawnHitRing(Vec3 pos, EntId source, EntId victim)
 #endif
 
 internal void Game_EntVsEntCollision(
-    GameState* gs,
+    GameScene* gs,
     GameTime* time,
     u32 id_A,
     u32 id_B,
@@ -62,7 +62,7 @@ internal void Game_EntVsEntCollision(
     }
 }
 
-inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
+inline void Game_HandleEntityUpdate(GameScene *gs, PhysEV_TransformUpdate *ev)
 {
     if (ev->tag == 0)
     {
@@ -120,7 +120,7 @@ inline void Game_HandleEntityUpdate(GameState *gs, PhysEV_TransformUpdate *ev)
 // STEP PHYSICS
 /////////////////////////////////////////////////////////////////////////////
 #define MAX_ALLOWED_PHYSICS_STEP 0.0334f
-void Game_StepPhysics(GameState* gs, GameTime* time)
+void Game_StepPhysics(GameScene* gs, GameTime* time)
 {
     
     // Force physics step to always be no lower than 30fps

@@ -20,7 +20,7 @@ inline u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)
     #endif
 }
 
-void Game_UpdateThinkers(GameState* gs, GameTime* time)
+void Game_UpdateThinkers(GameScene* gs, GameTime* time)
 {
     #if 1
     for (u32 i = 0; i < gs->thinkerList.max; ++i)

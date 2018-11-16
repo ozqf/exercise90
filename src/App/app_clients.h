@@ -65,7 +65,7 @@ internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
     return NULL;
 }
 
-/*internal*/ void App_BuildClientUpdate(GameState* gs, Client* cl)
+/*internal*/ void App_BuildClientUpdate(GameScene* gs, Client* cl)
 {
 
 }

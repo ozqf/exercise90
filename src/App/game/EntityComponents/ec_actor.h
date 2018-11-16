@@ -103,7 +103,7 @@ Vec3 MoveGround(
 #endif
 
 inline void ApplyActorMotorInput(
-    GameState *gs,
+    GameScene *gs,
     EC_ActorMotor *motor,
     EC_Collider *col,
     f32 deltaTime)
@@ -237,7 +237,7 @@ inline void ApplyActorMotorInput(
 }
 
 // returns num chars written
-i32 Game_DebugWriteActiveActorInput(GameState *gs, char *buf, i32 maxChars)
+i32 Game_DebugWriteActiveActorInput(GameScene *gs, char *buf, i32 maxChars)
 {
     i32 wroteSomething = 0;
     i32 written = 0;
@@ -287,7 +287,7 @@ ATK: %d TICK: %.2f SPEED: %.2f\n",
 ///////////////////////////////////////////////////////////////////
 // Player
 ///////////////////////////////////////////////////////////////////
-void Game_UpdateActorMotors(GameState *gs, GameTime *time)
+void Game_UpdateActorMotors(GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->actorMotorList.max; ++i)
     {

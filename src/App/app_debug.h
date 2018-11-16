@@ -24,7 +24,7 @@ void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
 }
 
 #if 1
-void App_DebugPrintEntities(GameState* gs)
+void App_DebugPrintEntities(GameScene* gs)
 {
     i32 l = gs->entList.max;
     i32 count = 0;
@@ -125,7 +125,7 @@ i32 AllocateTestStrings(Heap *heap)
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////
 
-ZStringHeader App_WriteDebugString(GameState *gs, GameTime *time)
+ZStringHeader App_WriteDebugString(GameScene *gs, GameTime *time)
 {
     //Vec3 pos, rot;
 

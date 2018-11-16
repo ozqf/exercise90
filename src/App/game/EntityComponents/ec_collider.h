@@ -22,7 +22,7 @@ EC_Collider* EC_ColliderGetByShapeId(EC_ColliderList* list, i32 shapeId)
 }
 
 // Handled in physics engine now
-void Game_UpdateColliders(GameState* gs, GameTime* time)
+void Game_UpdateColliders(GameScene* gs, GameTime* time)
 {
     #if 0
     u32 currentFrame = time->frameNumber;
@@ -65,7 +65,7 @@ void Game_UpdateColliders(GameState* gs, GameTime* time)
     #endif
 }
 
-void Game_DrawColliderAABBs(GameState* gs, GameTime* time, RenderScene* scene)
+void Game_DrawColliderAABBs(GameScene* gs, GameTime* time, RenderScene* scene)
 {
     i32 count = 0;
     for (u32 i = 0; i < gs->colliderList.max; ++i)

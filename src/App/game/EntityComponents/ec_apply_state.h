@@ -73,7 +73,7 @@ void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options)
 ///////////////////////////////////////////////////////////////////////////////////
 // APPLY SPECIFIC COMPONENT STATE
 ///////////////////////////////////////////////////////////////////////////////////
-internal void EC_TransformApplyState(GameState* gs, Ent* ent, Transform* transform)
+internal void EC_TransformApplyState(GameScene* gs, Ent* ent, Transform* transform)
 {
     EC_Transform* ecT = EC_FindTransform(gs, &ent->entId);
 	if (ecT == NULL)
@@ -97,7 +97,7 @@ internal void EC_RestoreRendObj(RendObj* rendObj, EC_RendObjState* state)
     );
 }
 
-internal void EC_SingleRendObjApplyState(GameState* gs, Ent* ent, EC_RendObjState* state)
+internal void EC_SingleRendObjApplyState(GameScene* gs, Ent* ent, EC_RendObjState* state)
 {
     EC_SingleRendObj* r = EC_FindSingleRendObj(gs, ent);
     if (r == NULL)
@@ -116,7 +116,7 @@ internal void EC_SingleRendObjApplyState(GameState* gs, Ent* ent, EC_RendObjStat
     //);
 }
 
-internal void EC_MultiRendObjApplyState(GameState* gs, Ent* ent, EC_MultiRendObjState* state)
+internal void EC_MultiRendObjApplyState(GameScene* gs, Ent* ent, EC_MultiRendObjState* state)
 {
     EC_MultiRendObj* r = EC_FindMultiRendObj(gs, ent);
     if (r == NULL)
@@ -129,7 +129,7 @@ internal void EC_MultiRendObjApplyState(GameState* gs, Ent* ent, EC_MultiRendObj
     EC_RestoreRendObj(&r->rendObjs[EC_MULTI_RENDOBJ_HEAD], &state->objStates[EC_MULTI_RENDOBJ_HEAD]);
 }
 
-internal void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* state)
+internal void EC_ColliderApplyState(GameScene* gs, Ent* ent, EC_ColliderState* state)
 {
     EC_Collider* col = EC_FindCollider(gs, ent);
     if (col == NULL)
@@ -155,7 +155,7 @@ internal void EC_ColliderApplyState(GameState* gs, Ent* ent, EC_ColliderState* s
     }
 }
 
-internal void EC_ThinkerApplyState(GameState* gs, Ent* ent, EC_ThinkerState* state)
+internal void EC_ThinkerApplyState(GameScene* gs, Ent* ent, EC_ThinkerState* state)
 {
     EC_Thinker* thinker = EC_FindThinker(gs, ent);
     if (thinker == NULL)
@@ -165,7 +165,7 @@ internal void EC_ThinkerApplyState(GameState* gs, Ent* ent, EC_ThinkerState* sta
     thinker->state = *state;
 }
 
-internal void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorState* state)
+internal void EC_ActorMotorApplyState(GameScene* gs, Ent* ent, EC_ActorMotorState* state)
 {
     EC_ActorMotor* motor = EC_FindActorMotor(gs, ent);
     if (motor == NULL)
@@ -175,7 +175,7 @@ internal void EC_ActorMotorApplyState(GameState* gs, Ent* ent, EC_ActorMotorStat
     motor->state = *state;
 }
 
-internal void EC_AIControllerApplyState(GameState* gs, Ent* ent, EC_AIState* state)
+internal void EC_AIControllerApplyState(GameScene* gs, Ent* ent, EC_AIState* state)
 {
     EC_AIController* ai = EC_FindAIController(gs, ent);
     if (ai == NULL)
@@ -191,7 +191,7 @@ internal void EC_AIControllerApplyState(GameState* gs, Ent* ent, EC_AIState* sta
     ai->state = *state;
 }
 
-internal void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state)
+internal void EC_HealthApplyState(GameScene* gs, Ent* ent, EC_HealthState* state)
 {
     EC_Health* hp = EC_FindHealth(gs, ent);
     if (hp == NULL)
@@ -201,7 +201,7 @@ internal void EC_HealthApplyState(GameState* gs, Ent* ent, EC_HealthState* state
     }
 }
 
-internal void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileState* state)
+internal void EC_ProjectileApplyState(GameScene* gs, Ent* ent, EC_ProjectileState* state)
 {
     EC_Projectile* prj = EC_FindProjectile(gs, ent);
     if (prj == NULL)
@@ -211,7 +211,7 @@ internal void EC_ProjectileApplyState(GameState* gs, Ent* ent, EC_ProjectileStat
     prj->state = *state;
 }
 
-internal void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
+internal void EC_LabelApplyState(GameScene* gs, Ent* ent, EC_LabelState* state)
 {
     EC_Label* label = EC_FindLabel(gs, ent);
     if (label == NULL)
@@ -221,7 +221,7 @@ internal void EC_LabelApplyState(GameState* gs, Ent* ent, EC_LabelState* state)
     COM_CopyStringLimited(state->label, label->state.label, EC_LABEL_LENGTH);
 }
 
-internal void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
+internal void EC_ApplyEntityMetaData(GameScene* gs, Ent* ent, Ent* entState)
 {
     // TODO: Move these data items into an 'EC_MetaData' component
     // In theory safe to copy everything but being careful
@@ -235,7 +235,7 @@ internal void EC_ApplyEntityMetaData(GameState* gs, Ent* ent, Ent* entState)
     ent->componentBits = entState->componentBits;
 }
 
-internal void EC_VolumeApplyState(GameState* gs, Ent* ent, EC_VolumeState* state)
+internal void EC_VolumeApplyState(GameScene* gs, Ent* ent, EC_VolumeState* state)
 {
     EC_Volume* vol = EC_FindVolume(gs, ent);
     if (vol == NULL)
@@ -245,7 +245,7 @@ internal void EC_VolumeApplyState(GameState* gs, Ent* ent, EC_VolumeState* state
     vol->state = *state;
 }
 
-internal void EC_SensorApplyState(GameState* gs, Ent* ent, EC_SensorState* state)
+internal void EC_SensorApplyState(GameScene* gs, Ent* ent, EC_SensorState* state)
 {
     EC_Sensor* sensor = EC_FindSensor(gs, ent);
     if (sensor == NULL)

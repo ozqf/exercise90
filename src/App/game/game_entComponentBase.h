@@ -26,14 +26,14 @@ struct EC_##type##List \
 //////////////////////////////////////////////////
 /*
 type is prefixed with EC_
-GameState must have a matching list, EC_FooList
+GameScene must have a matching list, EC_FooList
 
 Functions:
 u32		Ent_HasFoo			(Ent*);
-void	EC_AddFoo			(GameState*, Ent*);
+void	EC_AddFoo			(GameScene*, Ent*);
 void	EC_SetFooInactive	(EC_Foo, u8);
-EC_Foo	EC_FindFoo			(GameState*, EntId*);
-EC_Foo	EC_FindFoo			(GameState*, Ent*);
+EC_Foo	EC_FindFoo			(GameScene*, EntId*);
+EC_Foo	EC_FindFoo			(GameScene*, Ent*);
 void	EC_RemoveFoo		(Ent*)
 */
 
@@ -41,7 +41,7 @@ void	EC_RemoveFoo		(Ent*)
 \
 static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
 \
-static inline EC_##type* EC_Add##type##(GameState* gs, Ent* ent) \
+static inline EC_##type* EC_Add##type##(GameScene* gs, Ent* ent) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -65,7 +65,7 @@ static inline void EC_Set##type##Inactive(EC_##type##* comp, u8 isInActive) \
 	else { comp->state.flags &= ~EC_STATE_FLAG_INACTIVE; } \
 } \
 \
-static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
+static inline EC_##type* EC_Find##type##(GameScene* gs, Ent* ent) \
 { \
     if (!Ent_Has##type##(ent)) { return 0; } \
     EC_##type* comp; \
@@ -79,7 +79,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, Ent* ent) \
     } \
     return 0; \
 } \
-static inline EC_##type* EC_Find##type##(GameState* gs, EntId* id) \
+static inline EC_##type* EC_Find##type##(GameScene* gs, EntId* id) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -94,7 +94,7 @@ static inline EC_##type* EC_Find##type##(GameState* gs, EntId* id) \
 } \
 \
 \
-static inline void EC_Remove##type##(GameState* gs, Ent* ent) \
+static inline void EC_Remove##type##(GameScene* gs, Ent* ent) \
 { \
     EC_##type* comp = EC_Find##type##(gs, ent); \
     if (comp == 0) { return; } \

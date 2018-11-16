@@ -39,9 +39,9 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
     if (!COM_CompareStrings(tokens[0], "GOD"))
     {
-        Ent* ent = Game_GetLocalClientEnt(&g_gameState);
+        Ent* ent = Game_GetLocalClientEnt(&g_gameScene);
         if (!ent) { return 1; }
-        EC_Health* hp = EC_FindHealth(&g_gameState, ent);
+        EC_Health* hp = EC_FindHealth(&g_gameScene, ent);
         if (!hp) { return 1; }
         if ((hp->state.flags & EC_HEALTH_FLAG_INVULNERABLE))
         {
@@ -81,7 +81,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
     {
-        Game_BuildTestScene(&g_gameState, 0);
+        Game_BuildTestScene(&g_gameScene, 0);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
@@ -108,7 +108,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			{
 				EntitySpawnOptions options = {};
                 options.scale = { 1, 1, 1 };
-				Ent_QuickSpawnCmd(&g_gameState, i, &options);
+				Ent_QuickSpawnCmd(&g_gameScene, i, &options);
 				return 1;
 			}
             if (!COM_CompareStrings(tokens[1], "ENEMY"))
@@ -118,7 +118,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
                 options.scale = { 1, 1, 1 };
                 options.pos.y = 0.75f;
                 options.rot.y = 45;
-                Ent_QuickSpawnCmd(&g_gameState, ENTITY_TYPE6_ENEMY, &options);
+                Ent_QuickSpawnCmd(&g_gameScene, ENTITY_TYPE6_ENEMY, &options);
             }
         }
         return 1;
@@ -211,12 +211,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))
     {
-        App_DebugPrintEntities(&g_gameState);
+        App_DebugPrintEntities(&g_gameScene);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "PLAYERS"))
     {
-        //App_DebugPrintPlayers(&g_gameState);
+        //App_DebugPrintPlayers(&g_gameScene);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TEXTURES"))
@@ -254,8 +254,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         else if (numTokens == 2)
         {
             i32 val = COM_AsciToInt32(tokens[1]);
-            g_gameState.debugMode = (u16)val;
-            printf("APP Debug text mode %d\n", g_gameState.debugMode);
+            g_gameScene.debugMode = (u16)val;
+            printf("APP Debug text mode %d\n", g_gameScene.debugMode);
         }
         // else if (numTokens == 2)
         // {
@@ -313,10 +313,10 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
-		i32 len = g_gameState.clientList.max;
-		for (i32 i = 0; i < g_gameState.clientList.max; ++i)
+		i32 len = g_gameScene.clientList.max;
+		for (i32 i = 0; i < g_gameScene.clientList.max; ++i)
 		{
-			Client* cl = &g_gameState.clientList.items[i];
+			Client* cl = &g_gameScene.clientList.items[i];
 			printf("%d: ConnId %d, IsLocal %d, State %d, Avatar: %d/%d\n",
 				cl->clientId, cl->connectionId,
 				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
@@ -359,7 +359,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 // Loading
 ////////////////////////////////////////////////////////////////////////////
 
-void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
+void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf)
 {
     //App_ReadCommandBuffer(&g_time, buf);
     u8 *read = buf->ptrStart;
@@ -410,7 +410,7 @@ void App_ReadStateBuffer(GameState *gs, ByteBuffer *buf)
 	}
 }
 
-u8 App_LoadStateFromFile(GameState *gs, char *fileName)
+u8 App_LoadStateFromFile(GameScene *gs, char *fileName)
 {
     printf("APP Load state from %s\n", fileName);
     BlockRef ref = {};

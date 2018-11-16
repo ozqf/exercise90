@@ -8,7 +8,7 @@
 /**
  * TODO: Rewrite me I'm awful
  */
-internal void Game_AddTestSolid(GameState* gs,
+internal void Game_AddTestSolid(GameScene* gs,
 	f32 x, f32 y, f32 z,
 	f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ, u8 isVisible)
 {
@@ -94,7 +94,7 @@ internal void Game_AddTestSolid(GameState* gs,
     printf("  Add test solid: cmd stream type %d, size %d bytes\n", CMD_TYPE_ENTITY_STATE_2, size);
 }
 
-internal void Game_AddAcidPool(GameState* gs, Vec3 pos, Vec3 scale)
+internal void Game_AddAcidPool(GameScene* gs, Vec3 pos, Vec3 scale)
 {
     EntityState state;
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, NULL))
@@ -118,7 +118,7 @@ internal void Game_AddAcidPool(GameState* gs, Vec3 pos, Vec3 scale)
     }
 }
 
-internal void Game_BuildTestScene_0(GameState* gs)
+internal void Game_BuildTestScene_0(GameScene* gs)
 {
     printf("--- GAME LOAD SCENE 0 ---\n");
 	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
@@ -159,7 +159,7 @@ internal void Game_BuildTestScene_0(GameState* gs)
     #endif
 }
 
-internal void Game_BuildTestScene_1(GameState* gs)
+internal void Game_BuildTestScene_1(GameScene* gs)
 {
 	Game_AddTestSolid(gs, 0, -6, 0, 24, 1, 24, 1);
 	Game_AddTestSolid(gs, 0, 6, 0, 24, 1, 24, 1);
@@ -171,7 +171,7 @@ internal void Game_BuildTestScene_1(GameState* gs)
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 1);
 }
 
-internal void Game_BuildTestScene(GameState* gs, i32 sceneIndex)
+internal void Game_BuildTestScene(GameScene* gs, i32 sceneIndex)
 {
 	switch (sceneIndex)
 	{

@@ -17,28 +17,28 @@
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d accepted\n", conn->id);
-    if (IsRunningServer(g_gameState.netMode))
+    if (IsRunningServer(g_gameScene.netMode))
     {
         // Create client
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
-        spawnClient.clientId = App_GetNextClientId(&g_gameState.clientList);
+        spawnClient.clientId = App_GetNextClientId(&g_gameScene.clientList);
         spawnClient.state = CLIENT_STATE_OBSERVER;
         APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
     }
     else
     {
         printf("CL Connected to server with conn id %d\n", conn->id);
-        g_gameState.remoteConnectionId = conn->id;
+        g_gameScene.remoteConnectionId = conn->id;
     }
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d dropped\n", conn->id);
-	if (IsRunningServer(g_gameState.netMode))
+	if (IsRunningServer(g_gameScene.netMode))
     {
-		Client* cl = App_FindClientByConnectionId(&g_gameState.clientList, conn->id);
+		Client* cl = App_FindClientByConnectionId(&g_gameScene.clientList, conn->id);
         // Delete client
         Cmd_ClientUpdate spawnClient = {};
         spawnClient.clientId = cl->connectionId;
@@ -50,13 +50,13 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
-    switch (g_gameState.netMode)
+    switch (g_gameScene.netMode)
     {
         case NETMODE_CLIENT:
         {
             //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
             APP_ASSERT(
-                (info->sender.id == g_gameState.remoteConnectionId),
+                (info->sender.id == g_gameScene.remoteConnectionId),
                 "Received packet from unknown source");
 
             u8* read = bytes;
@@ -129,7 +129,7 @@ void Net_ClientReadInput(NetStream* stream)
     }
 }
 
-internal void Net_TransmitToClients(GameState* gs)
+internal void Net_TransmitToClients(GameScene* gs)
 {
     if(!IS_SERVER(gs)) { return; }
 
@@ -159,12 +159,12 @@ internal void Net_TransmitToClients(GameState* gs)
  * Load local client inputs into a server packet
  * TODO: These messages should be UNRELIABLE but only the reliable stream exists atm so change later
  */
-internal void Net_WriteClient2ServerOutput(GameState* gs, Client* cl, NetStream* server)
+internal void Net_WriteClient2ServerOutput(GameScene* gs, Client* cl, NetStream* server)
 {
     if(!IS_CLIENT(gs)) { return; }
 }
 
-internal void Net_TransmitToServer(GameState* gs)
+internal void Net_TransmitToServer(GameScene* gs)
 {
     if(!IS_CLIENT(gs)) { return; }
     const i32 packetSize = 1024;
@@ -180,7 +180,7 @@ internal void Net_TransmitToServer(GameState* gs)
     Stream_OutputToPacket(gs->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
 }
 
-internal void Net_Tick(GameState* gs, GameTime* time)
+internal void Net_Tick(GameScene* gs, GameTime* time)
 {
     switch (gs->netMode)
     {
@@ -212,7 +212,7 @@ internal void Net_Tick(GameState* gs, GameTime* time)
     }
 }
 
-internal void Net_Transmit(GameState* gs, GameTime* time)
+internal void Net_Transmit(GameScene* gs, GameTime* time)
 {
     switch (gs->netMode)
     {
