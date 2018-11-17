@@ -119,10 +119,9 @@ internal void Game_UpdateHudRingItem(HudRingItem* item, f32 camX, f32 camZ, f32 
     item->tick += deltaTime;
 }
 
-internal void Game_UpdateUI(GameScene* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
+internal void Game_UpdateUI(Client* localClient, GameScene* gs, UIEntity *ents, i32 maxEntities, GameTime *time)
 {
-    Client* cl = App_FindLocalClient(&gs->clientList, 1);
-    if (cl)
+    if (localClient)
     {
         //EC_Transform* trans = EC_FindTransform(gs, &cl->entId);
         //EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);

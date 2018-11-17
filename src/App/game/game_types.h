@@ -634,39 +634,36 @@ struct ClientList
 // Session data
 ///////////////////////////////////////////////////////////////////////
 
-// A Campaign spans multiple sessions
-// Stores the starting conditions of the current game session and
-// results of previous sessions
-// From hitting start in the main menu to game over
-// struct GameCampaign
-// {
-    
-// };
-
 #define GAME_SESSION_STATE_WARMUP 0
 #define GAME_SESSION_STATE_PLAYING 1
 #define GAME_SESSION_STATE_FAILED 2
 #define GAME_SESSION_STATE_SUCCESS 3
 
-// overall game information in the current instance (eg progress, wave count, scores etc)
+// Stores the starting conditions of the current game session and
+// results of previous sessions
+// From hitting start in the main menu to game over
 struct GameSession
 {
+    u8 netMode; // 0 == server, 1 == client
     //i32 score;
     //i32 state;
     char mapName[64];
     i32 levelsCompleted = 0;
     i32 localClientId = 0;
+    
+    ClientList clientList;
+    i32 remoteConnectionId;
 };
 
 // Specific local settings on this machine
-struct GameSceneLocal
-{
-    u8 localPlayerHasEnt = 0;
-    EntId localPlayerEntId;
-};
+// struct GameSceneLocal
+// {
+//     u8 localPlayerHasEnt = 0;
+//     EntId localPlayerEntId;
+// };
 
-#define IS_SERVER(ptrGameScene) (IsRunningServer(##ptrGameScene##->netMode))
-#define IS_CLIENT(ptrGameScene) (IsRunningClient(##ptrGameScene##->netMode))
+#define IS_SERVER(ptrGameSession) (IsRunningServer(##ptrGameSession##->netMode))
+#define IS_CLIENT(ptrGameSession) (IsRunningClient(##ptrGameSession##->netMode))
 
 //////////////////////////////////////////////////
 // GameScene God Object
@@ -675,16 +672,12 @@ struct GameSceneLocal
 //////////////////////////////////////////////////
 struct GameScene
 {
-    u8 netMode; // 0 == server, 1 == client
     i32 state;
     
     //GameCampaign campaign;
     //GameSession session;
     
-    ClientList clientList;
     //GameSceneLocal local;
-
-    i32 remoteConnectionId;
 
     // Entities
     //i32 nextEntityID;
@@ -740,6 +733,8 @@ DEFINE_ENT_COMPONENT_BASE(Sensor, sensor, EC_BIT12_SENSOR)
 
 struct Game
 {
+    // TODO Change names to ptrScene/ptrSession to make it more
+    // obvious they're that they're not members
     GameSession* session;
     GameScene* scene;
 };

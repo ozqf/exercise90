@@ -17,28 +17,28 @@
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d accepted\n", conn->id);
-    if (IsRunningServer(g_gameScene.netMode))
+    if (IsRunningServer(g_session.netMode))
     {
         // Create client
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
-        spawnClient.clientId = App_GetNextClientId(&g_gameScene.clientList);
+        spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
         spawnClient.state = CLIENT_STATE_OBSERVER;
         APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
     }
     else
     {
         printf("CL Connected to server with conn id %d\n", conn->id);
-        g_gameScene.remoteConnectionId = conn->id;
+        g_session.remoteConnectionId = conn->id;
     }
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d dropped\n", conn->id);
-	if (IsRunningServer(g_gameScene.netMode))
+	if (IsRunningServer(g_session.netMode))
     {
-		Client* cl = App_FindClientByConnectionId(&g_gameScene.clientList, conn->id);
+		Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
         // Delete client
         Cmd_ClientUpdate spawnClient = {};
         spawnClient.clientId = cl->connectionId;
@@ -50,13 +50,13 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
     //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
-    switch (g_gameScene.netMode)
+    switch (g_session.netMode)
     {
         case NETMODE_CLIENT:
         {
             //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
             APP_ASSERT(
-                (info->sender.id == g_gameScene.remoteConnectionId),
+                (info->sender.id == g_session.remoteConnectionId),
                 "Received packet from unknown source");
 
             u8* read = bytes;
@@ -129,16 +129,16 @@ void Net_ClientReadInput(NetStream* stream)
     }
 }
 
-internal void Net_TransmitToClients(GameScene* gs)
+internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
 {
-    if(!IS_SERVER(gs)) { return; }
+    if(!IsRunningServer(session->netMode)) { return; }
 
     const i32 packetSize = 1024;
     u8 packetBuffer[packetSize];
 
-    for (i32 i = 0; i < gs->clientList.max; ++i)
+    for (i32 i = 0; i < session->clientList.max; ++i)
     {
-        Client* cl = &gs->clientList.items[i];
+        Client* cl = &session->clientList.items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
 
         // TODO: Sending once per tick regardless of framerate at the moment
@@ -159,14 +159,14 @@ internal void Net_TransmitToClients(GameScene* gs)
  * Load local client inputs into a server packet
  * TODO: These messages should be UNRELIABLE but only the reliable stream exists atm so change later
  */
-internal void Net_WriteClient2ServerOutput(GameScene* gs, Client* cl, NetStream* server)
+internal void Net_WriteClient2ServerOutput(GameSession* session, GameScene* gs, Client* cl, NetStream* server)
 {
-    if(!IS_CLIENT(gs)) { return; }
+    if(!IsRunningClient(session->netMode)) { return; }
 }
 
-internal void Net_TransmitToServer(GameScene* gs)
+internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 {
-    if(!IS_CLIENT(gs)) { return; }
+    if(!IsRunningClient(session->netMode)) { return; }
     const i32 packetSize = 1024;
     u8 packetBuffer[packetSize];
 
@@ -177,12 +177,12 @@ internal void Net_TransmitToServer(GameScene* gs)
         // nothing to transmit
         return;
     }
-    Stream_OutputToPacket(gs->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
+    Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
 }
 
-internal void Net_Tick(GameScene* gs, GameTime* time)
+internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
 {
-    switch (gs->netMode)
+    switch (session->netMode)
     {
         case NETMODE_NONE:
         {
@@ -212,9 +212,9 @@ internal void Net_Tick(GameScene* gs, GameTime* time)
     }
 }
 
-internal void Net_Transmit(GameScene* gs, GameTime* time)
+internal void Net_Transmit(GameSession* session, GameScene* gs, GameTime* time)
 {
-    switch (gs->netMode)
+    switch (session->netMode)
     {
         case NETMODE_NONE:
         {
@@ -223,18 +223,18 @@ internal void Net_Transmit(GameScene* gs, GameTime* time)
 
         case NETMODE_LISTEN_SERVER:
         {
-            Net_TransmitToClients(gs);
+            Net_TransmitToClients(session, gs);
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            Net_TransmitToClients(gs);
+            Net_TransmitToClients(session, gs);
         } break;
 
         case NETMODE_CLIENT:
         {
             // Transmit input
-            Net_TransmitToServer(gs);
+            Net_TransmitToServer(session, gs);
         } break;
 
         default:

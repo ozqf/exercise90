@@ -89,7 +89,7 @@ void App_PhysicsErrorHandler(char* message)
 void App_RunPostInitCommands()
 {
 	// TODO: This will EXEC straight away, which we don't want!
-	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, &g_session);
     //platform.Platform_WriteTextCommand("LOAD TEST");
 	//platform.Platform_WriteTextCommand("IMPULSE 1");
 	platform.Platform_WriteTextCommand("MENU CLOSE");
@@ -232,8 +232,12 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
  //////////////////////////////////////////////////////////////////////////////
 void App_UpdateGameScene(GameTime* time)
 {
+    Game game;
+    game.scene = &g_gameScene;
+    game.session = &g_session;
+
     // Update local client input
-    App_UpdateLocalClients(time, &g_gameScene.clientList);
+    App_UpdateLocalClients(time, &g_session.clientList);
     
     // Read game output from last frame + internally issued commands
     //App_ReadCommandBuffer(g_appReadBuffer);
@@ -242,9 +246,7 @@ void App_UpdateGameScene(GameTime* time)
     g_debugStr.length = 0;
 
     //GameScene *gs = &g_gameScene;
-    Game game;
-    game.scene = &g_gameScene;
-    game.session = &g_session;
+    
     #if 0
     MemoryBlock collisionBuffer = {};
     Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
@@ -350,6 +352,7 @@ void App_UpdateGameScene(GameTime* time)
 ///////////////////////////////////////////////////////////////////////////////
 void App_Render(GameTime* time, ScreenInfo screenInfo)
 {
+    ClientList* clients = &g_session.clientList;
     GameScene *gs = &g_gameScene;
     g_screenInfo = screenInfo;
     
@@ -388,15 +391,15 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     //g_worldScene.settings.lightBits |= (1 << 0);
     platform.Platform_RenderScene(&g_worldScene);
 
-    Client* cl = App_FindLocalClient(&gs->clientList, 1);
+    Client* cl = App_FindLocalClient(clients, 1);
     if (cl && !g_debugCameraOn)
     {
-        Game_BuildWeaponModelScene(gs, &g_weaponModelScene);
+        Game_BuildWeaponModelScene(cl, gs, &g_weaponModelScene);
         platform.Platform_RenderScene(&g_weaponModelScene);
     }
 
     #if 1
-    Game_UpdateUI(gs, g_ui_entities, UI_MAX_ENTITIES, time);
+    Game_UpdateUI(cl, gs, g_ui_entities, UI_MAX_ENTITIES, time);
     //App_BuildMenuRenderScene()
     UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);
 
@@ -463,14 +466,16 @@ void App_Frame(GameTime *time)
 	if (g_paused || g_minimised) { return; }
 	
     g_time = *time;
+    GameSession* session = &g_session;
 
-    Net_Tick(&g_gameScene, time);
+    Net_Tick(session, &g_gameScene, time);
 	App_UpdateGameScene(time);
     Net_WriteClient2ServerOutput(
+        session,
         &g_gameScene,
-        App_FindLocalClient(&g_gameScene.clientList, 0),
+        App_FindLocalClient(&session->clientList, 0),
         &g_serverStream);
-    Net_Transmit(&g_gameScene, time);
+    Net_Transmit(session, &g_gameScene, time);
 	
     if (time->singleFrame)
 	{
@@ -514,21 +519,21 @@ void App_Frame(GameTime *time)
 		} break;
 		case APP_STATE_OP_LOAD:
 		{
-			if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName))
+			if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName, session))
 			{
 				printf("Failed to load game\n");
 			}
 		} break;
         case APP_STATE_OP_HOST:
 		{
-			if (!App_StartSession(NETMODE_LISTEN_SERVER, g_appStateOperation.fileName))
+			if (!App_StartSession(NETMODE_LISTEN_SERVER, g_appStateOperation.fileName, session))
 			{
 				printf("Failed to load game\n");
 			}
 		} break;
         case APP_STATE_OP_JOIN:
 		{
-			if (!App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName))
+			if (!App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName, session))
 			{
 				printf("Failed to load game\n");
                 ILLEGAL_CODE_PATH

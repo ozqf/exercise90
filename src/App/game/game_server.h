@@ -9,7 +9,11 @@ internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
 
 }
 
-internal u8 SV_ReadImpulse(u8 netMode, GameScene* gs, Cmd_ServerImpulse* cmd)
+internal u8 SV_ReadImpulse(
+    u8 netMode,
+    ClientList* clients,
+    GameScene* gs,
+    Cmd_ServerImpulse* cmd)
 {
     if (!IsRunningServer(netMode))
 	{
@@ -21,7 +25,7 @@ internal u8 SV_ReadImpulse(u8 netMode, GameScene* gs, Cmd_ServerImpulse* cmd)
 	{
         case IMPULSE_NEXT_WEAPON:
         {
-            Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
+            Client* cl = App_FindClientById(cmd->clientId, clients);
             Assert(cl);
             if (cl->entId.value == 0) { return 1; }
             Ent* ent = Ent_GetEntityById(gs, &cl->entId);
@@ -40,7 +44,7 @@ internal u8 SV_ReadImpulse(u8 netMode, GameScene* gs, Cmd_ServerImpulse* cmd)
 		case IMPULSE_JOIN_GAME:
 		{
 			// How to assign player Id at this point
-            Client* cl = App_FindClientById(cmd->clientId, &gs->clientList);
+            Client* cl = App_FindClientById(cmd->clientId, clients);
 			APP_ASSERT(cl, "Client for join game impulse could not be found");
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
@@ -145,17 +149,17 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
-internal void SV_OutputToAllClients(GameScene* gs, Cmd_ClientUpdate* cmd)
+internal void SV_OutputToAllClients(u8 netMode, ClientList* clients, GameScene* game, Cmd_ClientUpdate* cmd)
 {
-    if(!IS_SERVER(gs)) { return; }
+    if(!IsRunningServer(netMode)) { return; }
 
     // correct conn id is only sent to the client to which it belongs
     i32 updateConnectionId = cmd->connectionId;
 
     printf("SV Transmitting client state update to all clients\n");
-    for (i32 i = 0; i < gs->clientList.max; ++i)
+    for (i32 i = 0; i < clients->max; ++i)
     {
-        Client* cl = &gs->clientList.items[i];
+        Client* cl = &clients->items[i];
 
         if (cl->state == CLIENT_STATE_FREE) { continue; }
 
@@ -179,9 +183,9 @@ internal void SV_OutputToAllClients(GameScene* gs, Cmd_ClientUpdate* cmd)
     }
 }
 
-internal void SV_ProcessClientSpawn(GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
+internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
 {
-	if(!IS_SERVER(gs)) { return; }
+	if(!IsRunningServer(netMode)) { return; }
     if (gs->state == 0)
     {
 		// TODO: Replicate client state change to all connected clients
@@ -196,10 +200,10 @@ internal void SV_ProcessClientSpawn(GameScene* gs, Client* cl, Cmd_ClientUpdate*
     }
 }
 
-internal void SV_ProcessClientDeath(GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
+internal void SV_ProcessClientDeath(u8 netMode, GameScene* gs, ClientList* clients, Client* cl, Cmd_ClientUpdate* cmd)
 {
-	if(!IS_SERVER(gs)) { return; }
-    if (App_NumPlayingClients(&gs->clientList) == 0)
+	if(!IsRunningServer(netMode)) { return; }
+    if (App_NumPlayingClients(clients) == 0)
     {
         // TODO: Replicate client state change to all connected clients
 		// Make sure connection Id is NOT replicated!
@@ -212,11 +216,11 @@ internal void SV_ProcessClientDeath(GameScene* gs, Client* cl, Cmd_ClientUpdate*
     }
 }
 
-internal void SV_ProcessEntityDeath(GameScene* gs, Ent* ent)
+internal void SV_ProcessEntityDeath(u8 netMode, ClientList* clients, GameScene* gs, Ent* ent)
 {
-    if(!IS_SERVER(gs)) { return; }
+    if(!IsRunningServer(netMode)) { return; }
     // is the entity a player?
-    Client* cl = App_FindClientByEntId(ent->entId, &gs->clientList);
+    Client* cl = App_FindClientByEntId(ent->entId, clients);
     if (cl)
     {
         printf("GAME Client %d avatar died\n", cl->clientId);
@@ -238,7 +242,7 @@ internal void SV_ProcessEntityDeath(GameScene* gs, Ent* ent)
 }
 
 // TODO: MOVE ME: This isn't a server only function!
-internal void Game_RemoveEntity(GameScene* gs, Cmd_RemoveEntity* cmd)
+internal void Game_RemoveEntity(u8 netMode, ClientList* clients, GameScene* gs, Cmd_RemoveEntity* cmd)
 {
     if (g_verbose)
     {
@@ -265,7 +269,7 @@ internal void Game_RemoveEntity(GameScene* gs, Cmd_RemoveEntity* cmd)
 		}
 
         // inform interested parties
-        SV_ProcessEntityDeath(gs, ent);
+        SV_ProcessEntityDeath(netMode, clients, gs, ent);
 		Ent_Free(gs, ent);
 	}
 	else

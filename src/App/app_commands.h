@@ -39,7 +39,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
     if (!COM_CompareStrings(tokens[0], "GOD"))
     {
-        Ent* ent = Game_GetLocalClientEnt(&g_gameScene);
+        Ent* ent = Game_GetLocalClientEnt(&g_session.clientList, &g_gameScene.entList);
         if (!ent) { return 1; }
         EC_Health* hp = EC_FindHealth(&g_gameScene, ent);
         if (!hp) { return 1; }
@@ -198,14 +198,14 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             return 1;
         }
         printf("Replay from %s\n", tokens[1]);
-        App_StartSession(NETMODE_REPLAY, tokens[1]);
+        App_StartSession(NETMODE_REPLAY, tokens[1], &g_session);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "STOP"))
     {
         // Stop recording, or stop replay playback
         g_replayMode = NoReplayMode;
-        App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP);
+        App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, &g_session);
         return 1;
 
     }
@@ -313,10 +313,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
-		i32 len = g_gameScene.clientList.max;
-		for (i32 i = 0; i < g_gameScene.clientList.max; ++i)
+        ClientList* cls = &g_session.clientList;
+		i32 len = cls->max;
+		for (i32 i = 0; i < cls->max; ++i)
 		{
-			Client* cl = &g_gameScene.clientList.items[i];
+			Client* cl = &cls->items[i];
 			printf("%d: ConnId %d, IsLocal %d, State %d, Avatar: %d/%d\n",
 				cl->clientId, cl->connectionId,
 				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
@@ -359,8 +360,9 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 // Loading
 ////////////////////////////////////////////////////////////////////////////
 
-void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf)
+void App_ReadStateBuffer(GameSession* session, GameScene* gs, ByteBuffer *buf)
 {
+    ClientList* clients = &session->clientList;
     //App_ReadCommandBuffer(&g_time, buf);
     u8 *read = buf->ptrStart;
     StateSaveHeader h = {};
@@ -386,7 +388,7 @@ void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf)
     
 	if (sub.capacity != 0) {
 		printf("APP Reading static commands (%d bytes)\n", sub.capacity);
-		i32 count = Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+		i32 count = Game_ReadCommandBuffer(session, gs, &sub, (g_time.singleFrame != 0));
         printf("  Executed %d commands\n", count);
 	}
 	else
@@ -401,7 +403,7 @@ void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf)
 	if (sub.capacity > 0)
 	{
 		printf("APP Reading dynamic commands (%d bytes)\n", sub.capacity);
-		i32 count = Game_ReadCommandBuffer(gs, &sub, (g_time.singleFrame != 0));
+		i32 count = Game_ReadCommandBuffer(session, gs, &sub, (g_time.singleFrame != 0));
         printf("  Executed %d commands\n", count);
 	}
 	else
@@ -410,14 +412,14 @@ void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf)
 	}
 }
 
-u8 App_LoadStateFromFile(GameScene *gs, char *fileName)
+u8 App_LoadStateFromFile(GameSession* session, GameScene *gs, char *fileName)
 {
     printf("APP Load state from %s\n", fileName);
     BlockRef ref = {};
     platform.Platform_LoadFileIntoHeap(&g_heap, &ref, fileName, 0);
     ByteBuffer bytes = Heap_RefToByteBuffer(&g_heap, &ref);
 
-    App_ReadStateBuffer(gs, &bytes);
+    App_ReadStateBuffer(session, gs, &bytes);
 
     Heap_Free(&g_heap, ref.id);
     return 1;

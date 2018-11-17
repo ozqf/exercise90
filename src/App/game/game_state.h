@@ -2,6 +2,14 @@
 
 #include "game.h"
 
+internal void GameSession_Init(GameSession* session)
+{
+    
+    // Don't wanna forget to assign all these.
+    session->clientList.items = g_clients;
+    session->clientList.count = 0;
+    session->clientList.max = GAME_MAX_CLIENTS;
+}
 
 internal void GS_Init(GameScene *gs)
 {
@@ -16,11 +24,6 @@ internal void GS_Init(GameScene *gs)
     gs->debugMode = debugMode;
     Transform_SetToIdentity(&gs->cameraTransform);
     Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
-    
-    // Don't wanna forget to assign all these.
-    gs->clientList.items = g_clients;
-    gs->clientList.count = 0;
-    gs->clientList.max = GAME_MAX_CLIENTS;
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;

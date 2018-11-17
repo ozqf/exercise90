@@ -99,8 +99,8 @@ inline Var* App_GetVar(char* name);
 void App_ClearIOBuffers();
 void App_SendToServer(u8* ptr, u8 type, u16 size);
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens);
-void App_ReadStateBuffer(GameScene *gs, ByteBuffer *buf);
-u8 App_LoadStateFromFile(GameScene *gs, char *fileName);
+void App_ReadStateBuffer(GameSession* session, GameScene* gs, ByteBuffer *buf);
+u8 App_LoadStateFromFile(GameSession* session, GameScene *gs, char *fileName);
 i32 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite, StateSaveHeader* header);
 void App_SaveDataVariables(char* fileName);
 
@@ -109,7 +109,7 @@ void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 void Exec_ReadInput(u32 frameNumber, InputEvent ev);
 void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead);
 void App_ReadCommandBuffer(ByteBuffer* commands);
-i32 App_StartSession(u8 netMode, char* path);
+i32 App_StartSession(u8 netMode, char *path, GameSession* session);
 
 // Debug
 void App_DumpHeap();

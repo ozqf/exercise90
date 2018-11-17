@@ -83,15 +83,16 @@ internal void Game_BuildTestMenu()
 
 internal void Game_Init()
 {
+    GameSession_Init(&g_session);
     GS_Init(&g_gameScene);
     Game_CreateEntityTemplates();
     Game_BuildTestHud();
     Game_BuildTestMenu();
 }
 
-internal void Exec_UpdateClient(GameScene* gs, Cmd_ClientUpdate* cmd)
+internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientUpdate* cmd)
 {
-    Client* cl = App_FindOrCreateClient(cmd->clientId, &gs->clientList);
+    Client* cl = App_FindOrCreateClient(cmd->clientId, &session->clientList);
     printf("Client avatar was %d/%d now %d/%d\n",
         cl->entId.iteration, cl->entId.index,
         cmd->entId.iteration, cmd->entId.index
@@ -107,12 +108,12 @@ internal void Exec_UpdateClient(GameScene* gs, Cmd_ClientUpdate* cmd)
     // Changes that server should act on
     if (spawn)
     {
-        SV_ProcessClientSpawn(gs, cl, cmd);
+        SV_ProcessClientSpawn(session->netMode, gs, cl, cmd);
     }
     if (death)
     {
         // deth!
-        SV_ProcessClientDeath(gs, cl, cmd);
+        SV_ProcessClientDeath(session->netMode, gs, &session->clientList, cl, cmd);
     }
     if (cl->flags != cmd->flags)
     {
@@ -126,7 +127,7 @@ internal void Exec_UpdateClient(GameScene* gs, Cmd_ClientUpdate* cmd)
     }
     cl->flags = cmd->flags;
 
-    SV_OutputToAllClients(gs, cmd);
+    SV_OutputToAllClients(session->netMode, &session->clientList, gs, cmd);
 }
 
 internal void Exec_UpdateGameInstance(GameScene* gs, Cmd_GameSessionState* cmd)
@@ -153,8 +154,9 @@ internal void Exec_SpawnViaTemplate(GameScene* gs, Cmd_SpawnViaTemplate* cmd)
 	
 }
 
-internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
+internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header, u8* ptr)
 {
+    ClientList* clients = &session->clientList;
     switch (header->GetType())
     {
         case CMD_TYPE_ENTITY_STATE_2:
@@ -205,7 +207,7 @@ internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
         {
             Cmd_RemoveEntity cmd = {};
             ptr += cmd.Read(ptr);
-            Game_RemoveEntity(gs, &cmd);
+            Game_RemoveEntity(session->netMode, clients, gs, &cmd);
             return 1;
         } break;
         
@@ -215,7 +217,7 @@ internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
             u16 measuredSize = cmd.MeasureForReading(ptr);
             APP_ASSERT(measuredSize == header->GetSize(), "Command read size mismatch");
             ptr += cmd.Read(ptr);
-            Client* cl = App_FindClientByConnectionId(&gs->clientList, cmd.connectionId);
+            Client* cl = App_FindClientByConnectionId(clients, cmd.connectionId);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
@@ -234,14 +236,14 @@ internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
         {
             Cmd_ServerImpulse cmd = {};
             ptr += cmd.Read(ptr);
-			return SV_ReadImpulse(gs->netMode, gs, &cmd);
+			return SV_ReadImpulse(session->netMode, clients, gs, &cmd);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
             Cmd_ClientUpdate cmd = {};
             ptr += cmd.Read(ptr);
-            Exec_UpdateClient(gs, &cmd);
+            Exec_UpdateClient(session, gs, &cmd);
             return 1;
         } break;
 		
@@ -264,8 +266,9 @@ internal u8 Game_ReadCmd(GameScene* gs, CmdHeader* header, u8* ptr)
     return 0;
 }
 
-internal i32 Game_ReadCommandBuffer(GameScene* gs, ByteBuffer* commands, u8 verbose)
+internal i32 Game_ReadCommandBuffer(GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose)
 {
+    ClientList* clients = &session->clientList;
     i32 numExecuted = 0;
     u8* ptrRead = commands->ptrStart;
     if (verbose)
@@ -296,7 +299,7 @@ internal i32 Game_ReadCommandBuffer(GameScene* gs, ByteBuffer* commands, u8 verb
         }
         else
         {
-            if (Game_ReadCmd(gs, &h, ptrRead) == 0)
+            if (Game_ReadCmd(session, gs, &h, ptrRead) == 0)
             {
                 printf("!GAME:  Unknown command type %d...\n", h.GetType());
                 ILLEGAL_CODE_PATH
@@ -308,12 +311,12 @@ internal i32 Game_ReadCommandBuffer(GameScene* gs, ByteBuffer* commands, u8 verb
     return numExecuted;
 }
 
-internal Ent* Game_GetLocalClientEnt(GameScene* gs)
+internal Ent* Game_GetLocalClientEnt(ClientList* clients, EntList* ents)
 {
-    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
+    Client* localClient = App_FindLocalClient(clients, 1);
     if (localClient)
     {
-        Ent* ent = Ent_GetEntityById(&gs->entList, &localClient->entId);
+        Ent* ent = Ent_GetEntityById(ents, &localClient->entId);
         return ent;
     }
     else
@@ -333,6 +336,7 @@ internal void Game_Tick(
     InputActionSet* actions)
 {
     GameScene* gs = game->scene;
+    ClientList* clients = &game->session->clientList;
     gs->verbose = (u8)time->singleFrame;
     if (time->singleFrame)
     {
@@ -382,7 +386,7 @@ internal void Game_Tick(
 		printf("GAME Reading commands from Buffer %s\n", App_GetBufferName(ptrRead));
         printf("GAME Writing commands to Buffer %s\n", App_GetBufferName(output->ptrStart));
 	}
-    Game_ReadCommandBuffer(gs, input, (time->singleFrame != 0));
+    Game_ReadCommandBuffer(game->session, gs, input, (time->singleFrame != 0));
     
     g_debugTransform = gs->cameraTransform;
 
@@ -393,21 +397,21 @@ internal void Game_Tick(
     // TODO: Bits of this are order sensitivity. eg projectiles etc hitting health.
     // health must be updated last, so that other events can all affect them!
     Game_UpdateActorMotors(gs, time);
-    Game_UpdateAIControllers(&gs->clientList, gs, time);
+    Game_UpdateAIControllers(clients, gs, time);
     Game_UpdateColliders(gs, time);
     Game_UpdateProjectiles(gs, time);
     Game_UpdateVolumes(gs, time);
-    Game_UpdateThinkers(&gs->clientList, gs, time);
+    Game_UpdateThinkers(clients, gs, time);
     Game_UpdateRenderObjects(gs, time);
     Game_UpdateSensors(gs, time);
-    Game_UpdateHealth(gs, time);
+    Game_UpdateHealth(clients, gs, time);
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 
     // step forward
     Game_StepPhysics(gs, time);
 
-    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
+    Client* localClient = App_FindLocalClient(clients, 1);
     if (localClient)
     {
         EntId id = localClient->entId;

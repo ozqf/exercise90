@@ -126,9 +126,8 @@ Vec3 g_weaponModalBack = { 0, -1, -0.6f };
 Vec3 g_weaponModalBackMinor = { 0, -1, -1.2f };
 Vec3 g_weaponModalCurrent = { 0, -1, -1.5 };
 
-inline void Game_BuildWeaponModelScene(GameScene* gs, RenderScene* scene)
+inline void Game_BuildWeaponModelScene(Client* localClient, GameScene* gs, RenderScene* scene)
 {
-    Client* localClient = App_FindLocalClient(&gs->clientList, 1);
     f32 z = g_weaponModelOrigin.z;
     if (localClient && localClient->IsPlaying())
     {

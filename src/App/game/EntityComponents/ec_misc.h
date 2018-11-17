@@ -208,7 +208,7 @@ internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
 /////////////////////////////////////////////////////////////////////////
 // HEALTH
 /////////////////////////////////////////////////////////////////////////
-internal void Game_UpdateHealth(GameScene *gs, GameTime *time)
+internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->healthList.max; ++i)
     {
@@ -276,7 +276,7 @@ internal void Game_UpdateHealth(GameScene *gs, GameTime *time)
             #if 1
             if (health->state.flags & EC_STATE_FLAG_IS_PLAYER)
             {
-                Client* cl = App_FindLocalClient(&gs->clientList, 1);
+                Client* cl = App_FindLocalClient(clients, 1);
                 if (health->header.entId.value == cl->entId.value)
                 {
                     //printf("Spawn hud ring\n");
