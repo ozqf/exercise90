@@ -76,7 +76,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "SAY"))
     {
-        printf("APP Client say...\n");
+        //printf("APP Client say...\n");
+        Net_TransmitSay(&g_session, str, tokens, numTokens);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))

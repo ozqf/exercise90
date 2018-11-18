@@ -346,17 +346,17 @@ static inline i32 COM_ConcatonateTokens(
 	i32 remaining = bufferSize;
 	i32 written = 0;
 	char* dest = buffer;
-	printf("Concatonating %d strings, buf size %d\n", numStrings, bufferSize);
+	//printf("Concatonating %d strings, buf size %d\n", numStrings, bufferSize);
 	for (int i = firstString; i < numStrings; ++i)
 	{
-		printf("Copying %s to %d, with %d remaining\n", strings[i], pos, remaining);
+		//printf("Copying %s to %d, with %d remaining\n", strings[i], pos, remaining);
 		dest = buffer + pos;
 		written = COM_CopyStringLimited(strings[i], dest, remaining);
 		*(dest + (written -1 )) = ' ';
 		totalWritten += written;
 		pos += written;
 		remaining -= written;
-		printf("Wrote %d result %s. Remaining %d\n", written, buffer, remaining);
+		//printf("Wrote %d result %s. Remaining %d\n", written, buffer, remaining);
 		if (remaining <= 0) { break; }
 	}
 	*(dest + (written -1 )) = '\0';

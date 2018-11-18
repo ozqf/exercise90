@@ -58,6 +58,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_VIA_TEMPLATE 112
 #define CMD_TYPE_SPAWN_GFX 113
 #define CMD_TYPE_SPAWN_HUD_ITEM 114
+#define CMD_TYPE_TEST 127
 
 // Define placeholder raw read/write functions for commands.
 
@@ -95,7 +96,8 @@ inline u16 Read(u8* ptr) \
     APP_ASSERT((commandType == u8_cmdType), "CMD read: type mismatched\n"); \
     ptr += COM_COPY(ptr, this, sizeof(structType)); \
     return (u16)(ptr - start); \
-}
+} \
+
 #endif
 
 //////////////////////////////////////////////////
@@ -304,4 +306,11 @@ struct Cmd_SpawnHudItem
     EntId victim;
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_SpawnHudItem, CMD_TYPE_SPAWN_HUD_ITEM)
+};
+
+struct Cmd_Test
+{
+    i32 data;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_Test, CMD_TYPE_TEST)
 };

@@ -6,7 +6,7 @@
 Persistent data (eg client list or server stream) are in the GameState struct.
 This struct should ONLY hold the state of the current entity scene!
 
-* Split into 'Persistent' and 'Scene' data
+*DONE* * Split into 'Persistent' and 'Scene' data
     * Persistent data is initialised on session start and kept between scenes until
     a new scene is started (ending a scene means start a single player game on a start scene).
         * All Network streams.
@@ -32,6 +32,16 @@ This struct should ONLY hold the state of the current entity scene!
 * Tick Simulation
 * Write Output (Load events into client output streams)
 * Transmit Output (stream messages to packets)
+
+Client receives and transmits on the global server stream.
+Server receives and transmits on it's client list.
+    (...with0 local clients use their streams as a loopback?)
+
+### Network Message to output stream process:
+* Increment id.
+* Measure Message
+* Write header to buffer
+* Call msg write function
 
 ### ECS complexity
 Insanely fiddly steps to adding a new component:

@@ -139,8 +139,13 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
     return blockStart + bytesToCopy;
 }
 
-u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b, u32* ackSequence)
+u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
 {
+
+    TransmissionRecord* rec =
+        Stream_FindTransmissionRecord(stream->transmissions, ackSequence);
+    if (!rec) { return 0; }
+    ByteBuffer* b = &stream->outputBuffer;
     //u32 currentSize = b->Written();
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
@@ -160,11 +165,12 @@ u32 Stream_ClearReceivedMessages(TransmissionRecord* rec, ByteBuffer* b, u32* ac
         b->ptrWrite = end;
         removed += blockSize;
 
+        // TODO: What was this doing...?
         // update ack if necessary
-        if (h->id > *ackSequence)
-        {
-            *ackSequence = h->id;
-        }
+        // if (h->id > ackSequence)
+        // {
+        //     ackSequence = h->id;
+        // }
     }
     //printf("  Removed %d bytes. Reduced %d to %d\n",
     //    removed, currentSize, b->Written());

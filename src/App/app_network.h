@@ -73,6 +73,18 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
     printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
+    switch (g_session.netMode)
+    {
+        case NETMODE_LISTEN_SERVER:
+        {
+            
+        } break;
+
+        case NETMODE_CLIENT:
+        {
+            Stream_ClearReceivedOutput(&g_serverStream, packetNumber);
+        } break;
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -101,12 +113,20 @@ ZNetOutputInterface Net_CreateOutputInterface()
 	return x;
 }
 
-void Net_ClientExecuteMessage(u8* bytes, u16 numBytes)
+/////////////////////////////////////////////////////////////////
+// Network Read
+/////////////////////////////////////////////////////////////////
+void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
     printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
 }
 
-void Net_ClientReadInput(NetStream* stream)
+void Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
+{
+    printf("SV Exec msg from %d: type %d size %d\n", cl->connectionId, *bytes, numBytes);
+}
+
+void Net_ReadInput(NetStream* stream, Client* nullable_cl)
 {
     ByteBuffer* b = &stream->inputBuffer;
     for(;;)
@@ -120,12 +140,44 @@ void Net_ClientReadInput(NetStream* stream)
         stream->inputSequence = nextMsg;
 
         u8* msg = (u8*)h + sizeof(StreamMsgHeader);
-        Net_ClientExecuteMessage(msg, (u16)h->size);
+        if (nullable_cl)
+        {
+			Net_ServerExecuteClientMessage(nullable_cl, msg, (u16)h->size);
+        }
+        else
+        {
+			Net_ClientExecuteServerMessage(msg, (u16)h->size);
+        }
+        
 
         // Clear
         u8* blockStart = (u8*)h;
         u32 blockSize = sizeof(StreamMsgHeader) + h->size;
         b->ptrWrite = Stream_CollapseBlock(blockStart, blockSize, b->ptrWrite);
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+// Network Send
+/////////////////////////////////////////////////////////////////
+internal void Net_TransmitSay(GameSession* session, char* str, char** tokens, i32 numTokens)
+{
+    char buf[256];
+    COM_ConcatonateTokens(buf, 256, tokens, numTokens, 1);
+    printf("NET SAY: \"%s\"\n", buf);
+    switch(session->netMode)
+    {
+        case NETMODE_CLIENT:
+        {
+            Cmd_Test cmd;
+            cmd.data = 1234;
+            NET_MSG_TO_OUTPUT((&g_serverStream), (&cmd));
+        } break;
+
+        case NETMODE_LISTEN_SERVER:
+        {
+
+        } break;
     }
 }
 
@@ -180,6 +232,9 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
 }
 
+/////////////////////////////////////////////////////////////////
+// Network Frame loop
+/////////////////////////////////////////////////////////////////
 internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
 {
     switch (session->netMode)
@@ -192,6 +247,14 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
         case NETMODE_LISTEN_SERVER:
         {
             ZNet_Tick(time->deltaTime);
+            for (i32 i = 0; i < session->clientList.max; ++i)
+            {
+                Client* cl = &session->clientList.items[i];
+                if (cl->state != CLIENT_STATE_FREE)
+                {
+                    Net_ReadInput(&cl->stream, cl);
+                }
+            }
         } break;
 
         case NETMODE_DEDICATED_SERVER:
@@ -202,7 +265,7 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
         case NETMODE_CLIENT:
         {
             ZNet_Tick(time->deltaTime);
-            Net_ClientReadInput(&g_serverStream);
+            Net_ReadInput(&g_serverStream, NULL);
         } break;
 
         default:

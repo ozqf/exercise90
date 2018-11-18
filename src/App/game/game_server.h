@@ -149,9 +149,13 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
-internal void SV_OutputToAllClients(u8 netMode, ClientList* clients, GameScene* game, Cmd_ClientUpdate* cmd)
+// TODO: How to make this more generic?
+internal void SV_OutputToAllClients(
+    u8 netMode, ClientList* clients, GameScene* game, Cmd_ClientUpdate* cmd)
 {
     if(!IsRunningServer(netMode)) { return; }
+
+    //NET_MSG_TRANSMIT_TO_ALL_CLIENTS(clients, cmd)
 
     // correct conn id is only sent to the client to which it belongs
     i32 updateConnectionId = cmd->connectionId;
@@ -169,17 +173,20 @@ internal void SV_OutputToAllClients(u8 netMode, ClientList* clients, GameScene* 
             continue;
         }
 
+        // send conn id of zero to non-matching clients
         if (cl->connectionId == updateConnectionId)
         { cmd->connectionId = updateConnectionId; }
         else { cmd->connectionId = 0; }
+        NetStream* s = &cl->stream;
+        NET_MSG_TO_OUTPUT(s, cmd);
 
-        ByteBuffer* b = &cl->stream.outputBuffer;
-        u32 msgId = ++cl->stream.outputSequence;
-        u16 size = cmd->MeasureForWriting();
-        printf("Writing client update id %d size %d to client %d output\n",
-            msgId, size, cl->clientId);
-        b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, size);
-        b->ptrWrite += cmd->Write(b->ptrWrite);
+        //ByteBuffer* b = &cl->stream.outputBuffer;
+        //u32 msgId = ++cl->stream.outputSequence;
+        //u16 size = cmd->MeasureForWriting();
+        //printf("Writing client update id %d size %d to client %d output\n",
+        //    msgId, size, cl->clientId);
+        //b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, size);
+        //b->ptrWrite += cmd->Write(b->ptrWrite);
     }
 }
 
