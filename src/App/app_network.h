@@ -9,7 +9,7 @@
 #include "app_network_types.h"
 #include "app_network_stream.h"
 
-#include "app_module.cpp"
+#include "app_module.cpp" 
 
 /////////////////////////////////////////////////////////////////
 // Network callbacks
@@ -49,7 +49,7 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-    printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
+    //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
     switch (g_session.netMode)
     {
         case NETMODE_LISTEN_SERVER:
@@ -65,7 +65,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             u16 unreliableBytes = COM_ReadU16(&read);
             if (reliableBytes > 0)
             {
-                printf("SV writing %d reliable input bytes to conn %d\n", reliableBytes, cl->connectionId);
+                //printf("SV writing %d reliable input bytes to conn %d\n", reliableBytes, cl->connectionId);
                 Stream_PacketToInput(&cl->stream, read, reliableBytes);
             }
         } break;
@@ -90,7 +90,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
-    printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
+    //printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
     switch (g_session.netMode)
     {
         case NETMODE_LISTEN_SERVER:
@@ -99,7 +99,7 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
             APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
 
-            printf("SV - Clearing output to CL %d\n", cl->connectionId);
+            //printf("SV - Clearing output to CL %d\n", cl->connectionId);
             Stream_ClearReceivedOutput(&cl->stream, packetNumber);
         } break;
 
@@ -107,6 +107,11 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
         {
             Stream_ClearReceivedOutput(&g_serverStream, packetNumber);
         } break;
+		
+		default:
+		{
+			APP_ASSERT(0, "Delivery Confirmed: Unsupported netmode");
+		} break;
     }
 }
 
@@ -141,12 +146,28 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
-    printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+    //printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+    u8 type = *bytes;
+    if (type == CMD_TYPE_TEST)
+    {
+        Cmd_Test cmd;
+        u16 bytesRead = cmd.Read(bytes);
+        APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
+        printf("CL Keep alive %d\n", cmd.data);
+    }
 }
 
 void Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
 {
-    printf("SV Exec msg from %d: type %d size %d\n", cl->connectionId, *bytes, numBytes);
+    //printf("SV Exec msg from %d: type %d size %d\n", cl->connectionId, *bytes, numBytes);
+    u8 type = *bytes;
+    if (type == CMD_TYPE_TEST)
+    {
+        Cmd_Test cmd;
+        u16 bytesRead = cmd.Read(bytes);
+        APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
+        printf("SV Keep alive %d\n", cmd.data);
+    }
 }
 
 void Net_ReadInput(NetStream* stream, Client* nullable_cl)
@@ -216,13 +237,21 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         Client* cl = &session->clientList.items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
 
+        // TODO: Preventing transmit to local clients... this will have to loopback
+        if (cl->connectionId == 0) { continue; }
+
         // TODO: Sending once per tick regardless of framerate at the moment
         ByteBuffer* b = &cl->stream.outputBuffer;
         
         i32 pendingBytes = b->Written();
         if (pendingBytes == 0)
         {
-            continue;
+            // nothing to transmit - write keep alive
+            // acks are piggy-backed on regular packets. No traffic == no acks
+            //printf("SV 2 CL: Nothing to transmit, writing keepalive\n");
+            Cmd_Test cmd = {};
+            cmd.data = 1234;
+            NET_MSG_TO_OUTPUT((&cl->stream), (&cmd));
         }
         //printf("%dB, ", pendingBytes);
         
@@ -255,12 +284,13 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     if (pendingBytes == 0)
     {
         // nothing to transmit - write keep alive
-        printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
+        // acks are piggy-backed on regular packets. No traffic == no acks
+        //printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
         Cmd_Test cmd = {};
-        cmd.data = 1234;
+        cmd.data = 5678;
         NET_MSG_TO_OUTPUT((&g_serverStream), (&cmd));
     }
-    printf("CL %d bytes in output buffer\n", b->Written());
+    //printf("CL %d bytes in output buffer\n", b->Written());
     Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
 }
 
@@ -278,6 +308,7 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
 
         case NETMODE_LISTEN_SERVER:
         {
+			printf(".");
             ZNet_Tick(time->deltaTime);
             for (i32 i = 0; i < session->clientList.max; ++i)
             {
