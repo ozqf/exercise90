@@ -159,7 +159,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
             continue;
         }
         // clear and collapse
-        //printf("  Delete %d from output\n", id);
+        printf("  Delete %d from output\n", id);
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         b->ptrWrite = end;
@@ -232,8 +232,8 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
         read += h->size;
     }
 
-    //printf("Sending packet %d. Contents: ", packetSequence);
-    //Stream_PrintTransmissionRecord(rec);
+    printf("Sending packet %d. Contents: ", packetSequence);
+    Stream_PrintTransmissionRecord(rec);
 
     // Step back and write header
     u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
@@ -275,6 +275,7 @@ void Stream_PacketToInput(NetStream* s, u8* ptr, u16 numBytes)
         if (messageId <= s->inputSequence)
         {
             read += size;
+            printf("  MessageId %d is out of date\n", messageId);
             continue;
         }
         // message might have already been received

@@ -49,9 +49,27 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-    //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
+    printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
     switch (g_session.netMode)
     {
+        case NETMODE_LISTEN_SERVER:
+        {
+            ClientList* cls = &g_session.clientList;
+
+            Client* cl = App_FindClientByConnectionId(&g_session.clientList, info->sender.id);
+            APP_ASSERT(cl, "SV Unknown client for packet received\n");
+            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
+
+            u8* read = bytes;
+            u16 reliableBytes = COM_ReadU16(&read);
+            u16 unreliableBytes = COM_ReadU16(&read);
+            if (reliableBytes > 0)
+            {
+                printf("SV writing %d reliable input bytes to conn %d\n", reliableBytes, cl->connectionId);
+                Stream_PacketToInput(&cl->stream, read, reliableBytes);
+            }
+        } break;
+
         case NETMODE_CLIENT:
         {
             //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
@@ -77,7 +95,12 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
     {
         case NETMODE_LISTEN_SERVER:
         {
-            
+            Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
+            APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
+            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
+
+            printf("SV - Clearing output to CL %d\n", cl->connectionId);
+            Stream_ClearReceivedOutput(&cl->stream, packetNumber);
         } break;
 
         case NETMODE_CLIENT:
@@ -219,6 +242,11 @@ internal void Net_WriteClient2ServerOutput(GameSession* session, GameScene* gs, 
 internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 {
     if(!IsRunningClient(session->netMode)) { return; }
+    if (g_session.remoteConnectionId == 0)
+    {
+        printf("CL Attempting send to SV but conn is 0\n");
+        return;
+    }
     const i32 packetSize = 1024;
     u8 packetBuffer[packetSize];
 
@@ -226,9 +254,13 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     i32 pendingBytes = b->Written();
     if (pendingBytes == 0)
     {
-        // nothing to transmit
-        return;
+        // nothing to transmit - write keep alive
+        printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
+        Cmd_Test cmd = {};
+        cmd.data = 1234;
+        NET_MSG_TO_OUTPUT((&g_serverStream), (&cmd));
     }
+    printf("CL %d bytes in output buffer\n", b->Written());
     Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
 }
 
@@ -250,17 +282,15 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
             for (i32 i = 0; i < session->clientList.max; ++i)
             {
                 Client* cl = &session->clientList.items[i];
-                if (cl->state != CLIENT_STATE_FREE)
-                {
-                    Net_ReadInput(&cl->stream, cl);
-                }
+                if (cl->state == CLIENT_STATE_FREE) { continue; }
+                Net_ReadInput(&cl->stream, cl);
             }
         } break;
 
-        case NETMODE_DEDICATED_SERVER:
-        {
-            ZNet_Tick(time->deltaTime);
-        } break;
+        // case NETMODE_DEDICATED_SERVER:
+        // {
+        //     ZNet_Tick(time->deltaTime);
+        // } break;
 
         case NETMODE_CLIENT:
         {

@@ -179,6 +179,7 @@ internal void SV_OutputToAllClients(
         else { cmd->connectionId = 0; }
         NetStream* s = &cl->stream;
         NET_MSG_TO_OUTPUT(s, cmd);
+        printf("  SV Sending sequence %d to CL %d\n", cl->stream.outputSequence, cl->connectionId);
 
         //ByteBuffer* b = &cl->stream.outputBuffer;
         //u32 msgId = ++cl->stream.outputSequence;
