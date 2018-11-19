@@ -46,7 +46,7 @@
 	{ \
 		Client* ptrToClient = &##ptrClientList##->items[iterator]; \
 		if (ptrToClient->state == CLIENT_STATE_FREE) { continue; } \
-		NET_MSG_TO_OUTPUT(ptrToClient->stream, ptrMsgStruct##) \
+		NET_MSG_TO_OUTPUT((&ptrToClient->stream), ptrMsgStruct##) \
 	} \
 }
 

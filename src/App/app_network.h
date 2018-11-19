@@ -214,13 +214,15 @@ internal void Net_TransmitSay(GameSession* session, char* str, char** tokens, i3
         case NETMODE_CLIENT:
         {
             Cmd_Test cmd;
-            cmd.data = 1234;
+            cmd.data = 999999;
             NET_MSG_TO_OUTPUT((&g_serverStream), (&cmd));
         } break;
 
         case NETMODE_LISTEN_SERVER:
         {
-
+            Cmd_Test cmd;
+            cmd.data = 111111;
+            NET_MSG_TRANSMIT_TO_ALL_CLIENTS((&session->clientList), (&cmd));
         } break;
     }
 }
