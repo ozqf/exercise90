@@ -16,7 +16,8 @@ inline u8* App_StartCommandStream()
 
 inline u32 App_WriteCommandBytesToFrameOutput(u8* inputStream, u32 numBytes)
 {
-    g_appWriteBuffer->ptrWrite += COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
+    g_appWriteBuffer->ptrWrite +=
+        COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
     return numBytes;
 }
 
@@ -31,7 +32,8 @@ inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSiz
 
 void App_DumpHeap()
 {
-    printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n", g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);
+    printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n",
+        g_heap.usedSpace, g_heap.freeSpace, g_heap.nextID);
     Heap_DebugPrintAllocations2(&g_heap);
 }
 

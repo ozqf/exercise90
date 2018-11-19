@@ -17,14 +17,22 @@ This struct should ONLY hold the state of the current entity scene!
         * Scene I/O buffers
 
 ### Network Integration
+
+#### Execution
+* Homogenise command headers between game commands and stream commands to be interchangable.
+* Pass valid command types from input stream to app buffer (eg only add client suitable commands when running a client).
+* Consider replacing the app read/write buffers with the global server stream (questionable due to
+    the way that the buffers flip).
+
+#### Fundamental network streams
 * *Done* Integrating the rudimentary network code into the app.
 * *Done* Refactor game command buffers to better match network buffers.
 * *Done* Allocate memory and any other resources for server side client network streams
 * *Done* Allocate memory and any other resources for client side server I/O
 * *Done* Write into network output from server
-* Read network input on client
-* Write into output from client
-* Read network input on server
+* *Done* Read network input on client
+* *Done* Write into output from client
+* *Done* Read network input on server
 
 #### Network Frame Loop
 * Tick Network (reads socket, packets to client input message stream)
