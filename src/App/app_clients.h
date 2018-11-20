@@ -96,7 +96,7 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
                 cmd.impulse = IMPULSE_JOIN_GAME;
 
                 printf("APP: Client %d wishes to spawn\n", cl->clientId);
-                APP_WRITE_CMD(&g_appWriteBuffer->ptrWrite, CMD_TYPE_IMPULSE, 0, cmd);
+                APP_WRITE_CMD(0, cmd);
             }
             #endif
         } break;
@@ -117,9 +117,7 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
             Cmd_PlayerInput cmd = {};
 			cmd.connectionId = cl->connectionId;
             cmd.input = cl->input;
-            APP_WRITE_CMD(
-                &g_appWriteBuffer->ptrWrite,
-                CMD_TYPE_PLAYER_INPUT, 0, cmd);
+            APP_WRITE_CMD(0, cmd);
             //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
         } break;
 

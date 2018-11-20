@@ -69,7 +69,7 @@ internal u8 SV_ReadImpulse(
             clUpdate.clientId = cmd->clientId;
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = entId;
-            APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+            APP_WRITE_CMD(0, clUpdate);
 			return 1;
 		} break;
 
@@ -150,7 +150,7 @@ void SV_DontRunMe()
 }
 
 // TODO: How to make this more generic?
-internal void SV_OutputToAllClients(
+/*internal*/ void SV_OutputToAllClients(
     u8 netMode, ClientList* clients, GameScene* game, Cmd_ClientUpdate* cmd)
 {
     if(!IsRunningServer(netMode)) { return; }
@@ -203,7 +203,7 @@ internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_C
         printf("SV: GAME START\n");
         Cmd_GameSessionState sessionCmd = {};
         sessionCmd.state = GAME_SESSION_STATE_PLAYING;
-        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, sessionCmd);
+        APP_WRITE_CMD(0, sessionCmd);
         //sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "");
     }
 }
@@ -220,7 +220,7 @@ internal void SV_ProcessClientDeath(u8 netMode, GameScene* gs, ClientList* clien
         printf("SV: GAME OVER\n");
         Cmd_GameSessionState sessionCmd = {};
         sessionCmd.state = GAME_SESSION_STATE_FAILED;
-        APP_WRITE_CMD(0, CMD_TYPE_GAME_SESSION_STATE, 0, sessionCmd);
+        APP_WRITE_CMD(0, sessionCmd);
     }
 }
 
@@ -236,7 +236,7 @@ internal void SV_ProcessEntityDeath(u8 netMode, ClientList* clients, GameScene* 
         clUpdate.clientId = cl->clientId;
         clUpdate.state = CLIENT_STATE_OBSERVER;
         clUpdate.entId = { };
-        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, clUpdate);
+        APP_WRITE_CMD(0, clUpdate);
     }
     // inform source entity
     EC_Thinker* thinker = EC_FindThinker(gs, &ent->source);

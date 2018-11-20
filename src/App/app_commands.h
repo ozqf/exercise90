@@ -98,7 +98,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         cmd.clientId = g_localClientId;
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
-        APP_WRITE_CMD(0, CMD_TYPE_IMPULSE, 0, cmd);
+        APP_WRITE_CMD(0, cmd);
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
@@ -244,7 +244,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         Cmd_SpawnHudItem cmd = {};
         cmd.pos = Game_RandomSpawnOffset(24, 0, 24);
-        APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+        APP_WRITE_CMD(0, cmd);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "DEBUG"))

@@ -181,7 +181,7 @@ internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
                             cmd.pos.z = sourceTransform->t.pos.z;
                             cmd.source = e->source;
                             cmd.victim = health->header.entId;
-                            APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+                            APP_WRITE_CMD(0, cmd);
                         }
                     }
                     #endif
@@ -288,7 +288,7 @@ internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *ti
                         cmd.pos = attackerXForm->t.pos;
                         cmd.source = health->state.lastHitSource;
                         cmd.victim = health->header.entId;
-                        APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+                        APP_WRITE_CMD(0, cmd);
                     }
                     else
                     {

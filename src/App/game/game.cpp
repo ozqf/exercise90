@@ -127,7 +127,13 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
     }
     cl->flags = cmd->flags;
 
-    SV_OutputToAllClients(session->netMode, &session->clientList, gs, cmd);
+    if (IS_SERVER)
+    {
+        printf("SV TRANSMIT cl update to all clients\n");
+        NET_MSG_TRANSMIT_TO_ALL_CLIENTS((&session->clientList), cmd);
+    }
+    
+    //SV_OutputToAllClients(session->netMode, &session->clientList, gs, cmd);
 }
 
 internal void Exec_UpdateGameInstance(GameScene* gs, Cmd_GameSessionState* cmd)
@@ -157,7 +163,9 @@ internal void Exec_SpawnViaTemplate(GameScene* gs, Cmd_SpawnViaTemplate* cmd)
 internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header, u8* ptr)
 {
     ClientList* clients = &session->clientList;
-    switch (header->GetType())
+    u8 type = *ptr;
+    //switch (header->GetType())
+    switch (type)
     {
         case CMD_TYPE_ENTITY_STATE_2:
         {

@@ -94,8 +94,7 @@ inline void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
 		    cmd.entId.index
         );
 	}
-    APP_WRITE_CMD(0, CMD_TYPE_REMOVE_ENT, 0, cmd);
-    //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_REMOVE_ENT, sizeof(Cmd_RemoveEntity));
+    APP_WRITE_CMD(0, cmd);
 }
 
 inline void Ent_Free(GameScene* gs, Ent* ent)

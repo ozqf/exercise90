@@ -20,6 +20,7 @@ This struct should ONLY hold the state of the current entity scene!
 
 #### Execution
 * Homogenise command headers between game commands and stream commands to be interchangable.
+	* Add timestamp for execution and jitter control...?
 * Pass valid command types from input stream to app buffer (eg only add client suitable commands when running a client).
 * Consider replacing the app read/write buffers with the global server stream (questionable due to
     the way that the buffers flip).

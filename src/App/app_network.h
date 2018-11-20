@@ -24,7 +24,7 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 		spawnClient.connectionId = conn->id;
         spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
         spawnClient.state = CLIENT_STATE_OBSERVER;
-        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+        APP_WRITE_CMD(0, spawnClient);
     }
     else
     {
@@ -43,7 +43,7 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
         Cmd_ClientUpdate spawnClient = {};
         spawnClient.clientId = cl->connectionId;
         spawnClient.state = CLIENT_STATE_FREE;
-        APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+        APP_WRITE_CMD(0, spawnClient);
     }
 }
 
@@ -153,7 +153,13 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         Cmd_Test cmd;
         u16 bytesRead = cmd.Read(bytes);
         APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
-        printf("CL Keep alive %d\n", cmd.data);
+        printf(".");
+        //printf("CL Keep alive %d\n", cmd.data);
+    }
+    else
+    {
+        //printf("CL Exec unknown msg type: %d\n", type);
+        APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
     }
 }
 
@@ -166,7 +172,8 @@ void Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
         Cmd_Test cmd;
         u16 bytesRead = cmd.Read(bytes);
         APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
-        printf("SV Keep alive %d\n", cmd.data);
+        //printf("SV Keep alive %d\n", cmd.data);
+        printf(".");
     }
 }
 

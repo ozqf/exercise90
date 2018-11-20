@@ -67,7 +67,7 @@ u32 App_WriteSaveState(
         Client *cl = &clients->items[i];
         Cmd_ClientUpdate cmd = {};
         cmd.Set(cl);
-        COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, CMD_TYPE_CLIENT_UPDATE, 0, cmd);
+        COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, cmd);
 
         h.dynamicCommands.count++;
     }
@@ -342,7 +342,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
 				Cmd_ClientUpdate spawnClient = {};
 				spawnClient.clientId = g_localClientId;
 				spawnClient.state = CLIENT_STATE_OBSERVER;
-				APP_WRITE_CMD(0, CMD_TYPE_CLIENT_UPDATE, 0, spawnClient);
+				APP_WRITE_CMD(0, spawnClient);
             }
 			else
 			{

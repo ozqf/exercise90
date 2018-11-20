@@ -14,7 +14,7 @@ internal void Game_SpawnHitRing(Vec3 pos, EntId source, EntId victim)
     cmd.pos.z = pos.z;
     cmd.source = source;
     cmd.victim = victim;
-    APP_WRITE_CMD(0, CMD_TYPE_SPAWN_HUD_ITEM, 0, cmd);
+    APP_WRITE_CMD(0, cmd);
 }
 #endif
 

@@ -8,18 +8,32 @@
 //#define APP_FIRST_MAP "maps\\testbox.lvl"
 #define APP_FIRST_MAP "TEST"
 
+// TODO: Remove Buffer Id until it is actually needed
 #ifndef APP_WRITE_CMD
-#define APP_WRITE_CMD(i32_bufferId, u8_cmdType, u8_cmdFlags, cmdObject) \
+#define APP_WRITE_CMD(i32_bufferId, cmdObject) \
 { \
 	GameTime* ptrGameTime = GetAppTime(); \
 	if (ptrGameTime->singleFrame)\
 	{\
 		char* label = App_GetBufferName(g_appWriteBuffer->ptrStart); \
-		printf("Writing type %d to %s\n", u8_cmdType, label);\
+		printf("Writing type %d to %s\n", cmdObject##.GetType(), label);\
 	}\
 \
     u8** ptrToWritePtr = &g_appWriteBuffer->ptrWrite; \
-    COM_WRITE_CMD_TO_BUFFER(ptrToWritePtr, u8_cmdType, u8_cmdFlags, cmdObject) \
+    COM_WRITE_CMD_TO_BUFFER(ptrToWritePtr, cmdObject) \
+}
+#endif
+
+// TODO: Remove Buffer Id until it is actually needed
+#ifndef APP_COPY_COMMAND_BYTES
+#define APP_COPY_COMMAND_BYTES(i32_bufferId, ptrToBytes, numBytesInCmd) \
+{ \
+	CmdHeader copyHeader = {}; \
+	copyHeader.Set(*##ptrToBytes##, numBytesInCmd##); \
+	ByteBuffer* ptrOutputBuf = g_appWriteBuffer; \
+\
+	ptrOutputBuf->ptrWrite += copyHeader.Write(ptrOutputBuf->ptrWrite); \
+	ptrOutputBuf->ptrWrite += COM_COPY(##ptrToBytes##, ptrOutputBuf->ptrWrite, numBytesInCmd##); \
 }
 #endif
 

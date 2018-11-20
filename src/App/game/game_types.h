@@ -662,8 +662,8 @@ struct GameSession
 //     EntId localPlayerEntId;
 // };
 
-#define IS_SERVER(ptrGameSession) (IsRunningServer(##ptrGameSession##->netMode))
-#define IS_CLIENT(ptrGameSession) (IsRunningClient(##ptrGameSession##->netMode))
+#define IS_SERVER (IsRunningServer(g_session.netMode))
+#define IS_CLIENT (IsRunningClient(g_session.netMode))
 
 //////////////////////////////////////////////////
 // GameScene God Object

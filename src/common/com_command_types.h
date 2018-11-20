@@ -25,6 +25,7 @@
  */
 struct CmdHeader
 {
+    // omg C++ keyword!!!
     private:
     u8 type;
     u8 flags;
@@ -35,6 +36,11 @@ struct CmdHeader
     inline void SetType(u8 newType) { this->type = newType; }
     inline u16 GetSize() { return (u16)size; }
     inline void SetSize(u16 newSize) { this->size = newSize; }
+    inline void Set(u8 newType, u16 newSize)
+    {
+        type = newType;
+        size = newSize;
+    }
 
     
     inline u16 Read(u8* ptr)
@@ -85,7 +91,7 @@ struct CmdHeader_ProtocolZero
  *   u32 Write(u8*) function, returning bytes writtten
  */
 #ifndef COM_WRITE_CMD_TO_BUFFER
-#define COM_WRITE_CMD_TO_BUFFER(u8ptr2ptr_write, u8_cmdType, u8_cmdFlags, cmdObject) \
+#define COM_WRITE_CMD_TO_BUFFER(u8ptr2ptr_write, cmdObject) \
 { \
     u8* ptrOrigin = *u8ptr2ptr_write##; \
      \
@@ -95,7 +101,7 @@ struct CmdHeader_ProtocolZero
      \
     *u8ptr2ptr_write += cmdBytesWritten; \
     CmdHeader newCmdHeader = {}; \
-    newCmdHeader.SetType(##u8_cmdType##); \
+    newCmdHeader.SetType(##cmdObject##.GetType()); \
     newCmdHeader.SetSize(cmdBytesWritten); \
     newCmdHeader.Write(ptrOrigin); \
 }

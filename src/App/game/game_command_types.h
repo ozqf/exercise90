@@ -68,6 +68,11 @@ internal u16 COL_MASK_PROJECTILE =
 
 #define GAME_CMD_DEFAULT_INTERFACE(structType, u8_cmdType)\
 \
+inline u8 GetType() \
+{ \
+    return u8_cmdType##; \
+} \
+\
 inline u16 MeasureForReading(u8* ptr) \
 { \
     u16 size = sizeof(structType) + sizeof(u8); \
