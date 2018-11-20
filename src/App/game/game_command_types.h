@@ -60,18 +60,28 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_HUD_ITEM 114
 #define CMD_TYPE_TEST 127
 
-// Define placeholder raw read/write functions for commands.
+//////////////////////////////////////////////////
+// DEFAULT COMMAND INTERFACE FUNCTIONS
+// All commands should follow this interface to be
+// usable in read/write macros
+//////////////////////////////////////////////////
 
-#ifndef GAME_CMD_DEFAULT_INTERFACE
-//#define GAME_CMD_DEFAULT_INTERFACE(structType)
-//#endif
+/**
+ * Should be safe for any command
+ */
+#ifndef GAME_CMD_DEFAULT_GetType
+#define GAME_CMD_DEFAULT_GetType(u8_cmdType) \
+inline u8 GetType() { return u8_cmdType##; }
+#endif
 
-#define GAME_CMD_DEFAULT_INTERFACE(structType, u8_cmdType)\
-\
-inline u8 GetType() \
-{ \
-    return u8_cmdType##; \
-} \
+/**
+ * Raw read/write functions for commands
+ * 
+ * TODO: This is a placeholder and the raw struct copies MUST be
+ * replaced with proper encoding functions!
+ */
+#ifndef GAME_CMD_DEFAULT_Read_Write
+#define GAME_CMD_DEFAULT_Read_Write(structType, u8_cmdType) \
 \
 inline u16 MeasureForReading(u8* ptr) \
 { \
@@ -101,9 +111,17 @@ inline u16 Read(u8* ptr) \
     APP_ASSERT((commandType == u8_cmdType), "CMD read: type mismatched\n"); \
     ptr += COM_COPY(ptr, this, sizeof(structType)); \
     return (u16)(ptr - start); \
-} \
-
+}
 #endif
+
+
+#ifndef GAME_CMD_DEFAULT_INTERFACE
+#define GAME_CMD_DEFAULT_INTERFACE(structType, u8_cmdType) \
+GAME_CMD_DEFAULT_GetType(##u8_cmdType##) \
+GAME_CMD_DEFAULT_Read_Write(##structType##, u8_cmdType##)
+#endif
+
+
 
 //////////////////////////////////////////////////
 // 101
@@ -118,12 +136,6 @@ struct Cmd_ServerImpulse
     i32 impulse;
     
     GAME_CMD_DEFAULT_INTERFACE(Cmd_ServerImpulse, CMD_TYPE_IMPULSE)
-    // inline u16 WriteRaw(u8* ptr)
-    // {
-    //     printf("Copying Impulse cmd\n");
-    //     return (u16)COM_COPY()
-    // }
-    
 };
 
 //////////////////////////////////////////////////
