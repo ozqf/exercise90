@@ -95,7 +95,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             return 1;
         }
         Cmd_ServerImpulse cmd = {};
-        cmd.clientId = g_localClientId;
+        cmd.clientId = g_session.clientList.localClientId;
         cmd.impulse = COM_AsciToInt32(tokens[1]);
         printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         APP_WRITE_CMD(0, cmd);

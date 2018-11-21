@@ -49,11 +49,11 @@ internal void App_DeleteClients(ClientList* cls)
 
 internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
-    if (g_localClientId == 0) { return NULL; }
+    if (cls->localClientId == 0) { return NULL; }
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
-        if (cl->state != CLIENT_STATE_FREE && cl->clientId == g_localClientId)
+        if (cl->state != CLIENT_STATE_FREE && cl->clientId == cls->localClientId)
         {
             if (checkIfPlaying && cl->state != CLIENT_STATE_PLAYING)
             {
@@ -187,6 +187,36 @@ internal Client* App_FindClientByConnectionId(ClientList* cls, i32 connId)
     return NULL;
 }
 
+internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cls)
+{
+    Client* cl = App_FindClientById(clientId, cls);
+    APP_ASSERT(cl == NULL, "A Client with the given Id already exists");
+    for (i32 i = 0; i < cls->max; ++i)
+    {
+        cl = &cls->items[i];
+        if (cl->state == CLIENT_STATE_FREE)
+        {
+            cl->state = CLIENT_STATE_SYNC;
+            cl->clientId = clientId;
+            cl->connectionId = connectionId;
+
+            NetStream* stream = &cl->stream;
+            printf("APP Allocating I/O streams for client %d\n", clientId);
+            u32 bytes = KiloBytes(64);
+            stream->inputBuffer = Buf_FromMalloc(
+                malloc(bytes), bytes
+            );
+            stream->outputBuffer = Buf_FromMalloc(
+                malloc(bytes), bytes
+            );
+
+            return cl;
+        }
+    }
+    return NULL;
+}
+
+#if 0
 internal Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 {
     Client* free = NULL;
@@ -231,16 +261,16 @@ internal Client* App_FindOrCreateClient(i32 id, ClientList* cls)
 	}
     return result;
 }
-
+#endif
 internal void App_UpdateLocalClients(GameTime* time, ClientList* cls)
 {
-    if (g_localClientId == 0) { return; }
+    if (cls->localClientId == 0) { return; }
     for (i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
         //if (cl->clientId == 0) { continue; }
         if (cl->state == CLIENT_STATE_FREE) { continue; }
-        if (cl->clientId == g_localClientId)
+        if (cl->clientId == cls->localClientId)
         {
             // Process input
             App_UpdateLocalClient(cl, &g_inputActions, time->gameFrameNumber);

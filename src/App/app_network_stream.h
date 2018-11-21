@@ -15,7 +15,8 @@
 
 void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
 {
-    Assert(b->Space() > numBytes)
+	APP_ASSERT(b->ptrWrite, "Buf write message destination is null")
+    APP_ASSERT(b->Space() > numBytes, "Buf write message has no space left")
     StreamMsgHeader h;
     h.id = msgId;
     h.size = numBytes;

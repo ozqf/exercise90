@@ -23,8 +23,12 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
         spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
-        spawnClient.state = CLIENT_STATE_OBSERVER;
+        spawnClient.state = CLIENT_STATE_SYNC;
+
+        // Exec local client update - will be recreated to clients when executed
         APP_WRITE_CMD(0, spawnClient);
+
+        // Prepare sync...?
     }
     else
     {

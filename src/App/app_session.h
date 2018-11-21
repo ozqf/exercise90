@@ -337,10 +337,10 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
             ZNetConnectionInfo info = {};
             if (ZNet_CreateLocalConnection(&info))
             {
-                g_localClientId = App_GetNextClientId(&session->clientList);
-				
+                session->clientList.localClientId = App_GetNextClientId(&session->clientList);
+				printf("SV Creating local client %d\n", session->clientList.localClientId);
 				Cmd_ClientUpdate spawnClient = {};
-				spawnClient.clientId = g_localClientId;
+				spawnClient.clientId = session->clientList.localClientId;
 				spawnClient.state = CLIENT_STATE_OBSERVER;
 				APP_WRITE_CMD(0, spawnClient);
             }

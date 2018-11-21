@@ -149,46 +149,26 @@ void SV_DontRunMe()
     SV_UpdateLocalPlayers(NULL, NULL);
 }
 
-// TODO: How to make this more generic?
-/*internal*/ void SV_OutputToAllClients(
-    u8 netMode, ClientList* clients, GameScene* game, Cmd_ClientUpdate* cmd)
+internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)
 {
-    if(!IsRunningServer(netMode)) { return; }
-
-    //NET_MSG_TRANSMIT_TO_ALL_CLIENTS(clients, cmd)
-
-    // correct conn id is only sent to the client to which it belongs
-    i32 updateConnectionId = cmd->connectionId;
-
-    printf("SV Transmitting client state update to all clients\n");
-    for (i32 i = 0; i < clients->max; ++i)
+    printf("SV Transmitting client list to cl %d\n", receiver->clientId);
+    for(i32 i = 0; i < cls->max; ++i)
     {
-        Client* cl = &clients->items[i];
-
-        if (cl->state == CLIENT_STATE_FREE) { continue; }
-
-        if (cl->connectionId == 0)
-        {
-            // local client
-            continue;
-        }
-
-        // send conn id of zero to non-matching clients
-        if (cl->connectionId == updateConnectionId)
-        { cmd->connectionId = updateConnectionId; }
-        else { cmd->connectionId = 0; }
-        NetStream* s = &cl->stream;
-        NET_MSG_TO_OUTPUT(s, cmd);
-        printf("  SV Sending sequence %d to CL %d\n", cl->stream.outputSequence, cl->connectionId);
-
-        //ByteBuffer* b = &cl->stream.outputBuffer;
-        //u32 msgId = ++cl->stream.outputSequence;
-        //u16 size = cmd->MeasureForWriting();
-        //printf("Writing client update id %d size %d to client %d output\n",
-        //    msgId, size, cl->clientId);
-        //b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, size);
-        //b->ptrWrite += cmd->Write(b->ptrWrite);
+        Client* cl = &cls->items[i];
+        if (cl->state == CLIENT_STATE_FREE ||
+			cl->clientId == cls->localClientId)
+		{ continue; }
+        Cmd_ClientUpdate cmd;
+        cmd.Set(cl);
+        NET_MSG_TO_OUTPUT(&receiver->stream, &cmd);
     }
+}
+
+internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
+{
+    if (!IS_SERVER) { return; }
+    //APP_ASSERT(cl->state == CLIENT_STATE_SYNC, "New client is not in sync state");
+    SV_TransmitClientListToClient(&session->clientList, cl);
 }
 
 internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
@@ -208,7 +188,12 @@ internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_C
     }
 }
 
-internal void SV_ProcessClientDeath(u8 netMode, GameScene* gs, ClientList* clients, Client* cl, Cmd_ClientUpdate* cmd)
+internal void SV_ProcessClientDeath(
+    u8 netMode,
+    GameScene* gs,
+    ClientList* clients,
+    Client* cl,
+    Cmd_ClientUpdate* cmd)
 {
 	if(!IsRunningServer(netMode)) { return; }
     if (App_NumPlayingClients(clients) == 0)

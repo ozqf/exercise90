@@ -627,6 +627,9 @@ struct ClientList
     i32 count;
     i32 max;
     i32 nextId;
+    // id of the client this exe represents
+    // 0 == no local client
+    i32 localClientId = 0;
 };
 
 

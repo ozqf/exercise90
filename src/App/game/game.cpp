@@ -92,13 +92,21 @@ internal void Game_Init()
 
 internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientUpdate* cmd)
 {
-    Client* cl = App_FindOrCreateClient(cmd->clientId, &session->clientList);
+    // Detected change events
+    i32 spawn = 0, death = 0, created = 0;
+
+    Client* cl = App_FindClientById(cmd->clientId, &session->clientList);
+    if (cl == NULL)
+    {
+        cl = App_CreateClient(cmd->clientId, cmd->connectionId, &session->clientList);
+        created = 1;
+    }
     printf("Client avatar was %d/%d now %d/%d\n",
         cl->entId.iteration, cl->entId.index,
         cmd->entId.iteration, cmd->entId.index
     );
-    u8 spawn = (cl->entId.value == 0 && cmd->entId.value != 0);
-    u8 death = (cl->entId.value != 0 && cmd->entId.value == 0);
+    spawn = (cl->entId.value == 0 && cmd->entId.value != 0);
+    death = (cl->entId.value != 0 && cmd->entId.value == 0);
     cl->state = cmd->state;
     cl->entId = cmd->entId;
     cl->connectionId = cmd->connectionId;
@@ -106,6 +114,10 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
         cl->clientId, cl->connectionId, cl->state, cl->entId.iteration, cl->entId.index);
     
     // Changes that server should act on
+    if (created)
+    {
+        SV_ProcessClientCreated(session, cl);
+    }
     if (spawn)
     {
         SV_ProcessClientSpawn(session->netMode, gs, cl, cmd);

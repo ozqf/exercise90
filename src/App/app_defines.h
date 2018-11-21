@@ -25,6 +25,7 @@
 #endif
 
 // TODO: Remove Buffer Id until it is actually needed
+// Use this macro to transfer from a network input stream to app command buffer.
 #ifndef APP_COPY_COMMAND_BYTES
 #define APP_COPY_COMMAND_BYTES(i32_bufferId, ptrToBytes, numBytesInCmd) \
 { \
@@ -38,16 +39,19 @@
 #endif
 
 /////////////////////////////////////////////////////////////////
-// Network message struct to output stream macro
+// Network message struct to output stream macros
 /////////////////////////////////////////////////////////////////
 #ifndef NET_MSG_TO_OUTPUT
 #define NET_MSG_TO_OUTPUT(ptrNetStream, ptrMsgStruct) \
 { \
-    u32 msgId = ++##ptrNetStream##->outputSequence; \
-	u16 msgSize = ptrMsgStruct##->MeasureForWriting(); \
-	ByteBuffer* ptrOutputBuf = &ptrNetStream->outputBuffer; \
-	ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize); \
-	ptrOutputBuf->ptrWrite += ptrMsgStruct##->Write(ptrOutputBuf->ptrWrite); \
+	if ((##ptrNetStream##)->outputBuffer.ptrWrite != NULL) \
+	{ \
+		u32 msgId = ++(##ptrNetStream##)->outputSequence; \
+		u16 msgSize = (##ptrMsgStruct##)->MeasureForWriting(); \
+		ByteBuffer* ptrOutputBuf = &(ptrNetStream##)->outputBuffer; \
+		ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize); \
+		ptrOutputBuf->ptrWrite += (##ptrMsgStruct##)->Write(ptrOutputBuf->ptrWrite); \
+	} \
     \
 }
 #endif
