@@ -151,15 +151,21 @@ void SV_DontRunMe()
 
 internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)
 {
+	if (receiver->clientId == cls->localClientId)
+	{
+		printf("SV Not transmitting client list - client is local!\n");
+		return;
+	}
     printf("SV Transmitting client list to cl %d\n", receiver->clientId);
+	i32 receiverConnId = receiver->connectionId;
     for(i32 i = 0; i < cls->max; ++i)
     {
         Client* cl = &cls->items[i];
-        if (cl->state == CLIENT_STATE_FREE ||
-			cl->clientId == cls->localClientId)
+        if (cl->state == CLIENT_STATE_FREE)
 		{ continue; }
         Cmd_ClientUpdate cmd;
-        cmd.Set(cl);
+        cmd.Set(cl, (receiver->connectionId == cl->connectionId));
+		// override connectionId info. Only send an actual Id to the receiver
         NET_MSG_TO_OUTPUT(&receiver->stream, &cmd);
     }
 }

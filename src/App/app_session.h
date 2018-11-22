@@ -66,7 +66,7 @@ u32 App_WriteSaveState(
     {
         Client *cl = &clients->items[i];
         Cmd_ClientUpdate cmd = {};
-        cmd.Set(cl);
+        cmd.Set(cl, 1);
         COM_WRITE_CMD_TO_BUFFER(&buf->ptrWrite, cmd);
 
         h.dynamicCommands.count++;

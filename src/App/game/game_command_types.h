@@ -171,14 +171,21 @@ struct Cmd_ClientUpdate
     ActorInput input;
     //i32 playerId;
 
-    void Set(Client* cl)
+    void Set(Client* cl, i32 setPrivateId)
     {
         clientId = cl->clientId;
         state = cl->state;
-        connectionId = cl->connectionId;
         flags = cl->flags;
         entId = cl->entId;
         input = cl->input;
+		if (setPrivateId)
+		{
+			connectionId = cl->connectionId;
+		}
+		else
+		{
+			connectionId = 0;
+		}
     }
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_ClientUpdate, CMD_TYPE_CLIENT_UPDATE)

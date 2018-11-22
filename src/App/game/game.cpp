@@ -142,6 +142,9 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
     if (IS_SERVER)
     {
         printf("SV TRANSMIT cl update to all clients\n");
+        // TODO: Figure out how to wipe private connectionId here.
+        // it is broadcast to all clients
+        cmd->connectionId = 0;
         NET_MSG_TRANSMIT_TO_ALL_CLIENTS((&session->clientList), cmd);
     }
     
