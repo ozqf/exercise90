@@ -174,6 +174,11 @@ internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
 {
     if (!IS_SERVER) { return; }
     //APP_ASSERT(cl->state == CLIENT_STATE_SYNC, "New client is not in sync state");
+    // Tell the new client what their public Id is
+    Cmd_Quick cmd = {};
+    cmd.data1 = CMD_QUICK_TYPE_SET_CLIENT_ID;
+    cmd.data2 = cl->clientId;
+    NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
     SV_TransmitClientListToClient(&session->clientList, cl);
 }
 

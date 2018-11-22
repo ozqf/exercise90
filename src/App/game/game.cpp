@@ -175,6 +175,22 @@ internal void Exec_SpawnViaTemplate(GameScene* gs, Cmd_SpawnViaTemplate* cmd)
 	
 }
 
+internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* cmd)
+{
+    switch (cmd->data1)
+    {
+        case CMD_QUICK_TYPE_SET_CLIENT_ID:
+        {
+            session->localClientId = cmd->data2;
+            printf("GAME Set local client Id: %d\n", session->localClientId);
+        } break;
+        default:
+        {
+            printf("GAME Unknown quick command type: %d\n", cmd->data1);
+        } break;
+    }
+}
+
 internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header, u8* ptr)
 {
     ClientList* clients = &session->clientList;
@@ -254,6 +270,14 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
             motor->state.input = cmd.input;
 			return 1;
 		} break;
+
+        case CMD_TYPE_QUICK:
+        {
+            Cmd_Quick cmd = {};
+            ptr += cmd.Read(ptr);
+            Exec_QuickCommand(session, gs, &cmd);
+            return 1;
+        } break;
         
         case CMD_TYPE_IMPULSE:
         {

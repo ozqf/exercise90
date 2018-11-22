@@ -51,7 +51,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_ENTITY_STATE 105
 #define CMD_TYPE_REMOVE_ENT 106
 #define CMD_TYPE_ENTITY_DELTA 107
-#define CMD_TYPE_PLAYER_STATE 108
+#define CMD_TYPE_QUICK 108
 #define CMD_TYPE_ENTITY_STATE_2 109
 #define CMD_TYPE_GAME_SESSION_STATE 110
 #define CMD_TYPE_GAME_CAMPAIGN_STATE 111
@@ -271,14 +271,14 @@ struct Cmd_EntityDelta
     u32 fields;
 };
 
-// 108 Player State
-struct Cmd_PlayerState
+#define CMD_QUICK_TYPE_SET_CLIENT_ID 1
+// 108 For quick data transfer
+struct Cmd_Quick
 {
-    i32 playerId;
-    i32 state;
-    EntId avatarId;
+    i32 data1;
+    i32 data2;
 	
-	GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerState, CMD_TYPE_PLAYER_STATE)
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_Quick, CMD_TYPE_QUICK)
 };
 
 // 109 CMD_TYPE_ENTITY_STATE_2
