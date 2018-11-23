@@ -16,15 +16,16 @@ void ZNet_EnableQualitySimulation(i32 minMilliSeconds, i32 maxMilliSeconds, f32 
     
 }
 
-void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
+i32 ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 {
     // TODO: Make sure rand is somehow mixed up by this point
     // or server and client random numbers can exactly align!
     // Currently done by seeding it from the address of argv, but bleh.
     ZNet* net = &g_net;
-    NET_ASSERT((net->state == 0), "Net session was not ended!");
+    NET_ASSERT((net->state == 0), "Cannot start a new network session until current is shutdown!");
     net->isListening = 0;
 	u16 sockedOpened = 1;
+    i32 result = COM_ERROR_NONE;
     switch (netMode)
     {
         case NETMODE_SINGLE_PLAYER:
@@ -39,6 +40,11 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
             printf("ZNet - DEDICATED SERVER on port %d\n", selfPort);
             net->selfPort = selfPort;
             net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
+            if (net->socketIndex < 0)
+            {
+                result = COM_ERROR_OPEN_SOCKET_FAILED;
+                break;
+            }
 			printf("Dedicated server requested port %d opened port %d\n", selfPort, sockedOpened);
             net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
@@ -49,7 +55,14 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
             printf("ZNet - LISTEN SERVER on port %d\n", selfPort);
             net->selfPort = selfPort;
             net->socketIndex = g_netPlatform.OpenSocket(net->selfPort, &sockedOpened);
-			printf("List server requested port %d opened port %d\n", selfPort, sockedOpened);
+            printf("ZNet socket index: %d\n", net->socketIndex);
+            if (net->socketIndex < 0)
+            {
+                result = COM_ERROR_OPEN_SOCKET_FAILED;
+                printf("ZNET start socket failed with %d\n", result);
+                break;
+            }
+			printf("  Listen server requested port %d opened port %d\n", selfPort, sockedOpened);
             net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
@@ -59,8 +72,14 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
             printf("ZNet - CLIENT\n");
             
             net->socketIndex = g_netPlatform.OpenSocket(0, &sockedOpened);
+            printf("ZNet socket index: %d\n", net->socketIndex);
+            if (net->socketIndex < 0)
+            {
+                result = COM_ERROR_OPEN_SOCKET_FAILED;
+                break;
+            }
 			net->selfPort = sockedOpened;
-			
+            
             ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
             net->state = ZNET_STATE_CONNECTING;
             conn->type = ZNET_CONN_TYPE_CLIENT2SERVER;
@@ -78,9 +97,12 @@ void ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 
         default:
         {
-            NET_ASSERT(0, "Unsupported netmode\n");
+            //NET_ASSERT(0, "Unsupported netmode\n");
+            result = COM_ERROR_UNSUPPORTED_OPTION;
         } break;
     }
+    printf("ZNET Start session result %d\n", result);
+    return result;
 }
 
 void ZNet_EndSession()

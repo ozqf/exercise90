@@ -508,7 +508,7 @@ void App_Frame(GameTime *time)
 	///////////////////////////
     // End of Frame.
 	///////////////////////////
-
+    i32 error;
 	// Perform state related operations
 	switch (g_appStateOperation.op)
 	{
@@ -519,24 +519,26 @@ void App_Frame(GameTime *time)
 		} break;
 		case APP_STATE_OP_LOAD:
 		{
-			if (!App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName, session))
+			error = App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName, session);
+            if (error)
 			{
-				printf("Failed to load game\n");
+				printf("Failed to load game: Code %d\n", error);
 			}
 		} break;
         case APP_STATE_OP_HOST:
 		{
-			if (!App_StartSession(NETMODE_LISTEN_SERVER, g_appStateOperation.fileName, session))
+			error = App_StartSession(NETMODE_LISTEN_SERVER, g_appStateOperation.fileName, session);
+			if (error)
 			{
-				printf("Failed to load game\n");
+				printf("Failed to load game: Code %d\n", error);
 			}
 		} break;
         case APP_STATE_OP_JOIN:
 		{
-			if (!App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName, session))
+			error = App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName, session);
+			if (error)
 			{
-				printf("Failed to load game\n");
-                ILLEGAL_CODE_PATH
+				printf("Failed to load game: Code %d\n", error);
 			}
 		} break;
 		case APP_STATE_OP_RECORD:

@@ -28,7 +28,7 @@
 #define ZNET_SIM_MODE_REALISTIC 1
 #define ZNET_SIM_MODE_BAD 2				// dev to this most of the time
 #define ZNET_SIM_MODE_TERRIBLE 3		// for easier checking of reliability robustness only
-
+ 
 /////////////////////////////////////////////////////////////////
 // Data types
 /////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output, i32 
 void ZNet_Shutdown();
 
 // session lifetime
-void ZNet_StartSession(u8 netMode, ZNetAddress* serverAddress, u16 localPort);
+i32 ZNet_StartSession(u8 netMode, ZNetAddress* serverAddress, u16 localPort);
 void ZNet_EndSession();
 i32 ZNet_Tick(f32 deltaTime);
 

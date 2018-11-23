@@ -56,6 +56,14 @@ MACROS
 
 #define DLL_EXPORT __declspec(dllexport)
 
+#define COM_ERROR_NONE 0
+
+#define COM_ERROR_BAD_INDEX -1
+#define COM_ERROR_UNKNOWN 1
+#define COM_ERROR_UNSUPPORTED_OPTION 2
+#define COM_ERROR_OPEN_SOCKET_FAILED 3
+#define COM_ERROR_MISSING_FILE 4
+
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros
 ///////////////////////////////////////////////////////////////////////

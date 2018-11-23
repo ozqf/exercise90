@@ -282,7 +282,7 @@ u8 App_StartReplay(char *path)
     return 1;
 }
 
-u8 App_LoadScene(char *path)
+i32 App_LoadScene(char *path)
 {
     printf(">>> APP load scene: %s <<<\n", path);
 
@@ -299,7 +299,7 @@ u8 App_LoadScene(char *path)
     {
         if (!App_LoadStateFromFile(&g_session, &g_gameScene, path))
         {
-            return 0;
+            return COM_ERROR_MISSING_FILE;
         }
     }
 
@@ -309,23 +309,23 @@ u8 App_LoadScene(char *path)
 
     
 
-    return 1;
+    return COM_ERROR_NONE;
 }
 
 i32 App_StartSession(u8 netMode, char *path, GameSession* session)
 {
     App_EndSession();
     printf("\n**** APP START SESSION ****\n");
+    i32 error = COM_ERROR_NONE;
     switch (netMode)
     {
     //case NETMODE_SINGLE_PLAYER:
     case NETMODE_LISTEN_SERVER:
     {
-        ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
-        if (!App_LoadScene(path))
-        {
-            return 0;
-        }
+        error = ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
+        if (error) { printf("APP Start session failed\n"); return error; }
+        error = App_LoadScene(path);
+        if (error) { printf("APP Start session failed\n"); return error; }
         session->netMode = NETMODE_LISTEN_SERVER;
 
         // Spawn local client if one hasn't been restored via file
@@ -354,7 +354,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
 			printf("Found local client %d for session start\n", cl->clientId);
 		}
 
-        return 1;
+        return COM_ERROR_NONE;
     }
     break;
     
@@ -362,13 +362,12 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
     {
         u16 port = ZNET_DEFAULT_SERVER_PORT;
         printf("SESSION dedicated server on port %d\n", port);
-        ZNet_StartSession(netMode, NULL, port);
-        if (!App_LoadScene("TEST"))
-        {
-            APP_ASSERT(0, "Failed to init network session\n");
-        }
+        error = ZNet_StartSession(netMode, NULL, port);
+        if (error) { return error; }
+        error = App_LoadScene("TEST");
+        if (error) { return error; }
         session->netMode = NETMODE_DEDICATED_SERVER;
-        return 1;
+        return COM_ERROR_NONE;
     }
     break;
 
@@ -377,13 +376,12 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
         ZNetAddress addr = COM_LocalHost(ZNET_DEFAULT_SERVER_PORT);
         printf("SESSION join %d.%d.%d.%d:%d\n",
             addr.ip4Bytes[0], addr.ip4Bytes[1], addr.ip4Bytes[2], addr.ip4Bytes[3], addr.port);
-        ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
-        if (!App_LoadScene("TEST"))
-        {
-            APP_ASSERT(0, "Failed to init network session\n");
-        }
+        error = ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
+        if (error) { return error; }
+        error = App_LoadScene("TEST");
+        if (error) { return error; }
         session->netMode = NETMODE_CLIENT;
-        return 1;
+        return COM_ERROR_NONE;
     }
     break;
 
@@ -392,7 +390,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
         if (App_StartReplay(path))
         {
             session->netMode = NETMODE_REPLAY;
-            return 1;
+            return COM_ERROR_NONE;
         }
     }
     break;
@@ -404,5 +402,5 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
     break;
     }
 
-    return 0;
+    return COM_ERROR_UNKNOWN;
 }

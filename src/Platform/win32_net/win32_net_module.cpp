@@ -284,7 +284,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
     if (winSock == NULL)
     {
         // no free sockets?
-        return -1;
+        return COM_ERROR_BAD_INDEX;
     }
     
     winSock->port = port;
@@ -295,7 +295,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
     if (iResult != 0)
     {
         printf("WSAStartup failed: %d\n", iResult);
-        return -1;
+        return COM_ERROR_BAD_INDEX;
     }
     printf("Winsock initialised\n");
     
@@ -303,7 +303,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
     {
         i32 errorCode = WSAGetLastError();
         printf("Could not create socket: %d\n", errorCode);
-        return -1;
+        return COM_ERROR_BAD_INDEX;
     }
 
     winSock->server.sin_family = AF_INET;
@@ -316,7 +316,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
     {
         i32 errorCode = WSAGetLastError();
         printf("Error setting socket to unblockable %d\n", errorCode);
-        return -1;
+        return COM_ERROR_BAD_INDEX;
     }
 
     iResult = bind(winSock->socket, (sockaddr*)&winSock->server, sizeof(winSock->server));
@@ -325,7 +325,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
         i32 errorCode = WSAGetLastError();
         printf("Failed to bind socket with code: %d\n", errorCode);
         Net_PrintNetworkError(errorCode);
-        return -1;
+        return COM_ERROR_BAD_INDEX;
     }
     
 	// Retreive socket port number
@@ -341,7 +341,7 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
 	else
 	{
 		printf("FAILED TO ACQUIRE SOCKET NAME!\n");
-		return -1;
+		return COM_ERROR_BAD_INDEX;
 	}
 	
 	if (portResult)
