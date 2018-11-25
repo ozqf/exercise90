@@ -127,6 +127,11 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
             printf("APP Attempting to update a free client. ID: %d\n ", cl->clientId);
         } break;
 
+        case CLIENT_STATE_SYNC:
+        {
+            // TODO: Sync related stuff...
+        } break;
+
         default:
         {
             char buf[256];

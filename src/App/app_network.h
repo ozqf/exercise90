@@ -78,6 +78,11 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 			{
 				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
 			}
+            u16 numUnreliableBytes = COM_ReadU16(&read);
+            if (numUnreliableBytes > 0)
+            {
+                printf("Read %d unreliable bytes\n", numUnreliableBytes);
+            }
 			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
 
@@ -89,18 +94,21 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
                 "Received packet from unknown source");
 
             u8* read = bytes;
-			// Read reliable section header (input will read reliable sequence)
-            //u16 reliableBytes = COM_ReadU16(&read);
-            //if (reliableBytes > 0)
-            //{
-				read = Stream_PacketToInput(&g_serverStream, read);
-            //}
+			// Read reliable section
+            read = Stream_PacketToInput(&g_serverStream, read);
 			// Deserialise sync check
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
 				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
+                return;
 			}
+            u16 numUnreliableBytes = COM_ReadU16(&read);
+            if (numUnreliableBytes > 0)
+            {
+                printf("Read %d unreliable bytes\n", numUnreliableBytes);
+            }
+            //printf("Read %d unreliable bytes\n", numUnreliableBytes);
 			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
     }
@@ -288,18 +296,51 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf);
 		// sync check
 		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
+        // Write unreliable
+        packetBuf.ptrWrite += COM_WriteU16(0, packetBuf.ptrWrite);
         // Send
         ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
     }
 }
 
 /**
- * Load local client inputs into a server packet
- * TODO: These messages should be UNRELIABLE but only the reliable stream exists atm so change later
+ * Load UNRELIABLE local client inputs into a server packet
+ * returns bytesWritten
  */
-internal void Net_WriteClient2ServerOutput(GameSession* session, GameScene* gs, Client* cl, NetStream* server)
+u32 Net_WriteClient2ServerOutput(
+    GameSession* session,
+    GameScene* gs,
+    NetStream* server,
+    ByteBuffer* packetBuf)
 {
-    if(!IsRunningClient(session->netMode)) { return; }
+    if(!IsRunningClient(session->netMode))
+    {
+        printf("CL2SV Not running a client!\n");
+        return 0;
+    }
+
+    u8* headerPos = packetBuf->ptrWrite;
+    packetBuf->ptrWrite += NET_SIZE_OF_UNRELIABLE_HEADER;
+
+    Client* cl = App_FindLocalClient(&session->clientList, 0);
+
+    if (cl)
+    {
+       Cmd_PlayerInput cmd = {};
+       cmd.clientId = cl->clientId;
+       cmd.input = cl->input;
+       packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
+       //NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
+    }
+    else
+    {
+        printf("CL No local client %d to send!\n", session->clientList.localClientId);
+    }
+
+    u16 bytesWritten = (u16)(packetBuf->ptrWrite - (headerPos + sizeof(u16)));
+    //printf("CL Wrote %d unreliable bytes\n", bytesWritten);
+    COM_WriteU16(bytesWritten, headerPos);
+    return bytesWritten;
 }
 
 internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
@@ -334,7 +375,7 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
     
     // Write unreliable messages
-
+    Net_WriteClient2ServerOutput(session, gs, &g_serverStream, &packetBuf);
     //// TODO: Output player input to SV
     //Client* cl = App_FindLocalClient(&session->clientList, 0);
     //if (cl)

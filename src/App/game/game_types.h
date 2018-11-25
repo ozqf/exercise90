@@ -652,7 +652,7 @@ struct GameSession
     //i32 state;
     char mapName[64];
     i32 levelsCompleted = 0;
-    i32 localClientId = 0;
+    //i32 localClientId = 0;
     
     ClientList clientList;
     i32 remoteConnectionId;

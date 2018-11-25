@@ -468,11 +468,11 @@ void App_Frame(GameTime *time)
 
     Net_Tick(session, &g_gameScene, time);
 	App_UpdateGameScene(time);
-    Net_WriteClient2ServerOutput(
-        session,
-        &g_gameScene,
-        App_FindLocalClient(&session->clientList, 0),
-        &g_serverStream);
+    // Net_WriteClient2ServerOutput(
+    //     session,
+    //     &g_gameScene,
+    //     App_FindLocalClient(&session->clientList, 0),
+    //     &g_serverStream);
     Net_Transmit(session, &g_gameScene, time);
 	
     if (time->singleFrame)

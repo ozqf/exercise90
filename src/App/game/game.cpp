@@ -181,8 +181,8 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
     {
         case CMD_QUICK_TYPE_SET_CLIENT_ID:
         {
-            session->localClientId = cmd->data2;
-            printf("GAME Set local client Id: %d\n", session->localClientId);
+            session->clientList.localClientId = cmd->data2;
+            printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
         default:
         {
