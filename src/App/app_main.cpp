@@ -236,28 +236,12 @@ void App_UpdateGameScene(GameTime* time)
     game.scene = &g_gameScene;
     game.session = &g_session;
 
-    // Update local client input
+    // Write local client input commands
     App_UpdateLocalClients(time, &g_session.clientList);
     
-    // Read game output from last frame + internally issued commands
-    //App_ReadCommandBuffer(g_appReadBuffer);
-
     // clear debug buffer
     g_debugStr.length = 0;
 
-    //GameScene *gs = &g_gameScene;
-    
-    #if 0
-    MemoryBlock collisionBuffer = {};
-    Heap_GetBlockMemoryAddress(&g_heap, &g_collisionEventBuffer);
-    collisionBuffer.ptrMemory = g_collisionEventBuffer.ptrMemory;
-    collisionBuffer.size = g_collisionEventBuffer.objectSize;
-
-    MemoryBlock commandBuffer = {};
-    Heap_GetBlockMemoryAddress(&g_heap, &g_collisionCommandBuffer);
-    commandBuffer.ptrMemory = g_collisionCommandBuffer.ptrMemory;
-    commandBuffer.size = g_collisionCommandBuffer.objectSize;
-    #endif
     // Prepare input buffer
 	ByteBuffer* input = g_appReadBuffer;
 	
@@ -265,7 +249,7 @@ void App_UpdateGameScene(GameTime* time)
 	//////////////////////////////////////////////
 	// demo buffer
 	//////////////////////////////////////////////
-	#if 1
+	
 	ByteBuffer replayBuffer = {};
     if (g_replayMode == RecordingReplay)
     {
@@ -323,15 +307,16 @@ void App_UpdateGameScene(GameTime* time)
         }
     }
 	//////////////////////////////////////////////
-#endif
 
 	if (time->singleFrame)
 	{
 		printf("-- GAME INPUT --\n");
 		App_PrintCommandBufferManifest(input->ptrStart, (u16)input->Written());
 	}
-		
+	
+    //////////////////////////////////////////////
     // Game state update
+    //////////////////////////////////////////////
     Game_Tick(&game,
               input,
               g_appWriteBuffer,
@@ -430,7 +415,19 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     
 }
 
-
+void App_SwapGameCommandBuffers()
+{
+    ByteBuffer* temp = g_appReadBuffer;
+    g_appReadBuffer = g_appWriteBuffer;
+    g_appWriteBuffer = temp;
+	
+    g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
+    g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
+    // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
+    COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
+    //*g_appWriteBuffer->ptrWrite = NULL;
+	
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PLATFORM INPUT
@@ -463,7 +460,8 @@ void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
 
 void App_Frame(GameTime *time)
 {
-	if (g_paused || g_minimised) { return; }
+    // TODO: Fix pause functionality - currently blocks Net_Tick which means no net I/O!
+	//if (g_paused || g_minimised) { return; }
 	
     g_time = *time;
     GameSession* session = &g_session;
@@ -494,17 +492,9 @@ void App_Frame(GameTime *time)
 	}
 
 
-	//Swap Command Buffers.
-    ByteBuffer* temp = g_appReadBuffer;
-    g_appReadBuffer = g_appWriteBuffer;
-    g_appWriteBuffer = temp;
-	
-    g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
-    g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
-    // Zeroing unncessary, just mark first byte null incase nothing is written for some reason
-    COM_ZeroMemory(g_appWriteBuffer->ptrWrite, g_appWriteBuffer->capacity);
-    //*g_appWriteBuffer->ptrWrite = NULL;
-	
+	//Swap Command Buffers
+    App_SwapGameCommandBuffers();
+    
 	///////////////////////////
     // End of Frame.
 	///////////////////////////

@@ -4,10 +4,10 @@ Server only functions
 */
 #include "app_module.cpp"
 
-internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
-{
+// internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
+// {
 
-}
+// }
 
 internal u8 SV_ReadImpulse(
     u8 netMode,
@@ -93,7 +93,7 @@ Server construction of a relevance list for a specific client.
     whilst the whole game is one arena though!)
 
 */
-internal i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, EntList* ents)
+/*internal*/ i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, EntList* ents)
 {
     i32 count = 0;
     for (u32 i = 0; i < ents->count; ++i)
@@ -112,7 +112,7 @@ internal i32 SV_BuildRelevanceList(Client* cl, EntityLink* links, i32 maxLinks, 
     return count;
 }
 
-internal void SV_IterateImportance(EntityLink* links, i32 numLinks)
+/*internal*/ void SV_IterateImportance(EntityLink* links, i32 numLinks)
 {
 
     /*
@@ -139,14 +139,6 @@ internal void SV_IterateImportance(EntityLink* links, i32 numLinks)
     }
 
     // Sort list by importance
-}
-
-void SV_DontRunMe()
-{
-    ILLEGAL_CODE_PATH
-    SV_BuildRelevanceList(NULL, NULL, 0, NULL);
-    SV_IterateImportance(NULL, 0);
-    SV_UpdateLocalPlayers(NULL, NULL);
 }
 
 internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)

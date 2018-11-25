@@ -25,6 +25,14 @@ struct StreamMsgHeader
     u32 size;
 };
 
+#define NET_DESERIALISE_CHECK 0xDEADBEEF
+
+// (u16 - num reliable bytes) (u32 - first message Id)
+#define NET_SIZE_OF_RELIABLE_HEADER (sizeof(u16) + sizeof(u32))
+
+// (u16 -num reliable bytes)
+#define NET_SIZE_OF_UNRELIABLE_HEADER (sizeof(u16))
+
 #define MAX_PACKET_TRANSMISSION_MESSAGES 64
 struct TransmissionRecord
 {

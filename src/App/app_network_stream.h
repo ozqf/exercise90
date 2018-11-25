@@ -171,7 +171,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
     return removed;
 }
 
-void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
+void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
 {
     // Do we even need to send anything reliable?
     if (s->outputBuffer.Written() == 0) { return; }
@@ -180,15 +180,11 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
     u32 packetSequence = ZNet_GetNextSequenceNumber(connId);
     TransmissionRecord* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
 
-    // sanitise packet
-    COM_ZeroMemory(packet, numBytes);
-    ByteBuffer b = Buf_FromBytes(packet, numBytes);
-    // step over header
-    // > u16 num reliable bytes
-    // > u16 num unreliable bytes
+    // step over space for header
+    // > u16 num reliable bytes written
     // > u32 first reliable sequence
-    b.ptrWrite += sizeof(u16) + sizeof(u16) + sizeof(u32);
-    u8* reliableStart = b.ptrWrite;
+    packetBuf->ptrWrite += NET_SIZE_OF_RELIABLE_HEADER;
+    u8* reliableStart = packetBuf->ptrWrite;
 
     // iterate output buffer
     u8* read = s->outputBuffer.ptrStart;
@@ -203,9 +199,9 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
         StreamMsgHeader* h = (StreamMsgHeader*)read;
         read += sizeof(StreamMsgHeader);
         //u32 messageId = COM_ReadU32(&read);
-        if (b.Space() < h->size)
+        if (packetBuf->Space() < h->size)
         {
-            printf("Packet full! Space %d size required %d\n", b.Space(), h->size);
+            printf("Packet full! Space %d size required %d\n", packetBuf->Space(), h->size);
             Stream_PrintBufferManifest(&s->outputBuffer);
             break;
         }
@@ -214,8 +210,8 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
         
         u32 offset = h->id - firstReliableId;
         u16 msgHeader = Stream_PackMessageHeader((u8)offset, (u16)h->size);
-        b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
-        b.ptrWrite += COM_COPY(read, b.ptrWrite, h->size);
+        packetBuf->ptrWrite += COM_WriteU16(msgHeader, packetBuf->ptrWrite);
+        packetBuf->ptrWrite += COM_COPY(read, packetBuf->ptrWrite, h->size);
         rec->reliableMessageIds[rec->numReliableMessages] = h->id;
         rec->numReliableMessages++;
         if (rec->numReliableMessages == MAX_PACKET_TRANSMISSION_MESSAGES)
@@ -229,26 +225,33 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, u8* packet, u16 numBytes)
     //printf("Sending packet %d. Contents: ", packetSequence);
     //Stream_PrintTransmissionRecord(rec);
 
-    // Step back and write header
-    u16 reliableBytes = (u16)(b.ptrWrite - reliableStart);
-    u8* write = b.ptrStart;
+    // Step back and write header reliable section header
+    u16 reliableBytes = (u16)(packetBuf->ptrWrite - reliableStart);
+    u8* write = packetBuf->ptrStart;
     write += COM_WriteU16(reliableBytes, write);
-    write += COM_WriteU16(0, write);
     write += COM_WriteU32(firstReliableId, write);
 
     // Send!
-    ZNet_SendData(connId, b.ptrStart, (u16)b.Written(), 0);
+    //ZNet_SendData(connId, packetBuf->ptrStart, (u16)packetBuf->Written(), 0);
+
+    // return position for next part of packet payload
+    //return packetBuf->ptrWrite;
 }
 
-void Stream_PacketToInput(NetStream* s, u8* ptr, u16 numBytes)
+// Returns read position after section
+u8* Stream_PacketToInput(NetStream* s, u8* ptr)
 {
     //printf("Copy reliable packet (%d bytes) to input... ", numBytes);
     // iterate for messages
     // > if messageId <= stream input sequence ignore
     // > if messageId > input sequence, copy to input buffer (if it isn't already there)
     u8* read = ptr;
-    u8* end = read + numBytes;
+
+    // Reliable header
+    u16 numReliableBytes = COM_ReadU16(&read);
     u32 reliableSequence = COM_ReadU32(&read);
+
+    u8* end = read + numReliableBytes;
     while(read < end)
     {
         //u32 messageId = COM_ReadU32(&read);
@@ -289,5 +292,6 @@ void Stream_PacketToInput(NetStream* s, u8* ptr, u16 numBytes)
             read += size;
         }
     }
+	return read;
     //printf("Done\n");
 }

@@ -12,7 +12,6 @@ they can be rebound when the renderer is reloaded
 Components:
 > Opengl index -> opengl int: mapping for graphics card. May be different, and non sequential when created
 > Custom index -> integer: app keeps track of the texture
-> Header/Name -> for app to 
 
 
 */

@@ -16,9 +16,9 @@
 /////////////////////////////////////////////////////////////////
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
-    printf("APP Connection %d accepted\n", conn->id);
     if (IsRunningServer(g_session.netMode))
     {
+        printf("SV Accepted connection %d\n", conn->id);
         // Create client
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
@@ -65,13 +65,20 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
 
             u8* read = bytes;
-            u16 reliableBytes = COM_ReadU16(&read);
-            u16 unreliableBytes = COM_ReadU16(&read);
-            if (reliableBytes > 0)
-            {
+            //u16 reliableBytes = COM_ReadU16(&read);
+            //u16 unreliableBytes = COM_ReadU16(&read);
+            //if (reliableBytes > 0)
+            //{
                 //printf("SV writing %d reliable input bytes to conn %d\n", reliableBytes, cl->connectionId);
-                Stream_PacketToInput(&cl->stream, read, reliableBytes);
-            }
+                read = Stream_PacketToInput(&cl->stream, read);
+            //}
+			// Deserialise sync check
+			u32 positionCheck = COM_ReadU32(&read);
+			if (positionCheck != NET_DESERIALISE_CHECK)
+			{
+				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
+			}
+			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
 
         case NETMODE_CLIENT:
@@ -82,12 +89,19 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
                 "Received packet from unknown source");
 
             u8* read = bytes;
-            u16 reliableBytes = COM_ReadU16(&read);
-            u16 unreliableBytes = COM_ReadU16(&read);
-            if (reliableBytes > 0)
-            {
-                Stream_PacketToInput(&g_serverStream, read, reliableBytes);
-            }
+			// Read reliable section header (input will read reliable sequence)
+            //u16 reliableBytes = COM_ReadU16(&read);
+            //if (reliableBytes > 0)
+            //{
+				read = Stream_PacketToInput(&g_serverStream, read);
+            //}
+			// Deserialise sync check
+			u32 positionCheck = COM_ReadU32(&read);
+			if (positionCheck != NET_DESERIALISE_CHECK)
+			{
+				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
+			}
+			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
     }
 }
@@ -243,7 +257,9 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
     if(!IsRunningServer(session->netMode)) { return; }
 
     const i32 packetSize = 1024;
-    u8 packetBuffer[packetSize];
+    u8 packetBytes[packetSize];
+    ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
+    Buf_Clear(&packetBuf);
 
     for (i32 i = 0; i < session->clientList.max; ++i)
     {
@@ -268,7 +284,12 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         }
         //printf("%dB, ", pendingBytes);
         
-        Stream_OutputToPacket(cl->connectionId, &cl->stream, packetBuffer, packetSize);
+		// Write reliable
+        Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf);
+		// sync check
+		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
+        // Send
+        ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
     }
 }
 
@@ -284,27 +305,49 @@ internal void Net_WriteClient2ServerOutput(GameSession* session, GameScene* gs, 
 internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 {
     if(!IsRunningClient(session->netMode)) { return; }
-    if (g_session.remoteConnectionId == 0)
-    {
-        printf("CL Attempting send to SV but conn is 0\n");
-        return;
-    }
-    const i32 packetSize = 1024;
-    u8 packetBuffer[packetSize];
+    // Conn Id will be 0 if connection has not been established so drop out
+    if (g_session.remoteConnectionId == 0) { return; }
 
-    ByteBuffer* b = &g_serverStream.outputBuffer;
-    i32 pendingBytes = b->Written();
+    const i32 packetSize = 1024;
+    u8 packetBytes[packetSize];
+    ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
+    // sanitise packet
+    Buf_Clear(&packetBuf);
+
+    ByteBuffer* outputBuf = &g_serverStream.outputBuffer;
+    i32 pendingBytes = outputBuf->Written();
     if (pendingBytes == 0)
     {
         // nothing to transmit - write keep alive
         // acks are piggy-backed on regular packets. No traffic == no acks
+        // Will also automatically keep the connection alive
         //printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
         Cmd_Test cmd = {};
         cmd.data = 5678;
-        NET_MSG_TO_OUTPUT((&g_serverStream), (&cmd));
+        NET_MSG_TO_OUTPUT(&g_serverStream, &cmd)
     }
     //printf("CL %d bytes in output buffer\n", b->Written());
-    Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, packetBuffer, packetSize);
+    // Write reliable messages
+    Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, &packetBuf);
+
+    // Write magic number for read validation between sections
+    packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
+    
+    // Write unreliable messages
+
+    //// TODO: Output player input to SV
+    //Client* cl = App_FindLocalClient(&session->clientList, 0);
+    //if (cl)
+    //{
+    //    Cmd_PlayerInput cmd = {};
+    //    cmd.clientId = cl->clientId;
+    //    cmd.input = cl->input;
+    //    NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
+    //}
+    //
+
+    // Send
+    ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
 }
 
 /////////////////////////////////////////////////////////////////

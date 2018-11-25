@@ -112,10 +112,11 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
                 cl->input.buttons = 0;
             }
             // Always copy input (and other vars) even if it hasn't
-            //mbeen affected or the players orientation will be reset!
+            // been affected or the players orientation will be reset!
             // (and everything else, including state)
             Cmd_PlayerInput cmd = {};
-			cmd.connectionId = cl->connectionId;
+			//cmd.connectionId = cl->connectionId;
+            cmd.clientId = cl->clientId;
             cmd.input = cl->input;
             APP_WRITE_CMD(0, cmd);
             //App_WriteGameCmd((u8*)&cmd, CMD_TYPE_PLAYER_INPUT, sizeof(Cmd_PlayerInput));
@@ -216,52 +217,6 @@ internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cl
     return NULL;
 }
 
-#if 0
-internal Client* App_FindOrCreateClient(i32 id, ClientList* cls)
-{
-    Client* free = NULL;
-    Client* result = NULL;
-    for (i32 i = 0; i < cls->max; ++i)
-    {
-        Client* query = &cls->items[i];
-        if (query->clientId == id)
-        {
-            result = query;
-            break;
-        }
-        else if (free == NULL && query->clientId == 0)
-        {
-            free = query;
-        }
-    }
-    if (result == NULL)
-    {
-        if (free == NULL)
-        {
-            platform.Platform_Error("No free clients", "APP");
-        }
-        else
-        {
-            result = free;
-            NetStream* stream = &result->stream;
-            printf("APP Allocating I/O streams for client %d\n", id);
-            u32 bytes = KiloBytes(64);
-            stream->inputBuffer = Buf_FromMalloc(
-                malloc(bytes), bytes
-            );
-            stream->outputBuffer = Buf_FromMalloc(
-                malloc(bytes), bytes
-            );
-        }
-    }
-    result->clientId = id;
-	if (id == -1)
-	{
-		result->isLocal = 1;
-	}
-    return result;
-}
-#endif
 internal void App_UpdateLocalClients(GameTime* time, ClientList* cls)
 {
     if (cls->localClientId == 0) { return; }

@@ -147,11 +147,20 @@ struct Cmd_ServerImpulse
 // 102
 struct Cmd_PlayerInput
 {
-	i32 connectionId;       // Use private id so player input must come from the correct client
+    // Use private id so player input must come from the correct client?
+	// i32 connectionId;
+    // This struct is also sent from client to client for prediction:
+    i32 clientId;
     ActorInput input;
     Vec3 avatarPosition;    // Have to sanity check this on server
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_PlayerInput, CMD_TYPE_PLAYER_INPUT)
+
+    void Set(Client* cl)
+    {
+        clientId = cl->clientId;
+        input = cl->input;
+    }
 };
 #endif
 //////////////////////////////////////////////////
