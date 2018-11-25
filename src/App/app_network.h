@@ -11,6 +11,9 @@
 
 #include "app_module.cpp" 
 
+
+void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
+
 /////////////////////////////////////////////////////////////////
 // Network callbacks
 /////////////////////////////////////////////////////////////////
@@ -65,13 +68,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
 
             u8* read = bytes;
-            //u16 reliableBytes = COM_ReadU16(&read);
-            //u16 unreliableBytes = COM_ReadU16(&read);
-            //if (reliableBytes > 0)
-            //{
-                //printf("SV writing %d reliable input bytes to conn %d\n", reliableBytes, cl->connectionId);
-                read = Stream_PacketToInput(&cl->stream, read);
-            //}
+            read = Stream_PacketToInput(&cl->stream, read);
 			// Deserialise sync check
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
@@ -81,7 +78,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             u16 numUnreliableBytes = COM_ReadU16(&read);
             if (numUnreliableBytes > 0)
             {
-                printf("Read %d unreliable bytes\n", numUnreliableBytes);
+                Net_ServerReadUnreliable(cl, read, numUnreliableBytes);
             }
 			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
@@ -104,10 +101,10 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
                 return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);
-            if (numUnreliableBytes > 0)
-            {
-                printf("Read %d unreliable bytes\n", numUnreliableBytes);
-            }
+            // if (numUnreliableBytes > 0)
+            // {
+            //     printf("Read %d unreliable bytes\n", numUnreliableBytes);
+            // }
             //printf("Read %d unreliable bytes\n", numUnreliableBytes);
 			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
@@ -168,17 +165,21 @@ ZNetOutputInterface Net_CreateOutputInterface()
 }
 
 /////////////////////////////////////////////////////////////////
-// Network Read
+// Network Execute from read
 /////////////////////////////////////////////////////////////////
 void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
     //printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
+    u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
     {
         Cmd_Test cmd;
-        u16 bytesRead = cmd.Read(bytes);
-        APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
+        bytesRead = cmd.Read(bytes);
+        if (numBytes != UINT16_MAX)
+        {
+            APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
+        }
         printf(".");
         //printf("CL Keep alive %d\n", cmd.data);
     }
@@ -189,17 +190,72 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
     }
 }
 
-void Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
+u16 Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
 {
     //printf("SV Exec msg from %d: type %d size %d\n", cl->connectionId, *bytes, numBytes);
     u8 type = *bytes;
+    u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
     {
         Cmd_Test cmd;
-        u16 bytesRead = cmd.Read(bytes);
-        APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
+        bytesRead = cmd.Read(bytes);
+        if (numBytes != UINT16_MAX)
+        {
+            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
+        }
+        // Don't actually try to execute this command type!
         //printf("SV Keep alive %d\n", cmd.data);
-        printf(".");
+    }
+    else if (type == CMD_TYPE_PLAYER_INPUT)
+    {
+        Cmd_PlayerInput cmd;
+        bytesRead += cmd.Read(bytes);
+        if (numBytes != UINT16_MAX)
+        {
+            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
+        }
+        APP_WRITE_CMD(0, cmd);
+    }
+    else if (type == CMD_TYPE_IMPULSE)
+    {
+        Cmd_ServerImpulse cmd;
+        bytesRead += cmd.Read(bytes);
+        if (numBytes != UINT16_MAX)
+        {
+            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
+        }
+        APP_WRITE_CMD(0, cmd);
+    }
+    return bytesRead;
+}
+
+/////////////////////////////////////////////////////////////////
+// Network Read
+// > Reliable commands are transfered to a stream input buffer
+// then executed.
+// > Unreliable commands are read and executed straight from the
+// packet
+/////////////////////////////////////////////////////////////////
+void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes)
+{
+    u8* end = ptr + numBytes;
+    u8* read = ptr;
+    //printf("SV reading %d unreliable bytes for CL %d\n", numBytes, cl->connectionId);
+    i32 escapeCounter = 0;
+    while (read < end)
+    {
+        u8 type = *read;
+        //printf("SV Exec unreliable cmd %d\n", type);
+        u16 bytesRead = Net_ServerExecuteClientMessage(cl, read, UINT16_MAX);
+        if (bytesRead > 0)
+        {
+            read += bytesRead;
+        }
+        else
+        {
+            break;
+        }
+        if (++escapeCounter > 9999) { break; }
     }
 }
 
@@ -389,6 +445,26 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 
     // Send
     ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
+}
+
+internal void NET_WriteImpulse(GameSession* gs, i32 impulse)
+{
+    Cmd_ServerImpulse cmd = {};
+    cmd.clientId = gs->clientList.localClientId;
+    cmd.impulse = impulse;
+    if (IS_SERVER)
+    {
+        APP_WRITE_CMD(0, cmd);
+    }
+    else if (IS_CLIENT)
+    {
+        printf("CL Write Impulse %d to server\n", impulse);
+        NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
+    }
+    else
+    {
+        printf("NET Cannot impulse, not running\n");
+    }
 }
 
 /////////////////////////////////////////////////////////////////

@@ -94,11 +94,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("Wrong number of tokens for impulse\n");
             return 1;
         }
-        Cmd_ServerImpulse cmd = {};
-        cmd.clientId = g_session.clientList.localClientId;
-        cmd.impulse = COM_AsciToInt32(tokens[1]);
-        printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
-        APP_WRITE_CMD(0, cmd);
+        //Cmd_ServerImpulse cmd = {};
+        //cmd.clientId = g_session.clientList.localClientId;
+        //cmd.impulse = COM_AsciToInt32(tokens[1]);
+        //printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
+        //APP_WRITE_CMD(0, cmd);
+        NET_WriteImpulse(&g_session, COM_AsciToInt32(tokens[1]));
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
@@ -321,9 +322,11 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		for (i32 i = 0; i < cls->max; ++i)
 		{
 			Client* cl = &cls->items[i];
-			printf("%d: ConnId %d, IsLocal %d, State %d, Avatar: %d/%d\n",
-				cl->clientId, cl->connectionId,
-				cl->isLocal, cl->state, cl->entId.iteration, cl->entId.index
+			printf("ID: %d: IsLocal %d, State %d, Avatar: %d/%d, Input: %d\n ConnId %d\n",
+				cl->clientId, cl->isLocal,
+                cl->state, cl->entId.iteration,
+                cl->entId.index, cl->input.buttons,
+                cl->connectionId
 			);
 
 		}

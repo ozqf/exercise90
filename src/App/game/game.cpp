@@ -262,9 +262,9 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
             EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
 			if (motor == NULL)
 			{
-				printf("!GAME No motor for Entity %d/%d\n",
-                    cl->entId.iteration,
-                    cl->entId.index);
+				//printf("!GAME No motor for Entity %d/%d\n",
+                //    cl->entId.iteration,
+                //    cl->entId.index);
 				return 1;
 			}
             motor->state.input = cmd.input;

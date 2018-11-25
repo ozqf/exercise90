@@ -112,6 +112,9 @@ void App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead);
 void App_ReadCommandBuffer(ByteBuffer* commands);
 i32 App_StartSession(u8 netMode, char *path, GameSession* session);
 
+// Networking
+internal void Net_WriteImpulse(GameSession* gs, i32 impulse);
+
 // Debug
 void App_DumpHeap();
 
