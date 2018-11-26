@@ -14,6 +14,7 @@
 #define GAME_DEBUG_MODE_ACTOR_INPUT 4
 #define GAME_DEBUG_MODE_INPUT 5
 #define GAME_DEBUG_MODE_RECORDING 6
+#define GAME_DEBUG_MODE_NETWORK 7
 
 // MODE      | ID        SERVER      CLIENT      CONNECTION
 //--------------------------------------------------------------

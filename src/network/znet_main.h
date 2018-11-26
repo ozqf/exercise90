@@ -445,7 +445,7 @@ i32 ZNet_Tick(f32 deltaTime)
 
                 conn->keepAliveSendTicks++;
 				conn->timeSinceLastMessage += deltaTime;
-                if (conn->ticksSinceLastMessage > ZNET_CONNECTION_TIMEOUT_SECONDS)
+                if (conn->timeSinceLastMessage > ZNET_CONNECTION_TIMEOUT_SECONDS)
                 {
                     printf("  Conn to port %d lost\n", conn->remoteAddress.port);
                     ZNet_DisconnectPeer(net, conn, "Connection lost");

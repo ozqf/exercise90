@@ -703,7 +703,7 @@ struct GameScene
     Transform cameraTransform;
     EntId cameraEntId;
     
-    u16 debugMode = 0;
+    u16 debugMode = 7;
     char debugString[2048];
     u32 debugStringLength = 0;
     u32 debugStringCapacity = 2048;

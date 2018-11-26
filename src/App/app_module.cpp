@@ -114,6 +114,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session);
 
 // Networking
 internal void Net_WriteImpulse(GameSession* gs, i32 impulse);
+internal void Net_WriteDebug(ZStringHeader* txt, GameSession* session);
 
 // Debug
 void App_DumpHeap();

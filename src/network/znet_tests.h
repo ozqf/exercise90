@@ -34,3 +34,25 @@ void ZNet_RunTests()
     // Check acks would be reported:
     ZNet_CheckAcks(&send, 6, ackBits);
 }
+
+char* ZNet_WriteDebug(char* start, char* end)
+{
+    char* write = start;
+    ZNet* net = &g_net;
+    write += sprintf_s(write, (end - write),
+        "--- ZNET LAYER ---\nState: %d, isListening %d, socket %d\n, selfPort: %d\nClient2ServId %d\n- CONNECTIONS -\n",
+        net->state, net->isListening, net->socketIndex, net->selfPort, net->client2ServerId
+    );
+    i32 numConnections = MAX_CONNECTIONS;
+    for (i32 i = 0; i < numConnections; ++i)
+    {
+        ZNetConnection* conn = &net->connections[i];
+        if (conn->id == 0) { continue; }
+        write += sprintf_s(write, (end - write),
+            "ConnId %d, seq %d, remote seq: %d, Timeout: %.2f\n",
+            conn->id, conn->sequence, conn->remoteSequence, conn->timeSinceLastMessage
+        );
+    }
+
+    return write;
+}

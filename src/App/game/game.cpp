@@ -61,7 +61,7 @@ internal void Game_BuildTestHud()
     ent = UI_GetFreeEntity(g_ui_entities, UI_MAX_ENTITIES);
     //char* message = "GAME OVER";
     //numChars = COM_StrLen(chars);
-    sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, "WAITING");
+    sprintf_s(g_hud_centreText, HUD_CENTRE_TEXT_LENGTH, ""/*"WAITING"*/);
     ent->transform.pos.x = 0;
     ent->transform.pos.y = 0.5f;
     RendObj_SetAsAsciCharArray(

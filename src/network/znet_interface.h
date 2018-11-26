@@ -87,6 +87,7 @@ ZNetConnectionInfo* ZNet_RecreateLocalClient(i32 id);
 void ZNet_Info();
 i32 ZNet_IsServer();
 void ZNet_RunTests();
+char* ZNet_WriteDebug(char* start, char* end);
 
 // system lifetime
 void ZNet_Init(ZNetPlatformFunctions functions, ZNetOutputInterface output, i32 simMode);

@@ -322,7 +322,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		for (i32 i = 0; i < cls->max; ++i)
 		{
 			Client* cl = &cls->items[i];
-			printf("ID: %d: IsLocal %d, State %d, Avatar: %d/%d, Input: %d\n ConnId %d\n",
+			printf("ID: %d: IsLocal %d, State %d, Avatar: %d/%d, Input: %d ConnId %d\n",
 				cl->clientId, cl->isLocal,
                 cl->state, cl->entId.iteration,
                 cl->entId.index, cl->input.buttons,

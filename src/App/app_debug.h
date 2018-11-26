@@ -131,10 +131,21 @@ ZStringHeader App_WriteDebugString(GameScene *gs, GameTime *time)
 
     ZStringHeader h;
     h.chars = gs->debugString;
+    h.maxLength = 2048;
     h.length = 0;
 #if 1
     switch (gs->debugMode)
     {
+        case GAME_DEBUG_MODE_NONE:
+        {
+            h.length = 0;
+            return h;
+        } break;
+
+        case GAME_DEBUG_MODE_NETWORK:
+        {
+            Net_WriteDebug(&h, &g_session);
+        } break;
         #if 0
         case GAME_DEBUG_MODE_CAMERA:
         {
@@ -284,6 +295,8 @@ Rotation:\n\
 
         default:
         {
+            h.length = sprintf_s(gs->debugString, h.maxLength,
+                "Unknown Debug mode %d\n", gs->debugMode);
             h.length = 0;
             return h;
         }

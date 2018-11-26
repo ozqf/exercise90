@@ -538,3 +538,49 @@ internal void Net_Transmit(GameSession* session, GameScene* gs, GameTime* time)
         } break;
     }
 }
+
+internal char* Net_GetModeLabel(u8 netMode)
+{
+    switch (netMode)
+    {
+        case NETMODE_SINGLE_PLAYER: return "Single player";
+        case NETMODE_CLIENT: return "Client";
+        case NETMODE_LISTEN_SERVER: return "Listen Server";
+        case NETMODE_REPLAY: return "Replay";
+        case NETMODE_DEDICATED_SERVER: "Dedicated Server";
+        case NETMODE_NONE: return "None";
+        default: return "Unknown mode";
+    }
+}
+
+internal void Net_WriteDebug(ZStringHeader* txt, GameSession* session)
+{
+    char* start = txt->chars;
+    char* write = start;
+    char* end = start + txt->maxLength;
+
+    write += sprintf_s(write, (end - write),
+        "===== NETWORK =====\nMode: %s\nRemote ConnId: %d\n-----CLIENTS-----\n",
+        Net_GetModeLabel(session->netMode),
+        session->remoteConnectionId
+    );
+
+    ClientList* cls = &session->clientList;
+    i32 numClients = cls->max;
+    for (i32 i = 0; i < cls->max; ++i)
+    {
+        Client* cl = &cls->items[i];
+        if (cl->state == CLIENT_STATE_FREE) { continue; }
+        write += sprintf_s(write, (end - write),
+            "ID: %d: IsLocal %d, State %d, Avatar: %d/%d, Input: %d ConnId %d\n",
+				cl->clientId, cl->isLocal,
+                cl->state, cl->entId.iteration,
+                cl->entId.index, cl->input.buttons,
+                cl->connectionId
+        );
+    }
+
+    write = ZNet_WriteDebug(write, end);
+
+    txt->length = (end - write);
+}
