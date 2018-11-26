@@ -58,7 +58,10 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_VIA_TEMPLATE 112
 #define CMD_TYPE_SPAWN_GFX 113
 #define CMD_TYPE_SPAWN_HUD_ITEM 114
-#define CMD_TYPE_TEST 127
+#define CMD_TYPE_S2C_SYNC 115
+#define CMD_TYPE_C2S_SYNC 116
+
+#define CMD_TYPE_TEST 255
 
 //////////////////////////////////////////////////
 // DEFAULT COMMAND INTERFACE FUNCTIONS
@@ -319,6 +322,55 @@ struct Cmd_GameCampaignState
 	i32 state;
 	
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState, CMD_TYPE_GAME_CAMPAIGN_STATE)
+};
+
+#define CMD_SYNC_FILE_NAME_LENGTH 255
+struct Cmd_S2C_Sync
+{
+    // length excludes \0 terminator
+    u8 length;
+	char fileName[CMD_SYNC_FILE_NAME_LENGTH];
+	
+	GAME_CMD_DEFAULT_GetType(CMD_TYPE_S2C_SYNC)
+
+    inline u16 MeasureForReading(u8* ptr)
+    {
+        return sizeof(u8) + length;// + sizeof('\0');
+    }
+    inline u16 MeasureForWriting()
+    {
+        return sizeof(u8) + length;// + sizeof('\0');
+    }
+    inline u16 Write(u8* ptr)
+    {
+        u8* start = ptr;
+        ptr += COM_WriteByte(CMD_TYPE_S2C_SYNC, ptr);
+        if (length >= CMD_SYNC_FILE_NAME_LENGTH)
+        {
+            // force space for null terminator
+            length = (CMD_SYNC_FILE_NAME_LENGTH - 1);
+        }
+        ptr += COM_WriteByte(length, ptr);
+        ptr += COM_COPY(fileName, ptr, length);
+        return (u16)(ptr - start);
+    }
+    inline u16 Read(u8* ptr)
+    {
+        u8* start = ptr;
+        u8 commandType = COM_ReadByte(&ptr);
+        APP_ASSERT((commandType == CMD_TYPE_S2C_SYNC), "Cmd read type mismatch");
+        length = COM_ReadByte(&ptr);
+        ptr += COM_COPY(ptr, fileName, length);
+        *ptr = '\0';
+        return (u16)(ptr - start);
+    }
+};
+
+struct Cmd_C2S_Sync
+{
+	i32 state;
+	
+	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState, CMD_TYPE_C2S_SYNC)
 };
 
 struct Cmd_SpawnViaTemplate

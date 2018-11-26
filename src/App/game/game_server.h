@@ -172,6 +172,14 @@ internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
     cmd.data2 = cl->clientId;
     NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
     SV_TransmitClientListToClient(&session->clientList, cl);
+
+    // scene sync
+    Cmd_S2C_Sync sync = {};
+    sync.length = (u8)sprintf_s(
+        sync.fileName, CMD_SYNC_FILE_NAME_LENGTH,
+        "TEST"
+    );
+    NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
 }
 
 internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)

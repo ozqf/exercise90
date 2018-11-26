@@ -62,7 +62,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
         case NETMODE_LISTEN_SERVER:
         {
             ClientList* cls = &g_session.clientList;
-
+            
             Client* cl = App_FindClientByConnectionId(&g_session.clientList, info->sender.id);
             APP_ASSERT(cl, "SV Unknown client for packet received\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
@@ -101,12 +101,6 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
                 return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);
-            // if (numUnreliableBytes > 0)
-            // {
-            //     printf("Read %d unreliable bytes\n", numUnreliableBytes);
-            // }
-            //printf("Read %d unreliable bytes\n", numUnreliableBytes);
-			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
         } break;
     }
 }
@@ -182,6 +176,16 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         }
         printf(".");
         //printf("CL Keep alive %d\n", cmd.data);
+    }
+    else if (type == CMD_TYPE_S2C_SYNC)
+    {
+        Cmd_S2C_Sync cmd;
+        bytesRead = cmd.Read(bytes);
+        if (numBytes != UINT16_MAX)
+        {
+            APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
+        }
+        printf("CL - SYNC TO SCENE %s\n", cmd.fileName);
     }
     else
     {
@@ -362,6 +366,8 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
 /**
  * Load UNRELIABLE local client inputs into a server packet
  * returns bytesWritten
+ * - Always write something here to keep conn alive
+ * 
  */
 u32 Net_WriteClient2ServerOutput(
     GameSession* session,
@@ -382,15 +388,27 @@ u32 Net_WriteClient2ServerOutput(
 
     if (cl)
     {
-       Cmd_PlayerInput cmd = {};
-       cmd.clientId = cl->clientId;
-       cmd.input = cl->input;
-       packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
-       //NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
+        if (cl->state == CLIENT_STATE_PLAYING)
+        {
+            Cmd_PlayerInput cmd = {};
+            cmd.clientId = cl->clientId;
+            cmd.input = cl->input;
+            packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
+            //NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
+        }
+        else
+        {
+            // nothing to transmit - write keep alive
+            // acks are piggy-backed on regular packets. No traffic == no acks
+            // Will also automatically keep the connection alive
+            Cmd_Test cmd = {};
+            cmd.data = 5678;
+            packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
+        }
     }
     else
     {
-        printf("CL No local client %d to send!\n", session->clientList.localClientId);
+        printf("CL No local client %d to send from!\n", session->clientList.localClientId);
     }
 
     u16 bytesWritten = (u16)(packetBuf->ptrWrite - (headerPos + sizeof(u16)));
@@ -410,20 +428,7 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
     // sanitise packet
     Buf_Clear(&packetBuf);
-
-    ByteBuffer* outputBuf = &g_serverStream.outputBuffer;
-    i32 pendingBytes = outputBuf->Written();
-    if (pendingBytes == 0)
-    {
-        // nothing to transmit - write keep alive
-        // acks are piggy-backed on regular packets. No traffic == no acks
-        // Will also automatically keep the connection alive
-        //printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
-        Cmd_Test cmd = {};
-        cmd.data = 5678;
-        NET_MSG_TO_OUTPUT(&g_serverStream, &cmd)
-    }
-    //printf("CL %d bytes in output buffer\n", b->Written());
+    
     // Write reliable messages
     Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, &packetBuf);
 
@@ -432,16 +437,6 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     
     // Write unreliable messages
     Net_WriteClient2ServerOutput(session, gs, &g_serverStream, &packetBuf);
-    //// TODO: Output player input to SV
-    //Client* cl = App_FindLocalClient(&session->clientList, 0);
-    //if (cl)
-    //{
-    //    Cmd_PlayerInput cmd = {};
-    //    cmd.clientId = cl->clientId;
-    //    cmd.input = cl->input;
-    //    NET_MSG_TO_OUTPUT(&g_serverStream, &cmd);
-    //}
-    //
 
     // Send
     ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
