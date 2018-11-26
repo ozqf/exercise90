@@ -25,7 +25,11 @@ struct StreamMsgHeader
     u32 size;
 };
 
-#define NET_DESERIALISE_CHECK 0xDEADBEEF
+// Big-endian
+//#define NET_DESERIALISE_CHECK 0xDEADBEEF
+// Little-endian
+#define NET_DESERIALISE_CHECK 0xEFBEADDE
+#define NET_DESERIALISE_CHECK_LABEL "0xDEADBEEF"
 
 // (u16 - num reliable bytes) (u32 - first message Id)
 #define NET_SIZE_OF_RELIABLE_HEADER (sizeof(u16) + sizeof(u32))

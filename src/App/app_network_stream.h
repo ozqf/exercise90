@@ -174,7 +174,11 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
 void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
 {
     // Do we even need to send anything reliable?
-    if (s->outputBuffer.Written() == 0) { return; }
+    if (s->outputBuffer.Written() == 0)
+    {
+        packetBuf->ptrWrite += COM_WriteU16(0, packetBuf->ptrWrite);
+        return;
+    }
 
     // Open a packet
     u32 packetSequence = ZNet_GetNextSequenceNumber(connId);
@@ -249,7 +253,13 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
 
     // Reliable header
     u16 numReliableBytes = COM_ReadU16(&read);
+    if (numReliableBytes == 0)
+    {
+        return read;
+    }
     u32 reliableSequence = COM_ReadU32(&read);
+    // Nothing to read
+    if (numReliableBytes == 0) { return read; }
 
     u8* end = read + numReliableBytes;
     while(read < end)

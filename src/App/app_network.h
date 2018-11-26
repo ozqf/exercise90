@@ -73,7 +73,9 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
-				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
+				printf("SV ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+                COM_PrintBytesHex(bytes, numBytes, 32);
+                return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);
             if (numUnreliableBytes > 0)
@@ -97,7 +99,8 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
-				printf("Deserialise expected %X got %X\n", NET_DESERIALISE_CHECK, positionCheck);
+				printf("CL ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+                COM_PrintBytesHex(bytes, numBytes, 32);
                 return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);

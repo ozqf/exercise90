@@ -14,6 +14,7 @@ inline void COM_PrintBits(i32 val, u8 printNewLine)
         printf("\n");
     }
 }
+
 inline void COM_PrintBytes(u8* bytes, u16 numBytes, i32 bytesPerRow)
 {
     u8* read = bytes;
@@ -26,6 +27,27 @@ inline void COM_PrintBytes(u8* bytes, u16 numBytes, i32 bytesPerRow)
     while (read < end)
     {
         printf("%d, ", *read);
+        read++;
+        if (++count >= bytesPerRow)
+        {
+            count = 0;
+        }
+    }
+    printf("\n");
+}
+
+inline void COM_PrintBytesHex(u8* bytes, u16 numBytes, i32 bytesPerRow)
+{
+    u8* read = bytes;
+    if (bytesPerRow <= 0)
+    {
+        bytesPerRow = 16;
+    }
+    u8* end = read + numBytes;
+    i32 count = 0;
+    while (read < end)
+    {
+        printf("%X, ", *read);
         read++;
         if (++count >= bytesPerRow)
         {
