@@ -39,6 +39,7 @@ internal void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
 {
     NET_ASSERT(net, "Close connection: Net is null\n");
     NET_ASSERT(conn, "Close conncetion: conn is null\n");
+    printf("NET Closing connection to %d\n", conn->id);
     conn->id = 0;
 }
 

@@ -283,13 +283,36 @@ struct Cmd_EntityDelta
     u32 fields;
 };
 
-#define CMD_QUICK_TYPE_SET_CLIENT_ID 1
+#define CMD_QUICK_TYPE_CONFIRM_CLIENT_ID 1
+#define CMD_QUICK_TYPE_PACKET_DELIVERED 2
 // 108 For quick data transfer
 struct Cmd_Quick
 {
-    i32 data1;
-    i32 data2;
-	
+    u8 quickType;
+    struct
+    {
+        i32 clientId;
+
+    };
+    struct
+    {
+        i32 connectionId;
+        u32 packetNumber;
+    };
+
+    void SetAsConfimClientId(i32 newClientId)
+    {
+        quickType = CMD_QUICK_TYPE_CONFIRM_CLIENT_ID;
+        clientId = newClientId;
+    }
+
+    void SetAsPacketDelivered(i32 connId, u32 newPacketNumber)
+    {
+        quickType = CMD_QUICK_TYPE_PACKET_DELIVERED;
+        connectionId = connId;
+        packetNumber = newPacketNumber;
+    }
+
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_Quick, CMD_TYPE_QUICK)
 };
 

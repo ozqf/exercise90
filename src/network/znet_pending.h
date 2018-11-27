@@ -9,7 +9,7 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
 	{
 		p = &net->pendingConnections[i];
 		i32 pXor = p->clientSalt ^ p->challenge;
-		printf("XOR %d vs %d\n", xor, pXor);
+		printf("ZNET XOR %d vs %d\n", xor, pXor);
 		if (pXor == xor)
 		{
 			return p;
@@ -37,7 +37,7 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
 		{
 			if (p->clientSalt == clientSalt && COM_COMPARE(&p->address, address, sizeof(ZNetAddress)))
 			{
-				printf("SV Repeat request from %d\n", clientSalt);
+				printf("ZNET SV Repeat request from %d\n", clientSalt);
 				return p;
 			}
 		}
@@ -49,7 +49,7 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
 		p->challenge = ZNet_CreateSalt();
 		p->clientSalt = clientSalt;
 		p->address = *address;
-		printf("SV Adding pending connection to \"%d.%d.%d.%d:%d\"\nClient Salt %d Challenge Salt %d\n",
+		printf("ZNET SV Adding pending connection to \"%d.%d.%d.%d:%d\"\nClient Salt %d Challenge Salt %d\n",
 			p->address.ip4Bytes[0],
 			p->address.ip4Bytes[1],
 			p->address.ip4Bytes[2],
@@ -61,7 +61,7 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
 	}
 	else
 	{
-		printf("SV No free challenge slots\n");
+		printf("ZNET SV No free challenge slots\n");
 	}
     return p;
 }

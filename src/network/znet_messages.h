@@ -92,11 +92,6 @@ void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 
 void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 {
-	ZNetConnectionInfo info = {};
-	info.address = conn->remoteAddress;
-	info.id = conn->id;
-	g_output.ConnectionDropped(&info);
-
 	ByteBuffer b = ZNet_GetDataWriteBuffer();
 	b.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_DENIED, b.ptrWrite);
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
@@ -116,6 +111,13 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
 	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+
+	// Inform higher level
+	ZNetConnectionInfo info = {};
+	info.address = conn->remoteAddress;
+	info.id = conn->id;
+	g_output.ConnectionDropped(&info);
+
 	printf("done\n");
 }
 

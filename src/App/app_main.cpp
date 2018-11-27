@@ -467,14 +467,10 @@ void App_Frame(GameTime *time)
     GameSession* session = &g_session;
 
     Net_Tick(session, &g_gameScene, time);
+	App_SwapGameCommandBuffers();
 	App_UpdateGameScene(time);
-    // Net_WriteClient2ServerOutput(
-    //     session,
-    //     &g_gameScene,
-    //     App_FindLocalClient(&session->clientList, 0),
-    //     &g_serverStream);
-    Net_Transmit(session, &g_gameScene, time);
-	
+	Net_Transmit(session, &g_gameScene, time);
+    
     if (time->singleFrame)
 	{
 		u32 bytesRead = g_appReadBuffer->ptrWrite - g_appReadBuffer->ptrStart;
@@ -491,15 +487,12 @@ void App_Frame(GameTime *time)
 		App_PrintCommandBufferManifest(g_appWriteBuffer->ptrStart, (u16)g_appWriteBuffer->Written());
 	}
 
-
-	//Swap Command Buffers
-    App_SwapGameCommandBuffers();
+	// Used to swap Command Buffers here for... some reason?
     
 	///////////////////////////
     // End of Frame.
 	///////////////////////////
     i32 error;
-	// Perform state related operations
 	switch (g_appStateOperation.op)
 	{
 		case APP_STATE_OP_SAVE:

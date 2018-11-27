@@ -22,6 +22,7 @@
 struct Cmd_ClientUpdate;
 struct Client;
 struct ClientList;
+struct GameSession;
 struct ActorInput;
 struct UIEntity;
 union EntId;
@@ -55,6 +56,7 @@ GameTime* GetAppTime();
 UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 
 u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes);
+internal void Net_ProcessPacketDelivered(GameSession* session, i32 connId, u32 packetNumber);
 
 // Clients
 internal void Exec_UpdateClient(Cmd_ClientUpdate* cmd);

@@ -46,11 +46,13 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 	if (IsRunningServer(g_session.netMode))
     {
 		Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
+        printf("SV Write Removal of client %d\n", cl->clientId);
         // Delete client
-        Cmd_ClientUpdate spawnClient = {};
-        spawnClient.clientId = cl->connectionId;
-        spawnClient.state = CLIENT_STATE_FREE;
-        APP_WRITE_CMD(0, spawnClient);
+        Cmd_ClientUpdate cmd = {};
+        cmd.clientId = cl->clientId;
+        cmd.connectionId = cl->connectionId;
+        cmd.state = CLIENT_STATE_FREE;
+        APP_WRITE_CMD(0, cmd);
     }
 }
 
@@ -111,11 +113,42 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
     //printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
+    Cmd_Quick cmd = {};
+    cmd.SetAsPacketDelivered(conn->id, packetNumber);
+    APP_WRITE_CMD(0, cmd);
+    #if 0
     switch (g_session.netMode)
     {
         case NETMODE_LISTEN_SERVER:
         {
             Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
+            APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
+            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
+
+            //printf("SV - Clearing output to CL %d\n", cl->connectionId);
+            Stream_ClearReceivedOutput(&cl->stream, packetNumber);
+        } break;
+
+        case NETMODE_CLIENT:
+        {
+            Stream_ClearReceivedOutput(&g_serverStream, packetNumber);
+        } break;
+		
+		default:
+		{
+			APP_ASSERT(0, "Delivery Confirmed: Unsupported netmode");
+		} break;
+    }
+    #endif
+}
+
+internal void Net_ProcessPacketDelivered(GameSession* session, i32 connId, u32 packetNumber)
+{
+    switch (session->netMode)
+    {
+        case NETMODE_LISTEN_SERVER:
+        {
+            Client* cl = App_FindClientByConnectionId(&session->clientList, connId);
             APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
 

@@ -40,6 +40,14 @@ MACROS
 
 // Quick cross platform assert. Read from address zero if expression is false
 // TODO: Message box assert with a print of __FILE__, __LINE__ and __TIME__ possible?
+// Yes, yes it is, eg:
+/* 
+#define log_message(guard,format,...) \
+if (guard) printf("%s:%d: " format "\n", __FILE__, __LINE__,__VA_ARGS_);
+
+log_message( foo == 7, "x %d", x)
+*/
+
 #if PARANOID
 #define Assert(expression) if(!(expression)) {*(int *)0 = 0; }
 #else

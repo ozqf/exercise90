@@ -150,14 +150,16 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         {
 			if (net->state == ZNET_STATE_SERVER || net->state == ZNET_STATE_CONNECTED)
 			{
-				ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+                // read payload header and local connection Id
+                i32 xor = COM_ReadI32(&read);
+
+                //ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+				ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
 				NET_ASSERT(conn, "No connection found for data packet\n");
-				ZNetPacketInfo info = {};
+                
+                ZNetPacketInfo info = {};
 				info.sender.address = conn->remoteAddress;
                 
-                // read payload header
-                i32 xor = COM_ReadI32(&read);
-				
                 if (xor != conn->id)
                 {
                     printf("ZNET data packet connId mismatch: got %d expected %d\n",
@@ -211,7 +213,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 			ZNet_BuildPacket(&output, data.ptrStart, Buf_BytesWritten(&data), &pending->address, 0);
             ZNet_Send(&pending->address, output.ptrStart, Buf_BytesWritten(&output));
 
-            printf("SV Challenging client %d with %d\n", clientSalt, pending->challenge);
+            printf("ZNET SV Challenging client %d with %d\n", clientSalt, pending->challenge);
         } break;
 
         case ZNET_MSG_TYPE_CHALLENGE:
@@ -223,17 +225,17 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
             if (!conn)
             {
-                printf("CL No conn for client2Server id %d\n", net->client2ServerId);
+                printf("ZNET CL No conn for client2Server id %d\n", net->client2ServerId);
                 return;
             }
             if (conn->id != clientSalt)
             {
-                printf("CL Client salt mismatch got %d expected %d\n", clientSalt, conn->id);
+                printf("ZNET CL Client salt mismatch got %d expected %d\n", clientSalt, conn->id);
                 return;
             }
 
             i32 challenge = COM_ReadI32(&read);
-            printf("CL: Challenged: %d\n", challenge);
+            printf("ZNET CL: Challenged: %d\n", challenge);
             
             // the conn->id is actually (clientSalt ^ challenge)
             // the conn id must therefore be changed to that here or 
@@ -256,7 +258,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 ZNetPending* p = ZNet_FindPendingConnection(net, response);
                 if (!p)
                 {
-                    printf("SV Found no pending connection for %d\n", response);
+                    printf("ZNET SV Found no pending connection for %d\n", response);
                     return;
                 }
                 conn = ZNet_CreateClientConnection(p->address, 0);
@@ -278,7 +280,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 ZNet_SendConnectionApproved(net, conn);
             }
             
-            printf("SV Response received: %d Accepted connection\n", response);
+            printf("ZNET SV Response received: %d Accepted connection\n", response);
         } break;
 
         case ZNET_MSG_TYPE_CONNECTION_APPROVED:
@@ -288,7 +290,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 			//i32 response = 
 			// TODO: Not validating XOR!
 			
-            printf("CL Conn approval received!\n");
+            printf("ZNET CL Conn approval received!\n");
             net->state = ZNET_STATE_CONNECTED;
 			
 			ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
@@ -304,14 +306,14 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
             if (!conn)
             {
-                printf("No conn with xor %d!\n", xor);
+                printf("ZNET No conn with xor %d!\n", xor);
                 return;
             }
             // TODO: Currently not copying this string to a safe buffer but trusting
             // to find a zero terminator!
             i32 numChars = COM_ReadI32(&read);
             char* msg = (char*)read;
-            printf("Connection denied, msg: %s\n", msg);
+            printf("ZNET Connection denied, msg: %s\n", msg);
             ZNet_CloseConnection(net, conn);
             if (net->state != ZNET_STATE_SERVER)
             {
@@ -332,7 +334,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             }
             else
             {
-                printf("NET No conn %d found for keep alive\n", xor);
+                printf("ZNET No conn %d found for keep alive\n", xor);
             }
         } break;
 
@@ -347,7 +349,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         {
             ZNetAddress* addr = &packet->address;
             ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
-            printf("Unknown msg type %d from \"%d.%d.%d.%d:%d\"\n",
+            printf("ZNET Unknown msg type %d from \"%d.%d.%d.%d:%d\"\n",
                 msgType,
                 addr->ip4Bytes[0], addr->ip4Bytes[1], addr->ip4Bytes[2], addr->ip4Bytes[3],
                 addr->port
@@ -387,10 +389,10 @@ internal void ZNet_ReadSocket(ZNet* net)
 	    {
 	    	switch (packetError)
 	    	{
-	    		case 1: printf("Packet Protocol mismatch\n"); break;
-                case 2: printf("Packet data checksum mismatch\n"); break;
+	    		case 1: printf("ZNET Packet Protocol mismatch\n"); break;
+                case 2: printf("ZNET Packet data checksum mismatch\n"); break;
 	    		default:
-	    		printf("Unknown packet check failure code: %d\n", packetError);
+	    		printf("ZNET Unknown packet check failure code: %d\n", packetError);
 	    		break;
 	    	}
 	    	return;
@@ -534,7 +536,7 @@ i32 ZNet_Tick(f32 deltaTime)
 
         default:
         {
-            printf("Unknown net state %d\n", net->state);
+            printf("ZNET Unknown net state %d\n", net->state);
         } break;
     }
     net->tickCount++;

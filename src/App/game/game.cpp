@@ -93,7 +93,7 @@ internal void Game_Init()
 internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientUpdate* cmd)
 {
     // Detected change events
-    i32 spawn = 0, death = 0, created = 0;
+    i32 spawn = 0, death = 0, created = 0, disconnected = 0;
 
     Client* cl = App_FindClientById(cmd->clientId, &session->clientList);
     if (cl == NULL)
@@ -107,12 +107,19 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
     );
     spawn = (cl->entId.value == 0 && cmd->entId.value != 0);
     death = (cl->entId.value != 0 && cmd->entId.value == 0);
+    disconnected = (cl->state != CLIENT_STATE_FREE && cmd->state == CLIENT_STATE_FREE);
+
     cl->state = cmd->state;
     cl->entId = cmd->entId;
     cl->connectionId = cmd->connectionId;
     printf("GAME EXEC Client %d conn %d, State: %d Avatar id %d/%d\n",
         cl->clientId, cl->connectionId, cl->state, cl->entId.iteration, cl->entId.index);
     
+    if (disconnected)
+    {
+        printf("GAME CL %d disconnected\n", cl->clientId);
+    }
+
     // Changes that server should act on
     if (created)
     {
@@ -177,16 +184,20 @@ internal void Exec_SpawnViaTemplate(GameScene* gs, Cmd_SpawnViaTemplate* cmd)
 
 internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* cmd)
 {
-    switch (cmd->data1)
+    switch (cmd->quickType)
     {
-        case CMD_QUICK_TYPE_SET_CLIENT_ID:
+        case CMD_QUICK_TYPE_PACKET_DELIVERED:
         {
-            session->clientList.localClientId = cmd->data2;
+            Net_ProcessPacketDelivered(session, cmd->connectionId, cmd->packetNumber);
+        } break;
+        case CMD_QUICK_TYPE_CONFIRM_CLIENT_ID:
+        {
+            session->clientList.localClientId = cmd->clientId;
             printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
         default:
         {
-            printf("GAME Unknown quick command type: %d\n", cmd->data1);
+            printf("GAME Unknown quick command type: %d\n", cmd->quickType);
         } break;
     }
 }
