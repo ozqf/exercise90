@@ -60,6 +60,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_SPAWN_HUD_ITEM 114
 #define CMD_TYPE_S2C_SYNC 115
 #define CMD_TYPE_C2S_SYNC 116
+#define CMD_TYPE_PACKET 117
 
 #define CMD_TYPE_TEST 255
 
@@ -394,6 +395,23 @@ struct Cmd_C2S_Sync
 	i32 state;
 	
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_GameCampaignState, CMD_TYPE_C2S_SYNC)
+};
+
+// This struct is a header, packet data should IMMEDIATELY follow
+// Due to containing data outside this struct, this command
+// cannot use the default interface and must be streamed into the
+// app buffer.
+struct Cmd_Packet
+{
+    i32 connectionId;
+    i32 numBytes;
+
+    inline u16 Measure()
+    {
+        return (u16)(sizeof(u8) + (sizeof(i32) * 2) + numBytes);
+    }
+
+    GAME_CMD_DEFAULT_GetType(CMD_TYPE_PACKET);
 };
 
 struct Cmd_SpawnViaTemplate

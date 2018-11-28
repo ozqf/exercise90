@@ -6,6 +6,8 @@ holding game/menu state and calling game update when required
 
 #include "app_module.cpp"
 
+void App_SwapGameCommandBuffers();
+
 inline Var* App_GetVar(char* name)
 {
     return COM_GetVar(g_vars, g_nextVar, name);
@@ -138,6 +140,10 @@ i32 App_Init()
 
     g_appWriteBuffer = &g_appBufferA;
     g_appReadBuffer = &g_appBufferB;
+    printf("APP init write Buffer: %s\n",
+        App_GetBufferName(g_appWriteBuffer->ptrStart));
+    printf("APP init read Buffer: %s\n",
+        App_GetBufferName(g_appReadBuffer->ptrStart));
 
     // 64KB = roughly 760 or so shape updates max per frame. (update being 84B due to being an entire matrix)
     Heap_Allocate(&g_heap, &g_collisionEventBuffer, MegaBytes(4), "Collision EV", 1);
@@ -243,7 +249,9 @@ void App_UpdateGameScene(GameTime* time)
     g_debugStr.length = 0;
 
     // Prepare input buffer
-	ByteBuffer* input = g_appReadBuffer;
+    // aaaargh how confusing is this?!?
+    // buffers have not swapped yet
+	ByteBuffer* writeBuf = g_appWriteBuffer;
 	
 	
 	//////////////////////////////////////////////
@@ -255,19 +263,20 @@ void App_UpdateGameScene(GameTime* time)
     {
         // > Write frame header
         // > Write contents of read buffer into demo file
-        u32 bytesInBuffer = (u32)input->ptrEnd - (u32)input->ptrStart;
+        u32 bytesInBuffer = (u32)writeBuf->ptrEnd - (u32)writeBuf->ptrStart;
         ReplayFrameHeader h = {};
 		COM_CopyStringLimited("FRAME", h.label, 16);
         h.frameNumber = time->gameFrameNumber;
         h.size = bytesInBuffer;
         if (time->singleFrame)
         {
-            printf("APP writing demo frame %d to file (%d bytes)\n", h.frameNumber, h.size);
+            printf("APP writing demo frame %d to file (%d bytes)\n",
+                h.frameNumber, h.size);
         }
         g_replayHeader.frames.count++;
         g_replayHeader.frames.size += sizeof(ReplayFrameHeader) + bytesInBuffer;
         platform.Platform_WriteToFile(g_replayFileId, (u8*)&h, sizeof(ReplayFrameHeader));
-        platform.Platform_WriteToFile(g_replayFileId, input->ptrStart, bytesInBuffer);
+        platform.Platform_WriteToFile(g_replayFileId, writeBuf->ptrStart, bytesInBuffer);
     }
     else if (g_replayMode == PlayingReplay && g_replayPtr != NULL)
     {
@@ -292,7 +301,7 @@ void App_UpdateGameScene(GameTime* time)
         // Set input buffer
 		replayBuffer.ptrStart = g_replayPtr;
 		replayBuffer.ptrEnd = g_replayPtr + h.size;
-		input = &replayBuffer;
+		writeBuf = &replayBuffer;
 
         // Step read forward
         g_replayPtr += h.size;
@@ -308,17 +317,18 @@ void App_UpdateGameScene(GameTime* time)
     }
 	//////////////////////////////////////////////
 
-	if (time->singleFrame)
-	{
+	//if (time->singleFrame)
+	//{
 		printf("-- GAME INPUT --\n");
-		App_PrintCommandBufferManifest(input->ptrStart, (u16)input->Written());
-	}
+		App_PrintCommandBufferManifest(writeBuf->ptrStart, (u16)writeBuf->Written());
+	//}
 	
     //////////////////////////////////////////////
     // Game state update
     //////////////////////////////////////////////
+    App_SwapGameCommandBuffers();
     Game_Tick(&game,
-              input,
+              g_appReadBuffer,
               g_appWriteBuffer,
               time,
               &g_inputActions);
@@ -417,9 +427,12 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
 
 void App_SwapGameCommandBuffers()
 {
-    ByteBuffer* temp = g_appReadBuffer;
+    printf("APP Swap buffers R <-> W\n");
+    ByteBuffer* tempReadBuffer = g_appReadBuffer;
     g_appReadBuffer = g_appWriteBuffer;
-    g_appWriteBuffer = temp;
+    g_appWriteBuffer = tempReadBuffer;
+    printf("APP write Buffer: %s\n", App_GetBufferName(g_appWriteBuffer->ptrStart));
+    printf("APP read Buffer: %s\n", App_GetBufferName(g_appReadBuffer->ptrStart));
 	
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
@@ -466,8 +479,9 @@ void App_Frame(GameTime *time)
     g_time = *time;
     GameSession* session = &g_session;
 
-    Net_Tick(session, &g_gameScene, time);
-	App_SwapGameCommandBuffers();
+    Net_ReadPackets(session, &g_gameScene, time);
+    Net_ReadInputStreams(session, &g_gameScene, time);
+	
 	App_UpdateGameScene(time);
 	Net_Transmit(session, &g_gameScene, time);
     

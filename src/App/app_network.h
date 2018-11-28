@@ -27,6 +27,7 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 		spawnClient.connectionId = conn->id;
         spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
         spawnClient.state = CLIENT_STATE_SYNC;
+        printf("  - issuing update cmd for clientId %d\n", spawnClient.clientId);
 
         // Exec local client update - will be recreated to clients when executed
         APP_WRITE_CMD(0, spawnClient);
@@ -46,6 +47,11 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 	if (IsRunningServer(g_session.netMode))
     {
 		Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
+		if (cl == NULL)
+		{
+			printf("  ERROR No Client to remove with Id %d\n", conn->id);
+			return;
+		}
         printf("SV Write Removal of client %d\n", cl->clientId);
         // Delete client
         Cmd_ClientUpdate cmd = {};
@@ -58,7 +64,23 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
+    Cmd_Packet packet = {};
+    packet.connectionId = info->sender.id;
+    packet.numBytes = numBytes;
+
+    i32 packetCommandSize = packet.Measure(); 
+    printf("NET Writing packet command (%d bytes)\n", packetCommandSize);
+    CmdHeader h = {};
+    h.Set(CMD_TYPE_PACKET, (u16)packetCommandSize);
+    u8* write = App_StartCommandStream();
+    write += h.Write(write);
+    write += COM_WriteByte(CMD_TYPE_PACKET, write);
+    write += COM_COPY_STRUCT(&packet, write, Cmd_Packet);
+    write += COM_COPY(bytes, write, numBytes);
+    
+    #if 0
     //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
+    // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)
     {
         case NETMODE_LISTEN_SERVER:
@@ -108,6 +130,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
             u16 numUnreliableBytes = COM_ReadU16(&read);
         } break;
     }
+    #endif
 }
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
@@ -142,7 +165,10 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
     #endif
 }
 
-internal void Net_ProcessPacketDelivered(GameSession* session, i32 connId, u32 packetNumber)
+/////////////////////////////////////////////////////////////////
+// Network callback event processing
+/////////////////////////////////////////////////////////////////
+internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 packetNumber)
 {
     switch (session->netMode)
     {
@@ -165,6 +191,61 @@ internal void Net_ProcessPacketDelivered(GameSession* session, i32 connId, u32 p
 		{
 			APP_ASSERT(0, "Delivery Confirmed: Unsupported netmode");
 		} break;
+    }
+}
+
+internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
+{
+    printf("Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+    // TODO: Copy packet reading to app command buffer
+    switch (g_session.netMode)
+    {
+        case NETMODE_LISTEN_SERVER:
+        {
+            ClientList* cls = &g_session.clientList;
+            
+            Client* cl = App_FindClientByConnectionId(&g_session.clientList, sourceConnectionId);
+            APP_ASSERT(cl, "SV Unknown client for packet received\n");
+            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
+
+            u8* read = bytes;
+            read = Stream_PacketToInput(&cl->stream, read);
+			// Deserialise sync check
+			u32 positionCheck = COM_ReadU32(&read);
+			if (positionCheck != NET_DESERIALISE_CHECK)
+			{
+				printf("SV ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+                COM_PrintBytesHex(bytes, numBytes, 32);
+                return;
+			}
+            u16 numUnreliableBytes = COM_ReadU16(&read);
+            if (numUnreliableBytes > 0)
+            {
+                Net_ServerReadUnreliable(cl, read, numUnreliableBytes);
+            }
+			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
+        } break;
+
+        case NETMODE_CLIENT:
+        {
+            //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
+            APP_ASSERT(
+                (sourceConnectionId == g_session.remoteConnectionId),
+                "Received packet from unknown source");
+
+            u8* read = bytes;
+			// Read reliable section
+            read = Stream_PacketToInput(&g_serverStream, read);
+			// Deserialise sync check
+			u32 positionCheck = COM_ReadU32(&read);
+			if (positionCheck != NET_DESERIALISE_CHECK)
+			{
+				printf("CL ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+                COM_PrintBytesHex(bytes, numBytes, 32);
+                return;
+			}
+            u16 numUnreliableBytes = COM_ReadU16(&read);
+        } break;
     }
 }
 
@@ -501,7 +582,7 @@ internal void NET_WriteImpulse(GameSession* gs, i32 impulse)
 /////////////////////////////////////////////////////////////////
 // Network Frame loop
 /////////////////////////////////////////////////////////////////
-internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
+internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* time)
 {
     switch (session->netMode)
     {
@@ -514,6 +595,37 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
         {
 			printf(".");
             ZNet_Tick(time->deltaTime);
+        } break;
+
+        // case NETMODE_DEDICATED_SERVER:
+        // {
+        //     ZNet_Tick(time->deltaTime);
+        // } break;
+
+        case NETMODE_CLIENT:
+        {
+            ZNet_Tick(time->deltaTime);
+        } break;
+
+        default:
+        {
+            APP_ASSERT(0, "Unknown netmode\n");
+        } break;
+    }
+}
+
+internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime* time)
+{
+    switch (session->netMode)
+    {
+        case NETMODE_NONE:
+        {
+            return;
+        } break;
+
+        case NETMODE_LISTEN_SERVER:
+        {
+			printf(".");
             for (i32 i = 0; i < session->clientList.max; ++i)
             {
                 Client* cl = &session->clientList.items[i];
@@ -529,7 +641,6 @@ internal void Net_Tick(GameSession* session, GameScene* gs, GameTime* time)
 
         case NETMODE_CLIENT:
         {
-            ZNet_Tick(time->deltaTime);
             Net_ReadInput(&g_serverStream, NULL);
         } break;
 

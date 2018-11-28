@@ -188,7 +188,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
     {
         case CMD_QUICK_TYPE_PACKET_DELIVERED:
         {
-            Net_ProcessPacketDelivered(session, cmd->connectionId, cmd->packetNumber);
+            Net_ProcessPacketDelivery(session, cmd->connectionId, cmd->packetNumber);
         } break;
         case CMD_QUICK_TYPE_CONFIRM_CLIENT_ID:
         {
@@ -202,20 +202,41 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
     }
 }
 
-internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header, u8* ptr)
+internal u8 Game_ReadCmd(
+    GameSession* session,
+    GameScene* gs,
+    CmdHeader* header,
+    u8* read,
+    i32 verbose)
 {
     ClientList* clients = &session->clientList;
-    u8 type = *ptr;
+    u8 type = *read;
     //switch (header->GetType())
+    if (verbose) { printf("GAME Exec cmd type %d\n", type); }
     switch (type)
     {
         case CMD_TYPE_ENTITY_STATE_2:
         {
-            if (gs->verbose)
+            if (verbose)
             {
                 printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
-            Ent_ReadStateData(gs, ptr, header->GetSize());
+            Ent_ReadStateData(gs, read, header->GetSize());
+            return 1;
+        } break;
+
+        case CMD_TYPE_PACKET:
+        {
+            if (verbose) { printf("  GAME Packet cmd\n"); }
+            Cmd_Packet cmd = {};
+            u8* ptr = read;
+            // skip read over packet and use ptr to load packet header
+            read += cmd.Measure();
+
+            ptr += sizeof(u8);
+            ptr += COM_COPY_STRUCT(ptr, &cmd, Cmd_Packet);
+
+            Net_ProcessPacket(cmd.connectionId, ptr, (u16)cmd.numBytes);
             return 1;
         } break;
 
@@ -224,7 +245,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
             printf("GAME: Defunct dynamic state call\n");
             #if 0
             Cmd_EntityState cmd = {};
-            ptr += cmd.Read(header, ptr);
+            read += cmd.Read(header, read);
             if (gs->verbose)
             {
                 printf("EXEC spawn dynamic ent %d/%d type %d\n",
@@ -239,7 +260,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
 		case CMD_TYPE_SPAWN_VIA_TEMPLATE:
 		{
 			Cmd_SpawnViaTemplate cmd = {};
-			ptr += cmd.Read(ptr);
+			read += cmd.Read(read);
 			Exec_SpawnViaTemplate(gs, &cmd);
 			return 1;
 		} break;
@@ -248,7 +269,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
         {
             printf("GAME: Defunct static state call\n");
             //Cmd_Spawn cmd = {};
-            //ptr += cmd.Read(ptr);
+            //read += cmd.Read(read);
             //Exec_StaticEntityState(gs, &cmd);
             return 1;
         } break;
@@ -256,7 +277,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
         case CMD_TYPE_REMOVE_ENT:
         {
             Cmd_RemoveEntity cmd = {};
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
             Game_RemoveEntity(session->netMode, clients, gs, &cmd);
             return 1;
         } break;
@@ -264,9 +285,9 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
 		case CMD_TYPE_PLAYER_INPUT:
 		{
             Cmd_PlayerInput cmd;
-            u16 measuredSize = cmd.MeasureForReading(ptr);
+            u16 measuredSize = cmd.MeasureForReading(read);
             APP_ASSERT(measuredSize == header->GetSize(), "Command read size mismatch");
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
             Client* cl = App_FindClientById(cmd.clientId, clients);
             Assert(cl != NULL);
             //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
@@ -285,7 +306,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
         case CMD_TYPE_QUICK:
         {
             Cmd_Quick cmd = {};
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
             Exec_QuickCommand(session, gs, &cmd);
             return 1;
         } break;
@@ -293,14 +314,15 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
 			return SV_ReadImpulse(session->netMode, clients, gs, &cmd);
         } break;
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
+            if (verbose) { printf("  CMD Client input\n"); }
             Cmd_ClientUpdate cmd = {};
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
             Exec_UpdateClient(session, gs, &cmd);
             return 1;
         } break;
@@ -308,7 +330,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
 		case CMD_TYPE_GAME_SESSION_STATE:
 		{
 			Cmd_GameSessionState cmd = {};
-			ptr += cmd.Read(ptr);
+			read += cmd.Read(read);
 			Exec_UpdateGameInstance(gs, &cmd);
 			return 1;
 		} break;
@@ -316,7 +338,7 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
         case CMD_TYPE_SPAWN_HUD_ITEM:
         {
             Cmd_SpawnHudItem cmd = {};
-            ptr += cmd.Read(ptr);
+            read += cmd.Read(read);
             Exec_SpawnHudItem(gs, &cmd);
             return 1;
         } break;
@@ -324,18 +346,20 @@ internal u8 Game_ReadCmd(GameSession* session, GameScene* gs, CmdHeader* header,
     return 0;
 }
 
-internal i32 Game_ReadCommandBuffer(GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose)
+internal i32 Game_ReadCommandBuffer(
+    GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose)
 {
     ClientList* clients = &session->clientList;
     i32 numExecuted = 0;
     u8* ptrRead = commands->ptrStart;
     if (verbose)
     {
-        u32 size = commands->ptrEnd - commands->ptrStart;
-        printf("GAME Reading %d bytes from %s\n", size, App_GetBufferName(commands->ptrStart));
+        u32 size = commands->ptrWrite - commands->ptrStart;
+        printf("GAME Reading %d bytes from %s\n",
+            size, App_GetBufferName(commands->ptrStart));
     }
     u32 totalRead = 0;
-    while(ptrRead < commands->ptrEnd)
+    while(ptrRead < commands->ptrWrite)
     {
         CmdHeader h = {};
 		i32 headerRead = h.Read(ptrRead);
@@ -347,17 +371,18 @@ internal i32 Game_ReadCommandBuffer(GameSession* session, GameScene* gs, ByteBuf
                 h.GetType(),
                 h.GetSize(),
                 totalRead,
-                (u32)(commands->ptrEnd - (ptrRead + h.GetSize()))
+                (u32)(commands->ptrWrite - (ptrRead + h.GetSize()))
             );
         }
         
         if (h.GetType() == NULL)
         {
-            ptrRead = commands->ptrEnd;
+            printf("  GAME Read cmd type 0. End read\n");
+            ptrRead = commands->ptrWrite;
         }
         else
         {
-            if (Game_ReadCmd(session, gs, &h, ptrRead) == 0)
+            if (Game_ReadCmd(session, gs, &h, ptrRead, verbose) == 0)
             {
                 printf("!GAME:  Unknown command type %d...\n", h.GetType());
                 ILLEGAL_CODE_PATH
@@ -395,7 +420,7 @@ internal void Game_Tick(
 {
     GameScene* gs = game->scene;
     ClientList* clients = &game->session->clientList;
-    gs->verbose = (u8)time->singleFrame;
+    gs->verbose = 1;//(u8)time->singleFrame;
     if (time->singleFrame)
     {
         printf("GAME Frame %d\n", time->gameFrameNumber);
@@ -439,12 +464,15 @@ internal void Game_Tick(
     // Read Commands
     //////////////////////////////////////////////////////////////////
     u8* ptrRead = input->ptrStart;
-	if (time->singleFrame)
+	if (gs->verbose)
 	{
-		printf("GAME Reading commands from Buffer %s\n", App_GetBufferName(ptrRead));
-        printf("GAME Writing commands to Buffer %s\n", App_GetBufferName(output->ptrStart));
+		printf("GAME Reading commands from Buffer %s (%d bytes)\n",
+            App_GetBufferName(ptrRead), input->Written());
+        printf("GAME Writing commands to Buffer %s (%d bytes)\n",
+            App_GetBufferName(output->ptrStart), output->Written());
 	}
-    Game_ReadCommandBuffer(game->session, gs, input, (time->singleFrame != 0));
+    Game_ReadCommandBuffer(game->session, gs, input, 1);//(time->singleFrame != 0));
+	// Read network stream inputs here...?
     
     g_debugTransform = gs->cameraTransform;
 

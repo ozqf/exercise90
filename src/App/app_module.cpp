@@ -56,7 +56,8 @@ GameTime* GetAppTime();
 UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
 
 u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes);
-internal void Net_ProcessPacketDelivered(GameSession* session, i32 connId, u32 packetNumber);
+internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 packetNumber);
+internal void Net_ProcessPacket(i32 senderConnectionId, u8* bytes, u16 numBytes);
 
 // Clients
 internal void Exec_UpdateClient(Cmd_ClientUpdate* cmd);
