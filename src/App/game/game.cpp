@@ -92,6 +92,8 @@ internal void Game_Init()
 
 internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientUpdate* cmd)
 {
+    APP_ASSERT(App_IsClientStateValid(cmd->state), "Exec_ClientUpdate: state is invalid");
+
     // Detected change events
     i32 spawn = 0, death = 0, created = 0, disconnected = 0;
 
@@ -193,6 +195,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
         case CMD_QUICK_TYPE_CONFIRM_CLIENT_ID:
         {
             session->clientList.localClientId = cmd->clientId;
+            APP_ASSERT(false, "Set local client Id from quick cmd");
             printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
         default:
@@ -228,15 +231,16 @@ internal u8 Game_ReadCmd(
         case CMD_TYPE_PACKET:
         {
             if (verbose) { printf("  GAME Packet cmd\n"); }
-            Cmd_Packet cmd = {};
-            u8* ptr = read;
-            // skip read over packet and use ptr to load packet header
-            read += cmd.Measure();
+            //Cmd_Packet cmd = {};
+			// Read packet info
+            read += sizeof(u8);
+            i32 connId = COM_ReadI32(&read);
+            i32 numBytes = COM_ReadI32(&read);
+            //read += COM_COPY_STRUCT(read, &cmd, Cmd_Packet);
 
-            ptr += sizeof(u8);
-            ptr += COM_COPY_STRUCT(ptr, &cmd, Cmd_Packet);
-
-            Net_ProcessPacket(cmd.connectionId, ptr, (u16)cmd.numBytes);
+            // Read should now be at the start of the packet block!
+            Net_ProcessPacket(connId, read, (u16)numBytes);
+            //Net_ProcessPacket(cmd.connectionId, read, (u16)cmd.numBytes);
             return 1;
         } break;
 
@@ -420,7 +424,8 @@ internal void Game_Tick(
 {
     GameScene* gs = game->scene;
     ClientList* clients = &game->session->clientList;
-    gs->verbose = 1;//(u8)time->singleFrame;
+    gs->verbose = (u8)time->singleFrame;
+    gs->verbose = 1;
     if (time->singleFrame)
     {
         printf("GAME Frame %d\n", time->gameFrameNumber);

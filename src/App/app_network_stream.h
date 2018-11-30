@@ -79,6 +79,50 @@ TransmissionRecord* Stream_FindTransmissionRecord(
 	return NULL;
 }
 
+void Stream_PrintPacketManifest(u8* read, u16 numBytes)
+{
+	printf("=== PACKET MANIFEST ===\n");
+    u8* start = read;
+	u16 reliableBytes = COM_ReadU16(&read);
+    u8* end;
+	printf("%d reliable Bytes\n", numBytes);
+	if (reliableBytes != 0)
+	{
+        u32 reliableSequence = COM_ReadU32(&read);
+        printf("Reliable sequence: %d\n", reliableSequence);
+        end = read + reliableBytes;
+        while (read < end)
+        {
+            u16 header = 0;
+            u8 sequenceOffset = 0;
+            u16 size = 0;
+		    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
+            u8 type = *read;
+            printf("Type %d, seq offset %d, size %d\n",
+                type, sequenceOffset, size);
+            read += size;
+        }
+        
+        
+	}
+    u32 sync = COM_ReadI32(&read);
+    printf("Deserialise check: %d\n", sync);
+    u16 unreliableBytes = COM_ReadU16(&read);
+    printf("Unreliable bytes %d\n", unreliableBytes);
+    end = read + unreliableBytes;
+    while (read < end)
+    {
+        u16 header = 0;
+        u8 sequenceOffset = 0;
+        u16 size = 0;
+	    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
+        u8 type = *read;
+        printf("Type %d, seq offset %d, size %d\n",
+            type, sequenceOffset, size);
+        read += size;
+    }
+}
+
 void Stream_PrintBufferManifest(ByteBuffer* b)
 {
     printf("-- Buffer Manifest --\n");

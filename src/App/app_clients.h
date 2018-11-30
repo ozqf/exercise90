@@ -2,6 +2,15 @@
 
 #include "app_module.cpp"
 
+internal i32 App_IsClientStateValid(i32 state)
+{
+    if (state == CLIENT_STATE_FREE) { return 1; }
+    if (state == CLIENT_STATE_SYNC) { return 1; }
+    if (state == CLIENT_STATE_OBSERVER) { return 1; }
+    if (state == CLIENT_STATE_PLAYING) { return 1; }
+    return 0;
+}
+
 internal i32 App_GetNextClientId(ClientList* cls)
 {
     // The first ID given out must be 1

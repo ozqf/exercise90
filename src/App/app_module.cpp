@@ -75,6 +75,7 @@ internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cl
 internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying);
 internal void App_UpdateLocalClients(GameTime* time, ClientList* cls);
 internal i32 App_NumPlayingClients(ClientList* cls);
+internal i32 App_IsClientStateValid(i32 state);
 
 // assets and data
 internal i32 AppGetTextureIndexByName(char* textureName);

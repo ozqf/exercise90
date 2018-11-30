@@ -18,6 +18,7 @@ internal void GS_Init(GameScene *gs)
     printf("  GAME sizeof(EntId): %d\n", sizeof(EntId));
     printf("  GAME sizeof(EntityState): %d\n", sizeof(EntityState));
     printf("  GAME sizeof(LocalEnt): %d\n", sizeof(LocalEnt));
+    printf("  GAME sizeof(Cmd_Quick): %d\n", sizeof(Cmd_Quick));
     // Nice to preserve the debug mode!
     u16 debugMode = gs->debugMode;
     *gs = {};

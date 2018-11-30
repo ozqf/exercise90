@@ -14,6 +14,7 @@
 
 void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
 
+
 /////////////////////////////////////////////////////////////////
 // Network callbacks
 /////////////////////////////////////////////////////////////////
@@ -68,6 +69,14 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     packet.connectionId = info->sender.id;
     packet.numBytes = numBytes;
 
+	#if 0
+	// TODO: Fix and test me!
+	// Force compile failure so you see this msg
+	:
+	// Either this write isn't working or the read of the measured size is incorrect
+	// in Game_ReadCmd
+	// A packet cmd is the cmdHeader, the cmd_packet header, and the packet itself
+	
     i32 packetCommandSize = packet.Measure(); 
     printf("NET Writing packet command (%d bytes)\n", packetCommandSize);
     CmdHeader h = {};
@@ -77,6 +86,21 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     write += COM_WriteByte(CMD_TYPE_PACKET, write);
     write += COM_COPY_STRUCT(&packet, write, Cmd_Packet);
     write += COM_COPY(bytes, write, numBytes);
+	#endif
+	
+	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
+	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
+	CmdHeader h = {};
+    h.Set(CMD_TYPE_PACKET, (u16)numCommandBytes);
+	
+	u8* write = App_StartCommandStream();
+	write += h.Write(write);
+	write += COM_WriteByte(CMD_TYPE_PACKET, write);
+	write += COM_WriteI32(info->sender.id, write);
+	write += COM_WriteI32(numBytes, write);
+    write += COM_COPY(bytes, write, numBytes);
+	printf("NET Wrote packet cmd (%d packet bytes, %d command bytes)\n",
+		numBytes, numCommandBytes);
     
     #if 0
     //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
@@ -197,6 +221,7 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
 internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 {
     printf("Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+    Stream_PrintPacketManifest(bytes, numBytes);
     // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)
     {

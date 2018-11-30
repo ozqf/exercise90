@@ -290,16 +290,19 @@ struct Cmd_EntityDelta
 struct Cmd_Quick
 {
     u8 quickType;
-    struct
-    {
-        i32 clientId;
+	union
+	{
+		struct
+		{
+			i32 clientId;
 
-    };
-    struct
-    {
-        i32 connectionId;
-        u32 packetNumber;
-    };
+		};
+		struct
+		{
+			i32 connectionId;
+			u32 packetNumber;
+		};
+	};
 
     void SetAsConfimClientId(i32 newClientId)
     {
