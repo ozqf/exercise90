@@ -155,8 +155,15 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
                 //ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
 				ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
-				NET_ASSERT(conn, "No connection found for data packet\n");
-                
+            
+                // May occur in the packet after a client is disconnected...
+                // TODO: Cleaner way to handle this situation?
+                if (conn == NULL)
+                {
+                    printf("ZNET: No connection found for data packet\n");
+                    return;
+                }
+				
                 ZNetPacketInfo info = {};
 				info.sender.address = conn->remoteAddress;
                 

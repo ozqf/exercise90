@@ -195,7 +195,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
         case CMD_QUICK_TYPE_CONFIRM_CLIENT_ID:
         {
             session->clientList.localClientId = cmd->clientId;
-            APP_ASSERT(false, "Set local client Id from quick cmd");
+            //APP_ASSERT(false, "Set local client Id from quick cmd");
             printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
         default:
@@ -422,10 +422,10 @@ internal void Game_Tick(
     GameTime *time,
     InputActionSet* actions)
 {
+    i32 verbose = (u8)time->singleFrame;
     GameScene* gs = game->scene;
     ClientList* clients = &game->session->clientList;
-    gs->verbose = (u8)time->singleFrame;
-    gs->verbose = 1;
+    //gs->verbose = 1;
     if (time->singleFrame)
     {
         printf("GAME Frame %d\n", time->gameFrameNumber);
@@ -469,7 +469,7 @@ internal void Game_Tick(
     // Read Commands
     //////////////////////////////////////////////////////////////////
     u8* ptrRead = input->ptrStart;
-	if (gs->verbose)
+	if (verbose)
 	{
 		printf("GAME Reading commands from Buffer %s (%d bytes)\n",
             App_GetBufferName(ptrRead), input->Written());

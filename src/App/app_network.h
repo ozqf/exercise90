@@ -65,10 +65,6 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-    Cmd_Packet packet = {};
-    packet.connectionId = info->sender.id;
-    packet.numBytes = numBytes;
-
 	#if 0
 	// TODO: Fix and test me!
 	// Force compile failure so you see this msg
@@ -76,6 +72,9 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 	// Either this write isn't working or the read of the measured size is incorrect
 	// in Game_ReadCmd
 	// A packet cmd is the cmdHeader, the cmd_packet header, and the packet itself
+	Cmd_Packet packet = {};
+    packet.connectionId = info->sender.id;
+    packet.numBytes = numBytes;
 	
     i32 packetCommandSize = packet.Measure(); 
     printf("NET Writing packet command (%d bytes)\n", packetCommandSize);
@@ -88,21 +87,38 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
     write += COM_COPY(bytes, write, numBytes);
 	#endif
 	
+	#if 1
+	//printf(">>> NET Packet manifest from %d\n", info->sender.id);
+	Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
 	CmdHeader h = {};
     h.Set(CMD_TYPE_PACKET, (u16)numCommandBytes);
 	
-	u8* write = App_StartCommandStream();
-	write += h.Write(write);
+	u8* write = App_CreateCommandSpace(CMD_TYPE_PACKET, 0, (u16)numCommandBytes);
+	write += COM_WriteByte(CMD_TYPE_PACKET, write);
+	write += COM_WriteI32(info->sender.id, write);
+	write += COM_WriteI32(numBytes, write);
+	write += COM_COPY(bytes, write, numBytes);
+	#endif
+
+	#if 0
+	// TODO: Using direct access to write buffer...
+	u8* headerPos = App_StartCommandStream();
+	u8* write = headerPos;
+	//write += h.Write(write);
 	write += COM_WriteByte(CMD_TYPE_PACKET, write);
 	write += COM_WriteI32(info->sender.id, write);
 	write += COM_WriteI32(numBytes, write);
     write += COM_COPY(bytes, write, numBytes);
+	App_FinishCommandStream(headerPos, CMD_TYPE_PACKET, 0, numCommandBytes);
 	printf("NET Wrote packet cmd (%d packet bytes, %d command bytes)\n",
 		numBytes, numCommandBytes);
+	#endif
     
     #if 0
+	printf(">>> NET Packet manifest from %d\n", info->sender.id);
+	Stream_PrintPacketManifest(bytes, numBytes);
     //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
     // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)

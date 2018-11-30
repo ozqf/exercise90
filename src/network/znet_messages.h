@@ -139,7 +139,12 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 	ZNet* net = &g_net;
 	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
 	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
-	NET_ASSERT(conn, "No connection found for packet start\n");
+	if (conn == NULL)
+	{
+		printf("No connection %d found for packet start\n", connId);
+		return 0;
+	}
+	
 
 	ByteBuffer b = ZNet_GetPacketWriteBuffer();
 	b.ptrWrite += COM_WriteI32(ZNET_PROTOCOL, b.ptrWrite);

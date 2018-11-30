@@ -6,6 +6,18 @@
 // Write unknown bytes into the current command buffer
 //////////////////////////////////////////////////////////////////////
 
+// Write a command header and step over the space so something else
+// can write. Return the empty space to the caller
+inline u8* App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize)
+{
+	CmdHeader h = {};
+	h.Set(cmdType, cmdSize);
+	g_appWriteBuffer->ptrWrite += h.Write(g_appWriteBuffer->ptrWrite);
+	u8* blockStart = g_appWriteBuffer->ptrWrite;
+	g_appWriteBuffer->ptrWrite += cmdSize;
+	return blockStart;
+}
+
 // leave a space for a header and return a write position to the caller
 inline u8* App_StartCommandStream()
 {
@@ -19,6 +31,13 @@ inline u32 App_WriteCommandBytesToFrameOutput(u8* inputStream, u32 numBytes)
     g_appWriteBuffer->ptrWrite +=
         COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
     return numBytes;
+}
+
+inline u32 App_SetCommand(u8* inputStream, u32 numBytes)
+{
+	g_appWriteBuffer->ptrWrite +=
+		COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
+	return numBytes;
 }
 
 // Write the given header information into the given position

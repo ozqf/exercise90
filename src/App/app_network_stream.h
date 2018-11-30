@@ -79,10 +79,10 @@ TransmissionRecord* Stream_FindTransmissionRecord(
 	return NULL;
 }
 
-void Stream_PrintPacketManifest(u8* read, u16 numBytes)
+void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
 {
-	printf("=== PACKET MANIFEST ===\n");
-    u8* start = read;
+	printf("=== PACKET MANIFEST (%d bytes)===\n", numBytes);
+    u8* read = bytes;
 	u16 reliableBytes = COM_ReadU16(&read);
     u8* end;
 	printf("%d reliable Bytes\n", numBytes);
@@ -90,35 +90,38 @@ void Stream_PrintPacketManifest(u8* read, u16 numBytes)
 	{
         u32 reliableSequence = COM_ReadU32(&read);
         printf("Reliable sequence: %d\n", reliableSequence);
+        
         end = read + reliableBytes;
         while (read < end)
         {
-            u16 header = 0;
+            u16 header = COM_ReadU16(&read);
             u8 sequenceOffset = 0;
             u16 size = 0;
 		    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
             u8 type = *read;
             printf("Type %d, seq offset %d, size %d\n",
                 type, sequenceOffset, size);
+			APP_ASSERT(size > 0, "Packet Cmd size is 0!");
             read += size;
         }
         
         
 	}
     u32 sync = COM_ReadI32(&read);
-    printf("Deserialise check: %d\n", sync);
+    printf("Deserialise check: %X (%d) vs (%s)\n", sync, sync, NET_DESERIALISE_CHECK_LABEL);
     u16 unreliableBytes = COM_ReadU16(&read);
     printf("Unreliable bytes %d\n", unreliableBytes);
     end = read + unreliableBytes;
     while (read < end)
     {
-        u16 header = 0;
+        u16 header = COM_ReadU16(&read);
         u8 sequenceOffset = 0;
         u16 size = 0;
 	    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
         u8 type = *read;
         printf("Type %d, seq offset %d, size %d\n",
             type, sequenceOffset, size);
+		APP_ASSERT(size > 0, "Packet Cmd size is 0!");
         read += size;
     }
 }
@@ -297,12 +300,8 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
 
     // Reliable header
     u16 numReliableBytes = COM_ReadU16(&read);
-    if (numReliableBytes == 0)
-    {
-        return read;
-    }
+    if (numReliableBytes == 0) { return read; }
     u32 reliableSequence = COM_ReadU32(&read);
-    // Nothing to read
     if (numReliableBytes == 0) { return read; }
 
     u8* end = read + numReliableBytes;
