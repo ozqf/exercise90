@@ -2,9 +2,9 @@
 
 #include "game.h"
 
-internal void GameSession_Init(GameSession* session)
+internal void GameSession_Clear(GameSession* session)
 {
-    
+    COM_SET_ZERO(session, sizeof(GameSession));
     // Don't wanna forget to assign all these.
     session->clientList.items = g_clients;
     session->clientList.count = 0;

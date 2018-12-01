@@ -83,7 +83,7 @@ internal void Game_BuildTestMenu()
 
 internal void Game_Init()
 {
-    GameSession_Init(&g_session);
+    GameSession_Clear(&g_session);
     GS_Init(&g_gameScene);
     Game_CreateEntityTemplates();
     Game_BuildTestHud();

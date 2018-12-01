@@ -220,7 +220,8 @@ void App_EndSession()
     
     App_DeleteClients(&g_session.clientList);
     ZNet_Shutdown();
-    COM_ZeroMemory((u8 *)g_appWriteBuffer->ptrStart, g_appWriteBuffer->capacity);
+    GameSession_Clear(&g_session);
+    Buf_Clear(g_appWriteBuffer);
 }
 
 u8 App_StartReplay(char *path)

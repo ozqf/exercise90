@@ -328,12 +328,13 @@ void ZNet_Shutdown()
 {
     printf("ZNet shutting down... ");
     ZNet* net = &g_net;
-    net->state = 0;
     if (net->socketIndex != -1)
     {
         g_netPlatform.CloseSocket(net->socketIndex);
         net->socketIndex = -1;
     }
+    COM_ZeroMemory((u8*)net, sizeof(ZNet));
+    g_netPlatform.Shutdown();
     printf("Done\n");
 }
 

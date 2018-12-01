@@ -94,3 +94,8 @@ COM_CopyMemory((u8*)##ptrSource##, (u8*)##ptrDestination##, sizeof(##structType#
 #define COM_COMPARE(ptrA, ptrB, numBytes) \
 COM_CompareMemory((u8*)##ptrA##, (u8*)##ptrB##, numBytes##)
 #endif
+
+#ifndef COM_SET_ZERO
+#define COM_SET_ZERO(ptrToMemory, numberOfBytesToZero) \
+COM_ZeroMemory((u8*)##ptrToMemory##, (u32)##numberOfBytesToZero##)
+#endif
