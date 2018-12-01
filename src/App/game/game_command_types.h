@@ -286,6 +286,7 @@ struct Cmd_EntityDelta
 
 #define CMD_QUICK_TYPE_CONFIRM_CLIENT_ID 1
 #define CMD_QUICK_TYPE_PACKET_DELIVERED 2
+#define CMD_QUICK_TYPE_CONNECTION_LOST 3
 // 108 For quick data transfer
 struct Cmd_Quick
 {
@@ -302,6 +303,10 @@ struct Cmd_Quick
 			i32 connectionId;
 			u32 packetNumber;
 		};
+        struct
+        {
+            i32 reason;
+        };
 	};
 
     void SetAsConfimClientId(i32 newClientId)
@@ -315,6 +320,12 @@ struct Cmd_Quick
         quickType = CMD_QUICK_TYPE_PACKET_DELIVERED;
         connectionId = connId;
         packetNumber = newPacketNumber;
+    }
+
+    void SetAsConnectionLost(i32 newReason)
+    {
+        quickType = CMD_QUICK_TYPE_CONNECTION_LOST;
+        reason = newReason;
     }
 
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_Quick, CMD_TYPE_QUICK)

@@ -214,6 +214,7 @@ void App_EndSession()
 {
     printf("APP Ending session\n");
 
+    g_session.netMode = NETMODE_NONE;
     App_StopRecording();
     App_ClearLevel();
     
@@ -319,87 +320,90 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
     i32 error = COM_ERROR_NONE;
     switch (netMode)
     {
-    //case NETMODE_SINGLE_PLAYER:
-    case NETMODE_LISTEN_SERVER:
-    {
-        error = ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
-        if (error) { printf("APP Start session failed\n"); return error; }
-        error = App_LoadScene(path);
-        if (error) { printf("APP Start session failed\n"); return error; }
-        session->netMode = NETMODE_LISTEN_SERVER;
-
-        // Spawn local client if one hasn't been restored via file
-        Client *cl = App_FindLocalClient(&session->clientList, 0);
-        if (cl == NULL)
+        case NETMODE_NONE: return COM_ERROR_NONE;
         {
-            printf("SESSION: No local client loaded, creating\n");
-            // Create a connection
-            ZNetConnectionInfo info = {};
-            if (ZNet_CreateLocalConnection(&info))
+
+        } break;
+        //case NETMODE_SINGLE_PLAYER:
+        case NETMODE_LISTEN_SERVER:
+        {
+            error = ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
+            if (error) { printf("APP Start session failed\n"); return error; }
+            error = App_LoadScene(path);
+            if (error) { printf("APP Start session failed\n"); return error; }
+            session->netMode = NETMODE_LISTEN_SERVER;
+
+            // Spawn local client if one hasn't been restored via file
+            Client *cl = App_FindLocalClient(&session->clientList, 0);
+            if (cl == NULL)
             {
-                session->clientList.localClientId = App_GetNextClientId(&session->clientList);
-				printf("SV Creating local client %d\n", session->clientList.localClientId);
-				Cmd_ClientUpdate spawnClient = {};
-				spawnClient.clientId = session->clientList.localClientId;
-				spawnClient.state = CLIENT_STATE_OBSERVER;
-				APP_WRITE_CMD(0, spawnClient);
+                printf("SESSION: No local client loaded, creating\n");
+                // Create a connection
+                ZNetConnectionInfo info = {};
+                if (ZNet_CreateLocalConnection(&info))
+                {
+                    session->clientList.localClientId = App_GetNextClientId(&session->clientList);
+	    			printf("SV Creating local client %d\n", session->clientList.localClientId);
+	    			Cmd_ClientUpdate spawnClient = {};
+	    			spawnClient.clientId = session->clientList.localClientId;
+	    			spawnClient.state = CLIENT_STATE_OBSERVER;
+	    			APP_WRITE_CMD(0, spawnClient);
+                }
+	    		else
+	    		{
+	    			ILLEGAL_CODE_PATH
+	    		}
             }
-			else
-			{
-				ILLEGAL_CODE_PATH
-			}
-        }
-		else
-		{
-			printf("Found local client %d for session start\n", cl->clientId);
-		}
+	    	else
+	    	{
+	    		printf("Found local client %d for session start\n", cl->clientId);
+	    	}
 
-        return COM_ERROR_NONE;
-    }
-    break;
+            return COM_ERROR_NONE;
+        } break;
     
-    case NETMODE_DEDICATED_SERVER:
-    {
-        u16 port = ZNET_DEFAULT_SERVER_PORT;
-        printf("SESSION dedicated server on port %d\n", port);
-        error = ZNet_StartSession(netMode, NULL, port);
-        if (error) { return error; }
-        error = App_LoadScene("TEST");
-        if (error) { return error; }
-        session->netMode = NETMODE_DEDICATED_SERVER;
-        return COM_ERROR_NONE;
-    }
-    break;
-
-    case NETMODE_CLIENT:
-    {
-        ZNetAddress addr = COM_LocalHost(ZNET_DEFAULT_SERVER_PORT);
-        printf("SESSION join %d.%d.%d.%d:%d\n",
-            addr.ip4Bytes[0], addr.ip4Bytes[1], addr.ip4Bytes[2], addr.ip4Bytes[3], addr.port);
-        error = ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
-        if (error) { return error; }
-        error = App_LoadScene("TEST");
-        if (error) { return error; }
-        session->netMode = NETMODE_CLIENT;
-        return COM_ERROR_NONE;
-    }
-    break;
-
-    case NETMODE_REPLAY:
-    {
-        if (App_StartReplay(path))
+        case NETMODE_DEDICATED_SERVER:
         {
-            session->netMode = NETMODE_REPLAY;
+            u16 port = ZNET_DEFAULT_SERVER_PORT;
+            printf("SESSION dedicated server on port %d\n", port);
+            error = ZNet_StartSession(netMode, NULL, port);
+            if (error) { return error; }
+            error = App_LoadScene("TEST");
+            if (error) { return error; }
+            session->netMode = NETMODE_DEDICATED_SERVER;
             return COM_ERROR_NONE;
         }
-    }
-    break;
-
-    default:
-    {
-        printf("APP Cannot start unknown netMode %d\n", netMode);
-    }
-    break;
+        break;
+    
+        case NETMODE_CLIENT:
+        {
+            ZNetAddress addr = COM_LocalHost(ZNET_DEFAULT_SERVER_PORT);
+            printf("SESSION join %d.%d.%d.%d:%d\n",
+                addr.ip4Bytes[0], addr.ip4Bytes[1], addr.ip4Bytes[2], addr.ip4Bytes[3], addr.port);
+            error = ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
+            if (error) { return error; }
+            error = App_LoadScene("TEST");
+            if (error) { return error; }
+            session->netMode = NETMODE_CLIENT;
+            return COM_ERROR_NONE;
+        }
+        break;
+    
+        case NETMODE_REPLAY:
+        {
+            if (App_StartReplay(path))
+            {
+                session->netMode = NETMODE_REPLAY;
+                return COM_ERROR_NONE;
+            }
+        }
+        break;
+    
+        default:
+        {
+            printf("APP Cannot start unknown netMode %d\n", netMode);
+        }
+        break;
     }
 
     return COM_ERROR_UNKNOWN;

@@ -317,11 +317,11 @@ void App_UpdateGameScene(GameTime* time)
     }
 	//////////////////////////////////////////////
 
-	//if (time->singleFrame)
-	//{
+	if (time->singleFrame)
+	{
 		printf("-- GAME INPUT --\n");
 		App_PrintCommandBufferManifest(writeBuf->ptrStart, (u16)writeBuf->Written());
-	//}
+	}
 	
     //////////////////////////////////////////////
     // Game state update
@@ -427,12 +427,12 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
 
 void App_SwapGameCommandBuffers()
 {
-    printf("APP Swap buffers R <-> W\n");
+    //printf("APP Swap buffers R <-> W\n");
     ByteBuffer* tempReadBuffer = g_appReadBuffer;
     g_appReadBuffer = g_appWriteBuffer;
     g_appWriteBuffer = tempReadBuffer;
-    printf("APP write Buffer: %s\n", App_GetBufferName(g_appWriteBuffer->ptrStart));
-    printf("APP read Buffer: %s\n", App_GetBufferName(g_appReadBuffer->ptrStart));
+    //printf("APP write Buffer: %s\n", App_GetBufferName(g_appWriteBuffer->ptrStart));
+    //printf("APP read Buffer: %s\n", App_GetBufferName(g_appReadBuffer->ptrStart));
 	
     g_appWriteBuffer->ptrWrite = g_appWriteBuffer->ptrStart;
     g_appWriteBuffer->ptrEnd = g_appWriteBuffer->ptrStart;
@@ -509,6 +509,7 @@ void App_Frame(GameTime *time)
     i32 error;
 	switch (g_appStateOperation.op)
 	{
+        case APP_STATE_OP_NONE: { } break;
 		case APP_STATE_OP_SAVE:
 		{
 			StateSaveHeader h = {};
@@ -538,6 +539,14 @@ void App_Frame(GameTime *time)
 				printf("Failed to load game: Code %d\n", error);
 			}
 		} break;
+        case APP_STATE_OP_EMPTY:
+        {
+            error = App_StartSession(NETMODE_NONE, g_appStateOperation.fileName, session);
+            if (error)
+			{
+				printf("Failed to switch to empty state: Code %d\n", error);
+			}
+        } break;
 		case APP_STATE_OP_RECORD:
 		{
 			ILLEGAL_CODE_PATH

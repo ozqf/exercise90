@@ -198,6 +198,11 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
             //APP_ASSERT(false, "Set local client Id from quick cmd");
             printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
+        case CMD_QUICK_TYPE_CONNECTION_LOST:
+        {
+            printf(">>> GAME: Issuing disconnect text command");
+            App_WriteTextCommand("DISCONNECT");
+        } break;
         default:
         {
             printf("GAME Unknown quick command type: %d\n", cmd->quickType);
@@ -476,7 +481,7 @@ internal void Game_Tick(
         printf("GAME Writing commands to Buffer %s (%d bytes)\n",
             App_GetBufferName(output->ptrStart), output->Written());
 	}
-    Game_ReadCommandBuffer(game->session, gs, input, 1);//(time->singleFrame != 0));
+    Game_ReadCommandBuffer(game->session, gs, input, (u8)verbose);//(time->singleFrame != 0));
 	// Read network stream inputs here...?
     
     g_debugTransform = gs->cameraTransform;

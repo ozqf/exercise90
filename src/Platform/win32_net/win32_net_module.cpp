@@ -21,6 +21,7 @@
 #define LOCALHOST_ADDRESS "127.0.0.1"
 
 #define NET_ERROR_RESET_BY_PEER 10054
+#define NET_ERROR_ADDRESS_NOT_AVAILABLE 10049
 
 #define NET_ERROR_CASE(errorCode, msg) case errorCode##: printf(##msg##); break;
 
@@ -36,6 +37,7 @@ void Net_PrintNetworkError(i32 code)
         NET_ERROR_CASE(10040, "Message too long.\n");
         NET_ERROR_CASE(10047, "Address family not supported by protocol family.\n");
         NET_ERROR_CASE(10048, "Address in use\n");
+        NET_ERROR_CASE(10049, "Address not available\n");
         NET_ERROR_CASE(NET_ERROR_RESET_BY_PEER, "Connection reset by peer\n");
         default: printf("Unknown error code... Sorry\n"); break;
     }
@@ -125,7 +127,12 @@ i32 Net_SendTo(
     if (sendResult == SOCKET_ERROR)
     {
         i32 errorCode = WSAGetLastError();
-        printf("Send error: %d\n", errorCode);
+        printf("Send error %d\n", errorCode);
+        Net_PrintNetworkError(errorCode);
+        if (errorCode == NET_ERROR_ADDRESS_NOT_AVAILABLE)
+        {
+            printf("    %s\n", address);
+        }
     }
     return sendResult;
 }

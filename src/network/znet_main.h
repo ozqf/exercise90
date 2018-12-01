@@ -316,6 +316,9 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 printf("ZNET No conn with xor %d!\n", xor);
                 return;
             }
+            ZNetConnectionInfo info = {};
+            info.address = conn->remoteAddress;
+            info.id = conn->id;
             // TODO: Currently not copying this string to a safe buffer but trusting
             // to find a zero terminator!
             i32 numChars = COM_ReadI32(&read);
@@ -325,6 +328,13 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             if (net->state != ZNET_STATE_SERVER)
             {
                 net->state = ZNET_STATE_DISCONNECTED;
+                // TODO: See if this ever happens...
+                if (conn->id != net->client2ServerId)
+                {
+                    printf("ZNET ERROR: Unknown source for client disconnection\n");
+                }
+                net->state = ZNET_STATE_DISCONNECTED;
+                g_output.ConnectionDropped(&info);
                 return;
             }
         } break;

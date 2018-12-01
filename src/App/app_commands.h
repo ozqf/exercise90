@@ -49,6 +49,12 @@ inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSiz
     h.Write(ptr);
 }
 
+inline void App_WriteTextCommand(char* text)
+{
+    // TODO: Some kinda of sanitisation?
+    platform.Platform_WriteTextCommand(text);
+}
+
 void App_DumpHeap()
 {
     printf("APP HEAP STATUS: Used: %d Free: %d NextId: %d\n",
@@ -211,6 +217,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf(" JOIN: connect to a multiplaye game at the given ip address and port\n");
         }
         return 1;
+    }
+    if (!COM_CompareStrings(tokens[0], "DISCONNECT"))
+    {
+        // No need for text here, except maybe to write a reason for disconnect
+        //COM_CopyStringLimited(tokens[1], g_appStateOperation.fileName, 63);
+		g_appStateOperation.op = APP_STATE_OP_EMPTY;
     }
     if (!COM_CompareStrings(tokens[0], "PLAY"))
     {

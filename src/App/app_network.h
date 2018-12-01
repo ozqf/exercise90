@@ -61,35 +61,20 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
         cmd.state = CLIENT_STATE_FREE;
         APP_WRITE_CMD(0, cmd);
     }
+    else
+    {
+        printf(">>> CL WRITE DISCONNECT CMD\n");
+        Cmd_Quick cmd = {};
+        cmd.SetAsConnectionLost(0);
+        APP_WRITE_CMD(0, cmd);
+    }
 }
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-	#if 0
-	// TODO: Fix and test me!
-	// Force compile failure so you see this msg
-	:
-	// Either this write isn't working or the read of the measured size is incorrect
-	// in Game_ReadCmd
-	// A packet cmd is the cmdHeader, the cmd_packet header, and the packet itself
-	Cmd_Packet packet = {};
-    packet.connectionId = info->sender.id;
-    packet.numBytes = numBytes;
-	
-    i32 packetCommandSize = packet.Measure(); 
-    printf("NET Writing packet command (%d bytes)\n", packetCommandSize);
-    CmdHeader h = {};
-    h.Set(CMD_TYPE_PACKET, (u16)packetCommandSize);
-    u8* write = App_StartCommandStream();
-    write += h.Write(write);
-    write += COM_WriteByte(CMD_TYPE_PACKET, write);
-    write += COM_COPY_STRUCT(&packet, write, Cmd_Packet);
-    write += COM_COPY(bytes, write, numBytes);
-	#endif
-	
 	#if 1
 	//printf(">>> NET Packet manifest from %d\n", info->sender.id);
-	Stream_PrintPacketManifest(bytes, numBytes);
+	//Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
 	CmdHeader h = {};
@@ -101,76 +86,6 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 	write += COM_WriteI32(numBytes, write);
 	write += COM_COPY(bytes, write, numBytes);
 	#endif
-
-	#if 0
-	// TODO: Using direct access to write buffer...
-	u8* headerPos = App_StartCommandStream();
-	u8* write = headerPos;
-	//write += h.Write(write);
-	write += COM_WriteByte(CMD_TYPE_PACKET, write);
-	write += COM_WriteI32(info->sender.id, write);
-	write += COM_WriteI32(numBytes, write);
-    write += COM_COPY(bytes, write, numBytes);
-	App_FinishCommandStream(headerPos, CMD_TYPE_PACKET, 0, numCommandBytes);
-	printf("NET Wrote packet cmd (%d packet bytes, %d command bytes)\n",
-		numBytes, numCommandBytes);
-	#endif
-    
-    #if 0
-	printf(">>> NET Packet manifest from %d\n", info->sender.id);
-	Stream_PrintPacketManifest(bytes, numBytes);
-    //printf("APP Received %d bytes from %d\n", numBytes, info->sender.id);
-    // TODO: Copy packet reading to app command buffer
-    switch (g_session.netMode)
-    {
-        case NETMODE_LISTEN_SERVER:
-        {
-            ClientList* cls = &g_session.clientList;
-            
-            Client* cl = App_FindClientByConnectionId(&g_session.clientList, info->sender.id);
-            APP_ASSERT(cl, "SV Unknown client for packet received\n");
-            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
-
-            u8* read = bytes;
-            read = Stream_PacketToInput(&cl->stream, read);
-			// Deserialise sync check
-			u32 positionCheck = COM_ReadU32(&read);
-			if (positionCheck != NET_DESERIALISE_CHECK)
-			{
-				printf("SV ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
-                COM_PrintBytesHex(bytes, numBytes, 32);
-                return;
-			}
-            u16 numUnreliableBytes = COM_ReadU16(&read);
-            if (numUnreliableBytes > 0)
-            {
-                Net_ServerReadUnreliable(cl, read, numUnreliableBytes);
-            }
-			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
-        } break;
-
-        case NETMODE_CLIENT:
-        {
-            //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
-            APP_ASSERT(
-                (info->sender.id == g_session.remoteConnectionId),
-                "Received packet from unknown source");
-
-            u8* read = bytes;
-			// Read reliable section
-            read = Stream_PacketToInput(&g_serverStream, read);
-			// Deserialise sync check
-			u32 positionCheck = COM_ReadU32(&read);
-			if (positionCheck != NET_DESERIALISE_CHECK)
-			{
-				printf("CL ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
-                COM_PrintBytesHex(bytes, numBytes, 32);
-                return;
-			}
-            u16 numUnreliableBytes = COM_ReadU16(&read);
-        } break;
-    }
-    #endif
 }
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
@@ -179,30 +94,6 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
     Cmd_Quick cmd = {};
     cmd.SetAsPacketDelivered(conn->id, packetNumber);
     APP_WRITE_CMD(0, cmd);
-    #if 0
-    switch (g_session.netMode)
-    {
-        case NETMODE_LISTEN_SERVER:
-        {
-            Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
-            APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
-            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
-
-            //printf("SV - Clearing output to CL %d\n", cl->connectionId);
-            Stream_ClearReceivedOutput(&cl->stream, packetNumber);
-        } break;
-
-        case NETMODE_CLIENT:
-        {
-            Stream_ClearReceivedOutput(&g_serverStream, packetNumber);
-        } break;
-		
-		default:
-		{
-			APP_ASSERT(0, "Delivery Confirmed: Unsupported netmode");
-		} break;
-    }
-    #endif
 }
 
 /////////////////////////////////////////////////////////////////
@@ -236,8 +127,8 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
 
 internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 {
-    printf("Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
-    Stream_PrintPacketManifest(bytes, numBytes);
+    //printf("Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+    //Stream_PrintPacketManifest(bytes, numBytes);
     // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)
     {
