@@ -50,7 +50,7 @@ global_variable u8 g_debugColliders = 1;
 
 global_variable u8 g_paused = 0;
 global_variable u8 g_minimised = 0;
-global_variable u8 g_menuOn = 0;
+global_variable u8 g_menuOn = 1;
 
 global_variable ReplayMode g_replayMode = NoReplayMode;
 global_variable i32 g_replayFileId = -1;

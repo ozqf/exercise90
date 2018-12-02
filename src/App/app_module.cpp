@@ -63,6 +63,7 @@ internal void       Net_ProcessPacket(i32 senderConnectionId, u8* bytes, u16 num
 // Clients
 internal void       Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 /*internal*/ void   App_EndAllClients(ClientList* cls);
+internal void       App_ResetClient(Client* cl);
 internal void       App_ClearClientGameLinks(ClientList* cls);
 internal void       App_DeleteClients(ClientList* cls);
 /*internal*/ void   App_AddLocalClient();

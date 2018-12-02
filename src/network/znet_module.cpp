@@ -33,8 +33,7 @@ App Network layer functionality:
 //#define ZNET_DEFAULT_PORT 23232
 #define ZNET_CONNECTION_FLAG_LOCAL (1 << 0)
 
-// TODO: Change this to seconds not ticks!
-#define ZNET_CONNECTION_TIMEOUT_SECONDS 30
+#define ZNET_CONNECTION_TIMEOUT_SECONDS 10
 
 #define ZNET_STATE_DISCONNECTED 0
 // client side

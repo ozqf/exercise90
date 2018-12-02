@@ -143,6 +143,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
     u8* end = packet->bytes + packet->numBytes;
     u8 msgType;
     msgType = COM_ReadByte(&read);
+    ZNetConnection* conn = NULL;
     //printf(">> Read packet type %d from remote port %d\n", msgType, packet->address.port);
     switch (msgType)
     {
@@ -154,7 +155,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 i32 xor = COM_ReadI32(&read);
 
                 //ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
-				ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+				conn = ZNet_GetConnectionById(net, xor);
             
                 // May occur in the packet after a client is disconnected...
                 // TODO: Cleaner way to handle this situation?
@@ -229,7 +230,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
             net->state = ZNET_STATE_RESPONDING;
             i32 clientSalt = COM_ReadI32(&read);
-            ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
+            conn = ZNet_GetConnectionById(net, net->client2ServerId);
             if (!conn)
             {
                 printf("ZNET CL No conn for client2Server id %d\n", net->client2ServerId);
@@ -258,7 +259,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
             i32 response = COM_ReadI32(&read);
 			
-			ZNetConnection* conn = ZNet_GetConnectionById(net, response);
+			conn = ZNet_GetConnectionById(net, response);
 			if (!conn)
 			{
                 // close pending connection
@@ -300,7 +301,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
             printf("ZNET CL Conn approval received!\n");
             net->state = ZNET_STATE_CONNECTED;
 			
-			ZNetConnection* conn = ZNet_GetConnectionById(net, net->client2ServerId);
+			conn = ZNet_GetConnectionById(net, net->client2ServerId);
 			ZNetConnectionInfo info = {};
 			info.address = conn->remoteAddress;
 			info.id = conn->id;
@@ -310,7 +311,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         case ZNET_MSG_TYPE_CONNECTION_DENIED:
         {
             i32 xor = COM_ReadI32(&read);
-            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            conn = ZNet_GetConnectionById(net, xor);
             if (!conn)
             {
                 printf("ZNET No conn with xor %d!\n", xor);
@@ -343,7 +344,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         case ZNET_MSG_TYPE_KEEP_ALIVE:
         {
             i32 xor = COM_ReadI32(&read);
-            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            conn = ZNet_GetConnectionById(net, xor);
             if (conn)
             {
                 conn->ticksSinceLastMessage = 0;
@@ -358,20 +359,28 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         case ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE:
         {
             i32 xor = COM_ReadI32(&read);
-            ZNetConnection* conn = ZNet_GetConnectionById(net, xor);
+            conn = ZNet_GetConnectionById(net, xor);
         } break;
         #endif
 
         default:
         {
+            printf("ZNET Unknown msg type %d\n", msgType);
+            #if 0
             ZNetAddress* addr = &packet->address;
-            ZNetConnection* conn = ZNet_GetConnectionByAddress(net, &packet->address);
+            conn = ZNet_GetConnectionByAddress(net, &packet->address);
             printf("ZNET Unknown msg type %d from \"%d.%d.%d.%d:%d\"\n",
                 msgType,
                 addr->ip4Bytes[0], addr->ip4Bytes[1], addr->ip4Bytes[2], addr->ip4Bytes[3],
                 addr->port
             );
+            #endif
         } break;
+    }
+
+    if (conn != NULL)
+    {
+        conn->timeSinceLastMessage = 0;
     }
 }
 

@@ -57,7 +57,10 @@ static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
 
 static inline void Buf_Clear(ByteBuffer* b)
 {
-	COM_ZeroMemory(b->ptrStart, b->capacity);
+    if (b->ptrStart != NULL)
+    {
+        COM_ZeroMemory(b->ptrStart, b->capacity);
+    }
 	b->ptrEnd = b->ptrStart;
 	b->ptrWrite = b->ptrStart;
 }

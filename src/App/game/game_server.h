@@ -169,6 +169,7 @@ internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
     // Tell the new client what their public Id is
     Cmd_Quick cmd = {};
     cmd.SetAsConfimClientId(cl->clientId);
+    printf(">>> SV Transmit clientId %d confirmation to %d\n", cl->clientId, cl->connectionId);
     //cmd.data1 = CMD_QUICK_TYPE_CONFI_CLIENT_ID;
     //cmd.data2 = cl->clientId;
     NET_MSG_TO_OUTPUT(&cl->stream, &cmd);

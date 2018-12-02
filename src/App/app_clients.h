@@ -11,6 +11,18 @@ internal i32 App_IsClientStateValid(i32 state)
     return 0;
 }
 
+internal void App_ResetClient(Client* cl)
+{
+    printf(">>> GAME CL %d disconnected. Clearing Client\n", cl->clientId);
+    ByteBuffer input = cl->stream.inputBuffer;
+    ByteBuffer output = cl->stream.outputBuffer;
+    Buf_Clear(&input);
+    Buf_Clear(&output);
+    COM_SET_ZERO(cl, sizeof(Client));
+    cl->stream.inputBuffer = input;
+    cl->stream.outputBuffer = output;
+}
+
 internal i32 App_GetNextClientId(ClientList* cls)
 {
     // The first ID given out must be 1
@@ -23,7 +35,8 @@ internal i32 App_GetNextClientId(ClientList* cls)
 {
 	for (i32 i = 0; i < cls->max; ++i)
 	{
-		cls->items[i] = {};
+		//cls->items[i] = {};
+        App_ResetClient(&cls->items[i]);
 	}
 }
 

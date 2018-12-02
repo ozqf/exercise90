@@ -24,6 +24,19 @@ void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
 }
 
+// Does NOT free I/O buffers
+#if 0
+void Stream_Clear(NetStream* stream)
+{
+    // careful not to change buffer pointers if they are set
+    ByteBuffer input = stream.inputBuffer;
+    ByteBuffer output = stream.outputBuffer;
+    COM_SET_ZERO(stream, sizeof(NetStream));
+    stream.inputBuffer = input;
+    stream.outputBuffer = output;
+}
+#endif
+
 u32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes)
 {
     u8* start = ptr;
@@ -82,47 +95,69 @@ TransmissionRecord* Stream_FindTransmissionRecord(
 void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
 {
 	printf("=== PACKET MANIFEST (%d bytes)===\n", numBytes);
-    u8* read = bytes;
-	u16 reliableBytes = COM_ReadU16(&read);
+    u8* reliableRead = bytes;
+	u16 numReliableBytes = COM_ReadU16(&reliableRead);
     u8* end;
 	printf("%d reliable Bytes\n", numBytes);
-	if (reliableBytes != 0)
+	if (numReliableBytes != 0)
 	{
-        u32 reliableSequence = COM_ReadU32(&read);
+        u32 reliableSequence = COM_ReadU32(&reliableRead);
         printf("Reliable sequence: %d\n", reliableSequence);
         
-        end = read + reliableBytes;
-        while (read < end)
+        end = reliableRead + numReliableBytes;
+        while (reliableRead < end)
         {
-            u16 header = COM_ReadU16(&read);
+            u16 header = COM_ReadU16(&reliableRead);
             u8 sequenceOffset = 0;
             u16 size = 0;
 		    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
-            u8 type = *read;
+            u8 type = *reliableRead;
             printf("Type %d, seq offset %d, size %d\n",
                 type, sequenceOffset, size);
-			APP_ASSERT(size > 0, "Packet Cmd size is 0!");
-            read += size;
+            if (size == 0)
+            {
+                printf("  Corrupted Manifest: cmd size is zero\n");
+                break;
+            }
+			//APP_ASSERT(size > 0, "Packet Cmd size is 0!");
+            reliableRead += size;
         }
-        
-        
 	}
-    u32 sync = COM_ReadI32(&read);
-    printf("Deserialise check: %X (%d) vs (%s)\n", sync, sync, NET_DESERIALISE_CHECK_LABEL);
-    u16 unreliableBytes = COM_ReadU16(&read);
-    printf("Unreliable bytes %d\n", unreliableBytes);
-    end = read + unreliableBytes;
-    while (read < end)
+    // else
+    // {
+    //     unreliableRead = reliableRead;
+    // }
+    u8* unreliableRead;
+    unreliableRead = bytes + (sizeof(u16) + numReliableBytes);
+
+    u32 sync = COM_ReadI32(&unreliableRead);
+    printf("Deserialise check: 0x%X vs 0x%X\n", sync, NET_DESERIALISE_CHECK);
+    if (sync != NET_DESERIALISE_CHECK)
     {
-        u16 header = COM_ReadU16(&read);
+        printf("  Check failed. Aborting manifest read\n");
+        return;
+    }
+    u16 unreliableBytes = COM_ReadU16(&unreliableRead);
+    printf("Unreliable bytes %d\n", unreliableBytes);
+    if (unreliableBytes == 0) { return; }
+
+    end = unreliableRead + unreliableBytes;
+    while (unreliableRead < end)
+    {
+        u16 header = COM_ReadU16(&unreliableRead);
         u8 sequenceOffset = 0;
         u16 size = 0;
 	    Stream_UnpackMessageHeader(header, &sequenceOffset, &size);
-        u8 type = *read;
+        u8 type = *unreliableRead;
         printf("Type %d, seq offset %d, size %d\n",
             type, sequenceOffset, size);
-		APP_ASSERT(size > 0, "Packet Cmd size is 0!");
-        read += size;
+		if (size == 0)
+		{
+			printf("  Corrupted Manifest: cmd size is zero\n");
+			break;
+		}
+		//APP_ASSERT(size > 0, "Packet Cmd size is 0!");
+        unreliableRead += size;
     }
 }
 

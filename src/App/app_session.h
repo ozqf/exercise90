@@ -383,8 +383,8 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
                 addr.ip4Bytes[0], addr.ip4Bytes[1], addr.ip4Bytes[2], addr.ip4Bytes[3], addr.port);
             error = ZNet_StartSession(netMode, &addr, ZNET_DEFAULT_CLIENT_PORT);
             if (error) { return error; }
-            error = App_LoadScene("TEST");
-            if (error) { return error; }
+            //error = App_LoadScene("TEST");
+            //if (error) { return error; }
             session->netMode = NETMODE_CLIENT;
             return COM_ERROR_NONE;
         }

@@ -134,7 +134,12 @@ inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, 
 {
     u32 used = b->ptrWrite - b->ptrStart;
     u32 space = b->capacity - used;
-    Assert((space - used) > itemSize + sizeof(PlatformEventHeader));
+	if ((space - used) <= itemSize + sizeof(PlatformEventHeader))
+	{
+		printf("WIN32 No capacity left for platform command!\n");
+		return;
+	}
+    //Assert((space - used) > itemSize + sizeof(PlatformEventHeader));
 
     PlatformEventHeader header = {};
     header.type = itemType;

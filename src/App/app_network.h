@@ -73,8 +73,8 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
 	#if 1
-	//printf(">>> NET Packet manifest from %d\n", info->sender.id);
-	//Stream_PrintPacketManifest(bytes, numBytes);
+	printf(">>> NET Packet manifest from %d\n", info->sender.id);
+	Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
 	CmdHeader h = {};
@@ -90,7 +90,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
-    //printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
+    printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
     Cmd_Quick cmd = {};
     cmd.SetAsPacketDelivered(conn->id, packetNumber);
     APP_WRITE_CMD(0, cmd);
@@ -173,6 +173,7 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
 				printf("CL ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+                Stream_PrintPacketManifest(bytes, numBytes);
                 COM_PrintBytesHex(bytes, numBytes, 32);
                 return;
 			}
@@ -389,24 +390,27 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         // TODO: Sending once per tick regardless of framerate at the moment
         ByteBuffer* b = &cl->stream.outputBuffer;
         
-        i32 pendingBytes = b->Written();
-        if (pendingBytes == 0)
-        {
-            // nothing to transmit - write keep alive
-            // acks are piggy-backed on regular packets. No traffic == no acks
-            //printf("SV 2 CL: Nothing to transmit, writing keepalive\n");
-            Cmd_Test cmd = {};
-            cmd.data = 1234;
-            NET_MSG_TO_OUTPUT((&cl->stream), (&cmd));
-        }
-        //printf("%dB, ", pendingBytes);
-        
+        i32 numReliableBytes = b->Written();
 		// Write reliable
         Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf);
 		// sync check
 		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
+
         // Write unreliable
-        packetBuf.ptrWrite += COM_WriteU16(0, packetBuf.ptrWrite);
+        // TODO: This is where entity state will be transmitted
+        if (numReliableBytes == 0)
+        {
+            packetBuf.ptrWrite += COM_WriteU16(7, packetBuf.ptrWrite);
+            packetBuf.ptrWrite += COM_WriteU16(Stream_PackMessageHeader(0, 5), packetBuf.ptrWrite);
+            Cmd_Test cmd = {};
+            cmd.data = 1234;
+            packetBuf.ptrWrite += cmd.Write(packetBuf.ptrWrite);
+            printf("SV 2 CL: Nothing to transmit, writing keepalive\n");
+        }
+        else
+        {
+            packetBuf.ptrWrite += COM_WriteU16(0, packetBuf.ptrWrite);
+        }
         // Send
         ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
     }
@@ -450,9 +454,11 @@ u32 Net_WriteClient2ServerOutput(
             // nothing to transmit - write keep alive
             // acks are piggy-backed on regular packets. No traffic == no acks
             // Will also automatically keep the connection alive
+            packetBuf->ptrWrite += COM_WriteU16(Stream_PackMessageHeader(0, 5), packetBuf->ptrWrite);
             Cmd_Test cmd = {};
             cmd.data = 5678;
             packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
+            printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
         }
     }
     else

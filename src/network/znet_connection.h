@@ -21,7 +21,7 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id)
     return NULL;
 }
 
-internal ZNetConnection* ZNet_GetConnectionByAddress(ZNet* net, ZNetAddress* address)
+/*internal*/ ZNetConnection* ZNet_GetConnectionByAddress(ZNet* net, ZNetAddress* address)
 {
     if (!address) { return NULL; }
     for (i32 i = 0; i < MAX_CONNECTIONS; ++i)

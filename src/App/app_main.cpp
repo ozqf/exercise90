@@ -94,7 +94,7 @@ void App_RunPostInitCommands()
 	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, &g_session);
     //platform.Platform_WriteTextCommand("LOAD TEST");
 	//platform.Platform_WriteTextCommand("IMPULSE 1");
-	platform.Platform_WriteTextCommand("MENU CLOSE");
+	//platform.Platform_WriteTextCommand("MENU CLOSE");
 }
 
 i32 App_Init()

@@ -119,9 +119,8 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
     
     if (disconnected)
     {
-        printf("GAME CL %d disconnected\n", cl->clientId);
+        App_ResetClient(cl);
     }
-
     // Changes that server should act on
     if (created)
     {
@@ -196,7 +195,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
         {
             session->clientList.localClientId = cmd->clientId;
             //APP_ASSERT(false, "Set local client Id from quick cmd");
-            printf("GAME Set local client Id: %d\n", session->clientList.localClientId);
+            printf(">>> GAME Set local client Id: %d\n", session->clientList.localClientId);
         } break;
         case CMD_QUICK_TYPE_CONNECTION_LOST:
         {
