@@ -73,7 +73,7 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
 	#if 1
-	printf(">>> NET Packet manifest from %d\n", info->sender.id);
+	//printf(">>> NET Packet manifest from %d\n", info->sender.id);
 	//Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
@@ -132,7 +132,7 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
     {
         case NETMODE_LISTEN_SERVER:
         {
-            printf("*SV* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+            //printf("*SV* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
             //Stream_PrintPacketManifest(bytes, numBytes);
             ClientList* cls = &g_session.clientList;
             
@@ -164,8 +164,7 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 
         case NETMODE_CLIENT:
         {
-            //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
-            printf("*CL* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+            //printf("*CL* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
             //Stream_PrintPacketManifest(bytes, numBytes);
             APP_ASSERT(
                 (sourceConnectionId == g_session.remoteConnectionId),
@@ -419,7 +418,6 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
             Cmd_Test cmd = {};
             cmd.data = 1234;
             packetBuf.ptrWrite += cmd.Write(packetBuf.ptrWrite);
-            printf("SV 2 CL: Nothing to transmit, writing keepalive\n");
         }
         else
         {
@@ -472,7 +470,6 @@ u32 Net_WriteClient2ServerOutput(
             Cmd_Test cmd = {};
             cmd.data = 5678;
             packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
-            printf("CL 2 SV: Nothing to transmit, writing keepalive\n");
         }
     }
     else
@@ -656,9 +653,10 @@ internal void Net_WriteDebug(ZStringHeader* txt, GameSession* session)
     char* end = start + txt->maxLength;
 
     write += sprintf_s(write, (end - write),
-        "===== NETWORK =====\nMode: %s\nRemote ConnId: %d\n-----CLIENTS-----\n",
+        "===== NETWORK =====\nMode: %s\nRemote ConnId: %d\nLocal Client ID: %d\n-----CLIENTS-----\n",
         Net_GetModeLabel(session->netMode),
-        session->remoteConnectionId
+        session->remoteConnectionId,
+        session->clientList.localClientId
     );
 
     ClientList* cls = &session->clientList;

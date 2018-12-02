@@ -335,7 +335,6 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
 // Returns read position after section
 u8* Stream_PacketToInput(NetStream* s, u8* ptr)
 {
-    printf("STREAM Copy reliable bytes to input... \n");
     // iterate for messages
     // > if messageId <= stream input sequence ignore
     // > if messageId > input sequence, copy to input buffer (if it isn't already there)
@@ -378,7 +377,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
             s->inputBuffer.ptrWrite,
             messageId))
         {
-            printf("  MessageId %d already received\n", messageId);
+            //printf("  MessageId %d already received\n", messageId);
             read += size;
             continue;
         }

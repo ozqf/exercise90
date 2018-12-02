@@ -6,6 +6,7 @@ internal void GameSession_Clear(GameSession* session)
 {
     COM_SET_ZERO(session, sizeof(GameSession));
     // Don't wanna forget to assign all these.
+    session->clientList.localClientId = 0;
     session->clientList.items = g_clients;
     session->clientList.count = 0;
     session->clientList.max = GAME_MAX_CLIENTS;
