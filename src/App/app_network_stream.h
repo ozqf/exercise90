@@ -25,15 +25,15 @@ void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
 }
 
 // Does NOT free I/O buffers
-#if 0
-void Stream_Clear(NetStream* stream)
+#if 1
+internal void Stream_Clear(NetStream* stream)
 {
     // careful not to change buffer pointers if they are set
-    ByteBuffer input = stream.inputBuffer;
-    ByteBuffer output = stream.outputBuffer;
+    ByteBuffer input = stream->inputBuffer;
+    ByteBuffer output = stream->outputBuffer;
     COM_SET_ZERO(stream, sizeof(NetStream));
-    stream.inputBuffer = input;
-    stream.outputBuffer = output;
+    stream->inputBuffer = input;
+    stream->outputBuffer = output;
 }
 #endif
 
@@ -335,7 +335,7 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
 // Returns read position after section
 u8* Stream_PacketToInput(NetStream* s, u8* ptr)
 {
-    //printf("Copy reliable packet (%d bytes) to input... ", numBytes);
+    printf("STREAM Copy reliable bytes to input... \n");
     // iterate for messages
     // > if messageId <= stream input sequence ignore
     // > if messageId > input sequence, copy to input buffer (if it isn't already there)
@@ -358,6 +358,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
         u32 messageId = reliableSequence + offset;
         //printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
 
+
         u8 msgType = *read;
         if (msgType == 0)
         {
@@ -368,7 +369,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
         if (messageId <= s->inputSequence)
         {
             read += size;
-            //printf("  MessageId %d is out of date\n", messageId);
+            printf("  MessageId %d is out of date\n", messageId);
             continue;
         }
         // message might have already been received
@@ -377,6 +378,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
             s->inputBuffer.ptrWrite,
             messageId))
         {
+            printf("  MessageId %d already received\n", messageId);
             read += size;
             continue;
         }

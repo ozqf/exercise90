@@ -215,6 +215,7 @@ void App_EndSession()
     printf("APP Ending session\n");
 
     g_session.netMode = NETMODE_NONE;
+    Stream_Clear(&g_serverStream);
     App_StopRecording();
     App_ClearLevel();
     

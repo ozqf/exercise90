@@ -74,7 +74,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
 	#if 1
 	printf(">>> NET Packet manifest from %d\n", info->sender.id);
-	Stream_PrintPacketManifest(bytes, numBytes);
+	//Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
 	CmdHeader h = {};
@@ -90,7 +90,7 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
-    printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
+    //printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
     Cmd_Quick cmd = {};
     cmd.SetAsPacketDelivered(conn->id, packetNumber);
     APP_WRITE_CMD(0, cmd);
@@ -127,18 +127,19 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
 
 internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 {
-    printf("* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
-    Stream_PrintPacketManifest(bytes, numBytes);
     // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)
     {
         case NETMODE_LISTEN_SERVER:
         {
+            printf("*SV* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+            //Stream_PrintPacketManifest(bytes, numBytes);
             ClientList* cls = &g_session.clientList;
             
             Client* cl = App_FindClientByConnectionId(&g_session.clientList, sourceConnectionId);
             APP_ASSERT(cl, "SV Unknown client for packet received\n");
-            APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for packet received\n");
+            APP_ASSERT((cl->state != CLIENT_STATE_FREE),
+                "SV Client is in state FREE for packet received\n");
 
             u8* read = bytes;
             read = Stream_PacketToInput(&cl->stream, read);
@@ -146,7 +147,9 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
-				printf("SV ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+				printf("SV ABORT Deserialise check %s got 0x%X\n",
+                    NET_DESERIALISE_CHECK_LABEL,
+                    positionCheck);
                 COM_PrintBytesHex(bytes, numBytes, 32);
                 return;
 			}
@@ -155,12 +158,15 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
             {
                 Net_ServerReadUnreliable(cl, read, numUnreliableBytes);
             }
-			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK, "Deserialise failed sync check at unreliable section");
+			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK,
+            //    "Deserialise failed sync check at unreliable section");
         } break;
 
         case NETMODE_CLIENT:
         {
             //printf("Received %d bytes from %d\n", numBytes, info->sender.id);
+            printf("*CL* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+            //Stream_PrintPacketManifest(bytes, numBytes);
             APP_ASSERT(
                 (sourceConnectionId == g_session.remoteConnectionId),
                 "Received packet from unknown source");
@@ -172,12 +178,20 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 			u32 positionCheck = COM_ReadU32(&read);
 			if (positionCheck != NET_DESERIALISE_CHECK)
 			{
-				printf("CL ABORT Deserialise check %s got 0x%X\n", NET_DESERIALISE_CHECK_LABEL, positionCheck);
+				printf("CL ABORT Deserialise check %s got 0x%X\n",
+                    NET_DESERIALISE_CHECK_LABEL,
+                    positionCheck);
                 Stream_PrintPacketManifest(bytes, numBytes);
                 COM_PrintBytesHex(bytes, numBytes, 32);
                 return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);
+        } break;
+
+        default:
+        {
+            printf("NET Unknown mode %d for processing packet!\n", g_session.netMode);
+            ILLEGAL_CODE_PATH
         } break;
     }
 }
@@ -213,7 +227,7 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
-    //printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+    printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
@@ -239,7 +253,7 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
     }
     else
     {
-        //printf("CL Exec unknown msg type: %d\n", type);
+        printf("CL Write SV msg to App Buffer %d\n", type);
         APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
     }
 }
