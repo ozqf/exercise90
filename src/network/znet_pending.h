@@ -9,7 +9,7 @@ ZNetPending* ZNet_FindPendingConnection(ZNet* net, i32 xor)
 	{
 		p = &net->pendingConnections[i];
 		i32 pXor = p->clientSalt ^ p->challenge;
-		printf("ZNET XOR %d vs %d\n", xor, pXor);
+		//printf("ZNET XOR %d vs %d\n", xor, pXor);
 		if (pXor == xor)
 		{
 			return p;

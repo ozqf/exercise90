@@ -226,18 +226,22 @@ internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cl
         {
             cl->state = CLIENT_STATE_SYNC;
             cl->clientId = clientId;
-            cl->connectionId = connectionId;
+            if (IS_SERVER)
+            {
+                cl->connectionId = connectionId;
 
-            NetStream* stream = &cl->stream;
-            printf("APP Allocating I/O streams for client %d\n", clientId);
-            u32 bytes = KiloBytes(64);
-            stream->inputBuffer = Buf_FromMalloc(
-                malloc(bytes), bytes
-            );
-            stream->outputBuffer = Buf_FromMalloc(
-                malloc(bytes), bytes
-            );
-
+                NetStream* stream = &cl->stream;
+                printf("SV APP Allocating I/O streams for client %d\n", clientId);
+                u32 bytes = KiloBytes(64);
+                stream->inputBuffer = Buf_FromMalloc(
+                    malloc(bytes), bytes
+                );
+                stream->outputBuffer = Buf_FromMalloc(
+                    malloc(bytes), bytes
+                );
+                Buf_Clear(&stream->inputBuffer);
+                Buf_Clear(&stream->outputBuffer);
+            }
             return cl;
         }
     }

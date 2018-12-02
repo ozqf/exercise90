@@ -390,7 +390,6 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
     const i32 packetSize = 1024;
     u8 packetBytes[packetSize];
     ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
-    Buf_Clear(&packetBuf);
 
     for (i32 i = 0; i < session->clientList.max; ++i)
     {
@@ -399,6 +398,9 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
 
         // TODO: Preventing transmit to local clients... this will have to loopback
         if (cl->connectionId == 0) { continue; }
+
+        // sanitise
+        Buf_Clear(&packetBuf);
 
         // TODO: Sending once per tick regardless of framerate at the moment
         ByteBuffer* b = &cl->stream.outputBuffer;

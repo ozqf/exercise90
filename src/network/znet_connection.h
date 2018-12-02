@@ -99,12 +99,12 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
     if (isLocal)
     {
         conn->flags |= ZNET_CONNECTION_FLAG_LOCAL;
-        printf("ZNET Creating local connection id %d\n", conn->id);
+        //printf("ZNET Creating local connection id %d\n", conn->id);
     }
     else
     {
         conn->remoteAddress = address;
-        printf("ZNET Creating remote connection id %d\n", conn->id);
+        //printf("ZNET Creating remote connection id %d\n", conn->id);
     }
     return conn;
 }
