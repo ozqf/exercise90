@@ -127,8 +127,8 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
 
 internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 {
-    //printf("Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
-    //Stream_PrintPacketManifest(bytes, numBytes);
+    printf("* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
+    Stream_PrintPacketManifest(bytes, numBytes);
     // TODO: Copy packet reading to app command buffer
     switch (g_session.netMode)
     {

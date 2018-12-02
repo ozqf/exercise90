@@ -98,7 +98,7 @@ void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
     u8* reliableRead = bytes;
 	u16 numReliableBytes = COM_ReadU16(&reliableRead);
     u8* end;
-	printf("%d reliable Bytes\n", numBytes);
+	printf("%d reliable Bytes\n", numReliableBytes);
 	if (numReliableBytes != 0)
 	{
         u32 reliableSequence = COM_ReadU32(&reliableRead);
@@ -128,7 +128,15 @@ void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
     //     unreliableRead = reliableRead;
     // }
     u8* unreliableRead;
-    unreliableRead = bytes + (sizeof(u16) + numReliableBytes);
+    if (numReliableBytes == 0)
+    {
+        unreliableRead = bytes + sizeof(u16);
+    }
+    else
+    {
+        // u16 == reliable bytes, i32 == reliable sequence
+        unreliableRead = bytes + (sizeof(u16) + sizeof(i32) + numReliableBytes);
+    }
 
     u32 sync = COM_ReadI32(&unreliableRead);
     printf("Deserialise check: 0x%X vs 0x%X\n", sync, NET_DESERIALISE_CHECK);
