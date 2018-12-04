@@ -216,6 +216,7 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 
     if (recv_len > 0)
     {
+        printf(".");
         // debug
         //printf("RECV: ");
         //COM_PrintBytes(buffer->ptrMemory, buffer->size, 16);

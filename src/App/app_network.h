@@ -429,7 +429,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
         numTransmissions++;
     }
-    printf("%d,", numTransmissions);
+    //printf("%d,", numTransmissions);
 }
 
 /**
@@ -510,7 +510,6 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 
     // Send
     ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
-    printf(">");
 }
 
 internal void NET_WriteImpulse(GameSession* gs, i32 impulse)
@@ -557,7 +556,6 @@ internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* tim
 
         case NETMODE_CLIENT:
         {
-            printf("<");
             ZNet_Tick(time->deltaTime);
         } break;
 

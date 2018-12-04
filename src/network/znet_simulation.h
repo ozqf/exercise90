@@ -84,6 +84,7 @@ struct ZNetDelayedPacketStore
     {
         if (this->info.RollDropPacket())
         {
+            printf("GULP");
             return;
         }
         i32 i = this->GetFreeHandleIndex();

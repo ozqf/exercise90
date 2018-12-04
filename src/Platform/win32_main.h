@@ -370,7 +370,7 @@ int CALLBACK WinMain(
     freopen_s(&stream, "conout$", "w", stdout);
     freopen_s(&stream, "conout$", "w", stderr);
     consoleHandle = GetConsoleWindow();
-    MoveWindow(consoleHandle, 1, 1, 680, 480, 1);
+    MoveWindow(consoleHandle, 1, 1, 680, 600, 1);
     printf("[%s] Console initialized.\n", __FILE__);
 #endif
 

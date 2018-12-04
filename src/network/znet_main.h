@@ -113,9 +113,6 @@ void ZNet_EndSession()
 
 internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)
 {
-    // Platform read function:
-    //i32  (*SendTo)
-    //(i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize);
     char asciAddress[32];
     sprintf_s(asciAddress, 32, "%d.%d.%d.%d",
         address->ip4Bytes[0],
@@ -126,6 +123,7 @@ internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)
     //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     //printf("SEND: ");
     //COM_PrintBytes(bytes, (u16)numBytes, 16);
+    printf(">");
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -149,6 +147,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
     {
         case ZNET_MSG_TYPE_DATA:
         {
+            printf("<");
 			if (net->state == ZNET_STATE_SERVER || net->state == ZNET_STATE_CONNECTED)
 			{
                 // read payload header and local connection Id
@@ -202,6 +201,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CONNECTION_REQUEST:
         {
+            printf("^");
             if (!net->isListening) { return; }
 
             i32 clientSalt;
@@ -226,6 +226,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CHALLENGE:
         {
+            printf("$");
             if (net->state != ZNET_STATE_CONNECTING) { return; }
 
             net->state = ZNET_STATE_RESPONDING;
@@ -255,6 +256,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CHALLENGE_RESPONSE:
         {
+            printf("^");
             if (!net->isListening) { return; }
 
             i32 response = COM_ReadI32(&read);
@@ -293,6 +295,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CONNECTION_APPROVED:
         {
+            printf("^");
             if (net->state != ZNET_STATE_RESPONDING) { return; }
 
 			//i32 response = 
@@ -310,6 +313,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_CONNECTION_DENIED:
         {
+            printf("^");
             i32 xor = COM_ReadI32(&read);
             conn = ZNet_GetConnectionById(net, xor);
             if (!conn)
@@ -343,6 +347,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
         #if 1
         case ZNET_MSG_TYPE_KEEP_ALIVE:
         {
+            printf("^");
             i32 xor = COM_ReadI32(&read);
             conn = ZNet_GetConnectionById(net, xor);
             if (conn)
@@ -358,6 +363,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
 
         case ZNET_MSG_TYPE_KEEP_ALIVE_RESPONSE:
         {
+            printf("^");
             i32 xor = COM_ReadI32(&read);
             conn = ZNet_GetConnectionById(net, xor);
         } break;
@@ -401,7 +407,6 @@ internal void ZNet_ReadSocket(ZNet* net)
         bytesRead = (u16)g_netPlatform.Read(g_net.socketIndex, &address, &mem);
         if (bytesRead == 0)
         {
-            //printf("Read %d packets\n", packetsRead);
             return;
         }
         packetsRead++;
@@ -439,6 +444,7 @@ internal void ZNet_ReadSocket(ZNet* net)
 // returns 0 if all is well
 i32 ZNet_Tick(f32 deltaTime)
 {
+    printf("|");
     ZNet* net = &g_net;
 	
 	//system("cls");
@@ -480,17 +486,7 @@ i32 ZNet_Tick(f32 deltaTime)
                     continue;
                 }
 
-                // timed dropping of clients for testing
-                #if 0
-                if (conn->keepAliveSendTicks > 8)
-                {
-                    printf("  Disconnecting conn to port %d\n", conn->remoteAddress.port);
-                    ZNet_DisconnectPeer(net, conn, "Kicked");
-                    continue;
-                }
-                #endif
-
-                ZNet_SendKeepAlive(net, conn);
+                //ZNet_SendKeepAlive(net, conn);
             }
         } break;
         
@@ -502,7 +498,9 @@ i32 ZNet_Tick(f32 deltaTime)
                 ZNetConnection* conn = &net->connections[i];
                 if (conn->id == 0) { continue; }
 
-                ZNet_SendKeepAlive(net, conn);
+                // TODO: Timeout server connection
+
+                //ZNet_SendKeepAlive(net, conn);
             }
         } break;
 
@@ -547,7 +545,7 @@ i32 ZNet_Tick(f32 deltaTime)
                 net->state = ZNET_STATE_DISCONNECTED;
                 break;
             }
-
+            printf("$");
             ByteBuffer b = ZNet_GetDataWriteBuffer();
             i32 numBytes = ZNet_WriteChallengeResponse(&b, conn->id);
             ByteBuffer p = ZNet_GetPacketWriteBuffer();
