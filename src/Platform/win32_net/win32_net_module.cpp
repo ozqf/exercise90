@@ -134,6 +134,7 @@ i32 Net_SendTo(
             printf("    %s\n", address);
         }
     }
+    printf("-");
     return sendResult;
 }
 #if 0

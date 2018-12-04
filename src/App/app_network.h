@@ -390,7 +390,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
     const i32 packetSize = 1024;
     u8 packetBytes[packetSize];
     ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
-
+    i32 numTransmissions = 0;
     for (i32 i = 0; i < session->clientList.max; ++i)
     {
         Client* cl = &session->clientList.items[i];
@@ -427,7 +427,9 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         }
         // Send
         ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
+        numTransmissions++;
     }
+    printf("%d,", numTransmissions);
 }
 
 /**
@@ -508,6 +510,7 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
 
     // Send
     ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
+    printf(">");
 }
 
 internal void NET_WriteImpulse(GameSession* gs, i32 impulse)
@@ -544,7 +547,6 @@ internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* tim
 
         case NETMODE_LISTEN_SERVER:
         {
-			printf(".");
             ZNet_Tick(time->deltaTime);
         } break;
 
@@ -555,6 +557,7 @@ internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* tim
 
         case NETMODE_CLIENT:
         {
+            printf("<");
             ZNet_Tick(time->deltaTime);
         } break;
 
@@ -576,7 +579,6 @@ internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime
 
         case NETMODE_LISTEN_SERVER:
         {
-			printf(".");
             for (i32 i = 0; i < session->clientList.max; ++i)
             {
                 Client* cl = &session->clientList.items[i];

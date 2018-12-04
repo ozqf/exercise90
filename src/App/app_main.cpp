@@ -170,7 +170,8 @@ i32 App_Init()
 	ZNet_Init(
         Net_CreateNetworkPlatformFunctions(),
         Net_CreateOutputInterface(),
-        ZNET_SIM_MODE_REALISTIC);
+        ZNET_SIM_MODE_NONE);
+        //ZNET_SIM_MODE_REALISTIC);
     
     
     Game_Init();

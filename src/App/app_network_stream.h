@@ -236,6 +236,9 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
     TransmissionRecord* rec =
         Stream_FindTransmissionRecord(stream->transmissions, ackSequence);
     if (!rec) { return 0; }
+    if (rec->numReliableMessages == 0) { return 0; }
+    printf("STREAM Confirming delivery of packet %d\n", ackSequence);
+
     ByteBuffer* b = &stream->outputBuffer;
     //u32 currentSize = b->Written();
     u8* read = b->ptrStart;
@@ -250,7 +253,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
             continue;
         }
         // clear and collapse
-        //printf("  Delete %d from output\n", id);
+        printf("  Delete %d from output\n", id);
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         b->ptrWrite = end;
@@ -292,7 +295,6 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
     {
         StreamMsgHeader* h = (StreamMsgHeader*)read;
         read += sizeof(StreamMsgHeader);
-        //u32 messageId = COM_ReadU32(&read);
         if (packetBuf->Space() < h->size)
         {
             printf("Packet full! Space %d size required %d\n", packetBuf->Space(), h->size);
@@ -313,6 +315,7 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
             printf("Max messages in packet!\n");
             break;
         }
+        printf("Output -> Packet MsgId %d\n", h->id);
         read += h->size;
     }
 
@@ -324,12 +327,6 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf)
     u8* write = packetBuf->ptrStart;
     write += COM_WriteU16(reliableBytes, write);
     write += COM_WriteU32(firstReliableId, write);
-
-    // Send!
-    //ZNet_SendData(connId, packetBuf->ptrStart, (u16)packetBuf->Written(), 0);
-
-    // return position for next part of packet payload
-    //return packetBuf->ptrWrite;
 }
 
 // Returns read position after section
@@ -368,7 +365,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
         if (messageId <= s->inputSequence)
         {
             read += size;
-            printf("  MessageId %d is out of date\n", messageId);
+            printf("  MessageId %d is out of date (vs %d)\n", messageId, s->inputSequence);
             continue;
         }
         // message might have already been received
