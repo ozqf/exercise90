@@ -65,8 +65,8 @@ global_variable GameTime g_gameTime;
 global_variable f32 g_fixedFrameAccumulator = 0;
 //global_variable f32 g_fixedFrameTime = 1.0f / 60.0f;
 //global_variable f32 g_fixedFrameTime = 1.0f / 30.0f;
-//global_variable f32 g_fixedFrameTime = 1.0f / 10.0f;
-global_variable f32 g_fixedFrameTime = 1.0f / 2.0f;
+global_variable f32 g_fixedFrameTime = 1.0f / 15.0f;
+//global_variable f32 g_fixedFrameTime = 1.0f / 2.0f;
 //global_variable f32 g_fixedFrameTime = 1.0f / 1.0f;
 
 global_variable HWND consoleHandle;

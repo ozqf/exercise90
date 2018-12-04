@@ -209,6 +209,12 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
     }
 }
 
+internal void Exec_S2CSync(GameSession* session, GameScene* gs, Cmd_S2C_Sync* cmd)
+{
+    printf("S2C Sync: %s\n", cmd->fileName);
+    App_LoadScene("TEST");
+}
+
 internal u8 Game_ReadCmd(
     GameSession* session,
     GameScene* gs,
@@ -229,6 +235,19 @@ internal u8 Game_ReadCmd(
                 printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
             Ent_ReadStateData(gs, read, header->GetSize());
+			if (IS_SERVER)
+			{
+				for (i32 i = 0; i < session->clientList.max; ++i)
+				{
+					Client* cl = &session->clientList.items[i];
+					if (cl->state == CLIENT_STATE_FREE) { continue; }
+					NetStream* s = &cl->stream;
+					ByteBuffer* b = &s->outputBuffer;
+					u32 msgId = ++s->outputSequence;
+					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize());
+					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
+				}
+			}
             return 1;
         } break;
 
@@ -350,6 +369,14 @@ internal u8 Game_ReadCmd(
             Exec_SpawnHudItem(gs, &cmd);
             return 1;
         } break;
+
+        case CMD_TYPE_S2C_SYNC:
+        {
+            Cmd_S2C_Sync cmd = {};
+            read += cmd.Read(read);
+            Exec_S2CSync(session, gs, &cmd);
+            return 1;
+        }
     }
     return 0;
 }

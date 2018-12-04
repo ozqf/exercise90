@@ -175,7 +175,11 @@ internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
     //cmd.data2 = cl->clientId;
     NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
     SV_TransmitClientListToClient(&session->clientList, cl);
-
+    Cmd_S2C_Sync sync = {};
+    i32 written = sprintf_s(sync.fileName, CMD_SYNC_FILE_NAME_LENGTH, "TEST LEVEL");
+    APP_ASSERT(written < CMD_SYNC_FILE_NAME_LENGTH, "Sync command string overflow");
+    sync.length = (u8)written;
+    NET_MSG_TO_OUTPUT(&cl->stream, &sync);
     // scene sync
     #if 0
     Cmd_S2C_Sync sync = {};

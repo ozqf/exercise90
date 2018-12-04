@@ -81,6 +81,9 @@ internal void       App_UpdateLocalClients(GameTime* time, ClientList* cls);
 internal i32        App_NumPlayingClients(ClientList* cls);
 internal i32        App_IsClientStateValid(i32 state);
 
+// Scene control
+internal i32 App_LoadScene(char *path);
+
 // assets and data
 internal i32        AppGetTextureIndexByName(char* textureName);
 MeshData            Assets_GetMeshDataByName(char* name);

@@ -285,7 +285,7 @@ u8 App_StartReplay(char *path)
     return 1;
 }
 
-i32 App_LoadScene(char *path)
+internal i32 App_LoadScene(char *path)
 {
     printf(">>> APP load scene: %s <<<\n", path);
 

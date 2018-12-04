@@ -240,16 +240,16 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         printf(".");
         //printf("CL Keep alive %d\n", cmd.data);
     }
-    else if (type == CMD_TYPE_S2C_SYNC)
-    {
-        Cmd_S2C_Sync cmd;
-        bytesRead = cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
-        {
-            APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
-        }
-        printf("CL - SYNC TO SCENE %s\n", cmd.fileName);
-    }
+    // else if (type == CMD_TYPE_S2C_SYNC)
+    // {
+    //     Cmd_S2C_Sync cmd;
+    //     bytesRead = cmd.Read(bytes);
+    //     if (numBytes != UINT16_MAX)
+    //     {
+    //         APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
+    //     }
+    //     printf("CL - SYNC TO SCENE %s\n", cmd.fileName);
+    // }
     else
     {
         printf("CL Write SV msg to App Buffer %d\n", type);

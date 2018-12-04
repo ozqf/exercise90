@@ -373,11 +373,12 @@ struct Cmd_S2C_Sync
 
     inline u16 MeasureForReading(u8* ptr)
     {
-        return sizeof(u8) + length;// + sizeof('\0');
+        // type + length + (length * sizeof(char))
+        return (sizeof(u8) * 2) + (length * sizeof(char));// + sizeof('\0');
     }
     inline u16 MeasureForWriting()
     {
-        return sizeof(u8) + length;// + sizeof('\0');
+        return (sizeof(u8) * 2) + (length * sizeof(char));// + sizeof('\0');
     }
     inline u16 Write(u8* ptr)
     {
