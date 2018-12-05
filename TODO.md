@@ -2,6 +2,27 @@
 
 ## Current
 
+### CONSIDER: Regress Entity system to basic monolithic form
+* Entity system is too complex and not properly feature complete.
+ECS should be removed and entities should be rewritten with simplicity and networking in mind.
+
+Notes for much simplier system:
+Quake 3's bitfields:
+https://github.com/id-Software/Quake-III-Arena/blob/master/code/qcommon/msg.c#L1200
+Quake 3's networking overview:
+http://fabiensanglard.net/quake3/network.php
+
+Doom's mobj_t 'Thing':
+https://github.com/id-Software/DOOM/blob/77735c3ff0772609e9c8d29e3ce2ab42ff54d20b/linuxdoom-1.10/p_mobj.h
+(uses function pointer to a 'think' function that updates the entity)
+
+Tribes uses static data blocks tied to a 'volatile' instance block of data.
+
+### Quaternions for transferring rotation
+* Rotations are currently stored as 3x3 matrices (288 bits, vs 128 for a quaternion)
+http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
+http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+
 ### Split Persistent/Level based data
 Persistent data (eg client list or server stream) are in the GameState struct.
 This struct should ONLY hold the state of the current entity scene!

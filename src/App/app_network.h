@@ -12,8 +12,8 @@
 #include "app_module.cpp" 
 
 
-void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
-
+internal void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
+internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes);
 
 /////////////////////////////////////////////////////////////////
 // Network callbacks
@@ -185,6 +185,10 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
                 return;
 			}
             u16 numUnreliableBytes = COM_ReadU16(&read);
+            if (numUnreliableBytes > 0)
+            {
+                Net_ClientReadUnreliable(read, numUnreliableBytes);
+            }
         } break;
 
         default:
@@ -224,7 +228,7 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 // Network Execute from read
 /////////////////////////////////////////////////////////////////
-void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
+internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
     printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
@@ -257,43 +261,18 @@ void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
     }
 }
 
-u16 Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
+internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes)
 {
-    //printf("SV Exec msg from %d: type %d size %d\n", cl->connectionId, *bytes, numBytes);
-    u8 type = *bytes;
-    u16 bytesRead = 0;
-    if (type == CMD_TYPE_TEST)
+    u8* end = bytes + numBytes;
+    while (bytes < end)
     {
-        Cmd_Test cmd;
-        bytesRead = cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
-        {
-            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
-        }
-        // Don't actually try to execute this command type!
-        //printf("SV Keep alive %d\n", cmd.data);
+        u8 sequenceOffset;
+        u16 size;
+        Stream_UnpackMessageHeader(COM_ReadU16(&bytes), &sequenceOffset, &size);
+        if (size == 0) { printf("CL SV Cmd gave a size of 0!"); return; }
+        Net_ClientExecuteServerMessage(bytes, size);
+        bytes += size;
     }
-    else if (type == CMD_TYPE_PLAYER_INPUT)
-    {
-        Cmd_PlayerInput cmd;
-        bytesRead += cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
-        {
-            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
-        }
-        APP_WRITE_CMD(0, cmd);
-    }
-    else if (type == CMD_TYPE_IMPULSE)
-    {
-        Cmd_ServerImpulse cmd;
-        bytesRead += cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
-        {
-            APP_ASSERT((bytesRead == numBytes), "SV Exec CL msg - Read() size mismatch")
-        }
-        APP_WRITE_CMD(0, cmd);
-    }
-    return bytesRead;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -303,28 +282,6 @@ u16 Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
 // > Unreliable commands are read and executed straight from the
 // packet
 /////////////////////////////////////////////////////////////////
-void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes)
-{
-    u8* end = ptr + numBytes;
-    u8* read = ptr;
-    //printf("SV reading %d unreliable bytes for CL %d\n", numBytes, cl->connectionId);
-    i32 escapeCounter = 0;
-    while (read < end)
-    {
-        u8 type = *read;
-        //printf("SV Exec unreliable cmd %d\n", type);
-        u16 bytesRead = Net_ServerExecuteClientMessage(cl, read, UINT16_MAX);
-        if (bytesRead > 0)
-        {
-            read += bytesRead;
-        }
-        else
-        {
-            break;
-        }
-        if (++escapeCounter > 9999) { break; }
-    }
-}
 
 void Net_ReadInput(NetStream* stream, Client* nullable_cl)
 {
@@ -381,55 +338,6 @@ internal void Net_TransmitSay(GameSession* session, char* str, char** tokens, i3
             NET_MSG_TRANSMIT_TO_ALL_CLIENTS((&session->clientList), (&cmd));
         } break;
     }
-}
-
-internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
-{
-    if(!IsRunningServer(session->netMode)) { return; }
-
-    const i32 packetSize = 1024;
-    u8 packetBytes[packetSize];
-    ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
-    i32 numTransmissions = 0;
-    for (i32 i = 0; i < session->clientList.max; ++i)
-    {
-        Client* cl = &session->clientList.items[i];
-        if (cl->state == CLIENT_STATE_FREE) { continue; }
-
-        // TODO: Preventing transmit to local clients... this will have to loopback
-        if (cl->connectionId == 0) { continue; }
-
-        // sanitise
-        Buf_Clear(&packetBuf);
-
-        // TODO: Sending once per tick regardless of framerate at the moment
-        ByteBuffer* b = &cl->stream.outputBuffer;
-        
-        i32 numReliableBytes = b->Written();
-		// Write reliable
-        Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf);
-		// sync check
-		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
-
-        // Write unreliable
-        // TODO: This is where entity state will be transmitted
-        if (numReliableBytes == 0)
-        {
-            packetBuf.ptrWrite += COM_WriteU16(7, packetBuf.ptrWrite);
-            packetBuf.ptrWrite += COM_WriteU16(Stream_PackMessageHeader(0, 5), packetBuf.ptrWrite);
-            Cmd_Test cmd = {};
-            cmd.data = 1234;
-            packetBuf.ptrWrite += cmd.Write(packetBuf.ptrWrite);
-        }
-        else
-        {
-            packetBuf.ptrWrite += COM_WriteU16(0, packetBuf.ptrWrite);
-        }
-        // Send
-        ZNet_SendData(cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
-        numTransmissions++;
-    }
-    //printf("%d,", numTransmissions);
 }
 
 /**

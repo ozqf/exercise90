@@ -222,4 +222,5 @@ internal i32 Ent_CopyTemplate(i32 templateId, EntityState* target, EntitySpawnOp
 #include "game_server.h"
 #include "game_embedded_scenes.cpp"
 #include "game_ui.cpp"
+#include "game_exec.h"
 #include "game.cpp"

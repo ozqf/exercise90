@@ -115,6 +115,8 @@ To create an entity:
 // NOTE: iteration starts at 1 and should never be zero
 // An EntId of 0/0 is a 'NULL' entity
 //////////////////////////////////////////////////
+#define ENT_ID_NULL 0
+
 #pragma pack(push, 1)
 union EntId
 {

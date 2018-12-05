@@ -34,6 +34,7 @@ internal void Ent_ApplyStateData(GameScene* gs, EntityState* state)
     if (state->componentBits & EC_BIT12_SENSOR) 		{ EC_SensorApplyState(gs, ent, &state->sensorState); }
 }
 
+// 
 internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes)
 {
     u8* origin = stream;

@@ -50,7 +50,7 @@ internal u16 COL_MASK_PROJECTILE =
 #define CMD_TYPE_TEXT 104
 #define CMD_TYPE_ENTITY_STATE 105
 #define CMD_TYPE_REMOVE_ENT 106
-#define CMD_TYPE_ENTITY_DELTA 107
+#define CMD_TYPE_ENTITY_SYNC 107
 #define CMD_TYPE_QUICK 108
 #define CMD_TYPE_ENTITY_STATE_2 109
 #define CMD_TYPE_GAME_SESSION_STATE 110
@@ -273,15 +273,15 @@ struct Cmd_RemoveEntity
     GAME_CMD_DEFAULT_INTERFACE(Cmd_RemoveEntity, CMD_TYPE_REMOVE_ENT)
 };
 
-// 107 - Entity delta contains a list of fields to update
-// each bit in 'fields' relates to a field on the state to set.
-// total size of this struct + the data after it should be encoded
-// in the command header
-struct Cmd_EntityDelta
+// 107 - quick sync info for an entity
+struct Cmd_EntitySync
 {
     EntId entId;
-    u32 size;
-    u32 fields;
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 vel;
+
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_EntitySync, CMD_TYPE_ENTITY_SYNC)
 };
 
 #define CMD_QUICK_TYPE_CONFIRM_CLIENT_ID 1
