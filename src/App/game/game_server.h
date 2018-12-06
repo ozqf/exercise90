@@ -160,7 +160,6 @@ internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)
 		// override connectionId info. Only send an actual Id to the receiver
         NET_MSG_TO_OUTPUT(&receiver->stream, &cmd);
     }
-    Stream_PrintBufferManifest(&receiver->stream.outputBuffer);
 }
 
 internal void SV_ProcessClientCreated(GameSession* session, Client* cl)

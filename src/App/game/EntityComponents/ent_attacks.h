@@ -50,6 +50,8 @@ inline void SV_FireAttack_02(GameScene *gs, AttackInfo *info)
     }
 }
 
+//#define ATK_PLAYER_SHOTGUN_SPEED 250
+#define ATK_PLAYER_SHOTGUN_SPEED 50
 // player shotgun
 inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
 {
@@ -63,7 +65,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        250);
+        ATK_PLAYER_SHOTGUN_SPEED);
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
@@ -85,7 +87,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
             info->origin,
             info->yawDegrees + randOffsetX,
             info->pitchDegrees + randOffsetY,
-            250);
+            ATK_PLAYER_SHOTGUN_SPEED);
         if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
         {
             state.renderState.colourRGB[0] = 0.3f;

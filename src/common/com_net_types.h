@@ -22,7 +22,9 @@ inline ZNetAddress COM_LocalHost(u16 port)
 struct StreamMsgHeader
 {
     u32 id;
-    u32 size;
+    i32 size;
+    f32 resendTime;
+    f32 resendMax;
 };
 
 // Big-endian

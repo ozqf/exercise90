@@ -39,6 +39,10 @@ This struct should ONLY hold the state of the current entity scene!
 
 ### Network Integration
 
+### Reduced size events
+
+
+
 #### Execution
 * Implement unreliable messages component of packet
 * Homogenise command headers between game commands and stream commands to be interchangable.

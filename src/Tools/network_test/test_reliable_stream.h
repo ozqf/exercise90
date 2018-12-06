@@ -36,14 +36,14 @@ void Buf_WriteStreamMsgHeader(ByteBuffer* b, u32 msgId, u32 numBytes)
     b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes);
 }
 
-inline u16 Stream_PackMessageHeader(u8 sequenceOffset, u16 size)
+inline u16 Stream_WritePacketHeader(u8 sequenceOffset, u16 size)
 {
     sequenceOffset = sequenceOffset & SIX_BIT_MASK;
     size = size & TEN_BIT_MASK;
     return ((sequenceOffset << 10) | size);
 }
 
-inline void Stream_UnpackMessageHeader(u16 header, u8* sequenceOffset, u16* size)
+inline void Stream_ReadPacketHeader(u16 header, u8* sequenceOffset, u16* size)
 {
     *sequenceOffset = (header >> 10) & SIX_BIT_MASK;
     *size = header & TEN_BIT_MASK;
@@ -206,7 +206,7 @@ void Stream_OutputToPacket(TestGameNetwork* net, i32 connId, ReliableStream* s, 
         if (rec->numReliableMessages == 0) { firstReliableId = h->id; }
         
         u32 offset = h->id - firstReliableId;
-        u16 msgHeader = Stream_PackMessageHeader((u8)offset, (u16)h->size);
+        u16 msgHeader = Stream_WritePacketHeader((u8)offset, (u16)h->size);
         b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
         b.ptrWrite += COM_COPY(read, b.ptrWrite, h->size);
         rec->reliableMessageIds[rec->numReliableMessages] = h->id;
@@ -248,7 +248,7 @@ void Stream_PacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         u16 packedHeader = COM_ReadU16(&read);
         u8 offset;
         u16 size;
-        Stream_UnpackMessageHeader(packedHeader, &offset, &size);
+        Stream_ReadPacketHeader(packedHeader, &offset, &size);
         u32 messageId = reliableSequence + offset;
         //printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
 

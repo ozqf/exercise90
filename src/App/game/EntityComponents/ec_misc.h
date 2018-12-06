@@ -210,6 +210,7 @@ internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
 /////////////////////////////////////////////////////////////////////////
 internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *time)
 {
+	if (!IS_SERVER) { return; }
     for (u32 i = 0; i < gs->healthList.max; ++i)
     {
         EC_Health *health = &gs->healthList.items[i];

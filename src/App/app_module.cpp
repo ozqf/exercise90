@@ -56,7 +56,7 @@ GameTime*           GetAppTime();
 
 UIEntity*           UI_GetFreeEntity(UIEntity* list, i32 max);
 
-u32                 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, u32 numBytes);
+i32                 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, i32 numBytes, f32 resendTimeSeconds);
 void                Stream_PrintBufferManifest(ByteBuffer* b);
 internal void       Stream_Clear(NetStream* stream);
 internal void       Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 packetNumber);

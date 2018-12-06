@@ -103,10 +103,10 @@ internal i32 Net_ServerWriteClientUnreliable(
         cmd.pos.x = etc->t.pos.x;
         cmd.pos.y = etc->t.pos.y;
         cmd.pos.z = etc->t.pos.z;
-        printf("@");
+        //printf("@");
 
         b->ptrWrite += COM_WriteU16(
-                Stream_PackMessageHeader(0, cmd.MeasureForWriting()),
+                Stream_WritePacketHeader(0, cmd.MeasureForWriting()),
                 b->ptrWrite);
         b->ptrWrite += cmd.Write(b->ptrWrite);
     }
@@ -117,7 +117,7 @@ internal i32 Net_ServerWriteClientUnreliable(
 // Network Send
 /////////////////////////////////////////////////////////////////
 
-internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
+internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTime* time)
 {
     if(!IsRunningServer(session->netMode)) { return; }
 
@@ -141,7 +141,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         
         i32 numReliableBytes = b->Written();
 		// Write reliable
-        Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf);
+        Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf, time->deltaTime);
 		// sync check
 		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
         
@@ -160,7 +160,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
             packetBuf.ptrWrite += COM_WriteU16(7, packetBuf.ptrWrite);
             // msg
             packetBuf.ptrWrite += COM_WriteU16(
-                Stream_PackMessageHeader(0, 5),
+                Stream_WritePacketHeader(0, 5),
                 packetBuf.ptrWrite);
             Cmd_Test cmd = {};
             cmd.data = 1234;
@@ -169,7 +169,6 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs)
         else
         {
             COM_WriteU16((u16)numUnreliableBytes, unreliableHeaderPos);
-            printf("SV wrote %d unreliable bytes\n", numUnreliableBytes);
         }
         // Send
         ZNet_SendData(

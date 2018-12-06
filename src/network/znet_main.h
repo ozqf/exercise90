@@ -123,7 +123,7 @@ internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)
     //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     //printf("SEND: ");
     //COM_PrintBytes(bytes, (u16)numBytes, 16);
-    printf(">");
+    //printf(">");
     g_netPlatform.SendTo(g_net.socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
@@ -147,7 +147,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
     {
         case ZNET_MSG_TYPE_DATA:
         {
-            printf("<");
+            //printf("<");
 			if (net->state == ZNET_STATE_SERVER || net->state == ZNET_STATE_CONNECTED)
 			{
                 // read payload header and local connection Id

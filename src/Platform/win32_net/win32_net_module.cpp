@@ -134,7 +134,7 @@ i32 Net_SendTo(
             printf("    %s\n", address);
         }
     }
-    printf("-");
+    //printf("-");
     return sendResult;
 }
 #if 0
@@ -216,7 +216,7 @@ i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 
     if (recv_len > 0)
     {
-        printf(".");
+        //printf(".");
         // debug
         //printf("RECV: ");
         //COM_PrintBytes(buffer->ptrMemory, buffer->size, 16);

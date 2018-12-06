@@ -10,11 +10,11 @@ struct ByteBuffer
     u8* ptrWrite;
     i32 capacity;
 
-    inline u32 Written()
+    inline i32 Written()
     {
         return this->ptrWrite - this->ptrStart;
     }
-    inline u32 Space()
+    inline i32 Space()
     {
         return capacity - (ptrWrite - ptrStart);
     }

@@ -230,7 +230,7 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
-    printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+    //printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
@@ -241,22 +241,10 @@ internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         {
             APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
         }
-        printf(".");
-        //printf("CL Keep alive %d\n", cmd.data);
     }
-    // else if (type == CMD_TYPE_S2C_SYNC)
-    // {
-    //     Cmd_S2C_Sync cmd;
-    //     bytesRead = cmd.Read(bytes);
-    //     if (numBytes != UINT16_MAX)
-    //     {
-    //         APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
-    //     }
-    //     printf("CL - SYNC TO SCENE %s\n", cmd.fileName);
-    // }
     else
     {
-        printf("CL Write SV msg to App Buffer %d\n", type);
+        //printf("CL Write SV msg to App Buffer %d\n", type);
         APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
     }
 }
@@ -268,7 +256,7 @@ internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes)
     {
         u8 sequenceOffset;
         u16 size;
-        Stream_UnpackMessageHeader(COM_ReadU16(&bytes), &sequenceOffset, &size);
+        Stream_ReadPacketHeader(COM_ReadU16(&bytes), &sequenceOffset, &size);
         if (size == 0) { printf("CL SV Cmd gave a size of 0!"); return; }
         Net_ClientExecuteServerMessage(bytes, size);
         bytes += size;
@@ -378,7 +366,8 @@ u32 Net_WriteClient2ServerOutput(
             // nothing to transmit - write keep alive
             // acks are piggy-backed on regular packets. No traffic == no acks
             // Will also automatically keep the connection alive
-            packetBuf->ptrWrite += COM_WriteU16(Stream_PackMessageHeader(0, 5), packetBuf->ptrWrite);
+            packetBuf->ptrWrite += COM_WriteU16(
+                Stream_WritePacketHeader(0, 5), packetBuf->ptrWrite);
             Cmd_Test cmd = {};
             cmd.data = 5678;
             packetBuf->ptrWrite += cmd.Write(packetBuf->ptrWrite);
@@ -386,7 +375,8 @@ u32 Net_WriteClient2ServerOutput(
     }
     else
     {
-        printf("CL No local client %d to send from!\n", session->clientList.localClientId);
+        printf("CL No local client %d to send from!\n",
+            session->clientList.localClientId);
     }
 
     u16 bytesWritten = (u16)(packetBuf->ptrWrite - (headerPos + sizeof(u16)));
@@ -395,7 +385,7 @@ u32 Net_WriteClient2ServerOutput(
     return bytesWritten;
 }
 
-internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
+internal void Net_TransmitToServer(GameSession* session, GameScene* gs, GameTime* time)
 {
     if(!IsRunningClient(session->netMode)) { return; }
     // Conn Id will be 0 if connection has not been established so drop out
@@ -408,7 +398,8 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     Buf_Clear(&packetBuf);
     
     // Write reliable messages
-    Stream_OutputToPacket(session->remoteConnectionId, &g_serverStream, &packetBuf);
+    Stream_OutputToPacket(
+        session->remoteConnectionId, &g_serverStream, &packetBuf, time->deltaTime);
 
     // Write magic number for read validation between sections
     packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
@@ -417,7 +408,8 @@ internal void Net_TransmitToServer(GameSession* session, GameScene* gs)
     Net_WriteClient2ServerOutput(session, gs, &g_serverStream, &packetBuf);
 
     // Send
-    ZNet_SendData(session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
+    ZNet_SendData(
+        session->remoteConnectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
 }
 
 internal void NET_WriteImpulse(GameSession* gs, i32 impulse)
@@ -521,18 +513,18 @@ internal void Net_Transmit(GameSession* session, GameScene* gs, GameTime* time)
 
         case NETMODE_LISTEN_SERVER:
         {
-            Net_TransmitToClients(session, gs);
+            Net_TransmitToClients(session, gs, time);
         } break;
 
         case NETMODE_DEDICATED_SERVER:
         {
-            Net_TransmitToClients(session, gs);
+            Net_TransmitToClients(session, gs, time);
         } break;
 
         case NETMODE_CLIENT:
         {
             // Transmit input
-            Net_TransmitToServer(session, gs);
+            Net_TransmitToServer(session, gs, time);
         } break;
 
         default:

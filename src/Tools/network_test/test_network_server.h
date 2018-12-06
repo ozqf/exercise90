@@ -170,7 +170,7 @@ void SV_SendOutput()
                 firstReliableId = id;
             }
             u32 idOffset = id - firstReliableId;
-            u16 msgHeader = Stream_PackMessageHeader((u8)idOffset, (u16)size);
+            u16 msgHeader = Stream_WritePacketHeader((u8)idOffset, (u16)size);
             //printf("First id %d offset %d size %d\n", firstReliableId, idOffset, size);
             b.ptrWrite += COM_WriteU16(msgHeader, b.ptrWrite);
 			//printf("Writing msg %d (%d bytes)\n", id, size);

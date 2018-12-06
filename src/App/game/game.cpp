@@ -128,7 +128,7 @@ internal u8 Game_ReadCmd(
 					NetStream* s = &cl->stream;
 					ByteBuffer* b = &s->outputBuffer;
 					u32 msgId = ++s->outputSequence;
-					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize());
+					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
 					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
 				}
 			}

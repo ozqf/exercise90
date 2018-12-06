@@ -141,7 +141,7 @@ internal void Exec_EntitySync(GameScene* gs, Cmd_EntitySync* cmd)
     }
     EC_Transform* ect = EC_FindTransform(gs, &id);
     EC_Collider* col = EC_FindCollider(gs, &id);
-    printf("@");
+    
     if (col == NULL)
     {
         ect->t.pos = cmd->pos;
