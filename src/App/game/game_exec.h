@@ -152,3 +152,178 @@ internal void Exec_EntitySync(GameScene* gs, Cmd_EntitySync* cmd)
         PhysCmd_TeleportShape(col->shapeId, cmd->pos.x, cmd->pos.y, cmd->pos.z);
     }
 }
+
+internal u8 Game_ReadCmd(
+    GameSession* session,
+    GameScene* gs,
+    CmdHeader* header,
+    u8* read,
+    i32 verbose)
+{
+    ClientList* clients = &session->clientList;
+    u8 type = *read;
+    //switch (header->GetType())
+    if (verbose) { printf("GAME Exec cmd type %d\n", type); }
+    switch (type)
+    {
+        case CMD_TYPE_ENTITY_SYNC:
+        {
+            if (!IS_CLIENT) { printf("SV cannot exec entity sync commands!\n"); return 1; }
+            Cmd_EntitySync cmd = {};
+            cmd.Read(read);
+            Exec_EntitySync(gs, &cmd);
+            return 1;
+        } break;
+
+        case CMD_TYPE_ENTITY_STATE_2:
+        {
+            if (verbose)
+            {
+                printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
+            }
+            Ent_ReadStateData(gs, read, header->GetSize());
+			if (IS_SERVER)
+			{
+				for (i32 i = 0; i < session->clientList.max; ++i)
+				{
+					Client* cl = &session->clientList.items[i];
+					if (cl->state == CLIENT_STATE_FREE) { continue; }
+					NetStream* s = &cl->stream;
+					ByteBuffer* b = &s->outputBuffer;
+					u32 msgId = ++s->outputSequence;
+					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
+					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
+				}
+			}
+            return 1;
+        } break;
+
+        case CMD_TYPE_PACKET:
+        {
+            if (verbose) { printf("  GAME Packet cmd\n"); }
+            //Cmd_Packet cmd = {};
+			// Read packet info
+            read += sizeof(u8);
+            i32 connId = COM_ReadI32(&read);
+            i32 numBytes = COM_ReadI32(&read);
+            //read += COM_COPY_STRUCT(read, &cmd, Cmd_Packet);
+
+            // Read should now be at the start of the packet block!
+            Net_ProcessPacket(connId, read, (u16)numBytes);
+            //Net_ProcessPacket(cmd.connectionId, read, (u16)cmd.numBytes);
+            return 1;
+        } break;
+
+        case CMD_TYPE_ENTITY_STATE:
+        {
+            printf("GAME: Defunct dynamic state call\n");
+            #if 0
+            Cmd_EntityState cmd = {};
+            read += cmd.Read(header, read);
+            if (gs->verbose)
+            {
+                printf("EXEC spawn dynamic ent %d/%d type %d\n",
+                    cmd.entityId.iteration, cmd.entityId.index, cmd.factoryType
+                );
+            }
+            Exec_DynamicEntityState(gs, &cmd);
+            #endif
+			return 1;
+        } break;
+		
+		case CMD_TYPE_SPAWN_VIA_TEMPLATE:
+		{
+			Cmd_SpawnViaTemplate cmd = {};
+			read += cmd.Read(read);
+			Exec_SpawnViaTemplate(gs, &cmd);
+			return 1;
+		} break;
+
+        case CMD_TYPE_STATIC_STATE:
+        {
+            printf("GAME: Defunct static state call\n");
+            //Cmd_Spawn cmd = {};
+            //read += cmd.Read(read);
+            //Exec_StaticEntityState(gs, &cmd);
+            return 1;
+        } break;
+
+        case CMD_TYPE_REMOVE_ENT:
+        {
+            Cmd_RemoveEntity cmd = {};
+            read += cmd.Read(read);
+            Game_RemoveEntity(session->netMode, clients, gs, &cmd);
+            return 1;
+        } break;
+        
+		case CMD_TYPE_PLAYER_INPUT:
+		{
+            Cmd_PlayerInput cmd;
+            u16 measuredSize = cmd.MeasureForReading(read);
+            APP_ASSERT(measuredSize == header->GetSize(), "Command read size mismatch");
+            read += cmd.Read(read);
+            Client* cl = App_FindClientById(cmd.clientId, clients);
+            Assert(cl != NULL);
+            //Ent* ent = Ent_GetEntityById(&gs->entList, (EntId*)&cl->entIdArr);
+            EC_ActorMotor* motor = EC_FindActorMotor(gs, &cl->entId);
+			if (motor == NULL)
+			{
+				//printf("!GAME No motor for Entity %d/%d\n",
+                //    cl->entId.iteration,
+                //    cl->entId.index);
+				return 1;
+			}
+            motor->state.input = cmd.input;
+			return 1;
+		} break;
+
+        case CMD_TYPE_QUICK:
+        {
+            Cmd_Quick cmd = {};
+            read += cmd.Read(read);
+            Exec_QuickCommand(session, gs, &cmd);
+            return 1;
+        } break;
+        
+        case CMD_TYPE_IMPULSE:
+        {
+            Cmd_ServerImpulse cmd = {};
+            read += cmd.Read(read);
+			return SV_ReadImpulse(session->netMode, clients, gs, &cmd);
+        } break;
+
+        case CMD_TYPE_CLIENT_UPDATE:
+        {
+            if (verbose) { printf("  CMD Client input\n"); }
+            Cmd_ClientUpdate cmd = {};
+            read += cmd.Read(read);
+            Exec_UpdateClient(session, gs, &cmd);
+            return 1;
+        } break;
+		
+		case CMD_TYPE_GAME_SESSION_STATE:
+		{
+			Cmd_GameSessionState cmd = {};
+			read += cmd.Read(read);
+			Exec_UpdateGameInstance(gs, &cmd);
+			return 1;
+		} break;
+
+        case CMD_TYPE_SPAWN_HUD_ITEM:
+        {
+            Cmd_SpawnHudItem cmd = {};
+            read += cmd.Read(read);
+            Exec_SpawnHudItem(gs, &cmd);
+            return 1;
+        } break;
+
+        case CMD_TYPE_S2C_SYNC:
+        {
+            Cmd_S2C_Sync cmd = {};
+            read += cmd.Read(read);
+            Exec_S2CSync(session, gs, &cmd);
+            return 1;
+        }
+    }
+    return 0;
+}

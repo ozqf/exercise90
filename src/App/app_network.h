@@ -230,7 +230,7 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
-    //printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
+    //!frame!printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
