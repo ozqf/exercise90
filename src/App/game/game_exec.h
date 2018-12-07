@@ -182,6 +182,10 @@ internal u8 Game_ReadCmd(
                 printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
             Ent_ReadStateData(gs, read, header->GetSize());
+
+            // TODO: THIS OVERFLOWS AND BREAKS EVERYTHING!!
+            // Crashes physics step or raycasts
+            #if 0
 			if (IS_SERVER)
 			{
 				for (i32 i = 0; i < session->clientList.max; ++i)
@@ -195,6 +199,7 @@ internal u8 Game_ReadCmd(
 					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
 				}
 			}
+            #endif
             return 1;
         } break;
 

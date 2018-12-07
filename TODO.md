@@ -6,7 +6,33 @@
 * Entity system is too complex and not properly feature complete.
 ECS should be removed and entities should be rewritten with simplicity and networking in mind.
 
-Notes for much simplier system:
+#### Notes for much simplier system
+Block allocate in 1024 entity blocks.
+> odd numbered blocks are networked
+> even numbered blocks are local only (eg static world geometry, client FX or server side logic triggers)
+
+Entities store a reference to an EntType struct which contains their core static information.
+- Their networking type
+- What update function they use
+- What replication function they use
+- Their physical or render properties.
+
+Entity updates are very static and specific, eg:
+```
+switch (ent->entType)
+{
+	case ENT_TYPE_BULLET:	{ BulletUpdate(ent); }
+	case ENT_TYPE_PLAYER:	{ PlayerUpdate(ent); }
+	case ENT_TYPE_ENEMY:	{ EnemyUpdate(ent); }
+}
+```
+This removes any confusion or ambiguity about what a given entity is doing each frame.
+It does exactly what it's update function will do.
+
+
+
+
+#### Examples
 Quake 3's bitfields:
 https://github.com/id-Software/Quake-III-Arena/blob/master/code/qcommon/msg.c#L1200
 Quake 3's networking overview:
