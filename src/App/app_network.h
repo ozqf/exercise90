@@ -242,6 +242,10 @@ internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
             APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
         }
     }
+    else if (type == CMD_TYPE_ENTITY_STATE_2)
+    {
+        printf("CL WARNING - SV should not send full state commands\n");
+    }
     else
     {
         //printf("CL Write SV msg to App Buffer %d\n", type);

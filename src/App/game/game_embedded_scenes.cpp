@@ -16,7 +16,7 @@ internal void Game_AddTestSolid(GameScene* gs,
 	u32 size = 0;
 	Cmd_EntityStateHeader h = {};
 	
-	h.entId = Ent_ReserveFreeEntity(&gs->entList);
+	h.entId = Ent_ReserveFreeEntity(&gs->entList, ENTITY_CATAGORY_LOCAL);
     h.componentBits |= EC_BIT0_ENTITY;
 	h.componentBits |= EC_BIT1_TRANSFORM;
     if (isVisible) { h.componentBits |= EC_BIT2_RENDERER; }
@@ -97,9 +97,9 @@ internal void Game_AddTestSolid(GameScene* gs,
 internal void Game_AddAcidPool(GameScene* gs, Vec3 pos, Vec3 scale)
 {
     EntityState state;
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, &state, NULL))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE13_VOLUME, ENTITY_CATAGORY_LOCAL, &state, NULL))
     {
-        state.entId = Ent_ReserveFreeEntity(&gs->entList);
+        state.entId = Ent_ReserveFreeEntity(&gs->entList, ENTITY_CATAGORY_LOCAL);
         state.entMetaData.team = TEAM_ENEMIES;
         state.transform.pos = pos;
         state.transform.scale = scale;

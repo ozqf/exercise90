@@ -50,7 +50,7 @@ void Game_UpdateThinkers(ClientList* clients, GameScene* gs, GameTime* time)
                 
                 );
                 thinker->state.count++;
-                Ent_QuickSpawnCmd(gs, ENTITY_TYPE6_ENEMY, &options);
+                Ent_QuickSpawnCmd(gs, ENTITY_TYPE6_ENEMY, ENTITY_CATAGORY_REPLICATED, &options);
             } break;
         }
     }

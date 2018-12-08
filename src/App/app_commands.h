@@ -137,7 +137,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			{
 				EntitySpawnOptions options = {};
                 options.scale = { 1, 1, 1 };
-				Ent_QuickSpawnCmd(&g_gameScene, i, &options);
+				Ent_QuickSpawnCmd(&g_gameScene, i, ENTITY_CATAGORY_REPLICATED, &options);
 				return 1;
 			}
             if (!COM_CompareStrings(tokens[1], "ENEMY"))
@@ -147,7 +147,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
                 options.scale = { 1, 1, 1 };
                 options.pos.y = 0.75f;
                 options.rot.y = 45;
-                Ent_QuickSpawnCmd(&g_gameScene, ENTITY_TYPE6_ENEMY, &options);
+                Ent_QuickSpawnCmd(
+                    &g_gameScene, ENTITY_TYPE6_ENEMY, ENTITY_CATAGORY_REPLICATED, &options);
             }
         }
         return 1;

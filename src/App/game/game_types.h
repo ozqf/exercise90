@@ -2,6 +2,8 @@
 
 #include "../common/com_module.h"
 
+struct GameScene;
+
 ////////////////////////////////////////////////////////////
 // ENTITY TEMPLATE TYPES
 ////////////////////////////////////////////////////////////
@@ -21,6 +23,13 @@
 #define ENTITY_TYPE13_VOLUME 13
 #define ENTITY_TYPE14_ACID 14
 #define ENTITY_TYPE15_LAVA 15
+
+////////////////////////////////////////////////////////////
+// ENTITY CATAGORIES
+////////////////////////////////////////////////////////////
+#define ENTITY_CATAGORY_NULL 0
+#define ENTITY_CATAGORY_REPLICATED 1
+#define ENTITY_CATAGORY_LOCAL 2
 
 ////////////////////////////////////////////////////////////
 // LOCAL ENTITY IDS
@@ -129,6 +138,10 @@ union EntId
     u32 value;
 };
 #pragma pack(pop)
+
+// If entities are assigned in blocks (an array of fixed size arrays) this is how to find them
+//#define ENTID_TO_ENT_BLOCK(entityId, blockSize) ((i32)(entityId.index / blockSize))
+//#define ENTID_TO_ENT_INDEX(entityId, blockSize) ((i32)(entityId.index % blockSize))
 
 // Entities are defined by the components grouped by ent id.
 // consider this struct as entity 'meta data'
@@ -670,6 +683,38 @@ struct GameSession
 #define IS_SERVER (IsRunningServer(g_session.netMode))
 #define IS_CLIENT (IsRunningClient(g_session.netMode))
 
+struct EntityType
+{
+    i32 id;
+    char* name;
+
+    EntId (*Spawn)(GameScene* scene);
+    i32 (*WriteNetworkSync)(GameScene* scene, EntId id, u8* ptr);
+    i32 (*ReadNetworkSync)(GameScene* scene, EntId id, u8* ptr);
+    i32 (*SaveState)(u8* ptr);
+    i32 (*LoadState)(u8* ptr);
+};
+
+struct EntityBlock
+{
+    i32 isAllocated;
+
+    EntList entList;
+    // Components
+    EC_TransformList transformList;
+    EC_SingleRendObjList singleRendObjList;
+    EC_ColliderList colliderList;
+    EC_AIControllerList aiControllerList;
+    EC_ActorMotorList actorMotorList;
+    EC_ProjectileList projectileList;
+    EC_LabelList labelList;
+    EC_HealthList healthList;
+    EC_ThinkerList thinkerList;
+    EC_MultiRendObjList multiRendObjList;
+    EC_VolumeList volumeList;
+    EC_SensorList sensorList;
+};
+
 //////////////////////////////////////////////////
 // GameScene God Object
 // This is a very carefully implemented god object and you should all piss off
@@ -678,12 +723,9 @@ struct GameSession
 struct GameScene
 {
     i32 state;
-    
-    //GameCampaign campaign;
-    //GameSession session;
-    
-    //GameSceneLocal local;
 
+    EntityBlock ents[8];
+    
     // Entities
     //i32 nextEntityID;
     EntList entList;

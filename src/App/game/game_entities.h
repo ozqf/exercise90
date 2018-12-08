@@ -15,14 +15,27 @@ inline void Ent_Reset(Ent* ent)
 #define ENTITY_STATUS_DEAD 3
 
 /**
- * Find a free Entity slot and set it to 'reserved'.
- * Actual config will occur later.
- * NOTE: This function is for the server ONLY.
+ * When writing an entity spawn command a unique Id must be reserved here
  */
-EntId Ent_ReserveFreeEntity(EntList* ents)
+EntId Ent_ReserveFreeEntity(EntList* ents, i32 entCatagory)
 {
+    i32 i = 0;
+    if (entCatagory == ENTITY_CATAGORY_REPLICATED)
+    {
+        APP_ASSERT(IS_SERVER, "Clients cannot reserve replicated entity Ids");
+        i = 0;
+    }
+    else if (entCatagory == ENTITY_CATAGORY_LOCAL)
+    {
+        i = ENTITY_BLOCK_SIZE;
+    }
+    else
+    {
+        ILLEGAL_CODE_PATH
+    }
     Ent* e = NULL;
-    for (u16 i = 0; i < ents->max; ++i)
+	i32 last = i + ENTITY_BLOCK_SIZE;
+    for (; i < last; ++i)
     {
         e = &ents->items[i];
         if (e->inUse == ENTITY_STATUS_FREE)

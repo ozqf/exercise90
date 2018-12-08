@@ -1,4 +1,4 @@
-# Exercise 90 To do
+# Exercise 90 To do and Notes
 
 ## Current
 
@@ -8,14 +8,14 @@ ECS should be removed and entities should be rewritten with simplicity and netwo
 
 #### Notes for much simplier system
 Block allocate in 1024 entity blocks.
-> odd numbered blocks are networked
-> even numbered blocks are local only (eg static world geometry, client FX or server side logic triggers)
+* odd numbered blocks are networked
+* even numbered blocks are local only (eg static world geometry, client FX or server side logic triggers)
 
 Entities store a reference to an EntType struct which contains their core static information.
-- Their networking type
-- What update function they use
-- What replication function they use
-- Their physical or render properties.
+* Their networking type
+* What update function they use
+* What replication function they use
+* Their physical or render properties.
 
 Entity updates are very static and specific, eg:
 ```
@@ -29,7 +29,28 @@ switch (ent->entType)
 This removes any confusion or ambiguity about what a given entity is doing each frame.
 It does exactly what it's update function will do.
 
+Required functions
+```
+struct EntityType
+{
+    i32 index;
+    char* name;
 
+    EntId (*Spawn)(GameScene* scene);
+    i32 (*WriteNetworkSync)(GameScene* scene, EntId id, u8* ptr);
+    i32 (*ReadNetworkSync)(GameScene* scene, EntId id, u8* ptr);
+    i32 (*SaveState)(u8* ptr);
+    i32 (*LoadState)(u8* ptr);
+};
+```
+
+Entity Categories:
+**Networked**
+* Server "original"
+* Replicated "ghost"
+**Non-Networked**
+* Local (either Client (FX) or Server (logic) side only)
+* Static (incapable of change, eg geometry)
 
 
 #### Examples

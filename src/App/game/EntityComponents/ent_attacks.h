@@ -16,7 +16,8 @@ inline void SV_FireAttack_01(GameScene *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         250);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(
+        gs, ENTITY_TYPE4_PROJECTILE, ENTITY_CATAGORY_REPLICATED, &state, &options))
     {
         //state.projectileState.move = options.vel;
         state.renderState.colourRGB[0] = 0.3f;
@@ -39,7 +40,7 @@ inline void SV_FireAttack_02(GameScene *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         15);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, ENTITY_CATAGORY_REPLICATED, &state, &options))
     {
         state.projectileState.ticker.tickMax = 2.0f;
         state.projectileState.ticker.tick = 2.0f;
@@ -66,7 +67,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
         info->yawDegrees,
         info->pitchDegrees,
         ATK_PLAYER_SHOTGUN_SPEED);
-    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
+    if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, ENTITY_CATAGORY_REPLICATED, &state, &options))
     {
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
@@ -88,7 +89,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
             info->yawDegrees + randOffsetX,
             info->pitchDegrees + randOffsetY,
             ATK_PLAYER_SHOTGUN_SPEED);
-        if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, &state, &options))
+        if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, ENTITY_CATAGORY_REPLICATED, &state, &options))
         {
             state.renderState.colourRGB[0] = 0.3f;
             state.renderState.colourRGB[1] = 0.3f;

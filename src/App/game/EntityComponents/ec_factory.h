@@ -284,10 +284,15 @@ internal void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* stat
     if (ent->componentBits & EC_BIT12_SENSOR) { state->sensorState = (EC_FindSensor(gs, ent))->state; }
 }
 
-internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options)
+internal u8 Ent_PrepareSpawnCmd(
+    GameScene*          gs,
+    i32                 factoryType,
+    i32                 catagory,
+    EntityState*        target,
+    EntitySpawnOptions* options)
 {
     *target = {};
-    EntId entId = Ent_ReserveFreeEntity(&gs->entList);
+    EntId entId = Ent_ReserveFreeEntity(&gs->entList, catagory);
     
     i32 result = Ent_CopyTemplate(factoryType, target, options);
     target->entId = entId;
@@ -295,10 +300,14 @@ internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, EntityState* tar
     return (u8)result;
 }
 
-internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, EntitySpawnOptions* options)
+internal EntId Ent_QuickSpawnCmd(
+    GameScene* gs,
+    i32 factoryType,
+    i32 catagory,
+    EntitySpawnOptions* options)
 {
     EntityState s = {};
-    EntId entId = Ent_ReserveFreeEntity(&gs->entList);
+    EntId entId = Ent_ReserveFreeEntity(&gs->entList, catagory);
     if (Ent_CopyTemplate(factoryType, &s, options))
     {
         s.entId = entId;

@@ -61,7 +61,8 @@ internal u8 SV_ReadImpulse(
             options.pos.x = 0;
             options.pos.y = 0;
             options.pos.z = 7;
-            EntId entId = Ent_QuickSpawnCmd(gs, ENTITY_TYPE3_ACTOR_GROUND, &options);
+            EntId entId = Ent_QuickSpawnCmd(
+                gs, ENTITY_TYPE3_ACTOR_GROUND, ENTITY_CATAGORY_REPLICATED, &options);
             
             printf("SV Spawning local client avatar %d/%d\n", entId.iteration, entId.index);
 

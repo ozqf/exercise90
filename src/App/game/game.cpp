@@ -212,25 +212,31 @@ internal void Game_Tick(
         printf("GAME Frame %d\n", time->gameFrameNumber);
     }
 	#if 1
-    f32 testRadius = 23;
-    if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
+    if (IS_SERVER)
     {
-        
-        EntitySpawnOptions options = {};
-        options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
-        Ent_QuickSpawnCmd(gs, ENTITY_TYPE6_ENEMY, &options);
-    }
-    if (Input_CheckActionToggledOn(actions, "Spawn Test 2", time->platformFrameNumber))
-    {
-        EntitySpawnOptions options = {};
-        options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
-        Ent_QuickSpawnCmd(gs, ENTITY_TYPE8_ENEMY_BRUTE, &options);
-    }
-    if (Input_CheckActionToggledOn(actions, "Spawn Test 3", time->platformFrameNumber))
-    {
-        EntitySpawnOptions options = {};
-        options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
-        Ent_QuickSpawnCmd(gs, ENTITY_TYPE9_ENEMY_CHARGER, &options);
+        f32 testRadius = 23;
+        if (Input_CheckActionToggledOn(actions, "Spawn Test", time->platformFrameNumber))
+        {
+
+            EntitySpawnOptions options = {};
+            options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
+            Ent_QuickSpawnCmd(
+                gs, ENTITY_TYPE6_ENEMY, ENTITY_CATAGORY_REPLICATED, &options);
+        }
+        if (Input_CheckActionToggledOn(actions, "Spawn Test 2", time->platformFrameNumber))
+        {
+            EntitySpawnOptions options = {};
+            options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
+            Ent_QuickSpawnCmd(
+                gs, ENTITY_TYPE8_ENEMY_BRUTE, ENTITY_CATAGORY_REPLICATED, &options);
+        }
+        if (Input_CheckActionToggledOn(actions, "Spawn Test 3", time->platformFrameNumber))
+        {
+            EntitySpawnOptions options = {};
+            options.pos = Game_RandomSpawnOffset(testRadius, 0, testRadius);
+            Ent_QuickSpawnCmd(
+                gs, ENTITY_TYPE9_ENEMY_CHARGER, ENTITY_CATAGORY_REPLICATED, &options);
+        }
     }
 	#endif
 	#if 0

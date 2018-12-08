@@ -83,11 +83,21 @@ void Game_DrawColliderAABBs(GameScene* gs, GameTime* time, RenderScene* scene)
             //if (collider->lastFrameOverlapping == time->frameNumber)
             if (collider->isGrounded)
             {
-                RendObj_SetAsAABB(&item->obj, collider->state.size.x, collider->state.size.y, collider->state.size.z, 1, 0, 0);
+                RendObj_SetAsAABB(
+                    &item->obj,
+                    collider->state.size.x,
+                    collider->state.size.y,
+                    collider->state.size.z,
+                    1, 0, 0);
             }
             else
             {
-                RendObj_SetAsAABB(&item->obj, collider->state.size.x, collider->state.size.y, collider->state.size.z, 0, 1, 0);
+                RendObj_SetAsAABB(
+                    &item->obj,
+                    collider->state.size.x,
+                    collider->state.size.y,
+                    collider->state.size.z,
+                    0, 1, 0);
             }
             
         }

@@ -64,7 +64,9 @@ inline u8 IsConnectionOpen(u8 netMode)
 
 
 // Entity and entity component lists
-#define GAME_MAX_ENTITIES 2048
+#define ENTITY_BLOCK_SIZE 2048
+#define ENTITY_BLOCK_COUNT 2
+#define GAME_MAX_ENTITIES (ENTITY_BLOCK_SIZE * ENTITY_BLOCK_COUNT)
 #define GAME_MAX_PLAYERS 64
 #define UI_MAX_ENTITIES 512
 #define GAME_MAX_LOCAL_ENTITIES 2048
@@ -193,8 +195,8 @@ global_variable HudRingItem g_hudRingItems[HUD_MAX_RING_ITEMS];
 // Interface
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
 internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state);
-internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, EntityState* target, EntitySpawnOptions* options);
-internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, EntitySpawnOptions* options);
+internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntityState* target, EntitySpawnOptions* options);
+internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntitySpawnOptions* options);
 
 //internal u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
 internal i32 Ent_CopyTemplate(i32 templateId, EntityState* target, EntitySpawnOptions* options);
