@@ -9,7 +9,7 @@ Server only functions
 
 // }
 
-internal u8 SV_ReadImpulse(
+internal i32 SV_ReadImpulse(
     u8 netMode,
     ClientList* clients,
     GameScene* gs,
@@ -18,7 +18,6 @@ internal u8 SV_ReadImpulse(
     if (!IsRunningServer(netMode))
 	{
 		printf("GAME Cannot impulse if not hosting the server!\n");
-		return 1;
 	}
     printf("SV EXEC impulse %d from client %d\n", cmd->impulse, cmd->clientId);
 	switch (cmd->impulse)
@@ -37,7 +36,6 @@ internal u8 SV_ReadImpulse(
             {
                 motor->state.attack1Type = 1;
             }
-            return  1;
         } break;
 
 
@@ -49,12 +47,10 @@ internal u8 SV_ReadImpulse(
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
                 printf("SV Cannot spawn - client is free or playing already\n");
-                return 1;
             }
 			if (!gs->AllowPlayerSpawning())
 			{
 				printf("SV: Instance disallows player spawning\n");
-				return 1;
 			}
 			
             EntitySpawnOptions options = {};
@@ -71,16 +67,14 @@ internal u8 SV_ReadImpulse(
             clUpdate.state = CLIENT_STATE_PLAYING;
             clUpdate.entId = entId;
             APP_WRITE_CMD(0, clUpdate);
-			return 1;
 		} break;
 
 		default:
 		{
             printf("SV UNKNOWN IMPULSE %d from client %d\n", cmd->impulse, cmd->clientId);
-			//ILLEGAL_CODE_PATH
-			return 1;
 		} break;
 	}
+    return COM_ERROR_NONE;
 }
 
 /*

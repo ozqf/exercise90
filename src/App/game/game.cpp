@@ -126,7 +126,7 @@ internal i32 Game_ReadCommandBuffer(
         }
         else
         {
-            if (Game_ReadCmd(session, gs, &h, ptrRead, verbose) == 0)
+            if (Game_ReadCmd(session, gs, &h, ptrRead, verbose) != COM_ERROR_NONE)
             {
                 printf("!GAME:  Unknown command type %d...\n", h.GetType());
                 ILLEGAL_CODE_PATH

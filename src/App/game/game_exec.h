@@ -153,7 +153,7 @@ internal void Exec_EntitySync(GameScene* gs, Cmd_EntitySync* cmd)
     }
 }
 
-internal u8 Game_ReadCmd(
+internal i32 Game_ReadCmd(
     GameSession* session,
     GameScene* gs,
     CmdHeader* header,
@@ -172,7 +172,7 @@ internal u8 Game_ReadCmd(
             Cmd_EntitySync cmd = {};
             cmd.Read(read);
             Exec_EntitySync(gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 
         case CMD_TYPE_ENTITY_STATE_2:
@@ -200,7 +200,7 @@ internal u8 Game_ReadCmd(
 				}
 			}
             #endif
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 
         case CMD_TYPE_PACKET:
@@ -216,7 +216,7 @@ internal u8 Game_ReadCmd(
             // Read should now be at the start of the packet block!
             Net_ProcessPacket(connId, read, (u16)numBytes);
             //Net_ProcessPacket(cmd.connectionId, read, (u16)cmd.numBytes);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 
         case CMD_TYPE_ENTITY_STATE:
@@ -233,7 +233,7 @@ internal u8 Game_ReadCmd(
             }
             Exec_DynamicEntityState(gs, &cmd);
             #endif
-			return 1;
+			return COM_ERROR_NONE;
         } break;
 		
 		case CMD_TYPE_SPAWN_VIA_TEMPLATE:
@@ -241,7 +241,7 @@ internal u8 Game_ReadCmd(
 			Cmd_SpawnViaTemplate cmd = {};
 			read += cmd.Read(read);
 			Exec_SpawnViaTemplate(gs, &cmd);
-			return 1;
+			return COM_ERROR_NONE;
 		} break;
 
         case CMD_TYPE_STATIC_STATE:
@@ -250,7 +250,7 @@ internal u8 Game_ReadCmd(
             //Cmd_Spawn cmd = {};
             //read += cmd.Read(read);
             //Exec_StaticEntityState(gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 
         case CMD_TYPE_REMOVE_ENT:
@@ -258,7 +258,7 @@ internal u8 Game_ReadCmd(
             Cmd_RemoveEntity cmd = {};
             read += cmd.Read(read);
             Game_RemoveEntity(session->netMode, clients, gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
         
 		case CMD_TYPE_PLAYER_INPUT:
@@ -276,10 +276,10 @@ internal u8 Game_ReadCmd(
 				//printf("!GAME No motor for Entity %d/%d\n",
                 //    cl->entId.iteration,
                 //    cl->entId.index);
-				return 1;
+				return COM_ERROR_NONE;
 			}
             motor->state.input = cmd.input;
-			return 1;
+			return COM_ERROR_NONE;
 		} break;
 
         case CMD_TYPE_QUICK:
@@ -287,13 +287,13 @@ internal u8 Game_ReadCmd(
             Cmd_Quick cmd = {};
             read += cmd.Read(read);
             Exec_QuickCommand(session, gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
         
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
-            read += cmd.Read(read);
+            read += cmd.Read(read);:
 			return SV_ReadImpulse(session->netMode, clients, gs, &cmd);
         } break;
 
@@ -303,7 +303,7 @@ internal u8 Game_ReadCmd(
             Cmd_ClientUpdate cmd = {};
             read += cmd.Read(read);
             Exec_UpdateClient(session, gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 		
 		case CMD_TYPE_GAME_SESSION_STATE:
@@ -311,7 +311,7 @@ internal u8 Game_ReadCmd(
 			Cmd_GameSessionState cmd = {};
 			read += cmd.Read(read);
 			Exec_UpdateGameInstance(gs, &cmd);
-			return 1;
+			return COM_ERROR_NONE;
 		} break;
 
         case CMD_TYPE_SPAWN_HUD_ITEM:
@@ -319,7 +319,7 @@ internal u8 Game_ReadCmd(
             Cmd_SpawnHudItem cmd = {};
             read += cmd.Read(read);
             Exec_SpawnHudItem(gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         } break;
 
         case CMD_TYPE_S2C_SYNC:
@@ -327,8 +327,8 @@ internal u8 Game_ReadCmd(
             Cmd_S2C_Sync cmd = {};
             read += cmd.Read(read);
             Exec_S2CSync(session, gs, &cmd);
-            return 1;
+            return COM_ERROR_NONE;
         }
     }
-    return 0;
+    return COM_ERROR_UNKNOWN_COMMAND;
 }

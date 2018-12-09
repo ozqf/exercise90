@@ -330,7 +330,7 @@ void App_Win32_invalid_parameter(
    uintptr_t pReserved  
 )
 {
-    platform.Platform_Error("An invalid parameter was pasted to the C runtime library", "Fatal error\n");
+    platform.Platform_Error("An invalid parameter was passed to the C runtime library", "Fatal error\n");
 }
 
 void App_Win32_AttachErrorHandlers()
