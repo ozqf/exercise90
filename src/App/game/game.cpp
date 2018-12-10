@@ -267,22 +267,29 @@ internal void Game_Tick(
 	// Read network stream inputs here...?
     
     g_debugTransform = gs->cameraTransform;
-
+    
     //GameScene* gs = &game->scene;
     
     // Game state update
     // Update all inputs, entity components and colliders/physics
     // TODO: Bits of this are order sensitivity. eg projectiles etc hitting health.
     // health must be updated last, so that other events can all affect them!
-    Game_UpdateActorMotors(gs, time);
-    Game_UpdateAIControllers(clients, gs, time);
-    Game_UpdateColliders(gs, time);
-    Game_UpdateProjectiles(gs, time);
-    Game_UpdateVolumes(gs, time);
-    Game_UpdateThinkers(clients, gs, time);
-    Game_UpdateRenderObjects(gs, time);
-    Game_UpdateSensors(gs, time);
-    Game_UpdateHealth(clients, gs, time);
+    if (IS_SERVER)
+    {
+        Game_UpdateActorMotors(gs, time);
+        Game_UpdateAIControllers(clients, gs, time);
+        Game_UpdateColliders(gs, time);
+        Game_UpdateProjectiles(gs, time);
+        Game_UpdateVolumes(gs, time);
+        Game_UpdateThinkers(clients, gs, time);
+        Game_UpdateRenderObjects(gs, time);
+        Game_UpdateSensors(gs, time);
+        Game_UpdateHealth(clients, gs, time);
+    }
+    else
+    {
+        // TODO: Client specific update code
+    }
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));
 

@@ -236,9 +236,9 @@ internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *ti
                     time->singleFrame == 1);
 
                 /**********************************
-             * // is this the time to do this...?
-            // TODO ^^ No, it isn't!
-            **********************************/
+                // is this the time to do this...?
+                // TODO ^^ No, it isn't!
+                **********************************/
                 EC_Collider *col = EC_FindCollider(gs, &health->header.entId);
                 Assert(col);
                 PhysCmd_RemoveShape(col->shapeId);
@@ -250,8 +250,8 @@ internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *ti
                 Vec3_Normalise(&dir);
 
                 EC_Transform *trans = EC_FindTransform(gs, &health->header.entId);
-                Transform *t = &trans->t;
                 Assert(trans);
+                Transform *t = &trans->t;
 
                 f32 launchPower = 20.0f; // * percentage;
                 if (health->state.maxHp > 0)
