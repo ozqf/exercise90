@@ -14,6 +14,7 @@
 // #include "../Platform/win32_system_include.h"
 
 #include "tests/test_common_module.h"
+#include "tests/test_introspection.cpp"
 
 // #include "test_heap.h"
 // #include "test_zlib.h"
@@ -36,7 +37,8 @@
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
-	Test_Com_Run(argc, argv);
+	//Test_Com_Run(argc, argv);
+    Test_Introspection();
     //Test_Win32(argc, argv);
     //Tests_Run(argc, argv);
 	//Test_EntityComponentSystem();
