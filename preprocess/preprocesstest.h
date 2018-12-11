@@ -1,6 +1,47 @@
 #pragma once
+
 //////////////////////////////////////////////////
 // Preprocessor Test
+//////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////
+// Testing expansion rules and strings
+//////////////////////////////////////////////////
+
+#define i32 unsigned int
+struct IntrospectTable;
+struct TestType;
+
+#define ADD_FIELD(ptrTable, varIndex, ptrStruct, varType, varName, sizeInBytes) \
+{ \
+	char* varLabel = "##varName##"; \
+    char* varLabel = varName \
+    char* varLabel = #varName \
+    char* varLabel = #varName# \
+    char* varLabel = ##varName \
+    
+	i32 offsetInStruct = (i32)((u8*)&##ptrStruct##->##varName - (u8*)&##ptrStruct##); \
+	Test_SetTableVar( \
+		ptrTable##, varIndex##, varType##, sizeInBytes##, offsetInStruct, varLabel \
+	); \
+}
+
+
+static void Test_BuildTestTypeIntrospectionTable(IntrospectTable* t)
+{
+	TestType item = {};
+	TestType* ptrItem = &item;
+	
+	// Via macro
+	ADD_FIELD(t, 0, ptrItem, INTROSPECTION_TYPE_BYTES, a, sizeof(i32))
+}
+
+
+
+
+#if 0
+//////////////////////////////////////////////////
 // Generated basic component functions
 //////////////////////////////////////////////////
 #define u32 unsigned int
@@ -237,3 +278,4 @@ DEFINE_ENT_COMPONENT_BASE(AIController, aiController, COMP_FLAG_FOO)
 #define GET_CUBOID(data) &data->cuboid;
 
 GET_CUBOID(shape)
+#endif

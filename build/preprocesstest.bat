@@ -1,5 +1,5 @@
 
-cl -nologo /P /C ../preprocess/preprocesstest2.h
+cl -nologo /P /C ../preprocess/preprocesstest.h
 
-@xcopy /f preprocesstest2.i preprocesstest2.cpp
+@xcopy /F /Y preprocesstest.i preprocesstest.cpp
 
