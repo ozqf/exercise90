@@ -233,6 +233,7 @@ internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
     //!frame!printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
+    // Can black list specific commands if required here
     if (type == CMD_TYPE_TEST)
     {
         Cmd_Test cmd;
@@ -241,16 +242,14 @@ internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         {
             APP_ASSERT((bytesRead == numBytes), "CL Exec SV msg - Read() size mismatch")
         }
+        return;
     }
     else if (type == CMD_TYPE_ENTITY_STATE_2)
     {
-        printf("CL WARNING - SV should not send full state commands\n");
+        printf("CL Received Ent State\n");
     }
-    else
-    {
-        //printf("CL Write SV msg to App Buffer %d\n", type);
-        APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
-    }
+    //printf("CL Write SV msg to App Buffer %d\n", type);
+    APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
 }
 
 internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes)

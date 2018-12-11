@@ -159,6 +159,18 @@ internal i32 Test_ReadTestTypeDelta(EncodeTable* table, u8* itemBytes, u8* buffe
 	return (cursor - buffer);
 }
 
+/*internal*/ EncodeTable* Test_GetEncodeTable(EncodeTable* tables, i32 numTables, char* name)
+{
+	for (i32 i = 0; i < numTables; ++i)
+	{
+		if (COM_CompareStrings(tables[i].label, name))
+		{
+			return &tables[i];
+		}
+	}
+	return NULL;
+}
+
 ///////////////////////////////////////////////////////
 // Test structs
 ///////////////////////////////////////////////////////
@@ -176,7 +188,8 @@ struct TestType
 	i32 state;
 };
 
-EncodeTable TestType_Table;
+internal EncodeTable g_encodeTables[13];
+internal EncodeTable TestType_Table;
 
 #define ADD_FIELD(ptrTable, varIndex, ptrStruct, varType, varName, sizeInBytes) \
 { \
@@ -229,6 +242,8 @@ internal void Test_PrintTestType(TestType* t)
 internal void Test_Introspection()
 {
 	TestType previousState = {};
+
+	printf("Number of encoding tables: %d\n", (sizeof(g_encodeTables) / sizeof(*g_encodeTables)));
 
 	TestType_Table.label = "TestType";
 	EncodeVar* vars = TestType_Table.vars;

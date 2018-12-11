@@ -136,7 +136,7 @@ internal void Exec_EntitySync(GameScene* gs, Cmd_EntitySync* cmd)
     Ent* ent = Ent_GetEntityById(gs, &id);
     if (ent == NULL)
     { 
-        printf("No entity %d/%d for sync\n", id.iteration, id.index);
+        printf("No ent %d/%d for sync", id.iteration, id.index);
         return;
     }
     EC_Transform* ect = EC_FindTransform(gs, &id);
@@ -185,16 +185,33 @@ internal i32 Game_ReadCmd(
 
             // TODO: THIS OVERFLOWS AND BREAKS EVERYTHING!!
             // Crashes physics step or raycasts
-            #if 0
+            #if 1
 			if (IS_SERVER)
 			{
 				for (i32 i = 0; i < session->clientList.max; ++i)
 				{
 					Client* cl = &session->clientList.items[i];
+					// check in use or local
 					if (cl->state == CLIENT_STATE_FREE) { continue; }
+					if (cl->connectionId == 0) { continue; }
 					NetStream* s = &cl->stream;
 					ByteBuffer* b = &s->outputBuffer;
 					u32 msgId = ++s->outputSequence;
+					i32 requiredSpace = header->GetSize() + sizeof(StreamMsgHeader);
+                    if (b->Space() < requiredSpace)
+                    {
+                        printf("CLIENT %d has no output capacity (has %d need %d)!\n",
+							cl->connectionId, (u16)b->Space(), requiredSpace);
+                        // Remote client and No output capacity?
+                        // Drop client!
+                        //Cmd_ClientUpdate cmd = {};
+                        //cmd.clientId = cl->clientId;
+                        //cmd.connectionId = cl->connectionId;
+                        //cmd.state = CLIENT_STATE_FREE;
+                        //APP_WRITE_CMD(0, cmd);
+                        continue;
+                    }
+                    printf("SV Write state of ent to %d\n", cl->connectionId);
 					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
 					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
 				}
@@ -293,7 +310,7 @@ internal i32 Game_ReadCmd(
         case CMD_TYPE_IMPULSE:
         {
             Cmd_ServerImpulse cmd = {};
-            read += cmd.Read(read);:
+            read += cmd.Read(read);
 			return SV_ReadImpulse(session->netMode, clients, gs, &cmd);
         } break;
 

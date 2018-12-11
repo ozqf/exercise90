@@ -13,14 +13,22 @@
 struct IntrospectTable;
 struct TestType;
 
+int someArray[32];
+
+#define STRING_PARAM_TEST(obj, name) (GetFooFromObjectByName(obj, #name##);)
+
+
+
 #define ADD_FIELD(ptrTable, varIndex, ptrStruct, varType, varName, sizeInBytes) \
 { \
+    sizeof(someArray); \
+    \
 	char* varLabel = "##varName##"; \
     char* varLabel = varName \
     char* varLabel = #varName \
     char* varLabel = #varName# \
     char* varLabel = ##varName \
-    
+    \
 	i32 offsetInStruct = (i32)((u8*)&##ptrStruct##->##varName - (u8*)&##ptrStruct##); \
 	Test_SetTableVar( \
 		ptrTable##, varIndex##, varType##, sizeInBytes##, offsetInStruct, varLabel \
@@ -35,6 +43,8 @@ static void Test_BuildTestTypeIntrospectionTable(IntrospectTable* t)
 	
 	// Via macro
 	ADD_FIELD(t, 0, ptrItem, INTROSPECTION_TYPE_BYTES, a, sizeof(i32))
+
+    STRING_PARAM_TEST(thing, StructName)
 }
 
 

@@ -6,9 +6,15 @@
 //////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////
+// Testing expansion rules and strings
+//////////////////////////////////////////////////
+
+
 struct IntrospectTable;
 struct TestType;
 
+int someArray[32];
 
 
 
@@ -17,11 +23,16 @@ struct TestType;
 
 
 
-	unsigned int offsetInStruct = (unsigned int)((u8*)&##ptrStruct##->##varName - (u8*)&##ptrStruct##); \
-	Test_SetTableVar( \
-		ptrTable##, varIndex##, varType##, sizeInBytes##, offsetInStruct, varLabel \
-	); \
-}
+
+
+
+
+
+
+
+
+
+
 
 
 static void Test_BuildTestTypeIntrospectionTable(IntrospectTable* t)
@@ -30,7 +41,9 @@ static void Test_BuildTestTypeIntrospectionTable(IntrospectTable* t)
 	TestType* ptrItem = &item;
 	
 	// Via macro
-	{ char* varLabel = "##varName##"; char* varLabel = a char* varLabel = "a" char* varLabel = "a"char* varLabel =a
+	{ sizeof(someArray); char* varLabel = "##varName##"; char* varLabel = a char* varLabel = "a" char* varLabel = "a"char* varLabel =a unsigned int offsetInStruct = (unsigned int)((u8*)&ptrItem->a - (u8*)&ptrItem); Test_SetTableVar( t, 0, INTROSPECTION_TYPE_BYTES, sizeof(unsigned int), offsetInStruct, varLabel ); }
+
+    (GetFooFromObjectByName(thing, "StructName");)
 }
 
 
@@ -274,4 +287,4 @@ static void Test_BuildTestTypeIntrospectionTable(IntrospectTable* t)
 
 
 
-#line 277 "../preprocess/preprocesstest.h"
+#line 290 "../preprocess/preprocesstest.h"
