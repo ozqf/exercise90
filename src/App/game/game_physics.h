@@ -27,18 +27,35 @@ internal void Game_EntVsEntCollision(
 {
     Ent* a = Ent_GetEntityByIdValue(&gs->entList, id_A);
     Ent* b = Ent_GetEntityByIdValue(&gs->entList, id_B);
-	// entities could have been removed before an end collision
-	// event is called
-	if (collisionState == 3)
+	
+	if (a == NULL || b == NULL)
 	{
-		if (a == NULL || b == NULL)
+		if (collisionState == 3)
 		{
+			// entities could have been removed before an end collision
+			// event is called, so this can be expected
 			return;
 		}
-	}
-	else
-	{
-		Assert((a != NULL && b != NULL));
+		else
+		{
+			// Appears to be occurring on clients.
+			// Warn about it and see what happens!
+			EntId aId = {};
+			aId.value = id_A;
+			EntId bId = {};
+			bId.value = id_B;
+			if (a == NULL)
+			{
+				printf("PHYS Report Col state %d: Entity %d/%d is null!\n",
+					collisionState, aId.iteration, aId.index);
+			}
+			if (b == NULL)
+			{
+				printf("PHYS Report Col state %d: Entity %d/%d is null!\n",
+					collisionState, aId.iteration, aId.index);
+			}
+			return;
+		}
 	}
 	
     // Sensors

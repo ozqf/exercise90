@@ -75,6 +75,34 @@ inline void Prj_PushRigidBody(EC_Collider *col)
     PhysCmd_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }
 
+internal void Game_ClientUpdateProjectiles(GameScene *gs, GameTime *time)
+{
+    for (u32 i = 0; i < gs->projectileList.max; ++i)
+    {
+        EC_Projectile *prj = &gs->projectileList.items[i];
+        if (prj->header.inUse == 0)
+        {
+            continue;
+        }
+
+        Ent *e = Ent_GetEntityById(&gs->entList, &prj->header.entId);
+        if (e == NULL)
+        {
+            printf("ERROR: Prj has no Ent\n");
+            ILLEGAL_CODE_PATH
+        }
+
+        EC_Transform *ecTrans = EC_FindTransform(gs, &prj->header.entId);
+        
+        Transform *t = &ecTrans->t;
+
+        // Move
+        t->pos.x += prj->state.move.x * time->deltaTime;
+        t->pos.y += prj->state.move.y * time->deltaTime;
+        t->pos.z += prj->state.move.z * time->deltaTime;
+    }
+}
+
 internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
 {
     for (u32 i = 0; i < gs->projectileList.max; ++i)
@@ -99,6 +127,7 @@ internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
             // Delete
             Vec3 v = Vec3_CreateUnitVector(&prj->state.move);
             Ent_WriteRemoveCmd(e, v.parts, time->singleFrame == 1);
+            continue;
         }
         else
         {

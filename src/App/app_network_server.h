@@ -129,16 +129,19 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
     {
         Client* cl = &session->clientList.items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
-
+        ByteBuffer* b = &cl->stream.outputBuffer;
         // TODO: Preventing transmit to local clients... this will have to loopback
-        if (cl->connectionId == 0) { continue; }
+        if (cl->connectionId == 0)
+        {
+            // Clear their output just in case
+            Buf_Clear(&cl->stream.outputBuffer);
+            continue;
+        }
+        // TODO: Sending once per tick regardless of framerate at the moment
 
         // sanitise
         Buf_Clear(&packetBuf);
 
-        // TODO: Sending once per tick regardless of framerate at the moment
-        ByteBuffer* b = &cl->stream.outputBuffer;
-        
         i32 numReliableBytes = b->Written();
 		// Write reliable
         Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf, time->deltaTime);

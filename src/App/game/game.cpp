@@ -289,15 +289,15 @@ internal void Game_Tick(
     else
     {
         // TODO: Client specific update code
-        Game_UpdateActorMotors(gs, time);
-        Game_UpdateAIControllers(clients, gs, time);
-        Game_UpdateColliders(gs, time);
-        Game_UpdateProjectiles(gs, time);
-        Game_UpdateVolumes(gs, time);
-        Game_UpdateThinkers(clients, gs, time);
+        //Game_UpdateActorMotors(gs, time);
+        //Game_UpdateAIControllers(clients, gs, time);
+        //Game_UpdateColliders(gs, time);
+        Game_ClientUpdateProjectiles(gs, time);
+        //Game_UpdateVolumes(gs, time);
+        //Game_UpdateThinkers(clients, gs, time);
         Game_UpdateRenderObjects(gs, time);
-        Game_UpdateSensors(gs, time);
-        Game_UpdateHealth(clients, gs, time);
+        //Game_UpdateSensors(gs, time);
+        //Game_UpdateHealth(clients, gs, time);
     }
 
     Game_TickLocalEntities(time->deltaTime, (time->singleFrame == 1));

@@ -182,18 +182,19 @@ internal i32 Game_ReadCmd(
                 printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
             Ent_ReadStateData(gs, read, header->GetSize());
-
-            // TODO: THIS OVERFLOWS AND BREAKS EVERYTHING!!
-            // Crashes physics step or raycasts
-            #if 1
+            
 			if (IS_SERVER)
 			{
-				for (i32 i = 0; i < session->clientList.max; ++i)
+                // TODO:: Entity state doesn't work directly through a command object
+                // and requires this stuff to send it instead...
+                for (i32 i = 0; i < session->clientList.max; ++i)
 				{
 					Client* cl = &session->clientList.items[i];
 					// check in use or local
 					if (cl->state == CLIENT_STATE_FREE) { continue; }
-					if (cl->connectionId == 0) { continue; }
+                    // ...Actually, send to client
+					//if (cl->connectionId == 0) { continue; }
+
 					NetStream* s = &cl->stream;
 					ByteBuffer* b = &s->outputBuffer;
 					u32 msgId = ++s->outputSequence;
@@ -204,19 +205,13 @@ internal i32 Game_ReadCmd(
 							cl->connectionId, (u16)b->Space(), requiredSpace);
                         // Remote client and No output capacity?
                         // Drop client!
-                        //Cmd_ClientUpdate cmd = {};
-                        //cmd.clientId = cl->clientId;
-                        //cmd.connectionId = cl->connectionId;
-                        //cmd.state = CLIENT_STATE_FREE;
-                        //APP_WRITE_CMD(0, cmd);
                         continue;
                     }
-                    printf("SV Write state of ent to %d\n", cl->connectionId);
+                    //printf("SV Write state of ent to %d\n", cl->connectionId);
 					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
 					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
 				}
 			}
-            #endif
             return COM_ERROR_NONE;
         } break;
 
@@ -275,6 +270,12 @@ internal i32 Game_ReadCmd(
             Cmd_RemoveEntity cmd = {};
             read += cmd.Read(read);
             Game_RemoveEntity(session->netMode, clients, gs, &cmd);
+
+            if (IS_SERVER)
+            {
+                NET_MSG_TRANSMIT_TO_ALL_CLIENTS((&session->clientList), &cmd);
+            }
+
             return COM_ERROR_NONE;
         } break;
         
