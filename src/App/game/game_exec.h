@@ -27,7 +27,9 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
 
     cl->state = cmd->state;
     cl->entId = cmd->entId;
-    cl->connectionId = cmd->connectionId;
+    // DON'T copy connectionId. It is set by the server on connect only
+    // and never known by clients
+    //cl->connectionId = cmd->connectionId;
     printf("GAME EXEC Client %d conn %d, State: %d Avatar id %d/%d\n",
         cl->clientId, cl->connectionId, cl->state, cl->entId.iteration, cl->entId.index);
     
@@ -38,7 +40,7 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
     // Changes that server should act on
     if (created)
     {
-        SV_ProcessClientCreated(session, cl);
+        SV_ProcessClientCreated(session, gs, cl);
     }
     if (spawn)
     {
@@ -49,6 +51,7 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
         // deth!
         SV_ProcessClientDeath(session->netMode, gs, &session->clientList, cl, cmd);
     }
+    #if 0
     if (cl->flags != cmd->flags)
     {
         // Find changes
@@ -60,6 +63,7 @@ internal void Exec_UpdateClient(GameSession* session, GameScene* gs, Cmd_ClientU
         }
     }
     cl->flags = cmd->flags;
+    #endif
 
     if (IS_SERVER)
     {
@@ -130,7 +134,7 @@ internal void Exec_S2CSync(GameSession* session, GameScene* gs, Cmd_S2C_Sync* cm
     App_LoadScene("TEST");
 }
 
-internal void Exec_EntitySync(GameScene* gs, Cmd_EntitySync* cmd)
+internal void Exec_EntitySync(GameScene* gs, Cmd_ActorSync* cmd)
 {
     EntId id = cmd->entId;
     Ent* ent = Ent_GetEntityById(gs, &id);
@@ -169,7 +173,7 @@ internal i32 Game_ReadCmd(
         case CMD_TYPE_ENTITY_SYNC:
         {
             if (!IS_CLIENT) { printf("SV cannot exec entity sync commands!\n"); return 1; }
-            Cmd_EntitySync cmd = {};
+            Cmd_ActorSync cmd = {};
             cmd.Read(read);
             Exec_EntitySync(gs, &cmd);
             return COM_ERROR_NONE;

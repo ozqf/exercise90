@@ -51,7 +51,7 @@ u32 App_WriteSaveState(
 
         EntityState data = {};
         Ent_CopyFullEntityState(gs, e, &data);
-        u32 written = Ent_WriteEntityStateCmd(buf->ptrWrite, &data);
+        u32 written = Ent_WriteStateCmdToAppBuffer(buf->ptrWrite, &data);
         printf("APP Write save state wrote %d bytes\n", written);
         buf->ptrWrite += written;
 

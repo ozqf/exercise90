@@ -23,7 +23,7 @@ inline void SV_FireAttack_01(GameScene *gs, AttackInfo *info)
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
         state.renderState.colourRGB[2] = 1;
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_WriteStateCmdToAppBuffer(NULL, &state);
     }
 }
 
@@ -47,7 +47,7 @@ inline void SV_FireAttack_02(GameScene *gs, AttackInfo *info)
         state.renderState.colourRGB[0] = 1;
         state.renderState.colourRGB[1] = 1;
         state.renderState.colourRGB[2] = 0;
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_WriteStateCmdToAppBuffer(NULL, &state);
     }
 }
 
@@ -72,7 +72,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
         state.renderState.colourRGB[0] = 0.3f;
         state.renderState.colourRGB[1] = 0.3f;
         state.renderState.colourRGB[2] = 1;
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_WriteStateCmdToAppBuffer(NULL, &state);
     }
     f32 spreadX = 3.0f;
     f32 spreadY = 1.5f;// 3f;
@@ -94,7 +94,7 @@ inline void SV_FireAttack_03(GameScene *gs, AttackInfo *info)
             state.renderState.colourRGB[0] = 0.3f;
             state.renderState.colourRGB[1] = 0.3f;
             state.renderState.colourRGB[2] = 1;
-            Ent_WriteEntityStateCmd(NULL, &state);
+            Ent_WriteStateCmdToAppBuffer(NULL, &state);
         }
     }
 }

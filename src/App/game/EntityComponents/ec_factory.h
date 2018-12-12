@@ -91,16 +91,23 @@ internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes)
     return read;
 }
 
+#define MAX_ENTITY_STATE_CMD_SIZE (sizeof(EntityState) * 2)
+
 /**
- * Write a state command to output.
+ * Write an entity state command to the given buffer.
+ * Does NOT write a header!
  */
-internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state)
+internal u16 Ent_WriteStateToBuffer(EntityState* state, u8* buffer, i32 capacity)
 {
-	// bumping this up 
-    const u32 bufferSize = (sizeof(EntityState) * 2);
-    u8 buffer[bufferSize];
+    // TODO: Make this calculation more precise if you can be bothered
+    // complete entity state struct + headers
+    const u32 maxStateCmdSize = (sizeof(EntityState) * 2);
+    // Chances of overflow!
+    APP_ASSERT(capacity >= maxStateCmdSize, "Buffer too small to write entity state safely")
+
     u8* origin = buffer;
     u8* stream = origin;
+
     
 	// TODO: Fix me! Force entity meta data flag. Loading will always read it
 	state->componentBits |= EC_BIT0_ENTITY;
@@ -140,13 +147,24 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
     if (h.componentBits & EC_BIT12_SENSOR)
     { stream += COM_COPY_STRUCT(&state->sensorState, stream, EC_SensorState); }
 
-    u16 bytesWritten = (u16)(stream - origin);
+    return (u16)(stream - origin);
+}
 
+/**
+ * Copy state command to a buffer, then copy that out to application output/state file
+ */
+internal u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state)
+{
+	// bumping this up 
+    const u32 bufferSize = (sizeof(EntityState) * 2);
+    u8 buffer[bufferSize];
+    u16 bytesWritten = Ent_WriteStateToBuffer(state, buffer, bufferSize);
+    
     if (optionalOutputStream == NULL)
     {
         // chuck into main app output
         u8* cmdOrigin = App_StartCommandStream();
-        App_WriteCommandBytesToFrameOutput(origin, bytesWritten);
+        App_WriteCommandBytesToFrameOutput(buffer, bytesWritten);
         App_FinishCommandStream(cmdOrigin, CMD_TYPE_ENTITY_STATE_2, 0, bytesWritten);
 		//printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten;
@@ -157,7 +175,7 @@ internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* stat
         cmdHeader.SetType(CMD_TYPE_ENTITY_STATE_2);
         cmdHeader.SetSize(bytesWritten);
         optionalOutputStream += cmdHeader.Write(optionalOutputStream);
-        optionalOutputStream += COM_COPY(origin, optionalOutputStream, bytesWritten);
+        optionalOutputStream += COM_COPY(buffer, optionalOutputStream, bytesWritten);
 		//printf("Wrote %d bytes of entity state\n", bytesWritten);
         return bytesWritten + sizeof(CmdHeader);
     }
@@ -312,7 +330,7 @@ internal EntId Ent_QuickSpawnCmd(
     {
         s.entId = entId;
         Ent_ApplySpawnOptions(&s, options);
-        Ent_WriteEntityStateCmd(NULL, &s);
+        Ent_WriteStateCmdToAppBuffer(NULL, &s);
     }
     return entId;
 }

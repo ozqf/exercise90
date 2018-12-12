@@ -114,7 +114,7 @@ internal void Game_AddAcidPool(GameScene* gs, Vec3 pos, Vec3 scale)
         state.colliderState.def.pos[2] = pos.z;
         state.volumeState.type = EC_VOLUME_TYPE_ACID;
         printf("Add acid pool %.2f/%.2f/%.2f\n", pos.x, pos.y, pos.z);
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_WriteStateCmdToAppBuffer(NULL, &state);
     }
 }
 
@@ -149,7 +149,7 @@ internal void Game_BuildTestScene_0(GameScene* gs)
         state.renderState.colourRGB[0] = 0;
         state.renderState.colourRGB[1] = 0.5f;
         state.renderState.colourRGB[2] = 0;
-        Ent_WriteEntityStateCmd(NULL, &state);
+        Ent_WriteStateCmdToAppBuffer(NULL, &state);
     }
     
     if (Ent_CopyTemplate(ENTITY_TYPE13_VOLUME, &state))

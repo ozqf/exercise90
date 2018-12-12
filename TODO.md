@@ -2,6 +2,38 @@
 
 ## Current
 
+### Networking GameScene
+
+* **DONE** Create new client when connection is accepted.
+* **DONE** Broadcast new Client state to connected Clients
+* Sync starting state to Client
+    * **DONE** Load Scene
+    * **DONE** Transfer Client list
+    * Transfer Entity list
+
+* Replication
+    * **DONE** Transfer Entity creation command.
+        * Optimise Entity creation data size
+            * Actors
+            * Projectiles
+    * **DONE** Transfer Entity delete command.
+        * Move death FX out of health update function and into deletion command.
+    * **DONE** Entity sync command
+    * Entity->client sync (priority queue)
+        * Form links between each entity and each client for tracking priority
+        * Update 'importance' of link by entity priority and sort links by importance.
+        * Load entity sync updates into unreliable commands
+            * Jitter buffer?
+            * Mark with current frame for ordered execution
+
+* Client Input
+    * Allow client Avatar spawning
+    * Apply client input to given avatar
+    * Include client's local avatar state in their inputs.
+    * Apply client's updates on server (validation...?)
+
+    
+
 ### CONSIDER: Regress Entity system to basic monolithic form
 * Entity system is too complex and not properly feature complete.
 ECS should be removed and entities should be rewritten with simplicity and networking in mind.
@@ -85,10 +117,6 @@ This struct should ONLY hold the state of the current entity scene!
         * Scene I/O buffers
 
 ### Network Integration
-
-### Reduced size events
-
-
 
 #### Execution
 * Implement unreliable messages component of packet

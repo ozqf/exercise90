@@ -157,7 +157,7 @@ internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)
     }
 }
 
-internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
+internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Client* cl)
 {
     if (!IS_SERVER) { return; }
     //APP_ASSERT(cl->state == CLIENT_STATE_SYNC, "New client is not in sync state");
@@ -174,14 +174,33 @@ internal void SV_ProcessClientCreated(GameSession* session, Client* cl)
     APP_ASSERT(written < CMD_SYNC_FILE_NAME_LENGTH, "Sync command string overflow");
     sync.length = (u8)written;
     NET_MSG_TO_OUTPUT(&cl->stream, &sync);
+
+    ByteBuffer* output = &cl->stream.outputBuffer;
+
+    u8 temp[MAX_ENTITY_STATE_CMD_SIZE];
+    #if 1
+    i32 entsWritten = 0;
     // scene sync
-    #if 0
-    Cmd_S2C_Sync sync = {};
-    sync.length = (u8)sprintf_s(
-        sync.fileName, CMD_SYNC_FILE_NAME_LENGTH,
-        "TEST"
-    );
-    printf("SV Issuing sync cmd %s to CL %d\n", sync.fileName, cl->connectionId);
+    for (i32 i = 0; i < ENTITY_BLOCK_SIZE; ++i)
+    {
+        Ent* ent = &gs->entList.items[i];
+        if (ent->inUse == ENTITY_STATUS_IN_USE)
+        {
+            EntityState es;
+            Ent_CopyFullEntityState(gs, ent, &es);
+            u16 stateSize = Ent_WriteStateToBuffer(&es, temp, MAX_ENTITY_STATE_CMD_SIZE);
+            u32 msgId = ++cl->stream.outputSequence;
+            output->ptrWrite += Stream_WriteStreamMsgHeader(
+                output->ptrWrite, msgId, stateSize, 0.1f);
+            entsWritten++;
+        }
+    }
+    
+    cl->syncCompleteMessageId = cl->stream.outputSequence - 1;
+    printf("SV Wrote %d ent states for CL %d\n", entsWritten, cl->connectionId);
+    printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
+
+
     NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
     #endif
 }

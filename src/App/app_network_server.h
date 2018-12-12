@@ -98,7 +98,7 @@ internal i32 Net_ServerWriteClientUnreliable(
         if (etc == NULL) { continue; }
 
         // TODO: Check for overflowing packet!
-        Cmd_EntitySync cmd = {};
+        Cmd_ActorSync cmd = {};
         cmd.entId = other->entId;
         cmd.pos.x = etc->t.pos.x;
         cmd.pos.y = etc->t.pos.y;

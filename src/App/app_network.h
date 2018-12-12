@@ -268,10 +268,7 @@ internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes)
 
 /////////////////////////////////////////////////////////////////
 // Network Read
-// > Reliable commands are transfered to a stream input buffer
-// then executed.
-// > Unreliable commands are read and executed straight from the
-// packet
+// Pull commands from the given stream and 
 /////////////////////////////////////////////////////////////////
 
 void Net_ReadInput(NetStream* stream, Client* nullable_cl)
@@ -485,6 +482,21 @@ internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime
                 Client* cl = &session->clientList.items[i];
                 if (cl->state == CLIENT_STATE_FREE) { continue; }
                 Net_ReadInput(&cl->stream, cl);
+                
+                // If client is syncing, check whether they have hi tthe end of their
+                // sync command queue
+                if (cl->state == CLIENT_STATE_SYNC)
+                {
+                    i32 diff = cl->syncCompleteMessageId - cl->stream.outputSequence;
+                    printf("SV Sync %d has %d remaining cmds\n", cl->connectionId, diff);
+                    if (diff <= 0)
+                    {
+                        Cmd_ClientUpdate cmd = {};
+                        cmd.Set(cl, 0);
+                        cmd.state = CLIENT_STATE_OBSERVER;
+                        APP_WRITE_CMD(0, cmd);
+                    }
+                }
             }
         } break;
 

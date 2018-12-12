@@ -269,19 +269,22 @@ struct Cmd_RemoveEntity
 {
     EntId entId;
     i32 gfxNormal;
+	u8 style;
+	u8 overkill;
 
     GAME_CMD_DEFAULT_INTERFACE(Cmd_RemoveEntity, CMD_TYPE_REMOVE_ENT)
 };
 
 // 107 - quick sync info for an entity
-struct Cmd_EntitySync
+struct Cmd_ActorSync
 {
     EntId entId;
     Vec3 pos;
-    Vec3 rot;
-    Vec3 vel;
+	Vec3 vel;
+    f32 pitch;
+	f32 yaw;
 
-    GAME_CMD_DEFAULT_INTERFACE(Cmd_EntitySync, CMD_TYPE_ENTITY_SYNC)
+    GAME_CMD_DEFAULT_INTERFACE(Cmd_ActorSync, CMD_TYPE_ENTITY_SYNC)
 };
 
 #define CMD_QUICK_TYPE_CONFIRM_CLIENT_ID 1
@@ -345,6 +348,20 @@ struct Cmd_EntitySpawn2
     i32 factoryType;
     EntitySpawnOptions options;
 };
+
+
+struct Cmd_SpawnProj
+{
+	//	4
+	EntId entId;
+	//	4
+	i32 type;
+	//	12	can quantize on server at spawn time
+	Vec3 pos;
+	//	12 can quantize on server at spawn time
+	Vec3 move;
+};
+
 
 //Ent* Exec_Spawn(GameScene* gs, Cmd_Spawn* cmd);
 

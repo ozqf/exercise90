@@ -194,7 +194,7 @@ global_variable HudRingItem g_hudRingItems[HUD_MAX_RING_ITEMS];
 
 // Interface
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
-internal u16 Ent_WriteEntityStateCmd(u8* optionalOutputStream, EntityState* state);
+internal u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state);
 internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntityState* target, EntitySpawnOptions* options);
 internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntitySpawnOptions* options);
 
