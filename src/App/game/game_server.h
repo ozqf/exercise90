@@ -202,7 +202,7 @@ internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Clien
     printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
 
 
-    NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
+    //NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
     #endif
 }
 

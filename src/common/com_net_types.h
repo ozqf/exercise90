@@ -19,12 +19,14 @@ inline ZNetAddress COM_LocalHost(u16 port)
     return addr;
 }
 
+#define STREAM_MSG_HEADER_SENTINEL_SIZE 4
 struct StreamMsgHeader
 {
     u32 id;
     i32 size;
     f32 resendTime;
     f32 resendMax;
+	char sentinel[STREAM_MSG_HEADER_SENTINEL_SIZE];
 };
 
 // Big-endian

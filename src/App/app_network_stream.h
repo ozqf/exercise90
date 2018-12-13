@@ -46,6 +46,11 @@ i32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, i32 numBytes, f32 resendRate
     // Write zero so msg is sent immediately when first discovered
     h->resendTime = 0;
     h->resendMax = resendRateSeconds;
+    // for debugging buffers:
+	h->sentinel[0] = 'M';
+	h->sentinel[1] = 'S';
+	h->sentinel[2] = 'G';
+	h->sentinel[3] = '\0';
     return sizeof(StreamMsgHeader);
 }
 /*
@@ -222,6 +227,7 @@ void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
 
 StreamMsgHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
 {
+	//printf("Scanning for cmd %d in %d bytes\n", id, (end - read));
     while (read < end)
     {
         StreamMsgHeader* h = (StreamMsgHeader*)read;
@@ -246,8 +252,24 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 {
     u8* copySrc = blockStart + blockSpace;
     i32 bytesToCopy = bufferEnd - copySrc;
-	APP_ASSERT(bytesToCopy > 0, "Collapse block size is <= 0");
-    COM_COPY(copySrc, blockStart, bytesToCopy);
+	//printf("  Collapsing %d bytes\n", bytesToCopy);
+	if (bytesToCopy == 0)
+	{
+		// nothing remains in this buffer. Just zero it out
+		COM_ZeroMemory(blockStart, blockSpace);
+	}
+	else
+	{
+		// copy the memory remaining over the block
+		COM_COPY(copySrc, blockStart, bytesToCopy);
+		i32 diff = blockSpace - bytesToCopy;
+		if (diff > 0)
+		{
+			// not enough bytes were copied back to fully write over the
+			// remaining space so sanitise it
+			COM_ZeroMemory((blockStart + bytesToCopy), diff);
+		}
+	}
     return blockStart + bytesToCopy;
 }
 
@@ -258,7 +280,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         Stream_FindTransmissionRecord(stream->transmissions, packetSequence);
     if (!rec) { return 0; }
     if (rec->numReliableMessages == 0) { return 0; }
-    printf("STREAM Confirming delivery of packet %d\n", packetSequence);
+    //printf("STREAM Confirming delivery of packet %d\n", packetSequence);
     ByteBuffer* b = &stream->outputBuffer;
     Stream_PrintTransmissionRecord(rec);
     Stream_PrintBufferManifest(b);
@@ -266,9 +288,13 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
     //u32 currentSize = b->Written();
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
+	//printf("  Output buffer Written %d space: %d\n", b->Written(), b->Space());
+    //printf("  Calculated collapsable space %d\n", (end - read));
     u32 removed = 0;
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
+		// Drop out if Buffer empty?
+		if (b->Written() == 0) { break; }
         u32 id = rec->reliableMessageIds[i];
         StreamMsgHeader* h = Stream_FindMessageById(read, end, id);
         if (h == NULL)
@@ -282,9 +308,14 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         }
         // clear and collapse
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
-		printf("  Delete %d from output. Blocksize %d cmd size %d Buffer space %d\n",
-			id, blockSize, h->size, b->Space());
+		//printf("  Delete %d from output. Blocksize %d cmd size %d Buffer Written %d Buffer space %d\n",
+		//	id, blockSize, h->size, b->Written(), b->Space());
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
+		//printf("  Deleted %d. Buffer Written %d Buffer space: %d\n",
+		//	(b->ptrWrite - end), b->Written(), b->Space());
+		
+        //printf("  New Buffer manifest:\n");
+        Stream_PrintBufferManifest(b);
         b->ptrWrite = end;
         removed += blockSize;
     }
