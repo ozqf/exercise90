@@ -108,7 +108,6 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
             Client* cl = App_FindClientByConnectionId(&session->clientList, connId);
             APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
-
             //printf("SV - Clearing output to CL %d\n", cl->connectionId);
             Stream_ClearReceivedOutput(&cl->stream, packetNumber);
         } break;
@@ -487,8 +486,11 @@ internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime
                 // sync command queue
                 if (cl->state == CLIENT_STATE_SYNC)
                 {
-                    i32 diff = cl->syncCompleteMessageId - cl->stream.outputSequence;
+                    i32 diff = cl->syncCompleteMessageId - cl->stream.ackSequence;
                     printf("SV Sync %d has %d remaining cmds\n", cl->connectionId, diff);
+                    printf("  sync complete on %d, seq %d\n",
+                        cl->syncCompleteMessageId,
+                        cl->stream.ackSequence);
                     if (diff <= 0)
                     {
                         Cmd_ClientUpdate cmd = {};

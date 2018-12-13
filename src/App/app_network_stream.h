@@ -245,21 +245,24 @@ StreamMsgHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
 u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 {
     u8* copySrc = blockStart + blockSpace;
-    u32 bytesToCopy = bufferEnd - copySrc;
+    i32 bytesToCopy = bufferEnd - copySrc;
+	APP_ASSERT(bytesToCopy > 0, "Collapse block size is <= 0");
     COM_COPY(copySrc, blockStart, bytesToCopy);
     return blockStart + bytesToCopy;
 }
 
-u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
+u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
 {
 
     TransmissionRecord* rec =
-        Stream_FindTransmissionRecord(stream->transmissions, ackSequence);
+        Stream_FindTransmissionRecord(stream->transmissions, packetSequence);
     if (!rec) { return 0; }
     if (rec->numReliableMessages == 0) { return 0; }
-    //printf("STREAM Confirming delivery of packet %d\n", ackSequence);
-
+    printf("STREAM Confirming delivery of packet %d\n", packetSequence);
     ByteBuffer* b = &stream->outputBuffer;
+    Stream_PrintTransmissionRecord(rec);
+    Stream_PrintBufferManifest(b);
+
     //u32 currentSize = b->Written();
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
@@ -272,9 +275,15 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 ackSequence)
         {
             continue;
         }
+        // Set ack if required
+        if (stream->ackSequence < id)
+        {
+            stream->ackSequence = id;
+        }
         // clear and collapse
-        //printf("  Delete %d from output\n", id);
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
+		printf("  Delete %d from output. Blocksize %d cmd size %d Buffer space %d\n",
+			id, blockSize, h->size, b->Space());
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
         b->ptrWrite = end;
         removed += blockSize;

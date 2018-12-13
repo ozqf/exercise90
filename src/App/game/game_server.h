@@ -197,7 +197,8 @@ internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Clien
     }
     
     cl->syncCompleteMessageId = cl->stream.outputSequence - 1;
-    printf("SV Wrote %d ent states for CL %d\n", entsWritten, cl->connectionId);
+    printf("SV Wrote %d ent states for CL %d output space %d\n",
+        entsWritten, cl->connectionId, output->Space());
     printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
 
 
