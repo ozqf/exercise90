@@ -141,14 +141,9 @@ void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
                 printf("  Corrupted Manifest: cmd size is zero\n");
                 break;
             }
-			//APP_ASSERT(size > 0, "Packet Cmd size is 0!");
             reliableRead += size;
         }
 	}
-    // else
-    // {
-    //     unreliableRead = reliableRead;
-    // }
     u8* unreliableRead;
     if (numReliableBytes == 0)
     {
@@ -156,7 +151,6 @@ void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
     }
     else
     {
-        // u16 == reliable bytes, i32 == reliable sequence
         unreliableRead = bytes + (sizeof(u16) + sizeof(i32) + numReliableBytes);
     }
 
@@ -186,7 +180,6 @@ void Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
 			printf("  Corrupted Manifest: cmd size is zero\n");
 			break;
 		}
-		//APP_ASSERT(size > 0, "Packet Cmd size is 0!");
         unreliableRead += size;
     }
 }
@@ -217,7 +210,6 @@ void Stream_PrintBufferManifest(ByteBuffer* b)
 
 void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
 {
-    //printf("RECORD: %d MSGS: ", rec->sequence);
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
         printf("%d, ", rec->reliableMessageIds[i]);
@@ -225,9 +217,9 @@ void Stream_PrintTransmissionRecord(TransmissionRecord* rec)
     printf("\n");
 }
 
+// Linear search through buffer
 StreamMsgHeader* Stream_FindMessageById(u8* read, u8* end, u32 id)
 {
-	//printf("Scanning for cmd %d in %d bytes\n", id, (end - read));
     while (read < end)
     {
         StreamMsgHeader* h = (StreamMsgHeader*)read;
@@ -252,7 +244,6 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 {
     u8* copySrc = blockStart + blockSpace;
     i32 bytesToCopy = bufferEnd - copySrc;
-	//printf("  Collapsing %d bytes\n", bytesToCopy);
 	if (bytesToCopy == 0)
 	{
 		// nothing remains in this buffer. Just zero it out
@@ -280,20 +271,13 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         Stream_FindTransmissionRecord(stream->transmissions, packetSequence);
     if (!rec) { return 0; }
     if (rec->numReliableMessages == 0) { return 0; }
-    //printf("STREAM Confirming delivery of packet %d\n", packetSequence);
     ByteBuffer* b = &stream->outputBuffer;
-    Stream_PrintTransmissionRecord(rec);
-    Stream_PrintBufferManifest(b);
-
-    //u32 currentSize = b->Written();
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
-	//printf("  Output buffer Written %d space: %d\n", b->Written(), b->Space());
-    //printf("  Calculated collapsable space %d\n", (end - read));
     u32 removed = 0;
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
-		// Drop out if Buffer empty?
+		// Drop out if Buffer empty
 		if (b->Written() == 0) { break; }
         u32 id = rec->reliableMessageIds[i];
         StreamMsgHeader* h = Stream_FindMessageById(read, end, id);
@@ -308,19 +292,11 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         }
         // clear and collapse
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
-		//printf("  Delete %d from output. Blocksize %d cmd size %d Buffer Written %d Buffer space %d\n",
-		//	id, blockSize, h->size, b->Written(), b->Space());
         end = Stream_CollapseBlock((u8*)h, blockSize, end);
-		//printf("  Deleted %d. Buffer Written %d Buffer space: %d\n",
-		//	(b->ptrWrite - end), b->Written(), b->Space());
-		
-        //printf("  New Buffer manifest:\n");
         Stream_PrintBufferManifest(b);
         b->ptrWrite = end;
         removed += blockSize;
     }
-    //printf("  Removed %d bytes. Reduced %d to %d\n",
-    //    removed, currentSize, b->Written());
     return removed;
 }
 
@@ -442,15 +418,12 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
     u8* end = read + numReliableBytes;
     while(read < end)
     {
-        //u32 messageId = COM_ReadU32(&read);
         u16 packedHeader = COM_ReadU16(&read);
         u8 offset;
         u16 size;
         Stream_ReadPacketHeader(packedHeader, &offset, &size);
         u32 messageId = reliableSequence + offset;
-        //printf("First id %d offset %d size %d\n", reliableSequence, offset, size);
-
-
+        
         u8 msgType = *read;
         if (msgType == 0)
         {
@@ -461,7 +434,6 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
         if (messageId <= s->inputSequence)
         {
             read += size;
-            //printf("  MessageId %d is out of date (vs %d)\n", messageId, s->inputSequence);
             continue;
         }
         // message might have already been received
@@ -470,13 +442,11 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
             s->inputBuffer.ptrWrite,
             messageId))
         {
-            //printf("  MessageId %d already received\n", messageId);
             read += size;
             continue;
         }
         else
         {
-            //printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
             u8* msg = read;
             Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
             read += size;

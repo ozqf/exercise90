@@ -11,8 +11,6 @@
 
 u16 Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
 {
-    //printf("SV Exec msg from %d: type %d size %d\n",
-    //  cl->connectionId, *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
     if (type == CMD_TYPE_TEST)
@@ -68,7 +66,6 @@ internal void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes)
     while (read < end)
     {
         u8 type = *read;
-        //printf("SV Exec unreliable cmd %d\n", type);
         u16 bytesRead = Net_ServerExecuteClientMessage(cl, read, UINT16_MAX);
         if (bytesRead > 0)
         {
@@ -178,5 +175,4 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
             cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);
         numTransmissions++;
     }
-    //printf("%d,", numTransmissions);
 }

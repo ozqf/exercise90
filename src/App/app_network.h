@@ -32,8 +32,6 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 
         // Exec local client update - will be recreated to clients when executed
         APP_WRITE_CMD(0, spawnClient);
-
-        // Prepare sync...?
     }
     else
     {
@@ -72,9 +70,6 @@ void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 
 void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-	#if 1
-	//printf(">>> NET Packet manifest from %d\n", info->sender.id);
-	//Stream_PrintPacketManifest(bytes, numBytes);
 	i32 sizeofPacketCmdHeader = sizeof(u8) + (sizeof(i32) * 2);
 	i32 numCommandBytes = sizeofPacketCmdHeader + numBytes;
 	CmdHeader h = {};
@@ -85,12 +80,10 @@ void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 	write += COM_WriteI32(info->sender.id, write);
 	write += COM_WriteI32(numBytes, write);
 	write += COM_COPY(bytes, write, numBytes);
-	#endif
 }
 
 void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 {
-    //printf("APP Confirmed delivery of conn %d packet %d\n", conn->id, packetNumber);
     Cmd_Quick cmd = {};
     cmd.SetAsPacketDelivered(conn->id, packetNumber);
     APP_WRITE_CMD(0, cmd);
@@ -108,7 +101,6 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
             Client* cl = App_FindClientByConnectionId(&session->clientList, connId);
             APP_ASSERT(cl, "SV Unknown client for packet delivery confirmation\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE), "SV Client is in state FREE for delivery confirmation\n");
-            //printf("SV - Clearing output to CL %d\n", cl->connectionId);
             Stream_ClearReceivedOutput(&cl->stream, packetNumber);
         } break;
 
@@ -131,7 +123,6 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
     {
         case NETMODE_LISTEN_SERVER:
         {
-            //printf("*SV* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
             //Stream_PrintPacketManifest(bytes, numBytes);
             ClientList* cls = &g_session.clientList;
             
@@ -157,14 +148,10 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
             {
                 Net_ServerReadUnreliable(cl, read, numUnreliableBytes);
             }
-			//APP_ASSERT(positionCheck == NET_DESERIALISE_CHECK,
-            //    "Deserialise failed sync check at unreliable section");
         } break;
 
         case NETMODE_CLIENT:
         {
-            //printf("*CL* Process packet %d bytes from %d\n", numBytes, sourceConnectionId);
-            //Stream_PrintPacketManifest(bytes, numBytes);
             APP_ASSERT(
                 (sourceConnectionId == g_session.remoteConnectionId),
                 "Received packet from unknown source");
@@ -229,7 +216,6 @@ ZNetOutputInterface Net_CreateOutputInterface()
 /////////////////////////////////////////////////////////////////
 internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
 {
-    //!frame!printf("CL Exec msg type %d size %d\n", *bytes, numBytes);
     u8 type = *bytes;
     u16 bytesRead = 0;
     // Can black list specific commands if required here
@@ -379,7 +365,6 @@ u32 Net_WriteClient2ServerOutput(
     }
 
     u16 bytesWritten = (u16)(packetBuf->ptrWrite - (headerPos + sizeof(u16)));
-    //printf("CL Wrote %d unreliable bytes\n", bytesWritten);
     COM_WriteU16(bytesWritten, headerPos);
     return bytesWritten;
 }
