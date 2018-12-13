@@ -273,14 +273,14 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
     if (rec->numReliableMessages == 0) { return 0; }
     ByteBuffer* b = &stream->outputBuffer;
     u8* read = b->ptrStart;
-    u8* end = b->ptrWrite;
+    //u8* end = b->ptrWrite;
     u32 removed = 0;
     for (u32 i = 0; i < rec->numReliableMessages; ++i)
     {
 		// Drop out if Buffer empty
 		if (b->Written() == 0) { break; }
         u32 id = rec->reliableMessageIds[i];
-        StreamMsgHeader* h = Stream_FindMessageById(read, end, id);
+        StreamMsgHeader* h = Stream_FindMessageById(read, b->ptrWrite, id);
         if (h == NULL)
         {
             continue;
@@ -292,9 +292,8 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         }
         // clear and collapse
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
-        end = Stream_CollapseBlock((u8*)h, blockSize, end);
+		b->ptrWrite = Stream_CollapseBlock((u8*)h, blockSize, b->ptrWrite);
         Stream_PrintBufferManifest(b);
-        b->ptrWrite = end;
         removed += blockSize;
     }
     return removed;
