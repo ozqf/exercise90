@@ -28,7 +28,11 @@
 #define ZNET_SIM_MODE_REALISTIC 1
 #define ZNET_SIM_MODE_BAD 2				// dev to this most of the time
 #define ZNET_SIM_MODE_TERRIBLE 3		// for easier checking of reliability robustness only
- 
+
+#define ZNET_MAX_UDP_PACKET_SIZE 1400
+#define ZNET_HEADER_SIZE 25
+#define ZNET_MAX_PAYLOAD_SIZE (ZNET_MAX_UDP_PACKET_SIZE - ZNET_HEADER_SIZE)
+
 /////////////////////////////////////////////////////////////////
 // Data types
 /////////////////////////////////////////////////////////////////
@@ -37,12 +41,6 @@ struct ZNetConnectionInfo
 	ZNetAddress address;
 	// should be kept private between this specific client and server
 	i32 id;
-
-	// NOTE: It is not the business of this layer to deal with public stuff.
-	// handle this in the layer below
-	// public client id is how the game and other clients can refer to each other.
-    // eg players 0, 1, 2. but their actual *connection* ids are not exposed to other clients.
-	// i32 publicId;
 };
 
 struct ZNetPacketInfo

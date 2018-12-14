@@ -136,6 +136,7 @@ u32 ZNet_GetNextSequenceNumber(i32 connId)
 
 u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 {
+	NET_ASSERT((numBytes <= ZNET_MAX_PAYLOAD_SIZE), "ZNET Packet payload too large");
 	ZNet* net = &g_net;
 	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
 	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
@@ -145,6 +146,15 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 		return 0;
 	}
 	
+	// protocol (4)
+	// checksum (4)
+	// type (1)
+	// id (4)
+	// sequence (4)
+	// ack (4)
+	// ack bitfield (4)
+	// 				(25) total
+	// payload	(max MTU - header)
 
 	ByteBuffer b = ZNet_GetPacketWriteBuffer();
 	b.ptrWrite += COM_WriteI32(ZNET_PROTOCOL, b.ptrWrite);

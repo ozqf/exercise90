@@ -222,17 +222,14 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits);
 // GLOBALS
 /////////////////////////////////////////////////////
 
-#define ZNET_DATA_WRITE_SIZE 1024   // >= size of data for this packet
-#define ZNET_PACKET_WRITE_SIZE 1400 // >= size of data + packet header
-#define ZNET_PACKET_READ_SIZE 1400 // >= size of data + packet header
 // Buffers
 // write data to this:
-internal u8 g_dataWriteBuffer[ZNET_DATA_WRITE_SIZE];
+internal u8 g_dataWriteBuffer[ZNET_MAX_PAYLOAD_SIZE];
 
 // final write buffer before call to platform send
-internal u8 g_packetWriteBuffer[ZNET_PACKET_WRITE_SIZE];
+internal u8 g_packetWriteBuffer[ZNET_MAX_UDP_PACKET_SIZE];
 
-internal u8 g_packetReadBuffer[ZNET_PACKET_READ_SIZE];
+internal u8 g_packetReadBuffer[ZNET_MAX_UDP_PACKET_SIZE];
 
 internal ZNetPlatformFunctions g_netPlatform;
 internal ZNetOutputInterface g_output;
@@ -265,11 +262,11 @@ internal i32 ZNet_CreateSalt()
 // if anything is async in future this will pull a free buffer from a list
 internal inline ByteBuffer ZNet_GetDataWriteBuffer()
 {
-	return Buf_FromBytes(g_dataWriteBuffer, ZNET_DATA_WRITE_SIZE);
+	return Buf_FromBytes(g_dataWriteBuffer, ZNET_MAX_UDP_PACKET_SIZE);
 }
 internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
 {
-	return Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
+	return Buf_FromBytes(g_packetWriteBuffer, ZNET_MAX_UDP_PACKET_SIZE);
 }
 
 

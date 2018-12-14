@@ -72,6 +72,7 @@ log_message( foo == 7, "x %d", x)
 #define COM_ERROR_OPEN_SOCKET_FAILED 3
 #define COM_ERROR_MISSING_FILE 4
 #define COM_ERROR_UNKNOWN_COMMAND 5
+#define COM_ERROR_NO_SPACE 6
 
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros

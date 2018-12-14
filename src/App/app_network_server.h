@@ -95,12 +95,20 @@ internal i32 Net_ServerWriteClientUnreliable(
         if (etc == NULL) { continue; }
 
         // TODO: Check for overflowing packet!
+
         Cmd_ActorSync cmd = {};
         cmd.entId = other->entId;
         cmd.pos.x = etc->t.pos.x;
         cmd.pos.y = etc->t.pos.y;
         cmd.pos.z = etc->t.pos.z;
         //printf("@");
+
+		i32 size = sizeof(u16) + cmd.MeasureForWriting();
+		if (size > b->Space())
+		{
+			printf("SV No space for Actor Sync\n");
+			continue;
+		}
 
         b->ptrWrite += COM_WriteU16(
                 Stream_WritePacketHeader(0, cmd.MeasureForWriting()),
@@ -118,9 +126,16 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
 {
     if(!IsRunningServer(session->netMode)) { return; }
 
-    const i32 packetSize = 1024;
-    u8 packetBytes[packetSize];
-    ByteBuffer packetBuf = Buf_FromBytes(packetBytes, packetSize);
+	// for low-bandwidth clients this number needs to be further reduced.
+    const i32 maxPacketSize = ZNET_MAX_PAYLOAD_SIZE;
+    // buffer capacity will be adjusted to avoid:
+    // > leaving no space for the mid packet sync check + unreliable byte count
+    // > avoid packet only containing events and no entity sync data
+    i32 maxReliableSectionSize = (maxPacketSize / 3) * 2;
+
+
+    u8 packetBytes[maxPacketSize];
+    ByteBuffer packetBuf = Buf_FromBytes(packetBytes, maxPacketSize);
     i32 numTransmissions = 0;
     for (i32 i = 0; i < session->clientList.max; ++i)
     {
@@ -139,9 +154,18 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
         // sanitise
         Buf_Clear(&packetBuf);
 
+        b->capacity = maxReliableSectionSize;
         i32 numReliableBytes = b->Written();
 		// Write reliable
         Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf, time->deltaTime);
+		
+        // correct capacity
+        b->capacity = maxPacketSize;
+
+		// Require at least 6 bytes here to write desync sentinel and a 0 for number of
+		// unreliable bytes
+		APP_ASSERT(packetBuf.Space() >= 6, "SV2CL Packet overflowed after writing reliable msgs");
+		
 		// sync check
 		packetBuf.ptrWrite += COM_WriteU32(NET_DESERIALISE_CHECK, packetBuf.ptrWrite);
         
@@ -152,7 +176,9 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
         // TODO: This is where entity state will be transmitted
         i32 numUnreliableBytes = Net_ServerWriteClientUnreliable(
             cl, session, gs, &packetBuf);
-
+		
+		// Check for overflow again.
+		APP_ASSERT(packetBuf.Space() >= 0, "SV2CL Packet Buffer overflow");
         // write *something* for acking and keepalive
         if (numReliableBytes == 0 && numUnreliableBytes == 0)
         {
@@ -170,6 +196,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
         {
             COM_WriteU16((u16)numUnreliableBytes, unreliableHeaderPos);
         }
+
         // Send
         ZNet_SendData(
             cl->connectionId, packetBuf.ptrStart, (u16)packetBuf.Written(), 0);

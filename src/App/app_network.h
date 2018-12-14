@@ -569,12 +569,12 @@ internal void Net_WriteDebug(ZStringHeader* txt, GameSession* session)
     {
         Client* cl = &cls->items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
+		i32 pendingOutputBytes = cl->stream.outputBuffer.Written();
+		i32 pendingInputBytes = cl->stream.inputBuffer.Written();
         write += sprintf_s(write, (end - write),
-            "ID: %d: IsLocal %d, State %d, Avatar: %d/%d, Input: %d ConnId %d\n",
-				cl->clientId, cl->isLocal,
-                cl->state, cl->entId.iteration,
-                cl->entId.index, cl->input.buttons,
-                cl->connectionId
+            "ID: %d: IsLocal %d, State %d. buffers out: %dB in: %dB  | Avatar: %d/%d, Input: %d ConnId %d\n",
+				cl->clientId, cl->isLocal, cl->state, pendingOutputBytes, pendingInputBytes,
+				cl->entId.iteration, cl->entId.index, cl->input.buttons, cl->connectionId
         );
     }
 

@@ -12,16 +12,22 @@
  */
 #include "app_module.cpp"
 
-
-void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
+// Returns 0 on successful copy
+i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
 {
 	APP_ASSERT(b->ptrWrite, "Buf write message destination is null")
-    APP_ASSERT(b->Space() > numBytes, "Buf write message has no space left")
-    StreamMsgHeader h;
-    h.id = msgId;
-    h.size = numBytes;
-    b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
+    if (b->Space() < numBytes)
+    {
+        return COM_ERROR_NO_SPACE;
+    }
+    //StreamMsgHeader h;
+    //h.id = msgId;
+    //h.size = numBytes;
+    //b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
+
+    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes);
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
+    return COM_ERROR_NONE;
 }
 
 // Does NOT free I/O buffers
@@ -447,7 +453,12 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
         else
         {
             u8* msg = read;
-            Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
+            i32 err = Stream_BufferMessage(&s->inputBuffer, messageId, msg, size);
+            if (err == COM_ERROR_NO_SPACE)
+            {
+                APP_ASSERT(0, "Stream Input buffer is full");
+                return read;
+            }
             read += size;
         }
     }

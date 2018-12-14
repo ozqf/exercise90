@@ -12,7 +12,7 @@
  */
 #include "test_network_win32.h"
 
-void Buf_WriteMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
+void Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, u32 numBytes)
 {
     Assert(b->Space() > numBytes)
     StreamMsgHeader h;
@@ -277,7 +277,7 @@ void Stream_PacketToInput(ReliableStream* s, u8* ptr, u16 numBytes)
         {
             //printf("\n INPUT Id: %d type %d size: %d\n", messageId, msgType, size);
             u8* msg = read;
-            Buf_WriteMessage(&s->inputBuffer, messageId, msg, size);
+            Stream_BufferMessage(&s->inputBuffer, messageId, msg, size);
             read += size;
         }
     }

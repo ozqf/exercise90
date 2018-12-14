@@ -402,7 +402,7 @@ internal void ZNet_ReadSocket(ZNet* net)
         ZNetAddress address = {};
         MemoryBlock mem = {};
         mem.ptrMemory = g_packetReadBuffer;
-        mem.size = ZNET_PACKET_READ_SIZE;
+        mem.size = ZNET_MAX_UDP_PACKET_SIZE;
 	
         bytesRead = (u16)g_netPlatform.Read(g_net.socketIndex, &address, &mem);
         if (bytesRead == 0)
@@ -507,19 +507,11 @@ i32 ZNet_Tick(f32 deltaTime)
         case ZNET_STATE_CONNECTING:
         {
             // Get conn for address and salt
-            ZNetConnection* conn = ZNet_GetConnectionById(&g_net, g_net.client2ServerId);
+            ZNetConnection* conn =
+                ZNet_GetConnectionById(&g_net, g_net.client2ServerId);
             NET_ASSERT(conn, "Client 2 Server connection is null");
             //printf("CL SENDING CONN REQUEST\n");
-            #if 0
-            // Prepare data buffer
-            ByteBuffer data = Buf_FromBytes(g_dataWriteBuffer, ZNET_DATA_WRITE_SIZE);
-            //data.ptrWrite += COM_WriteI32(ZNET_MSG_TYPE_CONNECTION_REQUEST, data.ptrWrite);
-            data.ptrWrite += COM_WriteByte(ZNET_MSG_TYPE_CONNECTION_REQUEST, data.ptrWrite);
-            data.ptrWrite += COM_WriteI32(conn->id, data.ptrWrite);
-            printf("CL Sending type %d\n", ZNET_MSG_TYPE_CONNECTION_REQUEST);
-            i32 numBytes = data.ptrWrite - data.ptrStart;
-            #endif
-
+            
             // Prepare data buffer
             ByteBuffer data = ZNet_GetDataWriteBuffer();
             ZNet_WriteConnRequest(&data, conn->id);
@@ -527,8 +519,10 @@ i32 ZNet_Tick(f32 deltaTime)
 
             // g_packetWriteBuffer
             // ZNET_PACKET_WRITE_SIZE
-            ByteBuffer packetBuffer = Buf_FromBytes(g_packetWriteBuffer, ZNET_PACKET_WRITE_SIZE);
-            i32 packetSize = ZNet_BuildPacket(&packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress, 0);
+            ByteBuffer packetBuffer = 
+                Buf_FromBytes(g_packetWriteBuffer, ZNET_MAX_PAYLOAD_SIZE);
+            i32 packetSize = ZNet_BuildPacket(
+                &packetBuffer, data.ptrStart, numBytes, &conn->remoteAddress, 0);
 
             // send!
             ZNet_Send(&conn->remoteAddress, packetBuffer.ptrStart, packetSize);
