@@ -257,6 +257,7 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 	}
 	else
 	{
+		APP_ASSERT(bytesToCopy > 0, "Collapse block - bytes < 0");
 		// copy the memory remaining over the block
 		COM_COPY(copySrc, blockStart, bytesToCopy);
 		i32 diff = blockSpace - bytesToCopy;
@@ -291,6 +292,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         {
             continue;
         }
+		APP_ASSERT(h->size > 0, "Clear Buffer found Command size <= 0");
 		// ACKING CANNOT BE DONE HERE!
 		// This merely tells you what the highest sequence number received is... NOT
 		// the highest executed. This allows for gaps!

@@ -177,13 +177,13 @@ internal void Game_UpdateProjectiles(GameScene *gs, GameTime *time)
                 }
                 if (targetEnt->entId.value == e->source.value)
                 {
-                    if (gs->verbose)
+                    if (gs->Verbose())
                     {
                         printf("PRJ from %d hit it's source ent %d\n", e->source.value, targetEnt->entId.value);
                     }
                     continue;
                 }
-                if (gs->verbose)
+                if (gs->Verbose())
                 {
                     printf("PRJ from %d hit ent %d\n", e->source.value, targetEnt->entId.value);
                 }

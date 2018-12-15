@@ -91,6 +91,8 @@ MeshData            Assets_GetMeshDataByName(char* name);
 i32                 App_GetVarAsI32(char* name);
 inline Var*         App_GetVar(char* name);
 
+internal void       Debug_AddVerboseFrames(i32 count);
+
 /////////////////////////////////////////////////////////
 // Game Layer
 /////////////////////////////////////////////////////////

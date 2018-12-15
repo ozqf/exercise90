@@ -197,17 +197,12 @@ void App_StartRecording(GameScene *gs)
     g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
 }
 
-void App_ClearLevel()
+void App_ClearScene()
 {
     GS_Clear(&g_gameScene);
     PhysExt_ClearWorld();
     App_ClearClientGameLinks(&g_session.clientList);
-    App_ClearIOBuffers();
-}
-
-void App_LoadLevel()
-{
-    App_ClearLevel();
+    //App_ClearIOBuffers();
 }
 
 void App_EndSession()
@@ -217,7 +212,7 @@ void App_EndSession()
     g_session.netMode = NETMODE_NONE;
     Stream_Clear(&g_serverStream);
     App_StopRecording();
-    App_ClearLevel();
+    App_ClearScene();
     
     App_DeleteClients(&g_session.clientList);
     ZNet_Shutdown();
@@ -287,7 +282,9 @@ u8 App_StartReplay(char *path)
 
 internal i32 App_LoadScene(char *path)
 {
-    printf(">>> APP load scene: %s <<<\n", path);
+    printf("\n>>> APP load scene: %s <<<\n\n", path);
+
+    App_ClearScene();
 
 	if (!COM_CompareStrings(path, "TEST"))
 	{

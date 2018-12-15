@@ -558,7 +558,10 @@ void App_Frame(GameTime *time)
 		} break;
 	}
 	g_appStateOperation.op = APP_STATE_OP_NONE;
-
+    if (g_gameScene.verboseFramesTick > 0)
+    {
+        g_gameScene.verboseFramesTick--;
+    }
 
     time->gameFrameNumber++;
 }

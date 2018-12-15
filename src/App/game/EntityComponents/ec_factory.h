@@ -13,7 +13,7 @@ internal void Ent_ApplyStateData(GameScene* gs, EntityState* state)
     if (ent == NULL)
     {
         // create for now. TODO: Split into create/update functions
-        if (gs->verbose)
+        if (gs->Verbose())
         {
             printf("  Failed to find ent %d/%d, assigning\n", state->entId.iteration, state->entId.index);
         }
@@ -35,7 +35,7 @@ internal void Ent_ApplyStateData(GameScene* gs, EntityState* state)
 }
 
 // 
-internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes)
+internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes, i32 verbose)
 {
     u8* origin = stream;
     Cmd_EntityStateHeader h = {};
@@ -45,7 +45,7 @@ internal u32 Ent_ReadStateData(GameScene* gs, u8* stream, u32 numBytes)
     stream += COM_COPY_STRUCT(stream, &h, Cmd_EntityStateHeader);
 	APP_ASSERT(type == CMD_TYPE_ENTITY_STATE_2, "Read ent state cmd type mismatch")
     #if 1
-    if (gs->verbose)
+    if (verbose)
     {
         printf("Reading %d bytes of state for ent %d/%d, comp bits %d:\n  ",
             numBytes,
@@ -254,7 +254,7 @@ u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
  */
 internal void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* state)
 {
-	if (gs->verbose)
+	if (gs->Verbose())
 	{
 		Ent_PrintComponents(ent);
 	}

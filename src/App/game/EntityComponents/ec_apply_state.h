@@ -79,7 +79,7 @@ internal void EC_TransformApplyState(GameScene* gs, Ent* ent, Transform* transfo
 	if (ecT == NULL)
 	{
 		ecT = EC_AddTransform(gs, ent);
-        if (gs->verbose)
+        if (gs->Verbose())
         {
             printf("EC Creating EC_Transform for %d/%d\n", ent->entId.iteration, ent->entId.index);
         }
@@ -134,7 +134,7 @@ internal void EC_ColliderApplyState(GameScene* gs, Ent* ent, EC_ColliderState* s
     EC_Collider* col = EC_FindCollider(gs, ent);
     if (col == NULL)
     {
-        if (gs->verbose)
+        if (gs->Verbose())
         {
             printf("  GAME Create collider for %d/%d\n",
 			    ent->entId.iteration,

@@ -172,7 +172,7 @@ internal void Game_SetCameraPosition(GameSession* session, GameScene* gs)
 				// raise camera to eye height
 				gs->cameraTransform.pos.y += (1.85f / 2) * 0.8f;
 			}
-			else if (gs->verbose)
+			else if (gs->Verbose())
 			{
 				printf("GAME: Could not find transform for local avatar %d/%d\n", id.iteration, id.index);
 			}
@@ -181,7 +181,7 @@ internal void Game_SetCameraPosition(GameSession* session, GameScene* gs)
                 sprintf_s(g_playerStatusText, PLAYER_STATUS_TEXT_LENGTH, "HP: %d", hp->state.hp);
             }
         }
-        else if (gs->verbose)
+        else if (gs->Verbose())
         {
             printf("GAME: Could not find local avatar %d/%d\n", id.iteration, id.index);
         }

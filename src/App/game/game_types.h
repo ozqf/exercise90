@@ -752,7 +752,13 @@ struct GameScene
     u32 debugStringLength = 0;
     u32 debugStringCapacity = 2048;
 
-    u8 verbose;
+    i32 verboseFramesTick = 0;
+    i32 alwaysVerbose;
+
+    i32 Verbose()
+    {
+        return (verboseFramesTick || alwaysVerbose);
+    }
 
     u8 AllowPlayerSpawning()
 	{

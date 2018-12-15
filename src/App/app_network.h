@@ -229,6 +229,14 @@ internal void Net_ClientExecuteServerMessage(u8* bytes, u16 numBytes)
         }
         return;
     }
+    else if (type == CMD_TYPE_ENTITY_STATE_2)
+    {
+        printf("\n** CL Received Ent State msg ** \n");
+        Debug_AddVerboseFrames(2);
+		Cmd_EntityStateHeader* h = (Cmd_EntityStateHeader*)(bytes + 1);
+		printf("  %d/%d\n", h->entId.iteration, h->entId.index);
+		printf("\n");
+    }
     //printf("CL Write SV msg to App Buffer %d\n", type);
     APP_COPY_COMMAND_BYTES(0, bytes, numBytes);
 }

@@ -140,7 +140,7 @@ internal void Exec_EntitySync(GameScene* gs, Cmd_ActorSync* cmd)
     Ent* ent = Ent_GetEntityById(gs, &id);
     if (ent == NULL)
     { 
-        printf("No ent %d/%d for sync", id.iteration, id.index);
+        printf("No sync %d/%d", id.iteration, id.index);
         return;
     }
     EC_Transform* ect = EC_FindTransform(gs, &id);
@@ -185,7 +185,7 @@ internal i32 Game_ReadCmd(
             {
                 printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
-            Ent_ReadStateData(gs, read, header->GetSize());
+            Ent_ReadStateData(gs, read, header->GetSize(), gs->Verbose());
             
 			if (IS_SERVER)
 			{

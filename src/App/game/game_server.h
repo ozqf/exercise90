@@ -192,6 +192,7 @@ internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Clien
             u32 msgId = ++cl->stream.outputSequence;
             output->ptrWrite += Stream_WriteStreamMsgHeader(
                 output->ptrWrite, msgId, stateSize, 0.1f);
+            output->ptrWrite += COM_COPY(temp, output->ptrWrite, stateSize);
             entsWritten++;
         }
     }
@@ -199,6 +200,10 @@ internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Clien
     cl->syncCompleteMessageId = cl->stream.outputSequence - 1;
     printf("SV Wrote %d ent states for CL %d output space %d\n",
         entsWritten, cl->connectionId, output->Space());
+    if (entsWritten > 0)
+    {
+        Stream_PrintBufferManifest(output);
+    }
     printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
 
 

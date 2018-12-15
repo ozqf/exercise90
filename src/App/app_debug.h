@@ -2,7 +2,7 @@
 
 #include "app_module.cpp"
 
-void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
+internal void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
 {
     printf("-- Buffer of %d manifest --\n", numBytes);
     u8* end = ptr + numBytes;
@@ -30,8 +30,13 @@ void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
     }
 }
 
+internal void Debug_AddVerboseFrames(i32 count)
+{
+    g_gameScene.verboseFramesTick += 2;
+}
+
 #if 1
-void App_DebugPrintEntities(GameScene* gs)
+internal void App_DebugPrintEntities(GameScene* gs)
 {
     i32 l = gs->entList.max;
     i32 count = 0;

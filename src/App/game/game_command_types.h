@@ -342,12 +342,12 @@ struct Cmd_EntityStateHeader
 };
 
 // 109 CMD_TYPE_ENTITY_STATE_2
-struct Cmd_EntitySpawn2
+/*struct Cmd_EntitySpawn2
 {
     EntId entId;
     i32 factoryType;
     EntitySpawnOptions options;
-};
+};*/
 
 
 struct Cmd_SpawnProj
