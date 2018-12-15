@@ -25,7 +25,7 @@ i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
     //h.size = numBytes;
     //b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
 
-    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes);
+    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes, 0.1f);
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
     return COM_ERROR_NONE;
 }
@@ -291,9 +291,14 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         {
             continue;
         }
+		// ACKING CANNOT BE DONE HERE!
+		// This merely tells you what the highest sequence number received is... NOT
+		// the highest executed. This allows for gaps!
+		
         // Set ack if required
         if (stream->ackSequence < id)
         {
+			printf("Increment ack - %d to %d\n", stream->ackSequence, id);
             stream->ackSequence = id;
         }
         // clear and collapse
@@ -314,6 +319,7 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
     // Do we even need to send anything reliable?
     if (s->outputBuffer.Written() == 0)
     {
+		//packetBuf->ptrWrite += COM_WriteU32(s->inputSequence, packetBuf->ptrWrite);
         packetBuf->ptrWrite += COM_WriteU16(0, packetBuf->ptrWrite);
         return;
     }
@@ -323,6 +329,7 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
     TransmissionRecord* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
 
     // step over space for header (assuming it will be written)
+	// > u32 input sequence (for moving remote sequence forward
     // > u16 num reliable bytes written
     // > u32 first reliable sequence
 	u8* reliableBlockStart = packetBuf->ptrWrite;
@@ -341,12 +348,14 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
     {
         StreamMsgHeader* h = (StreamMsgHeader*)read;
         read += sizeof(StreamMsgHeader);
+        #if 0
         if (h->resendTime > 0)
         {
             h->resendTime -= deltaTime;
 			read += h->size;
             continue;
         }
+        #endif
 
         // Ready to send (or resend)
         h->resendTime = h->resendMax;

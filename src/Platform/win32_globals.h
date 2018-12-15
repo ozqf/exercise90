@@ -124,7 +124,7 @@ global_variable u8 g_singleFrameStepMode = 0;
 global_variable u8 g_singleFrameRun = 0;
 
 // Command Line
-// Nice array of pointers to the start of each token in the launch param string
+// pointers to the start of each token in the launch param string
 #define MAX_LAUNCH_PARAMS 50
 global_variable char* g_launchParams[MAX_LAUNCH_PARAMS];
 global_variable i32 g_numLaunchParams = 0;
@@ -167,5 +167,6 @@ When something goes wrong
 void Win32_Error(char *msg, char *title)
 {
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
+	DebugBreak();
 	ILLEGAL_CODE_PATH
 }

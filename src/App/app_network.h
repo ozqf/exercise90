@@ -259,13 +259,22 @@ internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes)
 void Net_ReadInput(NetStream* stream, Client* nullable_cl)
 {
     ByteBuffer* b = &stream->inputBuffer;
+	if (b->Written() == 0) { return;  }
+	i32 executed = 0;
     for(;;)
     {
         u32 nextMsg = stream->inputSequence + 1;
         APP_ASSERT(nextMsg != 0, "CL Read input: nextMsg ID is 0");
 
         StreamMsgHeader* h = Stream_FindMessageById(b->ptrStart, b->ptrWrite, nextMsg);
-        if (!h) { return; }
+        if (!h)
+		{
+			if (executed == 0)
+			{
+				printf("unable to exe %d bytes!", b->Written());
+			}
+			return;
+		}
 
         stream->inputSequence = nextMsg;
 
@@ -278,7 +287,7 @@ void Net_ReadInput(NetStream* stream, Client* nullable_cl)
         {
 			Net_ClientExecuteServerMessage(msg, (u16)h->size);
         }
-        
+		executed++;
 
         // Clear
         u8* blockStart = (u8*)h;
@@ -570,13 +579,22 @@ internal void Net_WriteDebug(ZStringHeader* txt, GameSession* session)
         Client* cl = &cls->items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
 		i32 pendingOutputBytes = cl->stream.outputBuffer.Written();
+        i32 pendingOutputSpace = cl->stream.outputBuffer.Space();
 		i32 pendingInputBytes = cl->stream.inputBuffer.Written();
+        i32 pendingInputSpace = cl->stream.inputBuffer.Space();
         write += sprintf_s(write, (end - write),
-            "ID: %d: IsLocal %d, State %d. buffers out: %dB in: %dB  | Avatar: %d/%d, Input: %d ConnId %d\n",
-				cl->clientId, cl->isLocal, cl->state, pendingOutputBytes, pendingInputBytes,
-				cl->entId.iteration, cl->entId.index, cl->input.buttons, cl->connectionId
+            "ID: %d: in/out: %d/%d, ack %d Out: %dB/%dB in: %dB/%dB\n\tState %d Ent: %d/%d, Input: %d ConnId %d\n",
+				cl->clientId, cl->stream.inputSequence, cl->stream.outputSequence, cl->stream.ackSequence,
+                pendingOutputBytes, pendingOutputSpace,
+                pendingInputBytes, pendingInputSpace,
+				cl->state, cl->entId.iteration, cl->entId.index, cl->input.buttons, cl->connectionId
         );
     }
+    write += sprintf_s(write, (end - write), "Remote SV seq in/out %d/%d ack %d\nInput: %dB/%dB, Output: %dB/%dB\n",
+        g_serverStream.inputSequence, g_serverStream.outputSequence, g_serverStream.ackSequence,
+        g_serverStream.inputBuffer.Written(), g_serverStream.inputBuffer.Space(),
+        g_serverStream.outputBuffer.Written(), g_serverStream.outputBuffer.Space()
+    );
 
     write = ZNet_WriteDebug(write, end);
 

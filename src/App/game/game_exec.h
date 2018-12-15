@@ -203,10 +203,15 @@ internal i32 Game_ReadCmd(
 					ByteBuffer* b = &s->outputBuffer;
 					u32 msgId = ++s->outputSequence;
 					i32 requiredSpace = header->GetSize() + sizeof(StreamMsgHeader);
-                    if (b->Space() < requiredSpace)
+					i32 space = b->Space();
+                    if (space < requiredSpace)
                     {
-                        printf("CLIENT %d has no output capacity (has %d need %d)!\n",
-							cl->connectionId, (u16)b->Space(), requiredSpace);
+                        printf("CLIENT %d has no output capacity (has %d need %d, written %d)!\n",
+							cl->connectionId, b->Space(), requiredSpace, b->Written());
+						if (space > 60000)
+						{
+							printf(" WTF? Space left is %d!\n", space);
+						}
                         // Remote client and No output capacity?
                         // Drop client!
                         continue;

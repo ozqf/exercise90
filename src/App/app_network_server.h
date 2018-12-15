@@ -141,7 +141,7 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
     {
         Client* cl = &session->clientList.items[i];
         if (cl->state == CLIENT_STATE_FREE) { continue; }
-        ByteBuffer* b = &cl->stream.outputBuffer;
+        ByteBuffer* output = &cl->stream.outputBuffer;
         // TODO: Preventing transmit to local clients... this will have to loopback
         if (cl->connectionId == 0)
         {
@@ -154,13 +154,13 @@ internal void Net_TransmitToClients(GameSession* session, GameScene* gs, GameTim
         // sanitise
         Buf_Clear(&packetBuf);
 
-        b->capacity = maxReliableSectionSize;
-        i32 numReliableBytes = b->Written();
+		packetBuf.capacity = maxReliableSectionSize;
+        i32 numReliableBytes = output->Written();
 		// Write reliable
         Stream_OutputToPacket(cl->connectionId, &cl->stream, &packetBuf, time->deltaTime);
 		
         // correct capacity
-        b->capacity = maxPacketSize;
+		packetBuf.capacity = maxPacketSize;
 
 		// Require at least 6 bytes here to write desync sentinel and a 0 for number of
 		// unreliable bytes
