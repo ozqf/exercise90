@@ -264,6 +264,7 @@ internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *ti
                     normal,
                     time->singleFrame == 1);
 
+                #if 0
                 /**********************************
                 // is this the time to do this...?
                 // TODO ^^ No, it isn't!
@@ -271,6 +272,7 @@ internal void Game_UpdateHealth(ClientList* clients, GameScene *gs, GameTime *ti
                 EC_Collider *col = EC_FindCollider(gs, &health->header.entId);
                 Assert(col);
                 PhysCmd_RemoveShape(col->shapeId);
+                #endif
 
                 //Game_SpawnLocalEntity(hit->worldPos[0], hit->worldPos[1], hit->worldPos[2], NULL, 0, LOCAL_ENT_TYPE_EXPLOSION
                 //printf("Killed cube!\n");

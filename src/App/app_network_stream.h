@@ -298,13 +298,12 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         // Set ack if required
         if (stream->ackSequence < id)
         {
-			printf("Increment ack - %d to %d\n", stream->ackSequence, id);
             stream->ackSequence = id;
         }
         // clear and collapse
         i32 blockSize = sizeof(StreamMsgHeader) + h->size;
 		b->ptrWrite = Stream_CollapseBlock((u8*)h, blockSize, b->ptrWrite);
-        Stream_PrintBufferManifest(b);
+        //Stream_PrintBufferManifest(b);
         removed += blockSize;
     }
     return removed;
@@ -373,10 +372,11 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
         }
         if (space < msgSize)
         {
-            printf("Packet full! Space %d size required %d (Wrote %d so far)\n",
-                packetBuf->Space(),
-                h->size,
-                rec->numReliableMessages);
+            printf("-");
+            // printf("Packet full! Space %d size required %d (Wrote %d so far)\n",
+            //     packetBuf->Space(),
+            //     h->size,
+            //     rec->numReliableMessages);
             break;
         }
 

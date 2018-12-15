@@ -295,6 +295,11 @@ internal void Game_RemoveEntity(u8 netMode, ClientList* clients, GameScene* gs, 
 				ent->factoryType
 			);
 		}
+        EC_Collider* col = EC_FindCollider(gs, ent);
+        if (col)
+        {
+            PhysCmd_RemoveShape(col->shapeId);
+        }
 
         // inform interested parties
         SV_ProcessEntityDeath(netMode, clients, gs, ent);
