@@ -35,6 +35,7 @@
 
 #include "ZPhysics_query.h"
 #include "ZPhysics_factory.h"
+#include "ZPhysics_overlaps.cpp"
 #include "ZPhysics_main.h"
 
 #endif
