@@ -111,9 +111,14 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
         } break;
         case CMD_QUICK_TYPE_CONFIRM_CLIENT_ID:
         {
+            if (IS_SERVER)
+            {
+				printf("Server received a confirm client id msg from %d...", cmd->clientId);
+                break;
+            }
             session->clientList.localClientId = cmd->clientId;
             //APP_ASSERT(false, "Set local client Id from quick cmd");
-            printf(">>> GAME Set local client Id: %d\n",
+            printf("\n>>> GAME Set local client Id: %d\n\n",
                 session->clientList.localClientId);
         } break;
         case CMD_QUICK_TYPE_CONNECTION_LOST:
@@ -121,9 +126,13 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
             printf(">>> GAME: Issuing disconnect text command");
             App_WriteTextCommand("DISCONNECT");
         } break;
+        case CMD_QUICK_TYPE_LEVEL_LOAD_COMPLETE:
+        {
+
+        } break;
         default:
         {
-            printf("GAME Unknown quick command type: %d\n", cmd->quickType);
+            printf("!GAME Unknown quick command type: %d\n", cmd->quickType);
         } break;
     }
 }
@@ -167,7 +176,7 @@ internal i32 Game_ReadCmd(
     ClientList* clients = &session->clientList;
     u8 type = *read;
     //switch (header->GetType())
-    if (verbose) { printf("GAME Exec cmd type %d\n", type); }
+    if (verbose) { printf("GAMEe Exec cmd type %d\n", type); }
     switch (type)
     {
         case CMD_TYPE_ENTITY_SYNC:
@@ -183,12 +192,14 @@ internal i32 Game_ReadCmd(
         {
             if (verbose)
             {
-                printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
+                printf("GAME rading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
             Ent_ReadStateData(gs, read, header->GetSize(), gs->Verbose());
             
 			if (IS_SERVER)
 			{
+                SV_ReplicateEntitySpawn(header, clients, read);
+                #if 0
                 // TODO:: Entity state doesn't work directly through a command object
                 // and requires this stuff to send it instead...
                 for (i32 i = 0; i < session->clientList.max; ++i)
@@ -196,10 +207,10 @@ internal i32 Game_ReadCmd(
 					Client* cl = &session->clientList.items[i];
 					// check in use or local
 					if (cl->state == CLIENT_STATE_FREE) { continue; }
-                    // ...Actually, send to client
+                    // ...Actually, sen to client
 					//if (cl->connectionId == 0) { continue; }
 
-					NetStream* s = &cl->stream;
+					NetStream* s = &cl->dstream;
 					ByteBuffer* b = &s->outputBuffer;
 					u32 msgId = ++s->outputSequence;
 					i32 requiredSpace = header->GetSize() + sizeof(StreamMsgHeader);
@@ -220,6 +231,7 @@ internal i32 Game_ReadCmd(
 					b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
 					b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
 				}
+                #endif
 			}
             return COM_ERROR_NONE;
         } break;

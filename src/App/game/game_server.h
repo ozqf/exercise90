@@ -143,7 +143,7 @@ internal void SV_TransmitClientListToClient(ClientList* cls, Client* receiver)
 		printf("SV Not transmitting client list - client is local!\n");
 		return;
 	}
-    printf("SV Transmitting client list to cl %d\n", receiver->clientId);
+    printf("\nSV Transmitting client list to cl %d\n\n", receiver->clientId);
 	i32 receiverConnId = receiver->connectionId;
     for(i32 i = 0; i < cls->max; ++i)
     {

@@ -27,7 +27,7 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
         spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
-        spawnClient.state = CLIENT_STATE_SYNC;
+        spawnClient.state = CLIENT_STATE_SYNC_LEVEL;
         printf("  - issuing update cmd for clientId %d\n", spawnClient.clientId);
 
         // Exec local client update - will be recreated to clients when executed
@@ -373,8 +373,9 @@ u32 Net_WriteClient2ServerOutput(
     }
     else
     {
-        printf("CL No local client %d to send from!\n",
+        printf("CL No local id %d to send from!",
             session->clientList.localClientId);
+        //DebugBreak();
     }
 
     u16 bytesWritten = (u16)(packetBuf->ptrWrite - (headerPos + sizeof(u16)));
@@ -480,9 +481,9 @@ internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime
                 if (cl->state == CLIENT_STATE_FREE) { continue; }
                 Net_ReadInput(&cl->stream, cl);
                 
-                // If client is syncing, check whether they have hi tthe end of their
+                // If client is syncing, check whether they have hit the end of their
                 // sync command queue
-                if (cl->state == CLIENT_STATE_SYNC)
+                if (cl->state == CLIENT_STATE_SYNC_ENTITIES)
                 {
                     i32 diff = cl->syncCompleteMessageId - cl->stream.ackSequence;
                     printf("SV Sync %d has %d remaining cmds\n", cl->connectionId, diff);

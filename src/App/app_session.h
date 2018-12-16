@@ -201,8 +201,6 @@ void App_ClearScene()
 {
     GS_Clear(&g_gameScene);
     PhysExt_ClearWorld();
-    App_ClearClientGameLinks(&g_session.clientList);
-    //App_ClearIOBuffers();
 }
 
 void App_EndSession()
@@ -306,8 +304,10 @@ internal i32 App_LoadScene(char *path)
     COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
 
     //App_StartRecording(&g_gameScene);
-
-    
+    // Mark end of load
+    Cmd_Quick cmd = {};
+    cmd.SetAsLevelLoadComplete();
+    APP_WRITE_CMD(0, cmd);
 
     return COM_ERROR_NONE;
 }

@@ -290,6 +290,8 @@ struct Cmd_ActorSync
 #define CMD_QUICK_TYPE_CONFIRM_CLIENT_ID 1
 #define CMD_QUICK_TYPE_PACKET_DELIVERED 2
 #define CMD_QUICK_TYPE_CONNECTION_LOST 3
+#define CMD_QUICK_TYPE_LEVEL_LOAD_COMPLETE 4
+#define CMD_QUICK_TYPE_READY_FOR_ENTITY_SYNC 5
 // 108 For quick data transfer
 struct Cmd_Quick
 {
@@ -329,6 +331,11 @@ struct Cmd_Quick
     {
         quickType = CMD_QUICK_TYPE_CONNECTION_LOST;
         reason = newReason;
+    }
+
+    void SetAsLevelLoadComplete()
+    {
+        quickType = CMD_QUICK_TYPE_LEVEL_LOAD_COMPLETE;
     }
 
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_Quick, CMD_TYPE_QUICK)

@@ -74,8 +74,8 @@ void App_InitMenus()
 	//ent->transform.scale = {4, 4, 4};
 	ent->halfWidth = 8;
 	ent->halfHeight = 4;
-	ent->transform.scale.x = 16;
-	ent->transform.scale.y = 16;
+	ent->transform.scale.x = 4;//16;
+	ent->transform.scale.y = 4;//16;
 	ent->transform.scale.z = 1;
 
 #if 1
@@ -105,9 +105,12 @@ void App_InitMenus()
 	UI_InitEntAsButton(ent, "OPTIONS", "OPTIONS", 0, -3);
 
 	ent = &g_mainMenu.items[4];
-	UI_InitEntAsButton(ent, "QUIT", "QUIT", 0, -5);
+	UI_InitEntAsButton(ent, "END GAME", "END GAME", 0, -5);
 
-	g_mainMenu.numItems = 5;
+	ent = &g_mainMenu.items[5];
+	UI_InitEntAsButton(ent, "QUIT", "QUIT", 0, -7);
+
+	g_mainMenu.numItems = 6;
 }
 
 void App_BuildMenuRenderScene()
@@ -214,6 +217,10 @@ void App_MenuInput(InputActionSet *inputs, GameTime *time, ScreenInfo *info)
 			//platform.Platform_WriteTextCommand("QUIT");
 			ShellExecute(NULL, "open", "https://en.wikipedia.org/wiki/Bridge_to_nowhere", NULL, NULL, SW_SHOWNORMAL);
 		}
+		if (!COM_CompareStrings(ent->name, "END GAME"))
+		{
+			platform.Platform_WriteTextCommand("DISCONNECT");
+		}
 		if (!COM_CompareStrings(ent->name, "QUIT"))
 		{
 			platform.Platform_WriteTextCommand("QUIT");
@@ -242,7 +249,7 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			platform.Platform_WriteTextCommand("HOST TEST");
 			platform.Platform_WriteTextCommand("WAIT");
 			//platform.Platform_WriteTextCommand("IMPULSE 1");
-			platform.Platform_WriteTextCommand("MENU CLOSE");
+			//platform.Platform_WriteTextCommand("MENU CLOSE");
 		}
 		if (!COM_CompareStrings(tokens[1], "OPTIONS"))
 		{
@@ -254,7 +261,7 @@ u8 Menu_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			platform.Platform_WriteTextCommand("MARK");
 			platform.Platform_WriteTextCommand("JOIN TEST");
 			platform.Platform_WriteTextCommand("WAIT");
-			platform.Platform_WriteTextCommand("MENU CLOSE");
+			//platform.Platform_WriteTextCommand("MENU CLOSE");
 		}
 	}
 	return 1;

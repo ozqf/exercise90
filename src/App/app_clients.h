@@ -4,10 +4,9 @@
 
 internal i32 App_IsClientStateValid(i32 state)
 {
-    if (state == CLIENT_STATE_FREE) { return 1; }
-    if (state == CLIENT_STATE_SYNC) { return 1; }
-    if (state == CLIENT_STATE_OBSERVER) { return 1; }
-    if (state == CLIENT_STATE_PLAYING) { return 1; }
+    if (state >= CLIENT_STATE_FREE &&
+        state <= CLIENT_STATE_SYNC_ENTITIES)
+    { return 1; }
     return 0;
 }
 
@@ -40,23 +39,12 @@ internal i32 App_GetNextClientId(ClientList* cls)
 	}
 }
 
-internal void App_ClearClientGameLinks(ClientList* cls)
-{
-	for (i32 i = 0; i < cls->max; ++i)
-	{
-		Client* cl = &cls->items[i];
-        cl->entId = {};
-		cl->state = CLIENT_STATE_FREE;// CLIENT_STATE_OBSERVER;
-
-	}
-}
-
 internal void App_DeleteClients(ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
 	{
 		Client* cl = &cls->items[i];
-        printf("APP Deleting client %d I/O Streams\n", cl->clientId);
+        printf("~APP Deleting client %d I/O Streams\n", cl->clientId);
         if (cl->stream.inputBuffer.ptrStart)
         {
             free((void*)cl->stream.inputBuffer.ptrStart);
@@ -149,7 +137,12 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
             printf("APP Attempting to update a free client. ID: %d\n ", cl->clientId);
         } break;
 
-        case CLIENT_STATE_SYNC:
+        case CLIENT_STATE_SYNC_LEVEL:
+        {
+            // TODO: Sync related stuff...
+        } break;
+
+        case CLIENT_STATE_SYNC_ENTITIES:
         {
             // TODO: Sync related stuff...
         } break;
@@ -224,7 +217,7 @@ internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cl
         cl = &cls->items[i];
         if (cl->state == CLIENT_STATE_FREE)
         {
-            cl->state = CLIENT_STATE_SYNC;
+            cl->state = CLIENT_STATE_SYNC_LEVEL;
             cl->clientId = clientId;
             if (IS_SERVER)
             {
