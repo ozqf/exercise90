@@ -198,7 +198,6 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
         {
             if (pair->reportLevel == 2)
             {
-                printf("@");
                 h.size = sizeof(PhysEv_Collision);
                 h.type = OverlapInProgress;
 			    Phys_WriteCollisionEvent(&ev, pair);

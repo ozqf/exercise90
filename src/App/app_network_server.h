@@ -8,44 +8,55 @@
 /////////////////////////////////////////////////////////////////
 // Network Execute from read
 /////////////////////////////////////////////////////////////////
-
 u16 Net_ServerExecuteClientMessage(Client* cl, u8* bytes, u16 numBytes)
 {
+    // Only exec specific commands for clients.
+    // Validate params here too? If connection Ids mismatch,
+    // something's fishy, but can't check conn Id here yet...
     u8 type = *bytes;
     u16 bytesRead = 0;
-    if (type == CMD_TYPE_TEST)
+    switch (type)
     {
-        Cmd_Test cmd;
-        bytesRead = cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
+        case CMD_TYPE_TEST:
         {
-            APP_ASSERT((bytesRead == numBytes),
-                "SV Exec CL msg - Read() size mismatch")
-        }
-        // Don't actually try to execute this command type!
-        //printf("SV Keep alive %d\n", cmd.data);
-    }
-    else if (type == CMD_TYPE_PLAYER_INPUT)
-    {
-        Cmd_PlayerInput cmd;
-        bytesRead += cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
+            Cmd_Test cmd;
+            bytesRead = cmd.Read(bytes);
+            if (numBytes != UINT16_MAX)
+            {
+                APP_ASSERT((bytesRead == numBytes),
+                    "SV Exec CL msg - Read() size mismatch")
+            }
+            // Don't actually try to execute this ommand type!
+            //printf("SV Keep alive %d\n", cmd.datca);
+        } break;
+        case CMD_TYPE_PLAYER_INPUT:
         {
-            APP_ASSERT((bytesRead == numBytes),
-                "SV Exec CL msg - Read() size mismatch")
-        }
-        APP_WRITE_CMD(0, cmd);
-    }
-    else if (type == CMD_TYPE_IMPULSE)
-    {
-        Cmd_ServerImpulse cmd;
-        bytesRead += cmd.Read(bytes);
-        if (numBytes != UINT16_MAX)
+            Cmd_PlayerInput cmd;
+            bytesRead += cmd.Read(bytes);
+            if (numBytes != UINT16_MAX)
+            {
+                APP_ASSERT((bytesRead == numBytes),
+                    "SV Exec CL msg - Read() size mismatch")
+            }
+            APP_WRITE_CMD(0, cmd);
+        } break;
+        case CMD_TYPE_IMPULSE:
         {
-            APP_ASSERT((bytesRead == numBytes),
-                "SV Exec CL msg - Read() size mismatch")
-        }
-        APP_WRITE_CMD(0, cmd);
+            Cmd_ServerImpulse cmd;
+            bytesRead += cmd.Read(bytes);
+            if (numBytes != UINT16_MAX)
+            {
+                APP_ASSERT((bytesRead == numBytes),
+                    "SV Exec CL msg - Read() size mismatch")
+            }
+            APP_WRITE_CMD(0, cmd);
+        } break;
+        case CMD_TYPE_QUICK:
+        {
+            Cmd_Quick cmd;
+            cmd.Read(bytes);
+            APP_WRITE_CMD(0, cmd);
+        } break;
     }
     return bytesRead;
 }

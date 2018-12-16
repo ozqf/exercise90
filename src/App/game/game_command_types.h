@@ -338,6 +338,12 @@ struct Cmd_Quick
         quickType = CMD_QUICK_TYPE_LEVEL_LOAD_COMPLETE;
     }
 
+    void SetAsReadyForEntities(i32 newClientId)
+    {
+        clientId = newClientId;
+        quickType = CMD_QUICK_TYPE_READY_FOR_ENTITY_SYNC;
+    }
+
 	GAME_CMD_DEFAULT_INTERFACE(Cmd_Quick, CMD_TYPE_QUICK)
 };
 

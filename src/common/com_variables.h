@@ -99,11 +99,12 @@ static char* COM_ParseVar(char* buffer, VarSet* varSet)
 		//printf("Name length %d, value length: %d, total length %d ", nameLength, valueLength, totalLength);
 
 		Var v = {};
-
+		nameLength++;
+		valueLength++;
 		COM_CopyStringLimited(buffer, v.name, nameLength);
-		v.name[nameLength] = 0;
+		//v.name[nameLength] = 0;
 		COM_CopyStringLimited(buffer + valueStart, v.value, valueLength);
-		v.value[valueLength] = 0;
+		//v.value[valueLength] = 0;
 		//printf("%s: %s", v.name, v.value);
 		COM_SetVar(&v, varSet->vars, &varSet->numVars, varSet->maxVars);
 	}

@@ -128,7 +128,18 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
         } break;
         case CMD_QUICK_TYPE_LEVEL_LOAD_COMPLETE:
         {
-
+            printf("\nScene Change Complete\n\n");
+            if (IS_SERVER) { break; }
+            printf("CL Informing server... ready for ents!\n");
+            Cmd_Quick response = {};
+            response.SetAsReadyForEntities(g_session.clientList.localClientId);
+            NET_MSG_TO_OUTPUT(&g_serverStream, &response);
+        } break;
+        case CMD_QUICK_TYPE_READY_FOR_ENTITY_SYNC:
+        {
+            //printf("\nSV Client ready for entities\n\n");
+            Client* cl = App_FindClientById(cmd->clientId, &session->clientList);
+            SV_BeginEntityReplication(cl, gs);
         } break;
         default:
         {
@@ -170,13 +181,12 @@ internal i32 Game_ReadCmd(
     GameSession* session,
     GameScene* gs,
     CmdHeader* header,
-    u8* read,
-    i32 verbose)
+    u8* read)
 {
     ClientList* clients = &session->clientList;
     u8 type = *read;
     //switch (header->GetType())
-    if (verbose) { printf("GAMEe Exec cmd type %d\n", type); }
+    if (gs->Verbose()) { printf("GAME Exec cmd type %d\n", type); }
     switch (type)
     {
         case CMD_TYPE_ENTITY_SYNC:
@@ -190,9 +200,9 @@ internal i32 Game_ReadCmd(
 
         case CMD_TYPE_ENTITY_STATE_2:
         {
-            if (verbose)
+            if (gs->Verbose())
             {
-                printf("GAME rading Entity state stream cmd (%d bytes)\n", header->GetSize());
+                printf("GAME reading Entity state stream cmd (%d bytes)\n", header->GetSize());
             }
             Ent_ReadStateData(gs, read, header->GetSize(), gs->Verbose());
             
@@ -238,7 +248,7 @@ internal i32 Game_ReadCmd(
 
         case CMD_TYPE_PACKET:
         {
-            if (verbose) { printf("  GAME Packet cmd\n"); }
+            if (gs->Verbose()) { printf("  GAME Packet cmd\n"); }
             //Cmd_Packet cmd = {};
 			// Read packet info
             read += sizeof(u8);
@@ -338,7 +348,7 @@ internal i32 Game_ReadCmd(
 
         case CMD_TYPE_CLIENT_UPDATE:
         {
-            if (verbose) { printf("  CMD Client input\n"); }
+            if (gs->Verbose()) { printf("  CMD Client input\n"); }
             Cmd_ClientUpdate cmd = {};
             read += cmd.Read(read);
             Exec_UpdateClient(session, gs, &cmd);

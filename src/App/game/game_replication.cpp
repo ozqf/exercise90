@@ -3,9 +3,45 @@
 #include "game.h"
 
 // Enable replication of entities for the given client.
-void SV_BeginEntityReplication(Client *cl, GameScene *scene)
+void SV_BeginEntityReplication(Client *cl, GameScene *gs)
 {
     // set flag, send a current entity snapshot
+    printf("SV Begin entity replication to conn %d\n", cl->connectionId);
+    
+    ByteBuffer* output = &cl->stream.outputBuffer;
+
+    u8 temp[MAX_ENTITY_STATE_CMD_SIZE];
+    #if 1
+    i32 entsWritten = 0;
+    // scene sync
+    for (i32 i = 0; i < ENTITY_BLOCK_SIZE; ++i)
+    {
+        Ent* ent = &gs->entList.items[i];
+        if (ent->inUse == ENTITY_STATUS_IN_USE)
+        {
+            EntityState es;
+            Ent_CopyFullEntityState(gs, ent, &es);
+            u16 stateSize = Ent_WriteStateToBuffer(&es, temp, MAX_ENTITY_STATE_CMD_SIZE);
+            u32 msgId = ++cl->stream.outputSequence;
+            output->ptrWrite += Stream_WriteStreamMsgHeader(
+                output->ptrWrite, msgId, stateSize, 0.1f);
+            output->ptrWrite += COM_COPY(temp, output->ptrWrite, stateSize);
+            entsWritten++;
+        }
+    }
+    
+    cl->syncCompleteMessageId = cl->stream.outputSequence - 1;
+    printf("SV Wrote %d ent states for CL %d output space %d\n",
+        entsWritten, cl->connectionId, output->Space());
+    if (entsWritten > 0)
+    {
+        Stream_PrintBufferManifest(output);
+    }
+    printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
+
+
+    //NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
+    #endif
 }
 
 void SV_ReplicateEntitySpawn(CmdHeader* header, ClientList *cls, u8 *read)

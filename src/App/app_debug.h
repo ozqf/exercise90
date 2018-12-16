@@ -32,7 +32,7 @@ internal void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
 
 internal void Debug_AddVerboseFrames(i32 count)
 {
-    g_gameScene.verboseFramesTick += 2;
+    g_gameScene.verboseFramesTick += count;
 }
 
 #if 1

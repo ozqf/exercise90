@@ -47,10 +47,12 @@ internal i32 SV_ReadImpulse(
             if (cl->state != CLIENT_STATE_OBSERVER)
             {
                 printf("SV Cannot spawn - client is free or playing already\n");
+                break;
             }
 			if (!gs->AllowPlayerSpawning())
 			{
 				printf("SV: Instance disallows player spawning\n");
+                break;
 			}
 			
             EntitySpawnOptions options = {};
@@ -175,40 +177,6 @@ internal void SV_ProcessClientCreated(GameSession* session, GameScene* gs, Clien
     sync.length = (u8)written;
     NET_MSG_TO_OUTPUT(&cl->stream, &sync);
 
-    ByteBuffer* output = &cl->stream.outputBuffer;
-
-    u8 temp[MAX_ENTITY_STATE_CMD_SIZE];
-    #if 1
-    i32 entsWritten = 0;
-    // scene sync
-    for (i32 i = 0; i < ENTITY_BLOCK_SIZE; ++i)
-    {
-        Ent* ent = &gs->entList.items[i];
-        if (ent->inUse == ENTITY_STATUS_IN_USE)
-        {
-            EntityState es;
-            Ent_CopyFullEntityState(gs, ent, &es);
-            u16 stateSize = Ent_WriteStateToBuffer(&es, temp, MAX_ENTITY_STATE_CMD_SIZE);
-            u32 msgId = ++cl->stream.outputSequence;
-            output->ptrWrite += Stream_WriteStreamMsgHeader(
-                output->ptrWrite, msgId, stateSize, 0.1f);
-            output->ptrWrite += COM_COPY(temp, output->ptrWrite, stateSize);
-            entsWritten++;
-        }
-    }
-    
-    cl->syncCompleteMessageId = cl->stream.outputSequence - 1;
-    printf("SV Wrote %d ent states for CL %d output space %d\n",
-        entsWritten, cl->connectionId, output->Space());
-    if (entsWritten > 0)
-    {
-        Stream_PrintBufferManifest(output);
-    }
-    printf("  Sync completion seq: %d\n", cl->syncCompleteMessageId);
-
-
-    //NET_MSG_TO_OUTPUT(&cl->stream, &cmd);
-    #endif
 }
 
 internal void SV_ProcessClientSpawn(u8 netMode, GameScene* gs, Client* cl, Cmd_ClientUpdate* cmd)
