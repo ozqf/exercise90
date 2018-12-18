@@ -167,8 +167,16 @@ i32 App_Init()
         );
 	
     // Init network functions
+    ZNetPlatformFunctions netFuncs = {};
+	netFuncs.Init = platform.Net_Init;
+    netFuncs.Shutdown = platform.Net_Shutdown;
+    netFuncs.OpenSocket = platform.Net_OpenSocket;
+    netFuncs.CloseSocket = platform.Net_CloseSocket;
+    netFuncs.Read = platform.Net_Read;
+    netFuncs.SendTo = platform.Net_SendTo;
+    netFuncs.FatalError = App_FatalError;
 	ZNet_Init(
-        Net_CreateNetworkPlatformFunctions(),
+        netFuncs,
         Net_CreateOutputInterface(),
         //ZNET_SIM_MODE_NONE);
         ZNET_SIM_MODE_REALISTIC);

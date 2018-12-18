@@ -160,7 +160,7 @@ internal void       AppListTextures();
 #include "app_session.h"
 #include "app_clients.h"
 #include "app_network_server.h"
-#include "app_network.h"
+#include "app_network.cpp"
 #include "app_commands.h"
 #include "app_input.h"
 #include "assets/app_textures.cpp"
