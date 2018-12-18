@@ -8,8 +8,6 @@
 //#define APP_FIRST_MAP "maps\\testbox.lvl"
 #define APP_FIRST_MAP "TEST"
 
-#define APP_NET_DEFAULT_RESEND_RATE 0.05f
-
 // TODO: Remove Buffer Id until it is actually needed
 #ifndef APP_WRITE_CMD
 #define APP_WRITE_CMD(i32_bufferId, cmdObject) \

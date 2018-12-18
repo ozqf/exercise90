@@ -10,7 +10,10 @@
  * output buffer is continuously sent until successful ack
  * input is buffered and only executed in sequence
  */
-//#include "app_module.cpp"
+
+#include "../../App/app_network_types.h"
+
+i32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);
 
 // Returns 0 on successful copy
 i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
@@ -26,11 +29,11 @@ i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
     //b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
 
     b->ptrWrite += Stream_WriteStreamMsgHeader(
-        b->ptrWrite, msgId, numBytes, APP_NET_DEFAULT_RESEND_RATE);
+        b->ptrWrite, msgId, numBytes, NET_DEFAULT_RESEND_RATE);
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
     return COM_ERROR_NONE;
 }
-#if 0
+
 // Does NOT free I/O buffers
 #if 1
 internal void Stream_Clear(NetStream* stream)
@@ -258,7 +261,7 @@ u8* Stream_CollapseBlock(u8* blockStart, u32 blockSpace, u8* bufferEnd)
 	}
 	else
 	{
-		APP_ASSERT(bytesToCopy > 0, "Collapse block - bytes < 0");
+		COM_ASSERT(bytesToCopy > 0, "Collapse block - bytes < 0");
 		// copy the memory remaining over the block
 		COM_COPY(copySrc, blockStart, bytesToCopy);
 		i32 diff = blockSpace - bytesToCopy;
@@ -293,7 +296,7 @@ u32 Stream_ClearReceivedOutput(NetStream* stream, u32 packetSequence)
         {
             continue;
         }
-		APP_ASSERT(h->size > 0, "Clear Buffer found Command size <= 0");
+		COM_ASSERT(h->size > 0, "Clear Buffer found Command size <= 0");
 		// ACKING CANNOT BE DONE HERE!
 		// This merely tells you what the highest sequence number received is... NOT
 		// the highest executed. This allows for gaps!
@@ -366,12 +369,12 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
         if (space < 0)
         {
             Stream_PrintBufferManifest(&s->outputBuffer);
-            APP_ASSERT(0, "ERROR Packet Space < 0");
+            COM_ASSERT(0, "ERROR Packet Space < 0");
         }
         if (msgSize < 0)
         {
             Stream_PrintBufferManifest(&s->outputBuffer);
-            APP_ASSERT(0, "Msg size is < 0")
+            COM_ASSERT(0, "Msg size is < 0")
         }
         if (space < msgSize)
         {
@@ -414,7 +417,7 @@ void Stream_OutputToPacket(i32 connId, NetStream* s, ByteBuffer* packetBuf, f32 
 	write += COM_WriteU16(reliableBytes, write);
 	write += COM_WriteU32(firstReliableId, write);
 }
-
+#if 1
 /////////////////////////////////////////////////////////////////
 // Packet --> Stream reliable buffer
 // Returns read position after section
@@ -468,7 +471,7 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
             i32 err = Stream_BufferMessage(&s->inputBuffer, messageId, msg, size);
             if (err == COM_ERROR_NO_SPACE)
             {
-                APP_ASSERT(0, "Stream Input buffer is full");
+                COM_ASSERT(0, "Stream Input buffer is full");
                 return read;
             }
             read += size;

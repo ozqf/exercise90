@@ -28,6 +28,8 @@ struct StreamMsgHeader
 #define NET_DESERIALISE_CHECK 0xEFBEADDE
 #define NET_DESERIALISE_CHECK_LABEL "0xDEADBEEF"
 
+#define NET_DEFAULT_RESEND_RATE 0.05f
+
 // (u16 - num reliable bytes) (u32 - first message Id)
 #define NET_SIZE_OF_RELIABLE_HEADER (sizeof(u16) + sizeof(u32))
 

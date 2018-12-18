@@ -21,7 +21,7 @@
 // https://www.binarytides.com/udp-socket-programming-in-winsock/
 #endif
 
-//#include "../../App/app_network_stream.h"
+#include "../../App/app_network_stream.h"
 
 /////////////////////////////////////////////////////////////////
 // Entry point

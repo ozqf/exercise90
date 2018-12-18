@@ -71,9 +71,9 @@ set linkInputC=
 @rem -GR -> turn off runtime type information (C++ feature)
 @rem -EHa -> turn off exception handling
 @rem -nologo -> disable compile command line header
-@rem -wd4100 -> disable warning
-@rem -wd4201 -> disable warning
-@rem -wd4189 -> disable warning
+@rem -wd4100 -> disable warning about unreferenced function parameters
+@rem -wd4189 -> disable warning - "'identifier': local variable is initialized but not referenced"
+@rem -wd4201 -> disable warning - "nonstandard extension used : nameless struct/union"
 @rem -wd4505 -> disable warning about removal of unused internal functions
 @rem /Zi -> generate debug information
 @rem /Fe -> specify file name and path
