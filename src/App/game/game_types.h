@@ -684,7 +684,8 @@ struct GameSession
 
 #define IS_SERVER (IsRunningServer(g_session.netMode))
 #define IS_CLIENT (IsRunningClient(g_session.netMode))
-
+#if 0
+// meh, gone off this idea for now
 struct EntityType
 {
     i32 id;
@@ -696,7 +697,7 @@ struct EntityType
     i32 (*SaveState)(u8* ptr);
     i32 (*LoadState)(u8* ptr);
 };
-
+#endif
 struct EntityBlock
 {
     i32 isAllocated;

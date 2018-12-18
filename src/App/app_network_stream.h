@@ -25,7 +25,7 @@ i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
     //h.size = numBytes;
     //b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
 
-    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes, 0.1f);
+    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes, APP_NET_DEFAULT_RESEND_RATE);
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
     return COM_ERROR_NONE;
 }

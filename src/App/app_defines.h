@@ -8,6 +8,8 @@
 //#define APP_FIRST_MAP "maps\\testbox.lvl"
 #define APP_FIRST_MAP "TEST"
 
+#define APP_NET_DEFAULT_RESEND_RATE 0.05f
+
 // TODO: Remove Buffer Id until it is actually needed
 #ifndef APP_WRITE_CMD
 #define APP_WRITE_CMD(i32_bufferId, cmdObject) \
@@ -49,7 +51,7 @@
 		u32 msgId = ++(##ptrNetStream##)->outputSequence; \
 		u16 msgSize = (##ptrMsgStruct##)->MeasureForWriting(); \
 		ByteBuffer* ptrOutputBuf = &(ptrNetStream##)->outputBuffer; \
-		ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize, 0.1f); \
+		ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize, APP_NET_DEFAULT_RESEND_RATE); \
 		ptrOutputBuf->ptrWrite += (##ptrMsgStruct##)->Write(ptrOutputBuf->ptrWrite); \
 	} \
     \

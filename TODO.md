@@ -11,23 +11,47 @@
     * **DONE** Transfer Client list
     * Transfer Entity list
 
+Could you... instead of replicating the exact entity (dumb) assign a type of 'proxy' to each entity that must be replicated. This Proxy is what is actually created and synchronised, not the full entity.
+A proxy must look the same and have the same physical properties, but has a different logic component designed purely for syncing with it's 'real' partner on the server.
+Proxies should reduces data load and make tracking the logic that is running on the client side easier.
+BipedProxy
+SingleMeshProxy
+ProjectileProxy
+
+An actor's component list:
+* Transform,
+* Collider,
+* Multi-mesh,
+* actorMotor (also contains attack control and data),
+* health,
+* sensor
+
+...the same effect as proxies would probably be achieved in current scheme by:
+* Implementing dedicated 'ServerUpdate' and 'ClientUpdate' functions for entities
+* Giving entities a 'NetworkSync' component that contains settings on how the object is synchronised (and handles applying that state)
+* Optimising spawning down from entire state blocks (which is awful and needs to go ASAP).
+
+* Latency calculation - server and client need to be able to judge delays to time cmd execution
+
 * Replication
+    * Client Side specific
+        * Client side Avatar movement with sync sent back to server
+        
+    * Server Side specific
+        * **DONE** Prototype entity sync command
+        * Form links between each entity and each client for tracking priority
+            * Update 'importance' of link by entity priority and sort links by importance.
+            * Load entity sync updates into unreliable commands
+                * Jitter buffer?
+                * Mark with current frame for ordered execution
+
     * **DONE** Transfer Entity creation command.
-        * Optimise Entity creation data size
-            * Actors
-            * Projectiles
+        
     * **DONE** Transfer Entity delete command.
         * Move death FX out of health update function and into deletion command.
-    * **DONE** Entity sync command
-    * Entity->client sync (priority queue)
-        * Form links between each entity and each client for tracking priority
-        * Update 'importance' of link by entity priority and sort links by importance.
-        * Load entity sync updates into unreliable commands
-            * Jitter buffer?
-            * Mark with current frame for ordered execution
 
 * Client Input
-    * Allow client Avatar spawning
+    * Allow client Avatar spawning after entity sync process
     * Apply client input to given avatar
     * Include client's local avatar state in their inputs.
     * Apply client's updates on server (validation...?)

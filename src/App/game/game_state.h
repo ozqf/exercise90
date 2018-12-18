@@ -25,7 +25,8 @@ internal void GS_Init(GameScene *gs)
     *gs = {};
     gs->debugMode = debugMode;
     Transform_SetToIdentity(&gs->cameraTransform);
-    Transform_SetPosition(&gs->cameraTransform, 0, -0.5f, 8);
+    Transform_SetPosition(&gs->cameraTransform, 0, 15.0f, 25);
+    Transform_SetRotationDegrees(&gs->cameraTransform, -55, 0, 0);
 
     gs->entList.items = g_gameEntities;
     gs->entList.count = GAME_MAX_ENTITIES;

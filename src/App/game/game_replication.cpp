@@ -24,7 +24,7 @@ void SV_BeginEntityReplication(Client *cl, GameScene *gs)
             u16 stateSize = Ent_WriteStateToBuffer(&es, temp, MAX_ENTITY_STATE_CMD_SIZE);
             u32 msgId = ++cl->stream.outputSequence;
             output->ptrWrite += Stream_WriteStreamMsgHeader(
-                output->ptrWrite, msgId, stateSize, 0.1f);
+                output->ptrWrite, msgId, stateSize, APP_NET_DEFAULT_RESEND_RATE);
             output->ptrWrite += COM_COPY(temp, output->ptrWrite, stateSize);
             entsWritten++;
         }
@@ -76,7 +76,7 @@ void SV_ReplicateEntitySpawn(CmdHeader* header, ClientList *cls, u8 *read)
             continue;
         }
         //printf("SV Write state of ent to %d\n", cl->connectionId);
-        b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), 0.1f);
+        b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, header->GetSize(), APP_NET_DEFAULT_RESEND_RATE);
         b->ptrWrite += COM_COPY(read, b->ptrWrite, header->GetSize());
     }
 }
