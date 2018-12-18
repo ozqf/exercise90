@@ -10,12 +10,12 @@
  * output buffer is continuously sent until successful ack
  * input is buffered and only executed in sequence
  */
-#include "app_module.cpp"
+//#include "app_module.cpp"
 
 // Returns 0 on successful copy
 i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
 {
-	APP_ASSERT(b->ptrWrite, "Buf write message destination is null")
+	COM_ASSERT(b->ptrWrite, "Buf write message destination is null")
     if (b->Space() < numBytes)
     {
         return COM_ERROR_NO_SPACE;
@@ -25,11 +25,12 @@ i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
     //h.size = numBytes;
     //b->ptrWrite += COM_COPY(&h, b->ptrWrite, sizeof(StreamMsgHeader));
 
-    b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes, APP_NET_DEFAULT_RESEND_RATE);
+    b->ptrWrite += Stream_WriteStreamMsgHeader(
+        b->ptrWrite, msgId, numBytes, APP_NET_DEFAULT_RESEND_RATE);
     b->ptrWrite += COM_COPY(bytes, b->ptrWrite, numBytes);
     return COM_ERROR_NONE;
 }
-
+#if 0
 // Does NOT free I/O buffers
 #if 1
 internal void Stream_Clear(NetStream* stream)
@@ -475,3 +476,4 @@ u8* Stream_PacketToInput(NetStream* s, u8* ptr)
     }
 	return read;
 }
+#endif

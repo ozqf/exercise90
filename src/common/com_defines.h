@@ -101,3 +101,21 @@ COM_CompareMemory((u8*)##ptrA##, (u8*)##ptrB##, numBytes##)
 #define COM_SET_ZERO(ptrToMemory, numberOfBytesToZero) \
 COM_ZeroMemory((u8*)##ptrToMemory##, (u32)##numberOfBytesToZero##)
 #endif
+
+typedef void (*COM_FatalErrorFunction)(char* message, char* heading);
+internal COM_FatalErrorFunction com_fatalErrorFunc = NULL;
+
+internal void COM_SetFatalError(COM_FatalErrorFunction func)
+{
+    printf("COM Set error handler\n");
+    com_fatalErrorFunc = func;
+}
+
+#define COM_ASSERT(expression, msg) if(!(expression)) \
+{ \
+    if (com_fatalErrorFunc == NULL) { ILLEGAL_CODE_PATH; } \
+    char assertBuf[512]; \
+    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
+    com_fatalErrorFunc(assertBuf, "Fatal error"); \
+}
+

@@ -12,6 +12,7 @@
 // Types/Defines etc
 #include "app_defines.h"
 #include "app_types.h"
+#include "app_network_types.h"
 
 #include "assets/app_testTextures.cpp"
 

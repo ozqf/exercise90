@@ -14,7 +14,7 @@ del *.* /Q
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/test90.exe
 @rem main compile flags, elevating warnings
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi
 @rem No elevated warnings
 @rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
@@ -74,6 +74,7 @@ set linkInputC=
 @rem -wd4100 -> disable warning
 @rem -wd4201 -> disable warning
 @rem -wd4189 -> disable warning
+@rem -wd4505 -> disable warning about removal of unused internal functions
 @rem /Zi -> generate debug information
 @rem /Fe -> specify file name and path
 @rem -subsystem:windows,5.1 creates xp compatible windows program

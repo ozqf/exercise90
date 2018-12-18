@@ -14,7 +14,7 @@
 // #include "../Platform/win32_system_include.h"
 
 #include "tests/test_common_module.h"
-#include "tests/test_introspection.cpp"
+//#include "tests/test_introspection.cpp"
 
 // #include "test_heap.h"
 // #include "test_zlib.h"
@@ -32,14 +32,21 @@
 // #include "test_ecs2.h"
 // #include "test_misc.h"
 
-//#include "network_test/test_network_win32.h"
+#include "network_test/test_network_win32.h"
+
+internal void Test_FatalError(char* message, char* heading)
+{
+    printf("!--- %s ---!\n%s", heading, message);
+}
 
 // main function for everywhere except windows
 int main(i32 argc, char* argv[])
 {
+    COM_SetFatalError(Test_FatalError);
+
 	//Test_Com_Run(argc, argv);
-    Test_Introspection();
-    //Test_Win32(argc, argv);
+    //Test_Introspection();
+    Test_NetworkWin32(argc, argv);
     //Tests_Run(argc, argv);
 	//Test_EntityComponentSystem();
     

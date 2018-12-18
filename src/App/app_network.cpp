@@ -9,7 +9,7 @@
 #include "app_network_types.h"
 #include "app_network_stream.h"
 
-#include "app_module.cpp" 
+//#include "app_module.cpp" 
 
 
 internal void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
@@ -421,7 +421,7 @@ void NET_WriteImpulse(GameSession* gs, i32 impulse)
 /////////////////////////////////////////////////////////////////
 // Network Frame loop
 /////////////////////////////////////////////////////////////////
-internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* time)
+void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* time)
 {
     switch (session->netMode)
     {
@@ -452,7 +452,7 @@ internal void Net_ReadPackets(GameSession* session, GameScene* gs, GameTime* tim
     }
 }
 
-internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime* time)
+void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime* time)
 {
     switch (session->netMode)
     {
@@ -506,7 +506,7 @@ internal void Net_ReadInputStreams(GameSession* session, GameScene* gs, GameTime
     }
 }
 
-internal void Net_Transmit(GameSession* session, GameScene* gs, GameTime* time)
+void Net_Transmit(GameSession* session, GameScene* gs, GameTime* time)
 {
     switch (session->netMode)
     {

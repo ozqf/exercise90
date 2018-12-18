@@ -1,12 +1,89 @@
 #pragma once
 
-#include "app_module.cpp"
+//#include "app_module.cpp"
 
 #define CLIENT_APP_STATE_NULL 0
 #define CLIENT_APP_STATE_LOADING 1
 #define CLIENT_APP_STATE_IN_PLAY 2
 
 #define MAX_TEST_CLIENT_NAME_LENGTH 32
+
+////////////////////////////////////////////////////////////////////
+// Network
+////////////////////////////////////////////////////////////////////
+
+#define STREAM_MSG_HEADER_SENTINEL_SIZE 4
+struct StreamMsgHeader
+{
+    u32 id;
+    i32 size;
+    f32 resendTime;
+    f32 resendMax;
+	char sentinel[STREAM_MSG_HEADER_SENTINEL_SIZE];
+};
+
+// Big-endian
+//#define NET_DESERIALISE_CHECK 0xDEADBEEF
+// Little-endian
+#define NET_DESERIALISE_CHECK 0xEFBEADDE
+#define NET_DESERIALISE_CHECK_LABEL "0xDEADBEEF"
+
+// (u16 - num reliable bytes) (u32 - first message Id)
+#define NET_SIZE_OF_RELIABLE_HEADER (sizeof(u16) + sizeof(u32))
+
+// (u16 -num reliable bytes)
+#define NET_SIZE_OF_UNRELIABLE_HEADER (sizeof(u16))
+
+#define MAX_PACKET_TRANSMISSION_MESSAGES 64
+struct TransmissionRecord
+{
+	u32 sequence;
+	u32 numReliableMessages;
+	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
+};
+
+#define MAX_TRANSMISSION_RECORDS 33
+struct NetStream
+{
+    // latest reliable command from remote executed here
+    u32 inputSequence;
+    // id of next reliable message sent to remote
+    u32 outputSequence;
+    // the most recented acknowledged message Id
+    u32 ackSequence;
+
+    ByteBuffer inputBuffer;
+    ByteBuffer outputBuffer;
+    
+    TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
+};
+
+struct PacketData
+{
+    u8* ptr;
+    u16 size;
+
+    struct Timing
+    {
+        u32 frame;
+        f32 totalTime;
+    };
+    
+    struct ReliableSection
+    {
+        u8* start;
+        u16 numBytes;
+        u32 firstSequence;
+    };
+
+    u32 syncCheck;
+
+    struct UnreliableSection
+    {
+        u8* start;
+        u16 numBytes;
+    };
+};
 
 struct ClientInfo
 {
