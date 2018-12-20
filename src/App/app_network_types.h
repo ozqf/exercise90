@@ -60,31 +60,26 @@ struct NetStream
     TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
 };
 
-struct PacketData
+struct PacketDescriptor
 {
     u8* ptr;
+	u8* cursor;
     u16 size;
-
-    struct Timing
-    {
-        u32 frame;
-        f32 totalTime;
-    };
-    
-    struct ReliableSection
-    {
-        u8* start;
-        u16 numBytes;
-        u32 firstSequence;
-    };
-
-    u32 syncCheck;
-
-    struct UnreliableSection
-    {
-        u8* start;
-        u16 numBytes;
-    };
+	
+	u32 transmissionSimFrameNumber;
+	f32 transmissionSimTime;
+	// if 0, no data
+	// num bytes is offset gap to unreliable section - sync check size.
+	u16 reliableOffset;
+	u32 deserialiseCheck;
+	// if 0, no data.
+	// num bytes is size of packet - offset.
+	u16 unreliableOffset;
+	
+	i32 Space()
+	{
+		return size - (cursor - ptr);
+	}
 };
 
 struct ClientInfo

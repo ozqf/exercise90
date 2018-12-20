@@ -13,7 +13,8 @@
 
 #include "../../App/app_network_types.h"
 
-i32 Stream_WriteStreamMsgHeader(u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);
+i32 Stream_WriteStreamMsgHeader(
+    u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);
 
 // Returns 0 on successful copy
 i32 Stream_BufferMessage(ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)

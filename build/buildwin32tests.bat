@@ -37,8 +37,10 @@ set linkStr=/link /SUBSYSTEM:CONSOLE ../lib/zlib/zlibstatic.lib Ws2_32.lib
 
 cl %compilerFlags% %compilerDefines% %outputExe% %compInput_0% %compInput_1% %compInput_2% %linkStr%
 @if not %ERRORLEVEL% == 0 goto :FINISHED
+
 @rem Auto run if you like
-@rem @call ../build/rtests.bat
+@call ../build/rtests.bat
+
 @echo off
 
 :FINISHED
