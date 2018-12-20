@@ -21,6 +21,8 @@ PRIMITIVE TYPES
 
 #define bool32 uint32_t
 
+typedef int ErrorCode;
+
 static_assert(sizeof(i8) == 1, "Code requires i8 size == 1");
 static_assert(sizeof(u8) == 1, "Code requires u8 size == 1");
 static_assert(sizeof(i16) == 2, "Code requires i16 size == 2");
@@ -73,6 +75,8 @@ log_message( foo == 7, "x %d", x)
 #define COM_ERROR_MISSING_FILE 4
 #define COM_ERROR_UNKNOWN_COMMAND 5
 #define COM_ERROR_NO_SPACE 6
+#define COM_ERROR_SERIALISE_FAILED 7
+#define COM_ERROR_DESERIALISE_FAILED 8
 
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros

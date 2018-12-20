@@ -13,7 +13,7 @@ if not exist buildRenderer mkdir buildRenderer
 cd buildRenderer
 del *.* /q
 
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /LD
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi /LD
 set compilerDefines=/DPARANOID=1
 set linkInputA=opengl32.lib
 set linkInputB=user32.lib Gdi32.lib

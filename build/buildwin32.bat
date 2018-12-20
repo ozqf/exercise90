@@ -11,7 +11,7 @@ del *.* /Q
 @rem === COMPILER SETTINGS ===
 set outputExe=/Fe../bin/exercise90.exe
 @rem main compile flags, elevating warnings
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi
 @rem No elevated warnings
 @rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1
