@@ -21,7 +21,7 @@ set compOut=/Fe../bin/base/gamex86.dll
 
 @rem /EHsc to avoid exception handling issues.
 @rem Warnings as Errors
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /EHsc
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi /EHsc
 
 @rem No warning elevation
 @rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi /EHsc

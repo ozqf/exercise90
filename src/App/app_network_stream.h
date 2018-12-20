@@ -11,7 +11,7 @@
  * input is buffered and only executed in sequence
  */
 
-#include "../../App/app_network_types.h"
+#include "app_network_types.h"
 
 i32 Stream_WriteStreamMsgHeader(
     u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);

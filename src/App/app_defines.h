@@ -49,7 +49,7 @@
 		u32 msgId = ++(##ptrNetStream##)->outputSequence; \
 		u16 msgSize = (##ptrMsgStruct##)->MeasureForWriting(); \
 		ByteBuffer* ptrOutputBuf = &(ptrNetStream##)->outputBuffer; \
-		ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize, APP_NET_DEFAULT_RESEND_RATE); \
+		ptrOutputBuf->ptrWrite += Stream_WriteStreamMsgHeader(ptrOutputBuf->ptrWrite, msgId, msgSize, NET_DEFAULT_RESEND_RATE); \
 		ptrOutputBuf->ptrWrite += (##ptrMsgStruct##)->Write(ptrOutputBuf->ptrWrite); \
 	} \
     \
