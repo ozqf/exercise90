@@ -47,16 +47,19 @@ ErrorCode ReadPacketDescriptor(PacketDescriptor* packet, u8* buf, i32 size)
 	packet->transmissionSimTime = COM_ReadF32(&packet->cursor);
 	packet->reliableOffset = COM_ReadU16(&packet->cursor);
 	packet->unreliableOffset = COM_ReadU16(&packet->cursor);
+
+	i32 numReliableBytes =
+		packet->unreliableOffset - (sizeof(packet->deserialiseCheck) + packet->reliableOffset);
+	
+	packet->reliableBuffer = Buf_FromBytes(packet->ptr + packet->reliableOffset, numReliableBytes);
+
 	// deserialise sync check
 	u8* checkPos = (buf + packet->unreliableOffset) - sizeof(u32);
-	u32 check = *(u32*)checkPos;
-	if (check != NET_DESERIALISE_CHECK)
+	packet->deserialiseCheck = *(u32*)checkPos;
+	if (packet->deserialiseCheck != NET_DESERIALISE_CHECK)
 	{
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
-
-	printf("Check: 0x%X\n", check);
-
 	return COM_ERROR_NONE;
 }
 
@@ -111,7 +114,7 @@ PacketDescriptor WriteTestPacket()
 	u8* markReliableStart = packet.cursor;
 	i32 reliableBytesWritten = WriteTestReliableData(
 		packet.cursor, CalcRemainingBytes(packet.ptr, packet.cursor, packet.size));
-		
+	printf("Wrote %d reliable Bytes\n", reliableBytesWritten);
 	COM_ASSERT(reliableBytesWritten == TEST_RELIABLE_DATA_SIZE,
 		"Unexpected amount of reliable data written\n")
 	
@@ -148,6 +151,7 @@ void Test_NetworkWin32(i32 argc, char* argv[])
 	ErrorCode errorCode = ReadPacketDescriptor(&out, in.ptr, in.size);
 	if (errorCode == COM_ERROR_NONE)
 	{
+		COM_ASSERT(out.reliableBuffer.capacity == 15, "reliable size mismatch");
 		printf("Test completed\n");
 	}
 	else

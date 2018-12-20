@@ -75,6 +75,9 @@ struct PacketDescriptor
 	// if 0, no data.
 	// num bytes is size of packet - offset.
 	u16 unreliableOffset;
+
+    ByteBuffer reliableBuffer;
+    ByteBuffer unreliableBuffer;
 	
 	i32 Space()
 	{
