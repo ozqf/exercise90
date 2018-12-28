@@ -212,6 +212,7 @@ struct GameTime
     f32 sessionEllapsed;
     u32 platformFrameNumber;
 	u32 gameFrameNumber;
+    f32 percentToNextFixedFrame;
     /*u32 fixedFrameNumber;
     f32 fixedDeltaTime;*/
     u32 ticks;

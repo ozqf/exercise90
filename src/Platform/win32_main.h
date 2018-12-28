@@ -602,18 +602,14 @@ int CALLBACK WinMain(
                 // Render
                 if (g_rendererLink.moduleState == 1)
                 {
+                    g_gameTime.percentToNextFixedFrame =
+                        g_fixedFrameAccumulator / g_fixedFrameTime;
                     g_screenInfo = g_renderer.R_SetupFrame(appWindow);
-                }
-
-				g_app.AppRender(&g_gameTime, g_screenInfo);
-
-                if (g_debugInputActive)
-                {
-                    Platform_R_DrawScene(&g_debugScene);
-                }
-
-                if (g_rendererLink.moduleState == 1)
-                {
+                    g_app.AppRender(&g_gameTime, g_screenInfo);
+                    if (g_debugInputActive)
+                    {
+                        Platform_R_DrawScene(&g_debugScene);
+                    }
                     g_renderer.R_FinishFrame(appWindow);
                 }
             }

@@ -43,6 +43,11 @@ internal void Game_UpdateRenderObjects(GameScene *gs, GameTime *time)
 			f32* col = obj->state.colourRGB;
 			obj->rendObj.SetColour(col[0], col[1], col[2]);
 		}
+        EC_Transform* ect = EC_FindTransform(gs, &obj->header.entId);
+        APP_ASSERT(ect, "Renderer has no transform");
+        obj->rendObj.previousPosition = obj->rendObj.currentPosition;
+
+        obj->rendObj.currentPosition = ect->t.pos;
 	}
     for (u32 i = 0; i < gs->multiRendObjList.max; ++i)
     {

@@ -208,6 +208,8 @@ struct RendObj
 {
     u16 type;
     u32 flags;
+    Vec3 currentPosition;
+    Vec3 previousPosition;
     RendObj_Union data;
 
     void SetColour(f32 r, f32 g, f32 b)

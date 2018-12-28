@@ -46,7 +46,8 @@ inline void Game_AddPowerUpOverlayMesh(
 /**
  * Load relevant entity renderers into rend object list
  */
-internal void Game_BuildRenderList(GameScene* gs, RenderScene* scene)
+internal void Game_BuildRenderList(
+    GameScene* gs, RenderScene* scene, GameTime* time)
 {
     u32 l = gs->singleRendObjList.max;
     // Draw Ent render components
@@ -67,6 +68,11 @@ internal void Game_BuildRenderList(GameScene* gs, RenderScene* scene)
                 Transform_SetRotationDegrees(&t, pitch, yaw, 0);
             }
 
+            RendObj_InterpolatePosition(
+                &t.pos,
+                &rend->rendObj.previousPosition,
+                &rend->rendObj.currentPosition,
+                time->percentToNextFixedFrame);
             RScene_AddRenderItem(scene, &t, &rend->rendObj);
         }
     }

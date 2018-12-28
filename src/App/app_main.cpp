@@ -384,7 +384,7 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
         g_worldScene.cameraTransform = gs->cameraTransform;
     }
     
-    Game_BuildRenderList(gs, &g_worldScene);
+    Game_BuildRenderList(gs, &g_worldScene, time);
     if (g_debugColliders == 2 || (g_debugColliders == 1 && g_debugCameraOn))
     {
         Game_DrawColliderAABBs(gs, time, &g_worldScene);

@@ -60,7 +60,19 @@ static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, 
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////
 
-static inline void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
+static inline void RendObj_InterpolatePosition(
+    Vec3* result, Vec3* origin, Vec3* dest, f32 percentage)
+{
+    f32 diffX = dest->x - origin->x;
+    f32 diffY = dest->y - origin->y;
+    f32 diffZ = dest->z - origin->z;
+    result->x = origin->x + (diffX * percentage);
+    result->y = origin->y + (diffY * percentage);
+    result->z = origin->z + (diffZ * percentage);
+}
+
+static inline void RendObj_SetAsMesh(
+    RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_MESH;
 

@@ -39,7 +39,7 @@ inline void SV_FireAttack_02(GameScene *gs, AttackInfo *info)
         info->origin,
         info->yawDegrees,
         info->pitchDegrees,
-        15);
+        5);
     if (Ent_PrepareSpawnCmd(gs, ENTITY_TYPE4_PROJECTILE, ENTITY_CATAGORY_REPLICATED, &state, &options))
     {
         state.projectileState.ticker.tickMax = 2.0f;
