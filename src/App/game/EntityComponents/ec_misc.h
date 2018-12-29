@@ -56,6 +56,8 @@ internal void Game_UpdateRenderObjects(GameScene *gs, GameTime *time)
         {
             continue;
         }
+        RendObj* base = &obj->rendObjs[EC_MULTI_RENDOBJ_BASE];
+        RendObj* head = &obj->rendObjs[EC_MULTI_RENDOBJ_HEAD];
 		if (obj->state.objStates[0].flashFrames > 0)
 		{
 			obj->rendObjs[0].SetColour(1, 1, 1);
@@ -66,9 +68,18 @@ internal void Game_UpdateRenderObjects(GameScene *gs, GameTime *time)
 		{
 			f32* col0 = obj->state.objStates[0].colourRGB;
 			f32* col1 = obj->state.objStates[1].colourRGB;
-			obj->rendObjs[0].SetColour(col0[0], col0[1], col0[2]);
-			obj->rendObjs[1].SetColour(col1[0], col1[1], col1[2]);
+			base->SetColour(col0[0], col0[1], col0[2]);
+			head->SetColour(col1[0], col1[1], col1[2]);
 		}
+        EC_Transform* ect = EC_FindTransform(gs, &obj->header.entId);
+        APP_ASSERT(ect, "Multi-renderer has no transform");
+        base->previousPosition = base->currentPosition;
+        base->currentPosition = ect->t.pos;
+        base->currentPosition.y += obj->state.GetBaseRendObj()->heightOffset;
+
+        head->previousPosition = head->currentPosition;
+        head->currentPosition = ect->t.pos;
+        head->currentPosition.y += obj->state.GetHeadRendObj()->heightOffset;
 	}
 }
 

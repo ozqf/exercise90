@@ -89,12 +89,22 @@ internal void Game_BuildRenderList(
             // TODO: Multi renderer mode selects which rendobjs are active
             // TODO: Calculate final transform for rend object from
             // ent transform + offsets and pitch/yaw overrides
-
+            RendObj* base = &rend->rendObjs[EC_MULTI_RENDOBJ_BASE];
+            RendObj* head = &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD];
+            
             Transform baseTrans = entTrans->t;
             Transform headTrans = entTrans->t;
-            baseTrans.pos.y += rend->state.GetBaseRendObj()->heightOffset;
-            headTrans.pos.y += rend->state.GetHeadRendObj()->heightOffset;
-
+            RendObj_InterpolatePosition(
+                &baseTrans.pos,
+                &base->previousPosition,
+                &base->currentPosition,
+                time->percentToNextFixedFrame);
+            
+            RendObj_InterpolatePosition(
+                &headTrans.pos,
+                &head->previousPosition,
+                &head->currentPosition,
+                time->percentToNextFixedFrame);
             
             EC_ActorMotor* m = EC_FindActorMotor(gs, &rend->header.entId);
             if (m != NULL)
@@ -105,9 +115,9 @@ internal void Game_BuildRenderList(
                 Transform_SetRotationDegrees(&headTrans, pitch, yaw, 0);
             }
 
-            RScene_AddRenderItem(scene, &baseTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_BASE]);
+            RScene_AddRenderItem(scene, &baseTrans, base);
             
-            RScene_AddRenderItem(scene, &headTrans, &rend->rendObjs[EC_MULTI_RENDOBJ_HEAD]);
+            RScene_AddRenderItem(scene, &headTrans, head);
 
             // Add FX mesh
             #if 0
