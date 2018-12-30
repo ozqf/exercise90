@@ -604,6 +604,7 @@ int CALLBACK WinMain(
                 {
                     g_gameTime.percentToNextFixedFrame =
                         g_fixedFrameAccumulator / g_fixedFrameTime;
+                    COM_ClampF32(&g_gameTime.percentToNextFixedFrame, 0, 1);
                     g_screenInfo = g_renderer.R_SetupFrame(appWindow);
                     g_app.AppRender(&g_gameTime, g_screenInfo);
                     if (g_debugInputActive)

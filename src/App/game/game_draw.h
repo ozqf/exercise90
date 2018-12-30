@@ -49,6 +49,7 @@ inline void Game_AddPowerUpOverlayMesh(
 internal void Game_BuildRenderList(
     GameScene* gs, RenderScene* scene, GameTime* time)
 {
+    printf("Time  %.4f\n", time->percentToNextFixedFrame);
     u32 l = gs->singleRendObjList.max;
     // Draw Ent render components
     for (u32 i = 0; i < l; ++i)
