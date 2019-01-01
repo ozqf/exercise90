@@ -2,7 +2,7 @@
 /*
 Server only functions
 */
-#include "app_module.cpp"
+#include "../app_module.h"
 
 // internal void SV_UpdateLocalPlayers(GameScene* gs, GameTime* time)
 // {
@@ -245,10 +245,6 @@ internal void SV_ProcessEntityDeath(u8 netMode, ClientList* clients, GameScene* 
 // TODO: MOVE ME: This isn't a server only function!
 internal void Game_RemoveEntity(u8 netMode, ClientList* clients, GameScene* gs, Cmd_RemoveEntity* cmd)
 {
-    if (g_verbose)
-    {
-        printf("GAME Removing Ent %d/%d\n", cmd->entId.iteration, cmd->entId.index);
-    }
     Ent* ent = Ent_GetEntityToRemoveById(&gs->entList, &cmd->entId);
 	if (ent != NULL)
 	{

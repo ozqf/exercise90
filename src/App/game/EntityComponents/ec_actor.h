@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "../common/com_module.h"
 
 f32 friction = 7;
 f32 accelerate = 100;
@@ -167,7 +166,7 @@ inline void ApplyActorMotorInput(
     if (
         (buttons & ACTOR_INPUT_MOVE_SPECIAL1)
         && !col->isGrounded
-        && (motor->state.flags & EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED) == FALSE
+        && (motor->state.flags & EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED) == 0
         )
     {
         motor->state.flags |= EC_ACTOR_MOTOR_FLAG_MOVE_SPECIAL_LOCKED;

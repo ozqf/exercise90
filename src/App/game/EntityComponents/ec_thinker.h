@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "../common/com_module.h"
 
 // true if a 'tock' was triggered
 inline u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)

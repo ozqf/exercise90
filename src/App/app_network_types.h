@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "app_module.cpp"
+//#include "app_module.h"
 
 #define CLIENT_APP_STATE_NULL 0
 #define CLIENT_APP_STATE_LOADING 1

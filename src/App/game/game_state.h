@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-internal void GameSession_Clear(GameSession* session)
+void GameSession_Clear(GameSession* session)
 {
     COM_SET_ZERO(session, sizeof(GameSession));
     // Don't wanna forget to assign all these.
@@ -100,7 +100,7 @@ internal void GS_Init(GameScene *gs)
     Game_InitEntityFactory();
 }
 
-internal void GS_Clear(GameScene* gs)
+void GS_Clear(GameScene* gs)
 {
 	Game_ResetLocalEntities();
     GS_Init(gs);

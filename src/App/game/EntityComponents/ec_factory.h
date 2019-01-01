@@ -153,7 +153,7 @@ internal u16 Ent_WriteStateToBuffer(EntityState* state, u8* buffer, i32 capacity
 /**
  * Copy state command to a buffer, then copy that out to application output/state file
  */
-internal u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state)
+u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state)
 {
 	// bumping this up 
     const u32 bufferSize = (sizeof(EntityState) * 2);
@@ -252,7 +252,7 @@ u32 Ent_CalcDiffBits(EntityState* a, EntityState* b)
 /**
  * Fill out a state struct for the given entity
  */
-internal void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* state)
+void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* state)
 {
 	if (gs->Verbose())
 	{
@@ -318,7 +318,7 @@ internal u8 Ent_PrepareSpawnCmd(
     return (u8)result;
 }
 
-internal EntId Ent_QuickSpawnCmd(
+EntId Ent_QuickSpawnCmd(
     GameScene* gs,
     i32 factoryType,
     i32 catagory,

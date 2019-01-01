@@ -46,7 +46,7 @@ inline void Game_AddPowerUpOverlayMesh(
 /**
  * Load relevant entity renderers into rend object list
  */
-internal void Game_BuildRenderList(
+void Game_BuildRenderList(
     GameScene* gs, RenderScene* scene, GameTime* time)
 {
     printf("Time  %.4f\n", time->percentToNextFixedFrame);
@@ -143,7 +143,7 @@ Vec3 g_weaponModalBack = { 0, -1, -0.6f };
 Vec3 g_weaponModalBackMinor = { 0, -1, -1.2f };
 Vec3 g_weaponModalCurrent = { 0, -1, -1.5 };
 
-inline void Game_BuildWeaponModelScene(Client* localClient, GameScene* gs, RenderScene* scene)
+void Game_BuildWeaponModelScene(Client* localClient, GameScene* gs, RenderScene* scene)
 {
     f32 z = g_weaponModelOrigin.z;
     if (localClient && localClient->IsPlaying())

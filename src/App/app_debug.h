@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 internal void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
 {
@@ -30,42 +30,31 @@ internal void App_PrintCommandBufferManifest(u8* ptr, u16 numBytes)
     }
 }
 
+void Game_InitDebugStr()
+{
+    g_debugStr = {};
+    g_debugStr.chars = g_debugStrBuffer;
+    g_debugStr.maxLength = GAME_DEBUG_BUFFER_LENGTH;
+}
+
+void Game_SetDebugStringRender()
+{
+    RendObj_SetAsAsciCharArray(
+        &g_debugStrRenderer,
+        g_debugStr.chars,
+        g_debugStr.length,
+        0.05f,
+        TEXT_ALIGNMENT_TOP_LEFT,
+        AppGetTextureIndexByName("textures\\charset.bmp"),
+        0, 1, 1
+    );
+}
+
 internal void Debug_AddVerboseFrames(i32 count)
 {
-    g_gameScene.verboseFramesTick += count;
+    // TODO: Reimplement
+    //g_gameScene.verboseFramesTick += count;
 }
-
-#if 1
-internal void App_DebugPrintEntities(GameScene* gs)
-{
-    i32 l = gs->entList.max;
-    i32 count = 0;
-    for (i32 i = 0; i < l; ++i)
-    {
-        Ent* e = &gs->entList.items[i];
-        if (e->inUse == ENTITY_STATUS_FREE) { continue; }
-        EC_Transform* ecT = EC_FindTransform(gs, e);
-        if (ecT)
-        {
-            printf("%d/%d: Type %d status %d pos: %.2f %.2f %.2f\n",
-            e->entId.iteration, e->entId.index,
-            e->factoryType, e->inUse,
-            ecT->t.pos.x, ecT->t.pos.y, ecT->t.pos.z
-        );
-        }
-        else
-        {
-            printf("%d/%d: Type %d status %d\n",
-            e->entId.iteration, e->entId.index,
-            e->factoryType, e->inUse
-        );
-        }
-        count++;
-    }
-    printf(" %d active entities\n", count);
-}
-#endif
-
 
 char* g_bufferA_Name = "a";
 char* g_bufferB_Name = "b";
@@ -137,7 +126,7 @@ i32 AllocateTestStrings(Heap *heap)
 // Write Debug String
 /////////////////////////////////////////////////////////////////////////////
 
-ZStringHeader App_WriteDebugString(GameScene *gs, GameTime *time)
+ZStringHeader App_WriteDebugString(GameSession* session, GameScene *gs, GameTime *time)
 {
     //Vec3 pos, rot;
 
@@ -156,7 +145,7 @@ ZStringHeader App_WriteDebugString(GameScene *gs, GameTime *time)
 
         case GAME_DEBUG_MODE_NETWORK:
         {
-            Net_WriteDebug(&h, &g_session);
+            Net_WriteDebug(&h, session);
         } break;
         #if 0
         case GAME_DEBUG_MODE_CAMERA:

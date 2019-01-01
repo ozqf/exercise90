@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 #include "com_defines.h"
 #include "com_memory_utils.h"
 #include "com_string_utils.h"
@@ -18,6 +20,7 @@
 #include "com_parse.h"
 #include "com_variables.h"
 
+#include "com_input.cpp"
 #include "com_text_command_buffer.h"
 #include "com_types.cpp"
 #include "com_maths.cpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 ////////////////////////////////////////////////////////////
 // Save GameScene
@@ -14,13 +14,12 @@ u32 App_WriteSaveState(
     StateSaveHeader *header,
     ByteBuffer* nextFrameInputBuffer)
 {
-    ClientList* clients = &session->clientList;
     StateSaveHeader h = {};
     h.magic[0] = 'S';
     h.magic[1] = 'A';
     h.magic[2] = 'V';
     h.magic[3] = 'E';
-    COM_CopyStringLimited(g_currentSceneName, h.baseFile, 32);
+    COM_CopyStringLimited(GetCurrentSceneName(), h.baseFile, 32);
     printf("Header base file: %s\n", h.baseFile);
 
     // step forward, write header later
@@ -62,6 +61,7 @@ u32 App_WriteSaveState(
     // Write Clients
     // (after entities so they are spawned first)
     /////////////////////////////////////////////////////////
+    ClientList* clients = &session->clientList;
     for (i32 i = 0; i < clients->max; ++i)
     {
         Client *cl = &clients->items[i];
@@ -111,6 +111,7 @@ u32 App_WriteSaveState(
 
 // Returns id of the file opened to (if it is left open natch)
 i32 App_WriteStateToFile(
+    GameSession* session, GameScene* gs,
     char *fileName, u8 closeFileAfterWrite, StateSaveHeader *header)
 {
     printf("APP Writing state to %s\n", fileName);
@@ -123,13 +124,13 @@ i32 App_WriteStateToFile(
     u32 written;
 	if (closeFileAfterWrite)
 	{
-		written = App_WriteSaveState(&g_session, &g_gameScene, &buf, header, g_appReadBuffer);
+		written = App_WriteSaveState(session, gs, &buf, header, g_appReadBuffer);
 	}
 	else
 	{
 		// Recording a demo. Input will be written to the frame buffer anyway,
 		// so skip appending next frame buffer
-		written = App_WriteSaveState(&g_session, &g_gameScene, &buf, header, NULL);
+		written = App_WriteSaveState(session, gs, &buf, header, NULL);
 	}
 
     // Write state to buffer
@@ -197,32 +198,32 @@ void App_StartRecording(GameScene *gs)
     g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
 }
 
-void App_ClearScene()
+void App_ClearScene(GameScene* gs)
 {
-    GS_Clear(&g_gameScene);
+    GS_Clear(gs);
     PhysExt_ClearWorld();
 }
 
-void App_EndSession()
+void App_EndSession(GameSession* session, GameScene* scene)
 {
     printf("APP Ending session\n");
 
-    g_session.netMode = NETMODE_NONE;
+    session->netMode = NETMODE_NONE;
     Stream_Clear(&g_serverStream);
     App_StopRecording();
-    App_ClearScene();
+    App_ClearScene(scene);
     
-    App_DeleteClients(&g_session.clientList);
+    App_DeleteClients(GetClientList());
     ZNet_Shutdown();
-    GameSession_Clear(&g_session);
+    GameSession_Clear(session);
     Buf_Clear(g_appWriteBuffer);
 }
 
-u8 App_StartReplay(char *path)
+u8 App_StartReplay(char *path, GameSession* session, GameScene* scene)
 {
     printf("APP Start Replay %s\n", path);
 
-    App_EndSession();
+    App_EndSession(session, scene);
 
     ///////////////////////////////////////////
     // Prepare replay buffer
@@ -253,7 +254,7 @@ u8 App_StartReplay(char *path)
            g_replayHeader.frames.count,
            g_replayHeader.frames.size);
 
-    App_ReadStateBuffer(&g_session, &g_gameScene, &g_replayReadBuffer);
+    App_ReadStateBuffer(GetSession(), GetScene(), &g_replayReadBuffer);
 
     ///////////////////////////////////////////
     // Prepare frame reading
@@ -278,30 +279,30 @@ u8 App_StartReplay(char *path)
     return 1;
 }
 
-internal i32 App_LoadScene(char *path)
+i32 App_LoadScene(char *path, GameSession* session, GameScene* gs)
 {
     printf("\n>>> APP load scene: %s <<<\n\n", path);
 
-    App_ClearScene();
+    App_ClearScene(gs);
 
 	if (!COM_CompareStrings(path, "TEST"))
 	{
-		Game_BuildTestScene(&g_gameScene, 0);
+		Game_BuildTestScene(gs, 0);
 	}
     else if (COM_MatchStringStart(path, "TEST_"))
     {
 		i32 index = COM_StripTrailingInteger(path, '_', 0);
-        Game_BuildTestScene(&g_gameScene, index);
+        Game_BuildTestScene(gs, index);
     }
     else
     {
-        if (!App_LoadStateFromFile(&g_session, &g_gameScene, path))
+        if (!App_LoadStateFromFile(GetSession(), gs, path))
         {
             return COM_ERROR_MISSING_FILE;
         }
     }
 
-    COM_CopyStringLimited(path, g_currentSceneName, MAX_SCENE_NAME_CHARS);
+    COM_CopyStringLimited(path, GetCurrentSceneName(), MAX_SCENE_NAME_CHARS);
 
     //App_StartRecording(&g_gameScene);
     // Mark end of load
@@ -312,9 +313,9 @@ internal i32 App_LoadScene(char *path)
     return COM_ERROR_NONE;
 }
 
-i32 App_StartSession(u8 netMode, char *path, GameSession* session)
+i32 App_StartSession(u8 netMode, char *path, GameSession* session, GameScene* gs)
 {
-    App_EndSession();
+    App_EndSession(session, gs);
     printf("\n**** APP START SESSION ****\n");
     i32 error = COM_ERROR_NONE;
     switch (netMode)
@@ -328,7 +329,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
         {
             error = ZNet_StartSession(netMode, NULL, ZNET_DEFAULT_SERVER_PORT);
             if (error) { printf("APP Start session failed\n"); return error; }
-            error = App_LoadScene(path);
+            error = App_LoadScene(path, session, gs);
             if (error) { printf("APP Start session failed\n"); return error; }
             session->netMode = NETMODE_LISTEN_SERVER;
 
@@ -367,7 +368,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
             printf("SESSION dedicated server on port %d\n", port);
             error = ZNet_StartSession(netMode, NULL, port);
             if (error) { return error; }
-            error = App_LoadScene("TEST");
+            error = App_LoadScene("TEST", session, gs);
             if (error) { return error; }
             session->netMode = NETMODE_DEDICATED_SERVER;
             return COM_ERROR_NONE;
@@ -390,7 +391,7 @@ i32 App_StartSession(u8 netMode, char *path, GameSession* session)
     
         case NETMODE_REPLAY:
         {
-            if (App_StartReplay(path))
+            if (App_StartReplay(path, session, gs))
             {
                 session->netMode = NETMODE_REPLAY;
                 return COM_ERROR_NONE;

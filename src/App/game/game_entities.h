@@ -9,11 +9,6 @@ inline void Ent_Reset(Ent* ent)
     ent->tag = 0;
 }
 
-#define ENTITY_STATUS_FREE 0
-#define ENTITY_STATUS_RESERVED 1
-#define ENTITY_STATUS_IN_USE 2
-#define ENTITY_STATUS_DEAD 3
-
 /**
  * When writing an entity spawn command a unique Id must be reserved here
  */
@@ -41,10 +36,6 @@ EntId Ent_ReserveFreeEntity(EntList* ents, i32 entCatagory)
         if (e->inUse == ENTITY_STATUS_FREE)
         {
             e->inUse = ENTITY_STATUS_RESERVED;
-            if (g_verbose)
-            {
-                printf("SV Reserving Ent %d/%d\n", e->entId.iteration, e->entId.index);
-            }
             Ent_Reset(e);
             // Iteration remains same. Is iterated on free, not on reserve
 			return e->entId;

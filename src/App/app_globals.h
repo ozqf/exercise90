@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DLL GLOBALS
@@ -15,6 +15,13 @@ global_variable InputActionSet g_inputActions = {
     g_inputActionItems,
     0
 };
+
+
+global_variable ZStringHeader g_debugStr;
+global_variable char g_debugStrBuffer[GAME_DEBUG_BUFFER_LENGTH];
+global_variable RendObj g_debugStrRenderer;
+global_variable u8 g_verbose = 0;
+
 
 // Interface to the external world
 PlatformInterface platform;
@@ -58,6 +65,33 @@ global_variable StateSaveHeader g_replayHeader = {};
 global_variable BlockRef g_replayData;
 global_variable ByteBuffer g_replayReadBuffer = {};
 global_variable u8* g_replayPtr = NULL;
+
+// Game Command I/O buffer handles
+
+// pointers used for I/O
+global_variable ByteBuffer* g_appReadBuffer = NULL;
+global_variable ByteBuffer* g_appWriteBuffer = NULL;
+ByteBuffer* App_GetWriteBuffer() { return g_appWriteBuffer; }
+
+// Double buffers, swapped at the end of each app frame.
+global_variable ByteBuffer g_appBufferA;
+global_variable BlockRef g_appBufferA_Ref;
+
+global_variable ByteBuffer g_appBufferB;
+global_variable BlockRef g_appBufferB_Ref;
+
+
+global_variable NetStream g_serverStream;
+NetStream*      App_GetRemoteServerStream() { return &g_serverStream; }
+
+global_variable BlockRef g_serverStreamInputRef;
+global_variable BlockRef g_serverStreamOutputRef;
+global_variable ByteBuffer g_serverStreamInput;
+global_variable ByteBuffer g_serverStreamOutput;
+
+// Physics engine buffer handles
+global_variable BlockRef g_collisionCommandBuffer;
+global_variable BlockRef g_collisionEventBuffer;
 
 #define APP_STATE_OP_NONE 0
 #define APP_STATE_OP_SAVE 1

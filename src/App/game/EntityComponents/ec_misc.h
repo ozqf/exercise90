@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "../common/com_module.h"
 
 #include "EntityComponents/ec_actor.h"
 #include "EntityComponents/ec_collider.h"

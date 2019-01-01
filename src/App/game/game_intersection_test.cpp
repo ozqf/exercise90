@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "game.h"
 
 void DEBUG_DrawLineToScene(
     RenderScene* scene,

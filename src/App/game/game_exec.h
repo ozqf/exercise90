@@ -133,7 +133,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
             printf("CL Informing server... ready for ents!\n");
             Cmd_Quick response = {};
             response.SetAsReadyForEntities(g_session.clientList.localClientId);
-            NET_MSG_TO_OUTPUT(&g_serverStream, &response);
+            NET_MSG_TO_OUTPUT(App_GetRemoteServerStream(), &response);
         } break;
         case CMD_QUICK_TYPE_READY_FOR_ENTITY_SYNC:
         {
@@ -151,7 +151,7 @@ internal void Exec_QuickCommand(GameSession* session, GameScene* gs, Cmd_Quick* 
 internal void Exec_S2CSync(GameSession* session, GameScene* gs, Cmd_S2C_Sync* cmd)
 {
     printf("S2C Sync: %s\n", cmd->fileName);
-    App_LoadScene("TEST");
+    App_LoadScene("TEST", session, gs);
 }
 
 internal void Exec_EntitySync(GameScene* gs, Cmd_ActorSync* cmd)

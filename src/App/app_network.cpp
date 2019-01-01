@@ -6,10 +6,11 @@
  * the client/server command streams that go into/out of the
  * game state
  */
+#include "../common/com_module.h"
 #include "app_network_types.h"
 #include "app_network_stream.h"
 
-//#include "app_module.cpp" 
+//#include "app_module.h" 
 
 
 internal void Net_ServerReadUnreliable(Client* cl, u8* ptr, u16 numBytes);
@@ -20,13 +21,13 @@ internal void Net_ClientReadUnreliable(u8* bytes, u16 numBytes);
 /////////////////////////////////////////////////////////////////
 void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
-    if (IsRunningServer(g_session.netMode))
+    if (IS_SERVER)
     {
         printf("SV Accepted connection %d\n", conn->id);
         // Create client
         Cmd_ClientUpdate spawnClient = {};
 		spawnClient.connectionId = conn->id;
-        spawnClient.clientId = App_GetNextClientId(&g_session.clientList);
+        spawnClient.clientId = App_GetNextClientId(GetClientList());
         spawnClient.state = CLIENT_STATE_SYNC_LEVEL;
         printf("  - issuing update cmd for clientId %d\n", spawnClient.clientId);
 
@@ -36,16 +37,16 @@ void Net_ConnectionAccepted(ZNetConnectionInfo* conn)
     else
     {
         printf("CL Connected to server with conn id %d\n", conn->id);
-        g_session.remoteConnectionId = conn->id;
+        GetSession()->remoteConnectionId = conn->id;
     }
 }
 
 void Net_ConnectionDropped(ZNetConnectionInfo* conn)
 {
     printf("APP Connection %d dropped\n", conn->id);
-	if (IsRunningServer(g_session.netMode))
+	if (IS_SERVER)
     {
-		Client* cl = App_FindClientByConnectionId(&g_session.clientList, conn->id);
+		Client* cl = App_FindClientByConnectionId(GetClientList(), conn->id);
 		if (cl == NULL)
 		{
 			printf("  ERROR No Client to remove with Id %d\n", conn->id);
@@ -92,7 +93,7 @@ void Net_DeliveryConfirmed(ZNetConnectionInfo* conn, u32 packetNumber)
 /////////////////////////////////////////////////////////////////
 // Network callback event processing
 /////////////////////////////////////////////////////////////////
-internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 packetNumber)
+void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 packetNumber)
 {
     switch (session->netMode)
     {
@@ -116,17 +117,17 @@ internal void Net_ProcessPacketDelivery(GameSession* session, i32 connId, u32 pa
     }
 }
 
-internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
+void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 {
     // TODO: Copy packet reading to app command buffer
-    switch (g_session.netMode)
+    switch (GetSession()->netMode)
     {
         case NETMODE_LISTEN_SERVER:
         {
             //Stream_PrintPacketManifest(bytes, numBytes);
-            ClientList* cls = &g_session.clientList;
+            ClientList* cls = GetClientList();
             
-            Client* cl = App_FindClientByConnectionId(&g_session.clientList, sourceConnectionId);
+            Client* cl = App_FindClientByConnectionId(cls, sourceConnectionId);
             APP_ASSERT(cl, "SV Unknown client for packet received\n");
             APP_ASSERT((cl->state != CLIENT_STATE_FREE),
                 "SV Client is in state FREE for packet received\n");
@@ -153,7 +154,7 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
         case NETMODE_CLIENT:
         {
             APP_ASSERT(
-                (sourceConnectionId == g_session.remoteConnectionId),
+                (sourceConnectionId == GetSession()->remoteConnectionId),
                 "Received packet from unknown source");
 
             u8* read = bytes;
@@ -179,7 +180,7 @@ internal void Net_ProcessPacket(i32 sourceConnectionId, u8* bytes, u16 numBytes)
 
         default:
         {
-            printf("NET Unknown mode %d for processing packet!\n", g_session.netMode);
+            printf("NET Unknown mode %d for processing packet!\n", GetSession()->netMode);
             ILLEGAL_CODE_PATH
         } break;
     }
@@ -373,9 +374,9 @@ u32 Net_WriteClient2ServerOutput(
 
 internal void Net_TransmitToServer(GameSession* session, GameScene* gs, GameTime* time)
 {
-    if(!IsRunningClient(session->netMode)) { return; }
+    if(!IS_CLIENT) { return; }
     // Conn Id will be 0 if connection has not been established so drop out
-    if (g_session.remoteConnectionId == 0) { return; }
+    if (GetSession()->remoteConnectionId == 0) { return; }
 
     const i32 packetSize = 1024;
     u8 packetBytes[packetSize];

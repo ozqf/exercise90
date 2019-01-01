@@ -171,7 +171,7 @@ internal void Game_BuildTestScene_1(GameScene* gs)
     Game_AddTestSolid(gs, 0, 0, -24, 24, 12, 1, 1);
 }
 
-internal void Game_BuildTestScene(GameScene* gs, i32 sceneIndex)
+void Game_BuildTestScene(GameScene* gs, i32 sceneIndex)
 {
 	switch (sceneIndex)
 	{

@@ -3,7 +3,7 @@
 #include "app_network_types.h"
 #include "app_network_stream.h"
 
-#include "app_module.cpp" 
+#include "app_module.h" 
 
 /////////////////////////////////////////////////////////////////
 // Network Execute from read

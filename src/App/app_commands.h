@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 //////////////////////////////////////////////////////////////////////
 // Write unknown bytes into the current command buffer
@@ -64,11 +64,14 @@ void App_DumpHeap()
 
 u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
+    GameSession* session = GetSession();
+    GameScene* gs = GetScene();
+    ClientList* cls = GetClientList();
     if (!COM_CompareStrings(tokens[0], "GOD"))
     {
-        Ent* ent = Game_GetLocalClientEnt(&g_session.clientList, &g_gameScene.entList);
+        Ent* ent = Game_GetLocalClientEnt(cls, &gs->entList);
         if (!ent) { return 1; }
-        EC_Health* hp = EC_FindHealth(&g_gameScene, ent);
+        EC_Health* hp = EC_FindHealth(gs, ent);
         if (!hp) { return 1; }
         if ((hp->state.flags & EC_HEALTH_FLAG_INVULNERABLE))
         {
@@ -104,12 +107,12 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (!COM_CompareStrings(tokens[0], "SAY"))
     {
         //printf("APP Client say...\n");
-        Net_TransmitSay(&g_session, str, tokens, numTokens);
+        Net_TransmitSay(session, str, tokens, numTokens);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "TESTSCENE"))
     {
-        Game_BuildTestScene(&g_gameScene, 0);
+        Game_BuildTestScene(gs, 0);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "IMPULSE") || !COM_CompareStrings(tokens[0], "I"))
@@ -124,7 +127,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         //cmd.impulse = COM_AsciToInt32(tokens[1]);
         //printf("Client %d sending impulse %d\n", cmd.clientId, cmd.impulse);
         //APP_WRITE_CMD(0, cmd);
-        NET_WriteImpulse(&g_session, COM_AsciToInt32(tokens[1]));
+        NET_WriteImpulse(session, COM_AsciToInt32(tokens[1]));
         //App_SendToServer((u8*)&cmd, CMD_TYPE_IMPULSE, sizeof(cmd));
         return 1;
     }
@@ -137,7 +140,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			{
 				EntitySpawnOptions options = {};
                 options.scale = { 1, 1, 1 };
-				Ent_QuickSpawnCmd(&g_gameScene, i, ENTITY_CATAGORY_REPLICATED, &options);
+				Ent_QuickSpawnCmd(gs, i, ENTITY_CATAGORY_REPLICATED, &options);
 				return 1;
 			}
             if (!COM_CompareStrings(tokens[1], "ENEMY"))
@@ -148,7 +151,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
                 options.pos.y = 0.75f;
                 options.rot.y = 45;
                 Ent_QuickSpawnCmd(
-                    &g_gameScene, ENTITY_TYPE6_ENEMY, ENTITY_CATAGORY_REPLICATED, &options);
+                    gs, ENTITY_TYPE6_ENEMY, ENTITY_CATAGORY_REPLICATED, &options);
             }
         }
         return 1;
@@ -247,7 +250,7 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     }
     if (!COM_CompareStrings(tokens[0], "ENTS"))
     {
-        App_DebugPrintEntities(&g_gameScene);
+        Game_DebugPrintEntities(gs);
         return 1;
     }
     if (!COM_CompareStrings(tokens[0], "PLAYERS"))
@@ -290,8 +293,8 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         else if (numTokens == 2)
         {
             i32 val = COM_AsciToInt32(tokens[1]);
-            g_gameScene.debugMode = (u16)val;
-            printf("APP Debug text mode %d\n", g_gameScene.debugMode);
+            gs->debugMode = (u16)val;
+            printf("APP Debug text mode %d\n", gs->debugMode);
         }
         // else if (numTokens == 2)
         // {
@@ -349,7 +352,6 @@ u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 	if (!COM_CompareStrings(tokens[0], "CLIENTS"))
 	{
 		printf("APP Client list:\n");
-        ClientList* cls = &g_session.clientList;
 		i32 len = cls->max;
 		for (i32 i = 0; i < cls->max; ++i)
 		{

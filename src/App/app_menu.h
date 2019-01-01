@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 struct AppMenuPage
 {

@@ -76,12 +76,41 @@ internal void Game_BuildTestHud()
     
 }
 
+void Game_DebugPrintEntities(GameScene* gs)
+{
+    i32 l = gs->entList.max;
+    i32 count = 0;
+    for (i32 i = 0; i < l; ++i)
+    {
+        Ent* e = &gs->entList.items[i];
+        if (e->inUse == ENTITY_STATUS_FREE) { continue; }
+        EC_Transform* ecT = EC_FindTransform(gs, e);
+        if (ecT)
+        {
+            printf("%d/%d: Type %d status %d pos: %.2f %.2f %.2f\n",
+            e->entId.iteration, e->entId.index,
+            e->factoryType, e->inUse,
+            ecT->t.pos.x, ecT->t.pos.y, ecT->t.pos.z
+        );
+        }
+        else
+        {
+            printf("%d/%d: Type %d status %d\n",
+            e->entId.iteration, e->entId.index,
+            e->factoryType, e->inUse
+        );
+        }
+        count++;
+    }
+    printf(" %d active entities\n", count);
+}
+
 internal void Game_BuildTestMenu()
 {
     
 }
 
-internal void Game_Init()
+void Game_Init()
 {
     GameSession_Clear(&g_session);
     GS_Init(&g_gameScene);
@@ -90,7 +119,7 @@ internal void Game_Init()
     Game_BuildTestMenu();
 }
 
-internal i32 Game_ReadCommandBuffer(
+i32 Game_ReadCommandBuffer(
     GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose)
 {
     ClientList* clients = &session->clientList;
@@ -138,7 +167,7 @@ internal i32 Game_ReadCommandBuffer(
     return numExecuted;
 }
 
-internal Ent* Game_GetLocalClientEnt(ClientList* clients, EntList* ents)
+Ent* Game_GetLocalClientEnt(ClientList* clients, EntList* ents)
 {
     Client* localClient = App_FindLocalClient(clients, 1);
     if (localClient)
@@ -196,7 +225,7 @@ internal void Game_SetCameraPosition(GameSession* session, GameScene* gs)
 /////////////////////////////////////////////////////////////////////////////
 // Game Tick
 /////////////////////////////////////////////////////////////////////////////
-internal void Game_Tick(
+void Game_Tick(
     Game *game,
     ByteBuffer* input,
     ByteBuffer* output,

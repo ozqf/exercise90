@@ -1,5 +1,16 @@
 #pragma once
 
+
+void App_FatalError(char* message, char* heading);
+
+#define APP_ASSERT(expression, msg) if(!(expression)) \
+{ \
+    char assertBuf[512]; \
+    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
+    App_FatalError(assertBuf, "Fatal error"); \
+} \
+
+
 #define MAX_INPUT_ITEMS 32
 
 #define GAME_MAX_CLIENTS 8
@@ -15,11 +26,11 @@
 	GameTime* ptrGameTime = GetAppTime(); \
 	if (ptrGameTime->singleFrame)\
 	{\
-		char* label = App_GetBufferName(g_appWriteBuffer->ptrStart); \
+		char* label = App_GetBufferName(App_GetWriteBuffer()->ptrStart); \
 		printf("Writing type %d to %s\n", cmdObject##.GetType(), label);\
 	}\
 \
-    u8** ptrToWritePtr = &g_appWriteBuffer->ptrWrite; \
+    u8** ptrToWritePtr = &App_GetWriteBuffer()->ptrWrite; \
     COM_WRITE_CMD_TO_BUFFER(ptrToWritePtr, cmdObject) \
 }
 #endif

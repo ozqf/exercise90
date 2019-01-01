@@ -1,8 +1,8 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
-internal i32 App_IsClientStateValid(i32 state)
+i32 App_IsClientStateValid(i32 state)
 {
     if (state >= CLIENT_STATE_FREE &&
         state <= CLIENT_STATE_SYNC_ENTITIES)
@@ -10,7 +10,7 @@ internal i32 App_IsClientStateValid(i32 state)
     return 0;
 }
 
-internal void App_ResetClient(Client* cl)
+void App_ResetClient(Client* cl)
 {
     printf(">>> GAME CL %d disconnected. Clearing Client\n", cl->clientId);
     ByteBuffer input = cl->stream.inputBuffer;
@@ -57,7 +57,7 @@ internal void App_DeleteClients(ClientList* cls)
 	}
 }
 
-internal Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
+Client* App_FindLocalClient(ClientList* cls, u8 checkIfPlaying)
 {
     if (cls->localClientId == 0) { return NULL; }
     for (i32 i = 0; i < cls->max; ++i)
@@ -156,7 +156,7 @@ internal void App_UpdateLocalClient(Client* cl, InputActionSet* actions, u32 fra
     }
 }
 
-internal Client* App_FindClientById(i32 id, ClientList* cls)
+Client* App_FindClientById(i32 id, ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
@@ -182,7 +182,7 @@ i32 App_NumPlayingClients(ClientList* cls)
     return count;
 }
 
-internal Client* App_FindClientByEntId(EntId entId, ClientList* cls)
+Client* App_FindClientByEntId(EntId entId, ClientList* cls)
 {
     for (i32 i = 0; i < cls->max; ++i)
     {
@@ -208,7 +208,7 @@ internal Client* App_FindClientByConnectionId(ClientList* cls, i32 connId)
     return NULL;
 }
 
-internal Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cls)
+Client* App_CreateClient(i32 clientId, i32 connectionId, ClientList* cls)
 {
     Client* cl = App_FindClientById(clientId, cls);
     APP_ASSERT(cl == NULL, "A Client with the given Id already exists");

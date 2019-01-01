@@ -5,7 +5,6 @@
 
 #include "game_types.h"
 #include "game_command_types.h"
-#include "game_utils.h"
 
 #define GAME_DEBUG_MODE_NONE 0
 #define GAME_DEBUG_MODE_CAMERA 1
@@ -16,52 +15,10 @@
 #define GAME_DEBUG_MODE_RECORDING 6
 #define GAME_DEBUG_MODE_NETWORK 7
 
-// MODE      | ID        SERVER      CLIENT      CONNECTION
-//--------------------------------------------------------------
-// SP        |  0          1           1           0
-// Client    |  1          0           1           1
-// Listen    |  2          1           1           1
-// Dedicated |  3          1           0           1
-// Replay    |  4          0           1           0
-
-#define NETMODE_NONE 0
-#define NETMODE_SINGLE_PLAYER 1
-#define NETMODE_CLIENT 2
-#define NETMODE_LISTEN_SERVER 3
-#define NETMODE_DEDICATED_SERVER 4
-#define NETMODE_REPLAY 5
-
-inline u8 IsRunningClient(u8 netMode)
-{
-    if (netMode == NETMODE_NONE) { return 0; }
-    return (
-           netMode == NETMODE_SINGLE_PLAYER
-        || netMode == NETMODE_LISTEN_SERVER
-        || netMode == NETMODE_CLIENT
-        || netMode == NETMODE_REPLAY
-    );
-}
-
-inline u8 IsRunningServer(u8 netMode)
-{
-    if (netMode == NETMODE_NONE) { return 0; }
-    return (
-           netMode == NETMODE_SINGLE_PLAYER
-        || netMode == NETMODE_LISTEN_SERVER
-        || netMode == NETMODE_DEDICATED_SERVER
-    );
-}
-
-inline u8 IsConnectionOpen(u8 netMode)
-{
-    if (netMode == NETMODE_NONE) { return 0; }
-    return (
-        netMode == NETMODE_CLIENT
-        || netMode == NETMODE_LISTEN_SERVER
-        || netMode == NETMODE_DEDICATED_SERVER
-    );
-}
-
+#define ENTITY_STATUS_FREE 0
+#define ENTITY_STATUS_RESERVED 1
+#define ENTITY_STATUS_IN_USE 2
+#define ENTITY_STATUS_DEAD 3
 
 // Entity and entity component lists
 #define ENTITY_BLOCK_SIZE 2048
@@ -78,152 +35,49 @@ inline u8 IsConnectionOpen(u8 netMode)
 
 #define TEST_PROJECTILE_SPEED 60.0f
 
-// TODO: Remove this stuff sometime
-global_variable u8 g_testAsciChar = '+';
-global_variable char* g_testString = "Hello, World!...\nHey look, new line!";
-global_variable u8 g_input_escapePressed = 0;
-global_variable u8 cycleTexturePressed = 0;
-
-global_variable ZStringHeader g_debugStr;
-global_variable char g_debugStrBuffer[GAME_DEBUG_BUFFER_LENGTH];
-global_variable RendObj g_debugStrRenderer;
-global_variable u8 g_verbose = 0;
-
-internal void Game_InitDebugStr()
-{
-    g_debugStr = {};
-    g_debugStr.chars = g_debugStrBuffer;
-    g_debugStr.maxLength = GAME_DEBUG_BUFFER_LENGTH;
-}
-
-internal void Game_SetDebugStringRender()
-{
-    RendObj_SetAsAsciCharArray(
-        &g_debugStrRenderer,
-        g_debugStr.chars,
-        g_debugStr.length,
-        0.05f,
-        TEXT_ALIGNMENT_TOP_LEFT,
-        AppGetTextureIndexByName("textures\\charset.bmp"),
-        0, 1, 1
-    );
-}
-
-/////////////////////////////////////////////////////////////
-// Game State Memory
-/////////////////////////////////////////////////////////////
-// Game
-#define MAX_SCENE_NAME_CHARS 64
-global_variable char g_currentSceneName[MAX_SCENE_NAME_CHARS];
-global_variable GameSession g_session;
-global_variable GameScene g_gameScene;
-
-// Game Command I/O buffer handles
-
-// pointers used for I/O
-global_variable ByteBuffer* g_appReadBuffer = NULL;
-global_variable ByteBuffer* g_appWriteBuffer = NULL;
-
-// Double buffers, swapped at the end of each app frame.
-global_variable ByteBuffer g_appBufferA;
-global_variable BlockRef g_appBufferA_Ref;
-
-global_variable ByteBuffer g_appBufferB;
-global_variable BlockRef g_appBufferB_Ref;
-
-
-global_variable NetStream g_serverStream;
-global_variable BlockRef g_serverStreamInputRef;
-global_variable BlockRef g_serverStreamOutputRef;
-global_variable ByteBuffer g_serverStreamInput;
-global_variable ByteBuffer g_serverStreamOutput;
-
-// Physics engine buffer handles
-global_variable BlockRef g_collisionCommandBuffer;
-global_variable BlockRef g_collisionEventBuffer;
-
-/////////////////////////////////////////////////////////////
-// Entity + Entity Components Memory
-/////////////////////////////////////////////////////////////
-// TODO: This stuff should be allocated on the heap so it can be scaled,
-// and not globally accessible
-// Bah, to heck with it. Statics for everyone!!!
-
-global_variable Client g_clients[GAME_MAX_CLIENTS];
-
-// client N linksStart = (maxEnts * N) and end at (linksStart + (maxEnts - 1))
-global_variable EntityLink g_clientEntityLinks[GAME_MAX_ENTITIES * GAME_MAX_CLIENTS];
-// eg 2048 ents, 8 clients == 16384
-// link struct is 22 Bytes.
-// total array: 16384 * 22 == 360,448 (352 KB, 0.34375 MB)
-
-// Entity Components
-// unlike everywhere else involving this ECS, this bit ISN'T order dependent (harhar)
-global_variable Ent                 g_gameEntities[GAME_MAX_ENTITIES];
-global_variable EC_Transform        g_transforms[GAME_MAX_ENTITIES];
-global_variable EC_SingleRendObj    g_renderers[GAME_MAX_ENTITIES];
-global_variable EC_Collider         g_colliders[GAME_MAX_ENTITIES];
-global_variable EC_ActorMotor       g_actorMotors[GAME_MAX_ENTITIES];
-global_variable EC_AIController     g_aiControllers[GAME_MAX_ENTITIES];
-global_variable EC_Projectile       g_prjControllers[GAME_MAX_ENTITIES];
-global_variable EC_Label            g_entLabels[GAME_MAX_ENTITIES];
-global_variable EC_Health           g_health[GAME_MAX_ENTITIES];
-global_variable EC_Thinker          g_thinkers[GAME_MAX_ENTITIES];
-global_variable EC_MultiRendObj     g_multiRenderers[GAME_MAX_ENTITIES];
-global_variable EC_Volume           g_volumes[GAME_MAX_ENTITIES];
-global_variable EC_Sensor           g_sensors[GAME_MAX_ENTITIES];
-
-// UI
-global_variable UIEntity            g_ui_entities[UI_MAX_ENTITIES];
-#define PLAYER_STATUS_TEXT_LENGTH 256
-global_variable char                g_playerStatusText[PLAYER_STATUS_TEXT_LENGTH];
-#define HUD_CENTRE_TEXT_LENGTH 256
-global_variable char                g_hud_centreText[HUD_CENTRE_TEXT_LENGTH];
-
-// GFX
-global_variable LocalEnt            g_localEntities[GAME_MAX_LOCAL_ENTITIES];
-
-/////////////////////////////////////////////////////////////
-// Debug
-////////////////////////////////////////////////////////////
-Transform g_debugTransform = {};
-
-#define HUD_MAX_RING_ITEMS 16
-global_variable HudRingItem g_hudRingItems[HUD_MAX_RING_ITEMS];
-
-
 // Interface
+#define MAX_SCENE_NAME_CHARS 64
+char* GetCurrentSceneName();
+
+GameSession* GetSession();
+GameScene* GetScene();
+ClientList* GetClientList();
+UIEntity* GetUIEntities();
+void Game_DebugPrintEntities(GameScene* gs);
+
 internal void Ent_ApplySpawnOptions(EntityState* state, EntitySpawnOptions* options);
-internal u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state);
+u16 Ent_WriteStateCmdToAppBuffer(u8* optionalOutputStream, EntityState* state);
 internal u8 Ent_PrepareSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntityState* target, EntitySpawnOptions* options);
-internal EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntitySpawnOptions* options);
+EntId Ent_QuickSpawnCmd(GameScene* gs, i32 factoryType, i32 catagory, EntitySpawnOptions* options);
+void Ent_CopyFullEntityState(GameScene* gs, Ent* ent, EntityState* state);
+void GS_Clear(GameScene* gs);
+void GameSession_Clear(GameSession* session);
+void Game_BuildTestScene(GameScene* gs, i32 sceneIndex);
+void Game_CreateClientInput(InputActionSet* actions, ActorInput* input);
+Ent* Game_GetLocalClientEnt(ClientList* clients, EntList* ents);
+void Game_SpawnLocalEntity(f32 x, f32 y, f32 z, Vec3 *dir, f32 power, i32 type);
+inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ);
+i32 Game_ReadCommandBuffer(GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose);
+void Game_Init();
+void Game_InitDebugStr();
+void Game_Tick(
+    Game *game,
+    ByteBuffer* input,
+    ByteBuffer* output,
+    GameTime *time,
+    InputActionSet* actions);
+void Game_ApplyInputFlyMode(InputActionSet* actions, Vec3* degrees, Transform* t, f32 dt, u32 frame);
+void Game_DrawColliderAABBs(GameScene* gs, GameTime* time, RenderScene* scene);
+void Game_IntersectionTest(GameScene* gs, RenderScene* scene);
+void Game_BuildWeaponModelScene(Client* localClient, GameScene* gs, RenderScene* scene);
+void Game_BuildRenderList(GameScene* gs, RenderScene* scene, GameTime* time);
+void Game_UpdateUI(Client* localClient, GameScene* gs, UIEntity *ents, i32 maxEntities, GameTime *time);
+void Game_SetDebugStringRender();
+UIEntity* UI_GetFreeEntity(UIEntity* list, i32 max);
+void UI_BuildUIRenderScene(RenderScene* scene, UIEntity* ents, i32 maxEntities);
+
+// debugging
+i32 Game_DebugWriteActiveActorInput(GameScene *gs, char *buf, i32 maxChars);
 
 //internal u8 Game_WriteSpawnTemplate(i32 factoryType, EntityState* state, EntitySpawnOptions* options);
 internal i32 Ent_CopyTemplate(i32 templateId, EntityState* target, EntitySpawnOptions* options);
-
-#include "game_teams.h"
-#include "game_local_entities.h"
-#include "game_entities.h"
-#include "EntityComponents/ec_types.h"
-#include "EntityComponents/ent_attacks.h"
-#include "EntityComponents/ec_aiController.h"
-#include "EntityComponents/ec_collider.h"
-#include "EntityComponents/ec_volume.h"
-#include "EntityComponents/ec_misc.h"
-#include "EntityComponents/ec_apply_state.h"
-#include "EntityComponents/ec_factory.h"
-#include "EntityComponents/ent_enemy_templates.h"
-#include "EntityComponents/ent_templates.h"
-#include "game_draw.h"
-#include "game_players.h"
-
-#include "game_entityFactory.cpp"
-#include "game_physics.h"
-#include "game_state.h"
-#include "game_input.cpp"
-#include "game_server.h"
-#include "game_embedded_scenes.cpp"
-#include "game_ui.cpp"
-#include "game_replication.cpp"
-#include "game_exec.h"
-#include "game.cpp"

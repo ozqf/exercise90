@@ -5,7 +5,7 @@
 Manage sound assets
 */
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 ///////////////////////////////////////
 // Interface

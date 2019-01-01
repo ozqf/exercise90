@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 internal void AppListTextures()
 {
@@ -13,7 +13,7 @@ internal void AppListTextures()
     }
 }
 
-internal i32 AppGetTextureIndexByName(char* textureName)
+i32 AppGetTextureIndexByName(char* textureName)
 {
     i32 l = g_textureHandles.numTextures;
     for (i32 i = 0; i < l; ++i)

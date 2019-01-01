@@ -4,7 +4,7 @@ holding game/menu state and calling game update when required
 */
 #pragma once
 
-#include "app_module.cpp"
+#include "app_module.h"
 
 void App_SwapGameCommandBuffers();
 
@@ -91,7 +91,7 @@ void App_PhysicsErrorHandler(char* message)
 void App_RunPostInitCommands()
 {
 	// TODO: This will EXEC straight away, which we don't want!
-	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, &g_session);
+	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, GetSession());
     //platform.Platform_WriteTextCommand("LOAD TEST");
 	//platform.Platform_WriteTextCommand("IMPULSE 1");
 	//platform.Platform_WriteTextCommand("MENU CLOSE");
@@ -208,7 +208,7 @@ i32 App_Shutdown()
 
     App_StopRecording();
 	
-    GS_Clear(&g_gameScene);
+    GS_Clear(GetScene());
     PhysExt_Shutdown();
     ZNet_Shutdown();
 
@@ -249,11 +249,11 @@ void App_ReadInputItem(InputItem *item, i32 value, u32 frameNumber)
 void App_UpdateGameScene(GameTime* time)
 {
     Game game;
-    game.scene = &g_gameScene;
-    game.session = &g_session;
+    game.scene = GetScene();
+    game.session = GetSession();
 
     // Write local client input commands
-    App_UpdateLocalClients(time, &g_session.clientList);
+    App_UpdateLocalClients(time, GetClientList());
     
     // clear debug buffer
     g_debugStr.length = 0;
@@ -357,8 +357,9 @@ void App_UpdateGameScene(GameTime* time)
 ///////////////////////////////////////////////////////////////////////////////
 void App_Render(GameTime* time, ScreenInfo screenInfo)
 {
-    ClientList* clients = &g_session.clientList;
-    GameScene *gs = &g_gameScene;
+    ClientList* clients = GetClientList();
+    GameSession* session = GetSession();
+    GameScene *gs = GetScene();
     g_screenInfo = screenInfo;
     
     // Make sure  render lists have been cleared or bad stuff will happen
@@ -404,15 +405,15 @@ void App_Render(GameTime* time, ScreenInfo screenInfo)
     }
 
     #if 1
-    Game_UpdateUI(cl, gs, g_ui_entities, UI_MAX_ENTITIES, time);
+    Game_UpdateUI(cl, gs, GetUIEntities(), UI_MAX_ENTITIES, time);
     //App_BuildMenuRenderScene()
-    UI_BuildUIRenderScene(&g_uiScene, g_ui_entities, UI_MAX_ENTITIES);
+    UI_BuildUIRenderScene(&g_uiScene, GetUIEntities(), UI_MAX_ENTITIES);
 
 
     // Render debug string
     //App_WriteCameraDebug(time);
 
-    g_debugStr = App_WriteDebugString(gs, time);
+    g_debugStr = App_WriteDebugString(session, gs, time);
 
     Game_SetDebugStringRender();
     Transform t = {};
@@ -487,13 +488,14 @@ void App_Frame(GameTime *time)
 	//if (g_paused || g_minimised) { return; }
 	
     g_time = *time;
-    GameSession* session = &g_session;
+    GameSession* session = GetSession();
+    GameScene* gs = GetScene();
 
-    Net_ReadPackets(session, &g_gameScene, time);
-    Net_ReadInputStreams(session, &g_gameScene, time);
+    Net_ReadPackets(session, gs, time);
+    Net_ReadInputStreams(session, gs, time);
 	
 	App_UpdateGameScene(time);
-	Net_Transmit(session, &g_gameScene, time);
+	Net_Transmit(session, gs, time);
     
     if (time->singleFrame)
 	{
@@ -567,9 +569,9 @@ void App_Frame(GameTime *time)
 		} break;
 	}
 	g_appStateOperation.op = APP_STATE_OP_NONE;
-    if (g_gameScene.verboseFramesTick > 0)
+    if (gs->verboseFramesTick > 0)
     {
-        g_gameScene.verboseFramesTick--;
+        gs->verboseFramesTick--;
     }
 
     time->gameFrameNumber++;
