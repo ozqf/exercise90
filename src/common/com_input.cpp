@@ -20,7 +20,7 @@ struct InputActionSet
     i32 count;
 };
 
-void Input_InitAction(InputActionSet* actions, u32 keyCode, char* label)
+internal void Input_InitAction(InputActionSet* actions, u32 keyCode, char* label)
 {
     i32 index = actions->count++;
     actions->actions[index].keyCode = keyCode;
@@ -30,7 +30,7 @@ void Input_InitAction(InputActionSet* actions, u32 keyCode, char* label)
 }
 
 // Find an action... duh
-inline InputAction* Input_FindAction(InputAction* actions, i32 numActions, char* name)
+internal inline InputAction* Input_FindAction(InputAction* actions, i32 numActions, char* name)
 {
     for (i32 i = 0; i < numActions; ++i)
     {
@@ -43,19 +43,19 @@ inline InputAction* Input_FindAction(InputAction* actions, i32 numActions, char*
     return NULL;
 }
 
-inline i32 Input_GetActionValue(InputAction* actions, i32 numActions, char* actionName)
+internal inline i32 Input_GetActionValue(InputAction* actions, i32 numActions, char* actionName)
 {
     InputAction* action = Input_FindAction(actions, numActions, actionName);
     Assert(action != NULL);
     return action->value;
 }
 
-inline i32 Input_GetActionValue(InputActionSet* actions, char* actionName)
+internal inline i32 Input_GetActionValue(InputActionSet* actions, char* actionName)
 {
     return Input_GetActionValue(actions->actions, actions->count, actionName);
 }
 
-u8 Input_CheckActionToggledOn(InputActionSet* actions, char* actionName, u32 frameNumber)
+internal u8 Input_CheckActionToggledOn(InputActionSet* actions, char* actionName, u32 frameNumber)
 {
     InputAction* action = Input_FindAction(actions->actions, actions->count, actionName);
     Assert(action != NULL);
@@ -63,7 +63,7 @@ u8 Input_CheckActionToggledOn(InputActionSet* actions, char* actionName, u32 fra
     return (action->value != 0 && action->lastFrame == frameNumber);
 }
 
-u8 Input_CheckActionToggledOff(InputActionSet* actions, char* actionName, u32 frameNumber)
+internal u8 Input_CheckActionToggledOff(InputActionSet* actions, char* actionName, u32 frameNumber)
 {
     InputAction* action = Input_FindAction(actions->actions, actions->count, actionName);
     Assert(action != NULL);
@@ -72,7 +72,7 @@ u8 Input_CheckActionToggledOff(InputActionSet* actions, char* actionName, u32 fr
 }
 
 // Test an input event vs actions array. Return an input if it has changed, NULL if nothing changed
-InputAction* Input_TestForAction(InputActionSet* actions, i32 inputValue, u32 inputKeyCode, u32 frameNumber)
+internal InputAction* Input_TestForAction(InputActionSet* actions, i32 inputValue, u32 inputKeyCode, u32 frameNumber)
 {
 	for (i32 i = 0; i < actions->count; ++i)
     {

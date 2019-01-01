@@ -30,17 +30,17 @@ global_variable RendObj g_debugLine = {};
 
 // cmd writing
 //void App_WriteGameCmd(u8* ptr, u8 type, u16 size);
-char* App_GetBufferName(u8* bufferStartAddr);
+char*               App_GetBufferName(u8* bufferStartAddr);
 
 ByteBuffer*         App_GetWriteBuffer();
 NetStream*          App_GetRemoteServerStream();
 
-inline u8*          App_StartCommandStream();
-inline u32          App_WriteCommandBytesToFrameOutput(u8* stream, u32 numBytes);
-inline void         App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize);
+u8*                 App_StartCommandStream();
+u32                 App_WriteCommandBytesToFrameOutput(u8* stream, u32 numBytes);
+void                App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize);
 // Use this guy if you can:
-inline u8*          App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize);
-inline void         App_WriteTextCommand(char* text);
+u8*                 App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize);
+void                App_WriteTextCommand(char* text);
 
 GameTime*           GetAppTime();
 
@@ -102,7 +102,6 @@ void                App_SendToServer(u8* ptr, u8 type, u16 size);
 u8                  App_ParseCommandString(char* str, char** tokens, i32 numTokens);
 void                App_ReadStateBuffer(GameSession* session, GameScene* gs, ByteBuffer *buf);
 u8                  App_LoadStateFromFile(GameSession* session, GameScene *gs, char *fileName);
-i32                 App_WriteStateToFile(char* fileName, u8 closeFileAfterWrite, StateSaveHeader* header);
 void                App_SaveDataVariables(char* fileName);
 
 // Execution
@@ -110,7 +109,10 @@ void                Exec_UpdateClient(Cmd_ClientUpdate* cmd);
 void                Exec_ReadInput(u32 frameNumber, InputEvent ev);
 void                App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead);
 void                App_ReadCommandBuffer(ByteBuffer* commands);
-i32                 App_StartSession(u8 netMode, char *path, GameSession* session);
+i32                 App_StartSession(u8 netMode, char *path, GameSession* session, GameScene* gs);
+i32                 App_WriteStateToFile(
+                        GameSession* session, GameScene* gs,
+                        char *fileName, u8 closeFileAfterWrite, StateSaveHeader *header);
 
 // Networking
 internal void       Net_WriteImpulse(GameSession* gs, i32 impulse);

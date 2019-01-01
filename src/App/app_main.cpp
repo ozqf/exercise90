@@ -91,7 +91,9 @@ void App_PhysicsErrorHandler(char* message)
 void App_RunPostInitCommands()
 {
 	// TODO: This will EXEC straight away, which we don't want!
-	App_StartSession(NETMODE_SINGLE_PLAYER, APP_FIRST_MAP, GetSession());
+	App_StartSession(
+        NETMODE_SINGLE_PLAYER, APP_FIRST_MAP,
+        GetSession(), GetScene());
     //platform.Platform_WriteTextCommand("LOAD TEST");
 	//platform.Platform_WriteTextCommand("IMPULSE 1");
 	//platform.Platform_WriteTextCommand("MENU CLOSE");
@@ -525,11 +527,15 @@ void App_Frame(GameTime *time)
 		case APP_STATE_OP_SAVE:
 		{
 			StateSaveHeader h = {};
-			App_WriteStateToFile(g_appStateOperation.fileName, true, &h);
+			App_WriteStateToFile(
+                session, gs,
+                g_appStateOperation.fileName, true, &h);
 		} break;
 		case APP_STATE_OP_LOAD:
 		{
-			error = App_StartSession(NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName, session);
+			error = App_StartSession(
+                NETMODE_SINGLE_PLAYER, g_appStateOperation.fileName,
+                session, gs);
             if (error)
 			{
 				printf("Failed to load game: Code %d\n", error);
@@ -537,7 +543,9 @@ void App_Frame(GameTime *time)
 		} break;
         case APP_STATE_OP_HOST:
 		{
-			error = App_StartSession(NETMODE_LISTEN_SERVER, g_appStateOperation.fileName, session);
+			error = App_StartSession(
+                NETMODE_LISTEN_SERVER, g_appStateOperation.fileName,
+                session, gs);
 			if (error)
 			{
 				printf("Failed to load game: Code %d\n", error);
@@ -545,7 +553,9 @@ void App_Frame(GameTime *time)
 		} break;
         case APP_STATE_OP_JOIN:
 		{
-			error = App_StartSession(NETMODE_CLIENT, g_appStateOperation.fileName, session);
+			error = App_StartSession(
+                NETMODE_CLIENT, g_appStateOperation.fileName,
+                session, gs);
 			if (error)
 			{
 				printf("Failed to load game: Code %d\n", error);
@@ -553,7 +563,9 @@ void App_Frame(GameTime *time)
 		} break;
         case APP_STATE_OP_EMPTY:
         {
-            error = App_StartSession(NETMODE_NONE, g_appStateOperation.fileName, session);
+            error = App_StartSession(
+                NETMODE_NONE, g_appStateOperation.fileName,
+                session, gs);
             if (error)
 			{
 				printf("Failed to switch to empty state: Code %d\n", error);

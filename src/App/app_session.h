@@ -173,7 +173,7 @@ void App_StopRecording()
     }
 }
 
-void App_StartRecording(GameScene *gs)
+void App_StartRecording(GameSession* session, GameScene *gs)
 {
     char fileName[128];
 
@@ -195,7 +195,9 @@ void App_StartRecording(GameScene *gs)
 
     g_replayMode = RecordingReplay;
     // Write state and keep file open for writing frames
-    g_replayFileId = App_WriteStateToFile(fileName, false, &g_replayHeader);
+    g_replayFileId = App_WriteStateToFile(
+        session, gs,
+        fileName, false, &g_replayHeader);
 }
 
 void App_ClearScene(GameScene* gs)

@@ -8,7 +8,7 @@
 
 // Write a command header and step over the space so something else
 // can write. Return the empty space to the caller
-inline u8* App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize)
+u8* App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize)
 {
 	CmdHeader h = {};
 	h.Set(cmdType, cmdSize);
@@ -19,21 +19,21 @@ inline u8* App_CreateCommandSpace(u8 cmdType, u8 cmdFlags, u16 cmdSize)
 }
 
 // leave a space for a header and return a write position to the caller
-inline u8* App_StartCommandStream()
+u8* App_StartCommandStream()
 {
     u8* headerWritePosition = g_appWriteBuffer->ptrWrite;
     g_appWriteBuffer->ptrWrite += sizeof(CmdHeader);
     return headerWritePosition;
 }
 
-inline u32 App_WriteCommandBytesToFrameOutput(u8* inputStream, u32 numBytes)
+u32 App_WriteCommandBytesToFrameOutput(u8* inputStream, u32 numBytes)
 {
     g_appWriteBuffer->ptrWrite +=
         COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
     return numBytes;
 }
 
-inline u32 App_SetCommand(u8* inputStream, u32 numBytes)
+u32 App_SetCommand(u8* inputStream, u32 numBytes)
 {
 	g_appWriteBuffer->ptrWrite +=
 		COM_COPY(inputStream, g_appWriteBuffer->ptrWrite, numBytes);
@@ -41,7 +41,7 @@ inline u32 App_SetCommand(u8* inputStream, u32 numBytes)
 }
 
 // Write the given header information into the given position
-inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize)
+void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSize)
 {
     CmdHeader h = {};
     h.SetType(cmdType);
@@ -49,7 +49,7 @@ inline void App_FinishCommandStream(u8* ptr, u8 cmdType, u8 cmdFlags, u16 cmdSiz
     h.Write(ptr);
 }
 
-inline void App_WriteTextCommand(char* text)
+void App_WriteTextCommand(char* text)
 {
     // TODO: Some kinda of sanitisation?
     platform.Platform_WriteTextCommand(text);
