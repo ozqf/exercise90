@@ -20,6 +20,11 @@
 #define ENTITY_STATUS_IN_USE 2
 #define ENTITY_STATUS_DEAD 3
 
+#define TEAM_FREE 0
+#define TEAM_ENEMIES 1
+#define TEAM_PLAYERS 2
+#define TEAM_NON_COMBATANT 3
+
 // Entity and entity component lists
 #define ENTITY_BLOCK_SIZE 2048
 #define ENTITY_BLOCK_COUNT 2

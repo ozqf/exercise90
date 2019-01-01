@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app_network_types.h"
-#include "app_network_stream.h"
+#include "app_network_stream.cpp"
 
 #include "app_module.h" 
 

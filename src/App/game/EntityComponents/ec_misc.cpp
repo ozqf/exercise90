@@ -2,10 +2,6 @@
 
 #include "game.h"
 
-#include "EntityComponents/ec_actor.h"
-#include "EntityComponents/ec_collider.h"
-#include "EntityComponents/ec_thinker.h"
-
 /*internal*/ EntId Game_FindEntIdByLabel(GameScene *gs, char *queryLabel)
 {
     for (u32 i = 0; i < gs->labelList.max; ++i)
