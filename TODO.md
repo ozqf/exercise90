@@ -2,6 +2,30 @@
 
 ## Current
 
+### Application layer rebuild
+
+Goal:
+* Smooth game scene replication from server to client
+* Keep It Simple Stupid
+
+Crucial changes:
+* Allow for side-by-side physics, so that server <-> client can be tested in the same exe?
+    (rendered ontop of each other)
+* More generalised message system. Same systems used in network buffers and app/scene
+    * Internal message are just structs.
+    * Message must include timing information!
+    * Separation between application Messages and packet Messages. Only packet messages
+        should have anything fiddly for compression later!
+* Separate Scene compile unit and internal logic.
+    * Scene has it's own command queue run when it ticks. Application is responsible
+        for feeding events in.
+    * Monolithic entity struct. No complex ECS or other faff. Basic int to define types.
+
+
+
+
+
+
 ### Networking GameScene
 
 * **DONE** Create new client when connection is accepted.

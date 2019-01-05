@@ -186,8 +186,10 @@ u8 Win32_LinkToApplication()
             g_app = linkToApp(platInterface);
             // Attaching data files must happen BEFORE app init dummy
             Win32_LoadDataFiles();
-            if (!g_app.AppInit())
+            i32 errCode = g_app.AppInit();
+            if (errCode != COM_ERROR_NONE)
             {
+                printf("INIT APP ERROR CODE %d - ABORTED\n", errCode);
                 Win32_Error("Init App failed", "Error");
                 return 1;
             }

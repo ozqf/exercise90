@@ -1,9 +1,10 @@
 #pragma once
-
-#include "../common/com_defines.h"
-#include "../common/com_types.h"
-#include "platform_interface.h"
+//////////////////////////////////////////////////////////////////////
+// App data visible to platform
+//////////////////////////////////////////////////////////////////////
 #include <stdio.h>
+#include "../common/com_module.h"
+#include "platform_interface.h"
 
 //////////////////////////////////////////////////////////////////////
 // Input codes
@@ -109,14 +110,14 @@ inline InputEvent NewInputEvent(u32 inputID, i32 value)
 // Contains pointers to App functions
 struct AppInterface
 {
-    i32 isValid;
-    i32 (*AppInit)();
-    i32 (*AppShutdown)();
-    i32 (*AppRendererReloaded)();
-    void (*AppInput)(GameTime* time, ByteBuffer commands);
-    void (*AppUpdate)(GameTime* time);
-	void (*AppRender)(GameTime* time, ScreenInfo info);
-    u8 (*AppParseCommandString)(char* str, char** tokens, i32 numTokens);
+    i32     isValid;
+    i32     (*AppInit)();
+    i32     (*AppShutdown)();
+    i32     (*AppRendererReloaded)();
+    void    (*AppInput)(GameTime* time, ByteBuffer commands);
+    void    (*AppUpdate)(GameTime* time);
+	void    (*AppRender)(GameTime* time, ScreenInfo info);
+    u8      (*AppParseCommandString)(char* str, char** tokens, i32 numTokens);
 };
 
 /*****************************************************
