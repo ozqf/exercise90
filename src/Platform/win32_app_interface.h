@@ -49,7 +49,7 @@ void Platform_R_DrawScene(RenderScene* scene)
 {
     if (g_rendererLink.moduleState == 1)
     {
-        g_renderer.R_RenderScene(scene, &g_gameTime);
+        g_renderer.R_RenderScene(scene, &g_time);
     }
 }
 

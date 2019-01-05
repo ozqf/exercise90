@@ -333,7 +333,7 @@ void Win32_SendAppInput()
     {
         ILLEGAL_CODE_PATH
     }
-    g_app.AppInput(&g_gameTime, frameCommands);
+    g_app.AppInput(&g_time, frameCommands);
     COM_ZeroMemory(frameCommands.ptrStart, frameCommands.capacity);
 }
 
@@ -341,7 +341,7 @@ void Win32_RunAppFrame()
 {
     if (g_app.isValid)
     {
-        g_app.AppUpdate(&g_gameTime);
+        g_app.AppUpdate(&g_time);
     }
 }
 
@@ -464,7 +464,7 @@ int CALLBACK WinMain(
             Win32_LinkToSound();
 
             float previousTime = Win32_InitFloatTime();
-            g_gameTime = {};
+            g_time = {};
 
             // Make sure assets are ready before scene!
             SharedAssets_Init();
@@ -517,14 +517,14 @@ int CALLBACK WinMain(
                 // TIMING
                 //////////////////////////////////////////////
                 float newTime = Win32_FloatTime();
-                g_gameTime.deltaTime = newTime - previousTime;
+                g_time.deltaTime = newTime - previousTime;
                 previousTime = newTime;
-				g_gameTime.platformFrameNumber++;
+				g_time.frameNumber++;
 
                 //////////////////////////////////////////////
                 // CHECK HOT DLL RELOAD
                 //////////////////////////////////////////////
-                g_appLink.checkTick -= g_gameTime.deltaTime;
+                g_appLink.checkTick -= g_time.deltaTime;
                 if (g_appLink.checkTick <= 0)
                 {
                     g_appLink.checkTick = 0.1f;
@@ -534,7 +534,7 @@ int CALLBACK WinMain(
                     }
                 }
                 
-                g_rendererLink.checkTick -= g_gameTime.deltaTime;
+                g_rendererLink.checkTick -= g_time.deltaTime;
                 if (g_rendererLink.checkTick <= 0)
                 {
                     g_rendererLink.checkTick = 0.1f;
@@ -547,7 +547,7 @@ int CALLBACK WinMain(
                     }
                 }
                 
-                // g_soundLink.checkTick -= g_gameTime.deltaTime;
+                // g_soundLink.checkTick -= g_time.deltaTime;
                 // if (g_soundLink.checkTick <= 0)
                 // {
                 //     g_soundLink.checkTick = 0.1f;
@@ -561,7 +561,7 @@ int CALLBACK WinMain(
                 // }
 
                 // Keeping this, helped me find a buffer overrun due to crazy timing behaviour
-                if (g_gameTime.deltaTime < 0)
+                if (g_time.deltaTime < 0)
                 {
                     MessageBox(0, "Error: Negative timeDelta", "Error", MB_OK | MB_ICONINFORMATION);
                     return 1;
@@ -571,6 +571,9 @@ int CALLBACK WinMain(
                 //Win32_CheckTextBuffer();
                 Win32_ExecuteTextCommands();
 
+                Win32_RunAppFrame();
+
+                #if 0 // previous implementation of timing outside app layer
                 if (g_singleFrameStepMode == 1)
                 {
                     // Keep sending input
@@ -580,20 +583,20 @@ int CALLBACK WinMain(
                     {
                         g_singleFrameRun = 0;
                         // Force delta time or the game will get very confused
-                        g_gameTime.deltaTime = g_fixedFrameTime;
-                        printf("\n**** PLATFORM Step into frame %d ****\n", g_gameTime.platformFrameNumber);
-						g_gameTime.singleFrame = 1;
+                        g_time.deltaTime = g_fixedFrameTime;
+                        printf("\n**** PLATFORM Step into frame %d ****\n", g_time.platformFrameNumber);
+						g_time.singleFrame = 1;
                         Win32_RunAppFrame();
                     }
                 }
                 else
                 {
-                    g_fixedFrameAccumulator += g_gameTime.deltaTime;
+                    g_fixedFrameAccumulator += g_time.deltaTime;
                     if (g_fixedFrameAccumulator >= g_fixedFrameTime)
                     {
                         g_fixedFrameAccumulator -= g_fixedFrameTime;
-                        g_gameTime.deltaTime = g_fixedFrameTime;
-					    g_gameTime.singleFrame = 0;
+                        g_time.deltaTime = g_fixedFrameTime;
+					    g_time.singleFrame = 0;
                         Win32_SendAppInput();
                         Win32_RunAppFrame();
                     }
@@ -602,17 +605,18 @@ int CALLBACK WinMain(
                 // Render
                 if (g_rendererLink.moduleState == 1)
                 {
-                    g_gameTime.percentToNextFixedFrame =
+                    g_time.percentToNextFixedFrame =
                         g_fixedFrameAccumulator / g_fixedFrameTime;
-                    COM_ClampF32(&g_gameTime.percentToNextFixedFrame, 0, 1);
+                    COM_ClampF32(&g_time.percentToNextFixedFrame, 0, 1);
                     g_screenInfo = g_renderer.R_SetupFrame(appWindow);
-                    g_app.AppRender(&g_gameTime, g_screenInfo);
+                    g_app.AppRender(&g_time, g_screenInfo);
                     if (g_debugInputActive)
                     {
                         Platform_R_DrawScene(&g_debugScene);
                     }
                     g_renderer.R_FinishFrame(appWindow);
                 }
+                #endif
             }
         }
         else

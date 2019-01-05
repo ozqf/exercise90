@@ -206,6 +206,13 @@ struct ZStringHeader
     i32 maxLength;
 };
 
+struct PlatformTime
+{
+    f32 deltaTime;
+    f32 sessionEllapsed;
+    u32 frameNumber;
+};
+
 struct GameTime
 {
     f32 deltaTime;

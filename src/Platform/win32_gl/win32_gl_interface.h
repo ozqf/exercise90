@@ -14,7 +14,7 @@ struct RenderInterface
 
     ScreenInfo (*R_SetupFrame)(HWND window);
     void (*R_FinishFrame)(HWND window);
-    void (*R_RenderScene)(RenderScene* scene, GameTime* time);
+    void (*R_RenderScene)(RenderScene* scene, PlatformTime* time);
 };
 
 typedef RenderInterface (Func_LinkToRenderer)();

@@ -114,9 +114,9 @@ struct AppInterface
     i32     (*AppInit)();
     i32     (*AppShutdown)();
     i32     (*AppRendererReloaded)();
-    void    (*AppInput)(GameTime* time, ByteBuffer commands);
-    void    (*AppUpdate)(GameTime* time);
-	void    (*AppRender)(GameTime* time, ScreenInfo info);
+    void    (*AppInput)(PlatformTime* time, ByteBuffer commands);
+    void    (*AppUpdate)(PlatformTime* time);
+	void    (*AppRender)(PlatformTime* time, ScreenInfo info);
     u8      (*AppParseCommandString)(char* str, char** tokens, i32 numTokens);
 };
 

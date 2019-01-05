@@ -176,7 +176,7 @@ void Win32_R_FinishFrame(HWND window)
 }
 
 // NOTE: Win32_R_SetupFrame Must have been called already!
-void Win32_RenderFrame(RenderScene* scene, GameTime* time)
+void Win32_RenderFrame(RenderScene* scene, PlatformTime* time)
 {
 	if (g_openglRC == NULL) { return; }
 	glClear(GL_DEPTH_BUFFER_BIT);

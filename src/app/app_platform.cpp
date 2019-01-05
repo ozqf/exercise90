@@ -12,6 +12,7 @@
 //////////////////////////////////////////////////////
 
 internal PlatformInterface g_platform = {};
+internal f32 g_fixedFrameAcculator = 0;
 
 /***************************************
 * Define functions accessible to platform
@@ -35,17 +36,17 @@ internal i32  App_RendererReloaded()
     return COM_ERROR_NONE;
 }
 
-internal void App_Input(GameTime* time, ByteBuffer commands)
+internal void App_Input(PlatformTime* time, ByteBuffer commands)
 {
     
 }
 
-internal void App_Update(GameTime* time)
+internal void App_Update(PlatformTime* time)
 {
-    
+    //printf("App frame %d\n", time->frameNumber);
 }
 
-internal void App_Render(GameTime* time, ScreenInfo info)
+internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
     
 }
@@ -55,10 +56,6 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     return 0;
 }
 
-internal void App_ReadInputEvents(GameTime* time, ByteBuffer platformCommands)
-{
-
-}
 
 /***************************************
 * Export Windows DLL functions
@@ -78,7 +75,7 @@ AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
     app.AppShutdown = App_Shutdown;
     app.AppRendererReloaded = App_RendererReloaded;
     //app.AppFixedUpdate = App_FixedFrame;
-    app.AppInput = App_ReadInputEvents;
+    app.AppInput = App_Input;
     app.AppUpdate = App_Update;
     app.AppParseCommandString = App_ParseCommandString;
 	app.AppRender = App_Render;

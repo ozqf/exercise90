@@ -351,10 +351,10 @@ i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 {
 	fwrite(ptr, numBytes, 1, g_appReadFiles[fileId]);
 	i32 pos = ftell(g_appReadFiles[fileId]);
-	if (g_gameTime.singleFrame)
-	{
-		printf("PLATFORM Wrote %d bytes to file %d. Total: %d\n", numBytes, fileId, pos);
-	}
+	// if (g_time.singleFrame)
+	// {
+	// 	printf("PLATFORM Wrote %d bytes to file %d. Total: %d\n", numBytes, fileId, pos);
+	// }
 	return 1;
 }
 

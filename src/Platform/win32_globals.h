@@ -61,7 +61,7 @@ struct win32_module_link
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-global_variable GameTime g_gameTime;
+global_variable PlatformTime g_time;
 global_variable f32 g_fixedFrameAccumulator = 0;
 global_variable f32 g_fixedFrameTime = 1.0f / 60.0f;
 //global_variable f32 g_fixedFrameTime = 1.0f / 2.0f;
