@@ -25,6 +25,21 @@ struct DoubleByteBuffer
     i32 swapped;
     ByteBuffer a;
     ByteBuffer b;
+
+    ByteBuffer* GetRead()
+    {
+        return this->swapped ? &this->b : &this->a;
+    }
+
+    ByteBuffer* GetWrite()
+    {
+        return this->swapped ? &this->a : &this->b;
+    }
+
+    void Swap()
+    {
+        swapped = !swapped;
+    }
 };
 
 extern "C" com_internal i32 Buf_BytesWritten(ByteBuffer* b);

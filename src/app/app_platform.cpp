@@ -9,7 +9,7 @@
 #include "stdlib.h"
 
 internal PlatformInterface g_platform = {};
-internal i32 g_simFrameRate = 10;
+internal i32 g_simFrameRate = 1;
 internal f32 g_simFrameAcculator = 0;
 internal Heap g_heap;
 
@@ -30,7 +30,20 @@ internal f32 App_GetSimFrameInterval()
 
 internal void App_RunSimFrame(f32 deltaTime)
 {
+    Sim_Tick(&g_sim, deltaTime);
+}
 
+/*
+TODO: SUPER UNSAFE RIGHT NOW - CANNOT BE FREED AS IT LIES ABOUT BYTES ALLOCATED
+*/
+internal void* App_MallocWithSentinel(i32 mallocSize, char* sentinel)
+{
+    i32 strLen = COM_StrLen(sentinel);
+    i32 numBytes = mallocSize + strLen;
+    void* ptr = malloc(numBytes);
+    u8* bytes = (u8*)ptr;
+    bytes += COM_COPY(sentinel, ptr, strLen);
+    return (void*)bytes;
 }
 
 internal SimEntBlock App_MallocSimBlock(i32 capacity)
@@ -45,8 +58,10 @@ internal SimEntBlock App_MallocSimBlock(i32 capacity)
 internal void App_BuildTestScene(SimScene* sim)
 {
     i32 bufSize = MegaBytes(1);
-    ByteBuffer a = Buf_FromMalloc(malloc(bufSize), bufSize);
-    ByteBuffer b = Buf_FromMalloc(malloc(bufSize), bufSize);
+    ByteBuffer a = Buf_FromMalloc(App_MallocWithSentinel(bufSize, "BufferA"), bufSize);
+    ByteBuffer b = Buf_FromMalloc(App_MallocWithSentinel(bufSize, "BufferB"), bufSize);
+    printf("APP Sim buf a alloced at 0X%X\n", (u32)a.ptrStart);
+    printf("APP Sim buf b alloced at 0X%X\n", (u32)b.ptrStart);
 
     Sim_InitScene(sim, a, b);
     i32 numBlocks = 8;
@@ -56,7 +71,7 @@ internal void App_BuildTestScene(SimScene* sim)
         Sim_AddEntBlock(sim, block);
     }
     
-    for (i32 i = 0; i < 10; ++i)
+    for (i32 i = 0; i < 1; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;
         f32 randY = (COM_STDRandf32() * 2) - 1;

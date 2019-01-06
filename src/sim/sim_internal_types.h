@@ -4,6 +4,7 @@
 
 #define SIM_CMD_TYPE_ADD_ENTITY 1
 
+//#pragma pack(push, 1)
 struct SimCmd
 {
     i32 type;
@@ -18,6 +19,7 @@ struct SimCmdAddEntity
     SimEntId id;
     f32 pos[3];
 };
+//#pragma pack(pop)
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd);
 void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntId id, f32 x, f32 y, f32 z);

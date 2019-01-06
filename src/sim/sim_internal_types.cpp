@@ -17,10 +17,20 @@ void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
 
 void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntId id, f32 x, f32 y, f32 z)
 {
-    cmd->header.size = sizeof(SimCmdAddEntity);
-    cmd->header.type = SIM_CMD_TYPE_ADD_ENTITY;
+    SimCmd* h = (SimCmd*)cmd;
+    h->type = SIM_CMD_TYPE_ADD_ENTITY;
+    h->size = sizeof(SimCmdAddEntity);
+    //cmd->header.size = sizeof(SimCmdAddEntity);
+    //cmd->header.type = SIM_CMD_TYPE_ADD_ENTITY;
+    printf("Set Header type %d and size %d\n",
+        cmd->header.type, cmd->header.size);
     cmd->id = id;
     cmd->pos[0] = x;
     cmd->pos[1] = y;
     cmd->pos[2] = z;
+    
+    printf("  Addresses header: 0X%X vs command: 0X%X\n",
+        (u32)&cmd->header, (u32)cmd
+    );
+    Assert((u32)&cmd->header == (u32)cmd)
 }

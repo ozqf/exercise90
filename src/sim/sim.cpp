@@ -6,11 +6,28 @@
 ////////////////////////////////////////////////////////////////////
 // Command management
 ////////////////////////////////////////////////////////////////////
-internal i32 Sim_EnqueueCommand(SimScene* sim, SimCmd* cmd)
+internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 {
+	SimCmd* cmd = (SimCmd*)ptr;
+	//SimCmdAddEntity* addEnt = (SimCmdAddEntity*)ptr;
     Assert(cmd)
     Assert(cmd->type != 0)
     Assert(cmd->size > 0)
+
+    ByteBuffer* buf = sim->commands.GetWrite();
+	printf("SIM Writing command at 0X%X\n", (u32)buf->ptrWrite);
+
+	// Via old macro... DOESN'T WORK
+    //buf->ptrWrite += COM_COPY(&cmd, buf->ptrWrite, cmd->size);
+
+	// copy memory called... does...?
+	buf->ptrWrite += COM_CopyMemory(ptr, buf->ptrWrite, cmd->size);
+
+	// Via pointer assignment - works
+	//*(SimCmdAddEntity*)buf->ptrWrite = *addEnt;
+	//buf->ptrWrite += addEnt->header.size;
+    printf("SIM Enqueued type %d size %d. Wrote %d bytes of cmds\n", cmd->type, cmd->size, buf->Written());
+
     return COM_ERROR_NONE;
 }
 
@@ -68,9 +85,10 @@ SimEntId Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
     //    ent->id.sequence, ent->t.pos.x, ent->t.pos.y);
 
     SimCmdAddEntity cmd = {};
-    Sim_PrepareCommand(scene, &cmd.header);
+    Sim_PrepareCommand(scene, (SimCmd*)&cmd);
     Sim_SetAddEntityCmd(&cmd, id, x, y, z);
-    Sim_EnqueueCommand(scene, (SimCmd*)&cmd);
+	u8* addr = (u8*)&cmd;
+    Sim_EnqueueCommand(scene, addr);
     return id;
 }
 
@@ -114,7 +132,48 @@ void Sim_InitScene(
     Buf_Clear(&cmdBufferB);
 }
 
-void Sim_Tick(SimScene* scene, f32 deltaTime)
+i32 Sim_Tick(SimScene* scene, f32 deltaTime)
 {
-    printf("SIM tick\n");
+    scene->commands.Swap();
+    ByteBuffer* buf = scene->commands.GetRead();
+	if (buf->Written() == 0)
+	{
+		return COM_ERROR_NONE;
+	}
+    printf("SIM tick reading from 0X%X (%d bytes)\n", (u32)buf->ptrStart, buf->Written());
+
+    u8* read = buf->ptrStart;
+    u8* end = buf->ptrWrite;
+    while (read < end)
+    {
+        SimCmd* header = (SimCmd*)read;
+        read += header->size;
+        if (header->type == 0)
+        {
+            printf("SIM ABORT bad cmd type %d\n", header->type);
+            return COM_ERROR_UNKNOWN_COMMAND;
+        }
+        
+        if (header->size == 0)
+        {
+            printf("SIM ABORT bad cmd size %d\n", header->size);
+            return COM_ERROR_BAD_SIZE;
+        }
+        switch (header->type)
+        {
+            case SIM_CMD_TYPE_ADD_ENTITY:
+            {
+                SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
+                printf("SIM Add CMD read\n");
+            } break;
+
+            default:
+            {
+                printf("SIM Unknown command type %d\n", header->type);
+            } break;
+        }
+    }
+    Buf_Clear(buf);
+
+    return COM_ERROR_NONE;
 }
