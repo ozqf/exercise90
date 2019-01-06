@@ -3,16 +3,31 @@
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"
 
+#include "../sim/sim.h"
 #include "app_textures.h"
 
 internal PlatformInterface g_platform = {};
-internal f32 g_fixedFrameAcculator = 0;
+internal i32 g_simFrameRate = 10;
+internal f32 g_simFrameAcculator = 0;
 internal Heap g_heap;
 
 // World scene
 #define MAX_WORLD_SCENE_ITEMS 2048
 internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
+
+/***************************************
+* Private
+***************************************/
+inline internal f32 App_GetSimFrameInterval()
+{
+    return (1.0f / g_simFrameRate);
+}
+
+internal void App_RunSimFrame(f32 deltaTime)
+{
+
+}
 
 /***************************************
 * Define functions accessible to platform
@@ -55,7 +70,7 @@ internal i32  App_Init()
     //             //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
     //             8);
     //
-    g_worldScene.cameraTransform.pos.z += 0;
+    g_worldScene.cameraTransform.pos.z += 4;
     Transform t;
     Transform_SetToIdentity(&t);
     t.pos.z -= 2;
@@ -63,6 +78,12 @@ internal i32  App_Init()
     RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
     RScene_AddRenderItem(&g_worldScene, &t, &obj);
 
+    // create test scene
+    for (i32 i = 0; i < 10; ++i)
+    {
+        Sim_AddEntity();
+    }
+    
     return COM_ERROR_NONE;
 }
 
@@ -92,12 +113,38 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
 
 internal void App_Update(PlatformTime* time)
 {
-    //printf("App frame %d\n", time->frameNumber);
+    g_simFrameAcculator += time->deltaTime;
+    //printf("App Accumulator %.4f\n", g_simFrameAcculator);
+    f32 interval = App_GetSimFrameInterval();
+    if (g_simFrameAcculator > interval)
+    {
+        g_simFrameAcculator -= interval;
+        App_RunSimFrame(interval);
+    }
 }
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
-    printf("APP Draw %d objects\n", g_worldScene.numObjects);
+    g_worldScene.numObjects = 0;
+    Sim_Entity* ents;
+    i32 maxEnts;
+    Sim_GetEntityList(&ents, &maxEnts);
+    for (i32 i = 0; i < maxEnts; ++i)
+    {
+        Sim_Entity* ent = &ents[i];
+        if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+
+        Transform t;
+        Transform_SetToIdentity(&t);
+        RendObj obj = {};
+        RendObj_SetAsMesh(
+            &obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
+        
+        t.pos.x = ent->t.pos.x;
+        t.pos.y = ent->t.pos.y;
+        RScene_AddRenderItem(&g_worldScene, &t, &obj);
+    }
+
     g_platform.Platform_RenderScene(&g_worldScene);
 }
 
