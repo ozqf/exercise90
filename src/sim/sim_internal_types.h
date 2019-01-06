@@ -4,13 +4,20 @@
 
 #define SIM_CMD_TYPE_ADD_ENTITY 1
 
+// BASE FOR ALL COMMANDS
+// All commands MUST have a SimCmd as their first member, for
+// pointer casting
 //#pragma pack(push, 1)
 struct SimCmd
 {
+    // Type and Size must be set by the implementing command
     i32 type;
+    i32 size;
+
+    // Must be set from the Sim Scene when created.
+    // Controls execution time and order
     u32 tick;
     i32 sequence;
-    i32 size;
 };
 
 struct SimCmdAddEntity

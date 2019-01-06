@@ -24,7 +24,10 @@ Crucial changes:
 #### Rebuild TODO
 
 * Simulation tick and input commands
-
+* Attach Physics engine
+* Basic biped entity
+* Separate client and server sims and render scenes.
+* Clone activity from server to client with a faked internet
 
 
 

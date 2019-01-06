@@ -181,6 +181,11 @@ void Sim_InitScene(
     Buf_Clear(&cmdBufferB);
 }
 
+/*
+Read Inputs
+Update Entities -> generate outputs
+Step Physics -> generate outputs
+*/
 i32 Sim_Tick(SimScene* scene, f32 deltaTime)
 {
     scene->commands.Swap();
