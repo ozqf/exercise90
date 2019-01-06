@@ -4,7 +4,7 @@
 
 void Transform_SetToIdentity(Transform* t);
 
-void Transform_ToM4x4(Transform* t, f32* m4x4);
+void Transform_ToM4x4(Transform* t, M4x4* result);
 void Transform_FromM4x4(Transform* t, f32* m4x4);
 
 /////////////////////////////////////////////////////

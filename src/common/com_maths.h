@@ -140,3 +140,7 @@ Vec3 M4x4_GetEulerAnglesDegrees(f32* m);
 void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw);
 void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom);
 void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f32 prjNear, f32 prjFar);
+
+void M4x4_Invert(f32* src);
+void M4x4_ClearPosition(f32* src);
+void M4x4_ClearRotation(f32* src);

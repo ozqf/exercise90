@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#include "../../../src/common/com_defines.h"
+#include "../../../src/common/com_module.h"
 #include "../../interface/sound_interface.h"
 #include "win32_snd_interface.h"
 #include "win32_snd_internal.h"
