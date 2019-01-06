@@ -51,7 +51,7 @@ void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 t
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-	#if 0
+	#if 1
 	printf("REND Binding texture index: %d - GLuint: %d.  Img size: %d / %d\n",
 		textureIndex, texID, width, height
 	);
