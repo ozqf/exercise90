@@ -11,7 +11,7 @@ del *.* /Q
 @rem === COMPILER SETTINGS ===
 @set output=/Fo../lib/common.obj
 @rem main compile flags, elevating warnings
-set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 /Zi /c
+set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi /c
 @rem No elevated warnings
 @rem set compilerFlags=-nologo -Gm -MT -W4 -wd4100 -wd4201 -wd4189 /Zi
 set compilerDefines=/DPARANOID=1

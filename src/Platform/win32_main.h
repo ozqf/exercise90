@@ -570,7 +570,7 @@ int CALLBACK WinMain(
                 
                 //Win32_CheckTextBuffer();
                 Win32_ExecuteTextCommands();
-
+                Win32_SendAppInput();
                 Win32_RunAppFrame();
                 
                 // Render

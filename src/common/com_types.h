@@ -1,8 +1,9 @@
-#if 1
+
 #pragma once
 
 #include "com_defines.h"
 
+#if 0
 struct GL_Test_Input;
 /****************************************************************
 Graphics
@@ -19,9 +20,6 @@ struct AngleVectors;
 struct ZLineSegment;
 struct ZAABB;
 #endif
-#pragma once
-
-#include "com_module.h"
 
 /****************************************************************
 Conversion

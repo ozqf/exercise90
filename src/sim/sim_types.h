@@ -13,4 +13,5 @@ struct Sim_Entity
     i32 status;
     i32 id;
     Transform t;
+    Vec3 velocity;
 };

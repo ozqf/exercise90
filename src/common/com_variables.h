@@ -58,7 +58,7 @@ inline void COM_SetVarByString(char* name, char* value, Var* vars, i32* numVars,
 ///////////////////////////////////////////////////////////////
 // Read ini file
 ///////////////////////////////////////////////////////////////
-static char* COM_ParseVar(char* buffer, VarSet* varSet)
+com_internal char* COM_ParseVar(char* buffer, VarSet* varSet)
 {
     // look for '=' splitter and new line splitter.
 	// make sure string lengths are capped!
@@ -112,7 +112,7 @@ static char* COM_ParseVar(char* buffer, VarSet* varSet)
     return COM_RunToNewLine(buffer);
 }
 
-static char* COM_LookForVarInLine(char* buffer, VarSet* varSet)
+com_internal char* COM_LookForVarInLine(char* buffer, VarSet* varSet)
 {
     char c = *buffer;
     if (*buffer > 32 && c < 127)
@@ -130,7 +130,7 @@ static char* COM_LookForVarInLine(char* buffer, VarSet* varSet)
     return buffer;
 }
 
-static void COM_ReadVariablesBuffer(char* buffer, u32 numBytes, VarSet* varSet)
+com_internal void COM_ReadVariablesBuffer(char* buffer, u32 numBytes, VarSet* varSet)
 {
     printf("Reading data vars from %d bytes\nVars loaded: %d, vars max: %d\n",
 		numBytes,

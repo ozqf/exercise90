@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.cpp"
+#include "com_module.h"
 
 //////////////////////////////////////////////////////////////
 // Command header

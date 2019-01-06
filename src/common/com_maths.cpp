@@ -10,25 +10,25 @@ inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
 internal i32 g_z_nan = 0x7F800001;
 inline f32 ZNaN() { return *(float*)&g_z_nan; }
 
-static inline void COM_ClampF32(f32* val, f32 min, f32 max)
+com_internal inline void COM_ClampF32(f32* val, f32 min, f32 max)
 {
     if (*val < min) { *val = min; }
     if (*val > max) { *val = max; }
 }
 
-static inline void COM_ClampI32(i32* val, i32 min, i32 max)
+com_internal inline void COM_ClampI32(i32* val, i32 min, i32 max)
 {
     if (*val < min) { *val = min; }
     if (*val > max) { *val = max; }
 }
 
-static inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
+com_internal inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
 {
     return start + lerp * (end - start);
 }
 
 
-static inline float COM_LinearEase(
+com_internal inline float COM_LinearEase(
     f32 currentIteration,
     f32 startValue,
     f32 changeInValue,
@@ -37,7 +37,7 @@ static inline float COM_LinearEase(
     return changeInValue * currentIteration / totalIterations + startValue;
 }
 
-static inline f32 COM_CapAngleDegrees(f32 angle)
+com_internal inline f32 COM_CapAngleDegrees(f32 angle)
 {
     u32 loopCount = 0;
     while (angle > 360)
@@ -56,7 +56,7 @@ static inline f32 COM_CapAngleDegrees(f32 angle)
     return angle;
 }
 
-static inline f32 COM_STDRandf32()
+com_internal inline f32 COM_STDRandf32()
 {
     return (f32)rand() / (f32)RAND_MAX;
 }

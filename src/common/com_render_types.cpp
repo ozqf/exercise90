@@ -7,7 +7,7 @@
 // Build a render scene
 ///////////////////////////////////////////////////////////////////
 
-static inline void RScene_AddRenderItem(
+com_internal inline void RScene_AddRenderItem(
     RenderScene*    scene,
     RendObj*        rendObj,
     f32 x, f32 y, f32 z,
@@ -26,7 +26,7 @@ static inline void RScene_AddRenderItem(
     item->obj = *rendObj;
 }
 
-static inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
+com_internal inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
 {
     Assert(scene->numObjects < scene->maxObjects);
     RenderListItem* item = &scene->sceneItems[scene->numObjects];
@@ -36,7 +36,7 @@ static inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendOb
 }
 
 
-static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
+com_internal inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
                   i32 fov, i32 projectionMode, f32 orthographicHalfHeight)
 {
     *scene = {};
@@ -50,7 +50,7 @@ static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, 
 }
 
 // Default init
-static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects)
+com_internal inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects)
 {
     RScene_Init(scene, objectArray, maxObjects, 90, RENDER_PROJECTION_MODE_3D, 8);
 }
@@ -60,7 +60,7 @@ static inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, 
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////
 
-static inline void RendObj_InterpolatePosition(
+com_internal inline void RendObj_InterpolatePosition(
     Vec3* result, Vec3* origin, Vec3* dest, f32 percentage)
 {
     f32 diffX = dest->x - origin->x;
@@ -71,7 +71,7 @@ static inline void RendObj_InterpolatePosition(
     result->z = origin->z + (diffZ * percentage);
 }
 
-static inline void RendObj_SetAsMesh(
+com_internal inline void RendObj_SetAsMesh(
     RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_MESH;
@@ -84,7 +84,7 @@ static inline void RendObj_SetAsMesh(
     rend->textureIndex = textureIndex;   
 }
 
-static inline void RendObj_SetAsRainbowQuad(RendObj* obj)
+com_internal inline void RendObj_SetAsRainbowQuad(RendObj* obj)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
     
@@ -92,7 +92,7 @@ static inline void RendObj_SetAsRainbowQuad(RendObj* obj)
     prim->primitiveType = REND_PRIMITIVE_TYPE_RAINBOW_QUAD;
 }
 
-static inline void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ,
+com_internal inline void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ,
     f32 red, f32 green, f32 blue)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
@@ -107,7 +107,7 @@ static inline void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 siz
     prim->blue = blue;
 }
 
-static inline void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
+com_internal inline void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
 
@@ -119,7 +119,7 @@ static inline void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f
     prim->alpha = 1;
 }
 
-static inline void RendObj_SetAsSprite(RendObj* obj,
+com_internal inline void RendObj_SetAsSprite(RendObj* obj,
     i32 mode, i32 textureIndex,
     f32 width, f32 height)
 {
@@ -142,7 +142,7 @@ static inline void RendObj_SetAsSprite(RendObj* obj,
     rend->a = 1;
 }
 
-static inline void RendObj_SetAsLine(RendObj* obj,
+com_internal inline void RendObj_SetAsLine(RendObj* obj,
     f32 x0, f32 y0, f32 z0,
     f32 x1, f32 y1, f32 z1,
     f32 r0, f32 g0, f32 b0,
@@ -158,7 +158,7 @@ static inline void RendObj_SetAsLine(RendObj* obj,
     rend->colourB.x = r1; rend->colourB.y = g1; rend->colourB.z = b1;
 }
 
-static inline void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
+com_internal inline void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
     f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop)
 {
     sprite->uvLeft = uvLeft;
@@ -167,7 +167,7 @@ static inline void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
     sprite->uvTop = uvTop;
 }
 
-static inline void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
+com_internal inline void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_BILLBOARD;
     RendObj_Billboard* rend = &obj->data.billboard;
@@ -182,14 +182,14 @@ static inline void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32
     rend->textureIndex = textureIndex;
 }
 
-static inline void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
+com_internal inline void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
 {
     obj->type = RENDOBJ_TYPE_ASCI_CHAR;
     RendObj_AsciChar* c = &obj->data.asciChar;
     c->asciChar = asciCharacter;
 }
 
-static inline void RendObj_SetAsAsciCharArray(
+com_internal inline void RendObj_SetAsAsciCharArray(
     RendObj* obj,
     char* asciCharArray,
     i32 numChars,
@@ -212,7 +212,7 @@ static inline void RendObj_SetAsAsciCharArray(
     c->b = blue;
 }
 
-static inline void RendObj_CalculateSpriteAsciUVs(
+com_internal inline void RendObj_CalculateSpriteAsciUVs(
     RendObj_Sprite* sprite,
     u8 asciChar)
 {

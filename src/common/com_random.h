@@ -1,10 +1,8 @@
 #pragma once
 
-//#include "com_module.cpp"
-
 #define COM_RANDOM_NUMBER_TABLE_SIZE 512
 
-static f32 com_random[COM_RANDOM_NUMBER_TABLE_SIZE] = {
+com_internal f32 com_random[COM_RANDOM_NUMBER_TABLE_SIZE] = {
 	0.001251f,
 	0.563585f,
 	0.193304f,

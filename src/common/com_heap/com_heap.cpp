@@ -60,7 +60,7 @@ Deallocation involves:
 
 */
 
-inline static void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
+inline com_internal void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
 {
     // Address range
     heap->ptrMemory = allocatedMemory;
@@ -110,7 +110,7 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
     return NULL;
 }
 
-inline static MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
+inline com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
 {
     HeapBlock* block = Heap_FindBlock(heap, id);
     Assert(block != NULL);
@@ -122,7 +122,7 @@ inline static MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
 }
 
 // Find the data pointer for this BlockRef for use. Update if dirty
-inline static void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
+inline com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 {
     // if defrag indexes match, ref is okay
     if (BlockRef->iteration == heap->iteration)
@@ -167,7 +167,7 @@ inline ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
     return buf;
 }
 
-static u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
+com_internal u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
 {
     u32 result;
     HeapBlock *next = block->mem.next;
@@ -196,7 +196,7 @@ static u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block)
 }
 
 #if 1
-static void Heap_DebugPrintAllocations2(Heap *heap)
+com_internal void Heap_DebugPrintAllocations2(Heap *heap)
 {
 
     printf("\n** HEAP PRINT **\n");
@@ -255,7 +255,7 @@ static void Heap_DebugPrintAllocations2(Heap *heap)
  * LINKED LIST OPERATIONS
  ****************************/
 
-inline static void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous)
+inline com_internal void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous)
 {
     if (previous == NULL)
     {
@@ -283,7 +283,7 @@ inline static void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *pre
     }
 }
 
-inline static void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
+inline com_internal void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
 {
     HeapBlock *next = block->mem.next;
     HeapBlock *prev = block->mem.prev;
@@ -331,7 +331,7 @@ bool Heap_RemoveBlockById(Heap *heap, i32 id)
 /*****************************
  * ALLOC/FREE
  ****************************/
-inline static void Heap_Free(Heap *heap, u32 id)
+inline com_internal void Heap_Free(Heap *heap, u32 id)
 {
 	HeapBlock* block = Heap_FindBlock(heap, id);
 	Assert(block != NULL);
@@ -458,7 +458,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
     return newBlock->mem.id;
 }
 
-inline static void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
+inline com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
 {
     Assert(bRef != NULL);
     HeapBlock* block = Heap_FindBlock(heap, blockId);
@@ -473,7 +473,7 @@ inline static void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
     bRef->objectSize = block->mem.objectSize;
 }
 
-inline static void Heap_Purge(Heap* heap)
+inline com_internal void Heap_Purge(Heap* heap)
 {
     HeapBlock* next;
     HeapBlock* block = heap->headBlock;
@@ -541,7 +541,7 @@ i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize)
     return fragIndex;
 }
 
-inline static void Heap_Defrag2(Heap *heap)
+inline com_internal void Heap_Defrag2(Heap *heap)
 {
     //heap->iteration++;
     /*
@@ -559,7 +559,7 @@ inline static void Heap_Defrag2(Heap *heap)
     // i32 numFragments = Heap_ScanForFragments(heap, fragments, 1);
 }
 
-inline static i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapacity)
+inline com_internal i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapacity)
 {
     // length of string + 1 for null terminator
     u32 totalSize = maxStringCapacity + 1;

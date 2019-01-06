@@ -20,12 +20,12 @@ struct ByteBuffer
     }
 };
 
-static inline i32 Buf_BytesWritten(ByteBuffer* b)
+com_internal inline i32 Buf_BytesWritten(ByteBuffer* b)
 {
     return (b->ptrWrite - b->ptrStart);
 }
 
-static inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
+com_internal inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
 {
     ByteBuffer b = {};
     b.ptrStart = ptr;
@@ -35,7 +35,7 @@ static inline ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes)
     return b;
 }
 
-static inline ByteBuffer Buf_FromMalloc(void* ptr, i32 size)
+com_internal inline ByteBuffer Buf_FromMalloc(void* ptr, i32 size)
 {
     ByteBuffer b = {};
     b.ptrStart = (u8*)ptr;
@@ -45,7 +45,7 @@ static inline ByteBuffer Buf_FromMalloc(void* ptr, i32 size)
     return b;
 }
 
-static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
+com_internal inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
 {
     ByteBuffer b = {};
     b.ptrStart = (u8*)mem.ptrMemory;
@@ -55,7 +55,7 @@ static inline ByteBuffer Buf_FromMemoryBlock(MemoryBlock mem)
     return b;
 }
 
-static inline void Buf_Clear(ByteBuffer* b)
+com_internal inline void Buf_Clear(ByteBuffer* b)
 {
     if (b->ptrStart != NULL)
     {

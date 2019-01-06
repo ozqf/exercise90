@@ -40,3 +40,8 @@ void Sim_GetEntityList(Sim_Entity** ptr, i32* max)
     *ptr = g_entities;
     *max = SIM_MAX_ENTITIES;
 }
+
+void Sim_Tick(f32 deltaTime)
+{
+    
+}

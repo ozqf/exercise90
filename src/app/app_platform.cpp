@@ -71,12 +71,12 @@ internal i32  App_Init()
     //             8);
     //
     g_worldScene.cameraTransform.pos.z += 4;
-    Transform t;
-    Transform_SetToIdentity(&t);
-    t.pos.z -= 2;
-    RendObj obj = {};
-    RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
-    RScene_AddRenderItem(&g_worldScene, &t, &obj);
+    //Transform t;
+    //Transform_SetToIdentity(&t);
+    //t.pos.z -= 2;
+    //RendObj obj = {};
+    //RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
+    //RScene_AddRenderItem(&g_worldScene, &t, &obj);
 
     // create test scene
     for (i32 i = 0; i < 10; ++i)
@@ -137,8 +137,9 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
         Transform t;
         Transform_SetToIdentity(&t);
         RendObj obj = {};
+        MeshData* cube = COM_GetCubeMesh();
         RendObj_SetAsMesh(
-            &obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
+            &obj, *cube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
         
         t.pos.x = ent->t.pos.x;
         t.pos.y = ent->t.pos.y;
