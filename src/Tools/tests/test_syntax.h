@@ -6,27 +6,27 @@ struct Foo
     int b;
     int c;
 
-    inline Foo()
+    Foo()
     {
         printf("ctor Foo\n");
     }
 
-    inline ~Foo()
+    ~Foo()
     {
         printf("dtor Foo\n");
     }
 
-    inline int AccessA()
+    int AccessA()
     {
         return a;
     }
     
-    inline int AccessB()
+    int AccessB()
     {
         return b;
     }
     
-    inline void Set(int newA, int newB, int newC)
+    void Set(int newA, int newB, int newC)
     {
         a = newA;
         b = newB;

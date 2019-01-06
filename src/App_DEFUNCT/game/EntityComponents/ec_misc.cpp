@@ -81,7 +81,7 @@ internal void Game_UpdateRenderObjects(GameScene *gs, GameTime *time)
 ///////////////////////////////////////////////////////////////////
 // Projectiles
 ///////////////////////////////////////////////////////////////////
-inline void Prj_PushRigidBody(EC_Collider *col)
+void Prj_PushRigidBody(EC_Collider *col)
 {
     PhysCmd_ChangeVelocity(col->shapeId, 0.0f, 10.0f, 0.0f);
 }

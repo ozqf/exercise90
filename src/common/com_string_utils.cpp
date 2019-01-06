@@ -9,7 +9,7 @@
  * if b is first alphabetically, return 1
  */
 
-com_internal inline i32 COM_CompareStrings(const char *a, const char *b)
+com_internal i32 COM_CompareStrings(const char *a, const char *b)
 {
     while (*a == *b)
     {
@@ -26,7 +26,7 @@ com_internal inline i32 COM_CompareStrings(const char *a, const char *b)
 }
 
 // returns 1 if true, 0 if not
-com_internal inline i32 COM_MatchStringStart(const char *str, const char *start)
+com_internal i32 COM_MatchStringStart(const char *str, const char *start)
 {
     i32 strLen = COM_StrLen(str);
 	i32 startLen = COM_StrLen(start);
@@ -44,7 +44,7 @@ com_internal inline i32 COM_MatchStringStart(const char *str, const char *start)
 	}
 }
 
-com_internal inline void COM_CopyStringA(const char *source, char *target)
+com_internal void COM_CopyStringA(const char *source, char *target)
 {
     while (true)
     {
@@ -58,7 +58,7 @@ com_internal inline void COM_CopyStringA(const char *source, char *target)
     }
 }
 
-com_internal inline void COM_CopyString(const char *source, char *target)
+com_internal void COM_CopyString(const char *source, char *target)
 {
     while (*source)
     {
@@ -71,7 +71,7 @@ com_internal inline void COM_CopyString(const char *source, char *target)
  * Copy a string without exceeding the specified limit
  * Will always patch a NULL terminator at the final position
  */
-com_internal inline i32 COM_CopyStringLimited(const char *source, char *target, i32 limit)
+com_internal i32 COM_CopyStringLimited(const char *source, char *target, i32 limit)
 {
     if (limit < 1) { return 0; }
     i32 written = 0;
@@ -90,7 +90,7 @@ com_internal inline i32 COM_CopyStringLimited(const char *source, char *target, 
  * No checking whether source/target will clash
  * No checking that target has enough room!
  */
-com_internal inline void COM_CopyStringCount(const char *source, char *target, i32 count)
+com_internal void COM_CopyStringCount(const char *source, char *target, i32 count)
 {
     if (count <= 0) { return; }
     while (*source && count)
@@ -109,7 +109,7 @@ com_internal inline void COM_CopyStringCount(const char *source, char *target, i
     *target = 0;
 }
 
-com_internal inline i32 COM_StrLenA(const char* str)
+com_internal i32 COM_StrLenA(const char* str)
 {
     i32 result = 0;
     while (*str)
@@ -120,14 +120,14 @@ com_internal inline i32 COM_StrLenA(const char* str)
     return result;
 }
 
-com_internal inline i32 COM_StrLen(const char* str)
+com_internal i32 COM_StrLen(const char* str)
 {
     i32 count = 0;
     while (str[count]) { ++count; }
     return count;
 }
 
-com_internal inline i32 COM_StrReplace(char* str, char target, char replacement)
+com_internal i32 COM_StrReplace(char* str, char target, char replacement)
 {
     i32 count = 0;
     while (*str)
@@ -142,7 +142,7 @@ com_internal inline i32 COM_StrReplace(char* str, char target, char replacement)
     return count;
 }
 
-com_internal inline void COM_StrToUpperCase(char* str)
+com_internal void COM_StrToUpperCase(char* str)
 {
     // A to B == 65 to 90
     // a to b == 97 to 122
@@ -156,7 +156,7 @@ com_internal inline void COM_StrToUpperCase(char* str)
     }
 }
 
-com_internal inline void COM_StrToLowerCase(char* str)
+com_internal void COM_StrToLowerCase(char* str)
 {
     // A to B == 65 to 90
     // a to b == 97 to 122
@@ -170,7 +170,7 @@ com_internal inline void COM_StrToLowerCase(char* str)
     }
 }
 
-com_internal inline u8 COM_CharIsDecimalInt32(const char c)
+com_internal u8 COM_CharIsDecimalInt32(const char c)
 {
 	if (c < '0' || c > '9')
 	{
@@ -182,7 +182,7 @@ com_internal inline u8 COM_CharIsDecimalInt32(const char c)
 	return 1;
 }
 
-com_internal inline u8 COM_AsciIsDecimalInt32(const char *str)
+com_internal u8 COM_AsciIsDecimalInt32(const char *str)
 {
     i32 read = 0;
 	while (str && *str)
@@ -205,7 +205,7 @@ com_internal inline u8 COM_AsciIsDecimalInt32(const char *str)
 // decimal or hexadecimal
 // negative and positive
 // "-54" "12" "0x432146fd" "-0X4AbdC"
-com_internal inline i32 COM_AsciToInt32(const char *str)
+com_internal i32 COM_AsciToInt32(const char *str)
 {
     i32 sign = 1;
     i32 val = 0;
@@ -263,12 +263,12 @@ com_internal inline i32 COM_AsciToInt32(const char *str)
     return val * sign;
 }
 
-com_internal inline f32 COM_AsciToFloat32(const char *str)
+com_internal f32 COM_AsciToFloat32(const char *str)
 {
     return 0.0f;
 }
 
-com_internal inline i32 COM_StripTrailingInteger(char* text, char separator, i32 failureValue)
+com_internal i32 COM_StripTrailingInteger(char* text, char separator, i32 failureValue)
 {
 	i32 pos = COM_StrLen(text);
 	if (pos <= 0) { return failureValue; }
@@ -301,7 +301,7 @@ com_internal inline i32 COM_StripTrailingInteger(char* text, char separator, i32
 /**
  * Tests that the end of the given filePath matches the given extension
  */
-com_internal inline u8 COM_CheckForFileExtension(const char* filePath, const char* extension)
+com_internal u8 COM_CheckForFileExtension(const char* filePath, const char* extension)
 {
     Assert(filePath != NULL);
     Assert(extension != NULL);
@@ -334,7 +334,7 @@ com_internal inline u8 COM_CheckForFileExtension(const char* filePath, const cha
     return 1;
 }
 
-com_internal inline i32 COM_ConcatonateTokens(
+com_internal i32 COM_ConcatonateTokens(
 	char* buffer,
 	i32 bufferSize,
 	char** strings,

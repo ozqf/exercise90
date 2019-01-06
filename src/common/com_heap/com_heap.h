@@ -21,18 +21,18 @@ struct Heap;
 
 #include "com_heap_types.h"
 
-com_internal inline void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
-com_internal inline HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);
-com_internal inline HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label);
-com_internal inline MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id);
-com_internal inline void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef);
-com_internal inline u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block);
-com_internal inline void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous);
-com_internal inline void Heap_RemoveBlock(Heap *heap, const HeapBlock *block);
-com_internal inline bool Heap_RemoveBlockById(Heap *heap, i32 id);
-com_internal inline void Heap_Free(Heap *heap, u32 id);
-com_internal inline u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, u8 clearToZero);
-com_internal inline void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId);
-com_internal inline void Heap_Purge(Heap* heap);
-com_internal inline i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize);
-com_internal inline void Heap_Defrag2(Heap *heap);
+com_internal void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize);
+com_internal HeapBlock *Heap_FindBlock(Heap *heap, uint32_t blockId);
+com_internal HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label);
+com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id);
+com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef);
+com_internal u32 Heap_CalcSpaceAfterBlock(Heap *heap, HeapBlock *block);
+com_internal void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous);
+com_internal void Heap_RemoveBlock(Heap *heap, const HeapBlock *block);
+com_internal bool Heap_RemoveBlockById(Heap *heap, i32 id);
+com_internal void Heap_Free(Heap *heap, u32 id);
+com_internal u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, u8 clearToZero);
+com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId);
+com_internal void Heap_Purge(Heap* heap);
+com_internal i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize);
+com_internal void Heap_Defrag2(Heap *heap);

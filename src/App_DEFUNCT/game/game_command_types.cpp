@@ -21,7 +21,7 @@
  */
 #ifndef GAME_CMD_DEFAULT_GetType
 #define GAME_CMD_DEFAULT_GetType(u8_cmdType) \
-inline u8 GetType() { return u8_cmdType##; }
+u8 GetType() { return u8_cmdType##; }
 #endif
 
 /**
@@ -33,19 +33,19 @@ inline u8 GetType() { return u8_cmdType##; }
 #ifndef GAME_CMD_DEFAULT_Read_Write
 #define GAME_CMD_DEFAULT_Read_Write(structType, u8_cmdType) \
 \
-inline u16 MeasureForReading(u8* ptr) \
+u16 MeasureForReading(u8* ptr) \
 { \
     u16 size = sizeof(structType) + sizeof(u8); \
     return size; \
 } \
 \
-inline u16 MeasureForWriting() \
+u16 MeasureForWriting() \
 { \
     u16 size = sizeof(structType) + sizeof(u8); \
     return size; \
 } \
 \
-inline u16 Write(u8* ptr) \
+u16 Write(u8* ptr) \
 {\
     u8* start = ptr; \
     ptr += COM_WriteByte(u8_cmdType, ptr); \
@@ -54,7 +54,7 @@ inline u16 Write(u8* ptr) \
     return (u16)(ptr - start); \
 } \
 \
-inline u16 Read(u8* ptr) \
+u16 Read(u8* ptr) \
 { \
     u8* start = ptr; \
     u8 commandType = COM_ReadByte(&ptr); \
@@ -347,16 +347,16 @@ struct Cmd_S2C_Sync
 	
 	GAME_CMD_DEFAULT_GetType(CMD_TYPE_S2C_SYNC)
 
-    inline u16 MeasureForReading(u8* ptr)
+    u16 MeasureForReading(u8* ptr)
     {
         // type + length + (length * sizeof(char))
         return (sizeof(u8) * 2) + (length * sizeof(char));// + sizeof('\0');
     }
-    inline u16 MeasureForWriting()
+    u16 MeasureForWriting()
     {
         return (sizeof(u8) * 2) + (length * sizeof(char));// + sizeof('\0');
     }
-    inline u16 Write(u8* ptr)
+    u16 Write(u8* ptr)
     {
         u8* start = ptr;
         ptr += COM_WriteByte(CMD_TYPE_S2C_SYNC, ptr);
@@ -369,7 +369,7 @@ struct Cmd_S2C_Sync
         ptr += COM_COPY(fileName, ptr, length);
         return (u16)(ptr - start);
     }
-    inline u16 Read(u8* ptr)
+    u16 Read(u8* ptr)
     {
         u8* start = ptr;
         u8 commandType = COM_ReadByte(&ptr);
@@ -397,7 +397,7 @@ struct Cmd_Packet
     i32 connectionId;
     i32 numBytes;
 
-    inline u16 Measure()
+    u16 Measure()
     {
         return (u16)(sizeof(u8) + (sizeof(i32) * 2) + numBytes);
     }

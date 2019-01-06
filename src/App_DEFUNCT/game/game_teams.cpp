@@ -2,7 +2,7 @@
 
 #include "../../common/com_module.h"
 
-inline u8 Game_AttackIsValid(i32 attackingTeam, i32 defendingTeam)
+u8 Game_AttackIsValid(i32 attackingTeam, i32 defendingTeam)
 {
     if (defendingTeam == TEAM_NON_COMBATANT) { return 0; }
     if (attackingTeam == TEAM_FREE || defendingTeam == TEAM_FREE) { return 1; }

@@ -79,7 +79,7 @@ internal void Game_EntVsEntCollision(
     }
 }
 
-inline void Game_HandleEntityUpdate(GameScene *gs, PhysEV_TransformUpdate *ev)
+void Game_HandleEntityUpdate(GameScene *gs, PhysEV_TransformUpdate *ev)
 {
     if (ev->tag == 0)
     {

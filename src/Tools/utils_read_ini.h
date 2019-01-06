@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.cpp"
+#include "../common/com_module.h"
 
 #define INI_READ_MODE_NONE 0
 #define INI_READ_MODE_SECTION_NAME 1

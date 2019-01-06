@@ -60,7 +60,7 @@ Deallocation involves:
 
 */
 
-inline com_internal void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
+com_internal void Heap_Init(Heap *heap, void *allocatedMemory, uint32_t allocatedSize)
 {
     // Address range
     heap->ptrMemory = allocatedMemory;
@@ -110,7 +110,7 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
     return NULL;
 }
 
-inline com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
+com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
 {
     HeapBlock* block = Heap_FindBlock(heap, id);
     Assert(block != NULL);
@@ -122,7 +122,7 @@ inline com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
 }
 
 // Find the data pointer for this BlockRef for use. Update if dirty
-inline com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
+com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 {
     // if defrag indexes match, ref is okay
     if (BlockRef->iteration == heap->iteration)
@@ -147,7 +147,7 @@ inline com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *Block
     return newAddress;
 }
 
-inline MemoryBlock Heap_RefToMemoryBlock(Heap* heap, BlockRef* ref)
+MemoryBlock Heap_RefToMemoryBlock(Heap* heap, BlockRef* ref)
 {
     MemoryBlock mem = {};
     Heap_GetBlockMemoryAddress(heap, ref);
@@ -156,7 +156,7 @@ inline MemoryBlock Heap_RefToMemoryBlock(Heap* heap, BlockRef* ref)
     return mem;
 }
 
-inline ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
+ByteBuffer Heap_RefToByteBuffer(Heap* heap, BlockRef* ref)
 {
     ByteBuffer buf = {};
     Heap_GetBlockMemoryAddress(heap, ref);
@@ -255,7 +255,7 @@ com_internal void Heap_DebugPrintAllocations2(Heap *heap)
  * LINKED LIST OPERATIONS
  ****************************/
 
-inline com_internal void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous)
+com_internal void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBlock *previous)
 {
     if (previous == NULL)
     {
@@ -283,7 +283,7 @@ inline com_internal void Heap_InsertBlock(Heap *heap, HeapBlock *block, HeapBloc
     }
 }
 
-inline com_internal void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
+com_internal void Heap_RemoveBlock(Heap *heap, const HeapBlock *block)
 {
     HeapBlock *next = block->mem.next;
     HeapBlock *prev = block->mem.prev;
@@ -331,7 +331,7 @@ bool Heap_RemoveBlockById(Heap *heap, i32 id)
 /*****************************
  * ALLOC/FREE
  ****************************/
-inline com_internal void Heap_Free(Heap *heap, u32 id)
+com_internal void Heap_Free(Heap *heap, u32 id)
 {
 	HeapBlock* block = Heap_FindBlock(heap, id);
 	Assert(block != NULL);
@@ -458,7 +458,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
     return newBlock->mem.id;
 }
 
-inline com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
+com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
 {
     Assert(bRef != NULL);
     HeapBlock* block = Heap_FindBlock(heap, blockId);
@@ -473,7 +473,7 @@ inline com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 block
     bRef->objectSize = block->mem.objectSize;
 }
 
-inline com_internal void Heap_Purge(Heap* heap)
+com_internal void Heap_Purge(Heap* heap)
 {
     HeapBlock* next;
     HeapBlock* block = heap->headBlock;
@@ -541,7 +541,7 @@ i32 Heap_ScanForFragments(Heap *heap, Heap_Fragment* fragments, i32 arraySize)
     return fragIndex;
 }
 
-inline com_internal void Heap_Defrag2(Heap *heap)
+com_internal void Heap_Defrag2(Heap *heap)
 {
     //heap->iteration++;
     /*
@@ -559,14 +559,14 @@ inline com_internal void Heap_Defrag2(Heap *heap)
     // i32 numFragments = Heap_ScanForFragments(heap, fragments, 1);
 }
 
-inline com_internal i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapacity)
+com_internal i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapacity)
 {
     // length of string + 1 for null terminator
     u32 totalSize = maxStringCapacity + 1;
     return Heap_Allocate(heap, ref, totalSize, "ZString", 1);
 }
 
-inline void Heap_NeverCall()
+void Heap_NeverCall()
 {
     ILLEGAL_CODE_PATH
     Heap_DebugPrintAllocations2(NULL);

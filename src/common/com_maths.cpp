@@ -5,30 +5,30 @@
 #include <math.h>
 
 internal i32 g_z_inf = 0x7F800000;
-inline f32 ZINFINITY() { return *(float*)&g_z_inf; }
+f32 ZINFINITY() { return *(float*)&g_z_inf; }
 
 internal i32 g_z_nan = 0x7F800001;
-inline f32 ZNaN() { return *(float*)&g_z_nan; }
+f32 ZNaN() { return *(float*)&g_z_nan; }
 
-com_internal inline void COM_ClampF32(f32* val, f32 min, f32 max)
+com_internal void COM_ClampF32(f32* val, f32 min, f32 max)
 {
     if (*val < min) { *val = min; }
     if (*val > max) { *val = max; }
 }
 
-com_internal inline void COM_ClampI32(i32* val, i32 min, i32 max)
+com_internal void COM_ClampI32(i32* val, i32 min, i32 max)
 {
     if (*val < min) { *val = min; }
     if (*val > max) { *val = max; }
 }
 
-com_internal inline f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
+com_internal f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
 {
     return start + lerp * (end - start);
 }
 
 
-com_internal inline float COM_LinearEase(
+com_internal float COM_LinearEase(
     f32 currentIteration,
     f32 startValue,
     f32 changeInValue,
@@ -37,7 +37,7 @@ com_internal inline float COM_LinearEase(
     return changeInValue * currentIteration / totalIterations + startValue;
 }
 
-com_internal inline f32 COM_CapAngleDegrees(f32 angle)
+com_internal f32 COM_CapAngleDegrees(f32 angle)
 {
     u32 loopCount = 0;
     while (angle > 360)
@@ -56,12 +56,12 @@ com_internal inline f32 COM_CapAngleDegrees(f32 angle)
     return angle;
 }
 
-com_internal inline f32 COM_STDRandf32()
+com_internal f32 COM_STDRandf32()
 {
     return (f32)rand() / (f32)RAND_MAX;
 }
 
-inline void Vec3_ArraySet(f32* v, f32 x, f32 y, f32 z)
+void Vec3_ArraySet(f32* v, f32 x, f32 y, f32 z)
 {
     v[0] = x;
     v[1] = y;
@@ -72,24 +72,24 @@ inline void Vec3_ArraySet(f32* v, f32 x, f32 y, f32 z)
 // VECTOR 3 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
 
-inline void Vec3_Set(Vec3* v, f32 x, f32 y, f32 z)
+void Vec3_Set(Vec3* v, f32 x, f32 y, f32 z)
 {
     v->x = x;
     v->y = y;
     v->z = z;
 }
 
-inline f32 Vec3_Magnitude(Vec3* v)
+f32 Vec3_Magnitude(Vec3* v)
 {
     return (f32)sqrt((f32)(v->x * v->x) + (v->y * v->y) + (v->z * v->z));
 }
 
-inline f32 Vec3_Magnitudef(f32 x, f32 y, f32 z)
+f32 Vec3_Magnitudef(f32 x, f32 y, f32 z)
 {
 	return (f32)sqrt((f32)(x * x) + (y * y) + (z * z));
 }
 
-inline void Vec3_Normalise(Vec3* v)
+void Vec3_Normalise(Vec3* v)
 {
     f32 vectorMagnitude = Vec3_Magnitude(v);
     if (vectorMagnitude == 0) { return; }
@@ -98,7 +98,7 @@ inline void Vec3_Normalise(Vec3* v)
     v->z /= vectorMagnitude;
 }
 
-inline Vec3 Vec3_CreateUnitVector(Vec3* v)
+Vec3 Vec3_CreateUnitVector(Vec3* v)
 {
     Vec3 r = {};
     f32 vectorMagnitude = Vec3_Magnitude(v);
@@ -109,7 +109,7 @@ inline Vec3 Vec3_CreateUnitVector(Vec3* v)
     return r;
 }
 
-inline void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude)
+void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude)
 {
     Vec3_Normalise(v);
     v->x = v->x * newMagnitude;
@@ -117,19 +117,19 @@ inline void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude)
     v->z = v->z * newMagnitude;
 }
 
-inline void Vec3_CrossProduct(Vec3* a, Vec3* b, Vec3* result)
+void Vec3_CrossProduct(Vec3* a, Vec3* b, Vec3* result)
 {
     result->x = (a->y * b->z) - (a->z * b->y);
     result->z = (a->x * b->y) - (a->y * b->x);
     result->y = (a->z * b->x) - (a->x * b->z);
 }
 
-inline f32 Vec3_DotProduct(Vec3* a, Vec3* b)
+f32 Vec3_DotProduct(Vec3* a, Vec3* b)
 {
     return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
 }
 
-inline void Vec3_NormaliseOrForward(Vec3* v)
+void Vec3_NormaliseOrForward(Vec3* v)
 {
     f32 mag = Vec3_Magnitude(v);
     if (mag == 0)
@@ -149,12 +149,12 @@ inline void Vec3_NormaliseOrForward(Vec3* v)
 // VECTOR 3 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
 
-inline f32 Vec4_Magnitude(Vec4* v)
+f32 Vec4_Magnitude(Vec4* v)
 {
     return (f32)sqrt((f32)(v->x * v->x) + (v->y * v->y) + (v->z * v->z));
 }
 
-inline void Vec4_Normalise(Vec4* v)
+void Vec4_Normalise(Vec4* v)
 {
     f32 vectorMagnitude = Vec4_Magnitude(v);
     v->x /= vectorMagnitude;
@@ -162,7 +162,7 @@ inline void Vec4_Normalise(Vec4* v)
     v->z /= vectorMagnitude;
 }
 
-inline void Vec4_SetMagnitude(Vec4* v, f32 newMagnitude)
+void Vec4_SetMagnitude(Vec4* v, f32 newMagnitude)
 {
     Vec4_Normalise(v);
     v->x = v->x * newMagnitude;
@@ -173,7 +173,7 @@ inline void Vec4_SetMagnitude(Vec4* v, f32 newMagnitude)
 /////////////////////////////////////////////////////////////////////////////
 // M3x3 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
-inline void M3x3_SetToIdentity(f32* m)
+void M3x3_SetToIdentity(f32* m)
 {
     m[M3x3_X0] = 1;
     m[M3x3_X1] = 0;
@@ -188,22 +188,22 @@ inline void M3x3_SetToIdentity(f32* m)
     m[M3x3_Z2] = 1;
 }
 
-inline void M3x3_SetX(f32* m, f32 x0, f32 x1, f32 x2)
+void M3x3_SetX(f32* m, f32 x0, f32 x1, f32 x2)
 {
     m[M3x3_X0] = x0; m[M3x3_X1] = x1; m[M3x3_X2] = x2;
 }
 
-inline void M3x3_SetY(f32* m, f32 y0, f32 y1, f32 y2)
+void M3x3_SetY(f32* m, f32 y0, f32 y1, f32 y2)
 {
     m[M3x3_Y0] = y0; m[M3x3_Y1] = y1; m[M3x3_Y2] = y2;
 }
 
-inline void M3x3_SetZ(f32* m, f32 z0, f32 z1, f32 z2)
+void M3x3_SetZ(f32* m, f32 z0, f32 z1, f32 z2)
 {
     m[M3x3_Z0] = z0; m[M3x3_Z1] = z1; m[M3x3_Z2] = z2;
 }
 
-inline void M3x3_Multiply(f32* a, f32* b, f32* result)
+void M3x3_Multiply(f32* a, f32* b, f32* result)
 {
     /*
                 0   3   6
@@ -248,14 +248,14 @@ inline void M3x3_Multiply(f32* a, f32* b, f32* result)
     }
 }
 
-inline void M3x3_Copy(f32* src, f32* tar)
+void M3x3_Copy(f32* src, f32* tar)
 {
     tar[M3x3_X0] = src[M3x3_X0];  tar[M3x3_X1] = src[M3x3_X1];  tar[M3x3_X2] = src[M3x3_X2];
     tar[M3x3_Y0] = src[M3x3_Y0];  tar[M3x3_Y1] = src[M3x3_Y1];  tar[M3x3_Y2] = src[M3x3_Y2];
     tar[M3x3_Z0] = src[M3x3_Z0];  tar[M3x3_Z1] = src[M3x3_Z1];  tar[M3x3_Z2] = src[M3x3_Z2];
 }
 
-inline void M3x3_RotateX(f32* m, f32 radiansX)
+void M3x3_RotateX(f32* m, f32 radiansX)
 {
 	M3x3 rotM = {};
     rotM.xAxisX = 1;
@@ -266,7 +266,7 @@ inline void M3x3_RotateX(f32* m, f32 radiansX)
     M3x3_Multiply(m, rotM.cells, m);
 }
 
-inline void M3x3_RotateY(f32* m, f32 radiansY)
+void M3x3_RotateY(f32* m, f32 radiansY)
 {
 	M3x3 rotM = {};
     rotM.yAxisY = 1;
@@ -277,7 +277,7 @@ inline void M3x3_RotateY(f32* m, f32 radiansY)
     M3x3_Multiply(m, rotM.cells, m);
 }
 
-inline void M3x3_RotateZ(f32* m, f32 radiansZ)
+void M3x3_RotateZ(f32* m, f32 radiansZ)
 {
 	M3x3 rotM = {};
     rotM.zAxisZ = 1;
@@ -288,24 +288,24 @@ inline void M3x3_RotateZ(f32* m, f32 radiansZ)
     M3x3_Multiply(m, rotM.cells, m);
 }
 
-inline f32 M3x3_GetAngleX(f32* m)
+f32 M3x3_GetAngleX(f32* m)
 {
     //return (f32)atan2(m[8], m[10]);
     return (f32)-asinf(m[9]);
 }
 
-inline f32 M3x3_GetAngleY(f32* m)
+f32 M3x3_GetAngleY(f32* m)
 {
     return (f32)atan2(m[8], m[10]);
     //return (f32)-asinf(m[9]);
 }
 
-inline f32 M3x3_GetAngleZ(f32* m)
+f32 M3x3_GetAngleZ(f32* m)
 {
     return (f32)atan2(m[1], m[5]);
 }
 
-inline Vec3 M3x3_GetEulerAnglesRadians(f32* m)
+Vec3 M3x3_GetEulerAnglesRadians(f32* m)
 {
     Vec3 result;
     /*result.x = (f32)-asinf(m[9]);
@@ -318,7 +318,7 @@ inline Vec3 M3x3_GetEulerAnglesRadians(f32* m)
     return result;
 }
 
-inline Vec3 M3x3_GetEulerAnglesDegrees(f32* m)
+Vec3 M3x3_GetEulerAnglesDegrees(f32* m)
 {
     Vec3 result;
     /*result.x = (f32)-asinf(m[9]) * RAD2DEG;
@@ -344,12 +344,12 @@ inline Vec3 M3x3_GetEulerAnglesDegrees(f32* m)
     return result;
 }
 
-inline void M3x3_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
+void M3x3_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
 {
     // TODO: Implement
 }
 
-inline void M3x3_CopyFromM4x4(f32* m3x3, f32* m4x4)
+void M3x3_CopyFromM4x4(f32* m3x3, f32* m4x4)
 {
     m3x3[M3x3_X0] = m4x4[M4x4_X0];
     m3x3[M3x3_X1] = m4x4[M4x4_X1];
@@ -364,7 +364,7 @@ inline void M3x3_CopyFromM4x4(f32* m3x3, f32* m4x4)
     m3x3[M3x3_Z2] = m4x4[M4x4_Z2];
 }
 
-inline void M3x3_ClearTinyValues(f32* m, f32 cap)
+void M3x3_ClearTinyValues(f32* m, f32 cap)
 {
     if (ZABS(m[M3x3_X0]) < cap) { m[M3x3_X0] = 0; }
     if (ZABS(m[M3x3_X1]) < cap) { m[M3x3_X1] = 0; }
@@ -382,7 +382,7 @@ inline void M3x3_ClearTinyValues(f32* m, f32 cap)
 /////////////////////////////////////////////////////////////////////////////
 // M4x4 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
-inline void M4x4_SetToIdentity(f32* m)
+void M4x4_SetToIdentity(f32* m)
 {
     *m = {};
     m[M4x4_X0] = 1;
@@ -406,7 +406,7 @@ inline void M4x4_SetToIdentity(f32* m)
     m[M4x4_W3] = 1;
 }
 
-inline void M4x4_Transpose(f32* m)
+void M4x4_Transpose(f32* m)
 {
     /*
                     0   4   8   12
@@ -437,27 +437,27 @@ inline void M4x4_Transpose(f32* m)
     m[14] = c[11];
 }
 
-inline void M4x4_SetX(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
+void M4x4_SetX(f32* m, f32 x0, f32 x1, f32 x2, f32 x3)
 {
     m[M4x4_X0] = x0; m[M4x4_X1] = x1; m[M4x4_X2] = x2; m[M4x4_X3] = x3;
 }
 
-inline void M4x4_SetY(f32* m, f32 y0, f32 y1, f32 y2, f32 y3)
+void M4x4_SetY(f32* m, f32 y0, f32 y1, f32 y2, f32 y3)
 {
     m[M4x4_Y0] = y0; m[M4x4_Y1] = y1; m[M4x4_Y2] = y2; m[M4x4_Y3] = y3;
 }
 
-inline void M4x4_SetZ(f32* m, f32 z0, f32 z1, f32 z2, f32 z3)
+void M4x4_SetZ(f32* m, f32 z0, f32 z1, f32 z2, f32 z3)
 {
     m[M4x4_Z0] = z0; m[M4x4_Z1] = z1; m[M4x4_Z2] = z2; m[M4x4_Z3] = z3;
 }
 
-inline void M4x4_SetW(f32* m, f32 w0, f32 w1, f32 w2, f32 w3)
+void M4x4_SetW(f32* m, f32 w0, f32 w1, f32 w2, f32 w3)
 {
     m[M4x4_W0] = w0; m[M4x4_W1] = w1; m[M4x4_W2] = w2; m[M4x4_W3] = w3;
 }
 
-inline void M4x4_Multiply(f32* m0, f32* m1, f32* result)
+void M4x4_Multiply(f32* m0, f32* m1, f32* result)
 {
     /*
                     0   4   8   12
@@ -504,7 +504,7 @@ inline void M4x4_Multiply(f32* m0, f32* m1, f32* result)
 }
 
 // Flip rotation and position. Keep others intact
-inline void M4x4_Invert(f32* src)
+void M4x4_Invert(f32* src)
 {
     src[M4x4_X0] = -src[M4x4_X0];
     src[M4x4_X1] = -src[M4x4_X1];
@@ -523,7 +523,7 @@ inline void M4x4_Invert(f32* src)
     src[M4x4_W2] = -src[M4x4_W2];
 }
 
-inline void M4x4_Copy(f32* src, f32* tar)
+void M4x4_Copy(f32* src, f32* tar)
 {
     tar[M4x4_X0] = src[M4x4_X0];  tar[M4x4_X1] = src[M4x4_X1];  tar[M4x4_X2] = src[M4x4_X2];  tar[M4x4_X3] = src[M4x4_X3];
     tar[M4x4_Y0] = src[M4x4_Y0];  tar[M4x4_Y1] = src[M4x4_Y1];  tar[M4x4_Y2] = src[M4x4_Y2];  tar[M4x4_Y3] = src[M4x4_Y3];
@@ -532,7 +532,7 @@ inline void M4x4_Copy(f32* src, f32* tar)
 }
 
 // Clear axis columns
-inline void M4x4_ClearRotation(f32* src)
+void M4x4_ClearRotation(f32* src)
 {
     src[M4x4_X0] = 1;
     src[M4x4_X1] = 0;
@@ -547,7 +547,7 @@ inline void M4x4_ClearRotation(f32* src)
     src[M4x4_Z2] = 1;
 }
 
-inline void M4x4_ClearPosition(f32* src)
+void M4x4_ClearPosition(f32* src)
 {
     src[M4x4_W0] = 0;
     src[M4x4_W1] = 0;
@@ -555,7 +555,7 @@ inline void M4x4_ClearPosition(f32* src)
     src[M4x4_W3] = 1;
 }
 
-// inline f32 M4x4_GetScaleX(f32* m)
+// f32 M4x4_GetScaleX(f32* m)
 // {
 //     f32 x = fabsf(m[X0] * m[X0]);
 //     f32 y = fabsf(m[Y0] * m[Y0]);
@@ -563,7 +563,7 @@ inline void M4x4_ClearPosition(f32* src)
 //     return (f32)sqrt(x + y + z);
 // }
 
-// inline f32 M4x4_GetScaleY(f32* m)
+// f32 M4x4_GetScaleY(f32* m)
 // {
 //     f32 x = fabsf(m[X1] * m[X1]);
 //     f32 y = fabsf(m[Y1] * m[Y1]);
@@ -571,7 +571,7 @@ inline void M4x4_ClearPosition(f32* src)
 //     return (f32)sqrt(x + y + z);
 // }
 
-// inline f32 M4x4_GetScaleZ(f32* m)
+// f32 M4x4_GetScaleZ(f32* m)
 // {
 //     f32 x = fabsf(m[X2] * m[X2]);
 //     f32 y = fabsf(m[Y2] * m[Y2]);
@@ -579,7 +579,7 @@ inline void M4x4_ClearPosition(f32* src)
 //     return (f32)sqrt(x + y + z);
 // }
 
-// inline Vec4 M4x4_GetScale(f32* m)
+// Vec4 M4x4_GetScale(f32* m)
 // {
 //     Vec4 result;
 //     result.x = fabsf((f32)sqrt(m[X0] * m[X0] + m[Y0] * m[Y0] + m[Z0] * m[Z0]));
@@ -589,7 +589,7 @@ inline void M4x4_ClearPosition(f32* src)
 //     return result;
 // }
 
-// inline void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
+// void M4x4_SetScale(f32* m, f32 x, f32 y, f32 z)
 // {
 //     M4x4* mat = (M4x4*)m;
 //     Vec4_SetMagnitude(&mat->xAxis, x);
@@ -597,7 +597,7 @@ inline void M4x4_ClearPosition(f32* src)
 //     Vec4_SetMagnitude(&mat->zAxis, z);
 // }
 
-inline void M4x4_RotateX(f32* m, f32 radiansX)
+void M4x4_RotateX(f32* m, f32 radiansX)
 {
 	M4x4 rotM = {};
     rotM.xAxisX = 1;
@@ -609,7 +609,7 @@ inline void M4x4_RotateX(f32* m, f32 radiansX)
     M4x4_Multiply(m, rotM.cells, m);
 }
 
-inline void M4x4_RotateY(f32* m, f32 radiansY)
+void M4x4_RotateY(f32* m, f32 radiansY)
 {
 	M4x4 rotM = {};
     rotM.yAxisY = 1;
@@ -621,7 +621,7 @@ inline void M4x4_RotateY(f32* m, f32 radiansY)
     M4x4_Multiply(m, rotM.cells, m);
 }
 
-inline void M4x4_RotateZ(f32* m, f32 radiansZ)
+void M4x4_RotateZ(f32* m, f32 radiansZ)
 {
 	M4x4 rotM = {};
     rotM.zAxisZ = 1;
@@ -633,29 +633,29 @@ inline void M4x4_RotateZ(f32* m, f32 radiansZ)
     M4x4_Multiply(m, rotM.cells, m);
 }
 
-inline f32 M4x4_GetAngleX(f32* m)
+f32 M4x4_GetAngleX(f32* m)
 {
     //return (f32)atan2(m[8], m[10]);
     return (f32)-asinf(m[9]);
 }
 
-inline f32 M4x4_GetAngleY(f32* m)
+f32 M4x4_GetAngleY(f32* m)
 {
     return (f32)atan2(m[8], m[10]);
     //return (f32)-asinf(m[9]);
 }
 
-inline f32 M4x4_GetAngleZ(f32* m)
+f32 M4x4_GetAngleZ(f32* m)
 {
     return (f32)atan2(m[1], m[5]);
 }
 
-inline void M4x4_SetPosition(f32* m, f32 x, f32 y, f32 z)
+void M4x4_SetPosition(f32* m, f32 x, f32 y, f32 z)
 {
     m[M4x4_W0] = x, m[M4x4_W1] = y; m[M4x4_W2] = z;
 }
 
-inline Vec3 M4x4_GetPositionV3(f32* m)
+Vec3 M4x4_GetPositionV3(f32* m)
 {
     Vec3 result;
     result.x = m[M4x4_W0];
@@ -664,7 +664,7 @@ inline Vec3 M4x4_GetPositionV3(f32* m)
     return result;
 }
 
-inline Vec4 M4x4_GetPositionV4(f32* m)
+Vec4 M4x4_GetPositionV4(f32* m)
 {
     Vec4 result;
     result.x = m[M4x4_W0];
@@ -674,7 +674,7 @@ inline Vec4 M4x4_GetPositionV4(f32* m)
     return result;
 }
 
-inline Vec3 M4x4_GetEulerAnglesRadians(f32* m)
+Vec3 M4x4_GetEulerAnglesRadians(f32* m)
 {
     Vec3 result;
     result.x = (f32)-asinf(m[M4x4_Z1]);
@@ -683,7 +683,7 @@ inline Vec3 M4x4_GetEulerAnglesRadians(f32* m)
     return result;
 }
 
-inline Vec3 M4x4_GetEulerAnglesDegrees(f32* m)
+Vec3 M4x4_GetEulerAnglesDegrees(f32* m)
 {
     Vec3 result;
 	/*result.x = (f32)-asinf(m[9]) * RAD2DEG;
@@ -695,13 +695,13 @@ inline Vec3 M4x4_GetEulerAnglesDegrees(f32* m)
     return result;
 }
 
-// inline void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
+// void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw)
 // {
 //     // TODO: Implement... or not. euler angles suck :/
 // }
 
 
-inline void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)
+void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom)
 {
     m[0] = (2 * prjNear) / (prjRight - prjLeft);
 	m[4] = 0;

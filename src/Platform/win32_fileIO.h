@@ -119,6 +119,7 @@ void BlockRefTest()
     //BlockRef ref = {};
 }
 
+extern "C"
 void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePath)
 {
     /* From .dat file:
@@ -197,6 +198,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 
 }
 
+extern "C"
 void Win32_CopyFile(char* sourcePath, char* targetPath)
 {
     /*
@@ -215,6 +217,7 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     CopyFileEx(sourcePath, targetPath, NULL, NULL, &cancel, 0);
 }
 
+extern "C"
 u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure)
 {
 	AssertAlways(destRef != NULL);
@@ -306,6 +309,7 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 #define WIN32_MAX_OPEN_APP_FILES 4
 FILE* g_appReadFiles[WIN32_MAX_OPEN_APP_FILES];
 
+extern "C"
 i32 Win32_GetFreeAppFileHandle()
 {
 	for (i32 i = 0; i < WIN32_MAX_OPEN_APP_FILES; ++i)

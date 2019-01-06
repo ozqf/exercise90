@@ -18,7 +18,7 @@ set compilerDefines=/DPARANOID=1
 @rem /DVERBOSE=1
 
 @rem === Compile Win32 Window application
-set compilerInput=../src/Platform/win32_module.cpp
+set compilerInput=../src/Platform/win32_module.cpp ../src/common/com_module.cpp
 
 @rem === Compile Testing Win32 Console application
 @rem set compilerInput=../src/Platform/win32_consoleApp.cpp

@@ -2,7 +2,7 @@
 
 #include "com_module.h"
 
-inline u32 COM_CalcSizeOfMesh(MeshData* m)
+u32 COM_CalcSizeOfMesh(MeshData* m)
 {
     u32 total = 0;
     // verts

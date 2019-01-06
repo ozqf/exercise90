@@ -78,7 +78,7 @@ void Phys_NeverCall()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // COMMANDS
 ////////////////////////////////////////////////////////////////////////////////////////////
-inline void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
+void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
 {
     btTransform t;
     body->getMotionState()->getWorldTransform(t);
@@ -89,7 +89,7 @@ inline void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
     body->translate(newPosition);
 }
 
-inline void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
+void Phys_SetBodyVelocity(btRigidBody *body, f32 vx, f32 vy, f32 vz)
 {
     body->activate(true);
     btVector3 newVelocity;

@@ -10,7 +10,7 @@
 void Win32_Shutdown();
 
 // modules
-#include "../common/com_module.cpp"
+#include "../common/com_module.h"
 #include "win32_net/win32_net_module.cpp"
 
 

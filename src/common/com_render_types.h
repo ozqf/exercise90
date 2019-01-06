@@ -280,24 +280,24 @@ struct ScreenInfo
 // Build a render scene
 ///////////////////////////////////////////////////////////////////
 
-com_internal inline void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj);
-com_internal inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
+com_internal void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj);
+com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
                   i32 fov, i32 projectionMode, f32 orthographicHalfHeight);
-com_internal inline void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects);
+com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects);
 
 ///////////////////////////////////////////////////////////////////
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////
 
-com_internal inline void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex);
-com_internal inline void RendObj_SetAsRainbowQuad(RendObj* obj);
-com_internal inline void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ, f32 red, f32 green, f32 blue);
-com_internal inline void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue);
-com_internal inline void RendObj_SetAsSprite(RendObj* obj, i32 mode, i32 textureIndex, f32 width, f32 height);
-com_internal inline void RendObj_SetAsLine(RendObj* obj, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 r0, f32 g0, f32 b0, f32 r1, f32 g1, f32 b1);
-com_internal inline void RendObj_SetSpriteUVs(RendObj_Sprite* sprite, f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop);
-com_internal inline void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex);
-com_internal inline void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter);
-com_internal inline void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size, i32 alignmentMode, i32 textureIndex, f32 red, f32 green, f32 blue);
-com_internal inline void RendObj_CalculateSpriteAsciUVs(RendObj_Sprite* sprite, u8 asciChar);
+com_internal void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex);
+com_internal void RendObj_SetAsRainbowQuad(RendObj* obj);
+com_internal void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ, f32 red, f32 green, f32 blue);
+com_internal void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue);
+com_internal void RendObj_SetAsSprite(RendObj* obj, i32 mode, i32 textureIndex, f32 width, f32 height);
+com_internal void RendObj_SetAsLine(RendObj* obj, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 r0, f32 g0, f32 b0, f32 r1, f32 g1, f32 b1);
+com_internal void RendObj_SetSpriteUVs(RendObj_Sprite* sprite, f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop);
+com_internal void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex);
+com_internal void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter);
+com_internal void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size, i32 alignmentMode, i32 textureIndex, f32 red, f32 green, f32 blue);
+com_internal void RendObj_CalculateSpriteAsciUVs(RendObj_Sprite* sprite, u8 asciChar);
 

@@ -2,18 +2,18 @@
 
 #include "com_module.h"
 
-inline u8 PointVsAABB(
+u8 PointVsAABB(
     f32 pX, f32 pY, f32 pZ,
     f32 aabbX, f32 aabbY, f32 aabbZ,
     f32 aabbHalfX, f32 aabbHalfY, f32 aabbHalfZ
 );
-inline u8 AABBVsAABB(
+u8 AABBVsAABB(
     f32 aX, f32 aY, f32 aZ,
     f32 bX, f32 bY, f32 bZ,
     f32 aHalfX, f32 aHalfY, f32 aHalfZ,
     f32 bHalfX, f32 bHalfY, f32 bHalfZ
 );
-inline u8 LineSegmentVsAABB_2D(
+u8 LineSegmentVsAABB_2D(
     f32 lineOriginX, f32 lineOriginY,
     f32 lineEndX, f32 lineEndY,
     f32 boxMinX,
@@ -22,7 +22,7 @@ inline u8 LineSegmentVsAABB_2D(
     f32 boxMaxY,
     f32 point[2]
 );
-inline u8 LineSegmentVsAABB(
+u8 LineSegmentVsAABB(
     f32 lineOriginX, f32 lineOriginY, f32 lineOriginZ,
     f32 lineEndX, f32 lineEndY, f32 lineEndZ,
     f32 boxMinX,

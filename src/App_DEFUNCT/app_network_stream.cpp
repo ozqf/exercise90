@@ -84,14 +84,14 @@ u32 Stream_ReadStreamMsgHeader(u8* ptr, StreamMsgHeader* result)
 //     b->ptrWrite += Stream_WriteStreamMsgHeader(b->ptrWrite, msgId, numBytes);
 // }
 
-inline u16 Stream_WritePacketHeader(u8 sequenceOffset, u16 size)
+u16 Stream_WritePacketHeader(u8 sequenceOffset, u16 size)
 {
     sequenceOffset = sequenceOffset & SIX_BIT_MASK;
     size = size & TEN_BIT_MASK;
     return ((sequenceOffset << 10) | size);
 }
 
-inline void Stream_ReadPacketHeader(u16 header, u8* sequenceOffset, u16* size)
+void Stream_ReadPacketHeader(u16 header, u8* sequenceOffset, u16* size)
 {
     *sequenceOffset = (header >> 10) & SIX_BIT_MASK;
     *size = header & TEN_BIT_MASK;

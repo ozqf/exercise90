@@ -101,7 +101,7 @@ Vec3 MoveGround(
 }
 #endif
 
-inline void ApplyActorMotorInput(
+void ApplyActorMotorInput(
     GameScene *gs,
     EC_ActorMotor *motor,
     EC_Collider *col,

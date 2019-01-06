@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////
 // Position
 /////////////////////////////////////////////////////////////////////
-inline void Transform_SetToIdentity(Transform* t)
+void Transform_SetToIdentity(Transform* t)
 {
 	*t = {};
     t->pos = { 0, 0, 0 };
@@ -16,22 +16,22 @@ inline void Transform_SetToIdentity(Transform* t)
 /////////////////////////////////////////////////////////////////////
 // Position
 /////////////////////////////////////////////////////////////////////
-inline void Transform_SetPosX(Transform* t, f32 posX)
+void Transform_SetPosX(Transform* t, f32 posX)
 {
     t->pos.x = posX;
 }
 
-inline void Transform_SetPosY(Transform* t, f32 posY)
+void Transform_SetPosY(Transform* t, f32 posY)
 {
     t->pos.y = posY;
 }
 
-inline void Transform_SetPosZ(Transform* t, f32 posZ)
+void Transform_SetPosZ(Transform* t, f32 posZ)
 {
     t->pos.z = posZ;
 }
 
-inline void Transform_SetPosition(Transform* t, f32 posX, f32 posY, f32 posZ)
+void Transform_SetPosition(Transform* t, f32 posX, f32 posY, f32 posZ)
 {
     t->pos = { posX, posY, posZ };
 }
@@ -39,36 +39,36 @@ inline void Transform_SetPosition(Transform* t, f32 posX, f32 posY, f32 posZ)
 /////////////////////////////////////////////////////////////////////
 // Rotation
 /////////////////////////////////////////////////////////////////////
-inline void Transform_RotateX(Transform* t, f32 radiansX)
+void Transform_RotateX(Transform* t, f32 radiansX)
 {
     M3x3_RotateX(t->rotation.cells, radiansX);
 }
 
-inline void Transform_RotateY(Transform* t, f32 radiansY)
+void Transform_RotateY(Transform* t, f32 radiansY)
 {
     M3x3_RotateY(t->rotation.cells, radiansY);
 }
 
-inline void Transform_RotateZ(Transform* t, f32 radiansZ)
+void Transform_RotateZ(Transform* t, f32 radiansZ)
 {
     M3x3_RotateZ(t->rotation.cells, radiansZ);
 }
 
-inline void Transform_SetRotationDegrees(Transform* t, f32 degreesX, f32 degreesY, f32 degreesZ)
+void Transform_SetRotationDegrees(Transform* t, f32 degreesX, f32 degreesY, f32 degreesZ)
 {
     M3x3_RotateZ(t->rotation.cells, degreesZ * DEG2RAD);
     M3x3_RotateY(t->rotation.cells, degreesY * DEG2RAD);
 	M3x3_RotateX(t->rotation.cells, degreesX * DEG2RAD);
 }
 
-inline void Transform_SetRotation(Transform* t, f32 radiansX, f32 radiansY, f32 radiansZ)
+void Transform_SetRotation(Transform* t, f32 radiansX, f32 radiansY, f32 radiansZ)
 {
     M3x3_RotateZ(t->rotation.cells, radiansZ);
     M3x3_RotateY(t->rotation.cells, radiansY);
 	M3x3_RotateX(t->rotation.cells, radiansX);
 }
 
-inline void Transform_ClearRotation(Transform* t)
+void Transform_ClearRotation(Transform* t)
 {
 	M3x3_SetToIdentity(t->rotation.cells);
 }
@@ -76,7 +76,7 @@ inline void Transform_ClearRotation(Transform* t)
 /////////////////////////////////////////////////////////////////////
 // Scale
 /////////////////////////////////////////////////////////////////////
-inline void Transform_SetScale(Transform* t, f32 scaleX, f32 scaleY, f32 scaleZ)
+void Transform_SetScale(Transform* t, f32 scaleX, f32 scaleY, f32 scaleZ)
 {
 	t->scale.x = scaleX;
 	t->scale.y = scaleY;
@@ -86,7 +86,7 @@ inline void Transform_SetScale(Transform* t, f32 scaleX, f32 scaleY, f32 scaleZ)
 /////////////////////////////////////////////////////////////////////
 // Conversion
 /////////////////////////////////////////////////////////////////////
-inline void Transform_ToM4x4(Transform* t, M4x4* result)
+void Transform_ToM4x4(Transform* t, M4x4* result)
 {
     M4x4_SetToIdentity(result->cells);
     result->x0 = t->rotation.x0;
@@ -113,7 +113,7 @@ inline void Transform_ToM4x4(Transform* t, M4x4* result)
 /*
 DOES NOT AFFECT SCALE!
 */
-inline void Transform_FromM4x4(Transform* t, M4x4* source)
+void Transform_FromM4x4(Transform* t, M4x4* source)
 {
     t->pos.x = source->w0;
     t->pos.y = source->w1;
@@ -121,17 +121,17 @@ inline void Transform_FromM4x4(Transform* t, M4x4* source)
     M3x3_CopyFromM4x4(t->rotation.cells, source->cells);
 }
 
-inline Vec3 Transform_GetEulerAnglesDegrees(Transform* t)
+Vec3 Transform_GetEulerAnglesDegrees(Transform* t)
 {
     return M3x3_GetEulerAnglesDegrees(t->rotation.cells);
 }
 
-inline Vec3 Transform_GetEulerAngles(Transform* t)
+Vec3 Transform_GetEulerAngles(Transform* t)
 {
     return M3x3_GetEulerAnglesRadians(t->rotation.cells);
 }
 
-inline void Transform_SetByPosAndDegrees(Transform* t, Vec3* pos, Vec3* degrees)
+void Transform_SetByPosAndDegrees(Transform* t, Vec3* pos, Vec3* degrees)
 {
     Transform_ClearRotation(t);
 	Transform_RotateZ(t, degrees->z * DEG2RAD);

@@ -99,7 +99,7 @@ struct InputEvent
     i32 value = 0;
 };
 
-inline InputEvent NewInputEvent(u32 inputID, i32 value)
+InputEvent NewInputEvent(u32 inputID, i32 value)
 {
     InputEvent ev;
     ev.inputID = inputID;

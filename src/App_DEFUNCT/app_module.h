@@ -80,7 +80,7 @@ i32                 AppGetTextureIndexByName(char* textureName);
 MeshData            Assets_GetMeshDataByName(char* name);
 
 i32                 App_GetVarAsI32(char* name);
-inline Var*         App_GetVar(char* name);
+Var*         App_GetVar(char* name);
 
 internal void       Debug_AddVerboseFrames(i32 count);
 
@@ -153,7 +153,7 @@ internal void       AppListTextures();
 #define NETMODE_DEDICATED_SERVER 4
 #define NETMODE_REPLAY 5
 
-inline u8 IsRunningClient(u8 netMode)
+u8 IsRunningClient(u8 netMode)
 {
     if (netMode == NETMODE_NONE) { return 0; }
     return (
@@ -164,7 +164,7 @@ inline u8 IsRunningClient(u8 netMode)
     );
 }
 
-inline u8 IsRunningServer(u8 netMode)
+u8 IsRunningServer(u8 netMode)
 {
     if (netMode == NETMODE_NONE) { return 0; }
     return (
@@ -174,7 +174,7 @@ inline u8 IsRunningServer(u8 netMode)
     );
 }
 
-inline u8 IsConnectionOpen(u8 netMode)
+u8 IsConnectionOpen(u8 netMode)
 {
     if (netMode == NETMODE_NONE) { return 0; }
     return (

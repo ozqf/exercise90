@@ -32,23 +32,23 @@ struct CmdHeader
 	u16 size;
     
     public:
-    inline u8 GetType() { return (u8)type; }
-    inline void SetType(u8 newType) { this->type = newType; }
-    inline u16 GetSize() { return (u16)size; }
-    inline void SetSize(u16 newSize) { this->size = newSize; }
-    inline void Set(u8 newType, u16 newSize)
+    u8 GetType() { return (u8)type; }
+    void SetType(u8 newType) { this->type = newType; }
+    u16 GetSize() { return (u16)size; }
+    void SetSize(u16 newSize) { this->size = newSize; }
+    void Set(u8 newType, u16 newSize)
     {
         type = newType;
         size = newSize;
     }
 
     
-    inline u16 Read(u8* ptr)
+    u16 Read(u8* ptr)
     {
         return (u16)COM_CopyMemory(ptr, (u8*)this, sizeof(CmdHeader));
     }
 
-    inline u16 Write(u8* ptr)
+    u16 Write(u8* ptr)
     {
         return (u16)COM_CopyMemory((u8*)this, ptr, sizeof(CmdHeader));
     }
@@ -64,17 +64,17 @@ struct CmdHeader_ProtocolZero
     u32 data1;
     u32 data2;
     
-    inline u8 GetType() { return (u8)data1; }
-    inline void SetType(u8 newType) { this->data1 = newType; }
-    inline u16 GetSize() { return (u16)data2; }
-    inline void SetSize(u16 newSize) { this->data2 = newSize; }
+    u8 GetType() { return (u8)data1; }
+    void SetType(u8 newType) { this->data1 = newType; }
+    u16 GetSize() { return (u16)data2; }
+    void SetSize(u16 newSize) { this->data2 = newSize; }
 
-    inline u16 Read(u8* ptr)
+    u16 Read(u8* ptr)
     {
         return (u16)COM_CopyMemory(ptr, (u8*)this, sizeof(CmdHeader_ProtocolZero));
     }
 
-    inline u16 Write(u8* ptr)
+    u16 Write(u8* ptr)
     {
         return (u16)COM_CopyMemory((u8*)this, ptr, sizeof(CmdHeader_ProtocolZero));
     }

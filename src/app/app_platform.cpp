@@ -19,7 +19,7 @@ internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 /***************************************
 * Private
 ***************************************/
-inline internal f32 App_GetSimFrameInterval()
+internal f32 App_GetSimFrameInterval()
 {
     return (1.0f / g_simFrameRate);
 }

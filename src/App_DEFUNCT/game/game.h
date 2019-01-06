@@ -61,7 +61,7 @@ void Game_BuildTestScene(GameScene* gs, i32 sceneIndex);
 void Game_CreateClientInput(InputActionSet* actions, ActorInput* input);
 Ent* Game_GetLocalClientEnt(ClientList* clients, EntList* ents);
 void Game_SpawnLocalEntity(f32 x, f32 y, f32 z, Vec3 *dir, f32 power, i32 type);
-inline Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ);
+Vec3 Game_RandomSpawnOffset(f32 rangeX, f32 rangeY, f32 rangeZ);
 i32 Game_ReadCommandBuffer(GameSession* session, GameScene* gs, ByteBuffer* commands, u8 verbose);
 void Game_Init();
 void Game_InitDebugStr();

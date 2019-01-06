@@ -131,7 +131,7 @@ global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
 global_variable i32 g_textCommandBufferPosition = 0;
 
 
-inline void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
+void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
 {
     u32 used = b->ptrWrite - b->ptrStart;
     u32 space = b->capacity - used;

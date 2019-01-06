@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.cpp"
+#include "../common/com_module.h"
 
 union HeaderTest
 {

@@ -49,7 +49,7 @@ union FourBytes_U
 	i16 int16s[2];
 	u16 uInt16s[2];
 
-    inline i32 GetI24()
+    i32 GetI24()
     {
         return asI32 & TWENTY_FOUR_BIT_MASK;
     }

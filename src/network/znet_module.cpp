@@ -2,6 +2,7 @@
 #define ZNET_MODULE_CPP
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctime>
 
 //////////////////////////////////////////////////////////////
@@ -112,22 +113,22 @@ struct ZNetPacketHeader
     u32 protocol;
     i32 dataChecksum;
 
-    inline void Read(u8** ptr)
+    void Read(u8** ptr)
     {
         *ptr += COM_COPY(*ptr, this, sizeof(ZNetPacketHeader));
     }
     
-    inline i32 Read(u8* ptr)
+    i32 Read(u8* ptr)
     {
         return COM_COPY(ptr, this, sizeof(ZNetPacketHeader));
     }
 
-    inline void Write(u8** ptr)
+    void Write(u8** ptr)
     {
         *ptr += COM_COPY(this, *ptr, sizeof(ZNetPacketHeader));
     }
 
-    inline i32 Write(u8* ptr)
+    i32 Write(u8* ptr)
     {
         return COM_COPY(this, ptr, sizeof(ZNetPacketHeader));
     }
@@ -260,11 +261,11 @@ internal i32 ZNet_CreateSalt()
 }
 
 // if anything is async in future this will pull a free buffer from a list
-internal inline ByteBuffer ZNet_GetDataWriteBuffer()
+internal ByteBuffer ZNet_GetDataWriteBuffer()
 {
 	return Buf_FromBytes(g_dataWriteBuffer, ZNET_MAX_UDP_PACKET_SIZE);
 }
-internal inline ByteBuffer ZNet_GetPacketWriteBuffer()
+internal ByteBuffer ZNet_GetPacketWriteBuffer()
 {
 	return Buf_FromBytes(g_packetWriteBuffer, ZNET_MAX_UDP_PACKET_SIZE);
 }

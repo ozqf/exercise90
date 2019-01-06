@@ -41,7 +41,9 @@ MACROS
 #define global_variable static
 
 //#define com_internal static
+#ifndef com_internal
 #define com_internal
+#endif
 
 // Quick cross platform assert. Read from address zero if expression is false
 // TODO: Message box assert with a print of __FILE__, __LINE__ and __TIME__ possible?

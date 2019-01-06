@@ -5,7 +5,7 @@
 #if 0
 // Execute a raycast and write a results object + hits array to a byte buffer
 // Return bytes written
-inline i32 Phys_ExecRaycast_CmdBased(ZBulletWorld *world, PhysCmd_Raycast* cmd, u8* buf, u32 bufferCapacity)
+i32 Phys_ExecRaycast_CmdBased(ZBulletWorld *world, PhysCmd_Raycast* cmd, u8* buf, u32 bufferCapacity)
 {
     // prepare buffer header. cannot write it until the end when results are know.
     // record write pos and step, write later
@@ -65,7 +65,7 @@ inline i32 Phys_ExecRaycast_CmdBased(ZBulletWorld *world, PhysCmd_Raycast* cmd, 
 #endif
 
 // Return number of hits
-inline i32 Phys_QuickRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
+i32 Phys_QuickRaycast(ZBulletWorld *world, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
 {
     btVector3 start(cmd->start[0], cmd->start[1], cmd->start[2]);
     btVector3 end(cmd->end[0], cmd->end[1], cmd->end[2]);
@@ -131,7 +131,7 @@ i32 PhysCmd_RayTest(
 
 #define GROUND_CHECK_EPSILON 0.2f
 
-inline u8 PhysCmd_GroundTest(
+u8 PhysCmd_GroundTest(
     ZBulletWorld *world,
     f32 x0, f32 y0, f32 z0,
     f32 halfHeight,

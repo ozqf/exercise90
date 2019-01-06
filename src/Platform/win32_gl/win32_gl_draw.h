@@ -13,7 +13,7 @@ void R_SetupTestTexture(i32 textureIndex)
 
 }
 
-inline void R_SetupLights(RenderSceneSettings* settings, Transform* model)
+void R_SetupLights(RenderSceneSettings* settings, Transform* model)
 {
 	GLfloat pos[4];
 	GLfloat intensity[4];

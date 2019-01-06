@@ -39,9 +39,9 @@ void	EC_RemoveFoo		(Ent*)
 
 #define DEFINE_ENT_COMPONENT_BASE(type, typeCamelCase, typeFlagDefine) \
 \
-static inline u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
+static u32 Ent_Has##type##(Ent* ent) { return (u32)(ent->componentBits & typeFlagDefine); } \
 \
-static inline EC_##type* EC_Add##type##(GameScene* gs, Ent* ent) \
+static EC_##type* EC_Add##type##(GameScene* gs, Ent* ent) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -59,13 +59,13 @@ static inline EC_##type* EC_Add##type##(GameScene* gs, Ent* ent) \
     return NULL; \
 }; \
 \
-static inline void EC_Set##type##Inactive(EC_##type##* comp, u8 isInActive) \
+static void EC_Set##type##Inactive(EC_##type##* comp, u8 isInActive) \
 { \
 	if (isInActive) { comp->state.flags |= EC_STATE_FLAG_INACTIVE; } \
 	else { comp->state.flags &= ~EC_STATE_FLAG_INACTIVE; } \
 } \
 \
-static inline EC_##type* EC_Find##type##(GameScene* gs, Ent* ent) \
+static EC_##type* EC_Find##type##(GameScene* gs, Ent* ent) \
 { \
     if (!Ent_Has##type##(ent)) { return 0; } \
     EC_##type* comp; \
@@ -79,7 +79,7 @@ static inline EC_##type* EC_Find##type##(GameScene* gs, Ent* ent) \
     } \
     return 0; \
 } \
-static inline EC_##type* EC_Find##type##(GameScene* gs, EntId* id) \
+static EC_##type* EC_Find##type##(GameScene* gs, EntId* id) \
 { \
     EC_##type* comp; \
     for (u32 i = 0; i < gs->##typeCamelCase##List.count; ++i) \
@@ -94,7 +94,7 @@ static inline EC_##type* EC_Find##type##(GameScene* gs, EntId* id) \
 } \
 \
 \
-static inline void EC_Remove##type##(GameScene* gs, Ent* ent) \
+static void EC_Remove##type##(GameScene* gs, Ent* ent) \
 { \
     EC_##type* comp = EC_Find##type##(gs, ent); \
     if (comp == 0) { return; } \

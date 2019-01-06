@@ -32,7 +32,7 @@ global_variable Heap g_heap;
 // Input
 global_variable ZMouseMode g_mouseMode;
 global_variable GameTime g_time = {};
-inline GameTime* GetAppTime() { return &g_time; }
+GameTime* GetAppTime() { return &g_time; }
 
 // Assets
 global_variable TextureHandles g_textureHandles;

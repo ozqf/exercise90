@@ -3,7 +3,7 @@
 #include "game.h"
 
 // true if a 'tock' was triggered
-inline u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)
+u8 Game_TockThinker(EC_Thinker* thinker, f32 deltaTime)
 {
     #if 1
     if (thinker->state.ticker.tick <= 0)

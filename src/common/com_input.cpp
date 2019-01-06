@@ -30,7 +30,7 @@ internal void Input_InitAction(InputActionSet* actions, u32 keyCode, char* label
 }
 
 // Find an action... duh
-internal inline InputAction* Input_FindAction(InputAction* actions, i32 numActions, char* name)
+internal InputAction* Input_FindAction(InputAction* actions, i32 numActions, char* name)
 {
     for (i32 i = 0; i < numActions; ++i)
     {
@@ -43,14 +43,14 @@ internal inline InputAction* Input_FindAction(InputAction* actions, i32 numActio
     return NULL;
 }
 
-internal inline i32 Input_GetActionValue(InputAction* actions, i32 numActions, char* actionName)
+internal i32 Input_GetActionValue(InputAction* actions, i32 numActions, char* actionName)
 {
     InputAction* action = Input_FindAction(actions, numActions, actionName);
     Assert(action != NULL);
     return action->value;
 }
 
-internal inline i32 Input_GetActionValue(InputActionSet* actions, char* actionName)
+internal i32 Input_GetActionValue(InputActionSet* actions, char* actionName)
 {
     return Input_GetActionValue(actions->actions, actions->count, actionName);
 }

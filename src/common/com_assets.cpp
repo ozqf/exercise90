@@ -14,9 +14,9 @@ Very basic meshes/textures embedded in source
 #include "com_assets/primitive_octahedron.h"
 #include "com_assets/primitive_spike.h"
 
-com_internal inline void SharedAssets_Init() {}
+com_internal void SharedAssets_Init() {}
 
-com_internal inline MeshData* COM_GetCubeMesh()
+com_internal MeshData* COM_GetCubeMesh()
 {
     return &g_meshCube;
 }

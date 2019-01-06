@@ -8,7 +8,7 @@ holding game/menu state and calling game update when required
 
 void App_SwapGameCommandBuffers();
 
-inline Var* App_GetVar(char* name)
+Var* App_GetVar(char* name)
 {
     return COM_GetVar(g_vars, g_nextVar, name);
 }

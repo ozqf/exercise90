@@ -1,7 +1,7 @@
 #ifndef ZNET_INTERFACE_H
 #define ZNET_INTERFACE_H
 
-#include "../common/com_module.cpp"
+#include "../common/com_module.h"
 
 // TODO: Also in game.h at the moment, move this to a single location!
 

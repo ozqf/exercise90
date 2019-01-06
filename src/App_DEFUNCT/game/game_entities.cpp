@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-inline void Ent_Reset(Ent* ent)
+void Ent_Reset(Ent* ent)
 {
     ent->factoryType = 0;
     ent->componentBits = 0;
@@ -74,12 +74,12 @@ void Ent_ClearComponents(GameScene* gs, Ent* ent)
     EC_RemoveMultiRendObj(gs, ent);
 }
 
-inline void Ent_MarkForFree(Ent* ent)
+void Ent_MarkForFree(Ent* ent)
 {
     ent->inUse = ENTITY_STATUS_DEAD;
 }
 
-inline void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
+void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
 {
     Ent_MarkForFree(ent);
     Cmd_RemoveEntity cmd = {};
@@ -101,7 +101,7 @@ inline void Ent_WriteRemoveCmd(Ent* ent, f32* gfxNormalVec3, u8 verbose)
     APP_WRITE_CMD(0, cmd);
 }
 
-inline void Ent_Free(GameScene* gs, Ent* ent)
+void Ent_Free(GameScene* gs, Ent* ent)
 {
     Ent_ClearComponents(gs, ent);
 	ent->entId.iteration += 1;
@@ -118,7 +118,7 @@ inline void Ent_Free(GameScene* gs, Ent* ent)
  * Retrieve a free or reserved entity and mark it as ready for use
  * Do NOT call for an entity that is in use or it will error
 */
-inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
+Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 {
 	Ent* ent = &ents->items[queryId->index];
 	if (ent->inUse != ENTITY_STATUS_IN_USE)
@@ -139,7 +139,7 @@ inline Ent* Ent_GetAndAssign(EntList* ents, EntId* queryId)
 }
 
 // Will NOT return entities that are free or merely reserved. Only ones that are active
-inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
+Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)
     Ent* ent = &ents->items[id->index];
@@ -153,19 +153,19 @@ inline Ent* Ent_GetEntityById(EntList* ents, EntId* id)
 	}
 }
 
-inline Ent* Ent_GetEntityByIdValue(EntList* ents, u32 entIdValue)
+Ent* Ent_GetEntityByIdValue(EntList* ents, u32 entIdValue)
 {
     EntId id {};
     id.value = entIdValue;
     return Ent_GetEntityById(ents, &id);
 }
 
-inline Ent* Ent_GetEntityById(GameScene* gs, EntId* id)
+Ent* Ent_GetEntityById(GameScene* gs, EntId* id)
 {
     return Ent_GetEntityById(&gs->entList, id);
 }
 
-inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
+Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
 {
     Assert(id->index < ents->max)
     Ent* ent = &ents->items[id->index];
@@ -176,7 +176,7 @@ inline Ent* Ent_GetEntityToRemoveById(EntList* ents, EntId* id)
     return ent;
 }
 
-inline Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)
+Ent* Ent_GetEntityByTag(EntList* ents, i32 tag)
 {
     if (tag == 0) { return NULL; }
     for (u32 i = 0; i < ents->max; ++i)

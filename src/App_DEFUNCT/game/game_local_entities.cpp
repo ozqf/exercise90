@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-inline void LocalEnt_Reset(LocalEnt *e)
+void LocalEnt_Reset(LocalEnt *e)
 {
 	//printf("Reset local ent %d\n", e->id);
     if (e->flags & LOCAL_ENT_FLAG_PHYSICS)
@@ -13,7 +13,7 @@ inline void LocalEnt_Reset(LocalEnt *e)
     e->scale = {1, 1, 1};
 }
 
-inline void Game_ResetLocalEntities()
+void Game_ResetLocalEntities()
 {
     for (i32 i = 0; i < GAME_MAX_LOCAL_ENTITIES; ++i)
     {
@@ -21,7 +21,7 @@ inline void Game_ResetLocalEntities()
     }
 }
 
-inline LocalEnt* Game_GetLocalEntByIndex(u32 index)
+LocalEnt* Game_GetLocalEntByIndex(u32 index)
 {
     APP_ASSERT((index < GAME_MAX_LOCAL_ENTITIES), "local ent index out of bounds");
     LocalEnt* e = &g_localEntities[index];
@@ -29,7 +29,7 @@ inline LocalEnt* Game_GetLocalEntByIndex(u32 index)
     return e;
 }
 
-inline LocalEnt *Game_GetFreeLocalEntitiy()
+LocalEnt *Game_GetFreeLocalEntitiy()
 {
     for (i32 i = 0; i < GAME_MAX_LOCAL_ENTITIES; ++i)
     {

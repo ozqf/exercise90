@@ -150,13 +150,13 @@ CommandDescription* Test_GetCmdDescription(i32 type)
 	return NULL;
 }
 
-inline void FileSeg_Add(FileSegment* f, u32 fileSize)
+void FileSeg_Add(FileSegment* f, u32 fileSize)
 {
 	f->count++;
 	f->size += fileSize;
 };
 
-inline void WriteCommandHeader(FILE* f, u8 type, u16 size)
+void WriteCommandHeader(FILE* f, u8 type, u16 size)
 {
 	CmdHeader h;
 	h.SetType(type);
@@ -164,7 +164,7 @@ inline void WriteCommandHeader(FILE* f, u8 type, u16 size)
 	fwrite(&h, sizeof(CmdHeader), 1, f);
 }
 
-inline void FileSeg_PrintDebug(char* label, FileSegment* f)
+void FileSeg_PrintDebug(char* label, FileSegment* f)
 {
 	printf("%s - Count: %d, Offset: %d, Size: %d\n",
 		label,
@@ -174,7 +174,7 @@ inline void FileSeg_PrintDebug(char* label, FileSegment* f)
 	);
 }
 
-inline void DebugStateHeader(StateSaveHeader* h)
+void DebugStateHeader(StateSaveHeader* h)
 {
 	printf("Command Protocol %d\nSettings: %d, %d, %d, %d\nBase File: %s\n",
 		h->protocol,

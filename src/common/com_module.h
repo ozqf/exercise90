@@ -19,6 +19,9 @@
 #include "com_assets.h"
 #include "com_parse.h"
 #include "com_variables.h"
+#include "com_text_command_buffer.h"
+#include "com_debug.h"
+
 /*
 #include "com_input.cpp"
 #include "com_text_command_buffer.h"

@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-inline void Game_AddPowerUpOverlayMesh(
+void Game_AddPowerUpOverlayMesh(
     RenderScene* scene,
     Transform* baseT,
     Transform* headT,

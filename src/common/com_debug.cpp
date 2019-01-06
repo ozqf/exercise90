@@ -2,7 +2,7 @@
 
 #include "com_module.h"
 
-inline void COM_PrintBits(i32 val, u8 printNewLine)
+void COM_PrintBits(i32 val, u8 printNewLine)
 {
     for (i32 i = 31; i >= 0; --i)
     {
@@ -15,7 +15,7 @@ inline void COM_PrintBits(i32 val, u8 printNewLine)
     }
 }
 
-inline void COM_PrintBytes(u8* bytes, i32 numBytes, i32 bytesPerRow)
+void COM_PrintBytes(u8* bytes, i32 numBytes, i32 bytesPerRow)
 {
     u8* read = bytes;
     if (bytesPerRow <= 0)
@@ -36,7 +36,7 @@ inline void COM_PrintBytes(u8* bytes, i32 numBytes, i32 bytesPerRow)
     printf("\n");
 }
 
-inline void COM_PrintBytesHex(u8* bytes, u16 numBytes, i32 bytesPerRow)
+void COM_PrintBytesHex(u8* bytes, u16 numBytes, i32 bytesPerRow)
 {
     u8* read = bytes;
     if (bytesPerRow <= 0)

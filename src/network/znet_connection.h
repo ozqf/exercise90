@@ -2,7 +2,7 @@
 
 #include "znet_module.cpp"
 
-internal inline ZNetConnectionInfo ZNet_CreateConnInfo(ZNetConnection* conn)
+internal ZNetConnectionInfo ZNet_CreateConnInfo(ZNetConnection* conn)
 {
     ZNetConnectionInfo info;
     info.address = conn->remoteAddress;
