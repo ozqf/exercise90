@@ -4,5 +4,7 @@
 
 #include "sim_types.h"
 
-i32 Sim_AddEntity();
-void Sim_GetEntityList(Sim_Entity** ptr, i32* max);
+void Sim_GetEntityList(SimEntity** ptr, i32* max);
+void Sim_InitScene(SimScene* scene);
+void Sim_AddEntBlock(SimScene* scene, SimEntBlock block);
+SimEntId Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z);

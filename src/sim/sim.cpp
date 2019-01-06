@@ -2,46 +2,93 @@
 
 #include "sim.h"
 
-#define SIM_MAX_ENTITIES 2048
-
-internal i32 g_nextEntityId = 1;
-internal Sim_Entity g_entities[SIM_MAX_ENTITIES];
-
-internal Sim_Entity* Sim_GetFreeEntity()
+////////////////////////////////////////////////////////////////////
+// Entity assignment
+////////////////////////////////////////////////////////////////////
+internal i32 Sim_FindFreeSlot(SimEntBlock* block)
 {
-    for (i32 i = 0; i < SIM_MAX_ENTITIES; ++i)
+    for (i32 i = 0; i < block->capacity; ++i)
     {
-        Sim_Entity* ent = &g_entities[i];
-        if (ent->status == SIM_ENT_STATUS_FREE)
-        {
-            ent->status = SIM_ENT_STATUS_IN_USE;
-            ent->id = g_nextEntityId++;
-            return ent;
-        }
+        SimEntity* ent = &block->ents[i];
+        if (ent->status != SIM_ENT_STATUS_FREE) { continue; }
+        return i;
     }
-    ILLEGAL_CODE_PATH
-    return NULL;
+    return -1;
 }
 
-i32 Sim_AddEntity()
+internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
 {
-    Sim_Entity* ent = Sim_GetFreeEntity();
+    SimEntBlock* block = NULL;
+    i32 slotIndex = -1;
 
-    f32 randX = (COM_STDRandf32() * 2) - 1;
-    f32 randY = (COM_STDRandf32() * 2) - 1;
-    ent->t.pos.x = 2 * randX;
-    ent->t.pos.y = 2 * randY;
-    printf("SIM Added entity at %.3f, %.3f\n", ent->t.pos.x, ent->t.pos.y);
+    for (i32 blockIndex = 0; blockIndex < scene->numBlocks; ++blockIndex)
+    {
+        block = &scene->blocks[blockIndex];
+        slotIndex = Sim_FindFreeSlot(block);
+        if (slotIndex != -1) { break; }
+    }
+    if (slotIndex == -1)
+    {
+        printf("Failed to find free entity slot in %d blocks\n", scene->numBlocks);
+		ILLEGAL_CODE_PATH
+		return NULL;
+    }
+
+    i32 entityIndex = (scene->blockSize * block->index) + slotIndex;
+    SimEntity* ent = &block->ents[slotIndex];
+    ent->status = SIM_ENT_STATUS_IN_USE;
+    ent->id.slot.index = (u16)entityIndex;
+	ent->id.sequence = scene->nextEntId++;
+    printf("SIM Assigning entity id %d/%d seq %d\n",
+        ent->id.slot.iteration, ent->id.slot.index, ent->id.sequence);
+	return ent;
+}
+
+SimEntId Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
+{
+    SimEntity* ent = Sim_GetFreeEntity(scene);
+    ent->t.pos.x = x;
+    ent->t.pos.y = y;
+    ent->t.pos.z = z;
+    printf("SIM Added entity %d at %.3f, %.3f\n",
+        ent->id.sequence, ent->t.pos.x, ent->t.pos.y);
     return ent->id;
 }
 
-void Sim_GetEntityList(Sim_Entity** ptr, i32* max)
+void Sim_AddEntBlock(SimScene* scene, SimEntBlock block)
 {
-    *ptr = g_entities;
-    *max = SIM_MAX_ENTITIES;
+    Assert(scene->blockSize == block.capacity)
+
+    i32 i = scene->numBlocks;
+    i32 last = scene->maxBlocks - 1; 
+    if (i >= last)
+    {
+        ILLEGAL_CODE_PATH
+        return;
+    }
+    scene->blocks[i] = block;
+    scene->blocks[i].index = scene->numBlocks;
+    scene->numBlocks++;
+    for (i32 j = 0; j < block.capacity; ++j)
+    {
+        SimEntity* ent = &block.ents[j];
+        *ent = {};
+        ent->id.slot.iteration = 1;
+    }
+    printf("SIM new block added - now at %d blocks\n", scene->numBlocks);
 }
 
-void Sim_Tick(f32 deltaTime)
+////////////////////////////////////////////////////////////////////
+// Lifetime
+////////////////////////////////////////////////////////////////////
+void Sim_InitScene(SimScene* scene)
+{
+    *scene = {};
+    scene->maxBlocks = SIM_ENT_MAX_BLOCKS;
+    scene->blockSize = SIM_ENT_BLOCK_SIZE;
+}
+
+void Sim_Tick(SimScene* scene, f32 deltaTime)
 {
     
 }

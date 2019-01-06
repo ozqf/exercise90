@@ -6,6 +6,8 @@
 #include "../sim/sim.h"
 #include "app_textures.h"
 
+#include "stdlib.h"
+
 internal PlatformInterface g_platform = {};
 internal i32 g_simFrameRate = 10;
 internal f32 g_simFrameAcculator = 0;
@@ -15,6 +17,8 @@ internal Heap g_heap;
 #define MAX_WORLD_SCENE_ITEMS 2048
 internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
+
+internal SimScene g_sim;
 
 /***************************************
 * Private
@@ -27,6 +31,66 @@ internal f32 App_GetSimFrameInterval()
 internal void App_RunSimFrame(f32 deltaTime)
 {
 
+}
+
+internal SimEntBlock App_MallocSimBlock(i32 capacity)
+{
+    SimEntBlock block = {};
+    void* ptr = malloc((sizeof(SimEntity)) * capacity);
+    block.ents = (SimEntity*)ptr;
+    block.capacity = capacity;
+    return block;
+}
+
+internal void App_BuildTestScene(SimScene* sim)
+{
+    Sim_InitScene(sim);
+    i32 numBlocks = 8;
+    while (numBlocks-- > 0)
+    {
+        SimEntBlock block = App_MallocSimBlock(sim->blockSize);
+        Sim_AddEntBlock(sim, block);
+    }
+    
+    for (i32 i = 0; i < 10; ++i)
+    {
+        f32 randX = (COM_STDRandf32() * 2) - 1;
+        f32 randY = (COM_STDRandf32() * 2) - 1;
+        f32 x = 2 * randX;
+        f32 y = 2 * randY;
+        Sim_AddEntity(sim, x, y, 0);
+    }
+    
+}
+
+internal void App_SetupEntityForRender(RenderScene* rScene, SimEntity* ent)
+{
+    Transform t;
+    Transform_SetToIdentity(&t);
+    RendObj obj = {};
+    MeshData* cube = COM_GetCubeMesh();
+    RendObj_SetAsMesh(
+        &obj, *cube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
+    
+    t.pos.x = ent->t.pos.x;
+    t.pos.y = ent->t.pos.y;
+    RScene_AddRenderItem(&g_worldScene, &t, &obj);
+}
+
+internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
+{
+    i32 numBlocks = sim->numBlocks;
+    for (i32 i = 0; i < numBlocks; ++i)
+    {
+        SimEntBlock* block = &sim->blocks[i];
+        for (i32 j = 0; j < block->capacity; ++j)
+        {
+            SimEntity* ent = &block->ents[j];
+            if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+
+            App_SetupEntityForRender(rend, ent);
+        }
+    }
 }
 
 /***************************************
@@ -78,12 +142,9 @@ internal i32  App_Init()
     //RendObj_SetAsMesh(&obj, g_meshCube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
     //RScene_AddRenderItem(&g_worldScene, &t, &obj);
 
-    // create test scene
-    for (i32 i = 0; i < 10; ++i)
-    {
-        Sim_AddEntity();
-    }
-    
+    App_BuildTestScene(&g_sim);
+    // create test sim
+
     return COM_ERROR_NONE;
 }
 
@@ -126,6 +187,9 @@ internal void App_Update(PlatformTime* time)
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
     g_worldScene.numObjects = 0;
+    App_AddSimEntitiesForRender(&g_worldScene, &g_sim);
+    #if 0
+    g_worldScene.numObjects = 0;
     Sim_Entity* ents;
     i32 maxEnts;
     Sim_GetEntityList(&ents, &maxEnts);
@@ -145,7 +209,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
         t.pos.y = ent->t.pos.y;
         RScene_AddRenderItem(&g_worldScene, &t, &obj);
     }
-
+    #endif
     g_platform.Platform_RenderScene(&g_worldScene);
 }
 
