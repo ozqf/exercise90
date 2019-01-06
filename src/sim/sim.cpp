@@ -1,6 +1,18 @@
 #pragma once
 
 #include "sim.h"
+#include "sim_internal_types.h"
+
+////////////////////////////////////////////////////////////////////
+// Command management
+////////////////////////////////////////////////////////////////////
+internal i32 Sim_EnqueueCommand(SimScene* sim, SimCmd* cmd)
+{
+    Assert(cmd)
+    Assert(cmd->type != 0)
+    Assert(cmd->size > 0)
+    return COM_ERROR_NONE;
+}
 
 ////////////////////////////////////////////////////////////////////
 // Entity assignment
@@ -16,7 +28,7 @@ internal i32 Sim_FindFreeSlot(SimEntBlock* block)
     return -1;
 }
 
-internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
+internal SimEntId Sim_ReserveFreeEntity(SimScene* scene)
 {
     SimEntBlock* block = NULL;
     i32 slotIndex = -1;
@@ -31,28 +43,35 @@ internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
     {
         printf("Failed to find free entity slot in %d blocks\n", scene->numBlocks);
 		ILLEGAL_CODE_PATH
-		return NULL;
+		return {};
     }
 
     i32 entityIndex = (scene->blockSize * block->index) + slotIndex;
     SimEntity* ent = &block->ents[slotIndex];
-    ent->status = SIM_ENT_STATUS_IN_USE;
+    ent->status = SIM_ENT_STATUS_RESERVED;
     ent->id.slot.index = (u16)entityIndex;
-	ent->id.sequence = scene->nextEntId++;
+	ent->id.sequence = scene->entSequence++;
     printf("SIM Assigning entity id %d/%d seq %d\n",
         ent->id.slot.iteration, ent->id.slot.index, ent->id.sequence);
-	return ent;
+	return ent->id;
 }
 
 SimEntId Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
 {
-    SimEntity* ent = Sim_GetFreeEntity(scene);
-    ent->t.pos.x = x;
-    ent->t.pos.y = y;
-    ent->t.pos.z = z;
-    printf("SIM Added entity %d at %.3f, %.3f\n",
-        ent->id.sequence, ent->t.pos.x, ent->t.pos.y);
-    return ent->id;
+    SimEntId id = Sim_ReserveFreeEntity(scene);
+
+    //SimEntity* ent = Sim_GetFreeEntity(scene);
+    //ent->t.pos.x = x;
+    //ent->t.pos.y = y;
+    //ent->t.pos.z = z;
+    //printf("SIM Added entity %d at %.3f, %.3f\n",
+    //    ent->id.sequence, ent->t.pos.x, ent->t.pos.y);
+
+    SimCmdAddEntity cmd = {};
+    Sim_PrepareCommand(scene, &cmd.header);
+    Sim_SetAddEntityCmd(&cmd, id, x, y, z);
+    Sim_EnqueueCommand(scene, (SimCmd*)&cmd);
+    return id;
 }
 
 void Sim_AddEntBlock(SimScene* scene, SimEntBlock block)
@@ -81,14 +100,21 @@ void Sim_AddEntBlock(SimScene* scene, SimEntBlock block)
 ////////////////////////////////////////////////////////////////////
 // Lifetime
 ////////////////////////////////////////////////////////////////////
-void Sim_InitScene(SimScene* scene)
+void Sim_InitScene(
+    SimScene* scene, ByteBuffer cmdBufferA, ByteBuffer cmdBufferB)
 {
     *scene = {};
     scene->maxBlocks = SIM_ENT_MAX_BLOCKS;
     scene->blockSize = SIM_ENT_BLOCK_SIZE;
+    scene->commands = {};
+    scene->commands.swapped = 0;
+    scene->commands.a = cmdBufferA;
+    scene->commands.b = cmdBufferB;
+    Buf_Clear(&cmdBufferA);
+    Buf_Clear(&cmdBufferB);
 }
 
 void Sim_Tick(SimScene* scene, f32 deltaTime)
 {
-    
+    printf("SIM tick\n");
 }

@@ -21,6 +21,9 @@ Crucial changes:
         for feeding events in.
     * Monolithic entity struct. No complex ECS or other faff. Basic int to define types.
 
+#### Rebuild TODO
+
+* Simulation tick and input commands
 
 
 

@@ -51,7 +51,17 @@ struct SimScene
     i32 maxBlocks;
 
     // sequential, unrelated to blocks
-    i32 nextEntId;
+    i32 entSequence;
+    i32 cmdSequence;
+    u32 tick;
+
+    // Command buffers
+    DoubleByteBuffer commands;
 
     SimEntBlock blocks[SIM_ENT_MAX_BLOCKS];
 };
+
+
+////////////////////////////////////////////
+// 
+////////////////////////////////////////////

@@ -44,7 +44,11 @@ internal SimEntBlock App_MallocSimBlock(i32 capacity)
 
 internal void App_BuildTestScene(SimScene* sim)
 {
-    Sim_InitScene(sim);
+    i32 bufSize = MegaBytes(1);
+    ByteBuffer a = Buf_FromMalloc(malloc(bufSize), bufSize);
+    ByteBuffer b = Buf_FromMalloc(malloc(bufSize), bufSize);
+
+    Sim_InitScene(sim, a, b);
     i32 numBlocks = 8;
     while (numBlocks-- > 0)
     {

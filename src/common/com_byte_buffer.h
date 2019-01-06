@@ -20,6 +20,13 @@ struct ByteBuffer
     }
 };
 
+struct DoubleByteBuffer
+{
+    i32 swapped;
+    ByteBuffer a;
+    ByteBuffer b;
+};
+
 extern "C" com_internal i32 Buf_BytesWritten(ByteBuffer* b);
 com_internal ByteBuffer Buf_FromBytes(u8* ptr, i32 numBytes);
 com_internal ByteBuffer Buf_FromMalloc(void* ptr, i32 size);
