@@ -64,14 +64,14 @@ internal void App_BuildTestScene(SimScene* sim)
     printf("APP Sim buf b alloced at 0X%X\n", (u32)b.ptrStart);
 
     Sim_InitScene(sim, a, b);
-    i32 numBlocks = 8;
+    i32 numBlocks = 1;
     while (numBlocks-- > 0)
     {
         SimEntBlock block = App_MallocSimBlock(sim->blockSize);
         Sim_AddEntBlock(sim, block);
     }
     
-    for (i32 i = 0; i < 1; ++i)
+    for (i32 i = 0; i < 8; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;
         f32 randY = (COM_STDRandf32() * 2) - 1;
@@ -99,6 +99,7 @@ internal void App_SetupEntityForRender(RenderScene* rScene, SimEntity* ent)
 internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
 {
     i32 numBlocks = sim->numBlocks;
+    i32 objects = 0;
     for (i32 i = 0; i < numBlocks; ++i)
     {
         SimEntBlock* block = &sim->blocks[i];
@@ -108,8 +109,10 @@ internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
             if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
 
             App_SetupEntityForRender(rend, ent);
+            objects++;
         }
     }
+    printf("Draw %d sim objects\n", objects);
 }
 
 /***************************************

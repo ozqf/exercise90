@@ -15,7 +15,7 @@ void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
     cmd->size = 0;
 }
 
-void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntId id, f32 x, f32 y, f32 z)
+void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, i32 id, f32 x, f32 y, f32 z)
 {
     SimCmd* h = (SimCmd*)cmd;
     h->type = SIM_CMD_TYPE_ADD_ENTITY;
@@ -24,7 +24,7 @@ void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntId id, f32 x, f32 y, f32 z)
     //cmd->header.type = SIM_CMD_TYPE_ADD_ENTITY;
     printf("Set Header type %d and size %d\n",
         cmd->header.type, cmd->header.size);
-    cmd->id = id;
+    cmd->serial = id;
     cmd->pos[0] = x;
     cmd->pos[1] = y;
     cmd->pos[2] = z;

@@ -26,7 +26,7 @@ struct SimEntId
 {
     // location in entity blocks
     SimEntIndex slot;
-    i32 sequence;
+    i32 serial;
 };
 
 struct SimEntity
