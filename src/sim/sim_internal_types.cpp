@@ -5,6 +5,7 @@
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
 {
+    cmd->sentinel = SIM_CMD_SENTINEL;
     cmd->sequence = scene->cmdSequence++;
     cmd->tick = scene->tick;
     // Set type and size to 0. These can only be known by the concrete
@@ -15,22 +16,12 @@ void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
     cmd->size = 0;
 }
 
-void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, i32 id, f32 x, f32 y, f32 z)
+//void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, i32 id, f32 x, f32 y, f32 z)
+void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntityDef* def)
 {
     SimCmd* h = (SimCmd*)cmd;
     h->type = SIM_CMD_TYPE_ADD_ENTITY;
     h->size = sizeof(SimCmdAddEntity);
-    //cmd->header.size = sizeof(SimCmdAddEntity);
-    //cmd->header.type = SIM_CMD_TYPE_ADD_ENTITY;
-    printf("Set Header type %d and size %d\n",
-        cmd->header.type, cmd->header.size);
-    cmd->serial = id;
-    cmd->pos[0] = x;
-    cmd->pos[1] = y;
-    cmd->pos[2] = z;
-    
-    printf("  Addresses header: 0X%X vs command: 0X%X\n",
-        (u32)&cmd->header, (u32)cmd
-    );
+    cmd->def = *def;
     Assert((u32)&cmd->header == (u32)cmd)
 }

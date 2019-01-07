@@ -20,3 +20,7 @@ com_internal MeshData* COM_GetCubeMesh()
 {
     return &g_meshCube;
 }
+com_internal MeshData* COM_GetInverseCubeMesh()
+{
+    return &g_meshInverseCube;
+}

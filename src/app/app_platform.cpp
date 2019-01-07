@@ -70,14 +70,17 @@ internal void App_BuildTestScene(SimScene* sim)
         SimEntBlock block = App_MallocSimBlock(sim->blockSize);
         Sim_AddEntBlock(sim, block);
     }
-    
+    SimEntityDef def = {};
     for (i32 i = 0; i < 8; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;
         f32 randY = (COM_STDRandf32() * 2) - 1;
         f32 x = 2 * randX;
         f32 y = 2 * randY;
-        Sim_AddEntity(sim, x, y, 0);
+        def.isLocal = 0;
+        def.pos[0] = x;
+        def.pos[1] = y;
+        Sim_AddEntity(sim, &def);
     }
     
 }
@@ -112,7 +115,7 @@ internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
             objects++;
         }
     }
-    printf("Draw %d sim objects\n", objects);
+    //printf("Draw %d sim objects\n", objects);
 }
 
 /***************************************

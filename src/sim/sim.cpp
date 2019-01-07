@@ -11,11 +11,12 @@ internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 	SimCmd* cmd = (SimCmd*)ptr;
 	//SimCmdAddEntity* addEnt = (SimCmdAddEntity*)ptr;
     Assert(cmd)
+    Assert(cmd->sentinel == SIM_CMD_SENTINEL)
     Assert(cmd->type != 0)
     Assert(cmd->size > 0)
 
     ByteBuffer* buf = sim->commands.GetWrite();
-	printf("SIM Writing command at 0X%X\n", (u32)buf->ptrWrite);
+	//printf("SIM Writing command at 0X%X\n", (u32)buf->ptrWrite);
 
 	// Via old macro... DOESN'T WORK
     //buf->ptrWrite += COM_COPY(&cmd, buf->ptrWrite, cmd->size);
@@ -26,7 +27,8 @@ internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 	// Via pointer assignment - works
 	//*(SimCmdAddEntity*)buf->ptrWrite = *addEnt;
 	//buf->ptrWrite += addEnt->header.size;
-    printf("SIM Enqueued type %d size %d. Wrote %d bytes of cmds\n", cmd->type, cmd->size, buf->Written());
+    //printf("SIM Enqueued type %d size %d. Wrote %d bytes of cmds\n",
+    //    cmd->type, cmd->size, buf->Written());
 
     return COM_ERROR_NONE;
 }
@@ -34,7 +36,8 @@ internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 ////////////////////////////////////////////////////////////////////
 // Entity assignment
 ////////////////////////////////////////////////////////////////////
-internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumber)
+internal SimEntity* Sim_FindEntityBySerialNumber(
+    SimScene* scene, i32 serialNumber)
 {
     for (i32 i = 0; i < scene->numBlocks; ++i)
     {
@@ -51,9 +54,9 @@ internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumb
     return NULL;
 }
 
-internal i32 Sim_ReserveEntSerialNumber(SimScene* scene)
+internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene)
 {
-    return scene->entSequence++;
+    return scene->remoteEntitySequence++;
 }
 
 internal i32 Sim_FindFreeSlotInBlock(SimEntBlock* block)
@@ -67,7 +70,7 @@ internal i32 Sim_FindFreeSlotInBlock(SimEntBlock* block)
     return -1;
 }
 
-internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
+internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
 {
     SimEntity* ent = NULL;
     i32 slotIndex = -1;
@@ -83,7 +86,28 @@ internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
         ent = &block->ents[slotIndex];
         ent->status = SIM_ENT_STATUS_IN_USE;
         ent->id.slot.index = (u16)entityIndex;
-	    ent->id.serial = scene->entSequence++;
+	    ent->id.serial = newSerial;
+    }
+    return ent;
+}
+
+internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
+{
+    SimEntity* ent = NULL;
+    i32 slotIndex = -1;
+    for (i32 blockIndex = 0; blockIndex < scene->numBlocks; ++blockIndex)
+    {
+        SimEntBlock* block = NULL;
+        block = &scene->blocks[blockIndex];
+        slotIndex = Sim_FindFreeSlotInBlock(block);
+        if (slotIndex <= -1 ) { continue; }
+
+        // config
+        i32 entityIndex = (scene->blockSize * block->index) + slotIndex;
+        ent = &block->ents[slotIndex];
+        ent->status = SIM_ENT_STATUS_IN_USE;
+        ent->id.slot.index = (u16)entityIndex;
+	    ent->id.serial = newSerial;
     }
     return ent;
 }
@@ -121,24 +145,33 @@ internal SimEntity* Sim_GetFreeEntity(SimScene* scene)
 	return ent->id;
 }*/
 
-i32 Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
+////////////////////////////////////////////////////////////////////
+// Public functions
+////////////////////////////////////////////////////////////////////
+i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
+//i32 Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
 {
     //SimEntId id = Sim_ReserveFreeEntity(scene);
-    i32 serial = Sim_ReserveEntSerialNumber(scene);
+    i32 serial = Sim_ReserveRemoteEntitySerial(scene);
 
     //SimEntity* ent = Sim_GetFreeEntity(scene);
     //ent->t.pos.x = x;
     //ent->t.pos.y = y;
     //ent->t.pos.z = z;
     printf("SIM Enqueue Add entity %d at %.3f, %.3f\n",
-        serial, x, y);
+        serial, def->pos[0], def->pos[1]);
 
     SimCmdAddEntity cmd = {};
     Sim_PrepareCommand(scene, (SimCmd*)&cmd);
-    Sim_SetAddEntityCmd(&cmd, serial, x, y, z);
-	u8* addr = (u8*)&cmd;
+    Sim_SetAddEntityCmd(&cmd, def);
+    u8* addr = (u8*)&cmd;
     Sim_EnqueueCommand(scene, addr);
     return serial;
+}
+
+i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
+{
+    return COM_ERROR_UNKNOWN;
 }
 
 void Sim_AddEntBlock(SimScene* scene, SimEntBlock block)
@@ -171,6 +204,8 @@ void Sim_InitScene(
     SimScene* scene, ByteBuffer cmdBufferA, ByteBuffer cmdBufferB)
 {
     *scene = {};
+    scene->remoteEntitySequence = SIM_REPLICATED_ENT_SERIAL_MIN;
+    scene->localEntitySequence = SIM_LOCAL_ENT_SERIAL_MIN;
     scene->maxBlocks = SIM_ENT_MAX_BLOCKS;
     scene->blockSize = SIM_ENT_BLOCK_SIZE;
     scene->commands = {};
@@ -219,13 +254,22 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
             {
                 SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
                 
-                SimEntity* ent = Sim_GetFreeEntity(scene); // get entity...
+                SimEntity* ent;
+                if (cmd->def.isLocal)
+                {
+                    ent = Sim_GetFreeLocalEntity(scene, cmd->def.serial);
+                }
+                else
+                {
+                    ent = Sim_GetFreeReplicatedEntity(scene, cmd->def.serial);
+                }
+                
                 Assert(ent)
                 
                 ent->status = SIM_ENT_STATUS_IN_USE;
-                ent->t.pos.x = cmd->pos[0];
-                ent->t.pos.y = cmd->pos[1];
-                ent->t.pos.z = cmd->pos[2];
+                ent->t.pos.x = cmd->def.pos[0];
+                ent->t.pos.y = cmd->def.pos[1];
+                ent->t.pos.z = cmd->def.pos[2];
 
                 printf("SIM Add CMD read\n");
             } break;

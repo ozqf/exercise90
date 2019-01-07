@@ -15,3 +15,4 @@ Very basic meshes/textures embedded in source
 com_internal void SharedAssets_Init();
 
 com_internal MeshData* COM_GetCubeMesh();
+com_internal MeshData* COM_GetInverseCubeMesh();
