@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../common/com_module.h"
-
+/*
 #define SIM_ENT_BLOCK_SIZE 1024
 #define SIM_ENT_MAX_BLOCKS 128
 // serial numbers for entities.
@@ -9,7 +9,7 @@
 #define SIM_REPLICATED_ENT_SERIAL_MAX 1073741822
 #define SIM_LOCAL_ENT_SERIAL_MIN 1073741823
 #define SIM_LOCAL_ENT_SERIAL_MAX 2147483647
-
+*/
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1
 #define SIM_ENT_STATUS_IN_USE 2
@@ -52,6 +52,7 @@ struct SimEntityDef
     i32 serial;
     i32 isLocal;
     f32 pos[3];
+    f32 scale[3];
 };
 
 struct SimEntBlock
@@ -63,9 +64,8 @@ struct SimEntBlock
 
 struct SimScene
 {
-    i32 blockSize;
-    i32 numBlocks;
-    i32 maxBlocks;
+    SimEntity* ents;
+    i32 maxEnts;
 
     // sequential, unrelated to blocks
     i32 remoteEntitySequence;
@@ -75,8 +75,6 @@ struct SimScene
 
     // Command buffers
     DoubleByteBuffer commands;
-
-    SimEntBlock blocks[SIM_ENT_MAX_BLOCKS];
 };
 
 

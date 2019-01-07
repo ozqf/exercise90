@@ -46,15 +46,6 @@ internal void* App_MallocWithSentinel(i32 mallocSize, char* sentinel)
     return (void*)bytes;
 }
 
-internal SimEntBlock App_MallocSimBlock(i32 capacity)
-{
-    SimEntBlock block = {};
-    void* ptr = malloc((sizeof(SimEntity)) * capacity);
-    block.ents = (SimEntity*)ptr;
-    block.capacity = capacity;
-    return block;
-}
-
 internal void App_BuildTestScene(SimScene* sim)
 {
     i32 bufSize = MegaBytes(1);
@@ -63,13 +54,12 @@ internal void App_BuildTestScene(SimScene* sim)
     printf("APP Sim buf a alloced at 0X%X\n", (u32)a.ptrStart);
     printf("APP Sim buf b alloced at 0X%X\n", (u32)b.ptrStart);
 
-    Sim_InitScene(sim, a, b);
-    i32 numBlocks = 1;
-    while (numBlocks-- > 0)
-    {
-        SimEntBlock block = App_MallocSimBlock(sim->blockSize);
-        Sim_AddEntBlock(sim, block);
-    }
+    i32 maxEnts = 2048;
+    i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
+    SimEntity* mem = (SimEntity*)malloc(numEntityBytes);
+
+    Sim_InitScene(sim, a, b, mem, maxEnts);
+    
     SimEntityDef def = {};
     for (i32 i = 0; i < 8; ++i)
     {
@@ -101,21 +91,12 @@ internal void App_SetupEntityForRender(RenderScene* rScene, SimEntity* ent)
 
 internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
 {
-    i32 numBlocks = sim->numBlocks;
-    i32 objects = 0;
-    for (i32 i = 0; i < numBlocks; ++i)
+    for (i32 j = 0; j < sim->maxEnts; ++j)
     {
-        SimEntBlock* block = &sim->blocks[i];
-        for (i32 j = 0; j < block->capacity; ++j)
-        {
-            SimEntity* ent = &block->ents[j];
-            if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
-
-            App_SetupEntityForRender(rend, ent);
-            objects++;
-        }
+        SimEntity* ent = &sim->ents[j];
+        if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        App_SetupEntityForRender(rend, ent);
     }
-    //printf("Draw %d sim objects\n", objects);
 }
 
 /***************************************
