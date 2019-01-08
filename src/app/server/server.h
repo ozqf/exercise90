@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../common/com_defines.h"
+#include "../app.h"
 
 void SV_Init();
 i32 SV_IsRunning();

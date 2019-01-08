@@ -7,6 +7,11 @@
 ////////////////////////////////////////////////////////////////////
 internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 {
+    // immediate mode
+    #if 1
+    Sim_Execute(sim, (SimCmd*)ptr);
+    #endif
+    #if 0
 	SimCmd* cmd = (SimCmd*)ptr;
 	//SimCmdAddEntity* addEnt = (SimCmdAddEntity*)ptr;
     Assert(cmd)
@@ -28,7 +33,7 @@ internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
 	//buf->ptrWrite += addEnt->header.size;
     //printf("SIM Enqueued type %d size %d. Wrote %d bytes of cmds\n",
     //    cmd->type, cmd->size, buf->Written());
-
+    #endif
     return COM_ERROR_NONE;
 }
 
@@ -364,7 +369,7 @@ Step Physics -> generate outputs
 */
 i32 Sim_Tick(SimScene* scene, f32 deltaTime)
 {
-    Sim_ReadInput(scene, deltaTime);
+    //Sim_ReadInput(scene, deltaTime);
     Sim_RunFrame(scene, deltaTime);
     return COM_ERROR_NONE;
 }

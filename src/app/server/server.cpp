@@ -33,9 +33,9 @@ void SV_LoadTestScene()
     #if 1
     def = {};
     def.isLocal = 1;
-    def.pos[1] = -6;
+    def.pos[1] = 0;
     def.scale[0] = 12;
-    def.scale[1] = 0.25f;
+    def.scale[1] = 1;
     def.scale[2] = 12;
     Sim_AddEntity(&g_sim, &def);
 
@@ -67,6 +67,8 @@ void SV_Shutdown()
 void SV_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
+
+    ByteBuffer* buf = App_GetLocalClientPacket();
 }
 
 void SV_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)

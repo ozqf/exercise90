@@ -20,6 +20,19 @@ internal Heap g_heap;
 internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
+internal ByteBuffer g_localClientPacket;
+internal ByteBuffer g_localServerPacket;
+
+ByteBuffer* App_GetLocalClientPacket()
+{
+    return &g_localClientPacket;
+}
+
+ByteBuffer* App_GetLocalServerPacket()
+{
+    return &g_localServerPacket;
+}
+
 /***************************************
 * Private
 ***************************************/

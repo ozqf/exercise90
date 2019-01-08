@@ -34,7 +34,7 @@ void CL_LoadTestScene()
         f32 randX = (COM_STDRandf32() * 2) - 1;
         f32 randZ = (COM_STDRandf32() * 2) - 1;
         f32 x = 2 * randX;
-        f32 y = 4;
+        f32 y = 1;
         f32 z = 2 * randZ;
         def.isLocal = 1;
         def.pos[0] = x;
@@ -48,9 +48,9 @@ void CL_LoadTestScene()
     #if 1
     def = {};
     def.isLocal = 1;
-    def.pos[1] = -6;
+    def.pos[1] = 0;
     def.scale[0] = 12;
-    def.scale[1] = 0.25f;
+    def.scale[1] = 1;
     def.scale[2] = 12;
     Sim_AddEntity(&g_sim, &def);
 
