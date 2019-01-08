@@ -11,6 +11,6 @@ void    Sim_InitScene(
             ByteBuffer cmdBufferA,
             ByteBuffer cmdBufferB,
             SimEntity* entityMemory,
-            i32 entityMemoryCapacity);
+            i32 maxEntities);
 i32     Sim_Tick(SimScene* scene, f32 deltaTime);
 i32     Sim_CalcEntityArrayBytes(i32 capacity);

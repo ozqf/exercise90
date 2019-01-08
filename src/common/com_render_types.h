@@ -300,4 +300,4 @@ com_internal void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 
 com_internal void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter);
 com_internal void RendObj_SetAsAsciCharArray(RendObj* obj, char* asciCharArray, i32 numChars, f32 size, i32 alignmentMode, i32 textureIndex, f32 red, f32 green, f32 blue);
 com_internal void RendObj_CalculateSpriteAsciUVs(RendObj_Sprite* sprite, u8 asciChar);
-
+com_internal void RendObj_InterpolatePosition(Vec3* result, Vec3* origin, Vec3* dest, f32 percentage);

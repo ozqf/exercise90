@@ -50,11 +50,27 @@ internal SimEntity* Sim_FindEntityBySerialNumber(
     return NULL;
 }
 
+internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
+{
+	for (i32 i = 0; i < scene->maxEnts; ++i)
+	{
+		SimEntity* ent = &scene->ents[i];
+		
+		if (ent->id.serial != serial) { continue; }
+		
+		// free slot
+		ent->status = SIM_ENT_STATUS_FREE;
+		
+		return COM_ERROR_NONE;
+		
+	}
+	return COM_ERROR_NOT_FOUND;
+}
+
 internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene, i32 isLocal)
 {
     if (isLocal) { return scene->localEntitySequence++; }
     else { return scene->remoteEntitySequence++; }
-    
 }
 
 internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
@@ -161,7 +177,11 @@ i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
 
 i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 {
-    return COM_ERROR_UNKNOWN;
+	SimCmdRemoveEntity cmd = {};
+	Sim_PrepareCommand(scene, &cmd.header);
+	cmd.serial = serialNumber;
+	Sim_EnqueueCommand(scene, (u8*)&cmd);
+    return COM_ERROR_NONE;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -172,14 +192,14 @@ void Sim_InitScene(
     ByteBuffer cmdBufferA,
     ByteBuffer cmdBufferB,
     SimEntity* entityMemory,
-    i32 entityMemoryCapacity)
+    i32 maxEntities)
 {
     *scene = {};
     scene->remoteEntitySequence = 0;
-    scene->localEntitySequence = entityMemoryCapacity / 2;
+    scene->localEntitySequence = maxEntities / 2;
     scene->ents = entityMemory;
-    scene->maxEnts = entityMemoryCapacity;
-    i32 numBytes = entityMemoryCapacity * sizeof(SimEntity);
+    scene->maxEnts = maxEntities;
+    i32 numBytes = maxEntities * sizeof(SimEntity);
     COM_ZeroMemory((u8*)entityMemory, numBytes);
 
     scene->commands = {};
@@ -190,12 +210,47 @@ void Sim_InitScene(
     Buf_Clear(&cmdBufferB);
 }
 
-/*
-Read Inputs
-Update Entities -> generate outputs
-Step Physics -> generate outputs
-*/
-i32 Sim_Tick(SimScene* scene, f32 deltaTime)
+internal void Sim_BoundaryCheckEnt(SimEntity* ent, Vec3* min, Vec3* max)
+{
+    Vec3* p = &ent->t.pos;
+    if (p->x < min->x) { p->x = min->x; ent->velocity.x = -ent->velocity.x; }
+    if (p->x > max->x) { p->x = max->x; ent->velocity.x = -ent->velocity.x; }
+
+    if (p->y < min->y) { p->y = min->y; ent->velocity.y = -ent->velocity.y; }
+    if (p->y > max->y) { p->y = max->y; ent->velocity.y = -ent->velocity.y; }
+
+    if (p->z < min->z) { p->z = min->z; ent->velocity.z = -ent->velocity.z; }
+    if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
+}
+
+internal i32 Sim_RunFrame(SimScene* scene, f32 deltaTime)
+{
+    for (i32 i = 0; i < scene->maxEnts; ++i)
+    {
+        SimEntity* ent = &scene->ents[i];
+        if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        Vec3* pos = &ent->t.pos;
+        ent->previousPos.x = pos->x;
+        ent->previousPos.y = pos->y;
+        ent->previousPos.z = pos->z;
+        Vec3 move =
+        {
+            ent->velocity.x * deltaTime,
+            ent->velocity.y * deltaTime,
+            ent->velocity.z * deltaTime
+        };
+        
+        ent->t.pos.x += move.x;
+        ent->t.pos.y += move.y;
+        ent->t.pos.z += move.z;
+        
+        Sim_BoundaryCheckEnt(ent, &scene->boundaryMin, &scene->boundaryMax);
+
+    }
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_ReadInput(SimScene* scene, f32 deltaTime)
 {
     scene->commands.Swap();
     ByteBuffer* buf = scene->commands.GetRead();
@@ -227,6 +282,7 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
             case SIM_CMD_TYPE_ADD_ENTITY:
             {
                 SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
+				Assert(cmd->header.size == sizeof(SimCmdAddEntity));
                 
                 SimEntity* ent;
                 if (cmd->def.isLocal)
@@ -247,6 +303,14 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
                 ent->t.pos.x = cmd->def.pos[0];
                 ent->t.pos.y = cmd->def.pos[1];
                 ent->t.pos.z = cmd->def.pos[2];
+                ent->previousPos.x = cmd->def.pos[0];
+                ent->previousPos.x = cmd->def.pos[1];
+                ent->previousPos.x = cmd->def.pos[2];
+                ent->velocity.x = cmd->def.velocity[0];
+                ent->velocity.y = cmd->def.velocity[1];
+                ent->velocity.z = cmd->def.velocity[2];
+                printf("V: %.3f, %.3f, %.3f\n",
+                    ent->velocity.x, ent->velocity.y, ent->velocity.z);
 
                 i32 badScale = 0;
                 if (cmd->def.scale[0] == 0
@@ -270,6 +334,13 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
                 }
 
             } break;
+			
+			case SIM_CMD_TYPE_REMOVE_ENTITY:
+			{
+				SimCmdRemoveEntity* cmd = (SimCmdRemoveEntity*)header;
+				Assert(cmd->header.size == sizeof(SimCmdRemoveEntity));
+				printf("SIM Removing ent %d\n", cmd->serial);
+			} break;
 
             default:
             {
@@ -278,6 +349,17 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
         }
     }
     Buf_Clear(buf);
+    return COM_ERROR_NONE;
+}
 
+/*
+Read Inputs
+Update Entities -> generate outputs
+Step Physics -> generate outputs
+*/
+i32 Sim_Tick(SimScene* scene, f32 deltaTime)
+{
+    Sim_ReadInput(scene, deltaTime);
+    Sim_RunFrame(scene, deltaTime);
     return COM_ERROR_NONE;
 }

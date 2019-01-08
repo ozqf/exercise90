@@ -20,6 +20,9 @@ del *.* /q
 set in1=../src/network/znet_module.cpp ../src/common/com_module.cpp
 set in2=../src/app/app_module.cpp ../src/app/app_textures.cpp
 set in3=../src/sim/sim_module.cpp
+set in4=../src/app/server/server.cpp ../src/app/client/client.cpp
+set compIn=%in1% %in2% %in3% %in4%
+
 set compOut=/Fe../bin/base/gamex86.dll
 
 @rem /EHsc to avoid exception handling issues.
@@ -31,7 +34,7 @@ set compilerFlags=-nologo -Gm -MT -WX -W4 -wd4100 -wd4201 -wd4189 -wd4505 /Zi /E
 set compilerDefines=/DPARANOID=1
 set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @echo on
-@cl %compilerFlags% %compilerDefines% /LD %in1% %in2% %in3% %compOut% %linkInput%
+@cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
 
 @set compilerFlags=
 @set compilerDefines=

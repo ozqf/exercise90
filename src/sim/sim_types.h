@@ -44,6 +44,7 @@ struct SimEntity
     SimEntId id;
     i32 type;
     Transform t;
+    Vec3 previousPos;
     Vec3 velocity;
 };
 
@@ -53,6 +54,7 @@ struct SimEntityDef
     i32 isLocal;
     f32 pos[3];
     f32 scale[3];
+    f32 velocity[3];
 };
 
 struct SimEntBlock
@@ -73,11 +75,36 @@ struct SimScene
     i32 cmdSequence;
     u32 tick;
 
+    Vec3 boundaryMin;
+    Vec3 boundaryMax;
+
     // Command buffers
     DoubleByteBuffer commands;
 };
 
+struct SimEventHeader
+{
+	i32 type;
+	i32 size;
+	i32 tick;
+	i32 sequence;
+};
 
-////////////////////////////////////////////
-// 
-////////////////////////////////////////////
+// look up data and write at transmission time
+struct SimEventEntitySpawned
+{
+	SimEventHeader header;
+	i32 serial;
+};
+
+/*
+Main replication events
+> Entity is spawned.
+> Pattern of entities is spawned.
+> Entity is removed.
+> Sync current Entity position
+
+Questions:
+> Where does game logic reside...? in the Simulation itself or the server/client?
+> 
+*/
