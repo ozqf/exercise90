@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../user.h"
+
 void    CL_Init();
 i32     CL_IsRunning();
 void    CL_Tick(f32 deltaTime);
