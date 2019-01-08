@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "com_defines.h"
 #include "com_types.h"
@@ -13,6 +14,7 @@
 #include "com_maths.h"
 #include "com_transform.h"
 #include "com_byte_buffer.h"
+#include "com_alloc.h"
 #include "com_net_types.h"
 #include "com_collision.h"
 #include "com_heap/com_heap.h"

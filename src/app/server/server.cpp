@@ -5,6 +5,10 @@
 #include "server.h"
 #include "../../sim/sim.h"
 
+#define SV_MAX_MALLOCS 1024
+internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
+internal MallocList g_mallocs;
+internal UserList g_users;
 internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 i32 SV_IsRunning() { return g_isRunning; }
@@ -45,23 +49,46 @@ void SV_LoadTestScene()
     #endif
 }
 
+internal void SV_ListAllocs()
+{
+    printf("-- SV ALLOCS --\n");
+    for (i32 i = 0; i < g_mallocs.max; ++i)
+    {
+        MallocItem* item = &g_mallocs.items[i];
+        if (item->ptr == NULL) { continue; }
+        printf("%s: %d bytes\n", item->label, item->capacity);
+    }
+}
+
 void SV_Init()
 {
     printf("SV Init scene\n");
-    i32 cmdBufferSize = MegaBytes(1);
-    ByteBuffer a = Buf_FromMalloc(malloc(cmdBufferSize), cmdBufferSize);
-    ByteBuffer b = Buf_FromMalloc(malloc(cmdBufferSize), cmdBufferSize);
+
+    g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
+
+    i32 size = MegaBytes(1);
+    ByteBuffer a = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, size, "Sim Buf A"), size);
+    ByteBuffer b = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, size, "Sim Buf B"), size);
 
     i32 maxEnts = 2048;
-    i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
-    SimEntity* mem = (SimEntity*)malloc(numEntityBytes);
+    size = Sim_CalcEntityArrayBytes(maxEnts);
+    SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
     Sim_InitScene(&g_sim, a, b, mem, maxEnts);
     SV_LoadTestScene();
+    SV_ListAllocs();
 }
 
 void SV_Shutdown()
 {
-
+    for (i32 i = 0; i < g_mallocs.max; ++i)
+    {
+        if (g_mallocs.items[i].ptr != NULL)
+        {
+            free(g_mallocs.items[i].ptr);
+        }
+    }
 }
 
 void SV_Tick(f32 deltaTime)
