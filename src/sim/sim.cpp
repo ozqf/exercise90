@@ -50,9 +50,11 @@ internal SimEntity* Sim_FindEntityBySerialNumber(
     return NULL;
 }
 
-internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene)
+internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene, i32 isLocal)
 {
-    return scene->remoteEntitySequence++;
+    if (isLocal) { return scene->localEntitySequence++; }
+    else { return scene->remoteEntitySequence++; }
+    
 }
 
 internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
@@ -144,17 +146,17 @@ i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
 //i32 Sim_AddEntity(SimScene* scene, f32 x, f32 y, f32 z)
 {
     //SimEntId id = Sim_ReserveFreeEntity(scene);
-    i32 serial = Sim_ReserveRemoteEntitySerial(scene);
+    def->serial = Sim_ReserveRemoteEntitySerial(scene, def->isLocal);
 
     printf("SIM Enqueue Add entity %d at %.3f, %.3f\n",
-        serial, def->pos[0], def->pos[1]);
+        def->serial, def->pos[0], def->pos[1]);
 
     SimCmdAddEntity cmd = {};
     Sim_PrepareCommand(scene, (SimCmd*)&cmd);
     Sim_SetAddEntityCmd(&cmd, def);
     u8* addr = (u8*)&cmd;
     Sim_EnqueueCommand(scene, addr);
-    return serial;
+    return def->serial;
 }
 
 i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
@@ -237,13 +239,36 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
                 }
                 
                 Assert(ent)
+
+                printf("SIM CMD %d Add ent %d\n",
+                    cmd->header.sequence, cmd->def.serial);
                 
                 ent->status = SIM_ENT_STATUS_IN_USE;
                 ent->t.pos.x = cmd->def.pos[0];
                 ent->t.pos.y = cmd->def.pos[1];
                 ent->t.pos.z = cmd->def.pos[2];
 
-                printf("SIM Add CMD read\n");
+                i32 badScale = 0;
+                if (cmd->def.scale[0] == 0
+                    || cmd->def.scale[1] == 0
+                    || cmd->def.scale[2] == 0)
+                {
+                    printf("  bad scale\n");
+                    badScale = 1;
+                }
+                if (!badScale)
+                {
+                    ent->t.scale.x = cmd->def.scale[0];
+                    ent->t.scale.y = cmd->def.scale[1];
+                    ent->t.scale.z = cmd->def.scale[2];
+                }
+                else
+                {
+                    ent->t.scale.x = 1;
+                    ent->t.scale.y = 1;
+                    ent->t.scale.z = 1;
+                }
+
             } break;
 
             default:

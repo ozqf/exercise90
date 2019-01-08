@@ -61,32 +61,45 @@ internal void App_BuildTestScene(SimScene* sim)
     Sim_InitScene(sim, a, b, mem, maxEnts);
     
     SimEntityDef def = {};
+    #if 1
     for (i32 i = 0; i < 8; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;
-        f32 randY = (COM_STDRandf32() * 2) - 1;
+        f32 randZ = (COM_STDRandf32() * 2) - 1;
         f32 x = 2 * randX;
-        f32 y = 2 * randY;
-        def.isLocal = 0;
+        f32 y = 4;
+        f32 z = 2 * randZ;
+        def.isLocal = 1;
         def.pos[0] = x;
         def.pos[1] = y;
+        def.pos[2] = z;
         Sim_AddEntity(sim, &def);
     }
-    
+    #endif
+    #if 1
+    def = {};
+    def.isLocal = 1;
+    def.pos[1] = -6;
+    def.scale[0] = 12;
+    def.scale[1] = 0.25f;
+    def.scale[2] = 12;
+    Sim_AddEntity(sim, &def);
+    #endif
 }
 
 internal void App_SetupEntityForRender(RenderScene* rScene, SimEntity* ent)
 {
-    Transform t;
-    Transform_SetToIdentity(&t);
     RendObj obj = {};
     MeshData* cube = COM_GetCubeMesh();
     RendObj_SetAsMesh(
         &obj, *cube, 1, 1, 1, Tex_GetTextureIndexByName("textures\\W33_5.bmp"));
     
-    t.pos.x = ent->t.pos.x;
-    t.pos.y = ent->t.pos.y;
-    RScene_AddRenderItem(&g_worldScene, &t, &obj);
+    //Transform t;
+    //Transform_SetToIdentity(&t);
+    //t.pos.x = ent->t.pos.x;
+    //t.pos.y = ent->t.pos.y;
+    //RScene_AddRenderItem(&g_worldScene, &t, &obj);
+    RScene_AddRenderItem(&g_worldScene, &ent->t, &obj);
 }
 
 internal void App_AddSimEntitiesForRender(RenderScene* rend, SimScene* sim)
@@ -140,7 +153,8 @@ internal i32  App_Init()
     //             //RENDER_PROJECTION_MODE_ORTHOGRAPHIC,
     //             8);
     //
-    g_worldScene.cameraTransform.pos.z += 4;
+    g_worldScene.cameraTransform.pos.y += 16;
+    Transform_SetRotation(&g_worldScene.cameraTransform, -(90 * DEG2RAD), 0, 0);
     //Transform t;
     //Transform_SetToIdentity(&t);
     //t.pos.z -= 2;
