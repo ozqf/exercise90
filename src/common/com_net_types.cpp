@@ -12,3 +12,10 @@ ZNetAddress COM_LocalHost(u16 port)
     addr.port = port;
     return addr;
 }
+
+void COM_InitStream(NetStream* stream, ByteBuffer input, ByteBuffer output)
+{
+    stream->inputBuffer = input;
+    stream->outputBuffer = output;
+    stream->inputSequence = 1;
+}

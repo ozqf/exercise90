@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sim.h"
-#include "sim_internal_types.h"
 
 ////////////////////////////////////////////////////////////////////
 // Command management
@@ -250,6 +249,92 @@ internal i32 Sim_RunFrame(SimScene* scene, f32 deltaTime)
     return COM_ERROR_NONE;
 }
 
+i32 Sim_Execute(SimScene* scene, SimCmd* header)
+{
+    if (header->type == 0)
+    {
+        printf("SIM ABORT bad cmd type %d\n", header->type);
+        return COM_ERROR_UNKNOWN_COMMAND;
+    }
+    if (header->size == 0)
+    {
+        printf("SIM ABORT bad cmd size %d\n", header->size);
+        return COM_ERROR_BAD_SIZE;
+    }
+    if (header->sentinel != SIM_CMD_SENTINEL)
+    {
+        printf("SIM ABORT cmd sentinel mismatch\n");
+        return COM_ERROR_BAD_ARGUMENT;
+    }
+    switch (header->type)
+    {
+        case SIM_CMD_TYPE_ADD_ENTITY:
+        {
+            SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
+			Assert(cmd->header.size == sizeof(SimCmdAddEntity));
+            
+            SimEntity* ent;
+            if (cmd->def.isLocal)
+            {
+                ent = Sim_GetFreeLocalEntity(scene, cmd->def.serial);
+            }
+            else
+            {
+                ent = Sim_GetFreeReplicatedEntity(scene, cmd->def.serial);
+            }
+            
+            Assert(ent)
+            //printf("SIM CMD %d Add ent %d\n",
+            //    cmd->header.sequence, cmd->def.serial);
+            
+            ent->status = SIM_ENT_STATUS_IN_USE;
+            ent->t.pos.x = cmd->def.pos[0];
+            ent->t.pos.y = cmd->def.pos[1];
+            ent->t.pos.z = cmd->def.pos[2];
+            ent->previousPos.x = cmd->def.pos[0];
+            ent->previousPos.x = cmd->def.pos[1];
+            ent->previousPos.x = cmd->def.pos[2];
+            ent->velocity.x = cmd->def.velocity[0];
+            ent->velocity.y = cmd->def.velocity[1];
+            ent->velocity.z = cmd->def.velocity[2];
+            //printf("V: %.3f, %.3f, %.3f\n",
+            //    ent->velocity.x, ent->velocity.y, ent->velocity.z);
+            i32 badScale = 0;
+            if (cmd->def.scale[0] == 0
+                || cmd->def.scale[1] == 0
+                || cmd->def.scale[2] == 0)
+            {
+                printf("  bad scale\n");
+                badScale = 1;
+            }
+            if (!badScale)
+            {
+                ent->t.scale.x = cmd->def.scale[0];
+                ent->t.scale.y = cmd->def.scale[1];
+                ent->t.scale.z = cmd->def.scale[2];
+            }
+            else
+            {
+                ent->t.scale.x = 1;
+                ent->t.scale.y = 1;
+                ent->t.scale.z = 1;
+            }
+        } break;
+		
+		case SIM_CMD_TYPE_REMOVE_ENTITY:
+		{
+			SimCmdRemoveEntity* cmd = (SimCmdRemoveEntity*)header;
+			Assert(cmd->header.size == sizeof(SimCmdRemoveEntity));
+			printf("SIM Removing ent %d\n", cmd->serial);
+		} break;
+        default:
+        {
+            printf("SIM Unknown command type %d\n", header->type);
+        } break;
+    }
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_ReadInput(SimScene* scene, f32 deltaTime)
 {
     scene->commands.Swap();
@@ -266,87 +351,7 @@ internal i32 Sim_ReadInput(SimScene* scene, f32 deltaTime)
     {
         SimCmd* header = (SimCmd*)read;
         read += header->size;
-        if (header->type == 0)
-        {
-            printf("SIM ABORT bad cmd type %d\n", header->type);
-            return COM_ERROR_UNKNOWN_COMMAND;
-        }
-        
-        if (header->size == 0)
-        {
-            printf("SIM ABORT bad cmd size %d\n", header->size);
-            return COM_ERROR_BAD_SIZE;
-        }
-        switch (header->type)
-        {
-            case SIM_CMD_TYPE_ADD_ENTITY:
-            {
-                SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
-				Assert(cmd->header.size == sizeof(SimCmdAddEntity));
-                
-                SimEntity* ent;
-                if (cmd->def.isLocal)
-                {
-                    ent = Sim_GetFreeLocalEntity(scene, cmd->def.serial);
-                }
-                else
-                {
-                    ent = Sim_GetFreeReplicatedEntity(scene, cmd->def.serial);
-                }
-                
-                Assert(ent)
-
-                printf("SIM CMD %d Add ent %d\n",
-                    cmd->header.sequence, cmd->def.serial);
-                
-                ent->status = SIM_ENT_STATUS_IN_USE;
-                ent->t.pos.x = cmd->def.pos[0];
-                ent->t.pos.y = cmd->def.pos[1];
-                ent->t.pos.z = cmd->def.pos[2];
-                ent->previousPos.x = cmd->def.pos[0];
-                ent->previousPos.x = cmd->def.pos[1];
-                ent->previousPos.x = cmd->def.pos[2];
-                ent->velocity.x = cmd->def.velocity[0];
-                ent->velocity.y = cmd->def.velocity[1];
-                ent->velocity.z = cmd->def.velocity[2];
-                printf("V: %.3f, %.3f, %.3f\n",
-                    ent->velocity.x, ent->velocity.y, ent->velocity.z);
-
-                i32 badScale = 0;
-                if (cmd->def.scale[0] == 0
-                    || cmd->def.scale[1] == 0
-                    || cmd->def.scale[2] == 0)
-                {
-                    printf("  bad scale\n");
-                    badScale = 1;
-                }
-                if (!badScale)
-                {
-                    ent->t.scale.x = cmd->def.scale[0];
-                    ent->t.scale.y = cmd->def.scale[1];
-                    ent->t.scale.z = cmd->def.scale[2];
-                }
-                else
-                {
-                    ent->t.scale.x = 1;
-                    ent->t.scale.y = 1;
-                    ent->t.scale.z = 1;
-                }
-
-            } break;
-			
-			case SIM_CMD_TYPE_REMOVE_ENTITY:
-			{
-				SimCmdRemoveEntity* cmd = (SimCmdRemoveEntity*)header;
-				Assert(cmd->header.size == sizeof(SimCmdRemoveEntity));
-				printf("SIM Removing ent %d\n", cmd->serial);
-			} break;
-
-            default:
-            {
-                printf("SIM Unknown command type %d\n", header->type);
-            } break;
-        }
+        Sim_Execute(scene, header);
     }
     Buf_Clear(buf);
     return COM_ERROR_NONE;

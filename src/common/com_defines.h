@@ -84,6 +84,7 @@ log_message( foo == 7, "x %d", x)
 #define COM_ERROR_DESERIALISE_FAILED 8
 #define COM_ERROR_BAD_SIZE 9
 #define COM_ERROR_NOT_FOUND 10
+#define COM_ERROR_BAD_ARGUMENT 11
 
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros

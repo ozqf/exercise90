@@ -9,9 +9,24 @@ internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 i32 CL_IsRunning() { return g_isRunning; }
 
+#define CL_MAX_ALLOCATIONS 256
+internal void* g_allocations[CL_MAX_ALLOCATIONS];
+internal i32 g_bytesAllocated = 0;
+internal i32 g_numAllocations = 0;
+
+internal NetStream g_stream;
+
+internal void* CL_Malloc(i32 numBytes)
+{
+    Assert(g_numAllocations < CL_MAX_ALLOCATIONS)
+    i32 index = g_numAllocations++;
+    g_allocations[index] = malloc(numBytes);
+    g_bytesAllocated += numBytes;
+    return g_allocations[index];
+}
+
 void CL_LoadTestScene()
 {
-    
     SimEntityDef def = {};
     #if 1
     for (i32 i = 0; i < 8; ++i)
@@ -47,21 +62,28 @@ void CL_LoadTestScene()
 
 void CL_Init()
 {
-    printf("SV Init scene\n");
+    printf("CL Init scene\n");
     i32 cmdBufferSize = MegaBytes(1);
-    ByteBuffer a = Buf_FromMalloc(malloc(cmdBufferSize), cmdBufferSize);
-    ByteBuffer b = Buf_FromMalloc(malloc(cmdBufferSize), cmdBufferSize);
+    ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
+    ByteBuffer b = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
 
     i32 maxEnts = 2048;
     i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
-    SimEntity* mem = (SimEntity*)malloc(numEntityBytes);
+    SimEntity* mem = (SimEntity*)CL_Malloc(numEntityBytes);
     Sim_InitScene(&g_sim, a, b, mem, maxEnts);
     CL_LoadTestScene();
+
+    COM_InitStream(&g_stream,
+        Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
+        Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
+    );
+    printf("CL init completed with %d allocations (%dKB)\n ",
+        g_numAllocations, (u32)KiloBytes(g_bytesAllocated));
 }
 
 void CL_Shutdown()
 {
-
+    // TODO: Free memory (:
 }
 
 void CL_Tick(f32 deltaTime)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sim.h"
-#include "sim_internal_types.h"
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
 {

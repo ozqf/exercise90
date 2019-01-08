@@ -109,7 +109,9 @@ internal void App_Update(PlatformTime* time)
     {
         g_simFrameAcculator -= interval;
         SV_Tick(interval);
+
         CL_Tick(interval);
+        
         //App_RunSimFrame(interval);
     }
 }
