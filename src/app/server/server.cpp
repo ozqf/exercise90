@@ -14,11 +14,26 @@ internal SimScene g_sim;
 internal i32 g_isRunning = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
+internal void SV_AllocateUserStreams(NetStream* stream, i32 capacityPerBuffer)
+{
+    if (stream->initialised) { return; }
+    stream->initialised = 1;
+    stream->inputBuffer = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, capacityPerBuffer, "User Input"),
+        capacityPerBuffer
+    );
+    stream->outputBuffer = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, capacityPerBuffer, "User Input"),
+        capacityPerBuffer
+    );
+}
+
 UserIds SV_CreateLocalUser()
 {
     User* user = User_GetFree(&g_users);
     user->ids.privateId = 0xDEADDEAD;
     user->ids.publicId = g_users.nextPublicId++;
+    SV_AllocateUserStreams(&user->stream, KiloBytes(64));
     UserIds ids = user->ids;
     printf("SV creating local user public %d private %d",
         ids.publicId, ids.privateId
@@ -73,11 +88,11 @@ internal void SV_ListAllocs()
         if (item->ptr == NULL) { continue; }
         printf("%s: %d bytes\n", item->label, item->capacity);
     }
-    printf("  Total: %lluKB, %lluMB",
-        KiloBytes(g_mallocs.totalBytes),
-        MegaBytes(g_mallocs.totalBytes)
+    printf("  Total: %lluKB, %lluMB\n",
+        BytesAsKB(g_mallocs.totalBytes),
+        BytesAsMB(g_mallocs.totalBytes)
         );
-    printf("    Tally: %d bytes", tally);
+    printf("    Tally: %d bytes\n", tally);
 }
 
 void SV_Init()
@@ -117,6 +132,50 @@ void SV_Shutdown()
     }
 }
 
+void SV_EnqueueReliableOutput(User* user, Command* cmd)
+{
+    ByteBuffer* b = &user->stream.outputBuffer;
+    Assert(b->Space() >= cmd->size)
+    b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
+}
+
+void SV_BuildUserPacket(User* user, u8* buf, i32 capacity)
+{
+
+}
+
+/*
+i32                 Stream_BufferMessage(
+                        ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
+internal void       Stream_Clear(NetStream* stream)
+i32                 Stream_WriteStreamMsgHeader(
+                        u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);
+u16                 Stream_WritePacketHeader(u8 sequenceOffset, u16 size)
+void                Stream_ReadPacketHeader(
+                        u16 header, u8* sequenceOffset, u16* size)
+TransmissionRecord* Stream_AssignTransmissionRecord(
+                        TransmissionRecord* records,
+                        u32 sequence)
+TransmissionRecord* Stream_FindTransmissionRecord(
+                        TransmissionRecord* records,
+                        u32 sequence)
+void                Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
+StreamMsgHeader*    Stream_FindMessageById(u8* read, u8* end, u32 id)
+u8*                 Stream_CollapseBlock(
+                        u8* blockStart,
+                        u32 blockSpace,
+                        u8* bufferEnd)
+u32                 Stream_ClearReceivedOutput(
+                        NetStream* stream, u32 packetSequence)
+void                Stream_OutputToPacket(
+                        i32 connId,
+                        NetStream* s,
+                        ByteBuffer* packetBuf,
+                        f32 deltaTime)
+u8*                 Stream_PacketToInput(NetStream* s, u8* ptr)
+
+*/
+
 void SV_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
@@ -124,7 +183,11 @@ void SV_Tick(f32 deltaTime)
     ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 }
 
-void SV_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
+void SV_PopulateRenderScene(
+    RenderScene* scene,
+    i32 maxObjects,
+    i32 texIndex,
+    f32 interpolateTime)
 {
 
     for (i32 j = 0; j < g_sim.maxEnts; ++j)

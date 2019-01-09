@@ -3,6 +3,7 @@
 #include "../user.h"
 #include "../../common/com_defines.h"
 #include "../app.h"
+#include "../commands.h"
 
 void    CL_Init();
 void    CL_Shutdown();

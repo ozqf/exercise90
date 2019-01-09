@@ -66,6 +66,8 @@ log_message( foo == 7, "x %d", x)
 
 #define KiloBytes(bytes) ((bytes) * 1024LL)
 #define MegaBytes(bytes) (KiloBytes(bytes) * 1024LL)
+#define BytesAsKB(bytes) (bytes / 1024LL)
+#define BytesAsMB(bytes) (bytes / (1024LL * 1024LL))
 
 #define F32_EPSILON 1.19209290E-07F // decimal constant
 

@@ -62,7 +62,7 @@ void CL_LoadTestScene()
 
 void CL_SetLocalUser(UserIds ids)
 {
-    printf("CL Set local user public %d private %d",
+    printf("CL Set local user public %d private %d\n",
         ids.publicId, ids.privateId
     );
 }
@@ -85,12 +85,38 @@ void CL_Init()
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );
     printf("CL init completed with %d allocations (%dKB)\n ",
-        g_numAllocations, (u32)KiloBytes(g_bytesAllocated));
+        g_numAllocations, (u32)BytesAsKB(g_bytesAllocated));
 }
 
 void CL_Shutdown()
 {
     // TODO: Free memory (:
+}
+
+void CL_ReadReliableCommands(NetStream* stream)
+{
+    ByteBuffer* b = &stream->inputBuffer;
+    u8* read = b->ptrStart;
+    u8* end = b->ptrEnd;
+    while (read < end)
+    {
+        Command* header = (Command*)read;
+        Assert(header->sentinel == CMD_SENTINEL)
+        Assert(header->size > 0)
+        read += header->size;
+        switch (header->type)
+        {
+            case CMD_TYPE_IMPULSE:
+            {
+                CmdImpulse* cmd = (CmdImpulse*)header;
+            } break;
+            default:
+            {
+                printf("CL Unknown command type %d\n", header->type);
+                ILLEGAL_CODE_PATH
+            } break;
+        }
+    }
 }
 
 void CL_Tick(f32 deltaTime)

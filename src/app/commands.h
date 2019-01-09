@@ -8,7 +8,8 @@
 #include "../sim/sim.h"
 
 #define CMD_TYPE_NULL 0
-#define CMD_TYPE_SET_SCENE 1
+#define CMD_TYPE_IMPULSE 1
+#define CMD_TYPE_SET_SCENE 2
 
 // 48879?
 #define CMD_SENTINEL 0xBEEF
@@ -25,7 +26,6 @@ struct Command
     i32 type;
     i32 size;
 
-    // Must be set from the Sim Scene when created.
     // Controls execution time and order
     u32 tick;
     i32 sequence;
@@ -34,7 +34,6 @@ struct Command
 struct CmdImpulse
 {
 	Command header;
-	i32 sourceConnectionId;
 	u8 impulse;
 };
 

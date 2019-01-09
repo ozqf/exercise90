@@ -19,6 +19,8 @@ struct TransmissionRecord
 #define MAX_TRANSMISSION_RECORDS 33
 struct NetStream
 {
+	// Has allocated buffers
+	i32 initialised;
     // latest reliable command from remote executed here
     u32             inputSequence;
     ByteBuffer      inputBuffer;

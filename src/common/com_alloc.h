@@ -27,6 +27,7 @@ internal MallocList COM_InitMallocList(MallocItem* items, i32 capacity)
     list.items = items;
     list.next = 0;
     list.max = capacity;
+    list.totalBytes = 0;
     return list;
 }
 
