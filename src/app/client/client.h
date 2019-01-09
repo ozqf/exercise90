@@ -5,6 +5,8 @@
 #include "../app.h"
 
 void    CL_Init();
+void    CL_Shutdown();
 i32     CL_IsRunning();
 void    CL_Tick(f32 deltaTime);
 void    CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime);
+void    CL_SetLocalUser(UserIds ids);

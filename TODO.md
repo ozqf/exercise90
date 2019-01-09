@@ -29,6 +29,8 @@ Crucial changes:
 * Separate client and server sims and render scenes.
 * Clone activity from server to client with a faked internet
 
+* Proper shutdown of ZNet when session ends
+
 
 
 

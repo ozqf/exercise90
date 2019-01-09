@@ -6,12 +6,25 @@
 #include "../../sim/sim.h"
 
 #define SV_MAX_MALLOCS 1024
+
 internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
 internal MallocList g_mallocs;
 internal UserList g_users;
-internal i32 g_isRunning = 0;
 internal SimScene g_sim;
+internal i32 g_isRunning = 0;
 i32 SV_IsRunning() { return g_isRunning; }
+
+UserIds SV_CreateLocalUser()
+{
+    User* user = User_GetFree(&g_users);
+    user->ids.privateId = 0xDEADDEAD;
+    user->ids.publicId = g_users.nextPublicId++;
+    UserIds ids = user->ids;
+    printf("SV creating local user public %d private %d",
+        ids.publicId, ids.privateId
+    );
+    return ids;
+}
 
 void SV_LoadTestScene()
 {
@@ -52,12 +65,19 @@ void SV_LoadTestScene()
 internal void SV_ListAllocs()
 {
     printf("-- SV ALLOCS --\n");
+    i32 tally = 0;
     for (i32 i = 0; i < g_mallocs.max; ++i)
     {
         MallocItem* item = &g_mallocs.items[i];
+        tally += item->capacity;
         if (item->ptr == NULL) { continue; }
         printf("%s: %d bytes\n", item->label, item->capacity);
     }
+    printf("  Total: %lluKB, %lluMB",
+        KiloBytes(g_mallocs.totalBytes),
+        MegaBytes(g_mallocs.totalBytes)
+        );
+    printf("    Tally: %d bytes", tally);
 }
 
 void SV_Init()
@@ -66,7 +86,13 @@ void SV_Init()
 
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
-    i32 size = MegaBytes(1);
+    g_users = {};
+    g_users.max = APP_MAX_USERS;
+    i32 userBytes = sizeof(User) * APP_MAX_USERS;
+    User* users = (User*)COM_Malloc(&g_mallocs, userBytes, "SV Users");
+    g_users.items = users;
+
+    i32 size = KiloBytes(64);
     ByteBuffer a = Buf_FromMalloc(
         COM_Malloc(&g_mallocs, size, "Sim Buf A"), size);
     ByteBuffer b = Buf_FromMalloc(

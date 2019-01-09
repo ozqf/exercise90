@@ -230,9 +230,3 @@ internal void ZNet_PrintReceived(ZNetConnection* conn)
         printf("%u, ", conn->received[i]);
     }
 }
-
-void DeleteMe()
-{
-    ILLEGAL_CODE_PATH
-    ZNet_PrintAwaitingAcks(NULL);
-}

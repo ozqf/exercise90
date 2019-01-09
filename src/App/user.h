@@ -14,12 +14,17 @@ struct ActorInput
 //////////////////////////////////////////////////
 // Clients and players
 //////////////////////////////////////////////////
+struct UserIds
+{
+    // public identity for client to client and local application
+    i32 publicId;
+    // private between client and server
+    i32 privateId;
+};
+
 struct User
 {
-    // private between client and server
-    i32 connectionId;
-    // public identity for client to client and local application
-    i32 userId;
+    UserIds ids;
     i32 state;
 	u32 flags;
     i32 entSerial;
@@ -40,7 +45,7 @@ struct UserList
     User* items;
     i32 count;
     i32 max;
-    i32 nextId;
+    i32 nextPublicId;
     // id of the client this exe represents
     // 0 == no local client
     i32 localUserId = 0;
@@ -65,13 +70,24 @@ internal void User_Free(UserList* users, User* user)
     user->state = USER_STATE_FREE;
 }
 
-internal User* User_FindByUserId(UserList* users, i32 id)
+internal User* User_FindByPrivateId(UserList* users, i32 privateId)
 {
     for (i32 i = 0; i < users->max; ++i)
     {
         User* user = &users->items[i];
         if (user->state == USER_STATE_FREE) { continue; }
-        if (user->userId == id) { return user; }
+        if (user->ids.privateId == privateId) { return user; }
+    }
+    return NULL;
+}
+
+internal User* User_FindByPublicId(UserList* users, i32 publicId)
+{
+    for (i32 i = 0; i < users->max; ++i)
+    {
+        User* user = &users->items[i];
+        if (user->state == USER_STATE_FREE) { continue; }
+        if (user->ids.publicId == publicId) { return user; }
     }
     return NULL;
 }

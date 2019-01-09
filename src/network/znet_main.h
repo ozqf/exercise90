@@ -108,7 +108,9 @@ i32 ZNet_StartSession(u8 netMode, ZNetAddress* address, u16 selfPort)
 void ZNet_EndSession()
 {
     ZNet* net = &g_net;
-    NET_ASSERT((net->state != 0), "Net session shutdown but not running\n");
+    printf("Net session shutdown but not running\n");
+    net->state = NETMODE_NONE;
+    // TODO: Some actual shutting down would help
 }
 
 internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes)

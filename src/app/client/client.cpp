@@ -60,6 +60,13 @@ void CL_LoadTestScene()
     #endif
 }
 
+void CL_SetLocalUser(UserIds ids)
+{
+    printf("CL Set local user public %d private %d",
+        ids.publicId, ids.privateId
+    );
+}
+
 void CL_Init()
 {
     printf("CL Init scene\n");
