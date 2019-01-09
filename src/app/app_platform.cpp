@@ -3,7 +3,7 @@
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"
 
-//#include "../sim/sim.h"
+#include "app.h"
 #include "server/server.h"
 #include "client/client.h"
 #include "app_textures.h"
@@ -23,12 +23,27 @@ internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 internal ByteBuffer g_localClientPacket;
 internal ByteBuffer g_localServerPacket;
 
-ByteBuffer* App_GetLocalClientPacket()
+/***************************************
+* Access Server <-> Client communication buffers
+* TODO: storage of multiple packets. Pump 'ForRead'
+* to empty them out
+***************************************/
+ByteBuffer* App_GetLocalClientPacketForRead()
 {
     return &g_localClientPacket;
 }
 
-ByteBuffer* App_GetLocalServerPacket()
+ByteBuffer* App_GetLocalClientPacketForWrite()
+{
+    return &g_localClientPacket;
+}
+
+ByteBuffer* App_GetLocalServerPacketForRead()
+{
+    return &g_localServerPacket;
+}
+
+ByteBuffer* App_GetLocalServerPacketForWrite()
 {
     return &g_localServerPacket;
 }

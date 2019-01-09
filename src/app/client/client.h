@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../user.h"
+#include "../../common/com_defines.h"
+#include "../app.h"
 
 void    CL_Init();
 i32     CL_IsRunning();

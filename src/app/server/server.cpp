@@ -95,7 +95,7 @@ void SV_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
 
-    ByteBuffer* buf = App_GetLocalClientPacket();
+    ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 }
 
 void SV_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
