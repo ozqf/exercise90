@@ -32,7 +32,9 @@
 // #include "test_ecs2.h"
 // #include "test_misc.h"
 
-#include "network_test/test_network_win32.h"
+//#include "network_test/test_network_win32.h"
+
+#include "tests/test_command_stream.h"
 
 internal void Test_FatalError(char* message, char* heading)
 {
@@ -44,9 +46,10 @@ int main(i32 argc, char* argv[])
 {
     COM_SetFatalError(Test_FatalError);
 
+    TestCommandStream();
 	//Test_Com_Run(argc, argv);
     //Test_Introspection();
-    Test_NetworkWin32(argc, argv);
+    //Test_NetworkWin32(argc, argv);
     //Tests_Run(argc, argv);
 	//Test_EntityComponentSystem();
     

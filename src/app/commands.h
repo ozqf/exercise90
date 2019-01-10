@@ -1,5 +1,4 @@
 #pragma once
-
 ///////////////////////////////////////////////////////////
 // Header only - commands shared between client and server
 ///////////////////////////////////////////////////////////
@@ -56,6 +55,15 @@ struct CmdUserState
     i32 userId;
     i32 state;
 };
+
+internal inline i32 Cmd_Validate(Command* cmd)
+{
+    if (cmd == NULL)  { return COM_ERROR_BAD_ARGUMENT; }
+    if (cmd->sentinel != SIM_CMD_SENTINEL) { return COM_ERROR_DESERIALISE_FAILED; }
+    if (cmd->type == 0) { return COM_ERROR_UNKNOWN_COMMAND; }
+    if (cmd->size <= 0) { return COM_ERROR_BAD_SIZE; }
+    return COM_ERROR_NONE;
+}
 
 internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
 {

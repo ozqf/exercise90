@@ -23,11 +23,16 @@ Crucial changes:
 
 #### Rebuild TODO
 
-* Simulation tick and input commands
+**DONE** * Separate client and server sims and render scenes.
+Defunct: * Simulation tick and input commands (moving commands out to client/server)
+* Command Flow:
+	* Reliable/unreliable stream systems:
+		* Enqueue reliable commands (iterate sequence)
+		* Dequeue reliable commands (by sequence).
+		* Delete consumed messages
 * Attach Physics engine
 * Basic biped entity
-* Separate client and server sims and render scenes.
-* Clone activity from server to client with a faked internet
+
 
 * Proper shutdown of ZNet when session ends
 

@@ -276,13 +276,16 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     //char* texName = "textures\\W33_5.bmp";
     i32 texIndex = Tex_GetTextureIndexByName(texName);
     //f32 interpolationTime = 1;
-    f32 interpolationTime = App_CalcInterpolationTime(g_simFrameAcculator, App_GetSimFrameInterval());
+    f32 interpolationTime = App_CalcInterpolationTime(
+        g_simFrameAcculator, App_GetSimFrameInterval());
     
+    // offset blocks of render objects left or right to show SV and CL side by side
+
     g_worldScene.numObjects = 0;
     SV_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, 1);
     App_OffsetRenderObjects(&g_worldScene, 0, -10);
-    i32 firstCLObject = g_worldScene.numObjects;
 
+    i32 firstCLObject = g_worldScene.numObjects;
     CL_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, interpolationTime);
     App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
     
@@ -325,6 +328,7 @@ extern "C"
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     // TODO: Find out why this called seamingly at random whilst running
+    // ANSWER: For each thread that is started dllMain is called
     printf("APP DLL Main\n");
 	return 1;
 }

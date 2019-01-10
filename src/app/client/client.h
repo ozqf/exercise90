@@ -4,6 +4,7 @@
 #include "../../common/com_defines.h"
 #include "../app.h"
 #include "../commands.h"
+#include "../stream.h"
 
 void    CL_Init();
 void    CL_Shutdown();
