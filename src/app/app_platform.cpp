@@ -34,6 +34,9 @@ internal ByteBuffer g_localServerPacket;
 internal MallocItem g_mallocItems[APP_MAX_MALLOCS];
 internal MallocList g_mallocs;
 
+internal ZNetHandle* g_clientNet;
+internal ZNetHandle* g_serverNet;
+
 
 internal i32 App_StartSession(i32 sessionType);
 
@@ -168,7 +171,17 @@ internal i32  App_Init()
 
     g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "CL Packet"), 64);
     g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Packet"), 64);
+
+    // init client and server connection managers
+    i32 znetInstanceSize = ZNet_RequiredInstanceSize();
+    g_clientNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "CL Conn");
+    g_clientNet->memSize = znetInstanceSize;
+    ZNet_Init(g_clientNet, {}, {}, ZNET_SIM_MODE_NONE);
     
+    g_serverNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "SV Conn");
+    g_serverNet->memSize = znetInstanceSize;
+    ZNet_Init(g_serverNet, {}, {}, ZNET_SIM_MODE_NONE);
+
     // Render Scenes
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS);
     g_worldScene.cameraTransform.pos.y += 16;
@@ -176,7 +189,7 @@ internal i32  App_Init()
 
     // server and client areas currently acquiring their own memory
     App_StartSession(APP_SESSION_TYPE_SINGLE_PLAYER);
-    ZNet_Init(Net_GetPlatformFunctions(), Net_GetNetworkCallbacks(), ZNET_SIM_MODE_NONE);
+    //ZNet_Init(Net_GetPlatformFunctions(), Net_GetNetworkCallbacks(), ZNET_SIM_MODE_NONE);
 
     return COM_ERROR_NONE;
 }
@@ -198,7 +211,8 @@ internal i32 App_EndSession()
 {
     if (g_isRunningServer) { SV_Shutdown(); }
     if (g_isRunningClient) { CL_Shutdown(); }
-    ZNet_EndSession();
+    ZNet_EndSession(g_serverNet);
+    ZNet_EndSession(g_clientNet);
     return COM_ERROR_NONE;
 }
 
@@ -209,7 +223,8 @@ internal i32 App_StartSession(i32 sessionType)
         case APP_SESSION_TYPE_SINGLE_PLAYER:
         {
             App_EndSession();
-            ZNet_StartSession(NETMODE_SINGLE_PLAYER, NULL, 0);
+            ZNet_StartSession(g_serverNet, NETMODE_SINGLE_PLAYER, NULL, ZNET_LOOPBACK_PORT);
+            ZNet_StartSession(g_clientNet, NETMODE_SINGLE_PLAYER, NULL, ZNET_LOOPBACK_PORT);
             SV_Init();
             UserIds ids = SV_CreateLocalUser();
             CL_Init();

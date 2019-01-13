@@ -3,8 +3,10 @@
 #include "../../common/com_module.h"
 #include "../../app/commands.h"
 #include "../../app/stream.h"
+#include "../../app/packet.h"
 
 #define CMD_TYPE_TEST 1
+#define CMD_TYPE_TEST_2 2
 
 struct TestCommand1
 {
@@ -16,28 +18,31 @@ struct TestCommand1
 struct TestCommand2
 {
     Command header;
-    i32 data1;
-    i32 data2;
+    i32 id;
+    u16 pos[3];
+    u16 pitch;
+    u16 yaw;
 };
 
 NetStream g_stream;
 
 void PrintCommand(Command* header)
 {
-    printf("Read Cmd type 1. sequence %d, tick %d\n",
-		header->sequence, header->tick);
+    printf("Read Cmd type %d. sequence %d, tick %d\n",
+		header->type, header->sequence, header->tick);
     switch (header->type)
     {
         case CMD_TYPE_TEST:
         {
             TestCommand1* cmd = (TestCommand1*)header;
-            printf("Cmd data1: %d, data2: %d\n", cmd->data1, cmd->data2);
+            printf(" Cmd data1: %d, data2: %d\n", cmd->data1, cmd->data2);
         } break;
     }
 }
 
 void PrintCommandBuffer(u8* ptr, i32 numBytes)
 {
+	printf("\n=== CMD BUFFER (%d bytes) ===\n", numBytes);
     u8* read = ptr;
     u8* end = ptr + numBytes;
 
@@ -48,6 +53,13 @@ void PrintCommandBuffer(u8* ptr, i32 numBytes)
         read += header->size;
         PrintCommand(header);
     }
+	printf("  Ptr diff check: %d\n", (read - end));
+}
+
+void TestStreamToPacket(NetStream* s, u8* packet, i32 packetBytes)
+{
+    i32 packetSequence = 1; // IRL: acquired from znet!;
+    TransmissionRecor* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
 }
 
 void TestCommandStream()
@@ -73,6 +85,12 @@ void TestCommandStream()
     
     // Enqueue command
     TestCommand2 cmd2 = {};
+    Cmd_Prepare(&cmd2.header, 3, 0);
+    cmd2.header.type = CMD_TYPE_TEST_2;
+    cmd2.header.size = sizeof(TestCommand2);
+    cmd2.pos[0] = 8642;
+    cmd2.pos[2] = 9753;
+    Stream_EnqueueReliableOutput(&g_stream, &cmd2.header);
 
     // Enqueue command
     cmd.data1 = 4321;
@@ -106,5 +124,9 @@ void TestCommandStream()
 	
 	printf("Deleted command %d\n", 0);
 	Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 0);
+	PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	
+	
+	Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 2);
 	PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
 }

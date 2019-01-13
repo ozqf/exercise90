@@ -77,7 +77,7 @@ void ZNet_SendConnectionApproved(ZNet* net, ZNetConnection* conn)
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
-	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+	ZNet_Send(net, &conn->remoteAddress, p.ptrStart, p.Written());
 }
 
 void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
@@ -87,7 +87,7 @@ void ZNet_SendKeepAlive(ZNet* net, ZNetConnection* conn)
 	b.ptrWrite += COM_WriteI32(conn->id, b.ptrWrite);
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
-	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+	ZNet_Send(net, &conn->remoteAddress, p.ptrStart, p.Written());
 }
 
 void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
@@ -110,13 +110,13 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 	printf("\nWrote msg bytes: %d...", b.Written());
 	ByteBuffer p = ZNet_GetPacketWriteBuffer();
 	ZNet_BuildPacket(&p, b.ptrStart, b.Written(), NULL, 0);
-	ZNet_Send(&conn->remoteAddress, p.ptrStart, p.Written());
+	ZNet_Send(net, &conn->remoteAddress, p.ptrStart, p.Written());
 
 	// Inform higher level
 	ZNetConnectionInfo info = {};
 	info.address = conn->remoteAddress;
 	info.id = conn->id;
-	g_output.ConnectionDropped(&info);
+	net->output.ConnectionDropped(&info);
 
 	printf("done\n");
 }
@@ -126,18 +126,21 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 // Chicken-and-egg problem: to retrieve the transmission record to fill in
 // We need the sequence number of the packet. But ZNet only tells the caller
 // AFTER the caller has invoked ZNet_SendData
-u32 ZNet_GetNextSequenceNumber(i32 connId)
+u32 ZNet_GetNextSequenceNumber(ZNetHandle* handle, i32 connId)
 {
-	ZNetConnection* conn = ZNet_GetConnectionById(&g_net, connId);
-	NET_ASSERT((connId != 0), "Get Next Packet Sequence: Connection Id is zero");
-	NET_ASSERT(conn, "Get Next Packet Sequence: Connection could not be found\n");
+	ZNet* net = (ZNet*)handle;
+	Assert(handle->memSize == sizeof(ZNet))
+	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
+	NET_ASSERT(net, (connId != 0), "Get Next Packet Sequence: Connection Id is zero");
+	NET_ASSERT(net, conn, "Get Next Packet Sequence: Connection could not be found\n");
 	return conn->sequence;
 }
 
-u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
+u32 ZNet_SendData(ZNetHandle* handle, i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 {
-	NET_ASSERT((numBytes <= ZNET_MAX_PAYLOAD_SIZE), "ZNET Packet payload too large");
-	ZNet* net = &g_net;
+	ZNet* net = (ZNet*)handle;
+	NET_ASSERT(net, (numBytes <= ZNET_MAX_PAYLOAD_SIZE), "ZNET Packet payload too large");
+	
 	//printf("ZNet send %d bytes to conn %d\n", numBytes, connId);
 	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
 	if (conn == NULL)
@@ -182,7 +185,7 @@ u32 ZNet_SendData(i32 connId, u8* data, u16 numBytes, i32 printSendInfo)
 	COM_WriteI32(COM_SimpleHash(payloadStart, payloadSize), ptrCheckSum);
 	//printf("ZNET Send data payload of %d bytes to %d\n", numBytes, conn->id);
 
-	ZNet_Send(&conn->remoteAddress, b.ptrStart, b.Written());
+	ZNet_Send(net, &conn->remoteAddress, b.ptrStart, b.Written());
 	ZNet_RecordPacketTransmission(conn, packetNumber);
 	switch (printSendInfo)
 	{

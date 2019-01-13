@@ -32,13 +32,13 @@ void ZNet_RunTests()
     COM_PrintBits((i32)ackBits, 1);
 
     // Check acks would be reported:
-    ZNet_CheckAcks(&send, 6, ackBits);
+    ZNet_CheckAcks(NULL, &send, 6, ackBits);
 }
 
-char* ZNet_WriteDebug(char* start, char* end)
+char* ZNet_WriteDebug(ZNetHandle* handle, char* start, char* end)
 {
+    ZNET_HANDLE_2_NET(handle)
     char* write = start;
-    ZNet* net = &g_net;
     write += sprintf_s(write, (end - write),
         "--- ZNET LAYER ---\nState: %d, isListening %d, socket %d\n, selfPort: %d\nClient2ServId %d\n- CONNECTIONS -\n",
         net->state, net->isListening, net->socketIndex, net->selfPort, net->client2ServerId

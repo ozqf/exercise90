@@ -24,11 +24,11 @@ App Network layer functionality:
 
 */
 
-#define NET_ASSERT(expression, msg) if(!(expression)) \
+#define NET_ASSERT(ptrNet, expression, msg) if(!(expression)) \
 { \
     char assertBuf[512]; \
     sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
-    Net_FatalError(assertBuf, "Fatal Net Error"); \
+    Net_FatalError(ptrNet, assertBuf, "Fatal Net Error"); \
 } \
 
 //#define ZNET_DEFAULT_PORT 23232
@@ -52,6 +52,8 @@ App Network layer functionality:
 
 #define ZNET_AWAITING_ACK_CAPACITY 33
 #define ZNET_RECEIVED_CAPACITY 33
+
+#define ZNET_HANDLE_2_NET(ptrHandle) ZNet* net = (ZNet*)##ptrHandle##;
 
 struct ZNetAckRecord
 {
@@ -180,17 +182,39 @@ struct ZNetPending
     i32 ticks;
 };
 
+struct ZNet;
+//////////////////////////////////////////////////////////////
+// Internal interface
+//////////////////////////////////////////////////////////////
+internal void ZNet_Send(ZNet*, ZNetAddress* address, u8* bytes, i32 numBytes);
+internal void ZNet_SendActual(ZNet*, ZNetAddress* address, u8* bytes, i32 numBytes);
+internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
+
+// Needs a net instance:
+
+// Doesn't need a valid net instance:
+internal void ZNet_CheckAcks(ZNet*, ZNetConnection* conn, u32 ack, u32 ackBits);
+internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence);
+internal u32  ZNet_BuildAckBits(ZNetConnection* conn, u32 remoteSequence);
+internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn);
+
+#include "znet_simulation.h"
+
 #define MAX_CONNECTIONS 16
 #define MAX_PENDING_CONNECTIONS 32
 // assuming tick rate of 60, timeout after 30 seconds
 // TODO: Switch to delta time so tick rate can vary!
 #define MAX_PENDING_CONNECTION_TICKS 1800
+
 struct ZNet
 {
+    // Handle MUST be at the top!
+    ZNetHandle handle;
     ZNetConnection connections[MAX_CONNECTIONS];
 	i32 isListening;
     i32 maxConnections = MAX_CONNECTIONS;
     i32 socketIndex;
+    i32 localSocketIndex;
     i32 state;
     u16 selfPort;
     i32 client2ServerId;
@@ -202,22 +226,21 @@ struct ZNet
     // should still be randomly selected?
     i32 nextPublicClientId;
 
+    ZNetPlatformFunctions platform;
+    ZNetOutputInterface output;
+    ZNetDelayedPacketStore store;
+
+    // Buffers
+    // write data to this:
+    u8 g_dataWriteBuffer[ZNET_MAX_PAYLOAD_SIZE];
+
+    // final write buffer before call to platform send
+    u8 g_packetWriteBuffer[ZNET_MAX_UDP_PACKET_SIZE];
+
+    u8 g_packetReadBuffer[ZNET_MAX_UDP_PACKET_SIZE];
+
     ZNetPending pendingConnections[MAX_PENDING_CONNECTIONS];
 };
-
-//////////////////////////////////////////////////////////////
-// Internal interface
-//////////////////////////////////////////////////////////////
-internal void ZNet_Send(ZNetAddress* address, u8* bytes, i32 numBytes);
-internal void ZNet_SendActual(ZNetAddress* address, u8* bytes, i32 numBytes);
-internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence);
-internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id);
-
-internal void ZNet_PrintAwaitingAcks(ZNetConnection* conn);
-internal u32 ZNet_BuildAckBits(ZNetConnection* conn, u32 remoteSequence);
-internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits);
-
-#include "znet_simulation.h"
 
 /////////////////////////////////////////////////////
 // GLOBALS
@@ -232,16 +255,16 @@ internal u8 g_packetWriteBuffer[ZNET_MAX_UDP_PACKET_SIZE];
 
 internal u8 g_packetReadBuffer[ZNET_MAX_UDP_PACKET_SIZE];
 
-internal ZNetPlatformFunctions g_netPlatform;
-internal ZNetOutputInterface g_output;
-internal ZNet g_net;
-internal ZNetDelayedPacketStore g_store;
+//internal ZNetPlatformFunctions g_netPlatform;
+//internal ZNetOutputInterface g_output;
+//internal ZNet g_net;
+//internal ZNetDelayedPacketStore g_store;
 
-internal void Net_FatalError(char* message, char* heading)
+internal void Net_FatalError(ZNet* net, char* message, char* heading)
 {
-    if (g_netPlatform.FatalError)
+    if (net->platform.FatalError)
     {
-        g_netPlatform.FatalError(message, heading);
+        net->platform.FatalError(message, heading);
     }
     else
     {
@@ -281,37 +304,39 @@ internal ByteBuffer ZNet_GetPacketWriteBuffer()
 ///////////////////////////////////////////////////
 // system lifetime
 ///////////////////////////////////////////////////
-void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface, i32 simMode)
+void ZNet_Init(ZNetHandle* handle, ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface, i32 simMode)
 {
     printf("ZNet Initialising... ");
-    g_netPlatform = platform;
-	g_output = outputInterface;
-    COM_ZeroMemory((u8*)&g_net, sizeof(ZNet));
+    Assert(handle->memSize == sizeof(ZNet))
+    ZNET_HANDLE_2_NET(handle)
+    net->platform = platform;
+	net->output = outputInterface;
+    COM_ZeroMemory((u8*)net, sizeof(ZNet));
     // testing conditions:
     switch (simMode)
     {
         case ZNET_SIM_MODE_REALISTIC:
         {
-            g_store.Init(75, 125, 0.01f);
+            net->store.Init(75, 125, 0.01f);
             printf("Sim conditions: realistic\n");
         } break;
 
         case ZNET_SIM_MODE_BAD:
         {
-            g_store.Init(200, 400, 0.2f);
+            net->store.Init(200, 400, 0.2f);
             printf("Sim conditions: bad\n");
         } break;
 
         case ZNET_SIM_MODE_TERRIBLE:
         {
             // biblical packet loss
-            g_store.Init(500, 1000, 0.6f);
+            net->store.Init(500, 1000, 0.6f);
             printf("Sim conditions: terrible\n");
         } break;
 
         default:
         {
-            g_store.Init(0, 0, 0);
+            net->store.Init(0, 0, 0);
             printf("No sim delay\n");
         } break;
     }
@@ -321,17 +346,22 @@ void ZNet_Init(ZNetPlatformFunctions platform, ZNetOutputInterface outputInterfa
     printf("Done\n");
 }
 
-void ZNet_Shutdown()
+i32 ZNet_RequiredInstanceSize()
 {
+    return sizeof(ZNet);
+}
+
+void ZNet_Shutdown(ZNet* handle)
+{
+    ZNET_HANDLE_2_NET(handle)
     printf("ZNet shutting down... ");
-    ZNet* net = &g_net;
     if (net->socketIndex != -1)
     {
-        g_netPlatform.CloseSocket(net->socketIndex);
+        net->platform.CloseSocket(net->socketIndex);
         net->socketIndex = -1;
     }
     COM_ZeroMemory((u8*)net, sizeof(ZNet));
-    g_netPlatform.Shutdown();
+    net->platform.Shutdown();
     printf("Done\n");
 }
 

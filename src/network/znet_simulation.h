@@ -80,7 +80,7 @@ struct ZNetDelayedPacketStore
         }
     }
 
-    void SendPacket(ZNetAddress* address, u8* data, u16 numBytes)
+    void SendPacket(ZNet* net, ZNetAddress* address, u8* data, u16 numBytes)
     {
         if (this->info.RollDropPacket())
         {
@@ -91,7 +91,7 @@ struct ZNetDelayedPacketStore
         if (i == -1)
         {
             printf("ZNet Sim: Slots full, sending directly\n");
-            ZNet_Send(address, data, numBytes);
+            ZNet_Send(net, address, data, numBytes);
             return;
         }
 
@@ -106,7 +106,7 @@ struct ZNetDelayedPacketStore
         COM_COPY(data, ptr, numBytes);
     }
 
-    void Tick(f32 deltaTime)
+    void Tick(ZNet* net, f32 deltaTime)
     {
         for (i32 i = 0; i < 256; ++i)
         {
@@ -115,7 +115,7 @@ struct ZNetDelayedPacketStore
             h->tick -= deltaTime;
             if (h->tick > 0) { continue; }
             u8* ptr = (u8*)h + sizeof(ZNetDelayedPacketHeader);
-            ZNet_SendActual(&h->address, ptr, (u16)h->size);
+            ZNet_SendActual(net, &h->address, ptr, (u16)h->size);
             this->FreeHandle(i);
         }
     }

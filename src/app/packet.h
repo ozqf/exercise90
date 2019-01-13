@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common_com_module.h"
+#include "../common/com_module.h"
 
 // Fully unpacked descriptor for use by client/server streams
 struct PacketDescriptor
@@ -35,7 +35,7 @@ struct PacketHeader
     u16 unreliableOffset;
 };
 
-internal void Packet_GetHeaderSize()
+internal i32 Packet_GetHeaderSize()
 {
     return sizeof(PacketHeader);
 }
@@ -45,7 +45,9 @@ internal void Packet_ReadHeader(u8* ptr, PacketHeader* h)
     *h = *(PacketHeader*)ptr;
 }
 
-internal void Packet_WriteHeader(u8* ptr, PacketHeader* h)
+// Returns bytes written
+internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 {
     *(PacketHeader*)ptr = *h;
+	return sizeof(PacketHeader);
 }

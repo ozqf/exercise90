@@ -37,16 +37,16 @@ internal ZNetConnection* ZNet_GetConnectionById(ZNet* net, i32 id)
 
 internal void ZNet_CloseConnection(ZNet* net, ZNetConnection* conn)
 {
-    NET_ASSERT(net, "Close connection: Net is null\n");
-    NET_ASSERT(conn, "Close conncetion: conn is null\n");
+    NET_ASSERT(net, net, "Close connection: Net is null\n");
+    NET_ASSERT(net, conn, "Close conncetion: conn is null\n");
     printf("NET Closing connection to %d\n", conn->id);
     conn->id = 0;
 }
 
 internal void ZNet_DisconnectPeer(ZNet* net, ZNetConnection* conn, char* msg)
 {
-    NET_ASSERT(net, "Disconnect peer: Net is null\n");
-    NET_ASSERT(conn, "Disconnect peer: conn is null\n");
+    NET_ASSERT(net, net, "Disconnect peer: Net is null\n");
+    NET_ASSERT(net, conn, "Disconnect peer: conn is null\n");
     ZNet_SendDisconnectCommand(net, conn, msg);
     ZNet_CloseConnection(net, conn);
 }
@@ -91,10 +91,10 @@ internal ZNetConnection* ZNet_GetFreeConnection(ZNet* net)
 
 // TODO: check server connection response... is conn id xor used here or is a new one generated
 // by the server...?
-internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isLocal)
+internal ZNetConnection* ZNet_CreateClientConnection(ZNet* net, ZNetAddress address, u8 isLocal)
 {
-    ZNetConnection* conn = ZNet_GetFreeConnection(&g_net);
-    NET_ASSERT(conn, "ZNet failed to find free connection\n");
+    ZNetConnection* conn = ZNet_GetFreeConnection(net);
+    NET_ASSERT(net, conn, "ZNet failed to find free connection\n");
     // if client is local, ignore challenge/response stuff
     if (isLocal)
     {
@@ -112,9 +112,10 @@ internal ZNetConnection* ZNet_CreateClientConnection(ZNetAddress address, u8 isL
 /**
  * For creating fake connections for local players
  */
-i32 ZNet_CreateLocalConnection(ZNetConnectionInfo* result)
+i32 ZNet_CreateLocalConnection(ZNetHandle* h, ZNetConnectionInfo* result)
 {
-    ZNetConnection* conn = ZNet_CreateClientConnection({}, 1);
+    ZNet* net = (ZNet*)h;
+    ZNetConnection* conn = ZNet_CreateClientConnection(net, {}, 1);
     result->address = conn->remoteAddress;
     result->id = conn->id;
     // DON'T send callback in this case. Confuses control flow.
@@ -131,7 +132,8 @@ internal void ZNet_RecordPacketTransmission(ZNetConnection* conn, u32 sequence)
     conn->awaitingAck[index].acked = 0;
 }
 
-internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
+// net pointer can be null for testing purposes.
+internal void ZNet_CheckAcks(ZNet* net, ZNetConnection* conn, u32 ack, u32 ackBits)
 {
     //printf("Checking ack %u and ackBits %u\n", ack, ackBits);
     u32 index = ack % ZNET_AWAITING_ACK_CAPACITY;
@@ -141,8 +143,11 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
         conn->awaitingAck[index].acked = 1;
         // boardcast ack received!
         //printf("  %d acked!\n", ack);
-        ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
-        g_output.DeliveryConfirmed(&info, ack);
+        if (net != NULL)
+        {
+            ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
+            net->output.DeliveryConfirmed(&info, ack);
+        }
     }
     // Run through awaiting acks. If ack is on matching sequence, check ack'd is true
     u32 bit = 0;
@@ -161,8 +166,11 @@ internal void ZNet_CheckAcks(ZNetConnection* conn, u32 ack, u32 ackBits)
                 conn->awaitingAck[index].acked = 1;
                 // boardcast ack received!
                 //printf("  %d acked!\n", ack);
-                ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
-                g_output.DeliveryConfirmed(&info, ack);
+                if (net != NULL)
+                {
+                    ZNetConnectionInfo info = ZNet_CreateConnInfo(conn);
+                    net->output.DeliveryConfirmed(&info, ack);
+                }
             }
         }
         ack--;

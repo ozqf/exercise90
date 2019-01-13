@@ -66,7 +66,7 @@ internal i32 ZNet_BuildPacket(
     i32 debug)
 {
     i32 totalSize = sizeof(ZNetPacketHeader) + numDataBytes;
-    NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");
+    //NET_ASSERT(packetBuffer->capacity >totalSize, "Dataload too large for packet\n");
 	// header
 	ZNetPacketHeader h = {};
 	h.protocol = ZNET_PROTOCOL;
