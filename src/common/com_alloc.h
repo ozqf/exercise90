@@ -38,6 +38,7 @@ internal void* COM_Malloc(MallocList* list, i32 capacity, char* label)
     Assert(a->ptr)
     a->capacity = capacity;
     a->label = label;
+    COM_ZeroMemory((u8*)a->ptr, capacity);
     list->totalBytes += capacity;
     return a->ptr;
 }

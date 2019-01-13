@@ -309,9 +309,9 @@ void ZNet_Init(ZNetHandle* handle, ZNetPlatformFunctions platform, ZNetOutputInt
     printf("ZNet Initialising... ");
     Assert(handle->memSize == sizeof(ZNet))
     ZNET_HANDLE_2_NET(handle)
+	COM_ZeroMemory((u8*)net, sizeof(ZNet));
     net->platform = platform;
 	net->output = outputInterface;
-    COM_ZeroMemory((u8*)net, sizeof(ZNet));
     // testing conditions:
     switch (simMode)
     {

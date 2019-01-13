@@ -1,0 +1,186 @@
+#pragma once
+/*
+Functions related to routing client and server network calls
+Intention is that even in single player, the client and server
+modules should be unaware of each other and always believe they are
+talking through a network to remote instances
+*/
+#include "app.h"
+#include "../network/znet_interface.h"
+
+////////////////////////////////////////////////////////////////////////
+// Client - Platform functions
+////////////////////////////////////////////////////////////////////////
+internal i32 App_CLNet_Init()
+{
+    return g_platform.Net_Init();
+}
+
+internal i32 App_CLNet_Shutdown()
+{
+    return g_platform.Net_Shutdown();
+}
+
+internal i32 App_CLNet_OpenSocket(u16 port, u16* portOpened)
+{
+    return g_platform.Net_OpenSocket(port, portOpened);
+}
+
+internal i32 App_CLNet_CloseSocket(i32 socketIndex)
+{
+    return g_platform.Net_CloseSocket(socketIndex);
+}
+
+internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
+{
+    return g_platform.Net_Read(socketIndex, sender, dataPtr);
+}
+
+internal i32  App_CLNet_SendTo(
+    i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize)
+{
+    return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
+}
+
+internal void App_CLNet_FatalError(char* msg, char* heading)
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Client - output callbacks
+////////////////////////////////////////////////////////////////////////
+internal void App_CLNet_ConnectionAccepted(ZNetConnectionInfo* conn)
+{
+
+}
+
+internal void App_CLNet_ConnectionDropped(ZNetConnectionInfo* conn)
+{
+
+}
+
+internal void App_CLNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
+{
+
+}
+
+internal void App_CLNet_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Client - build objects
+////////////////////////////////////////////////////////////////////////
+internal ZNetPlatformFunctions App_CLNet_CreatePlatformFunctions()
+{
+    ZNetPlatformFunctions funcs = {};
+    funcs.Init = App_CLNet_Init;
+    funcs.Shutdown = App_CLNet_Shutdown;
+    funcs.OpenSocket = App_CLNet_OpenSocket;
+    funcs.CloseSocket = App_CLNet_CloseSocket;
+    funcs.Read = App_CLNet_Read;
+    funcs.SendTo = App_CLNet_SendTo;
+    funcs.FatalError = App_CLNet_FatalError;
+    return funcs;
+}
+
+internal ZNetOutputInterface App_CLNet_CreateOutputFunctions()
+{
+    ZNetOutputInterface funcs = {};
+    funcs.ConnectionAccepted = App_CLNet_ConnectionAccepted;
+    funcs.ConnectionDropped = App_CLNet_ConnectionDropped;
+    funcs.DataPacketReceived = App_CLNet_DataPacketReceived;
+    funcs.DeliveryConfirmed = App_CLNet_DeliveryConfirmed;
+    return funcs;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+// Server - Platform functions
+////////////////////////////////////////////////////////////////////////
+internal i32 App_SVNet_Init()
+{
+    return g_platform.Net_Init();
+}
+
+internal i32 App_SVNet_Shutdown()
+{
+    return g_platform.Net_Shutdown();
+}
+
+internal i32 App_SVNet_OpenSocket(u16 port, u16* portOpened)
+{
+    return g_platform.Net_OpenSocket(port, portOpened);
+}
+
+internal i32 App_SVNet_CloseSocket(i32 socketIndex)
+{
+    return g_platform.Net_CloseSocket(socketIndex);
+}
+
+internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
+{
+    return g_platform.Net_Read(socketIndex, sender, dataPtr);
+}
+
+internal i32  App_SVNet_SendTo(
+    i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize)
+{
+    return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
+}
+
+internal void App_SVNet_FatalError(char* msg, char* heading)
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Server - output callbacks
+////////////////////////////////////////////////////////////////////////
+internal void App_SVNet_ConnectionAccepted(ZNetConnectionInfo* conn)
+{
+
+}
+
+internal void App_SVNet_ConnectionDropped(ZNetConnectionInfo* conn)
+{
+
+}
+
+internal void App_SVNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
+{
+
+}
+
+internal void App_SVNet_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Server - build objects
+////////////////////////////////////////////////////////////////////////
+internal ZNetPlatformFunctions App_SVNet_CreatePlatformFunctions()
+{
+    ZNetPlatformFunctions funcs = {};
+    funcs.Init = App_SVNet_Init;
+    funcs.Shutdown = App_SVNet_Shutdown;
+    funcs.OpenSocket = App_SVNet_OpenSocket;
+    funcs.CloseSocket = App_SVNet_CloseSocket;
+    funcs.Read = App_SVNet_Read;
+    funcs.SendTo = App_SVNet_SendTo;
+    funcs.FatalError = App_SVNet_FatalError;
+    return funcs;
+}
+
+internal ZNetOutputInterface App_SVNet_CreateOutputFunctions()
+{
+    ZNetOutputInterface funcs = {};
+    funcs.ConnectionAccepted = App_SVNet_ConnectionAccepted;
+    funcs.ConnectionDropped = App_SVNet_ConnectionDropped;
+    funcs.DataPacketReceived = App_SVNet_DataPacketReceived;
+    funcs.DeliveryConfirmed = App_SVNet_DeliveryConfirmed;
+    return funcs;
+}
