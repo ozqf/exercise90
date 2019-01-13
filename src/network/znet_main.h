@@ -33,7 +33,7 @@ i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 
         {
             printf("ZNet - SINGLE PLAYER, no socket\n");
             net->isListening = 1;
-            net->socketIndex = net->platform.OpenSocket(ZNET_LOOPBACK_PORT, &sockedOpened);
+            net->socketIndex = net->platform.OpenSocket(selfPort, &sockedOpened);
             if (net->socketIndex < 0)
             {
                 result = COM_ERROR_OPEN_SOCKET_FAILED;

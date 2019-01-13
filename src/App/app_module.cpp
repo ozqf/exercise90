@@ -34,6 +34,7 @@ internal MallocList g_mallocs;
 
 internal ZNetHandle* g_clientNet;
 internal ZNetHandle* g_serverNet;
+internal ZNetAddress g_localClientAddress = {};
 
 
 internal i32 App_StartSession(i32 sessionType);

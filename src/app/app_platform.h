@@ -182,13 +182,15 @@ internal i32 App_EndSession()
 
 internal i32 App_StartSession(i32 sessionType)
 {
+    printf("\n=== START SESSION ===\n");
     switch (sessionType)
     {
         case APP_SESSION_TYPE_SINGLE_PLAYER:
         {
             App_EndSession();
-            ZNet_StartSession(g_serverNet, NETMODE_SINGLE_PLAYER, NULL, ZNET_LOOPBACK_PORT);
-            ZNet_StartSession(g_clientNet, NETMODE_SINGLE_PLAYER, NULL, ZNET_LOOPBACK_PORT);
+            printf("\tStarting single player\n");
+            ZNet_StartSession(g_serverNet, NETMODE_DEDICATED_SERVER, NULL, APP_SERVER_LOOPBACK_PORT);
+            ZNet_StartSession(g_clientNet, NETMODE_CLIENT, &g_localClientAddress, APP_CLIENT_LOOPBACK_PORT);
             SV_Init();
             UserIds ids = SV_CreateLocalUser();
             CL_Init();

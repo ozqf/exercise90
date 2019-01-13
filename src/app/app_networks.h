@@ -23,6 +23,11 @@ internal i32 App_CLNet_Shutdown()
 
 internal i32 App_CLNet_OpenSocket(u16 port, u16* portOpened)
 {
+    if (port == APP_CLIENT_LOOPBACK_PORT)
+    {
+        *portOpened = 0;
+        return COM_ERROR_NONE;
+    }
     return g_platform.Net_OpenSocket(port, portOpened);
 }
 
@@ -112,6 +117,11 @@ internal i32 App_SVNet_Shutdown()
 
 internal i32 App_SVNet_OpenSocket(u16 port, u16* portOpened)
 {
+    if (port == APP_SERVER_LOOPBACK_PORT)
+    {
+        *portOpened = 0;
+        return COM_ERROR_NONE;
+    }
     return g_platform.Net_OpenSocket(port, portOpened);
 }
 

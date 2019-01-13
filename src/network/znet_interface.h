@@ -13,9 +13,6 @@
 // Dedicated |  3          1           0           1
 // Replay    |  4          0           1           0
 
-// For communication between a local client/server
-#define ZNET_LOOPBACK_PORT 666
-
 #define NETMODE_NONE 0
 #define NETMODE_SINGLE_PLAYER 1
 #define NETMODE_CLIENT 2

@@ -59,7 +59,7 @@ void PrintCommandBuffer(u8* ptr, i32 numBytes)
 void TestStreamToPacket(NetStream* s, u8* packet, i32 packetBytes)
 {
     i32 packetSequence = 1; // IRL: acquired from znet!;
-    TransmissionRecor* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
+    TransmissionRecord* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
 }
 
 void TestCommandStream()
