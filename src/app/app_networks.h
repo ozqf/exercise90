@@ -1,6 +1,9 @@
 #pragma once
 /*
-Functions related to routing client and server network calls
+Functions related to routing client and server network calls.
+Sockets opened on local loopback ports are redirected by this layer
+to a local store read by the connections counterpart.
+
 Intention is that even in single player, the client and server
 modules should be unaware of each other and always believe they are
 talking through a network to remote instances
@@ -25,7 +28,7 @@ internal i32 App_CLNet_OpenSocket(u16 port, u16* portOpened)
 {
     if (port == APP_CLIENT_LOOPBACK_PORT)
     {
-        *portOpened = 0;
+        *portOpened = APP_CLIENT_LOOPBACK_PORT;
         return COM_ERROR_NONE;
     }
     return g_platform.Net_OpenSocket(port, portOpened);
@@ -38,18 +41,27 @@ internal i32 App_CLNet_CloseSocket(i32 socketIndex)
 
 internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
 {
-    return g_platform.Net_Read(socketIndex, sender, dataPtr);
+    printf("CL Reading\n");
+    return 0;
+    //return g_platform.Net_Read(socketIndex, sender, dataPtr);
 }
 
 internal i32  App_CLNet_SendTo(
-    i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize)
+    i32 transmittingSocketIndex, ZNetAddress* address, u16 port, u8* data, i32 dataSize)
 {
+    if (port == APP_SERVER_LOOPBACK_PORT)
+    {
+        printf(" Client sending %d bytes on loopback port\n", dataSize);
+        g_localServerSocket.SendPacket(address, (u8*)data, (u16)dataSize);
+        return COM_ERROR_NONE;
+    }
+    printf(" Client sending %d bytes on port %d\n", dataSize, port);
     return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
 }
 
 internal void App_CLNet_FatalError(char* msg, char* heading)
 {
-
+    g_platform.Platform_Error(msg, heading);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -119,7 +131,7 @@ internal i32 App_SVNet_OpenSocket(u16 port, u16* portOpened)
 {
     if (port == APP_SERVER_LOOPBACK_PORT)
     {
-        *portOpened = 0;
+        *portOpened = APP_SERVER_LOOPBACK_PORT;
         return COM_ERROR_NONE;
     }
     return g_platform.Net_OpenSocket(port, portOpened);
@@ -132,18 +144,35 @@ internal i32 App_SVNet_CloseSocket(i32 socketIndex)
 
 internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
 {
-    return g_platform.Net_Read(socketIndex, sender, dataPtr);
+    printf("SV Read Socket %d\n", socketIndex);
+
+    u8* bytes;
+    i32 numBytes;
+    ZNetAddress address;
+    g_localServerSocket.Read(&bytes, &numBytes, &address);
+    if (bytes != NULL)
+    {
+        // Send to Server network
+        dataPtr->ptrMemory = (void*)bytes;
+        dataPtr->size = numBytes;
+        printf("  SV READING %d BYTES\n", numBytes);
+        return numBytes;
+    }
+    return 0;
+    //return g_platform.Net_Read(socketIndex, sender, dataPtr);
 }
 
 internal i32  App_SVNet_SendTo(
-    i32 transmittingSocketIndex, char* address, u16 port, char* data, i32 dataSize)
+    i32 transmittingSocketIndex, ZNetAddress* address, u16 port, u8* data, i32 dataSize)
 {
-    return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
+    printf("SV Send to socket %d\n", address->port);
+    return 0;
+    //return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
 }
 
 internal void App_SVNet_FatalError(char* msg, char* heading)
 {
-
+    g_platform.Platform_Error(msg, heading);
 }
 
 ////////////////////////////////////////////////////////////////////////

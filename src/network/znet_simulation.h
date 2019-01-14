@@ -91,7 +91,7 @@ struct ZNetDelayedPacketStore
         if (i == -1)
         {
             printf("ZNet Sim: Slots full, sending directly\n");
-            ZNet_Send(net, address, data, numBytes);
+            ZNet_SendActual(net, address, data, numBytes);
             return;
         }
 

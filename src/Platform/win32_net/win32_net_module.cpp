@@ -100,17 +100,25 @@ Win32_Socket* WNet_GetFreeSocket(i32* socketIndexResult)
 //////////////////////////////////////////////////////////////////////////
 i32 Net_SendTo(
     i32 transmittingSocketIndex,
-    char* address,
-    u16 port, char* data,
+    ZNetAddress* address,
+    u16 port, u8* data,
     i32 dataSize)
 {
+    char asciAddress[32];
+    sprintf_s(asciAddress, 32, "%d.%d.%d.%d",
+        address->ip4Bytes[0],
+        address->ip4Bytes[1],
+        address->ip4Bytes[2],
+        address->ip4Bytes[3]
+    );
+
     Win32_Socket* winSock = WNet_GetActiveSocket(transmittingSocketIndex);
     //printf("Port %d Sending %d bytes to %s:%d\n", winSock->port, dataSize, address, port);
 	sockaddr_in toAddress;
     toAddress.sin_port = htons(port);
     toAddress.sin_family = AF_INET;
     //toAddress.sin_addr.S_un.S_addr = 
-    InetPton(AF_INET, address, &toAddress.sin_addr.S_un.S_addr);
+    InetPton(AF_INET, asciAddress, &toAddress.sin_addr.S_un.S_addr);
     
     i32 toAddressSize = sizeof(toAddress);
     
@@ -118,7 +126,7 @@ i32 Net_SendTo(
 
     i32 sendResult = sendto(
         winSock->socket,
-        data,
+        (char*)data,
         dataSize,
         0,
         (sockaddr*)&toAddress,
@@ -131,7 +139,7 @@ i32 Net_SendTo(
         Net_PrintNetworkError(errorCode);
         if (errorCode == NET_ERROR_ADDRESS_NOT_AVAILABLE)
         {
-            printf("    %s\n", address);
+            printf("    %s\n", asciAddress);
         }
     }
     //printf("-");

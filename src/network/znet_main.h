@@ -12,28 +12,38 @@ i32 ZNet_IsServer(ZNetHandle* handle)
     return (net->state == ZNET_STATE_SERVER);
 }
 
-void ZNet_EnableQualitySimulation(i32 minMilliSeconds, i32 maxMilliSeconds, f32 packetLossPercentage)
+void ZNet_EnableQualitySimulation(
+    i32 minMilliSeconds,
+    i32 maxMilliSeconds,
+    f32 packetLossPercentage)
 {
     
 }
 
-i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 selfPort)
+i32 ZNet_StartSession(
+    ZNetHandle* handle,
+    u8 netMode,
+    ZNetAddress* remotePeerAddress,
+    u16 selfPort)
 {
     ZNET_HANDLE_2_NET(handle)
     // TODO: Make sure rand is somehow mixed up by this point
     // or server and client random numbers can exactly align!
     // Currently done by seeding it from the address of argv, but bleh.
-    NET_ASSERT(net, (net->state == 0), "Cannot start a new network session until current is shutdown!");
+    NET_ASSERT(net, (net->state == 0),
+        "Cannot start a new network session until current is shutdown!");
     net->isListening = 0;
 	u16 sockedOpened = 1;
     i32 result = COM_ERROR_NONE;
     switch (netMode)
     {
+        #if 0
         case NETMODE_SINGLE_PLAYER:
         {
             printf("ZNet - SINGLE PLAYER, no socket\n");
             net->isListening = 1;
-            net->socketIndex = net->platform.OpenSocket(selfPort, &sockedOpened);
+            net->socketIndex = net->platform.OpenSocket(
+                selfPort, &sockedOpened);
             if (net->socketIndex < 0)
             {
                 result = COM_ERROR_OPEN_SOCKET_FAILED;
@@ -41,7 +51,7 @@ i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 
             }
             net->state = ZNET_STATE_SERVER;
         } break;
-
+        #endif
         case NETMODE_DEDICATED_SERVER:
         {
             printf("ZNet - DEDICATED SERVER on port %d\n", selfPort);
@@ -56,7 +66,7 @@ i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 
             net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
-
+        #if 0
         case NETMODE_LISTEN_SERVER:
         {
             printf("ZNet - LISTEN SERVER on port %d\n", selfPort);
@@ -73,12 +83,20 @@ i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 
             net->isListening = 1;
             net->state = ZNET_STATE_SERVER;
         } break;
-
+        #endif
         case NETMODE_CLIENT:
         {
+            Assert(remotePeerAddress);
             printf("ZNet - CLIENT\n");
-            
-            net->socketIndex = net->platform.OpenSocket(0, &sockedOpened);
+            if (remotePeerAddress->port == 666)
+            {
+                // server is same process!
+                net->socketIndex = net->platform.OpenSocket(667, &sockedOpened);
+            }
+            else
+            {
+                net->socketIndex = net->platform.OpenSocket(0, &sockedOpened);
+            }
             printf("ZNet socket index: %d\n", net->socketIndex);
             if (net->socketIndex < 0)
             {
@@ -90,7 +108,7 @@ i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* address, u16 
             ZNetConnection* conn = ZNet_GetFreeConnection(net);
             net->state = ZNET_STATE_CONNECTING;
             conn->type = ZNET_CONN_TYPE_CLIENT2SERVER;
-            conn->remoteAddress = *address;
+            conn->remoteAddress = *remotePeerAddress;
             net->client2ServerId = conn->id;
             printf("CL on port %d connecting to \"%d.%d.%d.%d:%d\"\n",
                 selfPort,
@@ -122,18 +140,21 @@ void ZNet_EndSession(ZNetHandle* handle)
 
 internal void ZNet_SendActual(ZNet* net, ZNetAddress* address, u8* bytes, i32 numBytes)
 {
-    char asciAddress[32];
-    sprintf_s(asciAddress, 32, "%d.%d.%d.%d",
-        address->ip4Bytes[0],
-        address->ip4Bytes[1],
-        address->ip4Bytes[2],
-        address->ip4Bytes[3]
-    );
+    net->platform.SendTo(net->socketIndex, address, address->port, bytes, numBytes);
+
+    //char asciAddress[32];
+    //sprintf_s(asciAddress, 32, "%d.%d.%d.%d",
+    //    address->ip4Bytes[0],
+    //    address->ip4Bytes[1],
+    //    address->ip4Bytes[2],
+    //    address->ip4Bytes[3]
+    //);
+
     //printf("Sending %d bytes to %s:%d\n", numBytes, asciAddress, address->port);
     //printf("SEND: ");
     //COM_PrintBytes(bytes, (u16)numBytes, 16);
     //printf(">");
-    net->platform.SendTo(net->socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
+    //net->platform.SendTo(net->socketIndex, asciAddress, address->port, (char*)bytes, numBytes);
 }
 
 internal void ZNet_Send(ZNet* net, ZNetAddress* address, u8* bytes, i32 numBytes)
@@ -427,6 +448,7 @@ internal void ZNet_ReadSocket(ZNet* net)
 	    i32 packetError = ZNet_ParsePacketHeader((u8*)mem.ptrMemory, bytesRead, &address, &packet);
 	    if (packetError)
 	    {
+            COM_PrintBytes((u8*)mem.ptrMemory, bytesRead, 24);
 	    	switch (packetError)
 	    	{
 	    		case 1: printf("ZNET Packet Protocol mismatch\n"); break;
