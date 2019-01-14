@@ -508,6 +508,8 @@ i32 ZNet_Tick(ZNetHandle* handle, f32 deltaTime)
                 if (conn->id == 0) { continue; }
                 if(conn->flags & ZNET_CONNECTION_FLAG_LOCAL) { continue; }
 
+                // tick keep alives
+                #if 0
                 conn->keepAliveSendTicks++;
 				conn->timeSinceLastMessage += deltaTime;
                 if (conn->timeSinceLastMessage > ZNET_CONNECTION_TIMEOUT_SECONDS)
@@ -516,6 +518,7 @@ i32 ZNet_Tick(ZNetHandle* handle, f32 deltaTime)
                     ZNet_DisconnectPeer(net, conn, "Connection lost");
                     continue;
                 }
+                #endif
 
                 //ZNet_SendKeepAlive(net, conn);
             }

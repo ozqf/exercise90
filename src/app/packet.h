@@ -28,9 +28,9 @@ struct PacketDescriptor
 // TODO: Replace this with a compacted version eventually
 struct PacketHeader
 {
-    u32 transmissionTickNumber;
+    i32 transmissionTickNumber;
 	f32 transmissionTime;
-    u32 lastReceivedTickNumber;
+    i32 lastReceivedTickNumber;
     u16 reliableOffset;
     u16 unreliableOffset;
 };
@@ -50,4 +50,33 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 {
     *(PacketHeader*)ptr = *h;
 	return sizeof(PacketHeader);
+}
+
+internal i32 Packet_WriteFromStream(
+	NetStream* stream, u8* buf, i32 capacity, f32 ellapsed,
+	i32 tickNumber, i32 lastReceivedTick)
+{
+	PacketHeader h = {};
+	h.transmissionTickNumber = tickNumber;
+	h.transmissionTime = ellapsed;
+	h.lastReceivedTickNumber = lastReceivedTick;
+	
+	u8* payloadStart = buf + Packet_GetHeaderSize();
+	u8* payloadEnd = buf + capacity;
+	u8* cursor = payloadStart;
+	
+	// iterate reliable output buffer, loading as many commands as possible
+	u8* streamRead = stream->outputBuffer.ptrStart;
+	u8* streamEnd = stream->outputBuffer.ptrWrite;
+	while (streamRead < streamEnd)
+	{
+		Command* cmd = (Command*)streamRead;
+		Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
+		streamRead += cmd->size;
+		if (cmd->size <= (streamEnd - streamRead))
+		{
+			cursor += COM_COPY(cmd, cursor, cmd->size);
+		}
+	}
+	return (cursor - buf);
 }

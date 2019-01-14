@@ -100,6 +100,12 @@ internal void Stream_ClearReceivedOutput(
 
 internal void Stream_EnqueueReliableOutput(NetStream* stream, Command* cmd)
 {
+    i32 error = Cmd_Validate(cmd);
+    if (error != COM_ERROR_NONE)
+    {
+        printf("STREAM cmd for enqueue is invalid. Code %d\n", error);
+        return;
+    }
     cmd->sequence = stream->outputSequence++;
     ByteBuffer* b = &stream->outputBuffer;
     Assert(b->Space() >= cmd->size);

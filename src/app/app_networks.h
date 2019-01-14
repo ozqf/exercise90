@@ -41,7 +41,7 @@ internal i32 App_CLNet_CloseSocket(i32 socketIndex)
 
 internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
 {
-    printf("CL Read Socket %d\n", socketIndex);
+    //printf("CL Read Socket %d\n", socketIndex);
 
     u8* bytes;
     i32 numBytes;
@@ -51,7 +51,7 @@ internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
         // Send to Server network
         dataPtr->ptrMemory = (void*)bytes;
         dataPtr->size = numBytes;
-        printf("  CL READING %d BYTES\n", numBytes);
+        //printf("  CL READING %d BYTES\n", numBytes);
         *sender = {};
         sender->port = APP_SERVER_LOOPBACK_PORT;
         return numBytes;
@@ -65,7 +65,7 @@ internal i32  App_CLNet_SendTo(
 {
     if (port == APP_SERVER_LOOPBACK_PORT)
     {
-        printf(" Client sending %d bytes on loopback port\n", dataSize);
+        //printf(" Client sending %d bytes on loopback port\n", dataSize);
         g_localServerSocket.SendPacket(address, (u8*)data, (u16)dataSize);
         return COM_ERROR_NONE;
     }
@@ -158,7 +158,7 @@ internal i32 App_SVNet_CloseSocket(i32 socketIndex)
 
 internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
 {
-    printf("SV Read Socket %d\n", socketIndex);
+    //printf("SV Read Socket %d\n", socketIndex);
 
     u8* bytes;
     i32 numBytes;
@@ -170,7 +170,7 @@ internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
         dataPtr->size = numBytes;
         *sender = {};
         sender->port = APP_CLIENT_LOOPBACK_PORT;
-        printf("  SV READING %d BYTES\n", numBytes);
+        //printf("  SV READING %d BYTES\n", numBytes);
         return numBytes;
     }
     return 0;
@@ -182,7 +182,7 @@ internal i32  App_SVNet_SendTo(
 {
     if (port == APP_CLIENT_LOOPBACK_PORT)
     {
-        printf(" Server sending %d bytes on loopback port\n", dataSize);
+        //printf(" Server sending %d bytes on loopback port\n", dataSize);
         g_localClientSocket.SendPacket(address, (u8*)data, (u16)dataSize);
         return COM_ERROR_NONE;
     }

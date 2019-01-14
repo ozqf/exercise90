@@ -12,6 +12,8 @@ internal MallocList g_mallocs;
 internal UserList g_users;
 internal SimScene g_sim;
 internal i32 g_isRunning = 0;
+internal i32 g_ticks = 0;
+internal f32 g_ellapsed = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
 internal void SV_AllocateUserStreams(NetStream* stream, i32 capacityPerBuffer)
@@ -118,7 +120,7 @@ void SV_Init()
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
     Sim_InitScene(&g_sim, a, b, mem, maxEnts);
     SV_LoadTestScene();
-    SV_ListAllocs();
+    //SV_ListAllocs();
 }
 
 void SV_Shutdown()
@@ -176,11 +178,38 @@ u8*                 Stream_PacketToInput(NetStream* s, u8* ptr)
 
 */
 
+void SV_WriteUserPacket(User* user)
+{
+	// Send ping
+	CmdPing ping = {};
+	// TODO: Stream enqueue will set the sequence for us
+	// so remove sending 0 here.
+	Cmd_Prepare(&ping.header, g_ticks, 0);
+	ping.sendTime = g_ellapsed;
+	Stream_EnqueueReliableOutput(&user->stream, &ping.header);
+	
+	// enqueue
+	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
+	
+	u8 buf[1400];
+	Packet_WriteFromStream(&user->stream, buf, 1400, g_ellapsed, g_ticks, 0);
+}
+
 void SV_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
-
-    ByteBuffer* buf = App_GetLocalClientPacketForWrite();
+	
+	
+	for (i32 i = 0; i < g_users.max; ++i)
+	{
+		User* user = &g_users.items[i];
+		if (user->state == USER_STATE_FREE) { continue; }
+		
+		
+	}
+	
+	g_ellapsed += deltaTime;
+    g_ticks++;
 }
 
 void SV_PopulateRenderScene(

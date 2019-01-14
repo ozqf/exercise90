@@ -14,7 +14,7 @@
 #define APP_SESSION_TYPE_SINGLE_PLAYER 1
 
 internal PlatformInterface g_platform = {};
-internal i32 g_simFrameRate = 5;
+internal i32 g_simFrameRate = 1;
 internal f32 g_simFrameAcculator = 0;
 internal Heap g_heap;
 

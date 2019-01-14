@@ -43,7 +43,7 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 /***************************************
 * Callbacks from net connection module
 ***************************************/
-internal void Net_ConnectionAccepted(ZNetConnectionInfo* info)
+/*internal void Net_ConnectionAccepted(ZNetConnectionInfo* info)
 {
 
 }
@@ -61,7 +61,7 @@ internal void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numByt
 internal void Net_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
 {
 
-}
+}*/
 #if 0
 internal ZNetPlatformFunctions Net_GetPlatformFunctions()
 {
@@ -245,6 +245,7 @@ internal void App_Update(PlatformTime* time)
     f32 interval = App_GetSimFrameInterval();
     if (g_simFrameAcculator > interval)
     {
+        printf("\n === APP TICK (%.4fs) ===\n", interval);
         g_simFrameAcculator -= interval;
         
         if (g_isRunningServer)

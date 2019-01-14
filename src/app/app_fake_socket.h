@@ -113,7 +113,7 @@ struct FakeSocket
         handles[i] = h;
         u8* ptr = (u8*)h + sizeof(FakeSocketPacketHeader);
         COM_COPY(data, ptr, numBytes);
-        printf("Fake Socket storing %d bytes. Packet delay: %.2f\n", h->size, h->tick);
+        //printf("Fake Socket storing %d bytes. Packet delay: %.2f\n", h->size, h->tick);
     }
 
     void Tick(f32 deltaTime)
@@ -151,7 +151,7 @@ struct FakeSocket
             *numBytes = h->size;
             *from = h->address;
             *ptr = (u8*)h + sizeof(FakeSocketPacketHeader);
-            printf("FAKESOCK: Reading %d bytes\n", h->size);
+            //printf("FAKESOCK: Reading %d bytes\n", h->size);
             return;
             
             //u8* ptr = (u8*)h + sizeof(FakeSocketPacketHeader);

@@ -15,7 +15,7 @@
 #define CMD_INVALID_SIZE 0
 
 // BASE FOR ALL COMMANDS
-// All commands MUST have a SimCmd as their first member, for
+// All commands MUST have a Command struct as their first member, for
 // pointer casting
 struct Command
 {
@@ -28,6 +28,13 @@ struct Command
     // Controls execution time and order
     u32 tick;
     i32 sequence;
+};
+
+struct CmdPing
+{
+	Command header;
+	i32 pingSequence;
+    f32 sendTime;
 };
 
 struct CmdImpulse
@@ -73,7 +80,6 @@ internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
     cmd->type = CMD_TYPE_NULL;
     cmd->size = CMD_INVALID_SIZE;
 }
-
 
 internal void Cmd_InitSetScene(CmdSetScene* cmd, i32 tick, i32 sequence, i32 sceneId)
 {

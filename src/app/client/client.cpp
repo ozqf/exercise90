@@ -7,6 +7,7 @@
 
 internal i32 g_isRunning = 0;
 internal SimScene g_sim;
+internal i32 g_ticks = 0;
 i32 CL_IsRunning() { return g_isRunning; }
 
 #define CL_MAX_ALLOCATIONS 256
@@ -122,6 +123,7 @@ void CL_ReadReliableCommands(NetStream* stream)
 void CL_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
+    g_ticks++;
 }
 
 void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)

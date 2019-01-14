@@ -168,8 +168,8 @@ i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
     //SimEntId id = Sim_ReserveFreeEntity(scene);
     def->serial = Sim_ReserveRemoteEntitySerial(scene, def->isLocal);
 
-    printf("SIM Enqueue Add entity %d at %.3f, %.3f\n",
-        def->serial, def->pos[0], def->pos[1]);
+    //printf("SIM Enqueue Add entity %d at %.3f, %.3f\n",
+    //    def->serial, def->pos[0], def->pos[1]);
 
     SimCmdAddEntity cmd = {};
     Sim_PrepareCommand(scene, (SimCmd*)&cmd);
@@ -309,7 +309,7 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
                 || cmd->def.scale[1] == 0
                 || cmd->def.scale[2] == 0)
             {
-                printf("  bad scale\n");
+                //printf("  bad scale\n");
                 badScale = 1;
             }
             if (!badScale)
