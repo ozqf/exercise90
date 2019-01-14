@@ -41,7 +41,21 @@ internal i32 App_CLNet_CloseSocket(i32 socketIndex)
 
 internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* dataPtr)
 {
-    printf("CL Reading\n");
+    printf("CL Read Socket %d\n", socketIndex);
+
+    u8* bytes;
+    i32 numBytes;
+    g_localClientSocket.Read(&bytes, &numBytes, sender);
+    if (bytes != NULL)
+    {
+        // Send to Server network
+        dataPtr->ptrMemory = (void*)bytes;
+        dataPtr->size = numBytes;
+        printf("  CL READING %d BYTES\n", numBytes);
+        *sender = {};
+        sender->port = APP_SERVER_LOOPBACK_PORT;
+        return numBytes;
+    }
     return 0;
     //return g_platform.Net_Read(socketIndex, sender, dataPtr);
 }
@@ -148,13 +162,14 @@ internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
 
     u8* bytes;
     i32 numBytes;
-    ZNetAddress address;
-    g_localServerSocket.Read(&bytes, &numBytes, &address);
+    g_localServerSocket.Read(&bytes, &numBytes, sender);
     if (bytes != NULL)
     {
         // Send to Server network
         dataPtr->ptrMemory = (void*)bytes;
         dataPtr->size = numBytes;
+        *sender = {};
+        sender->port = APP_CLIENT_LOOPBACK_PORT;
         printf("  SV READING %d BYTES\n", numBytes);
         return numBytes;
     }
@@ -165,7 +180,13 @@ internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
 internal i32  App_SVNet_SendTo(
     i32 transmittingSocketIndex, ZNetAddress* address, u16 port, u8* data, i32 dataSize)
 {
-    printf("SV Send to socket %d\n", address->port);
+    if (port == APP_CLIENT_LOOPBACK_PORT)
+    {
+        printf(" Server sending %d bytes on loopback port\n", dataSize);
+        g_localClientSocket.SendPacket(address, (u8*)data, (u16)dataSize);
+        return COM_ERROR_NONE;
+    }
+    printf(" Server sending %d bytes on port %d\n", dataSize, port);
     return 0;
     //return g_platform.Net_SendTo(transmittingSocketIndex, address, port, data, dataSize);
 }

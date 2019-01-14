@@ -249,12 +249,14 @@ internal void App_Update(PlatformTime* time)
         
         if (g_isRunningServer)
         {
+            g_localServerSocket.Tick(interval);
             ZNet_Tick(g_serverNet, interval);
             SV_Tick(interval);
         }
 
         if (g_isRunningClient)
         {
+            g_localClientSocket.Tick(interval);
             ZNet_Tick(g_clientNet, interval);
             CL_Tick(interval);
         }
