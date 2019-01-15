@@ -24,8 +24,6 @@ struct TestCommand2
     u16 yaw;
 };
 
-NetStream g_stream;
-
 void PrintCommand(Command* header)
 {
     printf("Read Cmd type %d. sequence %d, tick %d\n",
@@ -62,17 +60,34 @@ void TestStreamToPacket(NetStream* s, u8* packet, i32 packetBytes)
     TransmissionRecord* rec = Stream_AssignTransmissionRecord(s->transmissions, packetSequence);
 }
 
+void AllocStream(NetStream* stream, i32 size)
+{
+	*stream = {};
+	
+    stream->inputBuffer = Buf_FromMalloc(malloc(size), size);
+    Buf_Clear(&stream->inputBuffer);
+    stream->outputBuffer = Buf_FromMalloc(malloc(size), size);
+    Buf_Clear(&stream->outputBuffer);
+}
+
 void TestCommandStream()
 {
     printf("=== Test command streams ===\n");
 
     // init buffers
-    i32 size = KiloBytes(64);
-    g_stream = {};
-    g_stream.inputBuffer = Buf_FromMalloc(malloc(size), size);
-    Buf_Clear(&g_stream.inputBuffer);
-    g_stream.outputBuffer = Buf_FromMalloc(malloc(size), size);
-    Buf_Clear(&g_stream.outputBuffer);
+	i32 size = KiloBytes(64);
+	
+	NetStream reliableStream;
+	AllocStream(&reliableStream, size);
+	
+	NetStream unreliableStream;
+	AllocStream(&unreliableStream, size);
+	
+    //reliableStream = {};
+    //reliableStream.inputBuffer = Buf_FromMalloc(malloc(size), size);
+    //Buf_Clear(&reliableStream.inputBuffer);
+    //reliableStream.outputBuffer = Buf_FromMalloc(malloc(size), size);
+    //Buf_Clear(&reliableStream.outputBuffer);
 
     // Enqueue command
     TestCommand1 cmd = {};
@@ -81,7 +96,7 @@ void TestCommandStream()
     cmd.header.size = sizeof(TestCommand1);
     cmd.data1 = 1234;
     cmd.data2 = 5678;
-    Stream_EnqueueReliableOutput(&g_stream, &cmd.header);
+    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
     
     // Enqueue command
     TestCommand2 cmd2 = {};
@@ -90,26 +105,26 @@ void TestCommandStream()
     cmd2.header.size = sizeof(TestCommand2);
     cmd2.pos[0] = 8642;
     cmd2.pos[2] = 9753;
-    Stream_EnqueueReliableOutput(&g_stream, &cmd2.header);
+    Stream_EnqueueReliableOutput(&reliableStream, &cmd2.header);
 
     // Enqueue command
     cmd.data1 = 4321;
     cmd.data2 = 8765;
-    Stream_EnqueueReliableOutput(&g_stream, &cmd.header);
+    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
 
     // Enqueue command
     cmd.data1 = 1357;
     cmd.data2 = 2468;
-    Stream_EnqueueReliableOutput(&g_stream, &cmd.header);
+    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
 
     PrintCommandBuffer(
-        g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+        reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
 	
 	i32 sequence = 1;
 	#if 0
 	printf("Find output command seq %d\n", sequence);
 	Command* command = Stream_FindMessageBySequence(
-		g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written(), sequence);
+		reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written(), sequence);
 	if (command)
 	{
 		PrintCommand(command);
@@ -119,19 +134,41 @@ void TestCommandStream()
 		printf("Couldn't find output cmd %d\n", sequence);
 	}
     #endif
-	//Stream_DeleteCommand(&g_stream.outputBuffer, command);
+	//Stream_DeleteCommand(&reliableStream.outputBuffer, command);
 	//printf("Deleted command %d\n", sequence);
-	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	//PrintCommandBuffer(reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
 	
 	//printf("Deleted command %d\n", 0);
-	//Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 0);
-	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	//Stream_DeleteCommandBySequence(&reliableStream.outputBuffer, 0);
+	//PrintCommandBuffer(reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
 	
 	
-	//Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 2);
-	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	//Stream_DeleteCommandBySequence(&reliableStream.outputBuffer, 2);
+	//PrintCommandBuffer(reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
     printf("\n");
     u8 buf[1400];
-    i32 written = Packet_WriteFromStream(&g_stream, buf, 1400, 0, 3, 1);
-    printf("Packet wrote %d bytes\n", written);
+    i32 written = Packet_WriteFromStream(
+		&reliableStream, &unreliableStream, buf, 1400, 0, 3, 1);
+    
+    PacketDescriptor p;
+    
+    i32 result = Packet_InitDescriptor(&p, buf, written);
+    printf("Packet descriptor init result: %d\n", result);
+    if (result == COM_ERROR_NONE)
+    {
+        PrintCommandBuffer((p.ptr + p.reliableOffset), p.numReliableBytes);
+    }
+    printf("Done!\n");
+
+    // Hey lets explore endianess
+    printf("0X%X\n", 0xDEADBEEF);
+    u8 bytes[4];
+    bytes[0] = 0xDE;
+    bytes[1] = 0xAD;
+    bytes[2] = 0xBE;
+    bytes[3] = 0xEF;
+    printf("0X%X%X%X%X\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+
+    *(i32*)bytes = 0xDEADBEEF;
+    printf("0X%X%X%X%X\n", bytes[3], bytes[2], bytes[1], bytes[0]);
 }

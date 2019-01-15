@@ -2,22 +2,26 @@
 
 #include "../common/com_module.h"
 
+
+
 // Fully unpacked descriptor for use by client/server streams
 struct PacketDescriptor
 {
     u8* ptr;
 	u8* cursor;
-    u16 size;
+    i32 size;
 	
 	u32 transmissionSimFrameNumber;
 	f32 transmissionSimTime;
 	// if 0, no data
 	// num bytes is offset gap to unreliable section - sync check size.
-	u16 reliableOffset;
-	u32 deserialiseCheck;
+	i32 reliableOffset;
+	i32 numReliableBytes;
+	i32 deserialiseCheck;
 	// if 0, no data.
 	// num bytes is size of packet - offset.
-	u16 unreliableOffset;
+	i32 unreliableOffset;
+	i32 numUnreliableBytes;
 
 	i32 Space()
 	{
@@ -31,8 +35,8 @@ struct PacketHeader
     i32 transmissionTickNumber;
 	f32 transmissionTime;
     i32 lastReceivedTickNumber;
-    u16 reliableOffset;
-    u16 unreliableOffset;
+    u16 numReliableBytes;
+    u16 numUnreliableBytes;
 };
 
 internal i32 Packet_GetHeaderSize()
@@ -53,7 +57,8 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 }
 
 internal i32 Packet_WriteFromStream(
-	NetStream* stream, u8* buf, i32 capacity, f32 ellapsed,
+	NetStream* stream, NetStream* unreliableStream,
+	u8* buf, i32 capacity, f32 ellapsed,
 	i32 tickNumber, i32 lastReceivedTick)
 {
 	PacketHeader h = {};
@@ -82,5 +87,41 @@ internal i32 Packet_WriteFromStream(
 			cursor += COM_COPY(cmd, cursor, cmd->size);
 		}
 	}
-	return (cursor - payloadStart);
+	h.numReliableBytes = (u16)(cursor - payloadStart);
+	i32 reliableWritten = h.numReliableBytes;
+	cursor += COM_WriteI32(COM_SENTINEL_B, cursor);
+
+	h.numUnreliableBytes = 0;
+
+	*(PacketHeader*)buf = h;
+	
+	printf("Packet Wrote %d reliable bytes\n", reliableWritten);
+	i32 totalWritten = (cursor - buf);
+	printf("Packet Wrote %d total bytes\n", totalWritten);
+	return totalWritten;
+}
+
+internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numBytes)
+{
+	printf("=== Build packet descriptor (%d bytes)===\n", numBytes);
+	COM_PrintBytesHex(buf, numBytes, 16);
+	*packet = {};
+	packet->ptr = buf;
+	packet->size = numBytes;
+	PacketHeader* h = (PacketHeader*)buf;
+	packet->numReliableBytes = h->numReliableBytes;
+	packet->numUnreliableBytes = h->numUnreliableBytes;
+	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
+	printf("Reliable bytes: %d\n", packet->numReliableBytes);
+	
+	i32 syncOffset  = (packet->reliableOffset + packet->numReliableBytes);
+	i32* syncCheckCursor = (i32*)(buf + syncOffset);
+	packet->deserialiseCheck = *syncCheckCursor;
+	if (packet->deserialiseCheck != COM_SENTINEL_B)
+	{
+		*packet = {};
+		return COM_ERROR_DESERIALISE_FAILED;
+	}
+
+	return COM_ERROR_NONE;
 }

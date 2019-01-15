@@ -71,6 +71,9 @@ log_message( foo == 7, "x %d", x)
 
 #define F32_EPSILON 1.19209290E-07F // decimal constant
 
+#define COM_SENTINEL 0xDEADBEEF
+#define COM_SENTINEL_B 0xF0BAF0BA
+
 #define DLL_EXPORT __declspec(dllexport)
 
 #define COM_ERROR_NONE 0

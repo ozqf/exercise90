@@ -26,7 +26,7 @@ void COM_PrintBytes(u8* bytes, i32 numBytes, i32 bytesPerRow)
     i32 count = 0;
     while (read < end)
     {
-        printf("%d, ", *read);
+        printf("%03d, ", *read);
         read++;
         if (++count >= bytesPerRow)
         {
@@ -36,7 +36,7 @@ void COM_PrintBytes(u8* bytes, i32 numBytes, i32 bytesPerRow)
     printf("\n");
 }
 
-void COM_PrintBytesHex(u8* bytes, u16 numBytes, i32 bytesPerRow)
+void COM_PrintBytesHex(u8* bytes, i32 numBytes, i32 bytesPerRow)
 {
     u8* read = bytes;
     if (bytesPerRow <= 0)
@@ -47,11 +47,12 @@ void COM_PrintBytesHex(u8* bytes, u16 numBytes, i32 bytesPerRow)
     i32 count = 0;
     while (read < end)
     {
-        printf("%X, ", *read);
+        printf("%02X, ", *read);
         read++;
         if (++count >= bytesPerRow)
         {
             count = 0;
+            printf("\n");
         }
     }
     printf("\n");
