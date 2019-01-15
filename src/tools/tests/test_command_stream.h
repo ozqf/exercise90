@@ -106,7 +106,7 @@ void TestCommandStream()
         g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
 	
 	i32 sequence = 1;
-	
+	#if 0
 	printf("Find output command seq %d\n", sequence);
 	Command* command = Stream_FindMessageBySequence(
 		g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written(), sequence);
@@ -118,15 +118,20 @@ void TestCommandStream()
 	{
 		printf("Couldn't find output cmd %d\n", sequence);
 	}
-	Stream_DeleteCommand(&g_stream.outputBuffer, command);
-	printf("Deleted command %d\n", sequence);
-	PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+    #endif
+	//Stream_DeleteCommand(&g_stream.outputBuffer, command);
+	//printf("Deleted command %d\n", sequence);
+	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
 	
-	printf("Deleted command %d\n", 0);
-	Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 0);
-	PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	//printf("Deleted command %d\n", 0);
+	//Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 0);
+	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
 	
 	
-	Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 2);
-	PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+	//Stream_DeleteCommandBySequence(&g_stream.outputBuffer, 2);
+	//PrintCommandBuffer(g_stream.outputBuffer.ptrStart, g_stream.outputBuffer.Written());
+    printf("\n");
+    u8 buf[1400];
+    i32 written = Packet_WriteFromStream(&g_stream, buf, 1400, 0, 3, 1);
+    printf("Packet wrote %d bytes\n", written);
 }

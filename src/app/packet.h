@@ -68,15 +68,19 @@ internal i32 Packet_WriteFromStream(
 	// iterate reliable output buffer, loading as many commands as possible
 	u8* streamRead = stream->outputBuffer.ptrStart;
 	u8* streamEnd = stream->outputBuffer.ptrWrite;
+	printf("Packet reading %d bytes of input\n", (streamEnd - streamRead));
 	while (streamRead < streamEnd)
 	{
 		Command* cmd = (Command*)streamRead;
 		Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
 		streamRead += cmd->size;
-		if (cmd->size <= (streamEnd - streamRead))
+		//i32 space = (streamEnd - streamRead);
+		if (cmd->size <= (payloadEnd - payloadStart))
 		{
+			printf("Packet copying command seq %d (%d bytes)\n",
+				cmd->sequence, cmd->size);
 			cursor += COM_COPY(cmd, cursor, cmd->size);
 		}
 	}
-	return (cursor - buf);
+	return (cursor - payloadStart);
 }
