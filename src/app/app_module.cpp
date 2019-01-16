@@ -36,6 +36,9 @@ internal FakeSocket g_localClientSocket;
 internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
+// Buffer used to feed commands into server every tick
+internal ByteBuffer g_serverPlatformInput;
+
 internal ByteBuffer g_localClientPacket;
 internal ByteBuffer g_localServerPacket;
 
@@ -55,6 +58,10 @@ void App_FatalError(char* msg, char* heading)
     printf("FATAL %s: %s\n", heading, msg);
     ILLEGAL_CODE_PATH
 }
+
+// App wide access to server input buffer... good idea?
+// TODO: No checks on whether this buffer is being read!
+internal ByteBuffer* GetServerInput() { return &g_serverPlatformInput; }
 
 #include "app_networks.h"
 #include "app_platform.h"

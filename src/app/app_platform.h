@@ -125,8 +125,10 @@ internal i32  App_Init()
     // Basic malloc tracker
     g_mallocs = COM_InitMallocList(g_mallocItems, APP_MAX_MALLOCS);
 
-    g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "CL Packet"), 64);
-    g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Packet"), 64);
+    i32 bufferSize = KiloBytes(64);
+
+    g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "CL Packet"), KiloBytes(64));
+    g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Packet"), KiloBytes(64));
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
@@ -141,6 +143,9 @@ internal i32  App_Init()
         App_CLNet_CreateOutputFunctions(),
         ZNET_SIM_MODE_NONE);
     g_localClientSocket.Init(0, 0, 0);
+
+    g_serverPlatformInput = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Input"), KiloBytes(64));
+
     
     g_serverNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "SV Conn");
     g_serverNet->memSize = znetInstanceSize;

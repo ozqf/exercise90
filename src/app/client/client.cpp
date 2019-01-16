@@ -15,7 +15,8 @@ internal void* g_allocations[CL_MAX_ALLOCATIONS];
 internal i32 g_bytesAllocated = 0;
 internal i32 g_numAllocations = 0;
 
-internal NetStream g_stream;
+internal NetStream g_reliableStream;
+internal NetStream g_unreliableStream;
 
 internal void* CL_Malloc(i32 numBytes)
 {
@@ -81,7 +82,11 @@ void CL_Init()
     Sim_InitScene(&g_sim, a, b, mem, maxEnts);
     CL_LoadTestScene();
 
-    COM_InitStream(&g_stream,
+    COM_InitStream(&g_reliableStream,
+        Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
+        Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
+    );
+    COM_InitStream(&g_unreliableStream,
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );

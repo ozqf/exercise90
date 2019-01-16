@@ -105,7 +105,7 @@ void TestCommandStream()
     cmd.header.size = sizeof(TestCommand1);
     cmd.data1 = 1234;
     cmd.data2 = 5678;
-    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
+    Stream_EnqueueOutput(&reliableStream, &cmd.header);
     
     // Enqueue command
     TestCommand2 cmd2 = {};
@@ -114,17 +114,17 @@ void TestCommandStream()
     cmd2.header.size = sizeof(TestCommand2);
     cmd2.pos[0] = 8642;
     cmd2.pos[2] = 9753;
-    Stream_EnqueueReliableOutput(&reliableStream, &cmd2.header);
+    Stream_EnqueueOutput(&reliableStream, &cmd2.header);
 
     // Enqueue command
     cmd.data1 = 4321;
     cmd.data2 = 8765;
-    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
+    Stream_EnqueueOutput(&reliableStream, &cmd.header);
 
     // Enqueue command
     cmd.data1 = 1357;
     cmd.data2 = 2468;
-    Stream_EnqueueReliableOutput(&reliableStream, &cmd.header);
+    Stream_EnqueueOutput(&reliableStream, &cmd.header);
 
     PrintCommandBuffer(
         reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
@@ -133,7 +133,7 @@ void TestCommandStream()
     Cmd_Prepare(&gfx.header, 3, 0);
     gfx.header.type = CMD_TYPE_GFX;
     gfx.header.size = sizeof(GFXExample);
-    Stream_EnqueueReliableOutput(&unreliableStream, &gfx.header);
+    Stream_EnqueueOutput(&unreliableStream, &gfx.header);
 
 
 	i32 sequence = 1;

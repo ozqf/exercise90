@@ -98,7 +98,7 @@ internal void Stream_ClearReceivedOutput(
     }
 }
 
-internal void Stream_EnqueueReliableOutput(NetStream* stream, Command* cmd)
+internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
 {
     i32 error = Cmd_Validate(cmd);
     if (error != COM_ERROR_NONE)

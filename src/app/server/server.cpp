@@ -16,7 +16,15 @@ internal i32 g_ticks = 0;
 internal f32 g_ellapsed = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
-internal void SV_AllocateUserStreams(NetStream* stream, i32 capacityPerBuffer)
+// this is the server's command buffer to execute next tick
+internal ByteBuffer g_platformInput;
+
+ByteBuffer* SV_GetPlatformInput()
+{
+    return &g_platformInput;
+}
+
+internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
 {
     if (stream->initialised) { return; }
     stream->initialised = 1;
@@ -28,6 +36,11 @@ internal void SV_AllocateUserStreams(NetStream* stream, i32 capacityPerBuffer)
         COM_Malloc(&g_mallocs, capacityPerBuffer, "User Input"),
         capacityPerBuffer
     );
+
+    g_appInput = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, capacityPerBuffer, "SV Input"),
+        capacityPerBuffer
+    );
 }
 
 UserIds SV_CreateLocalUser()
@@ -35,7 +48,8 @@ UserIds SV_CreateLocalUser()
     User* user = User_GetFree(&g_users);
     user->ids.privateId = 0xDEADDEAD;
     user->ids.publicId = g_users.nextPublicId++;
-    SV_AllocateUserStreams(&user->reliableStream, KiloBytes(64));
+    SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
+    SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
     UserIds ids = user->ids;
     printf("SV creating local user public %d private %d",
         ids.publicId, ids.privateId
@@ -141,11 +155,6 @@ void SV_EnqueueReliableOutput(User* user, Command* cmd)
     b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
 }
 
-void SV_BuildUserPacket(User* user, u8* buf, i32 capacity)
-{
-
-}
-
 /*
 i32                 Stream_BufferMessage(
                         ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
@@ -186,7 +195,7 @@ void SV_WriteUserPacket(User* user)
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_ellapsed;
-	Stream_EnqueueReliableOutput(&user->reliableStream, &ping.header);
+	Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
 	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
@@ -206,7 +215,7 @@ void SV_Tick(f32 deltaTime)
 		User* user = &g_users.items[i];
 		if (user->state == USER_STATE_FREE) { continue; }
 		
-		
+		SV_WriteUserPacket(user);
 	}
 	
 	g_ellapsed += deltaTime;

@@ -201,23 +201,14 @@ internal void App_SVNet_FatalError(char* msg, char* heading)
 ////////////////////////////////////////////////////////////////////////
 internal void App_SVNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
-
+    CmdUserJoined cmd;
+    Cmd_InitUserJoined(&cmd, 0, 0, conn->id);
+    Cmd_WriteToByteBuffer(SV_GetPlatformInput(), &cmd.header);
 }
 
-internal void App_SVNet_ConnectionDropped(ZNetConnectionInfo* conn)
-{
-
-}
-
-internal void App_SVNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
-{
-
-}
-
-internal void App_SVNet_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
-{
-
-}
+internal void App_SVNet_ConnectionDropped(ZNetConnectionInfo* conn) { }
+internal void App_SVNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes) { }
+internal void App_SVNet_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber) { }
 
 ////////////////////////////////////////////////////////////////////////
 // Server - build objects
