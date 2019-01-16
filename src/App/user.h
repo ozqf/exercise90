@@ -31,7 +31,8 @@ struct User
     i32 isLocal;
     ActorInput input;
 
-    NetStream stream;
+    NetStream reliableStream;
+    NetStream unreliableStream;
     // Clients are considered in sync mode until their acknowledged
     // reliable message queue Id is >= to this.
     // Set to u32 max value when client first connects.

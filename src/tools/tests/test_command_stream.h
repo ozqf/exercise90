@@ -7,6 +7,7 @@
 
 #define CMD_TYPE_TEST 1
 #define CMD_TYPE_TEST_2 2
+#define CMD_TYPE_GFX 3
 
 struct TestCommand1
 {
@@ -22,6 +23,14 @@ struct TestCommand2
     u16 pos[3];
     u16 pitch;
     u16 yaw;
+};
+
+struct GFXExample
+{
+    Command header;
+    u8 type;
+    u16 pos[3];
+    i32 normal;
 };
 
 void PrintCommand(Command* header)
@@ -120,6 +129,13 @@ void TestCommandStream()
     PrintCommandBuffer(
         reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
 	
+    GFXExample gfx = {};
+    Cmd_Prepare(&gfx.header, 3, 0);
+    gfx.header.type = CMD_TYPE_GFX;
+    gfx.header.size = sizeof(GFXExample);
+    Stream_EnqueueReliableOutput(&unreliableStream, &gfx.header);
+
+
 	i32 sequence = 1;
 	#if 0
 	printf("Find output command seq %d\n", sequence);
@@ -146,10 +162,43 @@ void TestCommandStream()
 	//Stream_DeleteCommandBySequence(&reliableStream.outputBuffer, 2);
 	//PrintCommandBuffer(reliableStream.outputBuffer.ptrStart, reliableStream.outputBuffer.Written());
     printf("\n");
+
+    #if 1
     u8 buf[1400];
+    ByteBuffer b = Buf_FromBytes(buf, 1400);
+
+    Packet_StartWrite(&b, 300, 5.3f, 143);
+
+    PacketHeader* h = (PacketHeader*)b.ptrStart;
+    printf("Header sim frame %d time: %.2f\n",
+        h->transmissionTickNumber,
+        h->transmissionTime);
+    
+    i32 reliableWritten = Packet_WriteFromStream(
+        &b, &reliableStream.outputBuffer, 600
+    );
+    b.ptrWrite += COM_WriteI32(COM_SENTINEL_B, b.ptrWrite);
+    i32 unreliableWritten = Packet_WriteFromStream(
+        &b, &unreliableStream.outputBuffer, 600);
+
+    Packet_FinishWrite(&b, reliableWritten, unreliableWritten);
+    i32 written = b.Written();
+    #endif
+
+
+
+    #if 0
+    // Write packet
+    u8 buf[1400];
+    u8* cursor = buf;
     i32 written = Packet_WriteFromStream(
 		&reliableStream, &unreliableStream, buf, 1400, 0, 3, 1);
     
+    printf("Packet has %d bytes remaining\n", (1400 - written));
+    #endif
+
+    #if 1
+    // Read
     PacketDescriptor p;
     
     i32 result = Packet_InitDescriptor(&p, buf, written);
@@ -158,17 +207,7 @@ void TestCommandStream()
     {
         PrintCommandBuffer((p.ptr + p.reliableOffset), p.numReliableBytes);
     }
+    printf("Packet has %d bytes remaining\n", p.Space());
+    #endif
     printf("Done!\n");
-
-    // Hey lets explore endianess
-    printf("0X%X\n", 0xDEADBEEF);
-    u8 bytes[4];
-    bytes[0] = 0xDE;
-    bytes[1] = 0xAD;
-    bytes[2] = 0xBE;
-    bytes[3] = 0xEF;
-    printf("0X%X%X%X%X\n", bytes[3], bytes[2], bytes[1], bytes[0]);
-
-    *(i32*)bytes = 0xDEADBEEF;
-    printf("0X%X%X%X%X\n", bytes[3], bytes[2], bytes[1], bytes[0]);
 }

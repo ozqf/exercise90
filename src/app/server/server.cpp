@@ -35,7 +35,7 @@ UserIds SV_CreateLocalUser()
     User* user = User_GetFree(&g_users);
     user->ids.privateId = 0xDEADDEAD;
     user->ids.publicId = g_users.nextPublicId++;
-    SV_AllocateUserStreams(&user->stream, KiloBytes(64));
+    SV_AllocateUserStreams(&user->reliableStream, KiloBytes(64));
     UserIds ids = user->ids;
     printf("SV creating local user public %d private %d",
         ids.publicId, ids.privateId
@@ -136,7 +136,7 @@ void SV_Shutdown()
 
 void SV_EnqueueReliableOutput(User* user, Command* cmd)
 {
-    ByteBuffer* b = &user->stream.outputBuffer;
+    ByteBuffer* b = &user->reliableStream.outputBuffer;
     Assert(b->Space() >= cmd->size)
     b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
 }
@@ -186,13 +186,14 @@ void SV_WriteUserPacket(User* user)
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_ellapsed;
-	Stream_EnqueueReliableOutput(&user->stream, &ping.header);
+	Stream_EnqueueReliableOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
 	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 	
 	u8 buf[1400];
-	Packet_WriteFromStream(&user->stream, buf, 1400, g_ellapsed, g_ticks, 0);
+	Packet_WriteFromStream(
+        &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
 }
 
 void SV_Tick(f32 deltaTime)

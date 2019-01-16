@@ -56,6 +56,55 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 	return sizeof(PacketHeader);
 }
 
+internal void Packet_StartWrite(
+	ByteBuffer* packet,
+	i32 simFrame,
+	f32 time,
+	i32 lastReceivedTickNumber)
+{
+	PacketHeader* h = (PacketHeader*)packet->ptrStart;
+	*h = {};
+	h->transmissionTickNumber = simFrame;
+	h->transmissionTime = time;
+	h->lastReceivedTickNumber = lastReceivedTickNumber;
+	h->numReliableBytes = 0;
+	h->numUnreliableBytes = 0;	
+	packet->ptrWrite = packet->ptrStart + Packet_GetHeaderSize();
+}
+
+internal void Packet_FinishWrite(
+	ByteBuffer* packet,
+	i32 numReliableBytes,
+	i32 numUnreliableBytes)
+{
+	PacketHeader* h = (PacketHeader*)packet->ptrStart;
+	h->numReliableBytes = (u16)numReliableBytes;
+	h->numUnreliableBytes = (u16)numUnreliableBytes;
+}
+
+// Return bytes written
+internal i32 Packet_WriteFromStream(
+	ByteBuffer* packet, ByteBuffer* stream, i32 maxBytes)
+{
+	u8* read = stream->ptrStart;
+	u8* end = stream->ptrWrite;
+	i32 written = 0;
+	while (read < end)
+	{
+		Command* cmd = (Command*)read;
+		Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
+		read += cmd->size;
+		if (cmd->size < maxBytes)
+		{
+			maxBytes -= cmd->size;
+			written += cmd->size;
+			packet->ptrWrite += COM_COPY(
+				cmd, packet->ptrWrite, cmd->size);
+		}
+	}
+	return written;
+}
+
 internal i32 Packet_WriteFromStream(
 	NetStream* stream, NetStream* unreliableStream,
 	u8* buf, i32 capacity, f32 ellapsed,
@@ -113,6 +162,7 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	packet->numUnreliableBytes = h->numUnreliableBytes;
 	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
 	printf("Reliable bytes: %d\n", packet->numReliableBytes);
+	printf("Unreliable bytes: %d\n", packet->numUnreliableBytes);
 	
 	i32 syncOffset  = (packet->reliableOffset + packet->numReliableBytes);
 	i32* syncCheckCursor = (i32*)(buf + syncOffset);
@@ -120,6 +170,8 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	if (packet->deserialiseCheck != COM_SENTINEL_B)
 	{
 		*packet = {};
+		printf("Deserialise check failed! Expected %X got %X\n",
+			COM_SENTINEL_B, packet->deserialiseCheck);
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
 
