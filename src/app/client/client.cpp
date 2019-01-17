@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include "../../common/com_module.h"
 #include "client.h"
+#include "../packet.h"
 #include "../../sim/sim.h"
 
 internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 internal i32 g_ticks = 0;
+internal f32 g_ellapsed = 0;
 i32 CL_IsRunning() { return g_isRunning; }
 
 #define CL_MAX_ALLOCATIONS 256
@@ -17,6 +19,7 @@ internal i32 g_numAllocations = 0;
 
 internal NetStream g_reliableStream;
 internal NetStream g_unreliableStream;
+internal UserIds g_ids;
 
 internal void* CL_Malloc(i32 numBytes)
 {
@@ -67,6 +70,7 @@ void CL_SetLocalUser(UserIds ids)
     printf("CL Set local user public %d private %d\n",
         ids.publicId, ids.privateId
     );
+    g_ids = ids;
 }
 
 void CL_Init()
@@ -99,6 +103,42 @@ void CL_Shutdown()
     // TODO: Free memory (:
 }
 
+internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
+{
+    u8* start = packet->ptrWrite;
+    // Send ping
+	CmdPing ping = {};
+	// TODO: Stream enqueue will set the sequence for us
+	// so remove sending 0 here.
+	Cmd_Prepare(&ping.header, g_ticks, 0);
+	ping.sendTime = g_ellapsed;
+    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+    return (packet->ptrWrite - start);
+}
+
+internal void CL_WritePacket()
+{
+    #if 1
+	printf("CL Write packet for user %d\n", g_ids.privateId);
+	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
+	
+	// enqueue
+	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
+	
+	u8 buf[1400];
+    ByteBuffer packet = Buf_FromBytes(buf, 1400);
+    Packet_StartWrite(&packet, 0, 0, 0);
+    packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
+    i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
+    Packet_FinishWrite(&packet, 0, unreliableWritten);
+    i32 total = packet.Written();
+    App_CL_SendTo(g_ids.privateId, buf, total);
+    
+	//Packet_WriteFromStream(
+    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    #endif
+}
+
 void CL_ReadReliableCommands(NetStream* stream)
 {
     ByteBuffer* b = &stream->inputBuffer;
@@ -128,7 +168,9 @@ void CL_ReadReliableCommands(NetStream* stream)
 void CL_Tick(f32 deltaTime)
 {
     Sim_Tick(&g_sim, deltaTime);
+    CL_WritePacket();
     g_ticks++;
+    g_ellapsed += deltaTime;
 }
 
 void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
