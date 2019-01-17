@@ -7,7 +7,7 @@
 #include "../stream.h"
 #include "../packet.h"
 
-void    SV_Init();
+void    SV_Init(ZNetPlatformFunctions* net);
 void    SV_Shutdown();
 i32     SV_IsRunning();
 void    SV_Tick(ByteBuffer* platformCommands, f32 deltaTime);

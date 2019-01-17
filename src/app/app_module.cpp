@@ -21,12 +21,12 @@ internal Heap g_heap;
 internal i32 g_isRunningClient = 0;
 internal i32 g_isRunningServer = 0;
 
-// fake socket (666)
+// fake socket (port 666)
 // Local server reads from this
 // Local client sends to this
 internal FakeSocket g_localServerSocket;
 
-// fake socket (667)
+// fake socket (port 667)
 // Local client reads from this
 // Local server sends to this
 internal FakeSocket g_localClientSocket;

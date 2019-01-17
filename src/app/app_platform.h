@@ -127,8 +127,8 @@ internal i32  App_Init()
 
     i32 bufferSize = KiloBytes(64);
 
-    g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "CL Packet"), KiloBytes(64));
-    g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Packet"), KiloBytes(64));
+    g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "CL Packet"), bufferSize);
+    g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
@@ -144,7 +144,7 @@ internal i32  App_Init()
         ZNET_SIM_MODE_NONE);
     g_localClientSocket.Init(0, 0, 0);
 
-    g_serverPlatformInput = Buf_FromMalloc(COM_Malloc(&g_mallocs, KiloBytes(64), "SV Input"), KiloBytes(64));
+    g_serverPlatformInput = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Input"), bufferSize);
 
     
     g_serverNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "SV Conn");
@@ -257,7 +257,8 @@ internal void App_Update(PlatformTime* time)
         {
             g_localServerSocket.Tick(interval);
             ZNet_Tick(g_serverNet, interval);
-            SV_Tick(interval);
+            SV_Tick(GetServerInput(), interval);
+            Buf_Clear(&g_serverPlatformInput);
         }
 
         if (g_isRunningClient)

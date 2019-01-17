@@ -11,6 +11,8 @@ internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
 internal MallocList g_mallocs;
 internal UserList g_users;
 internal SimScene g_sim;
+internal ZNetPlatformFunctions* g_net;
+
 internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
 internal f32 g_ellapsed = 0;
@@ -34,11 +36,6 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
     );
     stream->outputBuffer = Buf_FromMalloc(
         COM_Malloc(&g_mallocs, capacityPerBuffer, "User Input"),
-        capacityPerBuffer
-    );
-
-    g_appInput = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, capacityPerBuffer, "SV Input"),
         capacityPerBuffer
     );
 }
@@ -111,9 +108,10 @@ internal void SV_ListAllocs()
     printf("    Tally: %d bytes\n", tally);
 }
 
-void SV_Init()
+void SV_Init(ZNetPlatformFunctions* net)
 {
     printf("SV Init scene\n");
+    g_net = net;
 
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
@@ -187,26 +185,60 @@ u8*                 Stream_PacketToInput(NetStream* s, u8* ptr)
 
 */
 
-void SV_WriteUserPacket(User* user)
+internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 {
-	// Send ping
+    u8* start = packet->ptrWrite;
+    // Send ping
 	CmdPing ping = {};
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_ellapsed;
-	Stream_EnqueueOutput(&user->reliableStream, &ping.header);
+    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+    return (packet->ptrWrite - start);
+}
+
+internal void SV_WriteUserPacket(User* user)
+{
+    #if 1
+	
+	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
 	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 	
 	u8 buf[1400];
-	Packet_WriteFromStream(
-        &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    ByteBuffer packet = Buf_FromBytes(buf, 1400);
+    Packet_StartWrite(&packet, 0, 0, 0);
+    packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
+    i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
+    Packet_FinishWrite(&packet, 0, unreliableWritten);
+    g_et
+	//Packet_WriteFromStream(
+    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    #endif
 }
 
-void SV_Tick(f32 deltaTime)
+void SV_Tick(ByteBuffer* input, f32 deltaTime)
 {
+    u8* read = input->ptrStart;
+    u8* end = input->ptrWrite;
+    while(read < end)
+    {
+        Command* h = (Command*)read;
+        i32 err = Cmd_Validate(h);
+        Assert(err == COM_ERROR_NONE)
+        read += h->size;
+        switch (h->type)
+        {
+            case CMD_TYPE_USER_JOINED:
+            {
+                CmdUserJoined* cmd = (CmdUserJoined*)h;
+                printf("SV User %d joined\n", cmd->privateId);
+            } break;
+        }
+    }
+
     Sim_Tick(&g_sim, deltaTime);
 	
 	

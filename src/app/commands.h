@@ -71,13 +71,6 @@ struct CmdUserState
     i32 state;
 };
 
-internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
-{
-    Assert(!Cmd_Validate(cmd))
-    Assert(b->Space() >= cmd->size)
-    b->ptrWrite COM_COPY(cmd, b->ptrWrite, cmd->size);
-}
-
 internal inline i32 Cmd_Validate(Command* cmd)
 {
     if (cmd == NULL)  { return COM_ERROR_BAD_ARGUMENT; }
@@ -85,6 +78,13 @@ internal inline i32 Cmd_Validate(Command* cmd)
     if (cmd->type == 0) { return COM_ERROR_UNKNOWN_COMMAND; }
     if (cmd->size <= 0) { return COM_ERROR_BAD_SIZE; }
     return COM_ERROR_NONE;
+}
+
+internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
+{
+    Assert(!Cmd_Validate(cmd))
+    Assert(b->Space() >= cmd->size)
+    b->ptrWrite += COM_COPY(cmd, b->ptrWrite, cmd->size);
 }
 
 internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)

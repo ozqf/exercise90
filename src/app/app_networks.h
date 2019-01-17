@@ -48,7 +48,6 @@ internal i32 App_CLNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
     g_localClientSocket.Read(&bytes, &numBytes, sender);
     if (bytes != NULL)
     {
-        // Send to Server network
         dataPtr->ptrMemory = (void*)bytes;
         dataPtr->size = numBytes;
         //printf("  CL READING %d BYTES\n", numBytes);
@@ -127,6 +126,17 @@ internal ZNetOutputInterface App_CLNet_CreateOutputFunctions()
     return funcs;
 }
 
+// Server's transmission function
+void App_SV_SendTo(i32 connId, u8* data, i32 dataSize)
+{
+    ZNetConnection* conn = ZNet_GetConnectionById(&g_serverNet, connId);
+    if (conn->remoteAddress.port == APP_CLIENT_LOOPBACK_PORT)
+    {
+        g_localClientSocket.SendPacket(
+            conn->remoteAddress, data, dataSize
+        );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Server - Platform functions
@@ -165,7 +175,6 @@ internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
     g_localServerSocket.Read(&bytes, &numBytes, sender);
     if (bytes != NULL)
     {
-        // Send to Server network
         dataPtr->ptrMemory = (void*)bytes;
         dataPtr->size = numBytes;
         *sender = {};
@@ -178,7 +187,8 @@ internal i32 App_SVNet_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* 
 }
 
 internal i32  App_SVNet_SendTo(
-    i32 transmittingSocketIndex, ZNetAddress* address, u16 port, u8* data, i32 dataSize)
+    i32 transmittingSocketIndex,
+    ZNetAddress* address, u16 port, u8* data, i32 dataSize)
 {
     if (port == APP_CLIENT_LOOPBACK_PORT)
     {
@@ -203,7 +213,7 @@ internal void App_SVNet_ConnectionAccepted(ZNetConnectionInfo* conn)
 {
     CmdUserJoined cmd;
     Cmd_InitUserJoined(&cmd, 0, 0, conn->id);
-    Cmd_WriteToByteBuffer(SV_GetPlatformInput(), &cmd.header);
+    Cmd_WriteToByteBuffer(GetServerInput(), &cmd.header);
 }
 
 internal void App_SVNet_ConnectionDropped(ZNetConnectionInfo* conn) { }
