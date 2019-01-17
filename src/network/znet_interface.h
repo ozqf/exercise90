@@ -83,26 +83,32 @@ struct ZNetOutputInterface
 	void (*DeliveryConfirmed)		(ZNetConnectionInfo* info, u32 packetNumber);
 };
 
-u32 ZNet_SendData(ZNetHandle* handle, i32 connId, u8* bytes, u16 numBytes, i32 printSendInfo);
-u32 ZNet_GetNextSequenceNumber(ZNetHandle* handle, i32 connId);
-i32 ZNet_CreateLocalConnection(ZNetHandle* handle, ZNetConnectionInfo* result);
+u32 	ZNet_SendData(
+			ZNetHandle* handle, i32 connId,
+			u8* bytes, u16 numBytes, i32 printSendInfo);
+u32 	ZNet_GetNextSequenceNumber(ZNetHandle* handle, i32 connId);
+i32 	ZNet_CreateLocalConnection(ZNetHandle* handle, ZNetConnectionInfo* result);
 ZNetConnectionInfo* ZNet_RecreateLocalClient(ZNetHandle* handle, i32 id);
 
 // info
-void ZNet_Info(ZNetHandle* handle);
-i32 ZNet_IsServer(ZNetHandle* handle);
-void ZNet_RunTests(ZNetHandle* handle);
-char* ZNet_WriteDebug(ZNetHandle* handle, char* start, char* end);
-i32 ZNet_RequiredInstanceSize();
+void	ZNet_Info(ZNetHandle* handle);
+i32		ZNet_IsServer(ZNetHandle* handle);
+void	ZNet_RunTests(ZNetHandle* handle);
+char*	ZNet_WriteDebug(ZNetHandle* handle, char* start, char* end);
+i32		ZNet_RequiredInstanceSize();
 
 // system lifetime
-void ZNet_Init(ZNetHandle* handle, ZNetPlatformFunctions functions, ZNetOutputInterface output, i32 simMode);
-void ZNet_Shutdown(ZNetHandle* handle);
+void	ZNet_Init(
+			ZNetHandle* handle, ZNetPlatformFunctions functions,
+			ZNetOutputInterface output, i32 simMode);
+void	ZNet_Shutdown(ZNetHandle* handle);
 
 // session lifetime
-i32 ZNet_StartSession(ZNetHandle* handle, u8 netMode, ZNetAddress* serverAddress, u16 localPort);
-void ZNet_EndSession(ZNetHandle* handle);
-i32 ZNet_Tick(ZNetHandle* handle, f32 deltaTime);
+i32		ZNet_StartSession(
+			ZNetHandle* handle, u8 netMode,
+			ZNetAddress* serverAddress, u16 localPort);
+void	ZNet_EndSession(ZNetHandle* handle);
+i32		ZNet_Tick(ZNetHandle* handle, f32 deltaTime);
 
 // ZNET_INTERFACE_H
 #endif

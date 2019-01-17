@@ -7,6 +7,7 @@ to a local store read by the connections counterpart.
 Intention is that even in single player, the client and server
 modules should be unaware of each other and always believe they are
 talking through a network to remote instances
+
 */
 #include "app.h"
 #include "../network/znet_interface.h"
@@ -92,7 +93,14 @@ internal void App_CLNet_ConnectionDropped(ZNetConnectionInfo* conn)
 
 internal void App_CLNet_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
 {
-
+    printf("CL Received %d of data from conn %d (%d.%d.%d.%d:%d)\n",
+        numBytes,
+        info->sender.id,
+        info->sender.address.ip4Bytes[0],
+        info->sender.address.ip4Bytes[1],
+        info->sender.address.ip4Bytes[2],
+        info->sender.address.ip4Bytes[3],
+        info->sender.address.port);
 }
 
 internal void App_CLNet_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
@@ -129,13 +137,7 @@ internal ZNetOutputInterface App_CLNet_CreateOutputFunctions()
 // Server's transmission function
 void App_SV_SendTo(i32 connId, u8* data, i32 dataSize)
 {
-    ZNetConnection* conn = ZNet_GetConnectionById(&g_serverNet, connId);
-    if (conn->remoteAddress.port == APP_CLIENT_LOOPBACK_PORT)
-    {
-        g_localClientSocket.SendPacket(
-            conn->remoteAddress, data, dataSize
-        );
-    }
+    ZNet_SendData(g_serverNet, connId, data, (u16)dataSize, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -192,7 +194,7 @@ internal i32  App_SVNet_SendTo(
 {
     if (port == APP_CLIENT_LOOPBACK_PORT)
     {
-        //printf(" Server sending %d bytes on loopback port\n", dataSize);
+        printf(" Server sending %d bytes on loopback port\n", dataSize);
         g_localClientSocket.SendPacket(address, (u8*)data, (u16)dataSize);
         return COM_ERROR_NONE;
     }

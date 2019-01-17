@@ -208,7 +208,7 @@ internal i32 App_StartSession(i32 sessionType)
                 APP_SERVER_LOOPBACK_PORT);
             g_localServerSocket.isActive = 1;
             SV_Init();
-            UserIds ids = SV_CreateLocalUser();
+            //UserIds ids = SV_CreateLocalUser();
             g_isRunningServer = 1;
 
             ZNet_StartSession(
@@ -218,7 +218,7 @@ internal i32 App_StartSession(i32 sessionType)
                 APP_CLIENT_LOOPBACK_PORT);
             g_localClientSocket.isActive = 1;
             CL_Init();
-            CL_SetLocalUser(ids);
+            //CL_SetLocalUser(ids);
             g_isRunningClient = 1;
 
             return COM_ERROR_NONE;
@@ -253,6 +253,17 @@ internal void App_Update(PlatformTime* time)
         printf("\n === APP TICK (%.4fs) ===\n", interval);
         g_simFrameAcculator -= interval;
         
+        /*
+        TODO: Remove/reduce use of callbacks here, particularly for data packets.
+        code is spagettifying and flow is not obvious.
+        Approach should be:
+        > Pump platform events and load into input buffer.
+        > Pump remote socket for packets/events and load into input buffer.
+        > Pump local socket for packets/events and load into input buffer
+        > Tick server (read commands)
+        > Clear buffer
+        */
+		
         if (g_isRunningServer)
         {
             g_localServerSocket.Tick(interval);

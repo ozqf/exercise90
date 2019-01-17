@@ -11,7 +11,6 @@ internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
 internal MallocList g_mallocs;
 internal UserList g_users;
 internal SimScene g_sim;
-internal ZNetPlatformFunctions* g_net;
 
 internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
@@ -40,15 +39,15 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
     );
 }
 
-UserIds SV_CreateLocalUser()
+internal UserIds SV_CreateUser(i32 privateId)
 {
     User* user = User_GetFree(&g_users);
-    user->ids.privateId = 0xDEADDEAD;
+    user->ids.privateId = privateId;
     user->ids.publicId = g_users.nextPublicId++;
     SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
     SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
     UserIds ids = user->ids;
-    printf("SV creating local user public %d private %d",
+    printf("SV creating new user public %d private %d",
         ids.publicId, ids.privateId
     );
     return ids;
@@ -108,10 +107,9 @@ internal void SV_ListAllocs()
     printf("    Tally: %d bytes\n", tally);
 }
 
-void SV_Init(ZNetPlatformFunctions* net)
+void SV_Init()
 {
     printf("SV Init scene\n");
-    g_net = net;
 
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
@@ -201,7 +199,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 internal void SV_WriteUserPacket(User* user)
 {
     #if 1
-	
+	printf("SV Write packet for user %d\n", user->ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
@@ -213,7 +211,9 @@ internal void SV_WriteUserPacket(User* user)
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
-    g_et
+    i32 total = packet.Written();
+    App_SV_SendTo(user->ids.privateId, buf, total);
+    
 	//Packet_WriteFromStream(
     //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
     #endif
@@ -235,6 +235,7 @@ void SV_Tick(ByteBuffer* input, f32 deltaTime)
             {
                 CmdUserJoined* cmd = (CmdUserJoined*)h;
                 printf("SV User %d joined\n", cmd->privateId);
+                SV_CreateUser(cmd->privateId);
             } break;
         }
     }

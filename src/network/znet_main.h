@@ -190,7 +190,7 @@ internal void ZNet_ReadPacket(ZNet* net, ZNetPacket* packet)
                 // TODO: Cleaner way to handle this situation?
                 if (conn == NULL)
                 {
-                    printf("ZNET: No connection found for data packet\n");
+                    printf("ZNET: No connection %d found for data packet\n", xor);
                     return;
                 }
 				
