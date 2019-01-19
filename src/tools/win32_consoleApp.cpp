@@ -23,7 +23,8 @@ int main(i32 argc, char* argv[])
 {
     COM_SetFatalError(Test_FatalError);
 
-    TestCommandStream();
+    //TestCommandStream();
+    TestAcks();
     return 0;
 }
 

@@ -211,3 +211,46 @@ void TestCommandStream()
     #endif
     printf("Done!\n");
 }
+
+void TestAcks()
+{
+    printf("=== TEST ACKS ===\n");
+    AckStream a = {};
+    AckStream b = {};
+
+    // Pretend to send some packets
+    for (i32 i = 0; i < 20; ++i)
+    {
+        Ack_RecordPacketTransmission(&a, a.sequence++);
+    }
+    printf("A sequence: %d\n", a.sequence);
+
+    // Pretend to receive
+    Ack_RecordPacketReceived(&b, 1);
+    Ack_RecordPacketReceived(&b, 0);
+    Ack_RecordPacketReceived(&b, 2);
+    Ack_RecordPacketReceived(&b, 4);
+    Ack_RecordPacketReceived(&b, 6);
+    Ack_RecordPacketReceived(&b, 6);
+	
+	Ack_RecordPacketReceived(&b, 9);
+	Ack_RecordPacketReceived(&b, 10);
+	Ack_RecordPacketReceived(&b, 13);
+	Ack_RecordPacketReceived(&b, 17);
+
+    Ack_RecordPacketReceived(&b, 20);
+	
+	// send back acks
+	u32 ack = b.remoteSequence;
+    u32 ackBits = Ack_BuildOutgoingAckBits(&b);
+    printf("B remote sequence: %d\nAck Bits: ", b.remoteSequence);
+    COM_PrintBits(ackBits, 1);
+	
+    u32 results[ACK_RESULTS_CAPACITY];
+    i32 numAcks = Ack_CheckIncomingAcks(&a, ack, ackBits, results);
+    printf("A: num Acks received %d:\n", numAcks);
+    for (i32 i = 0; i < numAcks; ++i)
+    {
+        printf("%d, ", results[i]);
+    }
+}
