@@ -46,8 +46,8 @@ internal ByteBuffer g_localServerPacket;
 internal MallocItem g_mallocItems[APP_MAX_MALLOCS];
 internal MallocList g_mallocs;
 
-internal ZNetHandle* g_clientNet;
-internal ZNetHandle* g_serverNet;
+//internal ZNetHandle* g_clientNet;
+//internal ZNetHandle* g_serverNet;
 internal ZNetAddress g_localServerAddress;
 
 

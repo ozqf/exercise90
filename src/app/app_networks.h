@@ -1,4 +1,18 @@
 #pragma once
+
+// Server's transmission function
+void App_SV_SendTo(i32 connId, u8* data, i32 dataSize)
+{
+    //ZNet_SendData(g_serverNet, connId, data, (u16)dataSize, 0);
+}
+
+// Client's transmission function
+void App_CL_SendTo(i32 connId, u8* data, i32 dataSize)
+{
+    //ZNet_SendData(g_clientNet, connId, data, (u16)dataSize, 0);
+}
+
+#if 0
 /*
 Functions related to routing client and server network calls.
 Sockets opened on local loopback ports are redirected by this layer
@@ -134,18 +148,6 @@ internal ZNetOutputInterface App_CLNet_CreateOutputFunctions()
     return funcs;
 }
 
-// Server's transmission function
-void App_SV_SendTo(i32 connId, u8* data, i32 dataSize)
-{
-    ZNet_SendData(g_serverNet, connId, data, (u16)dataSize, 0);
-}
-
-// Client's transmission function
-void App_CL_SendTo(i32 connId, u8* data, i32 dataSize)
-{
-    ZNet_SendData(g_clientNet, connId, data, (u16)dataSize, 0);
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Server - Platform functions
 ////////////////////////////////////////////////////////////////////////
@@ -253,3 +255,4 @@ internal ZNetOutputInterface App_SVNet_CreateOutputFunctions()
     funcs.DeliveryConfirmed = App_SVNet_DeliveryConfirmed;
     return funcs;
 }
+#endif

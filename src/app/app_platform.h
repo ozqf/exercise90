@@ -134,6 +134,7 @@ internal i32  App_Init()
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
 
     // init client and server connection managers
+    #if 0
     i32 znetInstanceSize = ZNet_RequiredInstanceSize();
     g_clientNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "CL Conn");
     g_clientNet->memSize = znetInstanceSize;
@@ -143,7 +144,7 @@ internal i32  App_Init()
         App_CLNet_CreateOutputFunctions(),
         ZNET_SIM_MODE_NONE);
     g_localClientSocket.Init(0, 0, 0);
-
+    
     g_serverPlatformInput = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Input"), bufferSize);
 
     
@@ -155,7 +156,7 @@ internal i32  App_Init()
         App_SVNet_CreateOutputFunctions(),
         ZNET_SIM_MODE_NONE);
     g_localServerSocket.Init(0, 0, 0);
-
+    #endif
     // Render Scenes
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS);
     g_worldScene.cameraTransform.pos.y += 16;
@@ -187,8 +188,8 @@ internal i32 App_EndSession()
 {
     if (g_isRunningServer) { SV_Shutdown(); }
     if (g_isRunningClient) { CL_Shutdown(); }
-    ZNet_EndSession(g_serverNet);
-    ZNet_EndSession(g_clientNet);
+    //ZNet_EndSession(g_serverNet);
+    //ZNet_EndSession(g_clientNet);
     return COM_ERROR_NONE;
 }
 
@@ -201,21 +202,21 @@ internal i32 App_StartSession(i32 sessionType)
         {
             App_EndSession();
             printf("\tStarting single player\n");
-            ZNet_StartSession(
+            /*ZNet_StartSession(
                 g_serverNet,
                 NETMODE_DEDICATED_SERVER,
                 NULL,
-                APP_SERVER_LOOPBACK_PORT);
+                APP_SERVER_LOOPBACK_PORT);*/
             g_localServerSocket.isActive = 1;
             SV_Init();
             //UserIds ids = SV_CreateLocalUser();
             g_isRunningServer = 1;
 
-            ZNet_StartSession(
+            /*ZNet_StartSession(
                 g_clientNet,
                 NETMODE_CLIENT,
                 &g_localServerAddress,
-                APP_CLIENT_LOOPBACK_PORT);
+                APP_CLIENT_LOOPBACK_PORT);*/
             g_localClientSocket.isActive = 1;
             CL_Init();
             //CL_SetLocalUser(ids);
@@ -267,7 +268,7 @@ internal void App_Update(PlatformTime* time)
         if (g_isRunningServer)
         {
             g_localServerSocket.Tick(interval);
-            ZNet_Tick(g_serverNet, interval);
+            //ZNet_Tick(g_serverNet, interval);
             SV_Tick(GetServerInput(), interval);
             Buf_Clear(&g_serverPlatformInput);
         }
@@ -275,7 +276,7 @@ internal void App_Update(PlatformTime* time)
         if (g_isRunningClient)
         {
             g_localClientSocket.Tick(interval);
-            ZNet_Tick(g_clientNet, interval);
+            //ZNet_Tick(g_clientNet, interval);
             CL_Tick(interval);
         }
         
