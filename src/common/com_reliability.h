@@ -88,7 +88,6 @@ static i32 Ack_CheckIncomingAcks(
 	return resultIndex;
 }
 
-extern "C"
 static u32 Ack_BuildOutgoingAckBits(AckStream* astream)
 {
 	u32 ackBits = 0;
