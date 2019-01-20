@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////////////////////
 #include <stdio.h>
 #include "../common/com_module.h"
+#include "sys_events.h"
 #include "platform_interface.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -91,21 +92,6 @@
 //////////////////////////////////////////////////////////////////////
 // Game Event types
 //////////////////////////////////////////////////////////////////////
-
-
-struct InputEvent
-{
-    u32 inputID = 0;
-    i32 value = 0;
-};
-
-InputEvent NewInputEvent(u32 inputID, i32 value)
-{
-    InputEvent ev;
-    ev.inputID = inputID;
-    ev.value = value;
-    return ev;
-}
 
 // Contains pointers to App functions
 struct AppInterface

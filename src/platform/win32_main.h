@@ -114,29 +114,33 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 
     case WM_LBUTTONDOWN:
     {
-        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
-        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        //SysInputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 1);
+        //Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
+        Sys_WriteInputEvent(&g_input, Z_INPUT_CODE_MOUSE_2, 1);
     }
     break;
 
     case WM_LBUTTONUP:
     {
-        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
-        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        //SysInputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_1, 0);
+        //Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
+        Sys_WriteInputEvent(&g_input, Z_INPUT_CODE_MOUSE_1, 0);
     }
     break;
 
     case WM_RBUTTONDOWN:
     {
-        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
-        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        //SysInputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 1);
+        //Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
+        Sys_WriteInputEvent(&g_input, Z_INPUT_CODE_MOUSE_2, 1);
     }
     break;
 
     case WM_RBUTTONUP:
     {
-        InputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
-        Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+        Sys_WriteInputEvent(&g_input, Z_INPUT_CODE_MOUSE_2, 0);
+        //SysInputEvent ev = NewInputEvent(Z_INPUT_CODE_MOUSE_2, 0);
+        //Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
     }
     break;
 
@@ -264,8 +268,9 @@ LRESULT CALLBACK Win32_MainWindowCallback(
         u32 inputCode = Win32_KeyCode_To_Input_Code(VKCode);
         if (inputCode != 0)
         {
-            InputEvent ev = NewInputEvent(inputCode, (i32)isDown);
-            Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+            Sys_WriteInputEvent(&g_input, inputCode, (i32)isDown);
+            //SysInputEvent ev = NewInputEvent(inputCode, (i32)isDown);
+            //Win32_WritePlatformCommand(&g_input, (u8 *)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
             break;
         }
         else

@@ -103,19 +103,26 @@ void Win32_SendMouseScreenPosition(ByteBuffer* cmdBuffer)
     i32 halfWidth = width / 2;
     i32 halfHeight = height / 2;
     
-    InputEvent ev;
-    
     Win32_SetMouseScreenPosition(&mousePosX, &mousePosY);
-    
+
+    SysInputEvent ev;
+
+    Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
+    Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
+
+    Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
+    Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
+    #if 0
     PlatformEventHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;
-    header.size = sizeof(InputEvent);
+    header.size = sizeof(SysInputEvent);
 
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
     
     ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
+    #endif
 }
 
 void Win32_TickInput(ByteBuffer* cmdBuffer)
@@ -147,15 +154,21 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
 
     PlatformEventHeader header = {};
     header.type = PLATFORM_EVENT_CODE_INPUT;
-    header.size = sizeof(InputEvent);
+    header.size = sizeof(SysInputEvent);
 
-    InputEvent ev;
+    SysInputEvent ev;
 
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
+    Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
+
+    Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
+    Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
+
+    //ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
+    //Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
     
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(InputEvent));
+    //ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
+    //Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
     
     Win32_SendMouseScreenPosition(cmdBuffer);
 }

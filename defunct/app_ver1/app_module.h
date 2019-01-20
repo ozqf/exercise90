@@ -106,7 +106,7 @@ void                App_SaveDataVariables(char* fileName);
 
 // Execution
 void                Exec_UpdateClient(Cmd_ClientUpdate* cmd);
-void                Exec_ReadInput(u32 frameNumber, InputEvent ev);
+void                Exec_ReadInput(u32 frameNumber, SysInputEvent ev);
 void                App_ReadCommand(u32 type, u32 bytes, u8 *ptrRead);
 void                App_ReadCommandBuffer(ByteBuffer* commands);
 i32                 App_StartSession(u8 netMode, char *path, GameSession* session, GameScene* gs);

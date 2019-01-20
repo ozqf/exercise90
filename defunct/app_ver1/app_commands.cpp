@@ -474,9 +474,9 @@ void App_ReadPlatformCommand(u32 type, u32 bytes, u8 *ptrRead)
     {
         case PLATFORM_EVENT_CODE_INPUT:
         {
-            APP_ASSERT((bytes == sizeof(InputEvent)), "Platform event cmd wrong size");
-            InputEvent ev = {};
-            ptrRead += COM_COPY_STRUCT(ptrRead, &ev, InputEvent);
+            APP_ASSERT((bytes == sizeof(SysInputEvent)), "Platform event cmd wrong size");
+            SysInputEvent ev = {};
+            ptrRead += COM_COPY_STRUCT(ptrRead, &ev, SysInputEvent);
             Input_TestForAction(&g_inputActions, ev.value, ev.inputID, g_time.platformFrameNumber);
         }
         break;

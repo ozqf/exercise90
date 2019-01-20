@@ -130,7 +130,7 @@ global_variable i32 g_numLaunchParams = 0;
 global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
 global_variable i32 g_textCommandBufferPosition = 0;
 
-
+#if 0
 void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
 {
     u32 used = b->ptrWrite - b->ptrStart;
@@ -154,7 +154,7 @@ void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 ite
 	// Trap to catch specific items being written
 	//Assert(itemType != 2);
 }
-
+#endif
 //void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
 void Win32_EnqueueTextCommand(char* command);
 
