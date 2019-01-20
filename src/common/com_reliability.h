@@ -1,6 +1,13 @@
 #ifndef NET_RELIABILITY_H
 #define NET_RELIABILITY_H
 
+/*
+Reliability  system for recording transmission and reception of packets in a sequence.
+Each ack response contains 33 acks made up of two u32s:
+> The highest remote sequence receive
+> 32 bits each representing the highest sequence number minus n, where n is the bit number (0 to 31)
+Records of transmission or reception are stored in rolling arrays
+*/
 #include "com_module.h"
 
 #define ACK_CAPACITY 32
@@ -15,18 +22,18 @@ struct AckRecord
 
 struct AckStream
 {
-	// Sequence number of outgoing packets
-	u32 sequence;
+	// Sequence number of transmitted packets - increment with each send
+	u32 outputSequence;
 	// Last 32 sent sequences and whether they have been acked or not
 	AckRecord awaitingAck[ACK_CAPACITY];
 	
-	// most recent received packet
+	// most recent received packet (highest ack)
 	u32 remoteSequence;
 	// Used to build ack bits from this side
 	u32 received[ACK_CAPACITY];
 	
 };
-#if 1
+
 static void Ack_RecordPacketTransmission(AckStream* astream, u32 outputSequence)
 {
 	u32 index = outputSequence % ACK_CAPACITY;
@@ -67,8 +74,6 @@ static i32 Ack_CheckIncomingAcks(
 		if (packetAckBits & (1 << bit))
 		{
 			index = packetAck % ACK_CAPACITY;
-			printf(" Sequence: %d Bit %d index %d\n", packetAck, bit, index);
-			#if 1
 			rec = &astream->awaitingAck[index];
 			// only report once
 			if (rec->sequence == packetAck && rec->acked == 0)
@@ -76,7 +81,6 @@ static i32 Ack_CheckIncomingAcks(
 				rec->acked = 1;
 				results[resultIndex++] = packetAck;
 			}
-			#endif
 		}
 		packetAck--;
 		bit++;
@@ -102,13 +106,6 @@ static u32 Ack_BuildOutgoingAckBits(AckStream* astream)
 	}
 	return ackBits;
 }
-
-extern "C"
-static void Ack_Test()
-{
-	
-}
-#endif
 
 // NET_RELIABILITY_H
 #endif

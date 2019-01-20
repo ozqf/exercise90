@@ -221,9 +221,9 @@ void TestAcks()
     // Pretend to send some packets
     for (i32 i = 0; i < 20; ++i)
     {
-        Ack_RecordPacketTransmission(&a, a.sequence++);
+        Ack_RecordPacketTransmission(&a, a.outputSequence++);
     }
-    printf("A sequence: %d\n", a.sequence);
+    printf("A sequence: %d\n", a.outputSequence);
 
     // Pretend to receive
     Ack_RecordPacketReceived(&b, 1);
