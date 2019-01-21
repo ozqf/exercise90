@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdlib.h"
+#include "../interface/sys_events.h"
 
 /***************************************
 * Access Server <-> Client communication buffers
@@ -241,7 +242,37 @@ internal i32  App_RendererReloaded()
 
 internal void App_Input(PlatformTime* time, ByteBuffer commands)
 {
-    
+	i32 inputBytes = commands.Written();
+	//printf("APP input %d bytes\n", inputBytes);
+	
+    u8* read = commands.ptrStart;
+    u8* end = commands.ptrWrite;
+    while (read < end)
+    {
+        SysEvent* header = (SysEvent*)read;
+        Assert(Sys_ValidateEvent(header) == COM_ERROR_NONE)
+        read += header->size;
+		
+        switch (header->type)
+        {
+            case SYS_EVENT_INPUT:
+            {
+                SysInputEvent* ev = (SysInputEvent*)header;
+                //printf("APP input Event: %d value %d\n", ev->inputID, ev->value);
+            } break;
+            case SYS_EVENT_PACKET:
+            {
+
+            } break;
+
+            default:
+            {
+                printf("APP Unknown sys event type %d size %d\n", header->type, header->size);
+            } break;
+        }
+
+    }
+	
 }
 
 internal void App_Update(PlatformTime* time)

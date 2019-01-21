@@ -44,6 +44,7 @@ static void Sys_EnqueueEvent(ByteBuffer* buf, SysEvent* ev)
 {
     Assert(Sys_ValidateEvent(ev) == COM_ERROR_NONE)
     Assert(buf->Space() >= ev->size)
+    //printf("SYS Enqueue ev %d size %d\n", ev->type, ev->size);
     buf->ptrWrite += COM_COPY(ev, buf->ptrWrite, ev->size);
 }
 

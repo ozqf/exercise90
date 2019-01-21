@@ -98,7 +98,7 @@ global_variable POINT g_win32_mousePos = {};
 global_variable POINT g_win32_mousePosLast = {};
 global_variable POINT g_win32_mousePosMove = {};
 
-#define COMMAND_BUFFER_SIZE 2048
+#define COMMAND_BUFFER_SIZE 65536
 global_variable u8 g_commandBufferA[COMMAND_BUFFER_SIZE];
 global_variable u8 g_commandBufferB[COMMAND_BUFFER_SIZE];
 // Init command buffer to point at and write from start of buffer A

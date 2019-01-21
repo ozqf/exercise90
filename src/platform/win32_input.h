@@ -152,9 +152,9 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         mouseMoveY = 0;
     }
 
-    PlatformEventHeader header = {};
-    header.type = PLATFORM_EVENT_CODE_INPUT;
-    header.size = sizeof(SysInputEvent);
+    //PlatformEventHeader header = {};
+    //header.type = PLATFORM_EVENT_CODE_INPUT;
+    //header.size = sizeof(SysInputEvent);
 
     SysInputEvent ev;
 
