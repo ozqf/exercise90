@@ -3,6 +3,10 @@
 #include "com_defines.h"
 #include "com_memory_utils.h"
 
+#define BUF_COPY(ptrToByteBuffer, ptrToByteArray, numOfBytesInArray) \
+{##ptrToByteBuffer##->ptrWrite += \
+    COM_CopyMemory((u8*)##ptrToByteArray##, ##ptrToByteBuffer##->ptrWrite##, numOfBytesInArray##);}
+
 struct ByteBuffer
 {
     u8* ptrStart;

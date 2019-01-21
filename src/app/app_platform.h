@@ -243,7 +243,7 @@ internal i32  App_RendererReloaded()
 internal void App_Input(PlatformTime* time, ByteBuffer commands)
 {
 	i32 inputBytes = commands.Written();
-	//printf("APP input %d bytes\n", inputBytes);
+	printf("APP input %d bytes\n", inputBytes);
 	
     u8* read = commands.ptrStart;
     u8* end = commands.ptrWrite;

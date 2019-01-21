@@ -24,6 +24,15 @@ struct SysInputEvent
     i32 value = 0;
 };
 
+struct SysPacketEvent
+{
+    SysEvent header;
+    i32 socketIndex;
+    ZNetAddress sender;
+    //number of bytes of data immediately following this struct
+    i32 numBytes;
+};
+
 static void Sys_PrepareEvent(SysEvent* ev, i32 type, i32 size)
 {
     ev->sentinel = SYS_EVENT_SENTINEL;
@@ -67,4 +76,21 @@ static void Sys_WriteInputEvent(ByteBuffer* b, u32 inputID, i32 value)
     SysInputEvent ev = {};
     Sys_CreateInputEvent(&ev, inputID, value);
     Sys_EnqueueEvent(b, SYS_CAST_EVENT_TO_BASE(&ev));
+}
+
+////////////////////////////////////////////////////
+// Packet
+
+static void Sys_WritePacketEvent(
+	ByteBuffer* b, i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize)
+{
+    SysPacketEvent ev = {};
+    i32 totalSize = sizeof(SysPacketEvent) + dataSize;
+	Sys_PrepareEvent(SYS_CAST_EVENT_TO_BASE(&ev), SYS_EVENT_PACKET, totalSize);
+    ev.socketIndex = socketIndex;
+    ev.sender = *addr;
+    BUF_COPY(b, &ev, sizeof(SysPacketEvent))
+    BUF_COPY(b, data, dataSize)
+    //b->ptrWrite += COM_COPY(&ev, b->ptrWrite, sizeof(SysPacketEvent));
+    //b->ptrWrite += COM_COPY(data, b->ptrWrite, dataSize);
 }
