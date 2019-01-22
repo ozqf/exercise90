@@ -212,7 +212,7 @@ internal i32 App_StartSession(i32 sessionType)
                 APP_SERVER_LOOPBACK_PORT);*/
             g_localServerSocket.isActive = 1;
             SV_Init();
-            //UserIds ids = SV_CreateLocalUser();
+            UserIds ids = SV_CreateLocalUser();
             g_isRunningServer = 1;
 
             /*ZNet_StartSession(
@@ -222,7 +222,7 @@ internal i32 App_StartSession(i32 sessionType)
                 APP_CLIENT_LOOPBACK_PORT);*/
             g_localClientSocket.isActive = 1;
             CL_Init();
-            //CL_SetLocalUser(ids);
+            CL_SetLocalUser(ids);
             g_isRunningClient = 1;
 
             return COM_ERROR_NONE;

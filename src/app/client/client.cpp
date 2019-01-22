@@ -7,6 +7,14 @@
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
+#define CLIENT_STATE_NONE 0
+#define CLIENT_STATE_REQUESTING 1
+#define CLIENT_STATE_HANDSHAKE 2
+#define CLIENT_STATE_SYNC 3
+#define CLIENT_STATE_PLAY 4
+
+internal i32 g_clientState = CLIENT_STATE_NONE;
+
 internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 internal i32 g_ticks = 0;
@@ -66,17 +74,22 @@ void CL_LoadTestScene()
     #endif
 }
 
+// Public so that local user can be instantly set from outside
 void CL_SetLocalUser(UserIds ids)
 {
+    Assert(g_clientState == CLIENT_STATE_REQUESTING)
     printf("CL Set local user public %d private %d\n",
         ids.publicId, ids.privateId
     );
     g_ids = ids;
+    g_clientState = CLIENT_STATE_SYNC;
 }
 
 void CL_Init()
 {
+    Assert(g_clientState == CLIENT_STATE_NONE)
     printf("CL Init scene\n");
+	g_clientState = CLIENT_STATE_REQUESTING;
     i32 cmdBufferSize = MegaBytes(1);
     ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
     ByteBuffer b = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);

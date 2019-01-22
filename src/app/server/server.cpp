@@ -22,6 +22,39 @@ i32 SV_IsRunning() { return g_isRunning; }
 // this is the server's command buffer to execute next tick
 internal ByteBuffer g_platformInput;
 
+internal i32 SV_IsPrivateIdInUse(i32 id)
+{
+    for (i32 i = 0; i < g_users.max; ++i)
+    {
+        User* u = &g_users.items[i];
+
+    }
+    return 0;
+}
+
+internal i32 SV_CreateSalt()
+{
+    i32 result = 0;
+    do
+    {
+        result = (i32)(COM_STDRandf32() * INT_MAX);
+    } while (result == 0);
+    return result;
+}
+
+internal UserIds SV_GenerateUserId()
+{
+    UserIds newId;
+    do
+    {
+        newId.privateId = SV_CreateSalt();
+    } while (SV_IsPrivateIdInUse(newId.privateId));
+    newId.publicId = g_users.nextPublicId++;
+    return newId;
+}
+
+            
+
 ByteBuffer* SV_GetPlatformInput()
 {
     return &g_platformInput;
@@ -42,19 +75,32 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
 }
 
 // This is public so that a local client can be made easily
-UserIds SV_CreateUser(i32 privateId, ZNetAddress* addr)
+internal UserIds SV_CreateUser(UserIds ids, ZNetAddress* addr)
 {
     User* user = User_GetFree(&g_users);
-    user->ids.privateId = privateId;
-    user->ids.publicId = g_users.nextPublicId++;
+    user->ids = ids;
     user->address = *addr;
     SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
     SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
-    UserIds ids = user->ids;
-    printf("SV creating new user public %d private %d",
+    printf("SV creating new user public %d private %d\n",
         ids.publicId, ids.privateId
     );
     return ids;
+}
+
+UserIds SV_CreateLocalUser()
+{
+    ZNetAddress addr = {};
+    addr.port = APP_CLIENT_LOOPBACK_PORT;
+    UserIds id = SV_GenerateUserId();
+    User* u = SV_CreateUser(id, &addr);
+    u->state = USER_STATE_SYNC;
+    return id;
+}
+
+internal void SV_UserStartSync(User* user)
+{
+    
 }
 
 internal void SV_LoadTestScene()
