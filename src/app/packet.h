@@ -152,8 +152,8 @@ internal i32 Packet_WriteFromStream(
 
 internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numBytes)
 {
-	printf("=== Build packet descriptor (%d bytes)===\n", numBytes);
-	COM_PrintBytesHex(buf, numBytes, 16);
+	//printf("=== Build packet descriptor (%d bytes)===\n", numBytes);
+	//COM_PrintBytesHex(buf, numBytes, 16);
 	*packet = {};
 	packet->ptr = buf;
 	packet->size = numBytes;
@@ -161,8 +161,8 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	packet->numReliableBytes = h->numReliableBytes;
 	packet->numUnreliableBytes = h->numUnreliableBytes;
 	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
-	printf("Reliable bytes: %d\n", packet->numReliableBytes);
-	printf("Unreliable bytes: %d\n", packet->numUnreliableBytes);
+	//printf("Reliable bytes: %d\n", packet->numReliableBytes);
+	//printf("Unreliable bytes: %d\n", packet->numUnreliableBytes);
 	
 	i32 syncOffset  = (packet->reliableOffset + packet->numReliableBytes);
 	i32* syncCheckCursor = (i32*)(buf + syncOffset);

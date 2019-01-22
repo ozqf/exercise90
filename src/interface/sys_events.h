@@ -92,8 +92,8 @@ static void Sys_WritePacketEvent(
 	Sys_PrepareEvent(SYS_CAST_EVENT_TO_BASE(&ev), SYS_EVENT_PACKET, totalSize);
     ev.socketIndex = socketIndex;
     ev.sender = *addr;
-    BUF_COPY(b, &ev, sizeof(SysPacketEvent))
-    BUF_COPY(b, data, dataSize)
-    //b->ptrWrite += COM_COPY(&ev, b->ptrWrite, sizeof(SysPacketEvent));
-    //b->ptrWrite += COM_COPY(data, b->ptrWrite, dataSize);
+    //BUF_COPY(b, &ev, sizeof(SysPacketEvent))
+    //BUF_COPY(b, data, dataSize)
+    b->ptrWrite += COM_COPY(&ev, b->ptrWrite, sizeof(SysPacketEvent));
+    b->ptrWrite += COM_COPY(data, b->ptrWrite, dataSize);
 }

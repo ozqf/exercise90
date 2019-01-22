@@ -30,6 +30,7 @@ struct User
     i32 entSerial;
     i32 isLocal;
     ActorInput input;
+    ZNetAddress address;
 
     NetStream reliableStream;
     NetStream unreliableStream;

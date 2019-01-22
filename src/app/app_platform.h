@@ -302,6 +302,7 @@ internal void App_Update(PlatformTime* time)
         {
             g_localServerSocket.Tick(interval);
             //ZNet_Tick(g_serverNet, interval);
+            printf("*** SV TICK ***\n");
             SV_Tick(GetServerInput(), interval);
             Buf_Clear(&g_serverPlatformInput);
         }
@@ -309,8 +310,10 @@ internal void App_Update(PlatformTime* time)
         if (g_isRunningClient)
         {
             g_localClientSocket.Tick(interval);
+            printf("*** CL TICK ***\n");
             //ZNet_Tick(g_clientNet, interval);
             CL_Tick(&g_loopbackBuffer,interval);
+            Buf_Clear(&g_loopbackBuffer);
         }
         
         //App_RunSimFrame(interval);

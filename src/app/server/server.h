@@ -9,6 +9,7 @@
 
 void    SV_Init();
 void    SV_Shutdown();
+UserIds SV_CreateUser(i32 privateId, ZNetAddress* addr);
 i32     SV_IsRunning();
 void    SV_Tick(ByteBuffer* platformCommands, f32 deltaTime);
 void    SV_PopulateRenderScene(

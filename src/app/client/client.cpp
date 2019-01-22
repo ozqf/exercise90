@@ -140,7 +140,7 @@ internal void CL_WritePacket()
     #endif
 }
 
-void CL_ReadReliableCommands(NetStream* stream)
+internal void CL_ReadReliableCommands(NetStream* stream)
 {
     ByteBuffer* b = &stream->inputBuffer;
     u8* read = b->ptrStart;
@@ -170,12 +170,17 @@ internal void CL_ReadPacket(SysPacketEvent* ev)
 {
     i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
-    u8* data = (u8*)(ev + headerSize);
+    u8* data = (u8*)(ev) + headerSize;
     printf("CL %d Packet bytes from %d\n", dataSize, ev->sender.port);
 
     PacketDescriptor p;
-    i32 result = Packet_InitDescriptor(
+    i32 err = Packet_InitDescriptor(
         &p, data, dataSize);
+	if (err != COM_ERROR_NONE)
+	{
+		printf("  Error %d deserialising packet\n", err);
+		return;
+	}
     printf("  Tick %d Time %.3f\n",
         p.transmissionSimFrameNumber,
         p.transmissionSimTime);
@@ -183,6 +188,7 @@ internal void CL_ReadPacket(SysPacketEvent* ev)
 
 internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 {
+    printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
     u8* read = sysEvents->ptrStart;
     u8* end = sysEvents->ptrWrite;
     while (read < end)
@@ -191,7 +197,7 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
         i32 err = Sys_ValidateEvent(ev);
         if (err != COM_ERROR_NONE)
         {
-            printf("Error %d reading system event header\n", err);
+            printf("CL Error %d reading system event header\n", err);
             return;
         }
         read += ev->size;
@@ -199,8 +205,14 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
         {
             case SYS_EVENT_PACKET:
             {
+				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
                 CL_ReadPacket(packet);
+            } break;
+
+            case SYS_EVENT_INPUT:
+            {
+                printf("CL Input - skip\n");
             } break;
         }
     }

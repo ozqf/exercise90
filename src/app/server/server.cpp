@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "../../common/com_module.h"
 #include "server.h"
+#include "../packet.h"
+#include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
 #define SV_MAX_MALLOCS 1024
@@ -39,11 +41,13 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
     );
 }
 
-internal UserIds SV_CreateUser(i32 privateId)
+// This is public so that a local client can be made easily
+UserIds SV_CreateUser(i32 privateId, ZNetAddress* addr)
 {
     User* user = User_GetFree(&g_users);
     user->ids.privateId = privateId;
     user->ids.publicId = g_users.nextPublicId++;
+    user->address = *addr;
     SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
     SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
     UserIds ids = user->ids;
@@ -53,7 +57,7 @@ internal UserIds SV_CreateUser(i32 privateId)
     return ids;
 }
 
-void SV_LoadTestScene()
+internal void SV_LoadTestScene()
 {
     
     SimEntityDef def = {};
@@ -145,7 +149,7 @@ void SV_Shutdown()
 }
 
 #if 0
-void SV_EnqueueReliableOutput(User* user, Command* cmd)
+internal void SV_EnqueueReliableOutput(User* user, Command* cmd)
 {
     ByteBuffer* b = &user->reliableStream.outputBuffer;
     Assert(b->Space() >= cmd->size)
@@ -221,7 +225,7 @@ internal void SV_WriteUserPacket(User* user)
 }
 #endif
 
-void SV_WriteTestPacket()
+internal void SV_WriteTestPacket()
 {
     // Make a packet, no messages just a header
     u8 buf[1400];
@@ -238,7 +242,58 @@ void SV_WriteTestPacket()
     App_SendTo(0, &addr, buf, written);
 }
 
-void SV_Tick(ByteBuffer* input, f32 deltaTime)
+internal void SV_ReadPacket(SysPacketEvent* ev)
+{
+	i32 headerSize = sizeof(SysPacketEvent);
+    i32 dataSize = ev->header.size - headerSize;
+    u8* data = (u8*)(ev) + headerSize;
+    printf("SV %d Packet bytes from %d\n", dataSize, ev->sender.port);
+
+    PacketDescriptor p;
+    i32 err = Packet_InitDescriptor(
+        &p, data, dataSize);
+	if (err != COM_ERROR_NONE)
+	{
+		printf("  Error %d deserialising packet\n", err);
+		return;
+	}
+    printf("  Tick %d Time %.3f\n",
+        p.transmissionSimFrameNumber,
+        p.transmissionSimTime);
+}
+
+internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
+{
+	u8* read = sysEvents->ptrStart;
+	u8* end = sysEvents->ptrWrite;
+	while (read < end)
+	{
+		SysEvent* ev = (SysEvent*)read;
+		i32 err = Sys_ValidateEvent(ev);
+		if (err != COM_ERROR_NONE)
+		{
+			printf("SV Error %d reading system event header\n", err);
+			return;
+		}
+		read += ev->size;
+		switch (ev->type)
+		{
+			case SYS_EVENT_PACKET:
+            {
+				COM_PrintBytes((u8*)ev, ev->size, 16);
+                SysPacketEvent* packet = (SysPacketEvent*)ev;
+                SV_ReadPacket(packet);
+            } break;
+
+            case SYS_EVENT_INPUT:
+            {
+                printf("SV Input - skip\n");
+            } break;
+		}
+	}
+}
+
+void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     #if 0
     u8* read = input->ptrStart;
@@ -260,10 +315,11 @@ void SV_Tick(ByteBuffer* input, f32 deltaTime)
         }
     }
     #endif
+    SV_WriteTestPacket();
     Sim_Tick(&g_sim, deltaTime);
     
-    SV_WriteTestPacket();
 	#if 0
+	SV_WriteTestPacket();
 	for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];

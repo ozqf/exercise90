@@ -10,10 +10,12 @@ void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize)
     else
     {
         // straight to input
-        printf("APP Sending %d bytes to Client loopback\n", dataSize);
         Sys_WritePacketEvent(&g_loopbackBuffer, socketIndex, addr, data, dataSize);
+
+        //printf("APP Sending %d bytes to Client loopback\n", dataSize);
+        //COM_PrintBytes(g_loopbackBuffer.ptrStart, g_loopbackBuffer.Written(), 16);
+        //printf("  %d bytes in platform buffer\n", g_loopbackBuffer.Written());
     }
-    
 }
 
 // Client's transmission function
