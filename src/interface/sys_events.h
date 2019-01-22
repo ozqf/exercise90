@@ -1,5 +1,8 @@
 #pragma once
-
+/*
+Defines event queue from platform resources
+(input, packets, OS messages etc) to App modules
+*/
 #include "../common/com_module.h"
 
 #define SYS_EVENT_SENTINEL 0xDEADBEEF

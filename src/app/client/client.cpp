@@ -4,6 +4,7 @@
 #include "../../common/com_module.h"
 #include "client.h"
 #include "../packet.h"
+#include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
 internal i32 g_isRunning = 0;
@@ -118,7 +119,7 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
 
 internal void CL_WritePacket()
 {
-    #if 1
+    #if 0
 	printf("CL Write packet for user %d\n", g_ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
@@ -165,8 +166,49 @@ void CL_ReadReliableCommands(NetStream* stream)
     }
 }
 
-void CL_Tick(f32 deltaTime)
+internal void CL_ReadPacket(SysPacketEvent* ev)
 {
+    i32 headerSize = sizeof(SysPacketEvent);
+    i32 dataSize = ev->header.size - headerSize;
+    u8* data = (u8*)(ev + headerSize);
+    printf("CL %d Packet bytes from %d\n", dataSize, ev->sender.port);
+
+    PacketDescriptor p;
+    i32 result = Packet_InitDescriptor(
+        &p, data, dataSize);
+    printf("  Tick %d Time %.3f\n",
+        p.transmissionSimFrameNumber,
+        p.transmissionSimTime);
+}
+
+internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
+{
+    u8* read = sysEvents->ptrStart;
+    u8* end = sysEvents->ptrWrite;
+    while (read < end)
+    {
+        SysEvent* ev = (SysEvent*)read;
+        i32 err = Sys_ValidateEvent(ev);
+        if (err != COM_ERROR_NONE)
+        {
+            printf("Error %d reading system event header\n", err);
+            return;
+        }
+        read += ev->size;
+        switch(ev->type)
+        {
+            case SYS_EVENT_PACKET:
+            {
+                SysPacketEvent* packet = (SysPacketEvent*)ev;
+                CL_ReadPacket(packet);
+            } break;
+        }
+    }
+}
+
+void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
+{
+    CL_ReadSystemEvents(sysEvents, deltaTime);
     Sim_Tick(&g_sim, deltaTime);
     CL_WritePacket();
     g_ticks++;

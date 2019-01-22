@@ -39,8 +39,7 @@ internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 // Buffer used to feed commands into server every tick
 internal ByteBuffer g_serverPlatformInput;
 
-internal ByteBuffer g_localClientPacket;
-internal ByteBuffer g_localServerPacket;
+internal ByteBuffer g_loopbackBuffer;
 
 #define APP_MAX_MALLOCS 1024
 internal MallocItem g_mallocItems[APP_MAX_MALLOCS];

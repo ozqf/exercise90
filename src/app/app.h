@@ -12,5 +12,4 @@ ByteBuffer* App_GetLocalClientPacketForWrite();
 ByteBuffer* App_GetLocalServerPacketForRead();
 ByteBuffer* App_GetLocalServerPacketForWrite();
 
-void App_SV_SendTo(i32 connId, u8* data, i32 dataSize);
-void App_CL_SendTo(i32 connId, u8* data, i32 dataSize);
+void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize);

@@ -8,14 +8,14 @@
 * TODO: storage of multiple packets. Pump 'ForRead'
 * to empty them out
 ***************************************/
-ByteBuffer* App_GetLocalClientPacketForRead()
+/*ByteBuffer* App_GetLocalClientPacketForRead()
 {
-    return &g_localClientPacket;
+    return &g_loopbackBuffer;
 }
 
 ByteBuffer* App_GetLocalClientPacketForWrite()
 {
-    return &g_localClientPacket;
+    return &g_loopbackBuffer;
 }
 
 ByteBuffer* App_GetLocalServerPacketForRead()
@@ -26,7 +26,7 @@ ByteBuffer* App_GetLocalServerPacketForRead()
 ByteBuffer* App_GetLocalServerPacketForWrite()
 {
     return &g_localServerPacket;
-}
+}*/
 
 /***************************************
 * Private
@@ -128,8 +128,10 @@ internal i32  App_Init()
 
     i32 bufferSize = KiloBytes(64);
 
-    g_localClientPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "CL Packet"), bufferSize);
-    g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
+    g_loopbackBuffer = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Loopback"),
+        bufferSize);
+    //g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
@@ -243,7 +245,7 @@ internal i32  App_RendererReloaded()
 internal void App_Input(PlatformTime* time, ByteBuffer commands)
 {
 	i32 inputBytes = commands.Written();
-	printf("APP input %d bytes\n", inputBytes);
+	//printf("APP input %d bytes\n", inputBytes);
 	
     u8* read = commands.ptrStart;
     u8* end = commands.ptrWrite;
@@ -308,7 +310,7 @@ internal void App_Update(PlatformTime* time)
         {
             g_localClientSocket.Tick(interval);
             //ZNet_Tick(g_clientNet, interval);
-            CL_Tick(interval);
+            CL_Tick(&g_loopbackBuffer,interval);
         }
         
         //App_RunSimFrame(interval);

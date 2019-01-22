@@ -144,6 +144,7 @@ void SV_Shutdown()
     }
 }
 
+#if 0
 void SV_EnqueueReliableOutput(User* user, Command* cmd)
 {
     ByteBuffer* b = &user->reliableStream.outputBuffer;
@@ -218,9 +219,28 @@ internal void SV_WriteUserPacket(User* user)
     //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
     #endif
 }
+#endif
+
+void SV_WriteTestPacket()
+{
+    // Make a packet, no messages just a header
+    u8 buf[1400];
+    ByteBuffer b = Buf_FromBytes(buf, 1400);
+    Packet_StartWrite(&b, g_ticks, g_ellapsed, 0);
+    b.ptrWrite += COM_WriteI32(COM_SENTINEL_B, b.ptrWrite);
+    Packet_FinishWrite(&b, 0, 0);
+    i32 written = b.Written();
+
+    // loopback address
+    ZNetAddress addr = {};
+    addr.port = APP_CLIENT_LOOPBACK_PORT;
+
+    App_SendTo(0, &addr, buf, written);
+}
 
 void SV_Tick(ByteBuffer* input, f32 deltaTime)
 {
+    #if 0
     u8* read = input->ptrStart;
     u8* end = input->ptrWrite;
     while(read < end)
@@ -239,10 +259,11 @@ void SV_Tick(ByteBuffer* input, f32 deltaTime)
             } break;
         }
     }
-
+    #endif
     Sim_Tick(&g_sim, deltaTime);
-	
-	
+    
+    SV_WriteTestPacket();
+	#if 0
 	for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];
@@ -250,7 +271,7 @@ void SV_Tick(ByteBuffer* input, f32 deltaTime)
 		
 		SV_WriteUserPacket(user);
 	}
-	
+	#endif
 	g_ellapsed += deltaTime;
     g_ticks++;
 }

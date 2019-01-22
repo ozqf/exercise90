@@ -1,9 +1,19 @@
 #pragma once
 
-// Server's transmission function
-void App_SV_SendTo(i32 connId, u8* data, i32 dataSize)
+void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize)
 {
-    //ZNet_SendData(g_serverNet, connId, data, (u16)dataSize, 0);
+    if (addr->port != APP_CLIENT_LOOPBACK_PORT)
+    {
+        // TODO: Call Socket for remote sends!
+        ILLEGAL_CODE_PATH
+    }
+    else
+    {
+        // straight to input
+        printf("APP Sending %d bytes to Client loopback\n", dataSize);
+        Sys_WritePacketEvent(&g_loopbackBuffer, socketIndex, addr, data, dataSize);
+    }
+    
 }
 
 // Client's transmission function
