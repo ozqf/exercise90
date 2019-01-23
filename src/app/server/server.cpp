@@ -74,8 +74,29 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
     );
 }
 
+internal void SV_UserStartSync(User* user)
+{
+    printf("SV - Begin sync for user %d\n", user->ids.privateId);
+    // start user command queue
+    for (i32 j = 0; j < g_sim.maxEnts; ++j)
+    {
+        SimEntity* ent = &g_sim.ents[j];
+        if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        S2C_SpawnEntity cmd = {};
+        // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
+        // is manually setting it ever required?
+        Cmd_InitSpawnEntity(&cmd, g_ticks, 0);
+        cmd.entType = (u8)ent->entType;
+        cmd.networkId = ent->id.serial;
+        cmd.pos = ent->t.pos;
+        ByteBuffer* b = &user->reliableStream.outputBuffer;
+        Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
+        printf("  Write Entity %d\n", ent->id.serial);
+    }
+}
+
 // This is public so that a local client can be made easily
-internal UserIds SV_CreateUser(UserIds ids, ZNetAddress* addr)
+internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
 {
     User* user = User_GetFree(&g_users);
     user->ids = ids;
@@ -85,7 +106,7 @@ internal UserIds SV_CreateUser(UserIds ids, ZNetAddress* addr)
     printf("SV creating new user public %d private %d\n",
         ids.publicId, ids.privateId
     );
-    return ids;
+    return user;
 }
 
 UserIds SV_CreateLocalUser()
@@ -95,12 +116,8 @@ UserIds SV_CreateLocalUser()
     UserIds id = SV_GenerateUserId();
     User* u = SV_CreateUser(id, &addr);
     u->state = USER_STATE_SYNC;
+    SV_UserStartSync(u);
     return id;
-}
-
-internal void SV_UserStartSync(User* user)
-{
-    
 }
 
 internal void SV_LoadTestScene()
@@ -233,7 +250,7 @@ void                Stream_OutputToPacket(
 u8*                 Stream_PacketToInput(NetStream* s, u8* ptr)
 
 */
-
+#endif
 internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 {
     u8* start = packet->ptrWrite;
@@ -245,6 +262,27 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 	ping.sendTime = g_ellapsed;
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
     return (packet->ptrWrite - start);
+}
+
+internal i32 SV_WriteReliableSection(
+    User* user, ByteBuffer* packet, i32 capacity)
+{
+    i32 space = capacity;
+    ByteBuffer* cmds = &user->reliableStream.outputBuffer;
+    u8* read = cmds->ptrStart;
+    u8* end = cmds->ptrWrite;
+    while(read < end)
+    {
+        Command* cmd = (Command*)read;
+        Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
+        i32 size = cmd->size;
+        read += size;
+        if (cmd->size > space) { continue; }
+        
+        packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
+        space -= size;
+    }
+    return (capacity - space);
 }
 
 internal void SV_WriteUserPacket(User* user)
@@ -259,17 +297,18 @@ internal void SV_WriteUserPacket(User* user)
 	u8 buf[1400];
     ByteBuffer packet = Buf_FromBytes(buf, 1400);
     Packet_StartWrite(&packet, 0, 0, 0);
+    i32 reliableWritten = SV_WriteReliableSection(user, &packet, 1000);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
-    Packet_FinishWrite(&packet, 0, unreliableWritten);
+    Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
-    App_SV_SendTo(user->ids.privateId, buf, total);
+    App_SendTo(0, &user->address, buf, total);
     
 	//Packet_WriteFromStream(
     //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
     #endif
 }
-#endif
+
 
 internal void SV_WriteTestPacket()
 {
@@ -361,11 +400,10 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
         }
     }
     #endif
-    SV_WriteTestPacket();
+    //SV_WriteTestPacket();
     Sim_Tick(&g_sim, deltaTime);
     
-	#if 0
-	SV_WriteTestPacket();
+	#if 1
 	for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];

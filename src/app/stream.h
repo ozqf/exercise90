@@ -5,7 +5,7 @@
 // other than store transmission records.
 ///////////////////////////////////////////////////////////
 #include "../common/com_module.h"
-#include "commands.h"
+#include "commands_base.h"
 
 internal TransmissionRecord* Stream_AssignTransmissionRecord(
         TransmissionRecord* records,

@@ -42,7 +42,7 @@ struct SimEntity
 {
     i32 status;
     SimEntId id;
-    i32 type;
+    i32 entType;
     Transform t;
     Vec3 previousPos;
     Vec3 velocity;
