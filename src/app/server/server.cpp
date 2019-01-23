@@ -265,7 +265,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 }
 
 internal i32 SV_WriteReliableSection(
-    User* user, ByteBuffer* packet, i32 capacity)
+    User* user, ByteBuffer* packet, i32 capacity, TransmissionRecord* rec)
 {
     i32 space = capacity;
     ByteBuffer* cmds = &user->reliableStream.outputBuffer;
@@ -281,6 +281,10 @@ internal i32 SV_WriteReliableSection(
         
         packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
         space -= size;
+		
+		// Record message
+		rec->reliableMessageIds[rec->numReliableMessages++] = cmd->sequence;
+		Assert(rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES)
     }
     return (capacity - space);
 }
@@ -294,12 +298,26 @@ internal void SV_WriteUserPacket(User* user)
 	// enqueue
 	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 	
-	u8 buf[1400];
-    ByteBuffer packet = Buf_FromBytes(buf, 1400);
-    Packet_StartWrite(&packet, 0, 0, 0);
-    i32 reliableWritten = SV_WriteReliableSection(user, &packet, 1000);
+	const i32 packetSize = 1400;
+	// unreliable may use whatever space is remaining, but
+	// we always want to send *some* unreliable sync info.
+	// so leave some space.
+	const i32 reliableAllocation = 1000;
+	
+	// Record packet transmission for ack
+	u32 packetSequence = user->acks.outputSequence++;
+	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
+		user->reliableStream.transmissions, packetSequence);
+	
+	u8 buf[packetSize];
+    ByteBuffer packet = Buf_FromBytes(buf, packetSize);
+    Packet_StartWrite(&packet, packetSequence, 0, 0, 0);
+    i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
+	printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
+	
+	// Finished
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
     App_SendTo(0, &user->address, buf, total);
@@ -315,7 +333,7 @@ internal void SV_WriteTestPacket()
     // Make a packet, no messages just a header
     u8 buf[1400];
     ByteBuffer b = Buf_FromBytes(buf, 1400);
-    Packet_StartWrite(&b, g_ticks, g_ellapsed, 0);
+    Packet_StartWrite(&b, 0, g_ticks, g_ellapsed, 0);
     b.ptrWrite += COM_WriteI32(COM_SENTINEL_B, b.ptrWrite);
     Packet_FinishWrite(&b, 0, 0);
     i32 written = b.Written();

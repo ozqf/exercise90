@@ -53,3 +53,28 @@ internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
     cmd->type = CMD_TYPE_NULL;
     cmd->size = CMD_INVALID_SIZE;
 }
+
+////////////////////////////////////////////////////////////////////////////
+// Debugging
+////////////////////////////////////////////////////////////////////////////
+internal void Cmd_PrintHeader(Command* header)
+{
+    printf("Read Cmd type %d. sequence %d, tick %d\n",
+		header->type, header->sequence, header->tick);
+}
+
+internal void Cmd_PrintBuffer(u8* ptr, i32 numBytes)
+{
+	printf("\n=== CMD BUFFER (%d bytes) ===\n", numBytes);
+    u8* read = ptr;
+    u8* end = ptr + numBytes;
+
+    while(read < end)
+    {
+        Command* header = (Command*)read;
+        Assert(Cmd_Validate(header) == COM_ERROR_NONE);
+        read += header->size;
+        Cmd_PrintHeader(header);
+    }
+	printf("  Ptr diff check: %d\n", (read - end));
+}

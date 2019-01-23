@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "../../common/com_module.h"
 #include "client.h"
-#include "../packet.h"
+#include "client_packets.h"
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
@@ -179,26 +179,6 @@ internal void CL_ReadReliableCommands(NetStream* stream)
     }
 }
 
-internal void CL_ReadPacket(SysPacketEvent* ev)
-{
-    i32 headerSize = sizeof(SysPacketEvent);
-    i32 dataSize = ev->header.size - headerSize;
-    u8* data = (u8*)(ev) + headerSize;
-    printf("CL %d Packet bytes from %d\n", dataSize, ev->sender.port);
-
-    PacketDescriptor p;
-    i32 err = Packet_InitDescriptor(
-        &p, data, dataSize);
-	if (err != COM_ERROR_NONE)
-	{
-		printf("  Error %d deserialising packet\n", err);
-		return;
-	}
-    printf("  Tick %d Time %.3f\n",
-        p.transmissionSimFrameNumber,
-        p.transmissionSimTime);
-}
-
 internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 {
     printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
@@ -220,7 +200,7 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
             {
 				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
-                CL_ReadPacket(packet);
+                CL_ReadPacket(packet, &g_reliableStream);
             } break;
 
             case SYS_EVENT_INPUT:

@@ -15,6 +15,7 @@
 #include "com_transform.h"
 #include "com_byte_buffer.h"
 #include "com_alloc.h"
+#include "com_reliability.h"
 #include "com_net_types.h"
 #include "com_collision.h"
 #include "com_heap/com_heap.h"
@@ -22,7 +23,6 @@
 #include "com_parse.h"
 #include "com_variables.h"
 #include "com_text_command_buffer.h"
-#include "com_reliability.h"
 #include "com_debug.h"
 
 /*

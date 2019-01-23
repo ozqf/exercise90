@@ -30,8 +30,9 @@ struct User
     i32 entSerial;
     i32 isLocal;
     ActorInput input;
+	
     ZNetAddress address;
-
+	AckStream acks;
     NetStream reliableStream;
     NetStream unreliableStream;
     // Clients are considered in sync mode until their acknowledged

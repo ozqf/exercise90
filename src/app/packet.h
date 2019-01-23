@@ -32,6 +32,7 @@ struct PacketDescriptor
 // TODO: Replace this with a compacted version eventually
 struct PacketHeader
 {
+	i32 packetSequence;
     i32 transmissionTickNumber;
 	f32 transmissionTime;
     i32 lastReceivedTickNumber;
@@ -58,12 +59,14 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 
 internal void Packet_StartWrite(
 	ByteBuffer* packet,
+	i32 packetSequence,
 	i32 simFrame,
 	f32 time,
 	i32 lastReceivedTickNumber)
 {
 	PacketHeader* h = (PacketHeader*)packet->ptrStart;
 	*h = {};
+	h->packetSequence = packetSequence;
 	h->transmissionTickNumber = simFrame;
 	h->transmissionTime = time;
 	h->lastReceivedTickNumber = lastReceivedTickNumber;

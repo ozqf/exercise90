@@ -30,6 +30,8 @@ struct NetStream
     ByteBuffer      outputBuffer;
     // the most recented remotely acknowledged message Id
     u32             ackSequence;
+	
+	AckStream		ackStream;
 
     TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
 };

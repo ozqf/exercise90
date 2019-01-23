@@ -17,5 +17,5 @@ void COM_InitStream(NetStream* stream, ByteBuffer input, ByteBuffer output)
 {
     stream->inputBuffer = input;
     stream->outputBuffer = output;
-    stream->inputSequence = 1;
+    stream->inputSequence = 0;
 }
