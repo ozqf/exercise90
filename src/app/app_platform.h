@@ -221,7 +221,9 @@ internal i32 App_StartSession(i32 sessionType)
                 &g_localServerAddress,
                 APP_CLIENT_LOOPBACK_PORT);*/
             g_localClientSocket.isActive = 1;
-            CL_Init();
+            ZNetAddress addr = {};
+            addr.port = APP_SERVER_LOOPBACK_PORT;
+            CL_Init(addr);
             CL_SetLocalUser(ids);
             g_isRunningClient = 1;
 

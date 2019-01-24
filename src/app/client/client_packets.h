@@ -27,7 +27,7 @@ internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
 
 internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
 {
-    // Create Descriptor
+    // -- Descriptor --
     i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
     u8* data = (u8*)(ev) + headerSize;
@@ -41,11 +41,17 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
 		printf("  Error %d deserialising packet\n", err);
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
-    printf("  Tick %d Time %.3f\n",
+    printf("  Seq %d Tick %d Time %.3f\n",
+        p.packetSequence,
         p.transmissionSimFrameNumber,
         p.transmissionSimTime);
     
-    // Read reliable section
+    // -- ack --
+    Ack_RecordPacketReceived(&g_acks, p.packetSequence);
+    
+    // -- reliable section --
+    // TODO: Put this byte buffer on the descriptor and initialise it there
+    // to save all this faff in multiple places
     ByteBuffer reliableSection = {};
     printf("  Reliable bytes: %d\n", p.numReliableBytes);
     reliableSection.ptrStart = data + Packet_GetHeaderSize();
@@ -56,4 +62,45 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
     //Cmd_PrintBuffer(reliableSection.ptrStart, reliableSection.Written());
 
     return COM_ERROR_NONE;
+}
+
+internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
+{
+    u8* start = packet->ptrWrite;
+    // Send ping
+	CmdPing ping = {};
+	// TODO: Stream enqueue will set the sequence for us
+	// so remove sending 0 here.
+	Cmd_Prepare(&ping.header, g_ticks, 0);
+	ping.sendTime = g_ellapsed;
+    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+    return (packet->ptrWrite - start);
+}
+
+internal void CL_WritePacket()
+{
+    #if 1
+	printf("CL Write packet for user %d\n", g_ids.privateId);
+	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
+	
+	// enqueue
+	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
+	
+	u8 buf[1400];
+    ByteBuffer packet = Buf_FromBytes(buf, 1400);
+    u32 sequence = g_acks.outputSequence;
+    u32 ack = g_acks.remoteSequence;
+    u32 ackBits = Ack_BuildOutgoingAckBits(&g_acks);
+
+    Packet_StartWrite(&packet, 0, 0, 0,  0, 0, 0);
+    packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
+    i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
+    Packet_FinishWrite(&packet, 0, unreliableWritten);
+    i32 total = packet.Written();
+
+    App_SendTo(0, &g_serverAddress, buf, total);
+    
+	//Packet_WriteFromStream(
+    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    #endif
 }

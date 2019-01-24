@@ -38,7 +38,10 @@ internal Command* Stream_FindMessageBySequence(u8* ptr, i32 numBytes, i32 sequen
     {
         Command* header = (Command*)read;
         Assert(Cmd_Validate(header) == COM_ERROR_NONE)
-        if (header->sequence == sequence) { return header; }
+        if (header->sequence == sequence)
+        { 
+            return header;
+        }
         read += header->size;
     }
     return NULL;
@@ -100,7 +103,7 @@ internal void Stream_ClearReceivedOutput(
 
 internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
 {
-    printf("CL Attempting to enqueue %d\n", cmd->sequence);
+    //printf("CL Attempting to enqueue %d\n", cmd->sequence);
     i32 error = Cmd_Validate(cmd);
     if (error != COM_ERROR_NONE)
     {
@@ -112,23 +115,26 @@ internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
     //buffered, ignore
     if ((u32)cmd->sequence < stream->inputSequence)
     {
-        printf("    CL ignored input: sequence %d < %d\n",
-            cmd->sequence, stream->inputSequence);
+        //printf("    CL ignored input: sequence %d < %d\n",
+        //    cmd->sequence, stream->inputSequence);
         return;
     }
     Command* current = Stream_FindMessageBySequence(
         stream->inputBuffer.ptrStart,
         stream->inputBuffer.Written(),
         cmd->sequence);
-    if (cmd != NULL)
+    if (current == NULL)
     {
-        printf("    CL ignored input: sequence %d already queued\n",
-            cmd->sequence);
+        //printf("CL Enqueuing CMD %d\n", cmd->sequence);
+        Assert(b->Space() >= cmd->size);
+        b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
+    }
+    else
+    {
+        //printf("    CL ignored input: sequence %d already queued\n",
+        //    cmd->sequence);
         return;
     }
-    printf("CL Enqueuing CMD %d\n", cmd->sequence);
-    Assert(b->Space() >= cmd->size);
-    b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
 }
 
 internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)

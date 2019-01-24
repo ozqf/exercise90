@@ -6,7 +6,7 @@
 #include "../commands.h"
 #include "../stream.h"
 
-void    CL_Init();
+void    CL_Init(ZNetAddress serverAddress);
 void    CL_Shutdown();
 i32     CL_IsRunning();
 void    CL_Tick(ByteBuffer* sysEvents, f32 deltaTime);

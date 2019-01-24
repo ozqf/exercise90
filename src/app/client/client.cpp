@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "../../common/com_module.h"
 #include "client.h"
-#include "client_packets.h"
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
@@ -29,6 +28,10 @@ internal i32 g_numAllocations = 0;
 internal NetStream g_reliableStream;
 internal NetStream g_unreliableStream;
 internal UserIds g_ids;
+internal AckStream g_acks;
+internal ZNetAddress g_serverAddress;
+
+#include "client_packets.h"
 
 internal void* CL_Malloc(i32 numBytes)
 {
@@ -85,10 +88,11 @@ void CL_SetLocalUser(UserIds ids)
     g_clientState = CLIENT_STATE_SYNC;
 }
 
-void CL_Init()
+void CL_Init(ZNetAddress serverAddress)
 {
     Assert(g_clientState == CLIENT_STATE_NONE)
     printf("CL Init scene\n");
+    g_serverAddress = serverAddress;
 	g_clientState = CLIENT_STATE_REQUESTING;
     i32 cmdBufferSize = MegaBytes(1);
     ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
@@ -115,42 +119,6 @@ void CL_Init()
 void CL_Shutdown()
 {
     // TODO: Free memory (:
-}
-
-internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
-{
-    u8* start = packet->ptrWrite;
-    // Send ping
-	CmdPing ping = {};
-	// TODO: Stream enqueue will set the sequence for us
-	// so remove sending 0 here.
-	Cmd_Prepare(&ping.header, g_ticks, 0);
-	ping.sendTime = g_ellapsed;
-    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
-    return (packet->ptrWrite - start);
-}
-
-internal void CL_WritePacket()
-{
-    #if 0
-	printf("CL Write packet for user %d\n", g_ids.privateId);
-	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
-	
-	// enqueue
-	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
-	
-	u8 buf[1400];
-    ByteBuffer packet = Buf_FromBytes(buf, 1400);
-    Packet_StartWrite(&packet, 0, 0, 0);
-    packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
-    i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
-    Packet_FinishWrite(&packet, 0, unreliableWritten);
-    i32 total = packet.Written();
-    App_CL_SendTo(g_ids.privateId, buf, total);
-    
-	//Packet_WriteFromStream(
-    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
-    #endif
 }
 
 internal void CL_ReadReliableCommands(NetStream* stream)

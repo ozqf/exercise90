@@ -2,19 +2,20 @@
 
 void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize)
 {
-    if (addr->port != APP_CLIENT_LOOPBACK_PORT)
+    if (addr->port == APP_CLIENT_LOOPBACK_PORT)
     {
-        // TODO: Call Socket for remote sends!
-        ILLEGAL_CODE_PATH
+		// straight to input
+		Sys_WritePacketEvent(&g_loopbackBuffer, socketIndex, addr, data, dataSize);
+    }
+    else if (addr->port == APP_SERVER_LOOPBACK_PORT)
+    {
+        printf("App SentTo server loopback\n");
+		// TODO: Hook this up!
     }
     else
     {
-        // straight to input
-        Sys_WritePacketEvent(&g_loopbackBuffer, socketIndex, addr, data, dataSize);
-
-        //printf("APP Sending %d bytes to Client loopback\n", dataSize);
-        //COM_PrintBytes(g_loopbackBuffer.ptrStart, g_loopbackBuffer.Written(), 16);
-        //printf("  %d bytes in platform buffer\n", g_loopbackBuffer.Written());
+		// TODO: Call Socket for remote sends!
+		ILLEGAL_CODE_PATH
     }
 }
 

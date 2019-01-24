@@ -11,6 +11,7 @@ struct PacketDescriptor
 	u8* cursor;
     i32 size;
 	
+	i32 packetSequence;
 	u32 transmissionSimFrameNumber;
 	f32 transmissionSimTime;
 	// if 0, no data
@@ -32,10 +33,15 @@ struct PacketDescriptor
 // TODO: Replace this with a compacted version eventually
 struct PacketHeader
 {
-	i32 packetSequence;
+	// Packet reliability
+	u32 packetSequence;
+	u32 ackSequence;
+	u32 ackBits;
+	// timing
     i32 transmissionTickNumber;
 	f32 transmissionTime;
     i32 lastReceivedTickNumber;
+	// payload
     u16 numReliableBytes;
     u16 numUnreliableBytes;
 };
@@ -60,6 +66,8 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 internal void Packet_StartWrite(
 	ByteBuffer* packet,
 	i32 packetSequence,
+	u32 ackSequence,
+	u32 ackBits,
 	i32 simFrame,
 	f32 time,
 	i32 lastReceivedTickNumber)
@@ -67,6 +75,8 @@ internal void Packet_StartWrite(
 	PacketHeader* h = (PacketHeader*)packet->ptrStart;
 	*h = {};
 	h->packetSequence = packetSequence;
+	h->ackSequence = ackSequence;
+	h->ackBits = ackBits;
 	h->transmissionTickNumber = simFrame;
 	h->transmissionTime = time;
 	h->lastReceivedTickNumber = lastReceivedTickNumber;
@@ -161,6 +171,7 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	packet->ptr = buf;
 	packet->size = numBytes;
 	PacketHeader* h = (PacketHeader*)buf;
+	packet->packetSequence = h->packetSequence;
 	packet->numReliableBytes = h->numReliableBytes;
 	packet->numUnreliableBytes = h->numUnreliableBytes;
 	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
