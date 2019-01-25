@@ -101,6 +101,14 @@ internal void Stream_ClearReceivedOutput(
     }
 }
 
+internal void Stream_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 numPacketAcks)
+{
+	for (i32 i = 0; i < numPacketAcks; ++i)
+	{
+		Stream_ClearReceivedOutput(stream, packetAcks[i]);
+	}
+}
+
 internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
 {
     //printf("CL Attempting to enqueue %d\n", cmd->sequence);

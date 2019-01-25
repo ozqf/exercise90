@@ -139,6 +139,14 @@ internal void SV_WriteTestPacket()
     App_SendTo(0, &addr, buf, written);
 }
 
+// internal void SV_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 numPacketAcks)
+// {
+	// for (i32 i = 0; i < numPacketAcks; ++i)
+	// {
+		// Stream_ClearReceivedOutput(stream, packetAcks[i]);
+	// }
+// }
+
 internal void SV_ReadPacket(SysPacketEvent* ev)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
@@ -170,9 +178,18 @@ internal void SV_ReadPacket(SysPacketEvent* ev)
         printf("SV Couldn't find user %d for packet\n", p.id);
         return;
     }
-
+	
+	// -- Ack packets + commands --
     Ack_RecordPacketReceived(&user->acks, p.packetSequence);
     u32 packetAcks[ACK_RESULTS_CAPACITY];
     i32 numPacketAcks = Ack_CheckIncomingAcks(
         &user->acks, p.ackSequence, p.ackBits, packetAcks);
+	
+	Stream_ProcessPacketAcks(&user->reliableStream, packetAcks, numPacketAcks);
+	
+	// -- reliable section --
+	
+	
+	// -- unreliable section --
+	
 }

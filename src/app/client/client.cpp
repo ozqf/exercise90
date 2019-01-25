@@ -45,7 +45,7 @@ internal void* CL_Malloc(i32 numBytes)
 void CL_LoadTestScene()
 {
     SimEntityDef def = {};
-    #if 1
+    #if 0
     for (i32 i = 0; i < 8; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;
@@ -180,11 +180,95 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
     }
 }
 
+internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
+{
+	ByteBuffer* b = &stream->inputBuffer;
+	// -- Reliable --
+	
+	// TODO: Calculate the server tick the client is up to (due to smoothing out jitter etc)
+	i32 serverTick = INT_MAX;
+	for (;;)
+	{
+		i32 sequence = stream->inputSequence;
+		Command* h = Stream_FindMessageBySequence(b->ptrStart, b->Written(), sequence);
+		if (!h) { break; }
+		// Execute only after jitter delay
+		if (h->sequence > serverTick) { break; }
+		
+		// Step queue counter forward as we are now executing
+		stream->inputSequence++;
+		
+		i32 err = Cmd_Validate(h);
+		Assert(err == COM_ERROR_NONE)
+		
+		printf("CL exec input seq %d\n", h->sequence);
+		
+		switch (h->type)
+		{
+			case CMD_TYPE_S2C_SPAWN_ENTITY:
+			{
+				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
+				printf("CL Spawn %d at %.3f, %.3f, %.3f\n",
+					spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
+				);
+				
+				SimEntityDef def = {};
+				def.pos[0] = spawn->pos.x;
+				def.pos[1] = spawn->pos.y;
+				def.pos[2] = spawn->pos.z;
+				def.velocity[0] = spawn->vel.x;
+				def.velocity[1] = spawn->vel.y;
+				def.velocity[2] = spawn->vel.z;
+				Sim_AddEntity(&g_sim, &def);
+			} break;
+			
+			default:
+			{
+				printf("CL Unknown command type %d\n", h->type);
+			} break;
+		}
+	}
+	/*
+	// -- Unreliable commands --
+	u8* read = buf->ptrStart;
+	u8* end = buf->ptrWrite;
+	while (read < end)
+	{
+		Command* h = (Command*)read;
+		i32 err = Cmd_Validate(h);
+		if (err != COM_ERROR_NONE)
+		{
+			printf("CL Error %d running input commands\n", err);
+			return;
+		}
+		read += h->size;
+		
+		switch(h->type)
+		{
+			case CMD_TYPE_S2C_SPAWN_ENTITY:
+			{
+				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
+				printf("CL Spawn %d at %.3f, %.3f, %.3f\n",
+					spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
+				);
+			} break;
+			
+			default:
+			{
+				printf("CL Unknown command type %d\n", h->type);
+			} break;
+		}
+	}
+	*/
+}
+
 void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     CL_ReadSystemEvents(sysEvents, deltaTime);
+	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     Sim_Tick(&g_sim, deltaTime);
     CL_WritePacket();
+	
     g_ticks++;
     g_ellapsed += deltaTime;
 }

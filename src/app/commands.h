@@ -24,6 +24,7 @@ struct S2C_SpawnEntity
     u8 entType;
     Vec3 pos;
     Vec3 rot;
+	Vec3 vel;
 };
 
 internal void Cmd_InitSpawnEntity(S2C_SpawnEntity* cmd, i32 tick, i32 sequence)
