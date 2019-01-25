@@ -105,7 +105,7 @@ internal void SV_WriteUserPacket(User* user)
 	
 	u8 buf[packetSize];
     ByteBuffer packet = Buf_FromBytes(buf, packetSize);
-    Packet_StartWrite(&packet, packetSequence, ack, ackBits, 0, 0, 0);
+    Packet_StartWrite(&packet, user->ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);
     i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
 	printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
@@ -127,7 +127,7 @@ internal void SV_WriteTestPacket()
     // Make a packet, no messages just a header
     u8 buf[1400];
     ByteBuffer b = Buf_FromBytes(buf, 1400);
-    Packet_StartWrite(&b, 0, 0, 0, g_ticks, g_ellapsed, 0);
+    Packet_StartWrite(&b, 0, 0, 0, 0, g_ticks, g_ellapsed, 0);
     b.ptrWrite += COM_WriteI32(COM_SENTINEL_B, b.ptrWrite);
     Packet_FinishWrite(&b, 0, 0);
     i32 written = b.Written();
@@ -154,7 +154,25 @@ internal void SV_ReadPacket(SysPacketEvent* ev)
 		printf("  Error %d deserialising packet\n", err);
 		return;
 	}
-    printf("  Tick %d Time %.3f\n",
+    printf("  Seq %d Tick %d Time %.3f\n",
+        p.packetSequence,
         p.transmissionSimFrameNumber,
         p.transmissionSimTime);
+	ev->header.type = SYS_EVENT_SKIP;
+
+    User* user = User_FindByPrivateId(&g_users, p.id);
+    if (user)
+    {
+        printf("\tSV packet from user %d\n", p.id);
+    }
+    else
+    {
+        printf("SV Couldn't find user %d for packet\n", p.id);
+        return;
+    }
+
+    Ack_RecordPacketReceived(&user->acks, p.packetSequence);
+    u32 packetAcks[ACK_RESULTS_CAPACITY];
+    i32 numPacketAcks = Ack_CheckIncomingAcks(
+        &user->acks, p.ackSequence, p.ackBits, packetAcks);
 }

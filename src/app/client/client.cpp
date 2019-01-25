@@ -175,6 +175,7 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
             {
                 printf("CL Input - skip\n");
             } break;
+            case SYS_EVENT_SKIP: break;
         }
     }
 }

@@ -2,27 +2,19 @@
 
 void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize)
 {
-    if (addr->port == APP_CLIENT_LOOPBACK_PORT)
+	// TODO: Is putting client and server packets into the same loopback going to
+	// be a problem?
+    if (addr->port == APP_CLIENT_LOOPBACK_PORT
+		|| addr->port == APP_SERVER_LOOPBACK_PORT)
     {
 		// straight to input
-		Sys_WritePacketEvent(&g_loopbackBuffer, socketIndex, addr, data, dataSize);
-    }
-    else if (addr->port == APP_SERVER_LOOPBACK_PORT)
-    {
-        printf("App SentTo server loopback\n");
-		// TODO: Hook this up!
+		Sys_WritePacketEvent(g_loopback.GetWrite(), socketIndex, addr, data, dataSize);
     }
     else
     {
 		// TODO: Call Socket for remote sends!
 		ILLEGAL_CODE_PATH
     }
-}
-
-// Client's transmission function
-void App_CL_SendTo(i32 connId, u8* data, i32 dataSize)
-{
-    //ZNet_SendData(g_clientNet, connId, data, (u16)dataSize, 0);
 }
 
 #if 0

@@ -48,6 +48,11 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
     
     // -- ack --
     Ack_RecordPacketReceived(&g_acks, p.packetSequence);
+	u32 packetAcks[ACK_RESULTS_CAPACITY]; 
+	i32 numPacketAcks = Ack_CheckIncomingAcks(
+		&g_acks, p.ackSequence, p.ackBits, packetAcks
+	);
+	// TODO: Process packets ack'd here
     
     // -- reliable section --
     // TODO: Put this byte buffer on the descriptor and initialise it there
@@ -88,16 +93,17 @@ internal void CL_WritePacket()
 	
 	u8 buf[1400];
     ByteBuffer packet = Buf_FromBytes(buf, 1400);
-    u32 sequence = g_acks.outputSequence;
+    u32 sequence = g_acks.outputSequence++;
     u32 ack = g_acks.remoteSequence;
     u32 ackBits = Ack_BuildOutgoingAckBits(&g_acks);
 
-    Packet_StartWrite(&packet, 0, 0, 0,  0, 0, 0);
+    Packet_StartWrite(&packet, g_ids.privateId, sequence, ack, ackBits, 0, 0, 0);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
-
+	
+	Ack_RecordPacketTransmission(&g_acks, ack);
     App_SendTo(0, &g_serverAddress, buf, total);
     
 	//Packet_WriteFromStream(

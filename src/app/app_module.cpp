@@ -24,12 +24,12 @@ internal i32 g_isRunningServer = 0;
 // fake socket (port 666)
 // Local server reads from this
 // Local client sends to this
-internal FakeSocket g_localServerSocket;
+//internal FakeSocket g_localServerSocket;
 
 // fake socket (port 667)
 // Local client reads from this
 // Local server sends to this
-internal FakeSocket g_localClientSocket;
+//internal FakeSocket g_localClientSocket;
 
 // World scene
 #define MAX_WORLD_SCENE_ITEMS 2048
@@ -37,9 +37,10 @@ internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
 // Buffer used to feed commands into server every tick
-internal ByteBuffer g_serverPlatformInput;
+//internal ByteBuffer g_serverPlatformInput;
 
-internal ByteBuffer g_loopbackBuffer;
+//internal ByteBuffer g_loopbackBuffer;
+internal DoubleByteBuffer g_loopback;
 
 #define APP_MAX_MALLOCS 1024
 internal MallocItem g_mallocItems[APP_MAX_MALLOCS];
@@ -60,7 +61,7 @@ void App_FatalError(char* msg, char* heading)
 
 // App wide access to server input buffer... good idea?
 // TODO: No checks on whether this buffer is being read!
-internal ByteBuffer* GetServerInput() { return &g_serverPlatformInput; }
+//internal ByteBuffer* GetServerInput() { return &g_serverPlatformInput; }
 
 #include "app_networks.h"
 #include "app_platform.h"

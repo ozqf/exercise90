@@ -7,8 +7,9 @@ Defines event queue from platform resources
 
 #define SYS_EVENT_SENTINEL 0xDEADBEEF
 #define SYS_EVENT_NULL 0
-#define SYS_EVENT_INPUT 1
-#define SYS_EVENT_PACKET 2
+#define SYS_EVENT_SKIP 1
+#define SYS_EVENT_INPUT 2
+#define SYS_EVENT_PACKET 3
 
 #define SYS_CAST_EVENT_TO_BASE(sysEvPtr) ((SysEvent*)##sysEvPtr##)
 

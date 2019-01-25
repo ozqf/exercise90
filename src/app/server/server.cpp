@@ -231,8 +231,13 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 		{
 			case SYS_EVENT_PACKET:
             {
-				COM_PrintBytes((u8*)ev, ev->size, 16);
+				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
+				// Don't read packets intended for the client
+				if (packet->sender.port == APP_CLIENT_LOOPBACK_PORT)
+				{
+					continue;
+				}
                 SV_ReadPacket(packet);
             } break;
 
@@ -240,6 +245,8 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
             {
                 printf("SV Input - skip\n");
             } break;
+
+            case SYS_EVENT_SKIP: break;
 		}
 	}
 }
@@ -267,6 +274,7 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     }
     #endif
     //SV_WriteTestPacket();
+    SV_ReadSystemEvents(sysEvents, deltaTime);
     Sim_Tick(&g_sim, deltaTime);
     
 	#if 1

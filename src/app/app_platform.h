@@ -128,8 +128,11 @@ internal i32  App_Init()
 
     i32 bufferSize = KiloBytes(64);
 
-    g_loopbackBuffer = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, bufferSize, "Loopback"),
+    g_loopback.a = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Loopback A"),
+        bufferSize);
+	g_loopback.b = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Loopback B"),
         bufferSize);
     //g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
 
@@ -181,8 +184,9 @@ internal i32  App_Shutdown()
     mem.ptrMemory = g_heap.ptrMemory;
     mem.size = g_heap.size;
     g_platform.Platform_Free(&mem);
-    g_localClientSocket.Destroy();
-    g_localServerSocket.Destroy();
+	
+    //g_localClientSocket.Destroy();
+    //g_localServerSocket.Destroy();
 
     return COM_ERROR_NONE;
 }
@@ -210,7 +214,7 @@ internal i32 App_StartSession(i32 sessionType)
                 NETMODE_DEDICATED_SERVER,
                 NULL,
                 APP_SERVER_LOOPBACK_PORT);*/
-            g_localServerSocket.isActive = 1;
+            //g_localServerSocket.isActive = 1;
             SV_Init();
             UserIds ids = SV_CreateLocalUser();
             g_isRunningServer = 1;
@@ -220,7 +224,7 @@ internal i32 App_StartSession(i32 sessionType)
                 NETMODE_CLIENT,
                 &g_localServerAddress,
                 APP_CLIENT_LOOPBACK_PORT);*/
-            g_localClientSocket.isActive = 1;
+            //g_localClientSocket.isActive = 1;
             ZNetAddress addr = {};
             addr.port = APP_SERVER_LOOPBACK_PORT;
             CL_Init(addr);
@@ -269,6 +273,8 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
 
             } break;
 
+            case SYS_EVENT_SKIP: break;
+
             default:
             {
                 printf("APP Unknown sys event type %d size %d\n", header->type, header->size);
@@ -300,22 +306,23 @@ internal void App_Update(PlatformTime* time)
         > Clear buffer
         */
 		
+		g_loopback.Swap();
+		Buf_Clear(g_loopback.GetWrite());
+		
         if (g_isRunningServer)
         {
-            g_localServerSocket.Tick(interval);
+            //g_localServerSocket.Tick(interval);
             //ZNet_Tick(g_serverNet, interval);
             printf("*** SV TICK ***\n");
-            SV_Tick(GetServerInput(), interval);
-            Buf_Clear(&g_serverPlatformInput);
+            SV_Tick(g_loopback.GetRead(), interval);
         }
 
         if (g_isRunningClient)
         {
-            g_localClientSocket.Tick(interval);
+            //g_localClientSocket.Tick(interval);
             printf("*** CL TICK ***\n");
             //ZNet_Tick(g_clientNet, interval);
-            CL_Tick(&g_loopbackBuffer,interval);
-            Buf_Clear(&g_loopbackBuffer);
+            CL_Tick(g_loopback.GetRead(), interval);
         }
         
         //App_RunSimFrame(interval);

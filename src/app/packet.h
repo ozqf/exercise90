@@ -11,9 +11,15 @@ struct PacketDescriptor
 	u8* cursor;
     i32 size;
 	
+	i32 id;
+
 	i32 packetSequence;
+	u32 ackSequence;
+	u32 ackBits;
+	
 	u32 transmissionSimFrameNumber;
 	f32 transmissionSimTime;
+	i32 lastReceivedTickNumber;
 	// if 0, no data
 	// num bytes is offset gap to unreliable section - sync check size.
 	i32 reliableOffset;
@@ -33,6 +39,14 @@ struct PacketDescriptor
 // TODO: Replace this with a compacted version eventually
 struct PacketHeader
 {
+	// TODO: This stuff
+	// Packet header
+	//i32 protocol
+	//i32 checksum
+	//u8 type;
+	// private Id of the connection
+	i32 id;
+	
 	// Packet reliability
 	u32 packetSequence;
 	u32 ackSequence;
@@ -65,6 +79,7 @@ internal i32 Packet_WriteHeader(u8* ptr, PacketHeader* h)
 
 internal void Packet_StartWrite(
 	ByteBuffer* packet,
+	i32 privateId,
 	i32 packetSequence,
 	u32 ackSequence,
 	u32 ackBits,
@@ -74,6 +89,7 @@ internal void Packet_StartWrite(
 {
 	PacketHeader* h = (PacketHeader*)packet->ptrStart;
 	*h = {};
+	h->id = privateId;
 	h->packetSequence = packetSequence;
 	h->ackSequence = ackSequence;
 	h->ackBits = ackBits;
@@ -170,8 +186,13 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	*packet = {};
 	packet->ptr = buf;
 	packet->size = numBytes;
+	
 	PacketHeader* h = (PacketHeader*)buf;
+	packet->id = h->id;
 	packet->packetSequence = h->packetSequence;
+	packet->ackSequence = h->ackSequence;
+	packet->ackBits = h->ackBits;
+	
 	packet->numReliableBytes = h->numReliableBytes;
 	packet->numUnreliableBytes = h->numUnreliableBytes;
 	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
