@@ -14,7 +14,7 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
-	ping.sendTime = g_ellapsed;
+	ping.sendTime = g_elapsed;
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
     return (packet->ptrWrite - start);
 }
@@ -44,7 +44,7 @@ internal void CL_WritePacket()
     App_SendTo(0, &g_serverAddress, buf, total);
     
 	//Packet_WriteFromStream(
-    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_elapsed, g_ticks, 0);
     #endif
 }
 

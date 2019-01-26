@@ -17,7 +17,7 @@ internal i32 g_clientState = CLIENT_STATE_NONE;
 internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 internal i32 g_ticks = 0;
-internal f32 g_ellapsed = 0;
+internal f32 g_elapsed = 0;
 i32 CL_IsRunning() { return g_isRunning; }
 
 #define CL_MAX_ALLOCATIONS 256
@@ -65,6 +65,7 @@ void CL_LoadTestScene()
     #if 1
     def = {};
     def.isLocal = 1;
+	def.entType = SIM_ENT_TYPE_WORLD;
     def.pos[1] = 0;
     def.scale[0] = 12;
     def.scale[1] = 1;
@@ -120,7 +121,7 @@ void CL_Shutdown()
 {
     // TODO: Free memory (:
 }
-
+#if 0
 internal void CL_ReadReliableCommands(NetStream* stream)
 {
     ByteBuffer* b = &stream->inputBuffer;
@@ -146,7 +147,7 @@ internal void CL_ReadReliableCommands(NetStream* stream)
         }
     }
 }
-
+#endif
 internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 {
     printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
@@ -213,6 +214,7 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 				);
 				
 				SimEntityDef def = {};
+                def.entType = spawn->entType;
 				def.pos[0] = spawn->pos.x;
 				def.pos[1] = spawn->pos.y;
 				def.pos[2] = spawn->pos.z;
@@ -270,7 +272,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     CL_WritePacket();
 	
     g_ticks++;
-    g_ellapsed += deltaTime;
+    g_elapsed += deltaTime;
 }
 
 void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)

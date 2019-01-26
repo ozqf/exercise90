@@ -50,7 +50,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
-	ping.sendTime = g_ellapsed;
+	ping.sendTime = g_elapsed;
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
     return (packet->ptrWrite - start);
 }
@@ -117,7 +117,7 @@ internal void SV_WriteUserPacket(User* user)
     App_SendTo(0, &user->address, buf, total);
     
 	//Packet_WriteFromStream(
-    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_ellapsed, g_ticks, 0);
+    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_elapsed, g_ticks, 0);
     #endif
 }
 
@@ -127,7 +127,7 @@ internal void SV_WriteTestPacket()
     // Make a packet, no messages just a header
     u8 buf[1400];
     ByteBuffer b = Buf_FromBytes(buf, 1400);
-    Packet_StartWrite(&b, 0, 0, 0, 0, g_ticks, g_ellapsed, 0);
+    Packet_StartWrite(&b, 0, 0, 0, 0, g_ticks, g_elapsed, 0);
     b.ptrWrite += COM_WriteI32(COM_SENTINEL_B, b.ptrWrite);
     Packet_FinishWrite(&b, 0, 0);
     i32 written = b.Written();

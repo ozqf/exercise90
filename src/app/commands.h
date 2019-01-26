@@ -23,8 +23,9 @@ struct S2C_SpawnEntity
     i32 networkId;
     u8 entType;
     Vec3 pos;
-    Vec3 rot;
 	Vec3 vel;
+    f32 pitch;
+    f32 yaw;
 };
 
 internal void Cmd_InitSpawnEntity(S2C_SpawnEntity* cmd, i32 tick, i32 sequence)

@@ -17,6 +17,7 @@
 #define SIM_ENT_TYPE_NONE 0
 #define SIM_ENT_TYPE_WORLD 1
 #define SIM_ENT_TYPE_ACTOR 2
+#define SIM_ENT_TYPE_WANDERER 3
 
 #pragma pack(push, 1)
 union SimEntIndex
@@ -46,12 +47,15 @@ struct SimEntity
     Transform t;
     Vec3 previousPos;
     Vec3 velocity;
+    f32 pitch;
+    f32 yaw;
 };
 
 struct SimEntityDef
 {
     i32 serial;
     i32 isLocal;
+    i32 entType;
     f32 pos[3];
     f32 scale[3];
     f32 velocity[3];

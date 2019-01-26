@@ -37,90 +37,6 @@ internal i32 Sim_EnqueueCommand(SimScene* sim, u8* ptr)
     return COM_ERROR_NONE;
 }
 
-////////////////////////////////////////////////////////////////////
-// Entity assignment
-////////////////////////////////////////////////////////////////////
-internal SimEntity* Sim_FindEntityBySerialNumber(
-    SimScene* scene, i32 serialNumber)
-{
-    for (i32 j = 0; j < scene->maxEnts; ++j)
-    {
-        SimEntity* ent = &scene->ents[j];
-        if (ent->id.serial == serialNumber)
-        {
-            return ent;
-        }
-    }
-    return NULL;
-}
-
-internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
-{
-	for (i32 i = 0; i < scene->maxEnts; ++i)
-	{
-		SimEntity* ent = &scene->ents[i];
-		
-		if (ent->id.serial != serial) { continue; }
-		
-		// free slot
-		ent->status = SIM_ENT_STATUS_FREE;
-		
-		return COM_ERROR_NONE;
-		
-	}
-	return COM_ERROR_NOT_FOUND;
-}
-
-internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene, i32 isLocal)
-{
-    if (isLocal) { return scene->localEntitySequence++; }
-    else { return scene->remoteEntitySequence++; }
-}
-
-internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
-{
-    i32 halfMax = scene->maxEnts / 2;
-    i32 i = forLocalEnt ? halfMax : 0;
-    i32 l = forLocalEnt ? scene->maxEnts : halfMax;
-    for (i = 0; i < l; ++i)
-    {
-        SimEntity* ent = &scene->ents[i];
-        if (ent->status != SIM_ENT_STATUS_FREE) { continue; }
-        return i;
-    }
-    return -1;
-}
-
-internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
-{
-    SimEntity* ent = NULL;
-    i32 slotIndex = -1;
-    slotIndex = Sim_FindFreeSlot(scene, 0);
-    if (slotIndex <= -1 ) { return NULL; }
-
-    // config
-    ent = &scene->ents[slotIndex];
-    ent->status = SIM_ENT_STATUS_IN_USE;
-    ent->id.slot.index = (u16)slotIndex;
-	ent->id.serial = newSerial;
-    return ent;
-}
-
-internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
-{
-    SimEntity* ent = NULL;
-    i32 slotIndex = -1;
-    slotIndex = Sim_FindFreeSlot(scene, 1);
-    if (slotIndex <= -1 ) { return NULL; }
-
-    // config
-    ent = &scene->ents[slotIndex];
-    ent->status = SIM_ENT_STATUS_IN_USE;
-    ent->id.slot.index = (u16)slotIndex;
-	ent->id.serial = newSerial;
-    return ent;
-}
-
 // internal SimEntity* Sim_AcquireEntity(SimScene* scene)
 // {
     
@@ -277,7 +193,8 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
         {
             SimCmdAddEntity* cmd = (SimCmdAddEntity*)header;
 			Assert(cmd->header.size == sizeof(SimCmdAddEntity));
-            
+            return Sim_SpawnEntity(scene, header, &cmd->def);
+            #if 0
             SimEntity* ent;
             if (cmd->def.isLocal)
             {
@@ -324,6 +241,7 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
                 ent->t.scale.y = 1;
                 ent->t.scale.z = 1;
             }
+            #endif
         } break;
 		
 		case SIM_CMD_TYPE_REMOVE_ENTITY:

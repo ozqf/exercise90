@@ -16,7 +16,7 @@ internal SimScene g_sim;
 
 internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
-internal f32 g_ellapsed = 0;
+internal f32 g_elapsed = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
 #include "server_packets.h"
@@ -91,6 +91,9 @@ internal void SV_UserStartSync(User* user)
         cmd.entType = (u8)ent->entType;
         cmd.networkId = ent->id.serial;
         cmd.pos = ent->t.pos;
+        cmd.vel = ent->velocity;
+        cmd.pitch = ent->pitch;
+        cmd.yaw = ent->yaw;
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
         printf("  Write Entity %d\n", ent->id.serial);
@@ -135,6 +138,7 @@ internal void SV_LoadTestScene()
         f32 y = 1;
         f32 z = 2 * randZ;
         def.isLocal = 1;
+        def.entType = SIM_ENT_TYPE_WANDERER;
         def.pos[0] = x;
         def.pos[1] = y;
         def.pos[2] = z;
@@ -147,9 +151,12 @@ internal void SV_LoadTestScene()
     def = {};
     def.isLocal = 1;
     def.pos[1] = 0;
+    def.entType = SIM_ENT_TYPE_WORLD;
     def.scale[0] = 12;
     def.scale[1] = 1;
     def.scale[2] = 12;
+    // Test: this should be ignored by the sim as world entities cannot move
+    def.velocity[0] = 3;
     Sim_AddEntity(&g_sim, &def);
 
     g_sim.boundaryMin = { -6, -6, -6 };
@@ -251,33 +258,8 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 	}
 }
 
-void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
+internal void SV_SendUserPackets(f32 deltaTime)
 {
-    #if 0
-    u8* read = input->ptrStart;
-    u8* end = input->ptrWrite;
-    while(read < end)
-    {
-        Command* h = (Command*)read;
-        i32 err = Cmd_Validate(h);
-        Assert(err == COM_ERROR_NONE)
-        read += h->size;
-        switch (h->type)
-        {
-            case CMD_TYPE_USER_JOINED:
-            {
-                CmdUserJoined* cmd = (CmdUserJoined*)h;
-                printf("SV User %d joined\n", cmd->privateId);
-                SV_CreateUser(cmd->privateId);
-            } break;
-        }
-    }
-    #endif
-    //SV_WriteTestPacket();
-    SV_ReadSystemEvents(sysEvents, deltaTime);
-    Sim_Tick(&g_sim, deltaTime);
-    
-	#if 1
 	for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];
@@ -285,8 +267,16 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 		
 		SV_WriteUserPacket(user);
 	}
-	#endif
-	g_ellapsed += deltaTime;
+}
+
+void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
+{
+    //SV_WriteTestPacket();
+    SV_ReadSystemEvents(sysEvents, deltaTime);
+    Sim_Tick(&g_sim, deltaTime);
+    SV_SendUserPackets(deltaTime);
+	
+	g_elapsed += deltaTime;
     g_ticks++;
 }
 
