@@ -18,6 +18,7 @@
 #define SIM_ENT_TYPE_WORLD 1
 #define SIM_ENT_TYPE_ACTOR 2
 #define SIM_ENT_TYPE_WANDERER 3
+#define SIM_ENT_TYPE_PROJECTILE 4
 
 #pragma pack(push, 1)
 union SimEntIndex
@@ -59,6 +60,16 @@ struct SimEntityDef
     f32 pos[3];
     f32 scale[3];
     f32 velocity[3];
+};
+
+struct SimProjectileSpawnDef
+{
+    i32 firstSerial;
+    u8 numProjectiles;
+    u8 projType;
+    u8 seedIndex;
+    Vec3 pos;
+	Vec3 forward;
 };
 
 struct SimEntBlock

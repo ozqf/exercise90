@@ -45,12 +45,10 @@ struct SimCmdSyncEntity
 	f32 pos[3];
 };
 
-struct SimCmdProjectile
+struct SimCmdAddProjectile
 {
 	SimCmd header;
-	f32 origin[3];
-	f32 velocity[3];
-	i32 deathTick;
+	SimProjectileSpawnDef def;
 };
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd);

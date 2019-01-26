@@ -9,6 +9,7 @@
 #define CMD_TYPE_S2C_HANDSHAKE 254
 #define CMD_TYPE_S2C_SET_SCENE 253
 #define CMD_TYPE_S2C_SPAWN_ENTITY 252
+#define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
 
 struct CmdPing
 {
@@ -34,8 +35,20 @@ internal void Cmd_InitSpawnEntity(S2C_SpawnEntity* cmd, i32 tick, i32 sequence)
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.size = sizeof(S2C_SpawnEntity);
     cmd->header.type = CMD_TYPE_S2C_SPAWN_ENTITY;
+}
 
+struct S2C_SpawnProjectile
+{
+    Command header;
+    SimProjectileSpawnDef def;
+};
 
+internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequence)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.size = sizeof(S2C_SpawnProjectile);
+    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
 }
 
 // SV -> CL
