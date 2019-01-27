@@ -19,6 +19,7 @@
 #define SIM_ENT_TYPE_ACTOR 2
 #define SIM_ENT_TYPE_WANDERER 3
 #define SIM_ENT_TYPE_PROJECTILE 4
+#define SIM_ENT_TYPE_TURRET 5
 
 #pragma pack(push, 1)
 union SimEntIndex
@@ -50,6 +51,9 @@ struct SimEntity
     Vec3 velocity;
     f32 pitch;
     f32 yaw;
+
+    f32 thinkTick;
+    f32 thinkTime;
 };
 
 struct SimEntityDef
@@ -62,6 +66,8 @@ struct SimEntityDef
     f32 velocity[3];
 };
 
+#define SIM_PROJ_TYPE_NONE 0
+#define SIM_PROJ_TYPE_TEST 1
 struct SimProjectileSpawnDef
 {
     i32 firstSerial;

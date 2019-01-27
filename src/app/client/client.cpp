@@ -31,6 +31,7 @@ internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
 
+#include "client_game.h"
 #include "client_packets.h"
 
 internal void* CL_Malloc(i32 numBytes)
@@ -268,7 +269,8 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     CL_ReadSystemEvents(sysEvents, deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
-    Sim_Tick(&g_sim, deltaTime);
+    //Sim_Tick(&g_sim, deltaTime);
+    CLG_TickGame(&g_sim, deltaTime);
     CL_WritePacket();
 	
     g_ticks++;

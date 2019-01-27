@@ -6,7 +6,7 @@
 // Entity assignment
 ////////////////////////////////////////////////////////////////////
 
-internal i32 Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max)
+i32 Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->t.pos;
     if (p->x < min->x) { return 0; }
@@ -18,7 +18,7 @@ internal i32 Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max)
     return 1;
 }
 
-internal void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
+void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->t.pos;
     if (p->x < min->x) { p->x = min->x; ent->velocity.x = -ent->velocity.x; }
@@ -30,7 +30,7 @@ internal void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     if (p->z < min->z) { p->z = min->z; ent->velocity.z = -ent->velocity.z; }
     if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
 }
-
+#if 0
 internal void Sim_UpdateWanderer(SimScene* scene, SimEntity* ent, f32 deltaTime)
 {
     Vec3* pos = &ent->t.pos;
@@ -51,13 +51,35 @@ internal void Sim_UpdateWanderer(SimScene* scene, SimEntity* ent, f32 deltaTime)
     Sim_BoundaryBounce(ent, &scene->boundaryMin, &scene->boundaryMax);
 }
 
+internal void Sim_UpdateTurret(SimScene* sim, SimEntity* ent, f32 deltaTime)
+{
+    if (ent->thinkTick <= 0.0f)
+    {
+        ent->thinkTick += ent->thinkTime;
+        // think
+
+        SimCmdProjectileSpawn cmd = {};
+        Sim_PrepareCommand(sim, &cmd.header);
+        cmd.def.projType = SIM_PROJ_TYPE_TEST;
+        cmd.def.pos = ent->t.pos;
+        cmd.def.seedIndex = 0;
+        cmd.def.forward = { 1, 0, 0 };
+        Sim_EnqueueCommand(sim, (u8*)&cmd);
+    }
+    else
+    {
+        ent->thinkTick -= deltaTime;
+    }
+}
+
 internal void Sim_UpdateEntity(SimScene* scene, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
-        case SIM_ENT_TYPE_WANDERER: { Sim_UpdateWanderer(scene, ent, deltaTime); }
-        case SIM_ENT_TYPE_WORLD: { }
+        case SIM_ENT_TYPE_WANDERER: { Sim_UpdateWanderer(scene, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
     }
 }
+#endif

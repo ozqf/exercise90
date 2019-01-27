@@ -147,6 +147,13 @@ internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* 
     return COM_ERROR_NONE;
 }
 
+internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_ApplySpawnTransform(ent, def);
+    ent->entType = def->entType;
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
 {
     SimEntity* ent;
@@ -176,6 +183,10 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
         {
             return Sim_InitWorldVolume(scene, ent, def);
         }
+        case SIM_ENT_TYPE_TURRET:
+        {
+            return Sim_InitTurret(scene, ent, def);
+        }
         case SIM_ENT_TYPE_NONE:
         {
             printf("SIM Cannot spawn, entity type not set!\n");
@@ -192,4 +203,16 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
     }
 
     //return COM_ERROR_NONE;
+}
+
+internal i32 Sim_ExecuteProjectileEvent(SimScene* sim, SimCmdProjectileSpawn* event)
+{
+    switch (event->def.projType)
+    {
+        case SIM_PROJ_TYPE_TEST:
+        {
+            SimEntityDef def = {};
+        } break;
+        default: { printf("Unknown proj type %d\n", event->def.projType); return COM_ERROR_BAD_ARGUMENT; }
+    }
 }

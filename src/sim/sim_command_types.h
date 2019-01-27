@@ -3,8 +3,9 @@
 #include "sim.h"
 
 #define SIM_CMD_TYPE_NULL 0
-#define SIM_CMD_TYPE_ADD_ENTITY 1
-#define SIM_CMD_TYPE_REMOVE_ENTITY 2
+#define SIM_CMD_TYPE_ADD_ENTITY 255
+#define SIM_CMD_TYPE_REMOVE_ENTITY 254
+#define SIM_CMD_TYPE_PROJECTILE_SPAWN 253
 
 // 48879?
 #define SIM_CMD_SENTINEL 0xBEEF
@@ -45,7 +46,7 @@ struct SimCmdSyncEntity
 	f32 pos[3];
 };
 
-struct SimCmdAddProjectile
+struct SimCmdProjectileSpawn
 {
 	SimCmd header;
 	SimProjectileSpawnDef def;

@@ -90,7 +90,7 @@ void Sim_InitScene(
     Buf_Clear(&cmdBufferA);
     Buf_Clear(&cmdBufferB);
 }
-
+#if 0
 internal i32 Sim_RunFrame(SimScene* scene, f32 deltaTime)
 {
     for (i32 i = 0; i < scene->maxEnts; ++i)
@@ -101,7 +101,7 @@ internal i32 Sim_RunFrame(SimScene* scene, f32 deltaTime)
     }
     return COM_ERROR_NONE;
 }
-
+#endif
 i32 Sim_Execute(SimScene* scene, SimCmd* header)
 {
     if (header->type == 0)
@@ -169,9 +169,11 @@ Read Inputs
 Update Entities -> generate outputs
 Step Physics -> generate outputs
 */
+#if 0
 i32 Sim_Tick(SimScene* scene, f32 deltaTime)
 {
     //Sim_ReadInput(scene, deltaTime);
     Sim_RunFrame(scene, deltaTime);
     return COM_ERROR_NONE;
 }
+#endif

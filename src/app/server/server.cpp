@@ -19,6 +19,7 @@ internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
+#include "server_game.h"
 #include "server_packets.h"
 
 // this is the server's command buffer to execute next tick
@@ -273,7 +274,8 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     //SV_WriteTestPacket();
     SV_ReadSystemEvents(sysEvents, deltaTime);
-    Sim_Tick(&g_sim, deltaTime);
+    //Sim_Tick(&g_sim, deltaTime);
+    SVG_TickSim(&g_sim, deltaTime);
     SV_SendUserPackets(deltaTime);
 	
 	g_elapsed += deltaTime;
