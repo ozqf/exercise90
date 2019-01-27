@@ -85,6 +85,7 @@ internal void SV_UserStartSync(User* user)
     {
         SimEntity* ent = &g_sim.ents[j];
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        if (ent->isLocal) { continue; }
         S2C_SpawnEntity cmd = {};
         // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
         // is manually setting it ever required?
@@ -148,6 +149,16 @@ internal void SV_LoadTestScene()
         Sim_AddEntity(&g_sim, &def);
     }
     #endif
+
+    def = {};
+    def.isLocal = 1;
+    def.pos[1] = 0;
+    def.entType = SIM_ENT_TYPE_TURRET;
+    def.scale[0] = 1;
+    def.scale[1] = 1;
+    def.scale[2] = 1;
+    Sim_AddEntity(&g_sim, &def);
+
     #if 1
     def = {};
     def.isLocal = 1;

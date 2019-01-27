@@ -2,7 +2,11 @@
 
 #include "server.h"
 
-internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
+#define SVG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
+    SVG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
+
+//internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
+SVG_DEFINE_ENT_UPDATE(Wanderer)
 {
     Vec3* pos = &ent->t.pos;
     ent->previousPos.x = pos->x;
@@ -22,11 +26,33 @@ internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
+SVG_DEFINE_ENT_UPDATE(Turret)
+{
+    if (ent->thinkTick <= 0.0f)
+    {
+        ent->thinkTick += ent->thinkTime;
+        // think
+        printf("SVG Turret think\n");
+        SimCmdProjectileSpawn cmd = {};
+        Sim_PrepareCommand(sim, &cmd.header);
+        cmd.def.projType = SIM_PROJ_TYPE_TEST;
+        cmd.def.pos = ent->t.pos;
+        cmd.def.seedIndex = 0;
+        cmd.def.forward = { 1, 0, 0 };
+        //Sim_EnqueueCommand(sim, (u8*)&cmd);
+    }
+    else
+    {
+        ent->thinkTick -= deltaTime;
+    }
+}
+
 internal void SVG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
         case SIM_ENT_TYPE_WANDERER: { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_TURRET: { SVG_UpdateTurret(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
