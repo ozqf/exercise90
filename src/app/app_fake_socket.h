@@ -31,7 +31,8 @@ struct FakeSocketInfo
 
 struct FakeSocketPacketHeader
 {
-	i32 status = 0;
+	i32 status;
+	i32 socketIndex;
     ZNetAddress address;
     i32 size;
     f32 tick;
@@ -88,7 +89,7 @@ struct FakeSocket
         }
     }
 
-    void SendPacket(ZNetAddress* address, u8* data, u16 numBytes)
+    void SendPacket(i32 socketIndex, ZNetAddress* address, u8* data, i32 numBytes)
     {
         if (this->info.RollDropPacket())
         {
@@ -107,6 +108,7 @@ struct FakeSocket
         FakeSocketPacketHeader* h = (FakeSocketPacketHeader*)malloc(space);
         Assert(h);
         h->address = *address;
+		h->socketIndex = socketIndex;
         h->size = numBytes;
         h->status = FAKE_SOCKET_STATUS_ACTIVE;
         h->tick = (f32)this->info.RollDelay() / 1000.0f;
@@ -137,7 +139,7 @@ struct FakeSocket
 
     // Call repeatedly to pull packets that are read out
     // one by one
-    void Read(u8** ptr, i32* numBytes, ZNetAddress* from)
+    void Read(i32* socketIndex, u8** ptr, i32* numBytes, ZNetAddress* from)
     {
         for (i32 i = 0; i < 256; ++i)
         {
@@ -148,6 +150,7 @@ struct FakeSocket
             
             //
             h->status = FAKE_SOCKET_STATUS_FREEABLE;
+			*socketIndex = h->socketIndex;
             *numBytes = h->size;
             *from = h->address;
             *ptr = (u8*)h + sizeof(FakeSocketPacketHeader);
@@ -160,5 +163,7 @@ struct FakeSocket
         }
         *ptr = NULL;
         *numBytes = 0;
+		*socketIndex = 0;
+		*from = {};
     }
 };

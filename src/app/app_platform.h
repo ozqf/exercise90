@@ -4,31 +4,6 @@
 #include "../interface/sys_events.h"
 
 /***************************************
-* Access Server <-> Client communication buffers
-* TODO: storage of multiple packets. Pump 'ForRead'
-* to empty them out
-***************************************/
-/*ByteBuffer* App_GetLocalClientPacketForRead()
-{
-    return &g_loopbackBuffer;
-}
-
-ByteBuffer* App_GetLocalClientPacketForWrite()
-{
-    return &g_loopbackBuffer;
-}
-
-ByteBuffer* App_GetLocalServerPacketForRead()
-{
-    return &g_localServerPacket;
-}
-
-ByteBuffer* App_GetLocalServerPacketForWrite()
-{
-    return &g_localServerPacket;
-}*/
-
-/***************************************
 * Private
 ***************************************/
 internal f32 App_GetSimFrameInterval()
@@ -41,52 +16,6 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
     return (accumulator / interval);
 }
 
-/***************************************
-* Callbacks from net connection module
-***************************************/
-/*internal void Net_ConnectionAccepted(ZNetConnectionInfo* info)
-{
-
-}
-
-internal void Net_ConnectionDropped(ZNetConnectionInfo* info)
-{
-
-}
-
-internal void Net_DataPacketReceived(ZNetPacketInfo* info, u8* bytes, u16 numBytes)
-{
-
-}
-
-internal void Net_DeliveryConfirmed(ZNetConnectionInfo* info, u32 packetNumber)
-{
-
-}*/
-#if 0
-internal ZNetPlatformFunctions Net_GetPlatformFunctions()
-{
-    ZNetPlatformFunctions funcs = {};
-    funcs.Init = g_platform.Net_Init;
-    funcs.Shutdown = g_platform.Net_Shutdown;
-    funcs.OpenSocket = g_platform.Net_OpenSocket;
-    funcs.CloseSocket = g_platform.Net_CloseSocket;
-    funcs.Read = g_platform.Net_Read;
-    funcs.SendTo = g_platform.Net_SendTo;
-    funcs.FatalError = App_FatalError;
-    return funcs;
-}
-
-internal ZNetOutputInterface Net_GetNetworkCallbacks()
-{
-    ZNetOutputInterface funcs = {};
-    funcs.ConnectionAccepted = Net_ConnectionAccepted;
-    funcs.ConnectionDropped = Net_ConnectionDropped;
-    funcs.DataPacketReceived = Net_DataPacketReceived;
-    funcs.DeliveryConfirmed = Net_DeliveryConfirmed;
-    return funcs;
-}
-#endif
 /***************************************
 * Define functions accessible to platform
 ***************************************/
@@ -128,41 +57,27 @@ internal i32  App_Init()
 
     i32 bufferSize = KiloBytes(64);
 
-    g_loopback.a = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, bufferSize, "Loopback A"),
+    // Internal loopbacks for client and server
+    g_serverLoopback.a = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Server Loopback A"),
         bufferSize);
-	g_loopback.b = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, bufferSize, "Loopback B"),
+	g_serverLoopback.b = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Server Loopback B"),
+        bufferSize);
+
+    g_clientLoopback.a = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Client Loopback A"),
+        bufferSize);
+	g_clientLoopback.b = Buf_FromMalloc(
+        COM_Malloc(&g_mallocs, bufferSize, "Client Loopback B"),
         bufferSize);
     //g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
+	
+	g_loopbackSocket.Init(75, 150, 0.1f);
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
 
-    // init client and server connection managers
-    #if 0
-    i32 znetInstanceSize = ZNet_RequiredInstanceSize();
-    g_clientNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "CL Conn");
-    g_clientNet->memSize = znetInstanceSize;
-    ZNet_Init(
-        g_clientNet,
-        App_CLNet_CreatePlatformFunctions(),
-        App_CLNet_CreateOutputFunctions(),
-        ZNET_SIM_MODE_NONE);
-    g_localClientSocket.Init(0, 0, 0);
-    
-    g_serverPlatformInput = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Input"), bufferSize);
-
-    
-    g_serverNet = (ZNetHandle*)COM_Malloc(&g_mallocs, znetInstanceSize, "SV Conn");
-    g_serverNet->memSize = znetInstanceSize;
-    ZNet_Init(
-        g_serverNet,
-        App_SVNet_CreatePlatformFunctions(),
-        App_SVNet_CreateOutputFunctions(),
-        ZNET_SIM_MODE_NONE);
-    g_localServerSocket.Init(0, 0, 0);
-    #endif
     // Render Scenes
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS);
     g_worldScene.cameraTransform.pos.y += 16;
@@ -306,23 +221,28 @@ internal void App_Update(PlatformTime* time)
         > Clear buffer
         */
 		
-		g_loopback.Swap();
-		Buf_Clear(g_loopback.GetWrite());
+		App_UpdateLoopbackSocket(&g_loopbackSocket, interval);
+		
+		g_serverLoopback.Swap();
+		Buf_Clear(g_serverLoopback.GetWrite());
 		
         if (g_isRunningServer)
         {
             //g_localServerSocket.Tick(interval);
             //ZNet_Tick(g_serverNet, interval);
             printf("*** SV TICK ***\n");
-            SV_Tick(g_loopback.GetRead(), interval);
+            SV_Tick(g_serverLoopback.GetRead(), interval);
         }
+
+        g_clientLoopback.Swap();
+        Buf_Clear(g_clientLoopback.GetWrite());
 
         if (g_isRunningClient)
         {
             //g_localClientSocket.Tick(interval);
             printf("*** CL TICK ***\n");
             //ZNet_Tick(g_clientNet, interval);
-            CL_Tick(g_loopback.GetRead(), interval);
+            CL_Tick(g_clientLoopback.GetRead(), interval);
         }
         
         //App_RunSimFrame(interval);

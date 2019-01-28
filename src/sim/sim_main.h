@@ -65,6 +65,23 @@ i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
     return COM_ERROR_NONE;
 }
 
+i32 Sim_LoadScene(SimScene* sim, i32 index)
+{
+	SimEntityDef def = {};
+    def.isLocal = 1;
+	def.entType = SIM_ENT_TYPE_WORLD;
+    def.pos[1] = 0;
+    def.scale[0] = 12;
+    def.scale[1] = 1;
+    def.scale[2] = 12;
+    Sim_AddEntity(sim, &def);
+
+    sim->boundaryMin = { -6, -6, -6 };
+    sim->boundaryMax = { 6, 6, 6 };
+
+	return COM_ERROR_NONE;
+}
+
 ////////////////////////////////////////////////////////////////////
 // Lifetime
 ////////////////////////////////////////////////////////////////////
@@ -102,6 +119,28 @@ internal i32 Sim_RunFrame(SimScene* scene, f32 deltaTime)
     return COM_ERROR_NONE;
 }
 #endif
+
+i32 Sim_ExecuteProjectileSpawn(
+    SimScene* sim,
+    i32 tick,
+    SimProjectileSpawnDef* def)
+{
+    switch (def->projType)
+    {
+        case 1:
+        {
+            i32 serial = def->firstSerial;
+            for (i32 i = 0; i < 10; ++i)
+            {
+                SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial++);
+            }
+        } break;
+        default: printf("SIM Unknown proj type %d\n", def->projType);
+        return COM_ERROR_BAD_ARGUMENT;
+    }
+    return COM_ERROR_NONE;
+}
+
 i32 Sim_Execute(SimScene* scene, SimCmd* header)
 {
     if (header->type == 0)

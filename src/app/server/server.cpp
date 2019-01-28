@@ -129,7 +129,8 @@ UserIds SV_CreateLocalUser()
 
 internal void SV_LoadTestScene()
 {
-    
+    Sim_LoadScene(&g_sim, 0);
+	
     SimEntityDef def = {};
     #if 1
     for (i32 i = 0; i < 8; ++i)
@@ -139,7 +140,7 @@ internal void SV_LoadTestScene()
         f32 x = 2 * randX;
         f32 y = 1;
         f32 z = 2 * randZ;
-        def.isLocal = 1;
+        def.isLocal = 0;
         def.entType = SIM_ENT_TYPE_WANDERER;
         def.pos[0] = x;
         def.pos[1] = y;
@@ -152,14 +153,15 @@ internal void SV_LoadTestScene()
 
     def = {};
     def.isLocal = 1;
-    def.pos[1] = 0;
+    def.pos[1] = 1;
     def.entType = SIM_ENT_TYPE_TURRET;
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
-
-    #if 1
+	
+	// World geometry
+    #if 0
     def = {};
     def.isLocal = 1;
     def.pos[1] = 0;

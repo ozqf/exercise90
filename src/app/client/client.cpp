@@ -45,6 +45,8 @@ internal void* CL_Malloc(i32 numBytes)
 
 void CL_LoadTestScene()
 {
+	Sim_LoadScene(&g_sim, 0);
+	
     SimEntityDef def = {};
     #if 0
     for (i32 i = 0; i < 8; ++i)
@@ -63,7 +65,7 @@ void CL_LoadTestScene()
         Sim_AddEntity(&g_sim, &def);
     }
     #endif
-    #if 1
+    #if 0
     def = {};
     def.isLocal = 1;
 	def.entType = SIM_ENT_TYPE_WORLD;

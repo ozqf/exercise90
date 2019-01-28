@@ -31,25 +31,20 @@ internal i32 g_isRunningServer = 0;
 // Local server sends to this
 //internal FakeSocket g_localClientSocket;
 
-// World scene
-#define MAX_WORLD_SCENE_ITEMS 2048
-internal RenderScene g_worldScene;
-internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
+internal FakeSocket g_loopbackSocket;
 
-// Buffer used to feed commands into server every tick
-//internal ByteBuffer g_serverPlatformInput;
-
-//internal ByteBuffer g_loopbackBuffer;
-internal DoubleByteBuffer g_loopback;
+internal DoubleByteBuffer g_serverLoopback;
+internal DoubleByteBuffer g_clientLoopback;
 
 #define APP_MAX_MALLOCS 1024
 internal MallocItem g_mallocItems[APP_MAX_MALLOCS];
 internal MallocList g_mallocs;
 
-//internal ZNetHandle* g_clientNet;
-//internal ZNetHandle* g_serverNet;
-internal ZNetAddress g_localServerAddress;
+#define MAX_WORLD_SCENE_ITEMS 2048
+internal RenderScene g_worldScene;
+internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
+internal ZNetAddress g_localServerAddress;
 
 internal i32 App_StartSession(i32 sessionType);
 
@@ -58,10 +53,6 @@ void App_FatalError(char* msg, char* heading)
     printf("FATAL %s: %s\n", heading, msg);
     ILLEGAL_CODE_PATH
 }
-
-// App wide access to server input buffer... good idea?
-// TODO: No checks on whether this buffer is being read!
-//internal ByteBuffer* GetServerInput() { return &g_serverPlatformInput; }
 
 #include "app_networks.h"
 #include "app_platform.h"

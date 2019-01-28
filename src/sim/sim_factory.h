@@ -68,6 +68,7 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+    ent->isLocal = 0;
     return ent;
 }
 
@@ -83,6 +84,7 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+    ent->isLocal = 1;
     return ent;
 }
 

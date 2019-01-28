@@ -44,6 +44,7 @@ struct SimEntId
 struct SimEntity
 {
     i32 status;
+    i32 isLocal;
     SimEntId id;
     i32 entType;
     Transform t;
@@ -71,7 +72,6 @@ struct SimEntityDef
 struct SimProjectileSpawnDef
 {
     i32 firstSerial;
-    u8 numProjectiles;
     u8 projType;
     u8 seedIndex;
     Vec3 pos;
