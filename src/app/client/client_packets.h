@@ -22,7 +22,7 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
 internal void CL_WritePacket()
 {
     #if 1
-	printf("CL Write packet for user %d\n", g_ids.privateId);
+	//printf("CL Write packet for user %d\n", g_ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
@@ -73,7 +73,7 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
     i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
     u8* data = (u8*)(ev) + headerSize;
-    printf("CL %d Packet bytes from %d\n", dataSize, ev->sender.port);
+    //printf("CL %d Packet bytes from %d\n", dataSize, ev->sender.port);
 	
     PacketDescriptor p;
     i32 err = Packet_InitDescriptor(
@@ -83,10 +83,10 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
 		printf("  Error %d deserialising packet\n", err);
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
-    printf("  Seq %d Tick %d Time %.3f\n",
+    /*printf("  Seq %d Tick %d Time %.3f\n",
         p.packetSequence,
         p.transmissionSimFrameNumber,
-        p.transmissionSimTime);
+        p.transmissionSimTime);*/
     
     // -- ack --
     Ack_RecordPacketReceived(&g_acks, p.packetSequence);
@@ -100,7 +100,7 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
     // TODO: Put this byte buffer on the descriptor and initialise it there
     // to save all this faff in multiple places
     ByteBuffer reliableSection = {};
-    printf("  Reliable bytes: %d\n", p.numReliableBytes);
+    //printf("  Reliable bytes: %d\n", p.numReliableBytes);
     reliableSection.ptrStart = data + Packet_GetHeaderSize();
     reliableSection.ptrWrite = reliableSection.ptrStart + p.numReliableBytes;
     reliableSection.ptrEnd = reliableSection.ptrWrite;

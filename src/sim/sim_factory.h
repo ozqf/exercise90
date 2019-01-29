@@ -36,10 +36,33 @@ internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
 	return COM_ERROR_NOT_FOUND;
 }
 
-internal i32 Sim_ReserveRemoteEntitySerial(SimScene* scene, i32 isLocal)
+i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 {
     if (isLocal) { return scene->localEntitySequence++; }
     else { return scene->remoteEntitySequence++; }
+}
+
+i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
+{
+    switch (patternType)
+    {
+        case SIM_PROJ_TYPE_TEST:
+        {
+            i32 serial;
+            if (isLocal)
+            {
+                serial = scene->localEntitySequence;
+                scene->localEntitySequence += 8;
+            }
+            else
+            {
+                serial = scene->remoteEntitySequence;
+                scene->remoteEntitySequence += 8;
+            }
+            return serial;
+        }
+    }
+    return -1;
 }
 
 internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)

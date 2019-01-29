@@ -153,7 +153,7 @@ internal void CL_ReadReliableCommands(NetStream* stream)
 #endif
 internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
+    //printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
     u8* read = sysEvents->ptrStart;
     u8* end = sysEvents->ptrWrite;
     while (read < end)
@@ -177,7 +177,7 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 
             case SYS_EVENT_INPUT:
             {
-                printf("CL Input - skip\n");
+                //printf("CL Input - skip\n");
             } break;
             case SYS_EVENT_SKIP: break;
         }

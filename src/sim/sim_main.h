@@ -48,7 +48,7 @@ i32 Sim_CalcEntityArrayBytes(i32 capacity)
 
 i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
 {
-    def->serial = Sim_ReserveRemoteEntitySerial(scene, def->isLocal);
+    def->serial = Sim_ReserveEntitySerial(scene, def->isLocal);
     SimCmdAddEntity cmd = {};
     Sim_PrepareCommand(scene, (SimCmd*)&cmd);
     Sim_SetAddEntityCmd(&cmd, def);
@@ -139,17 +139,19 @@ i32 Sim_ExecuteProjectileSpawn(
 			f32 step = FULL_ROTATION_RADIANS / (f32)numProjectiles;
             for (i32 i = 0; i < numProjectiles; ++i)
             {
-                SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial++);
+                SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
 				ent->status = SIM_ENT_STATUS_IN_USE;
 				ent->entType = SIM_ENT_TYPE_PROJECTILE;
 				Transform_SetToIdentity(&ent->t);
+                ent->lifeTime = 6.0f;
 				ent->t.pos = def->pos;
 				ent->velocity.x = cosf(radians) * speed;
 				ent->velocity.y = 0;
 				ent->velocity.z = sinf(radians) * speed;
-				printf("SIM prj vel: %.3f, %.3f\n",
-					ent->velocity.x, ent->velocity.y
+				printf("SIM prj %d: vel: %.3f, %.3f\n",
+                    serial, ent->velocity.x, ent->velocity.y
 				);
+                serial++;
 				radians += step;
             }
         } break;
@@ -189,11 +191,16 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
 		{
 			SimCmdRemoveEntity* cmd = (SimCmdRemoveEntity*)header;
 			Assert(cmd->header.size == sizeof(SimCmdRemoveEntity));
-			printf("SIM Removing ent %d\n", cmd->serial);
-			#if 0
-			SimEntity* ent = Sim_FindEntityBySerialNumber(scene, cmd->serial);
-			*ent = {};
-			#endif
+            SimEntity* ent = Sim_FindEntityBySerialNumber(scene, cmd->serial);
+            if (ent)
+            {
+                printf("SIM Removing ent %d\n", cmd->serial);
+                *ent = {};
+            }
+            else
+            {
+                printf("SIM Found no ent %d to remove\n", cmd->serial);
+            }
 		} break;
         default:
         {

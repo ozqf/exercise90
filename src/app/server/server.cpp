@@ -132,7 +132,7 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(&g_sim, 0);
 	
     SimEntityDef def = {};
-    #if 1
+    #if 0
     for (i32 i = 0; i < 8; ++i)
     {
         f32 randX = (COM_STDRandf32() * 2) - 1;

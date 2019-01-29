@@ -22,6 +22,12 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         SimCmdProjectileSpawn cmd = {};
         Sim_PrepareCommand(sim, &cmd.header);
         cmd.def.projType = SIM_PROJ_TYPE_TEST;
+        //cmd.def.firstSerial = Sim_ReserveEntitySerial(sim, 0);
+        cmd.def.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
+        if (cmd.def.firstSerial == -1)
+        {
+            return;
+        }
         cmd.def.pos = ent->t.pos;
         cmd.def.seedIndex = 0;
         cmd.def.forward = { 1, 0, 0 };

@@ -83,7 +83,7 @@ internal i32 SV_WriteReliableSection(
 internal void SV_WriteUserPacket(User* user)
 {
     #if 1
-	printf("SV Write packet for user %d\n", user->ids.privateId);
+	//printf("SV Write packet for user %d\n", user->ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
@@ -107,7 +107,7 @@ internal void SV_WriteUserPacket(User* user)
     ByteBuffer packet = Buf_FromBytes(buf, packetSize);
     Packet_StartWrite(&packet, user->ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);
     i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
-	printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
+	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
 	
@@ -152,7 +152,7 @@ internal void SV_ReadPacket(SysPacketEvent* ev)
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
     u8* data = (u8*)(ev) + headerSize;
-    printf("SV %d Packet bytes from %d\n", dataSize, ev->sender.port);
+    //printf("SV %d Packet bytes from %d\n", dataSize, ev->sender.port);
 
     PacketDescriptor p;
     i32 err = Packet_InitDescriptor(
@@ -162,16 +162,16 @@ internal void SV_ReadPacket(SysPacketEvent* ev)
 		printf("  Error %d deserialising packet\n", err);
 		return;
 	}
-    printf("  Seq %d Tick %d Time %.3f\n",
+    /*printf("  Seq %d Tick %d Time %.3f\n",
         p.packetSequence,
         p.transmissionSimFrameNumber,
-        p.transmissionSimTime);
+        p.transmissionSimTime);*/
 	ev->header.type = SYS_EVENT_SKIP;
 
     User* user = User_FindByPrivateId(&g_users, p.id);
     if (user)
     {
-        printf("\tSV packet from user %d\n", p.id);
+        //printf("\tSV packet from user %d\n", p.id);
     }
     else
     {
