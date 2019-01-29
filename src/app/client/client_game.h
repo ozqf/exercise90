@@ -2,7 +2,10 @@
 
 #include "client.h"
 
-internal void CLG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
+#define CLG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
+    CLG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
+
+CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
     Vec3* pos = &ent->t.pos;
     ent->previousPos.x = pos->x;
@@ -22,11 +25,22 @@ internal void CLG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
+CLG_DEFINE_ENT_UPDATE(Projectile)
+{
+    Sim_SimpleMove(ent, deltaTime);
+	/*ent->lifeTime -= deltaTime;
+	if (ent->lifeTime < 0)
+	{
+		Sim_RemoveEntity(sim, ent->id.serial);
+	}*/
+}
+
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
         case SIM_ENT_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
