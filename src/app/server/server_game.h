@@ -8,21 +8,7 @@
 //internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
 SVG_DEFINE_ENT_UPDATE(Wanderer)
 {
-    Vec3* pos = &ent->t.pos;
-    ent->previousPos.x = pos->x;
-    ent->previousPos.y = pos->y;
-    ent->previousPos.z = pos->z;
-    Vec3 move =
-    {
-        ent->velocity.x * deltaTime,
-        ent->velocity.y * deltaTime,
-        ent->velocity.z * deltaTime
-    };
-    
-    ent->t.pos.x += move.x;
-    ent->t.pos.y += move.y;
-    ent->t.pos.z += move.z;
-    
+    Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
@@ -39,6 +25,9 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         cmd.def.pos = ent->t.pos;
         cmd.def.seedIndex = 0;
         cmd.def.forward = { 1, 0, 0 };
+		Sim_ExecuteProjectileSpawn(
+			sim, 0, &cmd.def
+		);
         //Sim_EnqueueCommand(sim, (u8*)&cmd);
     }
     else
@@ -47,11 +36,22 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     }
 }
 
+SVG_DEFINE_ENT_UPDATE(Projectile)
+{
+	Sim_SimpleMove(ent, deltaTime);
+	ent->lifeTime -= deltaTime;
+	if (ent->lifeTime < 0)
+	{
+		Sim_RemoveEntity(sim, ent->id.serial);
+	}
+}
+
 internal void SVG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
         case SIM_ENT_TYPE_WANDERER: { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
+		case SIM_ENT_TYPE_PROJECTILE: { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_TURRET: { SVG_UpdateTurret(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;

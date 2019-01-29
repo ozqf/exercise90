@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sim.h"
+#include <math.h>
 
 ////////////////////////////////////////////////////////////////////
 // Command management
@@ -61,6 +62,8 @@ i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 	SimCmdRemoveEntity cmd = {};
 	Sim_PrepareCommand(scene, &cmd.header);
 	cmd.serial = serialNumber;
+	cmd.header.type = SIM_CMD_TYPE_REMOVE_ENTITY;
+	cmd.header.size = sizeof(SimCmdRemoveEntity);
 	Sim_EnqueueCommand(scene, (u8*)&cmd);
     return COM_ERROR_NONE;
 }
@@ -127,12 +130,27 @@ i32 Sim_ExecuteProjectileSpawn(
 {
     switch (def->projType)
     {
-        case 1:
+        case SIM_PROJ_TYPE_TEST:
         {
+			i32 numProjectiles = 8;
+			f32 speed = 1.5f;
             i32 serial = def->firstSerial;
-            for (i32 i = 0; i < 10; ++i)
+			f32 radians = 0;
+			f32 step = FULL_ROTATION_RADIANS / (f32)numProjectiles;
+            for (i32 i = 0; i < numProjectiles; ++i)
             {
                 SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial++);
+				ent->status = SIM_ENT_STATUS_IN_USE;
+				ent->entType = SIM_ENT_TYPE_PROJECTILE;
+				Transform_SetToIdentity(&ent->t);
+				ent->t.pos = def->pos;
+				ent->velocity.x = cosf(radians) * speed;
+				ent->velocity.y = 0;
+				ent->velocity.z = sinf(radians) * speed;
+				printf("SIM prj vel: %.3f, %.3f\n",
+					ent->velocity.x, ent->velocity.y
+				);
+				radians += step;
             }
         } break;
         default: printf("SIM Unknown proj type %d\n", def->projType);
@@ -172,6 +190,10 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
 			SimCmdRemoveEntity* cmd = (SimCmdRemoveEntity*)header;
 			Assert(cmd->header.size == sizeof(SimCmdRemoveEntity));
 			printf("SIM Removing ent %d\n", cmd->serial);
+			#if 0
+			SimEntity* ent = Sim_FindEntityBySerialNumber(scene, cmd->serial);
+			*ent = {};
+			#endif
 		} break;
         default:
         {

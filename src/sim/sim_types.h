@@ -55,11 +55,14 @@ struct SimEntity
 
     f32 thinkTick;
     f32 thinkTime;
+	f32 lifeTime;
 };
 
 struct SimEntityDef
 {
     i32 serial;
+	f32 thinkTime;
+	f32 lifeTime;
     i32 isLocal;
     i32 entType;
     f32 pos[3];

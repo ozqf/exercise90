@@ -153,6 +153,8 @@ internal void SV_LoadTestScene()
 
     def = {};
     def.isLocal = 1;
+	def.thinkTime = 2.5f;
+	def.lifeTime = 10;
     def.pos[1] = 1;
     def.entType = SIM_ENT_TYPE_TURRET;
     def.scale[0] = 1;

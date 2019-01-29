@@ -5,6 +5,7 @@
 #define pi32 3.14159265359f
 #define DEG2RAD 3.141593f / 180.0f
 #define RAD2DEG 57.2958f
+#define FULL_ROTATION_RADIANS (pi32 * 2)
 
 
 #define ZABS(value) (value = value >= 0 ? value : -value )

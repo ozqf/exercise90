@@ -2,10 +2,6 @@
 
 #include "sim.h"
 
-////////////////////////////////////////////////////////////////////
-// Entity assignment
-////////////////////////////////////////////////////////////////////
-
 i32 Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->t.pos;
@@ -30,6 +26,25 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     if (p->z < min->z) { p->z = min->z; ent->velocity.z = -ent->velocity.z; }
     if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
 }
+
+void Sim_SimpleMove(SimEntity* ent, f32 deltaTime)
+{
+    Vec3* pos = &ent->t.pos;
+    ent->previousPos.x = pos->x;
+    ent->previousPos.y = pos->y;
+    ent->previousPos.z = pos->z;
+    Vec3 move =
+    {
+        ent->velocity.x * deltaTime,
+        ent->velocity.y * deltaTime,
+        ent->velocity.z * deltaTime
+    };
+    
+    ent->t.pos.x += move.x;
+    ent->t.pos.y += move.y;
+    ent->t.pos.z += move.z;
+}
+
 #if 0
 internal void Sim_UpdateWanderer(SimScene* scene, SimEntity* ent, f32 deltaTime)
 {

@@ -93,6 +93,9 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
 ////////////////////////////////////////////////////////////////////
 internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
 {
+	ent->thinkTime = def->thinkTime;
+	ent->lifeTime = def->lifeTime;
+	
     ent->t.pos.x =          def->pos[0];
     ent->t.pos.y =          def->pos[1];
     ent->t.pos.z =          def->pos[2];
@@ -205,16 +208,4 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
     }
 
     //return COM_ERROR_NONE;
-}
-
-internal i32 Sim_ExecuteProjectileEvent(SimScene* sim, SimCmdProjectileSpawn* event)
-{
-    switch (event->def.projType)
-    {
-        case SIM_PROJ_TYPE_TEST:
-        {
-            SimEntityDef def = {};
-        } break;
-        default: { printf("Unknown proj type %d\n", event->def.projType); return COM_ERROR_BAD_ARGUMENT; }
-    }
 }
