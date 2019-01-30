@@ -76,7 +76,11 @@ internal i32  App_Init()
         bufferSize);
     //g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
 	
-	g_loopbackSocket.Init(75, 150, 0.1f);
+	// fake lag settings here
+	//g_loopbackSocket.Init(0, 0, 0);
+	//g_loopbackSocket.Init(100, 100, 0);
+	g_loopbackSocket.Init(50, 150, 0.05f);
+	//g_loopbackSocket.Init(200, 400, 0.2f);
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;

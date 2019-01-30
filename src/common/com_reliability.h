@@ -18,6 +18,8 @@ struct AckRecord
 {
     u32 sequence;
     u32 acked;
+	f32 sentTime;
+	f32 receivedTime;
 };
 
 struct AckStream
@@ -34,11 +36,13 @@ struct AckStream
 	
 };
 
-static void Ack_RecordPacketTransmission(AckStream* astream, u32 outputSequence)
+static void Ack_RecordPacketTransmission(
+	AckStream* astream, u32 outputSequence, f32 time)
 {
 	u32 index = outputSequence % ACK_CAPACITY;
 	astream->awaitingAck[index].sequence = outputSequence;
 	astream->awaitingAck[index].acked = 0;
+	astream->awaitingAck[index].sentTime = time;
 }
 
 static void Ack_RecordPacketReceived(AckStream* astream, u32 packetSequence)
@@ -52,10 +56,27 @@ static void Ack_RecordPacketReceived(AckStream* astream, u32 packetSequence)
 	astream->received[index] = packetSequence;
 }
 
+static f32 Ack_CalculateAverageDelay(AckStream* astream)
+{
+	i32 records = 0;
+	f32 total = 0;
+	for (i32 i = 0; i < ACK_CAPACITY; ++i)
+	{
+		AckRecord* rec = &astream->awaitingAck[i];
+		if (rec->acked)
+		{
+			records++;
+			total += rec->receivedTime - rec->sentTime;
+		}
+	}
+	if (records == 0) { return 0; }
+	return (total / (f32)records);
+}
+
 // Returns number of acknowledged packet sequences written to results
 // Max results must == (ACK_CAPACITY + 1)!
 static i32 Ack_CheckIncomingAcks(
-	AckStream* astream, u32 packetAck, u32 packetAckBits, u32* results)
+	AckStream* astream, u32 packetAck, u32 packetAckBits, u32* results, f32 time)
 {
 	i32 resultIndex = 0;
 	i32 index = packetAck % ACK_CAPACITY;
@@ -64,6 +85,7 @@ static i32 Ack_CheckIncomingAcks(
 		&& rec->acked == 0)
 	{
 		rec->acked = 1;
+		rec->receivedTime = time;
 		results[resultIndex++] = packetAck;
 	}
 	
@@ -79,6 +101,7 @@ static i32 Ack_CheckIncomingAcks(
 			if (rec->sequence == packetAck && rec->acked == 0)
 			{
 				rec->acked = 1;
+				rec->receivedTime = time;
 				results[resultIndex++] = packetAck;
 			}
 		}

@@ -148,9 +148,9 @@ i32 Sim_ExecuteProjectileSpawn(
 				ent->velocity.x = cosf(radians) * speed;
 				ent->velocity.y = 0;
 				ent->velocity.z = sinf(radians) * speed;
-				printf("SIM prj %d: vel: %.3f, %.3f\n",
-                    serial, ent->velocity.x, ent->velocity.y
-				);
+				//printf("SIM prj %d: vel: %.3f, %.3f\n",
+                //    serial, ent->velocity.x, ent->velocity.y
+				//);
                 serial++;
 				radians += step;
             }
@@ -194,7 +194,7 @@ i32 Sim_Execute(SimScene* scene, SimCmd* header)
             SimEntity* ent = Sim_FindEntityBySerialNumber(scene, cmd->serial);
             if (ent)
             {
-                printf("SIM Removing ent %d\n", cmd->serial);
+                //printf("SIM Removing ent %d\n", cmd->serial);
                 *ent = {};
             }
             else

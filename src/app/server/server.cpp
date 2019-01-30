@@ -266,7 +266,7 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 				{
 					continue;
 				}
-                SV_ReadPacket(packet);
+                SV_ReadPacket(packet, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -286,7 +286,7 @@ internal void SV_SendUserPackets(f32 deltaTime)
 		User* user = &g_users.items[i];
 		if (user->state == USER_STATE_FREE) { continue; }
 		
-		SV_WriteUserPacket(user);
+		SV_WriteUserPacket(user, g_elapsed);
 	}
 }
 

@@ -19,7 +19,7 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
     return (packet->ptrWrite - start);
 }
 
-internal void CL_WritePacket()
+internal void CL_WritePacket(f32 time)
 {
     #if 1
 	//printf("CL Write packet for user %d\n", g_ids.privateId);
@@ -40,7 +40,7 @@ internal void CL_WritePacket()
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
 	
-	Ack_RecordPacketTransmission(&g_acks, ack);
+	Ack_RecordPacketTransmission(&g_acks, ack, time);
     App_SendTo(0, &g_serverAddress, buf, total);
     
 	//Packet_WriteFromStream(
@@ -67,7 +67,7 @@ internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
     return COM_ERROR_NONE;
 }
 
-internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
+internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream, f32 time)
 {
     // -- Descriptor --
     i32 headerSize = sizeof(SysPacketEvent);
@@ -92,7 +92,7 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream)
     Ack_RecordPacketReceived(&g_acks, p.packetSequence);
 	u32 packetAcks[ACK_RESULTS_CAPACITY]; 
 	i32 numPacketAcks = Ack_CheckIncomingAcks(
-		&g_acks, p.ackSequence, p.ackBits, packetAcks
+		&g_acks, p.ackSequence, p.ackBits, packetAcks, time
 	);
 	Stream_ProcessPacketAcks(reliableStream, packetAcks, numPacketAcks);
     

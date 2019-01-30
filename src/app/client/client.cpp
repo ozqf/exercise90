@@ -36,10 +36,25 @@ internal ZNetAddress g_serverAddress;
 
 void CL_WriteDebugString(ZStringHeader* str)
 {
-    str->length = sprintf_s(str->chars, str->maxLength,
-        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d",
-        g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence
+	char* chars = str->chars;
+	i32 written = 0;
+    written += sprintf_s(chars, str->maxLength,
+        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\n",
+        g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence,
+		Ack_CalculateAverageDelay(&g_acks)
     );
+	
+	for (i32 i = 0; i < ACK_CAPACITY; ++i)
+	{
+		AckRecord* rec = &g_acks.awaitingAck[i];
+		if (rec->acked)
+		{
+			f32 time = rec->receivedTime - rec->sentTime;
+			written += sprintf_s(chars + written, str->maxLength,
+			"%.3f\n", time);
+		}
+	}
+	str->length = written;
 }
 
 internal void* CL_Malloc(i32 numBytes)
@@ -180,7 +195,7 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
             {
 				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
-                CL_ReadPacket(packet, &g_reliableStream);
+                CL_ReadPacket(packet, &g_reliableStream, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -280,7 +295,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     CL_ReadSystemEvents(sysEvents, deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
-    CL_WritePacket();
+    CL_WritePacket(g_elapsed);
 	
     g_ticks++;
     g_elapsed += deltaTime;

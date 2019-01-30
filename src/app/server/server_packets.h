@@ -80,7 +80,7 @@ internal i32 SV_WriteReliableSection(
     return (capacity - space);
 }
 
-internal void SV_WriteUserPacket(User* user)
+internal void SV_WriteUserPacket(User* user, f32 time)
 {
     #if 1
 	//printf("SV Write packet for user %d\n", user->ids.privateId);
@@ -99,7 +99,7 @@ internal void SV_WriteUserPacket(User* user)
 	u32 packetSequence = user->acks.outputSequence++;
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
-    Ack_RecordPacketTransmission(&user->acks, packetSequence);
+    Ack_RecordPacketTransmission(&user->acks, packetSequence, time);
     u32 ack = user->acks.remoteSequence;
     u32 ackBits = Ack_BuildOutgoingAckBits(&user->acks);
 	
@@ -147,7 +147,7 @@ internal void SV_WriteTestPacket()
 	// }
 // }
 
-internal void SV_ReadPacket(SysPacketEvent* ev)
+internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
@@ -183,7 +183,7 @@ internal void SV_ReadPacket(SysPacketEvent* ev)
     Ack_RecordPacketReceived(&user->acks, p.packetSequence);
     u32 packetAcks[ACK_RESULTS_CAPACITY];
     i32 numPacketAcks = Ack_CheckIncomingAcks(
-        &user->acks, p.ackSequence, p.ackBits, packetAcks);
+        &user->acks, p.ackSequence, p.ackBits, packetAcks, time);
 	
 	Stream_ProcessPacketAcks(&user->reliableStream, packetAcks, numPacketAcks);
 	

@@ -15,7 +15,7 @@
 #define APP_SESSION_TYPE_SINGLE_PLAYER 1
 
 internal PlatformInterface g_platform = {};
-internal i32 g_simFrameRate = 2;
+internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 internal Heap g_heap;
 
@@ -47,7 +47,7 @@ internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
 internal ZNetAddress g_localServerAddress;
 
-#define DEBUG_STRING_LENGTH 1024
+#define DEBUG_STRING_LENGTH 2048
 internal ZStringHeader g_clientDebugStr;
 internal char g_clientDebugStrBuffer[DEBUG_STRING_LENGTH];
 internal RendObj g_clientDebugStrRenderer;
