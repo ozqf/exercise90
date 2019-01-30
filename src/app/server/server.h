@@ -15,3 +15,4 @@ void    SV_Tick(ByteBuffer* platformCommands, f32 deltaTime);
 void    SV_PopulateRenderScene(
             RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime);
 //UserIds SV_CreateLocalUser();
+void    SV_WriteDebugString(ZStringHeader* str);

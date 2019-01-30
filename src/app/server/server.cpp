@@ -22,8 +22,13 @@ i32 SV_IsRunning() { return g_isRunning; }
 #include "server_game.h"
 #include "server_packets.h"
 
-// this is the server's command buffer to execute next tick
-//internal ByteBuffer g_platformInput;
+void SV_WriteDebugString(ZStringHeader* str)
+{
+    str->length = sprintf_s(str->chars, str->maxLength,
+        "SERVER:\nTick: %d\nElapsed: %.3f\n",
+        g_ticks, g_elapsed
+    );
+}
 
 internal i32 SV_IsPrivateIdInUse(i32 id)
 {

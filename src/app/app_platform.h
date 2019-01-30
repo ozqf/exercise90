@@ -52,6 +52,9 @@ internal i32  App_Init()
     // Assets
     Tex_Init(&g_heap, g_platform);
 
+    // must be init AFTER textures as it needs teh console char sheet
+    App_DebugInit();
+
     // Basic malloc tracker
     g_mallocs = COM_InitMallocList(g_mallocItems, APP_MAX_MALLOCS);
 
@@ -279,6 +282,9 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     
 
     g_platform.Platform_RenderScene(&g_worldScene);
+
+    App_WriteDebugStrings();
+    g_platform.Platform_RenderScene(&g_debugScene);
 }
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)

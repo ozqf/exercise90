@@ -34,6 +34,14 @@ internal ZNetAddress g_serverAddress;
 #include "client_game.h"
 #include "client_packets.h"
 
+void CL_WriteDebugString(ZStringHeader* str)
+{
+    str->length = sprintf_s(str->chars, str->maxLength,
+        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d",
+        g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence
+    );
+}
+
 internal void* CL_Malloc(i32 numBytes)
 {
     Assert(g_numAllocations < CL_MAX_ALLOCATIONS)
@@ -271,7 +279,6 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     CL_ReadSystemEvents(sysEvents, deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
-    //Sim_Tick(&g_sim, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
     CL_WritePacket();
 	
