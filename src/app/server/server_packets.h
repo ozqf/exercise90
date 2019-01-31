@@ -99,10 +99,11 @@ internal void SV_WriteUserPacket(User* user, f32 time)
 	u32 packetSequence = user->acks.outputSequence++;
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
-    Ack_RecordPacketTransmission(&user->acks, packetSequence, time);
+
     u32 ack = user->acks.remoteSequence;
     u32 ackBits = Ack_BuildOutgoingAckBits(&user->acks);
-	
+    Ack_RecordPacketTransmission(&user->acks, ack, time);
+    
 	u8 buf[packetSize];
     ByteBuffer packet = Buf_FromBytes(buf, packetSize);
     Packet_StartWrite(&packet, user->ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);

@@ -51,7 +51,8 @@ void CL_WriteDebugString(ZStringHeader* str)
 		{
 			f32 time = rec->receivedTime - rec->sentTime;
 			written += sprintf_s(chars + written, str->maxLength,
-			"%.3f\n", time);
+			"%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
+            );
 		}
 	}
 	str->length = written;

@@ -24,10 +24,43 @@ i32 SV_IsRunning() { return g_isRunning; }
 
 void SV_WriteDebugString(ZStringHeader* str)
 {
-    str->length = sprintf_s(str->chars, str->maxLength,
+    char* chars = str->chars;
+    i32 written = 0;
+    written += sprintf_s(chars, str->maxLength,
         "SERVER:\nTick: %d\nElapsed: %.3f\n",
         g_ticks, g_elapsed
     );
+    ZNetAddress addr = {};
+    addr.port = APP_CLIENT_LOOPBACK_PORT;
+    User* user = User_FindByAddress(&g_users, &addr);
+    if (user)
+    {
+        AckStream* acks = &user->acks;
+        written += sprintf_s(chars + written, str->maxLength - written,
+            "-- Local Client %d --\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\n",
+            user->ids.privateId,
+            acks->outputSequence,
+            acks->remoteSequence,
+            Ack_CalculateAverageDelay(acks));
+        
+        for (i32 j = 0; j < ACK_CAPACITY; ++j)
+        {
+            AckRecord* rec = &acks->awaitingAck[j];
+            if (rec->acked)
+            {
+                f32 time = rec->receivedTime - rec->sentTime;
+                written += sprintf_s(chars + written, str->maxLength - written,
+                    "%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
+                );
+            }
+        }
+    }
+    else
+    {
+        written += sprintf_s(chars + written, str->maxLength - written,
+            "No local client found\n");
+    }
+    str->length = written;
 }
 
 internal i32 SV_IsPrivateIdInUse(i32 id)
@@ -292,9 +325,7 @@ internal void SV_SendUserPackets(f32 deltaTime)
 
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    //SV_WriteTestPacket();
     SV_ReadSystemEvents(sysEvents, deltaTime);
-    //Sim_Tick(&g_sim, deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
     SV_SendUserPackets(deltaTime);
 	

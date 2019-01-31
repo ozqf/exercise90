@@ -79,7 +79,8 @@ internal i32  App_Init()
 	// fake lag settings here
 	//g_loopbackSocket.Init(0, 0, 0);
 	//g_loopbackSocket.Init(100, 100, 0);
-	g_loopbackSocket.Init(50, 150, 0.05f);
+	//g_loopbackSocket.Init(50, 150, 0.05f);
+    g_loopbackSocket.Init(300, 300, 0);
 	//g_loopbackSocket.Init(200, 400, 0.2f);
 
     g_localServerAddress = {};

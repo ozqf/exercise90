@@ -30,17 +30,20 @@ internal void CL_WritePacket(f32 time)
 	
 	u8 buf[1400];
     ByteBuffer packet = Buf_FromBytes(buf, 1400);
-    u32 sequence = g_acks.outputSequence++;
+    u32 packetSequence = g_acks.outputSequence++;
+    TransmissionRecord* rec = Stream_AssignTransmissionRecord(
+		g_reliableStream.transmissions, packetSequence);
+    
     u32 ack = g_acks.remoteSequence;
     u32 ackBits = Ack_BuildOutgoingAckBits(&g_acks);
+    Ack_RecordPacketTransmission(&g_acks, ack, time);
 
-    Packet_StartWrite(&packet, g_ids.privateId, sequence, ack, ackBits, 0, 0, 0);
+    Packet_StartWrite(&packet, g_ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
 	
-	Ack_RecordPacketTransmission(&g_acks, ack, time);
     App_SendTo(0, &g_serverAddress, buf, total);
     
 	//Packet_WriteFromStream(

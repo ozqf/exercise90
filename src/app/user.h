@@ -94,3 +94,21 @@ internal User* User_FindByPublicId(UserList* users, i32 publicId)
     }
     return NULL;
 }
+
+internal User* User_FindByAddress(UserList* users, ZNetAddress* addr)
+{
+    for (i32 i = 0; i < users->max; ++i)
+    {
+        User* user = &users->items[i];
+        if (user->state == USER_STATE_FREE) { continue; }
+        if (COM_CompareMemory(
+            (u8*)&user->address,
+            (u8*)addr,
+            sizeof(ZNetAddress)
+            ))
+        {
+            return user;
+        }
+    }
+    return NULL;
+}

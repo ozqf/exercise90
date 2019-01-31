@@ -112,6 +112,14 @@ struct FakeSocket
         h->size = numBytes;
         h->status = FAKE_SOCKET_STATUS_ACTIVE;
         h->tick = (f32)this->info.RollDelay() / 1000.0f;
+        if (h->address.port == APP_CLIENT_LOOPBACK_PORT)
+        {
+            printf("SV -> CL delay %.3f\n", h->tick);
+        }
+        else if (h->address.port == APP_SERVER_LOOPBACK_PORT)
+        {
+            printf("CL -> SV delay %.3f\n", h->tick);
+        }
         handles[i] = h;
         u8* ptr = (u8*)h + sizeof(FakeSocketPacketHeader);
         COM_COPY(data, ptr, numBytes);
