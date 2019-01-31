@@ -37,11 +37,13 @@ void SV_WriteDebugString(ZStringHeader* str)
     {
         AckStream* acks = &user->acks;
         written += sprintf_s(chars + written, str->maxLength - written,
-            "-- Local Client %d --\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\n",
+            "-- Local Client %d --\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
             user->ids.privateId,
             acks->outputSequence,
             acks->remoteSequence,
-            Ack_CalculateAverageDelay(acks));
+            Ack_CalculateAverageDelay(acks),
+			(acks->delayMax - acks->delayMin)
+		);
         #if 0
 		// currently overflows debug text buffer:
         for (i32 j = 0; j < ACK_CAPACITY; ++j)

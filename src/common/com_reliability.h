@@ -34,6 +34,9 @@ struct AckStream
 	// Used to build ack bits from this side
 	u32 received[ACK_CAPACITY];
 	
+	// used to calculate jitter
+	f32 delayMin;
+	f32 delayMax;
 };
 
 static void Ack_RecordPacketTransmission(
@@ -60,16 +63,29 @@ static f32 Ack_CalculateAverageDelay(AckStream* astream)
 {
 	i32 records = 0;
 	f32 total = 0;
+	f32 min = 9999;
+	f32 max = -9999;
 	for (i32 i = 0; i < ACK_CAPACITY; ++i)
 	{
 		AckRecord* rec = &astream->awaitingAck[i];
 		if (rec->acked)
 		{
 			records++;
-			total += rec->receivedTime - rec->sentTime;
+			f32 delay = (rec->receivedTime - rec->sentTime);
+			if (delay < min)
+			{
+				min = delay;
+			}
+			if (delay > max)
+			{
+				max = delay;
+			}
+			total += delay;
 		}
 	}
 	if (records == 0) { return 0; }
+	astream->delayMin = min;
+	astream->delayMax = max;
 	return (total / (f32)records);
 }
 

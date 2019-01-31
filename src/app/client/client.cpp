@@ -39,9 +39,10 @@ void CL_WriteDebugString(ZStringHeader* str)
 	char* chars = str->chars;
 	i32 written = 0;
     written += sprintf_s(chars, str->maxLength,
-        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\n",
+        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter %.3f\n",
         g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence,
-		Ack_CalculateAverageDelay(&g_acks)
+		Ack_CalculateAverageDelay(&g_acks),
+		(g_acks.delayMax - g_acks.delayMin)
     );
 	#if 0
 	// currently overflows debug text buffer:
