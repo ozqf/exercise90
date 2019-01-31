@@ -42,7 +42,8 @@ void SV_WriteDebugString(ZStringHeader* str)
             acks->outputSequence,
             acks->remoteSequence,
             Ack_CalculateAverageDelay(acks));
-        
+        #if 0
+		// currently overflows debug text buffer:
         for (i32 j = 0; j < ACK_CAPACITY; ++j)
         {
             AckRecord* rec = &acks->awaitingAck[j];
@@ -54,6 +55,7 @@ void SV_WriteDebugString(ZStringHeader* str)
                 );
             }
         }
+		#endif
     }
     else
     {
@@ -327,10 +329,9 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     SV_ReadSystemEvents(sysEvents, deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
-    SV_SendUserPackets(deltaTime);
-	
 	g_elapsed += deltaTime;
     g_ticks++;
+    SV_SendUserPackets(deltaTime);
 }
 
 void SV_PopulateRenderScene(

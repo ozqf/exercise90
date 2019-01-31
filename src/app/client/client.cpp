@@ -43,7 +43,8 @@ void CL_WriteDebugString(ZStringHeader* str)
         g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence,
 		Ack_CalculateAverageDelay(&g_acks)
     );
-	
+	#if 0
+	// currently overflows debug text buffer:
 	for (i32 i = 0; i < ACK_CAPACITY; ++i)
 	{
 		AckRecord* rec = &g_acks.awaitingAck[i];
@@ -55,6 +56,7 @@ void CL_WriteDebugString(ZStringHeader* str)
             );
 		}
 	}
+	#endif
 	str->length = written;
 }
 
@@ -296,10 +298,9 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     CL_ReadSystemEvents(sysEvents, deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
-    CL_WritePacket(g_elapsed);
-	
-    g_ticks++;
+	g_ticks++;
     g_elapsed += deltaTime;
+    CL_WritePacket(g_elapsed);
 }
 
 void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)

@@ -97,22 +97,25 @@ internal void SV_WriteUserPacket(User* user, f32 time)
 	
 	// Record packet transmission for ack
 	u32 packetSequence = user->acks.outputSequence++;
-	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
-		user->reliableStream.transmissions, packetSequence);
+	Ack_RecordPacketTransmission(&user->acks, packetSequence, time);
 
-    u32 ack = user->acks.remoteSequence;
-    u32 ackBits = Ack_BuildOutgoingAckBits(&user->acks);
-    Ack_RecordPacketTransmission(&user->acks, ack, time);
-    
 	u8 buf[packetSize];
     ByteBuffer packet = Buf_FromBytes(buf, packetSize);
+	
+	// -- header --
+	u32 ack = user->acks.remoteSequence;
+    u32 ackBits = Ack_BuildOutgoingAckBits(&user->acks);
     Packet_StartWrite(&packet, user->ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);
+	
+	// -- record packet payload -- 
+	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
+		user->reliableStream.transmissions, packetSequence);
     i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
 	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
 	
-	// Finished
+	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
     App_SendTo(0, &user->address, buf, total);

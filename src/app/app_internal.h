@@ -17,6 +17,10 @@
 internal PlatformInterface g_platform = {};
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
+internal i32 g_fakeLagMinMS = 100;
+internal i32 g_fakeLagMaxMS = 200;
+internal f32 g_fakeLoss = 0;
+
 internal Heap g_heap;
 
 internal i32 g_isRunningClient = 0;

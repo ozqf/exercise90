@@ -10,7 +10,7 @@ Records of transmission or reception are stored in rolling arrays
 */
 #include "com_module.h"
 
-#define ACK_CAPACITY 32
+#define ACK_CAPACITY 128
 // +1 due to ack number (1) + ackbits (32)
 #define ACK_RESULTS_CAPACITY 33
 

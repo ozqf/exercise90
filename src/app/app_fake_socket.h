@@ -49,8 +49,8 @@ struct FakeSocket
         if (minLagMS > maxLagMS) { minLagMS = maxLagMS; }
 
         COM_ClampF32(&normalisedPacketLossChance, 0, 0.9f);
-        COM_ClampI32(&minLagMS, 0, 500);
-        COM_ClampI32(&maxLagMS, 0, 1000);
+        //COM_ClampI32(&minLagMS, 0, 500);
+        //COM_ClampI32(&maxLagMS, 0, 1000);
 
         COM_ZeroMemory((u8*)this, sizeof(FakeSocket));
         info.minMS = minLagMS;
