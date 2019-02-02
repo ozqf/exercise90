@@ -216,7 +216,7 @@ internal void App_Update(PlatformTime* time)
     f32 interval = App_GetSimFrameInterval();
     if (g_simFrameAcculator > interval)
     {
-        printf("\n === APP TICK (%.4fs) ===\n", interval);
+        //printf("\n === APP TICK (%.4fs) ===\n", interval);
         g_simFrameAcculator -= interval;
         
         /*
@@ -239,7 +239,7 @@ internal void App_Update(PlatformTime* time)
         {
             //g_localServerSocket.Tick(interval);
             //ZNet_Tick(g_serverNet, interval);
-            printf("*** SV TICK ***\n");
+            //printf("*** SV TICK ***\n");
             SV_Tick(g_serverLoopback.GetRead(), interval);
         }
 
@@ -249,7 +249,7 @@ internal void App_Update(PlatformTime* time)
         if (g_isRunningClient)
         {
             //g_localClientSocket.Tick(interval);
-            printf("*** CL TICK ***\n");
+            //printf("*** CL TICK ***\n");
             //ZNet_Tick(g_clientNet, interval);
             CL_Tick(g_clientLoopback.GetRead(), interval);
         }

@@ -31,6 +31,9 @@ internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
 
+internal f32 g_ping;
+internal f32 g_jitter;
+
 #include "client_game.h"
 #include "client_packets.h"
 
@@ -41,8 +44,8 @@ void CL_WriteDebugString(ZStringHeader* str)
     written += sprintf_s(chars, str->maxLength,
         "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter %.3f\n",
         g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence,
-		Ack_CalculateAverageDelay(&g_acks),
-		(g_acks.delayMax - g_acks.delayMin)
+		g_ping,
+		g_jitter
     );
 	#if 0
 	// currently overflows debug text buffer:
@@ -294,9 +297,16 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 	*/
 }
 
+internal void CL_CalcPings(f32 deltaTime)
+{
+	g_ping = Ack_CalculateAverageDelay(&g_acks);
+	g_jitter = (g_acks.delayMax - g_acks.delayMin);
+}
+
 void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
     CL_ReadSystemEvents(sysEvents, deltaTime);
+    CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;

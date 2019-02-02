@@ -350,6 +350,13 @@ void Win32_RunAppFrame()
     }
 }
 
+internal void Win32_ShowInitError(i32 err)
+{
+    char buf[512];
+    sprintf_s(buf, 512, "Code %d\n", err);
+    Win32_Error(buf, "Platform startup error");
+}
+
 /**********************************************************************
  * WIN32 ENTRY POINT
  *********************************************************************/
@@ -359,16 +366,28 @@ int CALLBACK WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-	
-#if 0
+	int initialisationError = 0;
+    errno_t err = 0;
+
+    //DebugBreak();
+
+    #if 0
 	Win32_AttachErrorHandlers();
 	char* crashString = NULL;
 	printf(crashString);
-#endif
+    #endif
 
-#if 1
+    /*
+    errno_t freopen(
+       FILE** pFile,
+       const char *path,
+       const char *mode,
+       FILE *stream
+    );
+    */
+
     // Spawn debugging windows cmd
-#if 1
+    #if 1
     FILE *stream;
     AllocConsole();
     freopen_s(&stream, "conin$", "r", stdin);
@@ -377,7 +396,27 @@ int CALLBACK WinMain(
     consoleHandle = GetConsoleWindow();
     MoveWindow(consoleHandle, 1, 1, 680, 600, 1);
     printf("[%s] Console initialized.\n", __FILE__);
-#endif
+    #endif
+
+    // Print stdout to a file
+    #if 0 // Currently not working. Only logs from platform, not DLLs
+    FILE *stream;
+    //AllocConsole();
+
+	//AllocConsole();
+	//err = freopen_s(&stream, "conin$", "r", stdin);
+    //if (err != 0) { Win32_ShowInitError(err); }
+
+	err = freopen_s(&stream, "y:\\log.txt", "w", stdout);
+    if (err != 0) { Win32_ShowInitError(err); }
+
+	err = freopen_s(&stream, "y:\\logerr.txt", "w", stderr);
+    if (err != 0) { Win32_ShowInitError(err); }
+
+    //consoleHandle = GetConsoleWindow();
+    //MoveWindow(consoleHandle, 1, 1, 680, 600, 1);
+    printf("[%s] Log initialized. Session started %s - %s\n", __FILE__, __DATE__, __TIME__);
+    #endif
 
     Win32_BuildTextCommandList();
     
@@ -435,6 +474,12 @@ int CALLBACK WinMain(
     // top or left may well now be negative
     //
     AdjustWindowRect(&r, WindowClass.style, false);
+
+    if (initialisationError)
+    {
+        if (err != 0) { Win32_ShowInitError(initialisationError); }
+        return initialisationError;
+    }
 
     // register window class, returns an atom. 0 if register failed
     if (RegisterClass(&WindowClass))
@@ -658,5 +703,4 @@ int CALLBACK WinMain(
 		g_app.AppShutdown();
 	}
     return 0;
-#endif
 }

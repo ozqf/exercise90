@@ -18,7 +18,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     {
         ent->thinkTick += ent->thinkTime;
         // think
-        printf("SVG Turret think\n");
+        //printf("SVG Turret think\n");
         SimCmdProjectileSpawn cmd = {};
         Sim_PrepareCommand(sim, &cmd.header);
         cmd.def.projType = SIM_PROJ_TYPE_TEST;
