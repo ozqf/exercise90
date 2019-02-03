@@ -84,7 +84,7 @@ internal void Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
  */
 internal void Tex_BindTexture(Texture2DHeader *header)
 {
-    g_platform.Platform_BindTexture(
+    g_platform.BindTexture(
         header->ptrMemory,
         header->width,
         header->height,
@@ -99,7 +99,7 @@ internal void Tex_BindTexture(Texture2DHeader *header)
 internal BlockRef Tex_LoadTexture(char *filePath)
 {
     BlockRef ref = {};
-    g_platform.Platform_LoadTexture(g_heap, &ref, filePath);
+    g_platform.LoadTexture(g_heap, &ref, filePath);
     return ref;
 }
 
@@ -186,7 +186,7 @@ void Tex_Init(Heap* heap, PlatformInterface platform)
     Tex_BindAll();
 
     
-    g_platform.Platform_SetDebugInputTextureIndex(
+    g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName("textures\\charset.bmp"));
 }
 

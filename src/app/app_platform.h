@@ -4,6 +4,14 @@
 #include "../interface/sys_events.h"
 
 /***************************************
+* Public (app.h)
+***************************************/
+void App_Log(char* msg)
+{
+    g_platform.Log(msg);
+}
+
+/***************************************
 * Private
 ***************************************/
 internal f32 App_GetSimFrameInterval()
@@ -24,6 +32,7 @@ internal i32  g_isValid = 0;
 internal i32  App_Init()
 {
     printf("App Init\n");
+    App_Log("Test Log\n");
 
     //App_Win32_AttachErrorHandlers();
 
@@ -38,7 +47,7 @@ internal i32  App_Init()
 
     printf("APP Requested %d MB for Heap\n", heapMB);
 
-    if (!g_platform.Platform_Malloc(&mem, mainMemorySize))
+    if (!g_platform.Malloc(&mem, mainMemorySize))
     {
         printf("APP Platform malloc failed\n");
         Assert(false);
@@ -107,7 +116,7 @@ internal i32  App_Shutdown()
     MemoryBlock mem = {};
     mem.ptrMemory = g_heap.ptrMemory;
     mem.size = g_heap.size;
-    g_platform.Platform_Free(&mem);
+    g_platform.Free(&mem);
 	
     //g_localClientSocket.Destroy();
     //g_localServerSocket.Destroy();
@@ -287,10 +296,10 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
     
 
-    g_platform.Platform_RenderScene(&g_worldScene);
+    g_platform.RenderScene(&g_worldScene);
 
     App_WriteDebugStrings();
-    g_platform.Platform_RenderScene(&g_debugScene);
+    g_platform.RenderScene(&g_debugScene);
 }
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
