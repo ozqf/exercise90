@@ -11,6 +11,11 @@ void App_Log(char* msg)
     g_platform.Log(msg);
 }
 
+void App_Print(char* msg)
+{
+    g_platform.Print(msg);
+}
+
 /***************************************
 * Private
 ***************************************/
@@ -31,6 +36,8 @@ internal i32  g_isValid = 0;
 
 internal i32  App_Init()
 {
+    APP_PRINT(64, "This is just printed\n");
+    APP_LOG(64, "This is logged and printed\n");
     APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
     //App_Log("Test Log\n");
 

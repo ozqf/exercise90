@@ -9,10 +9,18 @@
 
 void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize);
 void App_Log(char* msg);
+void App_Print(char* msg);
 
 #define APP_LOG(messageBufSize, format, ...) \
 { \
     char appLogBuf[##messageBufSize##]; \
     sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
     App_Log(appLogBuf); \
+}
+
+#define APP_PRINT(messageBufSize, format, ...) \
+{ \
+    char appLogBuf[##messageBufSize##]; \
+    sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
+    App_Print(appLogBuf); \
 }

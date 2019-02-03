@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 void Win32_Shutdown();
+void Win32_Print(char* msg);
 void Win32_Log(char* msg);
 
 // modules

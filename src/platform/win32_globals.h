@@ -60,6 +60,7 @@ struct win32_module_link
 // GLOBALS
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
+global_variable FILE* g_logFile;
 
 global_variable PlatformTime g_time;
 global_variable f32 g_fixedFrameAccumulator = 0;
@@ -167,4 +168,18 @@ void Win32_Error(char *msg, char *title)
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
 	DebugBreak();
 	ILLEGAL_CODE_PATH
+}
+
+#define PLAT_LOG(messageBufSize, format, ...) \
+{ \
+    char appLogBuf[##messageBufSize##]; \
+    sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
+    Win32_Log(appLogBuf); \
+}
+
+#define PLAT_PRINT(messageBufSize, format, ...) \
+{ \
+    char appLogBuf[##messageBufSize##]; \
+    sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
+    Win32_Print(appLogBuf); \
 }

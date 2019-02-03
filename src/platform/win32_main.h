@@ -205,7 +205,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 		// F1 -> quick minimise
 		if (VKCode == 112)
 		{
-			printf("PLATFORM: Minimise\n");
+			PLAT_LOG(64, "PLATFORM: Minimise\n");
 			/*
 			https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-showwindow
 			https://docs.microsoft.com/en-us/windows/desktop/api/shellapi/ns-shellapi-_notifyicondataa
@@ -233,7 +233,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 		// F1 -> quick minimise
 		if (VKCode == 113)
 		{
-			printf("PLATFORM: Instant exit\n");
+			PLAT_PRINT(64, "PLATFORM: Instant exit\n");
 			globalRunning = false;
 		}
 
@@ -404,8 +404,12 @@ int CALLBACK WinMain(
         t.wSecond
     );
 
+    // Open log file
+    err = fopen_s(&g_logFile, logFileName, "w");
+    if (err != 0) { Win32_ShowInitError(err); }
+
     // Spawn debugging windows cmd
-    #if 0
+    #if 1
     FILE *stream;
     AllocConsole();
     freopen_s(&stream, "conin$", "r", stdin);
@@ -417,7 +421,7 @@ int CALLBACK WinMain(
     #endif
 
     // Print stdout to a file
-    #if 1 // Currently not working. Only logs from platform, not DLLs
+    #if 0 // Currently not working. Only logs from platform, not DLLs
     FILE *stream;
     //AllocConsole();
 

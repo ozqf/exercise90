@@ -20,13 +20,13 @@ PlatformInterface platformStub;
 //AppStubState appStubState;
 
 i32 AppInit_Stub() { return 1; }
-i32 AppShutdown_Stub() { printf("PLATFORM Shutdown App Stub\n"); return 1; }
+i32 AppShutdown_Stub() { printf("APP STUB Shutdown App Stub\n"); return 1; }
 void AppUpdate_Stub(GameTime* time) { }
 
 // Fill out an app stub
 AppInterface GetAppInterfaceStub(PlatformInterface platInterface)
 {
-    printf("PLATFORM Link to App Stub\n");
+    printf("APP STUB Link to App Stub\n");
     platformStub = platInterface;
 
     AppInterface app = { };

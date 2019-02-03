@@ -37,11 +37,6 @@ void Platform_Free(MemoryBlock *mem)
     }
 }
 
-void Win32_PrintDebug(char *str)
-{
-    printf(str);
-}
-
 /**********************************************************************
  * PLATFORM INTERFACE FUNCTIONS
  *********************************************************************/
@@ -94,6 +89,12 @@ void Platform_GetDateTime(DateTime* data)
 
 void Win32_Log(char* msg)
 {
+    fprintf(g_logFile, "%s", msg);
+}
+
+void Win32_Print(char* msg)
+{
+    fprintf(g_logFile, "%s", msg);
     printf("%s", msg);
 }
 
@@ -127,6 +128,7 @@ void Win32_InitPlatformInterface()
 {
     platInterface.Error = Win32_Error;
     platInterface.Log = Win32_Log;
+    platInterface.Print = Win32_Print;
 
     platInterface.Malloc = Platform_Alloc;
     platInterface.Free = Platform_Free;
@@ -177,7 +179,7 @@ void Win32_CloseAppLink()
 ///////////////////////////////////////////////////////////
 u8 Win32_LinkToApplication()
 {
-    printf("PLATFORM Link to App\n");
+    PLAT_LOG(64, "PLATFORM Link to App\n");
     if (g_app.isValid == 1)
     {
         Win32_CloseAppLink();
@@ -195,7 +197,7 @@ u8 Win32_LinkToApplication()
             i32 errCode = g_app.AppInit();
             if (errCode != COM_ERROR_NONE)
             {
-                printf("INIT APP ERROR CODE %d - ABORTED\n", errCode);
+                PLAT_LOG(64, "INIT APP ERROR CODE %d - ABORTED\n", errCode);
                 Win32_Error("Init App failed", "Error");
                 return 1;
             }
@@ -269,7 +271,7 @@ void Win32_CloseRendererLink()
 
 u8 Win32_LinkToRenderer()
 {
-    printf("PLATFORM Link to Renderer\n");
+    PLAT_LOG(64, "PLATFORM Link to Renderer\n");
     if (g_rendererLink.moduleState == 1)
     {
         Win32_CloseRendererLink();
@@ -320,7 +322,7 @@ void Win32_CloseSoundLink()
 
 u8 Win32_LinkToSound()
 {
-    printf("PLATFORM Link to Sound\n");
+    PLAT_LOG(64, "PLATFORM Link to Sound\n");
 	if (g_soundLink.moduleState == 1)
 	{
 		Win32_CloseRendererLink();

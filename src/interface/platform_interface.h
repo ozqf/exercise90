@@ -13,6 +13,7 @@ struct PlatformInterface
     // Oops
     void (*Error)(char* msg, char* title);
     void (*Log)(char* msg);
+    void (*Print)(char* msg);
 
     // Memory Allocation
     u8 (*Malloc)   (MemoryBlock* mem, u32 bytesToAllocate);

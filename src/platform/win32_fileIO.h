@@ -154,7 +154,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	i32 h = bmpHeader.Height;
 	u32 numPixels = w * h;
 	
-	printf("PLATFORM Reading BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
+	PLAT_PRINT(1024, "PLATFORM Reading BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
 		filePath, fileHeader.FileType, fileHeader.FileSize,
 		w, h);
 
@@ -247,7 +247,7 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 			}
 			else
 			{
-				printf("PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+				PLAT_PRINT(512, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
 				return 0;
 			}
 			
@@ -291,7 +291,7 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 			// mem.ptrMemory = malloc(mem.size);
 			fseek(r.handle, r.entry.offset, SEEK_SET);
 			fread(mem.ptrMemory, mem.size, 1, r.handle);
-			printf("PLATFORM Reading Generic File %s (%d bytes)\n", fileName, mem.size);
+			PLAT_PRINT(1024, "PLATFORM Reading Generic File %s (%d bytes)\n", fileName, mem.size);
 
 			Heap_Allocate(heap, destRef, mem.size, fileName, 1);
 			COM_CopyMemory((u8*)mem.ptrMemory, (u8*)destRef->ptrMemory, destRef->objectSize);
@@ -325,7 +325,7 @@ i32 Win32_GetFreeAppFileHandle()
 i32 Platform_OpenFileForWriting(char* fileName)
 {
 	i32 index = Win32_GetFreeAppFileHandle();
-	printf("PLATFORM Opening file %s for writing\n", fileName);
+	PLAT_LOG(512, "PLATFORM Opening file %s for writing\n", fileName);
 	if (index == -1)
 	{
 		printf("  PLATFORM no free file handle\n");
