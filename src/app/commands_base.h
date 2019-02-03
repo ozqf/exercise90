@@ -57,6 +57,7 @@ internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
 ////////////////////////////////////////////////////////////////////////////
 // Debugging
 ////////////////////////////////////////////////////////////////////////////
+#if 0
 internal void Cmd_PrintHeader(Command* header)
 {
     printf("Read Cmd type %d. sequence %d, tick %d\n",
@@ -78,3 +79,4 @@ internal void Cmd_PrintBuffer(u8* ptr, i32 numBytes)
     }
 	printf("  Ptr diff check: %d\n", (read - end));
 }
+#endif

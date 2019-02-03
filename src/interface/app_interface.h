@@ -104,7 +104,7 @@ struct AppInterface
 /*****************************************************
 Platform calls DLL with platform function pointers, DLL should return pointers
 *****************************************************/
-typedef AppInterface (Func_LinkToApp)(PlatformInterface);
+typedef AppInterface (Func_LinkToApp)(AppPlatform);
 
 // eg. in SDL:
 // Func_LinkToApp* linkToApp = (Func_LinkToApp *)SDL_LoadFunction(gameModule, "LinkToApp");

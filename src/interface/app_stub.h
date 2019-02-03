@@ -10,7 +10,7 @@
 Empty, default App implementation
 *****************************************************/
 
-PlatformInterface platformStub;
+AppPlatform platformStub;
 
 // struct AppStubState
 // {
@@ -24,7 +24,7 @@ i32 AppShutdown_Stub() { printf("APP STUB Shutdown App Stub\n"); return 1; }
 void AppUpdate_Stub(GameTime* time) { }
 
 // Fill out an app stub
-AppInterface GetAppInterfaceStub(PlatformInterface platInterface)
+AppInterface GetAppInterfaceStub(AppPlatform platInterface)
 {
     printf("APP STUB Link to App Stub\n");
     platformStub = platInterface;

@@ -321,7 +321,7 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 #include <Windows.h>
 
 extern "C"
-AppInterface __declspec(dllexport) LinkToApp(PlatformInterface platInterface)
+AppInterface __declspec(dllexport) LinkToApp(AppPlatform platInterface)
 {
     printf("APP: Library Built on %s at %s\n", __DATE__, __TIME__);
     g_platform = platInterface;

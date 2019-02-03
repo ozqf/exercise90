@@ -18,7 +18,7 @@ struct TextureHandles
     u32 maxTextures = MAX_TEXTURES;
 };
 
-internal PlatformInterface g_platform;
+internal AppPlatform g_platform;
 internal Heap* g_heap;
 internal TextureHandles g_textureHandles;
 
@@ -130,7 +130,7 @@ internal void Tex_BindAll()
     }
 }
 
-void Tex_Init(Heap* heap, PlatformInterface platform)
+void Tex_Init(Heap* heap, AppPlatform platform)
 {
     g_heap = heap;
     g_platform = platform;

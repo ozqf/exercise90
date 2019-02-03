@@ -60,6 +60,22 @@ struct win32_module_link
 // GLOBALS
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
+
+// Interfaces exported to DLLs
+global_variable AppPlatform platInterface;
+global_variable RendererPlatform g_plat2Rend;
+
+// Interfaces imported from DLLs
+global_variable AppInterface g_app;
+global_variable RenderInterface g_renderer = {};
+global_variable SoundInterface g_sound = {};
+
+// Runtime reload handles for DLLs
+global_variable win32_module_link g_appLink = {};
+global_variable win32_module_link g_rendererLink = {};
+global_variable win32_module_link g_soundLink = {};
+
+
 global_variable FILE* g_logFile;
 
 global_variable PlatformTime g_time;
@@ -68,17 +84,6 @@ global_variable f32 g_fixedFrameTime = 1.0f / 60.0f;
 //global_variable f32 g_fixedFrameTime = 1.0f / 2.0f;
 
 global_variable HWND consoleHandle;
-
-// Interfaces
-global_variable PlatformInterface platInterface;
-
-global_variable AppInterface g_app;
-global_variable RenderInterface g_renderer = {};
-global_variable SoundInterface g_sound = {};
-
-global_variable win32_module_link g_appLink = {};
-global_variable win32_module_link g_rendererLink = {};
-global_variable win32_module_link g_soundLink = {};
 
 // Data files will be opened and kept open for program duration
 #define PLATFORM_MAX_DATA_FILES 64
@@ -159,17 +164,6 @@ void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 ite
 //void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
 void Win32_EnqueueTextCommand(char* command);
 
-/****************************************************************
-When something goes wrong
-****************************************************************/
-void Win32_Error(char *msg, char *title)
-{
-	printf("FATAL: %s: %s\n", title, msg);
-    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
-	DebugBreak();
-	ILLEGAL_CODE_PATH
-}
-
 #define PLAT_LOG(messageBufSize, format, ...) \
 { \
     char appLogBuf[##messageBufSize##]; \
@@ -182,4 +176,15 @@ void Win32_Error(char *msg, char *title)
     char appLogBuf[##messageBufSize##]; \
     sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
     Win32_Print(appLogBuf); \
+}
+
+/****************************************************************
+When something goes wrong
+****************************************************************/
+void Win32_Error(char *msg, char *title)
+{
+	printf("FATAL: %s: %s\n", title, msg);
+    MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
+	DebugBreak();
+	ILLEGAL_CODE_PATH
 }

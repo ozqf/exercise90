@@ -164,6 +164,11 @@ void Win32_InitPlatformInterface()
     platInterface.SendTo = Net_SendTo;
     platInterface.Read = Net_Read;
     #endif
+
+    // Renderer
+    g_plat2Rend = {};
+    g_plat2Rend.Log = Win32_Log;
+    g_plat2Rend.Print = Win32_Log;
 }
 
 void Win32_CloseAppLink()
@@ -283,7 +288,7 @@ u8 Win32_LinkToRenderer()
         Func_LinkToRenderer *link = (Func_LinkToRenderer *)GetProcAddress(g_rendererLink.moduleHandle, "LinkToRenderer");
         if (link != NULL)
         {
-            g_renderer = link();
+            g_renderer = link(g_plat2Rend);
             if (!g_renderer.R_Init(appWindow))
             {
                 Win32_Error("Init Renderer failed", "Error");
