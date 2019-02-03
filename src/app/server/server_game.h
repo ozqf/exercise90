@@ -35,6 +35,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
 			sim, 0, &cmd.def
 		);
         //Sim_EnqueueCommand(sim, (u8*)&cmd);
+		SV_EnqueueCommandForAllUsers(&g_users, 
     }
     else
     {

@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include "sim.h"
 
 #define SIM_CMD_TYPE_NULL 0
@@ -54,3 +54,4 @@ struct SimCmdProjectileSpawn
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd);
 void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntityDef* def);
+#endif

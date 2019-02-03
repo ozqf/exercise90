@@ -119,6 +119,19 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
     );
 }
 
+internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd)
+{
+	for (i32 i = 0; i < users->max; ++i)
+	{
+		User* user = &users->items[i];
+		if (user->state == USER_STATE_FREE)
+		{ continue; }
+	
+		//
+		Stream_EnqueueOutput(&user->reliableStream, cmd);
+	}
+}
+
 internal void SV_UserStartSync(User* user)
 {
     printf("SV - Begin sync for user %d\n", user->ids.privateId);
