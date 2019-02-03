@@ -2,14 +2,22 @@
 
 #include "../common/com_module.h"
 
-void Win32_DebugPrintDataManifest()
+void Win32_DebugLogDataManifest(i32 printAsWellAsLog)
 {
 	for (i32 i = g_nextDataFileIndex - 1; i >= 0; --i)
 	{
 		DataFile file = g_dataFiles[i];
 		Assert(file.handle);
-
-		printf("--- data file %d ---\n", i);
+		if (printAsWellAsLog)
+		{
+			PLAT_PRINT(64, "--- data file %d ---\n", i);
+		}
+		else
+		{
+			PLAT_LOG(64, "--- data file %d ---\n", i);
+		}
+		
+		
 
 		u32 offset = file.header.fileListOffset;
 		fseek(file.handle, file.header.fileListOffset, SEEK_SET);
@@ -19,7 +27,16 @@ void Win32_DebugPrintDataManifest()
 		{
 			fread(&entry, sizeof(DataFileDiskEntry), 1, file.handle);
 
-			printf("%s - Size %d bytes, FileType: %d\n", entry.fileName, entry.size, entry.info[0]);
+			if (printAsWellAsLog)
+			{
+				PLAT_PRINT(1024, "%s - Size %d bytes, FileType: %d\n",
+					entry.fileName, entry.size, entry.info[0]);
+			}
+			else
+			{
+				PLAT_LOG(1024, "%s - Size %d bytes, FileType: %d\n",
+					entry.fileName, entry.size, entry.info[0]);
+			}
 		}
 	}
 }
@@ -66,10 +83,8 @@ u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)
 
 void Win32_AddDataFileHandle(char* filePath)
 {
-	
 	DataFile dFile = {};
 	
-
 	fopen_s(&dFile.handle, filePath, "rb");
 	Assert(dFile.handle != NULL);
 
@@ -87,14 +102,14 @@ void Win32_AddDataFileHandle(char* filePath)
 		|| dFile.header.magic[3] != 'K'
 		)
 	{
-		printf("PLATFORM Magic number of .dat not recognised\n");
+		PLAT_PRINT(64, "PLATFORM Magic number of .dat not recognised\n");
 		fclose(dFile.handle);
 		return;
 	}
 
-	char buf[512];
-	sprintf_s(buf, 512, "PLATFORM Loaded handle to %s. Size: %dkb, num files: %d\n", filePath, (dFile.fileSize / 1024), dFile.header.numFiles);
-	printf("%s", buf);
+	PLAT_LOG(512,
+		"PLATFORM Loaded handle to %s. Size: %dkb, num files: %d\n",
+		filePath, (dFile.fileSize / 1024), dFile.header.numFiles)
 	//dFile->header = 
 
 
@@ -123,7 +138,7 @@ i32 Win32_ScanForDataFiles(Heap* heap, DataFile* results, i32 maxResults, char* 
 	// printf("\n");
 	// printf(searchPath);
 	// printf("\n");
-	printf("PLATFORM Data path \"%s\"\n", searchPath);
+	PLAT_LOG(512, "PLATFORM Data path \"%s\"\n", searchPath);
 
 	// concat of search dir and file name
 	char fileLoadPath[256];
@@ -150,6 +165,7 @@ i32 Win32_ScanForDataFiles(Heap* heap, DataFile* results, i32 maxResults, char* 
 		}
 	} while (FindNextFile(handle, &findData) != 0);
 	FindClose(handle);
+	Win32_DebugLogDataManifest(0);
 	return count;
 }
 
@@ -166,7 +182,7 @@ void Win32_CloseDataFiles()
 void Win32_LoadDataFiles()
 {
 	// Possibly reloading. close any datafiles currently open
-	printf("PLATFORM: Recreate Data File Handles\n");
+	PLAT_LOG(64, "PLATFORM: Recreate Data File Handles\n");
 	Win32_CloseDataFiles();
 	Win32_ScanForDataFiles(NULL, g_dataFiles, PLATFORM_MAX_DATA_FILES, g_baseDirectoryName);
 

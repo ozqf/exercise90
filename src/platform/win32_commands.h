@@ -9,13 +9,13 @@ global_variable ZTextCommandHandler g_textCommands[64];
 
 u8 TextExec_ConsoleHelp(char* text, char** tokens, i32 numTokens)
 {
-    printf("--- Command List ---\n");
-    printf("  QUIT or EXIT - shutdown\n");
-    printf("  VERSION - show version info\n");
-    printf("  MANIFEST - List data files entries\n");
-    printf("  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
-    printf("  KEYCODES - toggle printing keycodes in debug input\n");
-    printf("  LAPTOP - Toggle mode to give up cpu time each frame\n");
+    PLAT_LOG(128, "--- Command List ---\n");
+    PLAT_LOG(128, "  QUIT or EXIT - shutdown\n");
+    PLAT_LOG(128, "  VERSION - show version info\n");
+    PLAT_LOG(128, "  MANIFEST - List data files entries\n");
+    PLAT_LOG(128, "  RESTART APP/RENDERER/SOUND/GAME - Reload subsystem\n");
+    PLAT_LOG(128, "  KEYCODES - toggle printing keycodes in debug input\n");
+    PLAT_LOG(128, "  LAPTOP - Toggle mode to give up cpu time each frame\n");
     return 0;
 }
 
@@ -27,23 +27,23 @@ u8 TextExec_Quit(char* text, char** tokens, i32 numTokens)
 
 TEXT_COMMAND_HANDLER(Version)
 {
-    printf("--- VERSIONS ---\n");
-    printf("PLATFORM Built %s: %s\n", __DATE__, __TIME__);
+    PLAT_PRINT(64, "--- VERSIONS ---\n");
+    PLAT_PRINT(64, "PLATFORM Built %s: %s\n", __DATE__, __TIME__);
     return 0;
 }
 
 TEXT_COMMAND_HANDLER(Mark)
 {
-    printf("/////////////////////////////////////////\n");
-    printf("// Kernel frame: %d\n",
+    PLAT_PRINT(64, "/////////////////////////////////////////\n");
+    PLAT_PRINT(64, "// Kernel frame: %d\n",
         g_time.frameNumber);
-    printf("/////////////////////////////////////////\n");
+    PLAT_PRINT(64, "/////////////////////////////////////////\n");
     return 1;
 }
 
 TEXT_COMMAND_HANDLER(Manifest)
 {
-    Win32_DebugPrintDataManifest();
+    Win32_DebugLogDataManifest(1);
     return 1;
 }
 
@@ -53,19 +53,19 @@ TEXT_COMMAND_HANDLER(Restart)
     {
         if (COM_CompareStrings(tokens[1], "APP") == 0)
         {
-            printf("  Restarting app\n");
+            PLAT_PRINT(64, "  Restarting app\n");
             g_appLink.timestamp = {};
             return 1;
         }
         else if (COM_CompareStrings(tokens[1], "RENDERER") == 0)
         {
-            printf("  Restarting renderer\n");
+            PLAT_PRINT(64, "  Restarting renderer\n");
             g_rendererLink.timestamp = {};
             return 1;
         }
         else if (COM_CompareStrings(tokens[1], "SOUND") == 0)
         {
-            printf("  Restarting sound\n");
+            PLAT_PRINT(64, "  Restarting sound\n");
             g_soundLink.timestamp = {};
             return 1;
         }
@@ -75,7 +75,7 @@ TEXT_COMMAND_HANDLER(Restart)
 
 TEXT_COMMAND_HANDLER(Hello)
 {
-    printf("HI.\n");
+    PLAT_PRINT(64, "HI.\n");
     return 1;
 }
 
@@ -83,7 +83,7 @@ TEXT_COMMAND_HANDLER(Time)
 {
     SYSTEMTIME t;
     GetSystemTime(&t);
-    printf("  TIME: %d/%d/%d - %d:%d:%d\n",
+    PLAT_PRINT(64, "  TIME: %d/%d/%d - %d:%d:%d\n",
         t.wYear,
         t.wMonth,
         t.wDay,
@@ -97,14 +97,14 @@ TEXT_COMMAND_HANDLER(Time)
 TEXT_COMMAND_HANDLER(StepMode)
 {
     g_singleFrameStepMode = !g_singleFrameStepMode;
-    printf("PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);
+    PLAT_PRINT(64, "PLATFORM Single frame mode: %d\n", g_singleFrameStepMode);
     return 1;
 }
 
 TEXT_COMMAND_HANDLER(Step)
 {
     g_singleFrameRun = 1;
-    printf("PLATFORM Step frame\n");
+    PLAT_PRINT(64, "PLATFORM Step frame\n");
     return 1;
 }
 
@@ -117,14 +117,14 @@ TEXT_COMMAND_HANDLER(Break)
 TEXT_COMMAND_HANDLER(KeyCodes)
 {
     g_debugPrintKeycodes = !g_debugPrintKeycodes;
-    printf("PLATFORM: Print keycodes: %d\n", g_debugPrintKeycodes);
+    PLAT_PRINT(64, "PLATFORM: Print keycodes: %d\n", g_debugPrintKeycodes);
     return 1;
 }
 
 TEXT_COMMAND_HANDLER(Laptop)
 {
     g_lowPowerMode = !g_lowPowerMode;
-    printf("PLATFORM: Low power mode: %d\n", g_lowPowerMode);
+    PLAT_PRINT(64, "PLATFORM: Low power mode: %d\n", g_lowPowerMode);
     return 1;
 }
 
@@ -133,7 +133,7 @@ void Win32_AddTextCommand(char* name, i32 minTokens, i32 maxTokens, ZParseTextCo
     u8 error = COM_ValidateTextCommandHandler(name, minTokens, maxTokens, func);
     if (error != 0)
     {
-        printf("Error creating command %s: %d\n", name, error);
+        PLAT_PRINT(64, "Error creating command %s: %d\n", name, error);
         return;
     }
 
@@ -180,7 +180,7 @@ u8 Win32_ExecTextCommand(char* str, char** tokens, i32 numTokens)
             //printf("Matched cmd %s\n", h->name);
             if (numTokens < h->minTokens || numTokens > h->maxTokens)
             {
-                printf("Invalid token count. Got %d. Supports %d to %d\n",
+                PLAT_PRINT(64, "Invalid token count. Got %d. Supports %d to %d\n",
                     numTokens, h->minTokens, h->maxTokens);
                 return 1;
             }
@@ -245,13 +245,15 @@ i32 Win32_ExecuteTextCommand(char* command)
     // Version is allowed to cascade down so each subsystem prints it's version
     if (COM_CompareStrings(tokens[0], "VERSION") == 0) { return TEXT_CMD_CONTINUE; }
 
-    printf(" Unknown command %s\n", g_textCommandBuffer);
+    PLAT_PRINT(64, " Unknown command %s\n", g_textCommandBuffer);
 	return TEXT_CMD_CONTINUE;
 }
 
 void Win32_ExecuteTextCommands()
 {
-    char executeBuffer[256];
+    const int executeBufferSize = 256;
+
+    char executeBuffer[executeBufferSize];
     i32 written = 0;
     i32 position = 0;
 
@@ -259,24 +261,24 @@ void Win32_ExecuteTextCommands()
 
     for (;;)
     {
-        written = COM_DequeueTextCommand(g_textCommandBuffer, executeBuffer, position, 256);
+        written = COM_DequeueTextCommand(g_textCommandBuffer, executeBuffer, position, executeBufferSize);
         position += written;
         if (written <= 1)
         {
             break;
         }
-        printf("EXEC %s\n", executeBuffer);
+        PLAT_PRINT((64 + executeBufferSize), "EXEC %s\n", executeBuffer);
         i32 result = Win32_ExecuteTextCommand(executeBuffer);
 		if (result == TEXT_CMD_WAIT)
 		{
 			// Continue on next frame
             i32 remaining = COM_StrLen(&g_textCommandBuffer[position]);
-			printf("PLATFORM Waiting at text buffer pos %d\n", g_textCommandBufferPosition);
+			PLAT_PRINT(64, "PLATFORM Waiting at text buffer pos %d\n", g_textCommandBufferPosition);
             //g_textCommandBufferPosition = position;
-            printf("  REMAINING: %d chars:\n%s\n", remaining, &g_textCommandBuffer[position]);
+            //PLAT_PRINT(64, "  REMAINING: %d chars:\n%s\n", remaining, &g_textCommandBuffer[position]);
             u8* source = (u8*)&g_textCommandBuffer[position];
             u8* dest = (u8*)&g_textCommandBuffer[0];
-            printf("Copying from %d to %d\n", (u32)source, (u32)dest);
+            //PLAT_PRINT(64, "Copying from %d to %d\n", (u32)source, (u32)dest);
             COM_CopyMemory(source, dest, remaining);
             //COM_COPY(&g_textCommandBuffer[position], &g_textCommandBuffer[0], remaining);
             break;
@@ -286,7 +288,7 @@ void Win32_ExecuteTextCommands()
     }
     // if (executeCount > 0)
     // {
-    //     printf("PLATFORM Executed %d text commands\n", executeCount);
+    //     PLAT_LOG(64, "PLATFORM Executed %d text commands\n", executeCount);
     // }
 
     // Clear buffer entirely
@@ -302,7 +304,7 @@ void Win32_ExecuteTextCommands()
 	 char buf[256];
 	 COM_ZeroMemory((u8*)buf, 256);
 	 i32 written = COM_ConcatonateTokens(buf, 256, argv, argc, 0);
-	 printf("PLATFORM exec launch string %s\n", buf);
+	 PLAT_PRINT(384, "PLATFORM exec launch string %s\n", buf);
 	 Win32_EnqueueTextCommand(buf);
  }
  

@@ -205,7 +205,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 		// F1 -> quick minimise
 		if (VKCode == 112)
 		{
-			printf("PLATFORM: Minimise\n");
+			PLAT_LOG(64, "PLATFORM: Minimise\n");
 			/*
 			https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-showwindow
 			https://docs.microsoft.com/en-us/windows/desktop/api/shellapi/ns-shellapi-_notifyicondataa
@@ -233,7 +233,7 @@ LRESULT CALLBACK Win32_MainWindowCallback(
 		// F1 -> quick minimise
 		if (VKCode == 113)
 		{
-			printf("PLATFORM: Instant exit\n");
+			PLAT_PRINT(64, "PLATFORM: Instant exit\n");
 			globalRunning = false;
 		}
 
@@ -377,14 +377,36 @@ int CALLBACK WinMain(
 	printf(crashString);
     #endif
 
-    /*
-    errno_t freopen(
+    
+    /*errno_t freopen(
        FILE** pFile,
        const char *path,
        const char *mode,
        FILE *stream
+    );*/
+    
+    SYSTEMTIME t;
+    GetSystemTime(&t);
+    COM_STRING(timeStr, 128, "%d/%d/%d - %d:%d:%d\n",
+        t.wYear,
+        t.wMonth,
+        t.wDay,
+        t.wHour,
+        t.wMinute,
+        t.wSecond
     );
-    */
+    COM_STRING(logFileName, 128, "ex90_log_%d_%d_%d - %d_%d_%d.txt",
+        t.wYear,
+        t.wMonth,
+        t.wDay,
+        t.wHour,
+        t.wMinute,
+        t.wSecond
+    );
+
+    // Open log file
+    err = fopen_s(&g_logFile, logFileName, "w");
+    if (err != 0) { Win32_ShowInitError(err); }
 
     // Spawn debugging windows cmd
     #if 1
@@ -407,15 +429,15 @@ int CALLBACK WinMain(
 	//err = freopen_s(&stream, "conin$", "r", stdin);
     //if (err != 0) { Win32_ShowInitError(err); }
 
-	err = freopen_s(&stream, "y:\\log.txt", "w", stdout);
+	err = freopen_s(&stream, logFileName, "w", stdout);
     if (err != 0) { Win32_ShowInitError(err); }
 
-	err = freopen_s(&stream, "y:\\logerr.txt", "w", stderr);
-    if (err != 0) { Win32_ShowInitError(err); }
+	//err = freopen_s(&stream, "logerr.txt", "w", stderr);
+    //if (err != 0) { Win32_ShowInitError(err); }
 
     //consoleHandle = GetConsoleWindow();
     //MoveWindow(consoleHandle, 1, 1, 680, 600, 1);
-    printf("[%s] Log initialized. Session started %s - %s\n", __FILE__, __DATE__, __TIME__);
+    printf("[%s] Log initialized. Session started %s\n", __FILE__, timeStr);
     #endif
 
     Win32_BuildTextCommandList();

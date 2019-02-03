@@ -83,7 +83,7 @@ void Win32_SetDebugInputTextureIndex(i32 index)
 {
     RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
     c->textureIndex = index;
-    printf("PLATFORM Set Console texture index %d\n", index);
+    PLAT_LOG(64, "PLATFORM Set Console texture index %d\n", index);
 }
 
 char g_lastDebugChar = 0;

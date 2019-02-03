@@ -18,7 +18,7 @@ struct TextureHandles
     u32 maxTextures = MAX_TEXTURES;
 };
 
-internal PlatformInterface g_platform;
+internal AppPlatform g_platform;
 internal Heap* g_heap;
 internal TextureHandles g_textureHandles;
 
@@ -48,7 +48,7 @@ i32 Tex_GetTextureIndexByName(char* textureName)
             return i;
         }
     }
-    printf("APP tex %s not found, loading\n", textureName);
+    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s not found, loading\n", textureName);
     return Tex_LoadAndBindTexture(textureName);
     //return -1;
 }
@@ -84,12 +84,12 @@ internal void Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
  */
 internal void Tex_BindTexture(Texture2DHeader *header)
 {
-    g_platform.Platform_BindTexture(
+    g_platform.BindTexture(
         header->ptrMemory,
         header->width,
         header->height,
         header->index);
-    printf("APP tex %s bound to index %d\n",
+    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s bound to index %d\n",
         header->name, header->index);
 }
 
@@ -99,7 +99,7 @@ internal void Tex_BindTexture(Texture2DHeader *header)
 internal BlockRef Tex_LoadTexture(char *filePath)
 {
     BlockRef ref = {};
-    g_platform.Platform_LoadTexture(g_heap, &ref, filePath);
+    g_platform.LoadTexture(g_heap, &ref, filePath);
     return ref;
 }
 
@@ -130,7 +130,7 @@ internal void Tex_BindAll()
     }
 }
 
-void Tex_Init(Heap* heap, PlatformInterface platform)
+void Tex_Init(Heap* heap, AppPlatform platform)
 {
     g_heap = heap;
     g_platform = platform;
@@ -186,7 +186,7 @@ void Tex_Init(Heap* heap, PlatformInterface platform)
     Tex_BindAll();
 
     
-    g_platform.Platform_SetDebugInputTextureIndex(
+    g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName("textures\\charset.bmp"));
 }
 

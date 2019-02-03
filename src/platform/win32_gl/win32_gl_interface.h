@@ -17,4 +17,10 @@ struct RenderInterface
     void (*R_RenderScene)(RenderScene* scene, PlatformTime* time);
 };
 
-typedef RenderInterface (Func_LinkToRenderer)();
+struct RendererPlatform
+{
+    void (*Log)(char* msg);
+    void (*Print)(char* msg);
+};
+
+typedef RenderInterface (Func_LinkToRenderer)(RendererPlatform platform);

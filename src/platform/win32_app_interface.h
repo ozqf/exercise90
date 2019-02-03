@@ -37,11 +37,6 @@ void Platform_Free(MemoryBlock *mem)
     }
 }
 
-void Win32_PrintDebug(char *str)
-{
-    printf(str);
-}
-
 /**********************************************************************
  * PLATFORM INTERFACE FUNCTIONS
  *********************************************************************/
@@ -92,6 +87,17 @@ void Platform_GetDateTime(DateTime* data)
     data->second = time.wSecond;
 }
 
+void Win32_Log(char* msg)
+{
+    fprintf(g_logFile, "%s", msg);
+}
+
+void Win32_Print(char* msg)
+{
+    fprintf(g_logFile, "%s", msg);
+    printf("%s", msg);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // Sound
@@ -120,42 +126,49 @@ u8 Snd_Play(ZSoundEvent* ev)
 
 void Win32_InitPlatformInterface()
 {
-    platInterface.Platform_Error = Win32_Error;
+    platInterface.Error = Win32_Error;
+    platInterface.Log = Win32_Log;
+    platInterface.Print = Win32_Print;
 
-    platInterface.Platform_Malloc = Platform_Alloc;
-    platInterface.Platform_Free = Platform_Free;
-    platInterface.Platform_LoadFileIntoHeap = Platform_LoadFileIntoHeap;
-    //platInterface.Platform_LoadDebugTextures = Platform_LoadDebugTextures;
-    platInterface.Platform_LoadTexture = Platform_LoadTexture;
-    platInterface.Platform_BindTexture = Platform_BindTexture;
+    platInterface.Malloc = Platform_Alloc;
+    platInterface.Free = Platform_Free;
+    platInterface.LoadFileIntoHeap = Platform_LoadFileIntoHeap;
+    //platInterface.LoadDebugTextures = Platform_LoadDebugTextures;
+    platInterface.LoadTexture = Platform_LoadTexture;
+    platInterface.BindTexture = Platform_BindTexture;
     
-    platInterface.Platform_SetMouseMode = Win32_SetMouseMode;
+    platInterface.SetMouseMode = Win32_SetMouseMode;
 
-    platInterface.Platform_RenderScene = Platform_R_DrawScene;
+    platInterface.RenderScene = Platform_R_DrawScene;
 
-    platInterface.Platform_SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
+    platInterface.SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
 
-    platInterface.Platform_LoadSound = Platform_LoadSound;
+    platInterface.LoadSound = Platform_LoadSound;
 
-    platInterface.Platform_OpenFileForWriting = Platform_OpenFileForWriting;
-    platInterface.Platform_WriteToFile = Platform_WriteToFile;
-    platInterface.Platform_CloseFileForWriting = Platform_CloseFileForWriting;
-	platInterface.Platform_SeekInFileFromStart = Platform_SeekInFileFromStart;
-    platInterface.Platform_GetBaseDirectoryName = Platform_GetBaseDirectoryName;
-    platInterface.Platform_GetDateTime = Platform_GetDateTime;
+    platInterface.OpenFileForWriting = Platform_OpenFileForWriting;
+    platInterface.WriteToFile = Platform_WriteToFile;
+    platInterface.CloseFileForWriting = Platform_CloseFileForWriting;
+	platInterface.SeekInFileFromStart = Platform_SeekInFileFromStart;
+    platInterface.GetBaseDirectoryName = Platform_GetBaseDirectoryName;
+    platInterface.GetDateTime = Platform_GetDateTime;
 
-    platInterface.Platform_WriteTextCommand = Win32_EnqueueTextCommand;
+    platInterface.WriteTextCommand = Win32_EnqueueTextCommand;
 
     // Network setup
     #if 1
-    platInterface.Net_Init = Net_Init;
-    platInterface.Net_OpenSocket = Net_OpenSocket;
-    platInterface.Net_Shutdown = Net_Shutdown;
-    platInterface.Net_CloseSocket = Net_CloseSocket;
+    platInterface.Init = Net_Init;
+    platInterface.OpenSocket = Net_OpenSocket;
+    platInterface.Shutdown = Net_Shutdown;
+    platInterface.CloseSocket = Net_CloseSocket;
     //platInterface.Net_RunLoopbackTest = Net_RunLoopbackTest;
-    platInterface.Net_SendTo = Net_SendTo;
-    platInterface.Net_Read = Net_Read;
+    platInterface.SendTo = Net_SendTo;
+    platInterface.Read = Net_Read;
     #endif
+
+    // Renderer
+    g_plat2Rend = {};
+    g_plat2Rend.Log = Win32_Log;
+    g_plat2Rend.Print = Win32_Log;
 }
 
 void Win32_CloseAppLink()
@@ -171,7 +184,7 @@ void Win32_CloseAppLink()
 ///////////////////////////////////////////////////////////
 u8 Win32_LinkToApplication()
 {
-    printf("PLATFORM Link to App\n");
+    PLAT_LOG(64, "PLATFORM Link to App\n");
     if (g_app.isValid == 1)
     {
         Win32_CloseAppLink();
@@ -189,7 +202,7 @@ u8 Win32_LinkToApplication()
             i32 errCode = g_app.AppInit();
             if (errCode != COM_ERROR_NONE)
             {
-                printf("INIT APP ERROR CODE %d - ABORTED\n", errCode);
+                PLAT_LOG(64, "INIT APP ERROR CODE %d - ABORTED\n", errCode);
                 Win32_Error("Init App failed", "Error");
                 return 1;
             }
@@ -263,7 +276,7 @@ void Win32_CloseRendererLink()
 
 u8 Win32_LinkToRenderer()
 {
-    printf("PLATFORM Link to Renderer\n");
+    PLAT_LOG(64, "PLATFORM Link to Renderer\n");
     if (g_rendererLink.moduleState == 1)
     {
         Win32_CloseRendererLink();
@@ -275,7 +288,7 @@ u8 Win32_LinkToRenderer()
         Func_LinkToRenderer *link = (Func_LinkToRenderer *)GetProcAddress(g_rendererLink.moduleHandle, "LinkToRenderer");
         if (link != NULL)
         {
-            g_renderer = link();
+            g_renderer = link(g_plat2Rend);
             if (!g_renderer.R_Init(appWindow))
             {
                 Win32_Error("Init Renderer failed", "Error");
@@ -314,7 +327,7 @@ void Win32_CloseSoundLink()
 
 u8 Win32_LinkToSound()
 {
-    printf("PLATFORM Link to Sound\n");
+    PLAT_LOG(64, "PLATFORM Link to Sound\n");
 	if (g_soundLink.moduleState == 1)
 	{
 		Win32_CloseRendererLink();

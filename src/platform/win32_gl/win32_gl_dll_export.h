@@ -3,9 +3,13 @@
 #include "../../common/com_defines.h"
 
 extern "C"
-RenderInterface __declspec(dllexport) LinkToRenderer()
+RenderInterface __declspec(dllexport) LinkToRenderer(RendererPlatform platform)
 {
-    printf("RENDERER: Built on %s at %s\n", __DATE__, __TIME__);
+    g_platform = platform;
+    COM_CALL_PRINT(g_platform.Log, 512, "RENDERER: Built on %s at %s\n", __DATE__, __TIME__);
+    //COM_STRING(buf, 512, "RENDERER: Built on %s at %s\n", __DATE__, __TIME__);
+    //g_platform.Log(buf);
+    //printf("RENDERER: Built on %s at %s\n", __DATE__, __TIME__);
     RenderInterface r;
     
     r.R_Init = Win32_InitOpenGL;
