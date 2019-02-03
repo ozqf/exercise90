@@ -154,7 +154,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	i32 h = bmpHeader.Height;
 	u32 numPixels = w * h;
 	
-	PLAT_PRINT(1024, "PLATFORM Reading BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
+	PLAT_LOG(1024, "PLATFORM Reading BMP at %s: Type: %d. bytes: %d Size: %d, %d\n",
 		filePath, fileHeader.FileType, fileHeader.FileSize,
 		w, h);
 
@@ -328,7 +328,7 @@ i32 Platform_OpenFileForWriting(char* fileName)
 	PLAT_LOG(512, "PLATFORM Opening file %s for writing\n", fileName);
 	if (index == -1)
 	{
-		printf("  PLATFORM no free file handle\n");
+		PLAT_PRINT(1024, "  PLATFORM no free file handle\n");
 		ILLEGAL_CODE_PATH
 	}
 	
@@ -336,7 +336,7 @@ i32 Platform_OpenFileForWriting(char* fileName)
 
 	if (g_appReadFiles[index] == NULL)
 	{
-		printf("  PLATFORM failed to open %s for writing\n", fileName);
+		PLAT_PRINT(1024, "  PLATFORM failed to open %s for writing\n", fileName);
 		return -1;
 	}
 

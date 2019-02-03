@@ -80,9 +80,9 @@ sprintf_s(##stringBufName##, stringBufSize##, stringFormat##, ##__VA_ARGS__##); 
 
 // printFunc must match signature void Func(char* str);
 #define COM_CALL_PRINT(printFunc, stringBufSize, stringFormat, ...) \
-char stringBuf[##stringBufSize##]; \
+{ char stringBuf[##stringBufSize##]; \
 sprintf_s(stringBuf, stringBufSize##, stringFormat##, ##__VA_ARGS__##); \
-printFunc##(stringBuf);
+printFunc##(stringBuf); }
 
 
 ///////////////////////////////////////////////////////////////////////

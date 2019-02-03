@@ -48,7 +48,7 @@ i32 Tex_GetTextureIndexByName(char* textureName)
             return i;
         }
     }
-    printf("APP tex %s not found, loading\n", textureName);
+    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s not found, loading\n", textureName);
     return Tex_LoadAndBindTexture(textureName);
     //return -1;
 }
@@ -89,7 +89,7 @@ internal void Tex_BindTexture(Texture2DHeader *header)
         header->width,
         header->height,
         header->index);
-    printf("APP tex %s bound to index %d\n",
+    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s bound to index %d\n",
         header->name, header->index);
 }
 
