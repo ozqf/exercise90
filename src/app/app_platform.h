@@ -31,8 +31,8 @@ internal i32  g_isValid = 0;
 
 internal i32  App_Init()
 {
-    printf("App Init\n");
-    App_Log("Test Log\n");
+    APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
+    //App_Log("Test Log\n");
 
     //App_Win32_AttachErrorHandlers();
 
@@ -45,11 +45,11 @@ internal i32  App_Init()
     u32 mainMemorySize = MegaBytes(heapMB);
     MemoryBlock mem = {};
 
-    printf("APP Requested %d MB for Heap\n", heapMB);
+    APP_LOG(128, "APP Requested %d MB for Heap\n", heapMB);
 
     if (!g_platform.Malloc(&mem, mainMemorySize))
     {
-        printf("APP Platform malloc failed\n");
+        APP_LOG(128, "APP Platform malloc failed\n");
         Assert(false);
         return 0;
     }
@@ -110,7 +110,7 @@ internal i32  App_Init()
 
 internal i32  App_Shutdown()
 {
-    printf("App Shutdown\n");
+    APP_LOG(128, "App Shutdown\n");
     
     // Free memory, assuming a new APP might be loaded in it's place
     MemoryBlock mem = {};
@@ -135,13 +135,13 @@ internal i32 App_EndSession()
 
 internal i32 App_StartSession(i32 sessionType)
 {
-    printf("\n=== START SESSION ===\n");
+    APP_LOG(128, "\n=== START SESSION ===\n");
     switch (sessionType)
     {
         case APP_SESSION_TYPE_SINGLE_PLAYER:
         {
             App_EndSession();
-            printf("\tStarting single player\n");
+            APP_LOG(128, "\tStarting single player\n");
             /*ZNet_StartSession(
                 g_serverNet,
                 NETMODE_DEDICATED_SERVER,
@@ -168,7 +168,7 @@ internal i32 App_StartSession(i32 sessionType)
         } break;
         default:
         {
-            printf("Unknown Session type %d\n", sessionType);
+            APP_LOG(128, "Unknown Session type %d\n", sessionType);
             return COM_ERROR_BAD_ARGUMENT;
         };
     }
@@ -210,7 +210,7 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
 
             default:
             {
-                printf("APP Unknown sys event type %d size %d\n", header->type, header->size);
+                APP_LOG(128, "APP Unknown sys event type %d size %d\n", header->type, header->size);
             } break;
         }
 
@@ -248,7 +248,7 @@ internal void App_Update(PlatformTime* time)
         {
             //g_localServerSocket.Tick(interval);
             //ZNet_Tick(g_serverNet, interval);
-            //printf("*** SV TICK ***\n");
+            APP_LOG(128, "*** SV TICK ***\n");
             SV_Tick(g_serverLoopback.GetRead(), interval);
         }
 
@@ -258,7 +258,7 @@ internal void App_Update(PlatformTime* time)
         if (g_isRunningClient)
         {
             //g_localClientSocket.Tick(interval);
-            //printf("*** CL TICK ***\n");
+            APP_LOG(128, "*** CL TICK ***\n");
             //ZNet_Tick(g_clientNet, interval);
             CL_Tick(g_clientLoopback.GetRead(), interval);
         }

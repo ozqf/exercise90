@@ -21,8 +21,6 @@ PRIMITIVE TYPES
 
 #define bool32 uint32_t
 
-typedef int ErrorCode;
-
 static_assert(sizeof(i8) == 1, "Code requires i8 size == 1");
 static_assert(sizeof(u8) == 1, "Code requires u8 size == 1");
 static_assert(sizeof(i16) == 2, "Code requires i16 size == 2");
@@ -76,6 +74,16 @@ log_message( foo == 7, "x %d", x)
 
 #define DLL_EXPORT __declspec(dllexport)
 
+#define COM_STRING(stringBufName, stringBufSize, stringFormat, ...) \
+char stringBufName##[##stringBufSize##]; \
+sprintf_s(##stringBufName##, stringBufSize##, stringFormat##, ##__VA_ARGS__##); \
+
+
+///////////////////////////////////////////////////////////////////////
+// Error handling
+///////////////////////////////////////////////////////////////////////
+typedef int ErrorCode;
+
 #define COM_ERROR_NONE 0
 
 #define COM_ERROR_BAD_INDEX -1
@@ -91,6 +99,23 @@ log_message( foo == 7, "x %d", x)
 #define COM_ERROR_NOT_FOUND 10
 #define COM_ERROR_BAD_ARGUMENT 11
 #define COM_ERROR_NULL_ARGUMENT 12
+
+typedef void (*COM_FatalErrorFunction)(char* message, char* heading);
+internal COM_FatalErrorFunction com_fatalErrorFunc = NULL;
+
+internal void COM_SetFatalError(COM_FatalErrorFunction func)
+{
+    printf("COM Set error handler\n");
+    com_fatalErrorFunc = func;
+}
+
+#define COM_ASSERT(expression, msg) if(!(expression)) \
+{ \
+    if (com_fatalErrorFunc == NULL) { ILLEGAL_CODE_PATH; } \
+    char assertBuf[512]; \
+    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
+    com_fatalErrorFunc(assertBuf, "Fatal error"); \
+}
 
 ///////////////////////////////////////////////////////////////////////
 // Buffer macros
@@ -119,21 +144,3 @@ COM_CompareMemory((u8*)##ptrA##, (u8*)##ptrB##, numBytes##)
 #define COM_SET_ZERO(ptrToMemory, numberOfBytesToZero) \
 COM_ZeroMemory((u8*)##ptrToMemory##, (u32)##numberOfBytesToZero##)
 #endif
-
-typedef void (*COM_FatalErrorFunction)(char* message, char* heading);
-internal COM_FatalErrorFunction com_fatalErrorFunc = NULL;
-
-internal void COM_SetFatalError(COM_FatalErrorFunction func)
-{
-    printf("COM Set error handler\n");
-    com_fatalErrorFunc = func;
-}
-
-#define COM_ASSERT(expression, msg) if(!(expression)) \
-{ \
-    if (com_fatalErrorFunc == NULL) { ILLEGAL_CODE_PATH; } \
-    char assertBuf[512]; \
-    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
-    com_fatalErrorFunc(assertBuf, "Fatal error"); \
-}
-
