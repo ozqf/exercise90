@@ -66,6 +66,7 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+	APP_LOG(64, "SIM assigned replicated ent serial %d\n", ent->id.serial);
     ent->isLocal = 0;
     return ent;
 }
@@ -82,6 +83,7 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+	APP_LOG(64, "SIM assigned local ent serial %d\n", ent->id.serial);
     ent->isLocal = 1;
     return ent;
 }
@@ -212,5 +214,16 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
 
 internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
 {
-    return COM_ERROR_NONE;
+    SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerialNumber);
+    if (ent)
+    {
+        APP_LOG(64, "SIM Removing ent %d to remove\n", entitySerialNumber);
+        *ent = {};
+        return COM_ERROR_NONE;
+    }
+    else
+    {
+        APP_PRINT(64, "SIM Found no ent %d to remove\n", entitySerialNumber);
+        return COM_ERROR_BAD_ARGUMENT;
+    }
 }

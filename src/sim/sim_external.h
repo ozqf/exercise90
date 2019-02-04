@@ -70,21 +70,37 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
     {
         case SIM_PROJ_TYPE_TEST:
         {
-            i32 serial;
+            i32 first;
+            i32 last;
+            i32 count = 8;
             if (isLocal)
             {
-                serial = scene->localEntitySequence;
-                scene->localEntitySequence += 8;
+                first = scene->localEntitySequence;
+                last = first + count;
+                scene->localEntitySequence = last;
+                APP_LOG(128,
+                    "SIM Reserving %d local entity serials (%d to %d)\n",
+                    count, first, last
+                    );
             }
             else
             {
-                serial = scene->remoteEntitySequence;
-                scene->remoteEntitySequence += 8;
+                first = scene->remoteEntitySequence;
+                last = first + count;
+                scene->remoteEntitySequence = last;
+                APP_LOG(128,
+                    "SIM Reserving %d replicated entity serials (%d to %d)\n",
+                    count, first, last
+                    );
             }
-            return serial;
+            return first;
         }
+        default:
+        {
+            APP_LOG(128, "SIM Cannot reserve serials for pattern type %d\n", patternType);
+        } break;
     }
-    return -1;
+    return COM_ERROR_BAD_INDEX;
 }
 
 extern "C"
@@ -104,7 +120,29 @@ i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
     SimProjectileSpawnDef* def)
 {
-    return COM_ERROR_NOT_IMPLEMENTED;
+    i32 numProjectiles = 8;
+	f32 speed = 1.5f;
+    i32 serial = def->firstSerial;
+	f32 radians = 0;
+	f32 step = FULL_ROTATION_RADIANS / (f32)numProjectiles;
+    for (i32 i = 0; i < numProjectiles; ++i)
+    {
+        SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
+		ent->status = SIM_ENT_STATUS_IN_USE;
+		ent->entType = SIM_ENT_TYPE_PROJECTILE;
+		Transform_SetToIdentity(&ent->t);
+        ent->lifeTime = 6.0f;
+		ent->t.pos = def->pos;
+		ent->velocity.x = cosf(radians) * speed;
+		ent->velocity.y = 0;
+		ent->velocity.z = sinf(radians) * speed;
+		//printf("SIM prj %d: vel: %.3f, %.3f\n",
+        //    serial, ent->velocity.x, ent->velocity.y
+		//);
+        serial++;
+		radians += step;
+    }
+    return COM_ERROR_NONE;
 }
 
 extern "C"
@@ -126,6 +164,7 @@ extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
     SimEntityDef def = {};
+    def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.entType = SIM_ENT_TYPE_WORLD;
     def.pos[1] = 0;
