@@ -10,7 +10,7 @@ Header only - base for command structs.
 #define CMD_TYPE_NULL 0
 
 // 48879?
-#define CMD_SENTINEL 0xBEEF
+#define CMD_SENTINEL 0xDEADBEEF
 #define CMD_INVALID_SIZE 0
 
 // BASE FOR ALL COMMANDS
@@ -32,7 +32,7 @@ struct Command
 internal inline i32 Cmd_Validate(Command* cmd)
 {
     if (cmd == NULL)  { return COM_ERROR_BAD_ARGUMENT; }
-    if (cmd->sentinel != SIM_CMD_SENTINEL) { return COM_ERROR_DESERIALISE_FAILED; }
+    if (cmd->sentinel != CMD_SENTINEL) { return COM_ERROR_DESERIALISE_FAILED; }
     if (cmd->type == 0) { return COM_ERROR_UNKNOWN_COMMAND; }
     if (cmd->size <= 0) { return COM_ERROR_BAD_SIZE; }
     return COM_ERROR_NONE;

@@ -1,5 +1,5 @@
 #pragma once
-#if 1
+#if 0
 #include "sim.h"
 
 #define SIM_CMD_TYPE_NULL 0

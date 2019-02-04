@@ -201,6 +201,7 @@ internal void SV_LoadTestScene()
         def.pos[1] = y;
         def.pos[2] = z;
         def.velocity[0] = x;
+        
         def.velocity[2] = z;
         Sim_AddEntity(&g_sim, &def);
     }
@@ -208,8 +209,6 @@ internal void SV_LoadTestScene()
 
     def = {};
     def.isLocal = 1;
-	def.thinkTime = 2.5f;
-	def.lifeTime = 10;
     def.pos[1] = 1;
     def.entType = SIM_ENT_TYPE_TURRET;
     def.scale[0] = 1;
@@ -256,7 +255,7 @@ internal void SV_ListAllocs()
 
 void SV_Init()
 {
-    printf("SV Init scene\n");
+    APP_PRINT(64, "SV Init scene\n");
 
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
@@ -267,15 +266,11 @@ void SV_Init()
     g_users.items = users;
 
     i32 size = KiloBytes(64);
-    ByteBuffer a = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, size, "Sim Buf A"), size);
-    ByteBuffer b = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, size, "Sim Buf B"), size);
 
     i32 maxEnts = 2048;
     size = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
-    Sim_InitScene(&g_sim, a, b, mem, maxEnts);
+    Sim_InitScene(&g_sim, mem, maxEnts);
     SV_LoadTestScene();
     //SV_ListAllocs();
 }

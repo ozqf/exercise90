@@ -2,7 +2,7 @@
 
 #include "sim.h"
 #include <math.h>
-
+#if 0
 ////////////////////////////////////////////////////////////////////
 // Command management
 ////////////////////////////////////////////////////////////////////
@@ -249,4 +249,6 @@ i32 Sim_Tick(SimScene* scene, f32 deltaTime)
     Sim_RunFrame(scene, deltaTime);
     return COM_ERROR_NONE;
 }
+#endif
+
 #endif

@@ -36,34 +36,9 @@ internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
 	return COM_ERROR_NOT_FOUND;
 }
 
-i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
-{
-    if (isLocal) { return scene->localEntitySequence++; }
-    else { return scene->remoteEntitySequence++; }
-}
 
-i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
-{
-    switch (patternType)
-    {
-        case SIM_PROJ_TYPE_TEST:
-        {
-            i32 serial;
-            if (isLocal)
-            {
-                serial = scene->localEntitySequence;
-                scene->localEntitySequence += 8;
-            }
-            else
-            {
-                serial = scene->remoteEntitySequence;
-                scene->remoteEntitySequence += 8;
-            }
-            return serial;
-        }
-    }
-    return -1;
-}
+
+
 
 internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
 {
@@ -116,8 +91,8 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
 ////////////////////////////////////////////////////////////////////
 internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
 {
-	ent->thinkTime = def->thinkTime;
-	ent->lifeTime = def->lifeTime;
+    ent->birthTick = def->birthTick;
+    ent->deathTick = def->deathTick;
 	
     ent->t.pos.x =          def->pos[0];
     ent->t.pos.y =          def->pos[1];
@@ -179,10 +154,12 @@ internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_ApplySpawnTransform(ent, def);
     ent->entType = def->entType;
+    ent->thinkTime = 2.5f;
+	ent->lifeTime = 10;
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
+internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
 {
     SimEntity* ent;
     if (def->isLocal)
@@ -231,4 +208,9 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimCmd* header, SimEntityDef* def)
     }
 
     //return COM_ERROR_NONE;
+}
+
+internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
+{
+    return COM_ERROR_NONE;
 }

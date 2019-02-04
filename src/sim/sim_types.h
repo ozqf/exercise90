@@ -47,22 +47,30 @@ struct SimEntity
     i32 isLocal;
     SimEntId id;
     i32 entType;
+
+    i32 birthTick;
+    i32 deathTick;
+
+    // timing
+    f32 thinkTick;
+    f32 thinkTime;
+	f32 lifeTime;
+
+    // physical
     Transform t;
     Vec3 previousPos;
     Vec3 velocity;
     f32 pitch;
     f32 yaw;
-
-    f32 thinkTick;
-    f32 thinkTime;
-	f32 lifeTime;
 };
 
 struct SimEntityDef
 {
     i32 serial;
-	f32 thinkTime;
-	f32 lifeTime;
+
+    i32 birthTick;
+    i32 deathTick;
+    
     i32 isLocal;
     i32 entType;
     f32 pos[3];
@@ -75,6 +83,7 @@ struct SimEntityDef
 struct SimProjectileSpawnDef
 {
     i32 firstSerial;
+    i32 tick;
     u8 projType;
     u8 seedIndex;
     Vec3 pos;
@@ -103,7 +112,7 @@ struct SimScene
     Vec3 boundaryMax;
 
     // Command buffers
-    DoubleByteBuffer commands;
+    //DoubleByteBuffer commands;
 };
 
 struct SimEventHeader

@@ -18,21 +18,20 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     {
         ent->thinkTick += ent->thinkTime;
         // think
-        //printf("SVG Turret think\n");
-        SimCmdProjectileSpawn cmd = {};
-        Sim_PrepareCommand(sim, &cmd.header);
-        cmd.def.projType = SIM_PROJ_TYPE_TEST;
-        //cmd.def.firstSerial = Sim_ReserveEntitySerial(sim, 0);
-        cmd.def.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
-        if (cmd.def.firstSerial == -1)
+        SimProjectileSpawnDef def = {};
+        def.projType = SIM_PROJ_TYPE_TEST;
+        def.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
+        if (def.firstSerial == -1)
         {
+            APP_PRINT(64, "SVG Turret failed to acquire ent serials\n");
             return;
         }
-        cmd.def.pos = ent->t.pos;
-        cmd.def.seedIndex = 0;
-        cmd.def.forward = { 1, 0, 0 };
+        def.pos = ent->t.pos;
+        def.seedIndex = 0;
+        def.forward = { 1, 0, 0 };
+        def.tick = Sim_GetFrameNumber(sim);
 		Sim_ExecuteProjectileSpawn(
-			sim, 0, &cmd.def
+			sim, &def
 		);
         // TODO: Encode sim event for client and send to all
 		//SV_EnqueueCommandForAllUsers(&g_users, 

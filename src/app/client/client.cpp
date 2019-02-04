@@ -129,13 +129,13 @@ void CL_Init(ZNetAddress serverAddress)
     g_serverAddress = serverAddress;
 	g_clientState = CLIENT_STATE_REQUESTING;
     i32 cmdBufferSize = MegaBytes(1);
-    ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
-    ByteBuffer b = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
+    //ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
+    //ByteBuffer b = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
 
     i32 maxEnts = 2048;
     i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)CL_Malloc(numEntityBytes);
-    Sim_InitScene(&g_sim, a, b, mem, maxEnts);
+    Sim_InitScene(&g_sim, mem, maxEnts);
     CL_LoadTestScene();
 
     COM_InitStream(&g_reliableStream,

@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include "sim.h"
 
 void Sim_PrepareCommand(SimScene* scene, SimCmd* cmd)
@@ -24,3 +24,4 @@ void Sim_SetAddEntityCmd(SimCmdAddEntity* cmd, SimEntityDef* def)
     cmd->def = *def;
     Assert((u32)&cmd->header == (u32)cmd)
 }
+#endif
