@@ -22,6 +22,7 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 #include <gl/gl.h>
 
 #include "../../common/com_module.h"
+#include "win32_gl_commands.h"
 #include "win32_gl_interface.h"
 
 //////////////////////////////////////////////////////////////////////////
