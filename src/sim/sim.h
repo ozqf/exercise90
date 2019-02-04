@@ -30,5 +30,5 @@ void    Sim_InitScene(
             i32 maxEntities);
 i32 	Sim_LoadScene(SimScene* sim, i32 index);
 //i32     Sim_Tick(SimScene* scene, f32 deltaTime);
-//i32     Sim_Execute(SimScene* scene, SimCmd* header);
+i32     Sim_Execute(SimScene* scene, SimCmd* header);
 i32     Sim_CalcEntityArrayBytes(i32 capacity);

@@ -161,6 +161,11 @@ i32 Sim_ExecuteProjectileSpawn(
     return COM_ERROR_NONE;
 }
 
+// i32 Sim_ExecAddEntity(SimCmdAddEntity* cmd)
+// {
+//     return Sim_SpawnEntity(scene, SimCmd* header, &cmd->def);
+// }
+
 i32 Sim_Execute(SimScene* scene, SimCmd* header)
 {
     if (header->type == 0)

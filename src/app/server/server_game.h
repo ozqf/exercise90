@@ -34,8 +34,8 @@ SVG_DEFINE_ENT_UPDATE(Turret)
 		Sim_ExecuteProjectileSpawn(
 			sim, 0, &cmd.def
 		);
-        //Sim_EnqueueCommand(sim, (u8*)&cmd);
-		SV_EnqueueCommandForAllUsers(&g_users, 
+        // TODO: Encode sim event for client and send to all
+		//SV_EnqueueCommandForAllUsers(&g_users, 
     }
     else
     {
