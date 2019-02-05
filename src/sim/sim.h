@@ -7,18 +7,19 @@
 
 // Scene management
 extern "C" void     Sim_InitScene(
-                        SimScene* scene,
+                        SimScene* sim,
                         SimEntity* entityMemory,
                         i32 maxEntities);
+extern "C" void 	Sim_Reset(SimScene* sim);
 extern "C" i32 	    Sim_LoadScene(SimScene* sim, i32 index);
 extern "C" i32      Sim_CalcEntityArrayBytes(i32 capacity);
 extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 
 // Entity list functions
-extern "C" i32      Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal);
-extern "C" i32      Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType);
-extern "C" i32      Sim_AddEntity(SimScene* scene, SimEntityDef* def);
-extern "C" i32      Sim_RemoveEntity(SimScene* scene, i32 serialNumber);
+extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
+extern "C" i32      Sim_ReserveEntitySerialGroup(SimScene* sim, i32 isLocal, i32 patternType);
+extern "C" i32      Sim_AddEntity(SimScene* sim, SimEntityDef* def);
+extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_ExecuteProjectileSpawn(
                         SimScene* sim,
                         SimProjectileSpawnDef* def);

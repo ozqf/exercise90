@@ -136,6 +136,7 @@ void CL_Init(ZNetAddress serverAddress)
     i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)CL_Malloc(numEntityBytes);
     Sim_InitScene(&g_sim, mem, maxEnts);
+	Sim_Reset(&g_sim);
     CL_LoadTestScene();
 
     COM_InitStream(&g_reliableStream,

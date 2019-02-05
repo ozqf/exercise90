@@ -217,7 +217,7 @@ internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
     SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerialNumber);
     if (ent)
     {
-        APP_LOG(64, "SIM Removing ent %d to remove\n", entitySerialNumber);
+        APP_LOG(64, "SIM Removing ent %d\n", entitySerialNumber);
         *ent = {};
         return COM_ERROR_NONE;
     }

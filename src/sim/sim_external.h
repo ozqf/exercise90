@@ -80,7 +80,7 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
                 scene->localEntitySequence = last;
                 APP_LOG(128,
                     "SIM Reserving %d local entity serials (%d to %d)\n",
-                    count, first, last
+                    count, first, (last - 1)
                     );
             }
             else
@@ -90,7 +90,7 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
                 scene->remoteEntitySequence = last;
                 APP_LOG(128,
                     "SIM Reserving %d replicated entity serials (%d to %d)\n",
-                    count, first, last
+                    count, first, (last - 1)
                     );
             }
             return first;
@@ -106,12 +106,14 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
 extern "C"
 i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
 {
+	Assert(def->serial)
     return Sim_SpawnEntity(scene, def);
 }
 
 extern "C"
 i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 {
+	Assert(serialNumber)
     return Sim_RecycleEntity(scene, serialNumber);
 }
 
@@ -146,18 +148,30 @@ i32 Sim_ExecuteProjectileSpawn(
 }
 
 extern "C"
+void Sim_Reset(SimScene* sim)
+{
+	i32 arraySize = Sim_CalcEntityArrayBytes(sim->maxEnts);
+	i32 numBytes = sim->maxEnts * sizeof(SimEntity);
+	COM_ZeroMemory((u8*)sim->ents, arraySize);
+	sim->cmdSequence = 0;
+	sim->tick = 0;
+	// 0 == an invalid serial for error handling. Means once less
+	// replicated entity, oh well
+	sim->remoteEntitySequence = 1;
+	sim->localEntitySequence = sim->maxEnts / 2;
+}
+
+extern "C"
 void Sim_InitScene(
-            SimScene* scene,
+            SimScene* sim,
             SimEntity* entityMemory,
             i32 maxEntities)
 {
-    *scene = {};
-    scene->remoteEntitySequence = 0;
-    scene->localEntitySequence = maxEntities / 2;
-    scene->ents = entityMemory;
-    scene->maxEnts = maxEntities;
-    i32 numBytes = maxEntities * sizeof(SimEntity);
-    COM_ZeroMemory((u8*)entityMemory, numBytes);
+    *sim = {};
+    
+    sim->ents = entityMemory;
+    sim->maxEnts = maxEntities;
+	Sim_Reset(sim);
 }
 
 extern "C"

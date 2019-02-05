@@ -272,6 +272,7 @@ void SV_Init()
     size = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
     Sim_InitScene(&g_sim, mem, maxEnts);
+	Sim_Reset(&g_sim);
     SV_LoadTestScene();
     //SV_ListAllocs();
 }
