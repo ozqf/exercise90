@@ -18,6 +18,10 @@ internal i32 g_isRunning = 0;
 internal SimScene g_sim;
 internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
+internal i32 g_serverTick = 0;
+internal f32 g_ping;
+internal f32 g_jitter;
+
 i32 CL_IsRunning() { return g_isRunning; }
 
 #define CL_MAX_ALLOCATIONS 256
@@ -31,9 +35,6 @@ internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
 
-internal f32 g_ping;
-internal f32 g_jitter;
-
 #include "client_game.h"
 #include "client_packets.h"
 
@@ -42,10 +43,9 @@ void CL_WriteDebugString(ZStringHeader* str)
 	char* chars = str->chars;
 	i32 written = 0;
     written += sprintf_s(chars, str->maxLength,
-        "CLIENT:\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter %.3f\n",
-        g_ticks, g_elapsed, g_acks.outputSequence, g_acks.remoteSequence,
-		g_ping,
-		g_jitter
+        "CLIENT:\nServer Tick: %d\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter %.3f\n",
+        g_serverTick, g_ticks, g_elapsed, g_acks.outputSequence,
+		g_acks.remoteSequence, g_ping, g_jitter
     );
 	#if 0
 	// currently overflows debug text buffer:
@@ -56,7 +56,7 @@ void CL_WriteDebugString(ZStringHeader* str)
 		{
 			f32 time = rec->receivedTime - rec->sentTime;
 			written += sprintf_s(chars + written, str->maxLength,
-			"%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
+				"%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
             );
 		}
 	}
@@ -115,7 +115,7 @@ void CL_LoadTestScene()
 void CL_SetLocalUser(UserIds ids)
 {
     Assert(g_clientState == CLIENT_STATE_REQUESTING)
-    printf("CL Set local user public %d private %d\n",
+    APP_LOG(64, "CL Set local user public %d private %d\n",
         ids.publicId, ids.privateId
     );
     g_ids = ids;
@@ -125,7 +125,7 @@ void CL_SetLocalUser(UserIds ids)
 void CL_Init(ZNetAddress serverAddress)
 {
     Assert(g_clientState == CLIENT_STATE_NONE)
-    printf("CL Init scene\n");
+    APP_PRINT(32, "CL Init scene\n");
     g_serverAddress = serverAddress;
 	g_clientState = CLIENT_STATE_REQUESTING;
     i32 cmdBufferSize = MegaBytes(1);
@@ -147,7 +147,7 @@ void CL_Init(ZNetAddress serverAddress)
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );
-    printf("CL init completed with %d allocations (%dKB)\n ",
+    APP_LOG(64, "CL init completed with %d allocations (%dKB)\n ",
         g_numAllocations, (u32)BytesAsKB(g_bytesAllocated));
 }
 
@@ -243,7 +243,7 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 			case CMD_TYPE_S2C_SPAWN_ENTITY:
 			{
 				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
-				printf("CL Spawn %d at %.3f, %.3f, %.3f\n",
+				APP_LOG(64, "CL Spawn %d at %.3f, %.3f, %.3f\n",
 					spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
 				);
 				
@@ -257,10 +257,18 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 				def.velocity[2] = spawn->vel.z;
 				Sim_AddEntity(&g_sim, &def);
 			} break;
+
+            case CMD_TYPE_S2C_SYNC:
+            {
+                S2C_Sync* sync = (S2C_Sync*)h;
+				g_serverTick = sync->simTick;
+                APP_PRINT(64, "CL Sync server sim tick %d\n", sync->simTick);
+            } break;
+			
 			
 			default:
 			{
-				printf("CL Unknown command type %d\n", h->type);
+				APP_PRINT(64, "CL Unknown command type %d\n", h->type);
 			} break;
 		}
 	}
@@ -306,11 +314,13 @@ internal void CL_CalcPings(f32 deltaTime)
 
 void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
+    APP_LOG(64, "*** CL TICK %d (T %.3f) ***\n", g_ticks, g_elapsed);
     CL_ReadSystemEvents(sysEvents, deltaTime);
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;
+	g_serverTick++;
     g_elapsed += deltaTime;
     CL_WritePacket(g_elapsed);
 }

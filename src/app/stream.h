@@ -150,7 +150,7 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
     i32 error = Cmd_Validate(cmd);
     if (error != COM_ERROR_NONE)
     {
-        printf("STREAM cmd for enqueue is invalid. Code %d\n", error);
+        APP_LOG(64, "STREAM cmd for enqueue is invalid. Code %d\n", error);
         return;
     }
     cmd->sequence = stream->outputSequence++;

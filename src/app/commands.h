@@ -10,6 +10,7 @@
 #define CMD_TYPE_S2C_SET_SCENE 253
 #define CMD_TYPE_S2C_SPAWN_ENTITY 252
 #define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
+#define CMD_TYPE_S2C_SYNC 250
 
 struct CmdPing
 {
@@ -17,6 +18,21 @@ struct CmdPing
 	i32 pingSequence;
     f32 sendTime;
 };
+
+struct S2C_Sync
+{
+    Command header;
+    i32 simTick;
+};
+
+internal void Cmd_InitSync(S2C_Sync* cmd, i32 tick, i32 sequence, i32 simTick)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.type = CMD_TYPE_S2C_SYNC;
+    cmd->header.size = sizeof(S2C_Sync);
+    cmd->simTick = simTick;
+}
 
 struct S2C_SpawnEntity
 {

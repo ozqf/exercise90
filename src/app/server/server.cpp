@@ -30,6 +30,8 @@ void SV_WriteDebugString(ZStringHeader* str)
         "SERVER:\nTick: %d\nElapsed: %.3f\n",
         g_ticks, g_elapsed
     );
+    
+    // TODO: Just showing local user for now
     ZNetAddress addr = {};
     addr.port = APP_CLIENT_LOOPBACK_PORT;
     User* user = User_FindByAddress(&g_users, &addr);
@@ -41,8 +43,8 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ids.privateId,
             acks->outputSequence,
             acks->remoteSequence,
-            Ack_CalculateAverageDelay(acks),
-			(acks->delayMax - acks->delayMin)
+            user->ping,
+			user->jitter
 		);
         #if 0
 		// currently overflows debug text buffer:
@@ -134,7 +136,12 @@ internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd)
 
 internal void SV_UserStartSync(User* user)
 {
-    printf("SV - Begin sync for user %d\n", user->ids.privateId);
+    APP_LOG(128, "SV - Begin sync for user %d\n", user->ids.privateId);
+    NetStream* stream = &user->reliableStream;
+
+    S2C_Sync sync;
+    Cmd_InitSync(&sync, g_ticks, 0, g_ticks);
+    Stream_EnqueueOutput(stream, &sync.header);
     // start user command queue
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {
@@ -153,8 +160,10 @@ internal void SV_UserStartSync(User* user)
         cmd.yaw = ent->yaw;
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
-        printf("  Write Entity %d\n", ent->id.serial);
+        APP_LOG(64, "  Write Entity %d\n", ent->id.serial);
     }
+    APP_LOG(64, "SV User %d has %d sync bytes\n",
+        user->ids.privateId, stream->outputBuffer.Written());
 }
 
 // This is public so that a local client can be made easily
@@ -165,7 +174,7 @@ internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
     user->address = *addr;
     SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
     SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
-    printf("SV creating new user public %d private %d\n",
+    APP_LOG(64, "SV creating new user public %d private %d\n",
         ids.publicId, ids.privateId
     );
     return user;
@@ -258,6 +267,10 @@ void SV_Init()
 {
     APP_PRINT(64, "SV Init scene\n");
 
+    // force time and ticks forward for debugging
+    g_ticks = 1000;
+    g_elapsed = g_ticks * (1.0f / 60.0f);
+
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
     g_users = {};
@@ -337,9 +350,23 @@ internal void SV_SendUserPackets(f32 deltaTime)
 	}
 }
 
+internal void SV_CalcPings(f32 deltaTime)
+{
+    for (i32 i = 0; i < g_users.max; ++i)
+    {
+        User* u = &g_users.items[i];
+        if (u->state == USER_STATE_FREE) { continue; }
+        AckStream* acks = &u->acks;
+        u->ping = Ack_CalculateAverageDelay(acks);
+        u->jitter = (acks->delayMax - acks->delayMin);
+    }
+}
+
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
+    APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_ticks, g_elapsed);
     SV_ReadSystemEvents(sysEvents, deltaTime);
+    SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
 	g_elapsed += deltaTime;
     g_ticks++;

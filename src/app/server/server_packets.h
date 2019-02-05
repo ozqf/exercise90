@@ -2,46 +2,6 @@
 
 #include "server.h"
 
-#if 0
-internal void SV_EnqueueReliableOutput(User* user, Command* cmd)
-{
-    ByteBuffer* b = &user->reliableStream.outputBuffer;
-    Assert(b->Space() >= cmd->size)
-    b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
-}
-
-/*
-i32                 Stream_BufferMessage(
-                        ByteBuffer* b, u32 msgId, u8* bytes, i32 numBytes)
-internal void       Stream_Clear(NetStream* stream)
-i32                 Stream_WriteStreamMsgHeader(
-                        u8* ptr, u32 msgId, i32 numBytes, f32 resendRateSeconds);
-u16                 Stream_WritePacketHeader(u8 sequenceOffset, u16 size)
-void                Stream_ReadPacketHeader(
-                        u16 header, u8* sequenceOffset, u16* size)
-TransmissionRecord* Stream_AssignTransmissionRecord(
-                        TransmissionRecord* records,
-                        u32 sequence)
-TransmissionRecord* Stream_FindTransmissionRecord(
-                        TransmissionRecord* records,
-                        u32 sequence)
-void                Stream_PrintPacketManifest(u8* bytes, u16 numBytes)
-StreamMsgHeader*    Stream_FindMessageById(u8* read, u8* end, u32 id)
-u8*                 Stream_CollapseBlock(
-                        u8* blockStart,
-                        u32 blockSpace,
-                        u8* bufferEnd)
-u32                 Stream_ClearReceivedOutput(
-                        NetStream* stream, u32 packetSequence)
-void                Stream_OutputToPacket(
-                        i32 connId,
-                        NetStream* s,
-                        ByteBuffer* packetBuf,
-                        f32 deltaTime)
-u8*                 Stream_PacketToInput(NetStream* s, u8* ptr)
-
-*/
-#endif
 internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 {
     u8* start = packet->ptrWrite;
@@ -142,14 +102,6 @@ internal void SV_WriteTestPacket()
 
     App_SendTo(0, &addr, buf, written);
 }
-
-// internal void SV_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 numPacketAcks)
-// {
-	// for (i32 i = 0; i < numPacketAcks; ++i)
-	// {
-		// Stream_ClearReceivedOutput(stream, packetAcks[i]);
-	// }
-// }
 
 internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
 {

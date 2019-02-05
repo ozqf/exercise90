@@ -30,6 +30,10 @@ struct User
     i32 entSerial;
     i32 isLocal;
     ActorInput input;
+
+    f32 ping;
+    f32 jitter;
+    i32 smoothingTicks;
 	
     ZNetAddress address;
 	AckStream acks;

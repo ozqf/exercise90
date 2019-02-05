@@ -233,42 +233,21 @@ internal void App_Update(PlatformTime* time)
         //printf("\n === APP TICK (%.4fs) ===\n", interval);
         g_simFrameAcculator -= interval;
         
-        /*
-        TODO: Remove/reduce use of callbacks here, particularly for data packets.
-        code is spagettifying and flow is not obvious.
-        Approach should be:
-        > Pump platform events and load into input buffer.
-        > Pump remote socket for packets/events and load into input buffer.
-        > Pump local socket for packets/events and load into input buffer
-        > Tick server (read commands)
-        > Clear buffer
-        */
-		
 		App_UpdateLoopbackSocket(&g_loopbackSocket, interval);
-		
-		g_serverLoopback.Swap();
-		Buf_Clear(g_serverLoopback.GetWrite());
 		
         if (g_isRunningServer)
         {
-            //g_localServerSocket.Tick(interval);
-            //ZNet_Tick(g_serverNet, interval);
-            APP_LOG(128, "*** SV TICK ***\n");
+            g_serverLoopback.Swap();
+		    Buf_Clear(g_serverLoopback.GetWrite());
             SV_Tick(g_serverLoopback.GetRead(), interval);
         }
 
-        g_clientLoopback.Swap();
-        Buf_Clear(g_clientLoopback.GetWrite());
-
         if (g_isRunningClient)
         {
-            //g_localClientSocket.Tick(interval);
-            APP_LOG(128, "*** CL TICK ***\n");
-            //ZNet_Tick(g_clientNet, interval);
+            g_clientLoopback.Swap();
+            Buf_Clear(g_clientLoopback.GetWrite());
             CL_Tick(g_clientLoopback.GetRead(), interval);
         }
-        
-        //App_RunSimFrame(interval);
     }
 }
 
