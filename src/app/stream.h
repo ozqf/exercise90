@@ -156,5 +156,6 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
     cmd->sequence = stream->outputSequence++;
     ByteBuffer* b = &stream->outputBuffer;
     Assert(b->Space() >= cmd->size);
+    // TODO: Replace direct copy with customised encoding functions when protocol is ready for it
     b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
 }

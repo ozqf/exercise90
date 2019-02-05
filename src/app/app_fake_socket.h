@@ -91,9 +91,20 @@ struct FakeSocket
 
     void SendPacket(i32 socketIndex, ZNetAddress* address, u8* data, i32 numBytes)
     {
+        f32 delay = (f32)this->info.RollDelay() / 1000.0f;
+        #if 1 // Report internal packets:
+        if (address->port == APP_CLIENT_LOOPBACK_PORT)
+        {
+            APP_LOG(64, "SV -> CL delay %.3f\n", delay);
+        }
+        else if (address->port == APP_SERVER_LOOPBACK_PORT)
+        {
+            APP_LOG(64, "CL -> SV delay %.3f\n", delay);
+        }
+        #endif
         if (this->info.RollDropPacket())
         {
-            printf("GULP");
+            APP_LOG(16, "GULP\n");
             return;
         }
         i32 i = this->GetFreeHandleIndex();
@@ -111,17 +122,8 @@ struct FakeSocket
 		h->socketIndex = socketIndex;
         h->size = numBytes;
         h->status = FAKE_SOCKET_STATUS_ACTIVE;
-        h->tick = (f32)this->info.RollDelay() / 1000.0f;
-        #if 0 // Report internal packets:
-        if (h->address.port == APP_CLIENT_LOOPBACK_PORT)
-        {
-            printf("SV -> CL delay %.3f\n", h->tick);
-        }
-        else if (h->address.port == APP_SERVER_LOOPBACK_PORT)
-        {
-            printf("CL -> SV delay %.3f\n", h->tick);
-        }
-        #endif
+        h->tick = delay;
+        
         handles[i] = h;
         u8* ptr = (u8*)h + sizeof(FakeSocketPacketHeader);
         COM_COPY(data, ptr, numBytes);

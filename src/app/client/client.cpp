@@ -240,6 +240,13 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 		
 		switch (h->type)
 		{
+            case CMD_TYPE_S2C_SPAWN_PROJECTILE:
+            {
+                S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
+                APP_PRINT(64, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d)\n",
+                    prj->def.projType, prj->def.tick, prj->def.tick - g_serverTick
+                );
+            } break;
 			case CMD_TYPE_S2C_SPAWN_ENTITY:
 			{
 				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
@@ -261,7 +268,9 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
             case CMD_TYPE_S2C_SYNC:
             {
                 S2C_Sync* sync = (S2C_Sync*)h;
-				g_serverTick = sync->simTick;
+                g_serverTick = sync->simTick - APP_DEFAULT_JITTER_TICKS;
+                // Lets not do what the server tells us!
+				//g_serverTick = sync->simTick - sync->jitterTickCount;
                 APP_PRINT(64, "CL Sync server sim tick %d\n", sync->simTick);
             } break;
 			

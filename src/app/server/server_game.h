@@ -29,12 +29,18 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         def.pos = ent->t.pos;
         def.seedIndex = 0;
         def.forward = { 1, 0, 0 };
-        def.tick = Sim_GetFrameNumber(sim);
+        // frame the event occurred is recorded
+        def.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
 			sim, &def
 		);
         // TODO: Encode sim event for client and send to all
-		//SV_EnqueueCommandForAllUsers(&g_users, 
+        S2C_SpawnProjectile prj = {};
+        Cmd_Prepare(&prj.header, g_ticks, 0);
+        prj.def = def;
+        prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+        prj.header.size = sizeof(prj);
+		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
     }
     else
     {

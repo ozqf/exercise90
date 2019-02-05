@@ -7,6 +7,8 @@
 #define APP_SERVER_LOOPBACK_PORT 666
 #define APP_CLIENT_LOOPBACK_PORT 667
 
+#define APP_DEFAULT_JITTER_TICKS 4
+
 void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize);
 void App_Log(char* msg);
 void App_Print(char* msg);

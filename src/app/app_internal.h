@@ -19,7 +19,7 @@ internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 internal i32 g_fakeLagMinMS = 100;
 internal i32 g_fakeLagMaxMS = 200;
-internal f32 g_fakeLoss = 0;
+internal f32 g_fakeLoss = 0.1f;
 
 internal Heap g_heap;
 
