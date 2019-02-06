@@ -110,7 +110,7 @@ internal void Packet_FinishWrite(
 	h->numReliableBytes = (u16)numReliableBytes;
 	h->numUnreliableBytes = (u16)numUnreliableBytes;
 }
-
+#if 0
 // Return bytes written
 internal i32 Packet_WriteFromStream(
 	ByteBuffer* packet, ByteBuffer* stream, i32 maxBytes)
@@ -133,7 +133,8 @@ internal i32 Packet_WriteFromStream(
 	}
 	return written;
 }
-
+#endif
+#if 0
 internal i32 Packet_WriteFromStream(
 	NetStream* stream, NetStream* unreliableStream,
 	u8* buf, i32 capacity, f32 ellapsed,
@@ -178,7 +179,7 @@ internal i32 Packet_WriteFromStream(
 	printf("Packet Wrote %d total bytes\n", totalWritten);
 	return totalWritten;
 }
-
+#endif
 internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numBytes)
 {
 	//printf("=== Build packet descriptor (%d bytes)===\n", numBytes);

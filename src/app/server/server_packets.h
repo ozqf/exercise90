@@ -79,9 +79,6 @@ internal void SV_WriteUserPacket(User* user, f32 time)
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
     App_SendTo(0, &user->address, buf, total);
-    
-	//Packet_WriteFromStream(
-    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_elapsed, g_ticks, 0);
     #endif
 }
 
