@@ -246,6 +246,7 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
                 APP_PRINT(64, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d)\n",
                     prj->def.projType, prj->def.tick, prj->def.tick - g_serverTick
                 );
+                Sim_ExecuteProjectileSpawn(&g_sim, &prj->def);
             } break;
 			case CMD_TYPE_S2C_SPAWN_ENTITY:
 			{

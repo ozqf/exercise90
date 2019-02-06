@@ -156,7 +156,7 @@ internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_ApplySpawnTransform(ent, def);
     ent->entType = def->entType;
-    ent->thinkTime = 2.5f;
+    ent->thinkTime = 1.25f;
 	ent->lifeTime = 10;
     return COM_ERROR_NONE;
 }

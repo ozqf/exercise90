@@ -29,6 +29,8 @@ struct FakeSocketInfo
 #define FAKE_SOCKET_STATUS_ACTIVE 1
 #define FAKE_SOCKET_STATUS_FREEABLE 2
 
+#define FAKE_SOCKET_MAX_HANDLES 2048
+
 struct FakeSocketPacketHeader
 {
 	i32 status;
@@ -42,7 +44,7 @@ struct FakeSocket
 {
     i32 isActive;
     FakeSocketInfo info;
-    FakeSocketPacketHeader* handles[256];
+    FakeSocketPacketHeader* handles[FAKE_SOCKET_MAX_HANDLES];
 
     void Init(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
     {
@@ -60,7 +62,7 @@ struct FakeSocket
 
     i32 GetFreeHandleIndex()
     {
-        for (i32 i = 0; i < 256; ++i)
+        for (i32 i = 0; i < FAKE_SOCKET_MAX_HANDLES; ++i)
         {
             if (this->handles[i] == 0)
             {

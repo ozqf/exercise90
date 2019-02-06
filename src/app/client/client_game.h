@@ -28,11 +28,11 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
 CLG_DEFINE_ENT_UPDATE(Projectile)
 {
     Sim_SimpleMove(ent, deltaTime);
-	/*ent->lifeTime -= deltaTime;
+	ent->lifeTime -= deltaTime;
 	if (ent->lifeTime < 0)
 	{
 		Sim_RemoveEntity(sim, ent->id.serial);
-	}*/
+	}
 }
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
