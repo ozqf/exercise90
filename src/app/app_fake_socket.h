@@ -97,11 +97,11 @@ struct FakeSocket
         #if 1 // Report internal packets:
         if (address->port == APP_CLIENT_LOOPBACK_PORT)
         {
-            APP_LOG(64, "SV -> CL delay %.3f\n", delay);
+            APP_LOG(64, "SV -> CL %d bytes, delay %.3f\n", numBytes, delay);
         }
         else if (address->port == APP_SERVER_LOOPBACK_PORT)
         {
-            APP_LOG(64, "CL -> SV delay %.3f\n", delay);
+            APP_LOG(64, "CL -> SV %d bytes, delay %.3f\n", numBytes, delay);
         }
         #endif
         if (this->info.RollDropPacket())

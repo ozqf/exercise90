@@ -36,16 +36,12 @@ internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
 	return COM_ERROR_NOT_FOUND;
 }
 
-
-
-
-
 internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
 {
     i32 halfMax = scene->maxEnts / 2;
     i32 i = forLocalEnt ? halfMax : 0;
     i32 l = forLocalEnt ? scene->maxEnts : halfMax;
-    for (i = 0; i < l; ++i)
+    for (; i < l; ++i)
     {
         SimEntity* ent = &scene->ents[i];
         if (ent->status != SIM_ENT_STATUS_FREE) { continue; }
@@ -66,7 +62,8 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
-	APP_LOG(64, "SIM assigned replicated ent serial %d\n", ent->id.serial);
+	APP_LOG(64, "SIM assigned replicated ent serial %d (slot %d/%d)\n",
+        ent->id.serial, ent->id.slot.iteration, ent->id.slot.index);
     ent->isLocal = 0;
     return ent;
 }
@@ -83,7 +80,8 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
-	APP_LOG(64, "SIM assigned local ent serial %d\n", ent->id.serial);
+	APP_LOG(64, "SIM assigned local ent serial %d (slot %d/%d)\n",
+        ent->id.serial, ent->id.slot.iteration, ent->id.slot.index);
     ent->isLocal = 1;
     return ent;
 }
@@ -172,6 +170,12 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
     {
         ent = Sim_GetFreeReplicatedEntity(scene, def->serial);
     }
+    if (!ent)
+    {
+        APP_PRINT(64, "SIM No Free Entity Available for Ent %d!\n",
+            def->serial
+        );
+    }
     
     Assert(ent)
     ent->status = SIM_ENT_STATUS_IN_USE;
@@ -217,8 +221,12 @@ internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
     SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerialNumber);
     if (ent)
     {
-        APP_LOG(64, "SIM Removing ent %d\n", entitySerialNumber);
+        SimEntIndex slot = ent->id.slot;
+        APP_LOG(64, "SIM Removing ent %d (slot %d/%d)\n",
+            entitySerialNumber, slot.iteration, slot.index);
+        
         *ent = {};
+        ent->id.slot.iteration++;
         return COM_ERROR_NONE;
     }
     else

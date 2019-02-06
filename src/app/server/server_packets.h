@@ -22,13 +22,14 @@ internal i32 SV_WriteReliableSection(
     ByteBuffer* cmds = &user->reliableStream.outputBuffer;
     u8* read = cmds->ptrStart;
     u8* end = cmds->ptrWrite;
+    i32 numCommandsNotWritten = 0;
     while(read < end)
     {
         Command* cmd = (Command*)read;
         Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
         i32 size = cmd->size;
         read += size;
-        if (cmd->size > space) { continue; }
+        if (cmd->size > space) { numCommandsNotWritten++; continue; }
         
         packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
         space -= size;
@@ -36,6 +37,11 @@ internal i32 SV_WriteReliableSection(
 		// Record message
 		rec->reliableMessageIds[rec->numReliableMessages++] = cmd->sequence;
 		Assert(rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES)
+    }
+    if (numCommandsNotWritten > 0)
+    {
+        APP_LOG(128, "SV no space for %d commands to user %d (%d bytes in output)\n",
+            numCommandsNotWritten, user->ids.privateId, cmds->Written());
     }
     return (capacity - space);
 }

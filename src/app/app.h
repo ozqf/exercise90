@@ -2,6 +2,8 @@
 
 #include "../common/com_module.h"
 
+#define APP_MAX_ENTITIES 512
+
 #define APP_MAX_USERS 16
 #define APP_DEFAULT_SOCKET_INDEX 0
 #define APP_SERVER_LOOPBACK_PORT 666

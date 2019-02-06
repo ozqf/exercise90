@@ -132,7 +132,7 @@ void CL_Init(ZNetAddress serverAddress)
     //ByteBuffer a = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
     //ByteBuffer b = Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize);
 
-    i32 maxEnts = 2048;
+    i32 maxEnts = APP_MAX_ENTITIES;
     i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)CL_Malloc(numEntityBytes);
     Sim_InitScene(&g_sim, mem, maxEnts);

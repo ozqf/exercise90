@@ -283,7 +283,7 @@ void SV_Init()
 
     i32 size = KiloBytes(64);
 
-    i32 maxEnts = 2048;
+    i32 maxEnts = APP_MAX_ENTITIES;
     size = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
     Sim_InitScene(&g_sim, mem, maxEnts);
