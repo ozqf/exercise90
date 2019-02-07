@@ -7,7 +7,4 @@
 #include "sim_internal.h"
 
 #include "sim_factory.h"
-#include "sim_entity.h"
-//#include "sim_main.h"
 #include "sim_external.h"
-#include "sim_command_types.cpp"

@@ -3,7 +3,6 @@
 #include "../common/com_module.h"
 
 #include "sim_types.h"
-#include "sim_command_types.h"
 
 // Scene management
 extern "C" void     Sim_InitScene(
