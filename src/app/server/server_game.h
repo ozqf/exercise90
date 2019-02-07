@@ -34,7 +34,6 @@ SVG_DEFINE_ENT_UPDATE(Turret)
 		Sim_ExecuteProjectileSpawn(
 			sim, &def
 		);
-        // TODO: Encode sim event for client and send to all
         S2C_SpawnProjectile prj = {};
         Cmd_Prepare(&prj.header, g_ticks, 0);
         prj.def = def;

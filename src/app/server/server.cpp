@@ -48,6 +48,10 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ping,
 			user->jitter
 		);
+        written += sprintf_s(chars + written, str->maxLength - written,
+            "\tOutbytes: %d\n",
+            user->reliableStream.outputBuffer.Written()
+		);
         #if 0
 		// currently overflows debug text buffer:
         for (i32 j = 0; j < ACK_CAPACITY; ++j)

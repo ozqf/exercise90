@@ -18,7 +18,7 @@ internal AppPlatform g_platform = {};
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 internal i32 g_fakeLagMinMS = 100;
-internal i32 g_fakeLagMaxMS = 350;
+internal i32 g_fakeLagMaxMS = 700;
 internal f32 g_fakeLoss = 0.3f;
 
 internal Heap g_heap;

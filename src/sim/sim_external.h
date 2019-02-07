@@ -138,9 +138,11 @@ i32 Sim_ExecuteProjectileSpawn(
 		ent->velocity.x = cosf(radians) * speed;
 		ent->velocity.y = 0;
 		ent->velocity.z = sinf(radians) * speed;
-		//printf("SIM prj %d: vel: %.3f, %.3f\n",
-        //    serial, ent->velocity.x, ent->velocity.y
-		//);
+		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. vel: %.3f, %.3f\n",
+            serial,
+            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
+            ent->velocity.x, ent->velocity.y
+		);
         serial++;
 		radians += step;
     }

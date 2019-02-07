@@ -45,9 +45,15 @@ struct FakeSocket
     i32 isActive;
     FakeSocketInfo info;
     FakeSocketPacketHeader* handles[FAKE_SOCKET_MAX_HANDLES];
+    f32 delayRecalcTime;
+    f32 dropRecalcTime;
+    f32 nextDelayTime;
+    f32 nextDropTime;
 
     void Init(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
     {
+        delayRecalcTime = 0;
+
         if (minLagMS > maxLagMS) { minLagMS = maxLagMS; }
 
         COM_ClampF32(&normalisedPacketLossChance, 0, 0.9f);
@@ -93,7 +99,7 @@ struct FakeSocket
 
     void SendPacket(i32 socketIndex, ZNetAddress* address, u8* data, i32 numBytes)
     {
-        f32 delay = (f32)this->info.RollDelay() / 1000.0f;
+        f32 delay = nextDelayTime;
         #if 1 // Report internal packets:
         if (address->port == APP_CLIENT_LOOPBACK_PORT)
         {
@@ -134,6 +140,15 @@ struct FakeSocket
 
     void Tick(f32 deltaTime)
     {
+        if (delayRecalcTime <= 0)
+        {
+            delayRecalcTime = 1;
+            nextDelayTime = (f32)this->info.RollDelay() / 1000.0f;
+        }
+        else
+        {
+            delayRecalcTime -= deltaTime;
+        }
         for (i32 i = 0; i < 256; ++i)
         {
             FakeSocketPacketHeader* h = this->handles[i];

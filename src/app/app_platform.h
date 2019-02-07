@@ -96,7 +96,9 @@ internal i32  App_Init()
 	//g_loopbackSocket.Init(50, 150, 0.05f);
     //g_loopbackSocket.Init(300, 300, 0);
 	//g_loopbackSocket.Init(200, 400, 0.2f);
+    
 	g_loopbackSocket.Init(g_fakeLagMinMS, g_fakeLagMaxMS, g_fakeLoss);
+    //g_loopbackSocket.Init();
 
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
