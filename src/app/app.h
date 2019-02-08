@@ -15,6 +15,10 @@ void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize);
 void App_Log(char* msg);
 void App_Print(char* msg);
 
+// comment out to disable logging/printing by app layer
+#define APP_FULL_LOGGING
+
+#ifdef APP_FULL_LOGGING
 #define APP_LOG(messageBufSize, format, ...) \
 { \
     char appLogBuf[##messageBufSize##]; \
@@ -28,3 +32,7 @@ void App_Print(char* msg);
     sprintf_s(appLogBuf, messageBufSize##, format##, ##__VA_ARGS__##); \
     App_Print(appLogBuf); \
 }
+#else
+#define APP_LOG(messageBufSize, format, ...)
+#define APP_PRINT(messageBufSize, format, ...)
+#endif

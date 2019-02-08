@@ -215,20 +215,24 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
     }
 }
 
-internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
+internal void CL_RunReliableCommands(NetStream* stream, u32 serverTick, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
-	// -- Reliable --
 	
-	// TODO: Calculate the server tick the client is up to (due to smoothing out jitter etc)
-	i32 serverTick = INT_MAX;
 	for (;;)
 	{
 		i32 sequence = stream->inputSequence;
 		Command* h = Stream_FindMessageBySequence(b->ptrStart, b->Written(), sequence);
+        // No commands to run
 		if (!h) { break; }
-		// Execute only after jitter delay
-		if (h->sequence > serverTick) { break; }
+
+		// Do not execute until jitter pause is over
+		if (h->tick > serverTick)
+        {
+            APP_LOG(64, "CL Delaying execution of cmd %d until tick %d\n",
+                h->sequence, h->tick);
+            break;
+        }
 		
 		// Step queue counter forward as we are now executing
 		stream->inputSequence++;
@@ -237,14 +241,14 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 		Assert(err == COM_ERROR_NONE)
 		
 		printf("CL exec input seq %d\n", h->sequence);
-		
+
 		switch (h->type)
 		{
             case CMD_TYPE_S2C_SPAWN_PROJECTILE:
             {
                 S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
-                APP_PRINT(64, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d)\n",
-                    prj->def.projType, prj->def.tick, prj->def.tick - g_serverTick
+                APP_PRINT(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
+                    prj->def.projType, prj->def.tick, prj->def.tick - g_serverTick, prj->header.tick
                 );
                 Sim_ExecuteProjectileSpawn(&g_sim, &prj->def);
             } break;
@@ -324,10 +328,11 @@ internal void CL_CalcPings(f32 deltaTime)
 
 void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    APP_LOG(64, "*** CL TICK %d (T %.3f) ***\n", g_ticks, g_elapsed);
+    APP_LOG(64, "*** CL TICK %d (Server Sync Tick %d. T %.3f) ***\n",
+        g_ticks, g_serverTick, g_elapsed);
     CL_ReadSystemEvents(sysEvents, deltaTime);
     CL_CalcPings(deltaTime);
-	CL_RunReliableCommands(&g_reliableStream, deltaTime);
+	CL_RunReliableCommands(&g_reliableStream, g_serverTick, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;
 	g_serverTick++;
