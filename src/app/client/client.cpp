@@ -215,7 +215,27 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
     }
 }
 
-internal void CL_RunReliableCommands(NetStream* stream, u32 serverTick, f32 deltaTime)
+internal i32 CL_IsCommandTickSensitive(i32 cmdType)
+{
+	switch (cmdType)
+	{
+		case CMD_TYPE_S2C_SYNC: { return false; }
+	}
+	return true;
+}
+
+internal void CL_SetServerTick(i32 value)
+{
+	g_serverTick = value;
+}
+
+// Can be changed during command execute so always retreive from here:
+internal i32 CL_GetServerTick()
+{
+	return g_serverTick;
+}
+
+internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
 	
@@ -226,13 +246,39 @@ internal void CL_RunReliableCommands(NetStream* stream, u32 serverTick, f32 delt
         // No commands to run
 		if (!h) { break; }
 
+		i32 diff = h->tick - CL_GetServerTick();
+		APP_LOG(128, "CL Exec Cmd %d: Cmd Tick %d, Sync Tick %d (diff %d), CL Tick %d\n",
+			h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
+		);
+		
+		if (CL_IsCommandTickSensitive(h->type))
+		{
+			if (diff > 0)
+			{
+				APP_LOG(128, "\tCL Delaying execution of cmd %d until tick %d (diff %d)\n",
+					h->sequence, h->tick, diff);
+				// Drop out - next reliable command cannot be executed until we reach this frame
+				break;
+			}
+			
+			if (diff < 0)
+			{
+				APP_LOG(128,  "\tCL Fast forward cmd %d by %d frames\n",
+					h->sequence, -(diff)
+				);
+			}
+		}
+		
+		#if 0
 		// Do not execute until jitter pause is over
-		if (h->tick > serverTick)
+		if (diff > 0)
         {
-            APP_LOG(64, "CL Delaying execution of cmd %d until tick %d\n",
-                h->sequence, h->tick);
+            APP_LOG(128, "\tCL Delaying execution of cmd %d until tick %d (diff %d)\n",
+                h->sequence, h->tick, diff);
+			// Drop out - next reliable command cannot be executed
             break;
         }
+		#endif
 		
 		// Step queue counter forward as we are now executing
 		stream->inputSequence++;
@@ -248,7 +294,7 @@ internal void CL_RunReliableCommands(NetStream* stream, u32 serverTick, f32 delt
             {
                 S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
                 APP_PRINT(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
-                    prj->def.projType, prj->def.tick, prj->def.tick - g_serverTick, prj->header.tick
+                    prj->def.projType, prj->def.tick, prj->def.tick - CL_GetServerTick(), prj->header.tick
                 );
                 Sim_ExecuteProjectileSpawn(&g_sim, &prj->def);
             } break;
@@ -273,10 +319,13 @@ internal void CL_RunReliableCommands(NetStream* stream, u32 serverTick, f32 delt
             case CMD_TYPE_S2C_SYNC:
             {
                 S2C_Sync* sync = (S2C_Sync*)h;
-                g_serverTick = sync->simTick - APP_DEFAULT_JITTER_TICKS;
+				CL_SetServerTick(sync->simTick - APP_DEFAULT_JITTER_TICKS);
+				
                 // Lets not do what the server tells us!
 				//g_serverTick = sync->simTick - sync->jitterTickCount;
-                APP_PRINT(64, "CL Sync server sim tick %d\n", sync->simTick);
+				APP_LOG(64, "/////////////////////////////////////////\n");
+                APP_LOG(64, "CL Sync server sim tick %d\n", CL_GetServerTick());
+				APP_LOG(64, "/////////////////////////////////////////\n");
             } break;
 			
 			
@@ -332,7 +381,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
         g_ticks, g_serverTick, g_elapsed);
     CL_ReadSystemEvents(sysEvents, deltaTime);
     CL_CalcPings(deltaTime);
-	CL_RunReliableCommands(&g_reliableStream, g_serverTick, deltaTime);
+	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;
 	g_serverTick++;
