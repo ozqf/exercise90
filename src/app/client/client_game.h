@@ -28,6 +28,9 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
 CLG_DEFINE_ENT_UPDATE(Projectile)
 {
 	i32 numSteps = 1 + ent->fastForwardTicks;
+    ent->fastForwardTicks = 0;
+    APP_LOG(64, "CL Prj %d steps: %d\n", ent->id.serial, numSteps);
+	if (numSteps < 1) { numSteps = 1; }
 	while (numSteps)
 	{
 		numSteps--;

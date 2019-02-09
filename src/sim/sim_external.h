@@ -124,7 +124,7 @@ i32 Sim_ExecuteProjectileSpawn(
 	i32 fastForwardTicks)
 {
     i32 numProjectiles = 8;
-	f32 speed = 1.5f;
+	f32 speed = 3.5f;
     i32 serial = def->firstSerial;
 	f32 radians = 0;
 	f32 step = FULL_ROTATION_RADIANS / (f32)numProjectiles;
@@ -139,11 +139,12 @@ i32 Sim_ExecuteProjectileSpawn(
 		ent->velocity.x = cosf(radians) * speed;
 		ent->velocity.y = 0;
 		ent->velocity.z = sinf(radians) * speed;
+        // if fastForwardTicks
 		ent->fastForwardTicks = fastForwardTicks;
-		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. vel: %.3f, %.3f\n",
+		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
             serial,
             ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
-            ent->velocity.x, ent->velocity.y
+            ent->fastForwardTicks
 		);
         serial++;
 		radians += step;
