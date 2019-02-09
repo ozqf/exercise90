@@ -27,11 +27,17 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
 
 CLG_DEFINE_ENT_UPDATE(Projectile)
 {
-    Sim_SimpleMove(ent, deltaTime);
-	ent->lifeTime -= deltaTime;
-	if (ent->lifeTime < 0)
+	i32 numSteps = 1 + ent->fastForwardTicks;
+	while (numSteps)
 	{
-		Sim_RemoveEntity(sim, ent->id.serial);
+		numSteps--;
+		Sim_SimpleMove(ent, deltaTime);
+		ent->lifeTime -= deltaTime;
+		if (ent->lifeTime < 0)
+		{
+			Sim_RemoveEntity(sim, ent->id.serial);
+			return;
+		}
 	}
 }
 

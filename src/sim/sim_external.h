@@ -120,7 +120,8 @@ i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
-    SimProjectileSpawnDef* def)
+    SimProjectileSpawnDef* def,
+	i32 fastForwardTicks)
 {
     i32 numProjectiles = 8;
 	f32 speed = 1.5f;
@@ -138,6 +139,7 @@ i32 Sim_ExecuteProjectileSpawn(
 		ent->velocity.x = cosf(radians) * speed;
 		ent->velocity.y = 0;
 		ent->velocity.z = sinf(radians) * speed;
+		ent->fastForwardTicks = fastForwardTicks;
 		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. vel: %.3f, %.3f\n",
             serial,
             ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,

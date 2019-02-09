@@ -32,7 +32,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         // frame the event occurred is recorded
         def.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
-			sim, &def
+			sim, &def, 0
 		);
         S2C_SpawnProjectile prj = {};
         Cmd_Prepare(&prj.header, g_ticks, 0);

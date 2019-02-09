@@ -47,7 +47,8 @@ struct SimEntity
     i32 isLocal;
     SimEntId id;
     i32 entType;
-
+	
+	i32 fastForwardTicks;
     i32 birthTick;
     i32 deathTick;
 
