@@ -75,6 +75,34 @@ void SV_WriteDebugString(ZStringHeader* str)
     str->length = written;
 }
 
+u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
+{
+	if (COM_CompareStrings(tokens[0], "SPAWN"))
+	{
+		if (numTokens == 1)
+		{
+			APP_PRINT(64, "SV === Spawn entity options: ===\n");
+			APP_PRINT(64, "\tWANDERER\n");
+			return 1;
+		}
+		if (numTokens == 2)
+		{
+			if (COM_CompareStrings(tokens[1], "WANDERER"))
+			{
+				APP_PRINT(128, "\tSV Spawn Wanderer\n");
+			}
+			else
+			{
+				APP_PRINT(256, "\tUnknown entity type %s\n", tokens[1]);
+			}
+			return 1;
+		}
+		APP_PRINT(64, "SV incorrect token count for spawn\n");
+		return 1;
+	}
+    return 0;
+}
+
 internal i32 SV_IsPrivateIdInUse(i32 id)
 {
     for (i32 i = 0; i < g_users.max; ++i)

@@ -92,7 +92,7 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
 internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
 {
     ent->birthTick = def->birthTick;
-    ent->deathTick = def->deathTick;
+    //ent->deathTick = def->deathTick;
 	
     ent->t.pos.x =          def->pos[0];
     ent->t.pos.y =          def->pos[1];

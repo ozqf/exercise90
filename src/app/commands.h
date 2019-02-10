@@ -40,6 +40,8 @@ internal void Cmd_InitSync(S2C_Sync* cmd, i32 tick, i32 sequence, i32 simTick, i
 struct S2C_SpawnEntity
 {
     Command header;
+    // All data that must be replicated to spawn this entity
+    // have to be here. The rest is client side
     i32 networkId;
     u8 entType;
     Vec3 pos;

@@ -290,6 +290,8 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
+    if (g_isRunningServer && SV_ParseCommandString(str, tokens, numTokens)) { return 1; }
+    if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }
     return 0;
 }
 

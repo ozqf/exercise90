@@ -1,15 +1,7 @@
 #pragma once
 
 #include "../common/com_module.h"
-/*
-#define SIM_ENT_BLOCK_SIZE 1024
-#define SIM_ENT_MAX_BLOCKS 128
-// serial numbers for entities.
-#define SIM_REPLICATED_ENT_SERIAL_MIN 0
-#define SIM_REPLICATED_ENT_SERIAL_MAX 1073741822
-#define SIM_LOCAL_ENT_SERIAL_MIN 1073741823
-#define SIM_LOCAL_ENT_SERIAL_MAX 2147483647
-*/
+
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1
 #define SIM_ENT_STATUS_IN_USE 2
@@ -17,9 +9,10 @@
 #define SIM_ENT_TYPE_NONE 0
 #define SIM_ENT_TYPE_WORLD 1
 #define SIM_ENT_TYPE_ACTOR 2
-#define SIM_ENT_TYPE_WANDERER 3
-#define SIM_ENT_TYPE_PROJECTILE 4
-#define SIM_ENT_TYPE_TURRET 5
+#define SIM_ENT_TYPE_PROJECTILE 3
+#define SIM_ENT_TYPE_TURRET 4
+#define SIM_ENT_TYPE_WANDERER 5 
+
 
 #pragma pack(push, 1)
 union SimEntIndex
@@ -70,7 +63,7 @@ struct SimEntityDef
     i32 serial;
 
     i32 birthTick;
-    i32 deathTick;
+    //i32 deathTick;
     
     i32 isLocal;
     i32 entType;

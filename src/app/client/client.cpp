@@ -73,6 +73,11 @@ internal void* CL_Malloc(i32 numBytes)
     return g_allocations[index];
 }
 
+u8 CL_ParseCommandString(char* str, char** tokens, i32 numTokens)
+{
+    return 0;
+}
+
 void CL_LoadTestScene()
 {
 	Sim_LoadScene(&g_sim, 0);
@@ -235,6 +240,59 @@ internal i32 CL_GetServerTick()
 	return g_serverTick;
 }
 
+internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
+{
+    printf("CL exec input seq %d\n", h->sequence);
+
+	switch (h->type)
+	{
+        case CMD_TYPE_S2C_SPAWN_PROJECTILE:
+        {
+            S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
+            APP_PRINT(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
+                prj->def.projType, prj->def.tick, prj->def.tick - CL_GetServerTick(), prj->header.tick
+            );
+            // flip diff to specify fast forwarding
+            Sim_ExecuteProjectileSpawn(&g_sim, &prj->def, -tickDiff);
+        } break;
+		case CMD_TYPE_S2C_SPAWN_ENTITY:
+		{
+			S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
+			APP_LOG(64, "CL Spawn %d at %.3f, %.3f, %.3f\n",
+				spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
+			);
+			
+			SimEntityDef def = {};
+            def.birthTick = h->tick;
+            def.entType = spawn->entType;
+			def.pos[0] = spawn->pos.x;
+			def.pos[1] = spawn->pos.y;
+			def.pos[2] = spawn->pos.z;
+			def.velocity[0] = spawn->vel.x;
+			def.velocity[1] = spawn->vel.y;
+			def.velocity[2] = spawn->vel.z;
+			Sim_AddEntity(&g_sim, &def);
+		} break;
+        case CMD_TYPE_S2C_SYNC:
+        {
+            S2C_Sync* sync = (S2C_Sync*)h;
+			CL_SetServerTick(sync->simTick - APP_DEFAULT_JITTER_TICKS);
+			
+            // Lets not do what the server tells us!
+			//g_serverTick = sync->simTick - sync->jitterTickCount;
+			APP_LOG(64, "/////////////////////////////////////////\n");
+            APP_LOG(64, "CL Sync server sim tick %d\n", CL_GetServerTick());
+			APP_LOG(64, "/////////////////////////////////////////\n");
+        } break;
+		
+		
+		default:
+		{
+			APP_PRINT(64, "CL Unknown command type %d\n", h->type);
+		} break;
+	}
+}
+
 internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
@@ -269,72 +327,12 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 			}
 		}
 		
-		#if 0
-		// Do not execute until jitter pause is over
-		if (diff > 0)
-        {
-            APP_LOG(128, "\tCL Delaying execution of cmd %d until tick %d (diff %d)\n",
-                h->sequence, h->tick, diff);
-			// Drop out - next reliable command cannot be executed
-            break;
-        }
-		#endif
-		
 		// Step queue counter forward as we are now executing
 		stream->inputSequence++;
 		
 		i32 err = Cmd_Validate(h);
 		Assert(err == COM_ERROR_NONE)
-		
-		printf("CL exec input seq %d\n", h->sequence);
-
-		switch (h->type)
-		{
-            case CMD_TYPE_S2C_SPAWN_PROJECTILE:
-            {
-                S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
-                APP_PRINT(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
-                    prj->def.projType, prj->def.tick, prj->def.tick - CL_GetServerTick(), prj->header.tick
-                );
-                // flip diff to specify fast forwarding
-                Sim_ExecuteProjectileSpawn(&g_sim, &prj->def, -diff);
-            } break;
-			case CMD_TYPE_S2C_SPAWN_ENTITY:
-			{
-				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
-				APP_LOG(64, "CL Spawn %d at %.3f, %.3f, %.3f\n",
-					spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
-				);
-				
-				SimEntityDef def = {};
-                def.entType = spawn->entType;
-				def.pos[0] = spawn->pos.x;
-				def.pos[1] = spawn->pos.y;
-				def.pos[2] = spawn->pos.z;
-				def.velocity[0] = spawn->vel.x;
-				def.velocity[1] = spawn->vel.y;
-				def.velocity[2] = spawn->vel.z;
-				Sim_AddEntity(&g_sim, &def);
-			} break;
-
-            case CMD_TYPE_S2C_SYNC:
-            {
-                S2C_Sync* sync = (S2C_Sync*)h;
-				CL_SetServerTick(sync->simTick - APP_DEFAULT_JITTER_TICKS);
-				
-                // Lets not do what the server tells us!
-				//g_serverTick = sync->simTick - sync->jitterTickCount;
-				APP_LOG(64, "/////////////////////////////////////////\n");
-                APP_LOG(64, "CL Sync server sim tick %d\n", CL_GetServerTick());
-				APP_LOG(64, "/////////////////////////////////////////\n");
-            } break;
-			
-			
-			default:
-			{
-				APP_PRINT(64, "CL Unknown command type %d\n", h->type);
-			} break;
-		}
+		CL_ExecReliableCommand(h, deltaTime, diff);
 	}
 	/*
 	// -- Unreliable commands --
