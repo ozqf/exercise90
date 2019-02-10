@@ -2,6 +2,7 @@
 
 #include "com_module.h"
 
+enum ZMouseMode { Free = 0, Captured = 1 };
 
 //////////////////////////////////////////////////////////////////////
 // Input codes

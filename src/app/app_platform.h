@@ -16,6 +16,11 @@ void App_Print(char* msg)
     g_platform.Print(msg);
 }
 
+void App_SetMouseMode(ZMouseMode mode)
+{
+	g_platform.SetMouseMode(mode);
+}
+
 /***************************************
 * Private
 ***************************************/

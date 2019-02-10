@@ -66,7 +66,8 @@ internal void CL_UpdateActorInput(InputActionSet* actions, SimActorInput* input)
     //input->degrees.y -= (((f32)Input_GetActionValue(actions, "Mouse Move X") * mouseMoveMultiplier));
     //input->degrees.y = COM_CapAngleDegrees(input->degrees.y);
 
-    input->degrees.x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y") * mouseMoveMultiplier))
+    input->degrees.x -= (((f32)Input_GetActionValue(actions, "Mouse Move Y")
+		* mouseMoveMultiplier))
         * mouseInvertedMultiplier;
     
 	if (input->degrees.x < -89)
@@ -80,8 +81,8 @@ internal void CL_UpdateActorInput(InputActionSet* actions, SimActorInput* input)
 
     input->buttons = flags;
 
-    printf("Mouse pos %d, %d\n",
-        Input_GetActionValue(actions, "Mouse Pos X"),
-        Input_GetActionValue(actions, "Mouse Pos Y")
-    );
+    //printf("Mouse pos %d, %d\n",
+    //    Input_GetActionValue(actions, "Mouse Pos X"),
+    //    Input_GetActionValue(actions, "Mouse Pos Y")
+    //);
 }

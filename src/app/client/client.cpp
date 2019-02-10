@@ -25,8 +25,6 @@ internal f32 g_jitter;
 
 internal i32 g_avatarSerial = -2;
 
-i32 CL_IsRunning() { return g_isRunning; }
-
 #define CL_MAX_ALLOCATIONS 256
 internal void* g_allocations[CL_MAX_ALLOCATIONS];
 internal i32 g_bytesAllocated = 0;
@@ -37,6 +35,9 @@ internal NetStream g_unreliableStream;
 internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
+
+// Menus
+internal i32 g_mainMenuOn;
 
 #define CL_MAX_INPUTS 256
 internal InputAction g_inputActionItems[CL_MAX_INPUTS];
@@ -49,6 +50,8 @@ internal SimActorInput g_actorInput = {};
 
 #include "client_game.h"
 #include "client_packets.h"
+
+i32 CL_IsRunning() { return g_isRunning; }
 
 void CL_WriteDebugString(ZStringHeader* str)
 {
@@ -218,7 +221,19 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime, u32 plat
             case SYS_EVENT_INPUT:
             {
                 SysInputEvent* inputEv = (SysInputEvent*)ev;
-                Input_TestForAction(&g_inputActions, inputEv->value, inputEv->inputID, platformFrame);
+                Input_TestForAction(
+					&g_inputActions,
+					inputEv->value,
+					inputEv->inputID,
+					platformFrame);
+				
+				if (Input_CheckActionToggledOn(
+					&g_inputActions,
+					"Menu",
+					platformFrame))
+				{
+					g_mainMenuOn = !g_mainMenuOn;
+				}
 
             } break;
             case SYS_EVENT_SKIP: break;
