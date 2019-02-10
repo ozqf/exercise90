@@ -229,27 +229,8 @@ internal void SV_LoadTestScene()
 {
     Sim_LoadScene(&g_sim, 0);
 	
+    // Place a test spawner
     SimEntityDef def = {};
-    #if 0
-    for (i32 i = 0; i < 8; ++i)
-    {
-        f32 randX = (COM_STDRandf32() * 2) - 1;
-        f32 randZ = (COM_STDRandf32() * 2) - 1;
-        f32 x = 2 * randX;
-        f32 y = 1;
-        f32 z = 2 * randZ;
-        def.isLocal = 0;
-        def.entType = SIM_ENT_TYPE_WANDERER;
-        def.pos[0] = x;
-        def.pos[1] = y;
-        def.pos[2] = z;
-        def.velocity[0] = x;
-        
-        def.velocity[2] = z;
-        Sim_AddEntity(&g_sim, &def);
-    }
-    #endif
-
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
@@ -260,23 +241,6 @@ internal void SV_LoadTestScene()
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
 	
-	// World geometry
-    #if 0
-    def = {};
-    def.isLocal = 1;
-    def.pos[1] = 0;
-    def.entType = SIM_ENT_TYPE_WORLD;
-    def.scale[0] = 12;
-    def.scale[1] = 1;
-    def.scale[2] = 12;
-    // Test: this should be ignored by the sim as world entities cannot move
-    def.velocity[0] = 3;
-    Sim_AddEntity(&g_sim, &def);
-
-    g_sim.boundaryMin = { -6, -6, -6 };
-    g_sim.boundaryMax = { 6, 6, 6 };
-
-    #endif
 }
 
 internal void SV_ListAllocs()

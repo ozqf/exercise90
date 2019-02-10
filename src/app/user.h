@@ -2,12 +2,6 @@
 
 #include "../common/com_module.h"
 
-struct ActorInput
-{
-    u32 buttons;
-    Vec3 degrees;
-};
-
 #define USER_STATE_FREE 0
 #define USER_STATE_SYNC 1
 #define USER_STATE_OBSERVING 2
@@ -29,7 +23,6 @@ struct User
 	u32 flags;
     i32 entSerial;
     i32 isLocal;
-    ActorInput input;
 
     f32 ping;
     f32 jitter;

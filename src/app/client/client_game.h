@@ -44,12 +44,18 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 	}
 }
 
+CLG_DEFINE_ENT_UPDATE(Actor)
+{
+
+}
+
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
         case SIM_ENT_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
+		case SIM_ENT_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;

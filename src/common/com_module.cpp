@@ -14,7 +14,6 @@
 #include "com_maths.cpp"
 #include "com_transform.cpp"
 
-#include "com_input.cpp"
 #include "com_parse.cpp"
 #include "com_byte_buffer.cpp"
 #include "com_text_command_buffer.cpp"

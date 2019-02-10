@@ -109,6 +109,12 @@ struct SimScene
     //DoubleByteBuffer commands;
 };
 
+struct SimActorInput
+{
+    u32 buttons;
+    Vec3 degrees;
+};
+/*
 struct SimEventHeader
 {
 	i32 type;
@@ -123,7 +129,7 @@ struct SimEventEntitySpawned
 	SimEventHeader header;
 	i32 serial;
 };
-
+*/
 /*
 Main replication events
 > Entity is spawned.

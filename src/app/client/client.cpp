@@ -5,6 +5,7 @@
 #include "client.h"
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
+#include "client_input.h"
 
 #define CLIENT_STATE_NONE 0
 #define CLIENT_STATE_REQUESTING 1
@@ -22,6 +23,8 @@ internal i32 g_serverTick = 0;
 internal f32 g_ping;
 internal f32 g_jitter;
 
+internal i32 g_avatarSerial = -2;
+
 i32 CL_IsRunning() { return g_isRunning; }
 
 #define CL_MAX_ALLOCATIONS 256
@@ -34,6 +37,13 @@ internal NetStream g_unreliableStream;
 internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
+
+#define CL_MAX_INPUTS 256
+internal InputAction g_inputActionItems[CL_MAX_INPUTS];
+internal InputActionSet g_inputs = {
+    g_inputActionItems,
+    0
+};
 
 #include "client_game.h"
 #include "client_packets.h"
@@ -88,31 +98,15 @@ void CL_LoadTestScene()
 	Sim_LoadScene(&g_sim, 0);
 	
     SimEntityDef def = {};
-    #if 0
-    for (i32 i = 0; i < 8; ++i)
-    {
-        f32 randX = (COM_STDRandf32() * 2) - 1;
-        f32 randZ = (COM_STDRandf32() * 2) - 1;
-        f32 x = 2 * randX;
-        f32 y = 1;
-        f32 z = 2 * randZ;
-        def.isLocal = 1;
-        def.pos[0] = x;
-        def.pos[1] = y;
-        def.pos[2] = z;
-        def.velocity[0] = x;
-        def.velocity[2] = z;
-        Sim_AddEntity(&g_sim, &def);
-    }
-    #endif
-    #if 0
+    #if 1
     def = {};
     def.isLocal = 1;
-	def.entType = SIM_ENT_TYPE_WORLD;
+    def.serial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
+	def.entType = SIM_ENT_TYPE_ACTOR;
     def.pos[1] = 0;
-    def.scale[0] = 12;
+    def.scale[0] = 1;
     def.scale[1] = 1;
-    def.scale[2] = 12;
+    def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
 
     g_sim.boundaryMin = { -6, -6, -6 };

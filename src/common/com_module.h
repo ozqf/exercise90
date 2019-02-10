@@ -23,6 +23,7 @@
 #include "com_parse.h"
 #include "com_variables.h"
 #include "com_text_command_buffer.h"
+#include "com_input.h"
 #include "com_debug.h"
 
 /*
