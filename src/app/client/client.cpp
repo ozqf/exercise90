@@ -220,12 +220,6 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime, u32 plat
                 SysInputEvent* inputEv = (SysInputEvent*)ev;
                 Input_TestForAction(&g_inputActions, inputEv->value, inputEv->inputID, platformFrame);
 
-                i32 val = Input_GetActionValue(&g_inputActions, "Move Up");
-                if (val)
-                {
-                    printf("CL Move Up\n");
-                }
-
             } break;
             case SYS_EVENT_SKIP: break;
         }
