@@ -72,3 +72,15 @@ internal void CLG_TickGame(SimScene* sim, f32 deltaTime)
         CLG_TickEntity(sim, ent, deltaTime);
     }
 }
+
+internal void CLG_HandlePlayerInput(SimEntity* ent, SimActorInput* input)
+{
+    if (input->buttons & ACTOR_INPUT_MOVE_FORWARD)
+    {
+        printf("Move Forward\n");
+    }
+    if (input->buttons & ACTOR_INPUT_MOVE_BACKWARD)
+    {
+        printf("Move Backward\n");
+    }
+}

@@ -45,6 +45,8 @@ internal InputActionSet g_inputActions = {
     0
 };
 
+internal SimActorInput g_actorInput = {};
+
 #include "client_game.h"
 #include "client_packets.h"
 
@@ -391,6 +393,9 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_ReadSystemEvents(sysEvents, deltaTime, platformFrame);
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
+    CL_UpdateActorInput(&g_inputActions, &g_actorInput);
+    CLG_HandlePlayerInput(NULL, &g_actorInput);
+    
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;
 	g_serverTick++;
