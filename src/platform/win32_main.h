@@ -651,13 +651,13 @@ int CALLBACK WinMain(
                     //g_time.percentToNextFixedFrame =
                     //    g_fixedFrameAccumulator / g_fixedFrameTime;
                     //COM_ClampF32(&g_time.percentToNextFixedFrame, 0, 1);
-                    g_screenInfo = g_renderer.R_SetupFrame(appWindow);
+                    g_screenInfo = g_renderer.R_SetupFrame();
                     g_app.AppRender(&g_time, g_screenInfo);
                     if (g_debugInputActive)
                     {
                         Platform_R_DrawScene(&g_debugScene);
                     }
-                    g_renderer.R_FinishFrame(appWindow);
+                    g_renderer.R_FinishFrame();
                 }
 
                 #if 0 // previous implementation of timing outside app layer
@@ -695,13 +695,13 @@ int CALLBACK WinMain(
                     g_time.percentToNextFixedFrame =
                         g_fixedFrameAccumulator / g_fixedFrameTime;
                     COM_ClampF32(&g_time.percentToNextFixedFrame, 0, 1);
-                    g_screenInfo = g_renderer.R_SetupFrame(appWindow);
+                    g_screenInfo = g_renderer.R_SetupFrame();
                     g_app.AppRender(&g_time, g_screenInfo);
                     if (g_debugInputActive)
                     {
                         Platform_R_DrawScene(&g_debugScene);
                     }
-                    g_renderer.R_FinishFrame(appWindow);
+                    g_renderer.R_FinishFrame();
                 }
                 #endif
             }

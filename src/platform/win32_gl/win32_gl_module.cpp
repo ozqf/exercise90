@@ -22,7 +22,6 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 #include <gl/gl.h>
 
 #include "../../common/com_module.h"
-#include "win32_gl_commands.h"
 #include "win32_gl_interface.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,6 +52,7 @@ internal RendererPlatform g_platform;
 
 // HGLRC "HandleOpenGLRenderingContext"
 HGLRC g_openglRC = NULL;
+HWND g_window = NULL;
 
 // Settings
 global_variable f32 win32_aspectRatio = 0;

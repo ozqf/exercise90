@@ -6,8 +6,11 @@ i32 Win32_InitOpenGL(HWND window)
 {
 	if (g_openglRC != NULL) { return 1; }
     //Win32_InitTestScene();
+	
+	g_window = window;
+	Assert(g_window);
 
-	HDC windowContext = GetDC(window);
+	HDC windowContext = GetDC(g_window);
     /** 
      * "Negotiate" with opengl for a supported Pixel Format Descriptor
      */
@@ -54,7 +57,7 @@ i32 Win32_InitOpenGL(HWND window)
         AssertAlways(false);
     }
 
-    ReleaseDC(window, windowContext);
+    ReleaseDC(g_window, windowContext);
 
 	// Depth buffer
 	glEnable(GL_DEPTH_TEST);
@@ -110,7 +113,7 @@ i32 Win32_R_Shutdown()
 ////////////////////////////////////////////////////////////////////
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////
-ScreenInfo Win32_R_SetupFrame(HWND window)
+ScreenInfo Win32_R_SetupFrame()
 {
 	ScreenInfo info = { 1, 1, 1 };
 	if (g_openglRC == NULL) { return info; }
@@ -120,7 +123,7 @@ ScreenInfo Win32_R_SetupFrame(HWND window)
         MessageBox(0, "Render", "Error", MB_OK | MB_ICONINFORMATION);
     }*/
 
-    HDC deviceContext = GetDC(window);
+    HDC deviceContext = GetDC(g_window);
 
     // Clear screen
 
@@ -135,7 +138,7 @@ ScreenInfo Win32_R_SetupFrame(HWND window)
 	i32 width = r.right - r.left;
 	i32 height = r.bottom - r.top;
 	*/
-	GetClientRect(window, &r);
+	GetClientRect(g_window, &r);
 	win32_aspectRatio = (f32)r.right / (f32)r.bottom;
 
 	info.width = r.right;
@@ -164,15 +167,15 @@ ScreenInfo Win32_R_SetupFrame(HWND window)
 	return info;
 }
 
-void Win32_R_FinishFrame(HWND window)
+void Win32_R_FinishFrame()
 {
 	if (g_openglRC == NULL) { return; }
-    HDC deviceContext = GetDC(window);
+    HDC deviceContext = GetDC(g_window);
 
 	// Finished, display
     SwapBuffers(deviceContext);
 
-    ReleaseDC(window, deviceContext);
+    ReleaseDC(g_window, deviceContext);
 }
 
 // NOTE: Win32_R_SetupFrame Must have been called already!

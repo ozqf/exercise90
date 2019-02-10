@@ -83,5 +83,5 @@ internal void CLG_HandlePlayerInput(SimEntity* ent, SimActorInput* input)
     {
         printf("Move Backward\n");
     }
-    printf("CL Cam angles: %.1f, %.1f\n", input->degrees.y, input->degrees.x);
+    //printf("CL Cam angles: %.1f, %.1f\n", input->degrees.y, input->degrees.x);
 }
