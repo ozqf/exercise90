@@ -262,12 +262,6 @@ struct RenderScene
     u32 maxObjects;
 };
 
-struct InputItem
-{
-    char on = 0;
-    u32 lastChangeFrame = 0;
-};
-
 struct ScreenInfo
 {
     i32 width;

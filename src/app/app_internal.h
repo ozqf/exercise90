@@ -21,6 +21,8 @@ internal i32 g_fakeLagMinMS = 100;
 internal i32 g_fakeLagMaxMS = 700;
 internal f32 g_fakeLoss = 0.3f;
 
+internal u32 g_lastPlatformFrame = 0;
+
 internal Heap g_heap;
 
 internal i32 g_isRunningClient = 0;

@@ -40,7 +40,7 @@ internal ZNetAddress g_serverAddress;
 
 #define CL_MAX_INPUTS 256
 internal InputAction g_inputActionItems[CL_MAX_INPUTS];
-internal InputActionSet g_inputs = {
+internal InputActionSet g_inputActions = {
     g_inputActionItems,
     0
 };
@@ -151,6 +151,9 @@ void CL_Init(ZNetAddress serverAddress)
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );
+
+    CL_InitInputs(&g_inputActions);
+
     APP_LOG(64, "CL init completed with %d allocations (%dKB)\n ",
         g_numAllocations, (u32)BytesAsKB(g_bytesAllocated));
 }
@@ -186,7 +189,7 @@ internal void CL_ReadReliableCommands(NetStream* stream)
     }
 }
 #endif
-internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
+internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 {
     //printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
     u8* read = sysEvents->ptrStart;
@@ -212,7 +215,15 @@ internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 
             case SYS_EVENT_INPUT:
             {
-                //printf("CL Input - skip\n");
+                SysInputEvent* inputEv = (SysInputEvent*)ev;
+                Input_TestForAction(&g_inputActions, inputEv->value, inputEv->inputID, platformFrame);
+
+                i32 val = Input_GetActionValue(&g_inputActions, "Move Up");
+                if (val)
+                {
+                    printf("CL Move Up\n");
+                }
+
             } break;
             case SYS_EVENT_SKIP: break;
         }
@@ -373,11 +384,11 @@ internal void CL_CalcPings(f32 deltaTime)
 	g_jitter = (g_acks.delayMax - g_acks.delayMin);
 }
 
-void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime)
+void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 {
     APP_LOG(64, "*** CL TICK %d (Server Sync Tick %d. T %.3f) ***\n",
         g_ticks, g_serverTick, g_elapsed);
-    CL_ReadSystemEvents(sysEvents, deltaTime);
+    CL_ReadSystemEvents(sysEvents, deltaTime, platformFrame);
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CLG_TickGame(&g_sim, deltaTime);

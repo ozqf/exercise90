@@ -191,6 +191,7 @@ internal i32  App_RendererReloaded()
 
 internal void App_Input(PlatformTime* time, ByteBuffer commands)
 {
+    g_lastPlatformFrame = time->frameNumber;
 	i32 inputBytes = commands.Written();
 	//printf("APP input %d bytes\n", inputBytes);
 	
@@ -208,10 +209,12 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
             {
                 SysInputEvent* ev = (SysInputEvent*)header;
                 //printf("APP input Event: %d value %d\n", ev->inputID, ev->value);
+                ByteBuffer* b = g_clientLoopback.GetWrite();
+                b->ptrWrite += COM_COPY(header, b->ptrWrite, header->size);
             } break;
             case SYS_EVENT_PACKET:
             {
-
+                // TODO: Load into loopbacks
             } break;
 
             case SYS_EVENT_SKIP: break;
@@ -249,7 +252,7 @@ internal void App_Update(PlatformTime* time)
         {
             g_clientLoopback.Swap();
             Buf_Clear(g_clientLoopback.GetWrite());
-            CL_Tick(g_clientLoopback.GetRead(), interval);
+            CL_Tick(g_clientLoopback.GetRead(), interval, g_lastPlatformFrame);
         }
     }
 }
