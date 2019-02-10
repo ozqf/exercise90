@@ -57,9 +57,21 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 }
 
 extern "C"
+SimEntity* Sim_GetEnityBySerial(SimScene* sim, i32 serial)
+{
+    for (i32 i = 0; i < sim->maxEnts; ++i)
+    {
+        SimEntity* ent = &sim->ents[i];
+        if (ent->status == SIM_ENT_STATUS_FREE) { continue; }
+        if (ent->id.serial == serial) { return ent; }
+    }
+    return NULL;
+}
+
+extern "C"
 i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 {
-    if (isLocal) { return scene->localEntitySequence++; }
+    if (isLocal) { return scene->localEntitySequence--; }
     else { return scene->remoteEntitySequence++; }
 }
 
@@ -163,7 +175,7 @@ void Sim_Reset(SimScene* sim)
 	// 0 == an invalid serial for error handling. Means once less
 	// replicated entity, oh well
 	sim->remoteEntitySequence = 1;
-	sim->localEntitySequence = sim->maxEnts / 2;
+	sim->localEntitySequence = -1;
 }
 
 extern "C"
@@ -186,10 +198,11 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.entType = SIM_ENT_TYPE_WORLD;
-    def.pos[1] = 0;
-    def.scale[0] = 12;
+    def.pos[1] = -0.5f;
+    def.scale[0] = 20;
     def.scale[1] = 1;
-    def.scale[2] = 12;
+    def.scale[2] = 20;
+    
     Sim_AddEntity(sim, &def);
 
     sim->boundaryMin = { -6, -6, -6 };

@@ -253,7 +253,7 @@ internal void SV_LoadTestScene()
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    def.pos[1] = 1;
+    def.pos[1] = 0;
     def.entType = SIM_ENT_TYPE_TURRET;
     def.scale[0] = 1;
     def.scale[1] = 1;

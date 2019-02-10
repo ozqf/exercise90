@@ -66,7 +66,7 @@ internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd)
 	u8* copyBlockDest = (u8*)cmd;
     u8* copyBlockStart = (u8*)cmd + bytesToDelete;
     i32 bytesToCopy = bufEnd - copyBlockStart;
-    printf("Deleting %d bytes. Copying %d bytes\n", bytesToDelete, bytesToCopy);
+    // printf("Deleting %d bytes. Copying %d bytes\n", bytesToDelete, bytesToCopy);
 	COM_CopyMemory(copyBlockStart, copyBlockDest, bytesToCopy);
 	b->ptrWrite -= bytesToDelete;
 }

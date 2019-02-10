@@ -31,7 +31,6 @@ internal i32 Sim_FreeEntityBySerial(SimScene* scene, i32 serial)
 		ent->status = SIM_ENT_STATUS_FREE;
 		
 		return COM_ERROR_NONE;
-		
 	}
 	return COM_ERROR_NOT_FOUND;
 }
@@ -98,8 +97,8 @@ internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
     ent->t.pos.y =          def->pos[1];
     ent->t.pos.z =          def->pos[2];
     ent->previousPos.x =    def->pos[0];
-    ent->previousPos.x =    def->pos[1];
-    ent->previousPos.x =    def->pos[2];
+    ent->previousPos.y =    def->pos[1];
+    ent->previousPos.z =    def->pos[2];
     ent->velocity.x =       def->velocity[0];
     ent->velocity.y =       def->velocity[1];
     ent->velocity.z =       def->velocity[2];
@@ -144,6 +143,8 @@ internal i32 Sim_InitWanderer(SimScene* scene, SimEntity* ent, SimEntityDef* def
 internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_ApplySpawnTransform(ent, def);
+    APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
+        def->pos[0], def->pos[1], def->pos[2]);
     ent->entType = def->entType;
     // world volumes can't move (yet!)
     ent->velocity = {};

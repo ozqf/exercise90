@@ -103,10 +103,11 @@ internal i32  App_Init()
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
 
-    // Render Scenes
+    // Render Scenes - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS);
-    g_worldScene.cameraTransform.pos.y += 16;
-    Transform_SetRotation(&g_worldScene.cameraTransform, -(90 * DEG2RAD), 0, 0);
+    g_worldScene.cameraTransform.pos.z = 18;
+    g_worldScene.cameraTransform.pos.y += 12;
+    Transform_SetRotation(&g_worldScene.cameraTransform, -(45    * DEG2RAD), 0, 0);
 
     // server and client areas currently acquiring their own memory
     App_StartSession(APP_SESSION_TYPE_SINGLE_PLAYER);

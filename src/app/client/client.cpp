@@ -47,6 +47,11 @@ void CL_WriteDebugString(ZStringHeader* str)
         g_serverTick, g_ticks, g_elapsed, g_acks.outputSequence,
 		g_acks.remoteSequence, g_ping, g_jitter
     );
+    SimEntity* ent =  Sim_GetEnityBySerial(&g_sim, -1);
+    if (ent)
+    {
+        written += sprintf_s(chars + written, str->maxLength, "World vol pos Y: %.3f\n", ent->t.pos.y);
+    }
 	#if 0
 	// currently overflows debug text buffer:
 	for (i32 i = 0; i < ACK_CAPACITY; ++i)
@@ -242,14 +247,14 @@ internal i32 CL_GetServerTick()
 
 internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 {
-    printf("CL exec input seq %d\n", h->sequence);
+    APP_LOG(64, "CL exec input seq %d\n", h->sequence);
 
 	switch (h->type)
 	{
         case CMD_TYPE_S2C_SPAWN_PROJECTILE:
         {
             S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
-            APP_PRINT(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
+            APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
                 prj->def.projType, prj->def.tick, prj->def.tick - CL_GetServerTick(), prj->header.tick
             );
             // flip diff to specify fast forwarding
