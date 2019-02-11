@@ -11,13 +11,7 @@
 #define REND_CMD_TYPE_END 3
 #define REND_CMD_TYPE_DRAW 4
 
-struct RCmdSceneSettings
-{
-    Transform cameraTransform;
-    RenderSceneSettings settings;
-};
-
-struct RCmdBeginFrame
+struct RViewPort
 {
     f32 vewPortX;
 	f32 vewPortY;
@@ -25,27 +19,14 @@ struct RCmdBeginFrame
 	f32 vewPortHeight;
 };
 
-struct RCmdEndFrame
-{
-    i32 foo;
-};
-
-struct RCmdDraw
-{
-    Transform transform;
-    RendObj obj;
-};
-
 struct RenderCommand
 {
-    i32 sentinel;
     i32 type;
 	
 	union
 	{
-		RCmdSceneSettings settings;
-		RCmdBeginFrame begin;
-		RCmdEndFrame end;
-		RCmdDraw draw;
+		RenderSceneSettings settings;
+		RViewPort begin;
+		RenderListItem drawItem;
 	};
 };

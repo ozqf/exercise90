@@ -242,6 +242,7 @@ struct SimpleLight
 
 struct RenderSceneSettings
 {
+	Transform cameraTransform;
     i32 projectionMode = 0;
     f32 orthographicHalfHeight = 8;
     i32 fov = 90;

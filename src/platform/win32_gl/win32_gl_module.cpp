@@ -75,6 +75,7 @@ void R_SetupLights(RenderSceneSettings* settings, Transform* model);
 #include "win32_gl_text.h"
 #include "win32_gl_matrix.h"
 #include "win32_gl_draw.h"
+#include "win32_gl_execute.h"
 #include "win32_gl_main.cpp"
 #include "win32_gl_dll_export.h"
 

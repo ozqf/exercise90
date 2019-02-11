@@ -20,6 +20,8 @@ RenderInterface __declspec(dllexport) LinkToRenderer(RendererPlatform platform)
     r.R_SetupFrame = Win32_R_SetupFrame;
     r.R_FinishFrame = Win32_R_FinishFrame;
     r.R_RenderScene = Win32_RenderFrame;
+	
+	r.R_Execute = R_Execute;
 
     return r;
 }

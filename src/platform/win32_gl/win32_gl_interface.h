@@ -23,7 +23,7 @@ struct RenderInterface
     void (*R_RenderScene)(RenderScene* scene, PlatformTime* time);
 	
 	// New render path
-	void (*R_Execute)(RenderCommand* commands, PlatformTime* time);
+	void (*R_Execute)(RenderCommand* commands, i32 numCommands, PlatformTime* time);
 };
 
 struct RendererPlatform
