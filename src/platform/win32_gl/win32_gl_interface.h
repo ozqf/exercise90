@@ -24,6 +24,7 @@ struct RenderInterface
 	
 	// New render path
 	void (*R_Execute)(RenderCommand* commands, i32 numCommands, PlatformTime* time);
+	ScreenInfo (*GetScreenInfo)();
 };
 
 struct RendererPlatform

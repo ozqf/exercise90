@@ -93,18 +93,9 @@ internal i32  App_Init()
 	g_clientLoopback.b = Buf_FromMalloc(
         COM_Malloc(&g_mallocs, bufferSize, "Client Loopback B"),
         bufferSize);
-    //g_localServerPacket = Buf_FromMalloc(COM_Malloc(&g_mallocs, bufferSize, "SV Packet"), bufferSize);
-	
-	// fake lag settings here
-	//g_loopbackSocket.Init(0, 0, 0);
-	//g_loopbackSocket.Init(100, 100, 0);
-	//g_loopbackSocket.Init(50, 150, 0.05f);
-    //g_loopbackSocket.Init(300, 300, 0);
-	//g_loopbackSocket.Init(200, 400, 0.2f);
     
 	g_loopbackSocket.Init(g_fakeLagMinMS, g_fakeLagMaxMS, g_fakeLoss);
-    //g_loopbackSocket.Init();
-
+    
     g_localServerAddress = {};
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
 
@@ -116,7 +107,6 @@ internal i32  App_Init()
 
     // server and client areas currently acquiring their own memory
     App_StartSession(APP_SESSION_TYPE_SINGLE_PLAYER);
-    //ZNet_Init(Net_GetPlatformFunctions(), Net_GetNetworkCallbacks(), ZNET_SIM_MODE_NONE);
 
     return COM_ERROR_NONE;
 }
@@ -280,6 +270,17 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     f32 interpolationTime = App_CalcInterpolationTime(
         g_simFrameAcculator, App_GetSimFrameInterval());
     
+    #if 1 // New route
+    RenderCommand* cmds;
+    i32 numCommands;
+    CL_GetRenderCommands(&cmds, &numCommands, texIndex, interpolationTime);
+
+    g_platform.SubmitRenderCommands(cmds, numCommands);
+
+    #endif
+
+    #if 0 // Old route
+    
     // offset blocks of render objects left or right to show SV and CL side by side
 
     g_worldScene.numObjects = 0;
@@ -295,6 +296,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     App_WriteDebugStrings();
     g_platform.RenderScene(&g_debugScene);
+    #endif
 }
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)

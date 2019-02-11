@@ -64,17 +64,17 @@ void R_Setup3DProjectionB(i32 fov)
 	glLoadMatrixf(prj);
 }
 
-void R_SetupProjection(RenderScene* scene)
+void R_SetupProjection(RenderSceneSettings* settings)
 {
-	switch (scene->settings.projectionMode)
+	switch (settings->projectionMode)
 	{
 		case RENDER_PROJECTION_MODE_3D:
 		{
-			R_Setup3DProjectionB(scene->settings.fov);
+			R_Setup3DProjectionB(settings->fov);
 		} break;
 		case RENDER_PROJECTION_MODE_ORTHOGRAPHIC:
 		{
-			R_SetupOrthoProjection(scene->settings.orthographicHalfHeight);
+			R_SetupOrthoProjection(settings->orthographicHalfHeight);
 		} break;
 		case RENDER_PROJECTION_MODE_IDENTITY:
 		{
@@ -83,11 +83,11 @@ void R_SetupProjection(RenderScene* scene)
 		} break;
 		case RENDER_PROJECTION_MODE_3D_OLD:
 		{
-			R_Setup3DProjectionA(scene->settings.fov);
+			R_Setup3DProjectionA(settings->fov);
 		} break;
 		default :
 		{
-			R_Setup3DProjectionB(scene->settings.fov);
+			R_Setup3DProjectionB(settings->fov);
 		} break;
 	}
 }

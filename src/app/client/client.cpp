@@ -4,6 +4,7 @@
 #include "../../common/com_module.h"
 #include "client.h"
 #include "../../interface/sys_events.h"
+#include "../../interface/renderer_interface.h"
 #include "../../sim/sim.h"
 #include "client_input.h"
 
@@ -45,6 +46,9 @@ internal InputActionSet g_inputActions = {
     g_inputActionItems,
     0
 };
+
+#define CL_MAX_RENDER_COMMANDS 1024
+internal RenderCommand* g_renderCommands;
 
 internal SimActorInput g_actorInput = {};
 
@@ -131,6 +135,9 @@ void CL_SetLocalUser(UserIds ids)
     g_clientState = CLIENT_STATE_SYNC;
 }
 
+////////////////////////////////////////////////////////////////////
+// Init
+////////////////////////////////////////////////////////////////////
 void CL_Init(ZNetAddress serverAddress)
 {
     Assert(g_clientState == CLIENT_STATE_NONE)
@@ -156,6 +163,12 @@ void CL_Init(ZNetAddress serverAddress)
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize),
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );
+
+    i32 numRenderCommandBytes = sizeof(RenderCommand) * CL_MAX_RENDER_COMMANDS;
+    u8* bytes = (u8*)CL_Malloc(numRenderCommandBytes);
+    COM_SET_ZERO(bytes, numRenderCommandBytes);
+
+    g_renderCommands = (RenderCommand*)bytes;
 
     CL_InitInputs(&g_inputActions);
 
@@ -433,4 +446,62 @@ void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f3
                 interpolateTime);
         RScene_AddRenderItem(scene, &t, &obj);
     }
+}
+
+void CL_GetRenderCommands(RenderCommand** cmds, i32* numCommands, i32 texIndex, f32 interpolateTime)
+{
+    *cmds = g_renderCommands;
+    *numCommands = 0;
+
+    i32 nextCommand = 0;
+
+    RenderCommand* cmd;
+
+    // setup scene
+    cmd = &g_renderCommands[nextCommand++];
+
+    cmd->type = REND_CMD_TYPE_SETTINGS;
+    RenderSceneSettings* s = &cmd->settings;
+    s->fov = 90;
+    s->projectionMode = RENDER_PROJECTION_MODE_3D;
+    s->orthographicHalfHeight = 8;
+    
+    Transform_SetToIdentity(&cmd->settings.cameraTransform);
+    s->cameraTransform.pos.z = 18;
+    s->cameraTransform.pos.y = 12;
+    Transform_SetRotation(
+        &cmd->settings.cameraTransform,
+        -(45 * DEG2RAD),
+        0,
+        0
+    );
+    for (i32 j = 0; j < g_sim.maxEnts; ++j)
+    {
+        if (nextCommand == CL_MAX_RENDER_COMMANDS)
+        {
+            break;
+        }
+        SimEntity* ent = &g_sim.ents[j];
+        if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        
+        RendObj obj = {};
+        MeshData* cube = COM_GetCubeMesh();
+        RendObj_SetAsMesh(
+            &obj, *cube, 0.3f, 0.3f, 1, texIndex);
+
+        Transform t = ent->t;
+        RendObj_InterpolatePosition(
+                &t.pos,
+                &ent->previousPos,
+                &ent->t.pos,
+                interpolateTime);
+        
+        // Add to command list
+        cmd = &g_renderCommands[nextCommand++];
+        cmd->type = REND_CMD_TYPE_DRAW;
+        cmd->drawItem.obj = obj;
+        cmd->drawItem.transform = t;
+    }
+
+    *numCommands = nextCommand;
 }

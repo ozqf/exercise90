@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/com_defines.h"
+#include "renderer_interface.h"
 
 struct PlatformEventHeader
 {
@@ -42,6 +43,7 @@ struct AppPlatform
 
     // Rendering
     void (*RenderScene)             (RenderScene* scene);
+    void (*SubmitRenderCommands)    (RenderCommand* commands, i32 numCommands);
     // Set the texture the debug text on the platform should use
     void (*SetDebugInputTextureIndex)  (i32 index);
 

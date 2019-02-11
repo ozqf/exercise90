@@ -43,21 +43,19 @@ struct CharArrayGeometryData
 
 #include "win32_gl_extension_defs.h"
 
-// Platform interface
-internal RendererPlatform g_platform;
-
 //////////////////////////////////////////////////////////////////////////
 // Data
 //////////////////////////////////////////////////////////////////////////
 
 // HGLRC "HandleOpenGLRenderingContext"
-HGLRC g_openglRC = NULL;
-HWND g_window = NULL;
+internal HGLRC g_openglRC = NULL;
+internal HWND g_window = NULL;
+internal ScreenInfo g_screenInfo;
+internal RendererPlatform g_platform;
 
 // Settings
-global_variable f32 win32_aspectRatio = 0;
-
-Extensions g_extensions = {};
+internal f32 win32_aspectRatio = 0;
+internal Extensions g_extensions = {};
 
 // assets
 #define NUM_TEST_TEXTURES 128

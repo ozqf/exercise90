@@ -22,6 +22,7 @@ RenderInterface __declspec(dllexport) LinkToRenderer(RendererPlatform platform)
     r.R_RenderScene = Win32_RenderFrame;
 	
 	r.R_Execute = R_Execute;
+	r.GetScreenInfo = Win32_R_GetScreenInfo;
 
     return r;
 }

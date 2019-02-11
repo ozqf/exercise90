@@ -480,7 +480,7 @@ void R_RenderEntity(RenderSceneSettings* settings, Transform* camera, RenderList
 
 void R_RenderScene(RenderScene* scene)
 {
-	R_SetupProjection(scene);
+	R_SetupProjection(&scene->settings);
 	if (scene->settings.lightBits == 0)
 	{
 		glDisable(GL_LIGHTING);

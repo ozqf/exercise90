@@ -110,9 +110,16 @@ i32 Win32_R_Shutdown()
 	return 1;
 }
 
+ScreenInfo Win32_R_GetScreenInfo()
+{
+	return g_screenInfo;
+}
+
 ////////////////////////////////////////////////////////////////////
 // FRAME LOOP
 ////////////////////////////////////////////////////////////////////
+
+// Create screen info data and clear buffers for a new frame
 ScreenInfo Win32_R_SetupFrame()
 {
 	ScreenInfo info = { 1, 1, 1 };
@@ -123,7 +130,7 @@ ScreenInfo Win32_R_SetupFrame()
         MessageBox(0, "Render", "Error", MB_OK | MB_ICONINFORMATION);
     }*/
 
-    HDC deviceContext = GetDC(g_window);
+    //HDC deviceContext = GetDC(g_window);
 
     // Clear screen
 

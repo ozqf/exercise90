@@ -48,6 +48,14 @@ void Platform_R_DrawScene(RenderScene* scene)
     }
 }
 
+void Platform_R_SubmitCommands(RenderCommand* commands, i32 numCommands)
+{
+    if (g_rendererLink.moduleState == 1)
+    {
+        g_renderer.R_Execute(commands, numCommands, &g_time);
+    }
+}
+
 void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 {
     //Win32_ReadBMPToHeap(heap, result, path);
@@ -140,6 +148,7 @@ void Win32_InitPlatformInterface()
     platInterface.SetMouseMode = Win32_SetMouseMode;
 
     platInterface.RenderScene = Platform_R_DrawScene;
+    platInterface.SubmitRenderCommands = Platform_R_SubmitCommands;
 
     platInterface.SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
 
