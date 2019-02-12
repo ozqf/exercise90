@@ -17,6 +17,8 @@ void R_ApplySceneSettings(RenderSceneSettings* settings)
 
 void R_SetViewport(RViewPort* v)
 {
+	//printf("R Set viewport: %d, %d - %d, %d\n",
+	//	v->viewPortX, v->viewPortY, v->viewPortWidth, v->viewPortHeight);
     glViewport(v->viewPortX, v->viewPortY, v->viewPortWidth, v->viewPortHeight);
 }
 

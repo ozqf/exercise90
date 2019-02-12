@@ -448,7 +448,11 @@ void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f3
     }
 }
 
-void CL_GetRenderCommands(RenderCommand** cmds, i32* numCommands, i32 texIndex, f32 interpolateTime)
+void CL_GetRenderCommands(
+	RenderCommand** cmds,
+	i32* numCommands,
+	i32 texIndex,
+	f32 interpolateTime)
 {
     *cmds = g_renderCommands;
     *numCommands = 0;
@@ -475,6 +479,16 @@ void CL_GetRenderCommands(RenderCommand** cmds, i32* numCommands, i32 texIndex, 
         0,
         0
     );
+	
+	// Set viewport
+	cmd = &g_renderCommands[nextCommand++];
+	cmd->type = REND_CMD_TYPE_SET_VIEWPORT;
+	ScreenInfo info = App_GetScreenInfo();
+	cmd->viewPort.viewPortX = 0;//info.width / 2;
+	cmd->viewPort.viewPortY = 0;
+	cmd->viewPort.viewPortWidth = info.width;// / 2;
+	cmd->viewPort.viewPortHeight = info.height;
+	
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {
         if (nextCommand == CL_MAX_RENDER_COMMANDS)
@@ -485,9 +499,12 @@ void CL_GetRenderCommands(RenderCommand** cmds, i32* numCommands, i32 texIndex, 
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
         
         RendObj obj = {};
-        MeshData* cube = COM_GetCubeMesh();
-        RendObj_SetAsMesh(
-            &obj, *cube, 0.3f, 0.3f, 1, texIndex);
+        //MeshData* cube = COM_GetCubeMesh();
+        //RendObj_SetAsMesh(
+        //    &obj, *cube, 0.3f, 0.3f, 1, texIndex);
+		
+		RendObj_SetAsAABB(
+			&obj, 1, 1, 1, 0, 1, 0);
 
         Transform t = ent->t;
         RendObj_InterpolatePosition(

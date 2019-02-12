@@ -21,6 +21,11 @@ void App_SetMouseMode(ZMouseMode mode)
 	g_platform.SetMouseMode(mode);
 }
 
+ScreenInfo App_GetScreenInfo()
+{
+	return g_screenInfo;
+}
+
 /***************************************
 * Private
 ***************************************/
@@ -263,6 +268,7 @@ internal void App_OffsetRenderObjects(RenderScene* scene, i32 firstItem, f32 x)
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
+	g_screenInfo = info;
     char* texName = "textures\\white_bordered.bmp";
     //char* texName = "textures\\W33_5.bmp";
     i32 texIndex = Tex_GetTextureIndexByName(texName);

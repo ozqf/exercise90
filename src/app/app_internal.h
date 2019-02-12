@@ -15,6 +15,7 @@
 #define APP_SESSION_TYPE_SINGLE_PLAYER 1
 
 internal AppPlatform g_platform = {};
+internal ScreenInfo g_screenInfo;
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 internal i32 g_fakeLagMinMS = 100;
