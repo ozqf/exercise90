@@ -2,6 +2,21 @@
 
 #include "../common/com_module.h"
 
+#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
+#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
+#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
+#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
+#define ACTOR_INPUT_MOVE_UP (1 << 4)
+#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
+#define ACTOR_INPUT_ATTACK (1 << 6)
+#define ACTOR_INPUT_ATTACK2 (1 << 7)
+#define ACTOR_INPUT_MOVE_SPECIAL1 (1 << 8)
+struct SimActorInput
+{
+    u32 buttons;
+    Vec3 degrees;
+};
+
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1
 #define SIM_ENT_STATUS_IN_USE 2
@@ -56,6 +71,8 @@ struct SimEntity
     Vec3 velocity;
     f32 pitch;
     f32 yaw;
+	
+	SimActorInput input;
 };
 
 struct SimEntityDef
@@ -109,20 +126,6 @@ struct SimScene
     //DoubleByteBuffer commands;
 };
 
-#define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
-#define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
-#define ACTOR_INPUT_MOVE_LEFT (1 << 2)
-#define ACTOR_INPUT_MOVE_RIGHT (1 << 3)
-#define ACTOR_INPUT_MOVE_UP (1 << 4)
-#define ACTOR_INPUT_MOVE_DOWN (1 << 5)
-#define ACTOR_INPUT_ATTACK (1 << 6)
-#define ACTOR_INPUT_ATTACK2 (1 << 7)
-#define ACTOR_INPUT_MOVE_SPECIAL1 (1 << 8)
-struct SimActorInput
-{
-    u32 buttons;
-    Vec3 degrees;
-};
 /*
 struct SimEventHeader
 {

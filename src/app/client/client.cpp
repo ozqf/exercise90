@@ -108,9 +108,11 @@ void CL_LoadTestScene()
 	
     SimEntityDef def = {};
     #if 1
+	
     def = {};
     def.isLocal = 1;
-    def.serial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
+	g_avatarSerial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
+    def.serial = g_avatarSerial;
 	def.entType = SIM_ENT_TYPE_ACTOR;
     def.pos[1] = 0;
     def.scale[0] = 1;
@@ -416,7 +418,16 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
-    CLG_HandlePlayerInput(NULL, &g_actorInput);
+    //CLG_HandlePlayerInput(NULL, &g_actorInput);
+	SimEntity* plyr = Sim_GetEnityBySerial(&g_sim, g_avatarSerial);
+	if (plyr)
+	{
+		plyr->input = g_actorInput;
+	}
+	else
+	{
+		printf("No player!\n");
+	}
     
     CLG_TickGame(&g_sim, deltaTime);
 	g_ticks++;
@@ -435,15 +446,25 @@ void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f3
 
         RendObj obj = {};
         MeshData* cube = COM_GetCubeMesh();
-		if (ent->id.serial > 0)
+		switch (ent->entType)
 		{
-			RendObj_SetAsMesh(
-				&obj, *cube, 0.3f, 0.3f, 1, texIndex);
-		}
-		else
-		{
-			RendObj_SetAsMesh(
-				&obj, *cube, 0.2f, 0.2f, 0.2f, texIndex);
+			case SIM_ENT_TYPE_WORLD:
+			{
+				RendObj_SetAsMesh(
+					&obj, *cube, 0.2f, 0.2f, 0.2f, texIndex);
+			} break;
+			
+			case SIM_ENT_TYPE_ACTOR:
+			{
+				RendObj_SetAsMesh(
+					&obj, *cube, 0.2f, 1, 0.2f, texIndex);
+			} break;
+			
+			default:
+			{
+				RendObj_SetAsMesh(
+					&obj, *cube, 0.3f, 0.3f, 1, texIndex);
+			} break;
 		}
         
 

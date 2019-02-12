@@ -46,7 +46,28 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
-
+	Vec3 move = {};
+	f32 speed = 5.0f;
+	if (ent->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
+	{
+		move.z -= speed * deltaTime;
+	}
+	if (ent->input.buttons & ACTOR_INPUT_MOVE_BACKWARD)
+	{
+		move.z += speed * deltaTime;
+	}
+	if (ent->input.buttons & ACTOR_INPUT_MOVE_LEFT)
+	{
+		move.x -= speed * deltaTime;
+	}
+	if (ent->input.buttons & ACTOR_INPUT_MOVE_RIGHT)
+	{
+		move.x += speed * deltaTime;
+	}
+	ent->previousPos = ent->t.pos;
+	ent->t.pos.x += move.x;
+	ent->t.pos.y += move.y;
+	ent->t.pos.z += move.z;
 }
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
