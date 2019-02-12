@@ -435,17 +435,39 @@ void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f3
 
         RendObj obj = {};
         MeshData* cube = COM_GetCubeMesh();
-        RendObj_SetAsMesh(
-            &obj, *cube, 0.3f, 0.3f, 1, texIndex);
+		if (ent->id.serial > 0)
+		{
+			RendObj_SetAsMesh(
+				&obj, *cube, 0.3f, 0.3f, 1, texIndex);
+		}
+		else
+		{
+			RendObj_SetAsMesh(
+				&obj, *cube, 0.2f, 0.2f, 0.2f, texIndex);
+		}
+        
 
         Transform t = ent->t;
-        RendObj_InterpolatePosition(
+		RendObj_InterpolatePosition(
                 &t.pos,
                 &ent->previousPos,
                 &ent->t.pos,
                 interpolateTime);
         RScene_AddRenderItem(scene, &t, &obj);
     }
+}
+
+void CL_CopyCameraTransform(Transform* target)
+{
+	Transform_SetToIdentity(target);
+    target->pos.z = 18;
+    target->pos.y = 12;
+    Transform_SetRotation(
+        target,
+        -(45 * DEG2RAD),
+        0,
+        0
+    );
 }
 
 void CL_GetRenderCommands(
@@ -470,7 +492,9 @@ void CL_GetRenderCommands(
     s->projectionMode = RENDER_PROJECTION_MODE_3D;
     s->orthographicHalfHeight = 8;
     
-    Transform_SetToIdentity(&cmd->settings.cameraTransform);
+	CL_CopyCameraTransform(&cmd->settings.cameraTransform);
+	
+    /*Transform_SetToIdentity(&cmd->settings.cameraTransform);
     s->cameraTransform.pos.z = 18;
     s->cameraTransform.pos.y = 12;
     Transform_SetRotation(
@@ -478,7 +502,7 @@ void CL_GetRenderCommands(
         -(45 * DEG2RAD),
         0,
         0
-    );
+    );*/
 	
 	// Set viewport
 	cmd = &g_renderCommands[nextCommand++];

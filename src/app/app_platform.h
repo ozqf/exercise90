@@ -276,7 +276,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     f32 interpolationTime = App_CalcInterpolationTime(
         g_simFrameAcculator, App_GetSimFrameInterval());
     
-    #if 1 // New route
+    #if 0 // New route
     RenderCommand* cmds;
     i32 numCommands;
     CL_GetRenderCommands(&cmds, &numCommands, texIndex, interpolationTime);
@@ -285,17 +285,17 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     #endif
 
-    #if 0 // Old route
+    #if 1 // Old route
     
     // offset blocks of render objects left or right to show SV and CL side by side
 
     g_worldScene.numObjects = 0;
     SV_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, 1);
-    App_OffsetRenderObjects(&g_worldScene, 0, -10);
+    //App_OffsetRenderObjects(&g_worldScene, 0, -10);
 
     i32 firstCLObject = g_worldScene.numObjects;
     CL_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, interpolationTime);
-    App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
+    //App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
     
 
     g_platform.RenderScene(&g_worldScene);

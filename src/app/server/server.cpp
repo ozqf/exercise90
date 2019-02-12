@@ -384,9 +384,12 @@ void SV_PopulateRenderScene(
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
 
         RendObj obj = {};
-        MeshData* cube = COM_GetCubeMesh();
-        RendObj_SetAsMesh(
-            &obj, *cube, 1, 0, 0, texIndex);
+        //MeshData* cube = COM_GetCubeMesh();
+        //RendObj_SetAsMesh(
+        //    &obj, *cube, 1, 0, 0, texIndex);
+        RendObj_SetAsAABB(
+			&obj, 1, 1, 1, 0, 1, 0);
+        
         RScene_AddRenderItem(scene, &ent->t, &obj);
     }
 }

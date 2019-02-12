@@ -11,6 +11,7 @@
 void    CL_Init(ZNetAddress serverAddress);
 void    CL_Shutdown();
 i32     CL_IsRunning();
+void	CL_CopyCameraTransform(Transform* target);
 void    CL_Tick(
 			ByteBuffer* sysEvents,
 			f32 deltaTime,
