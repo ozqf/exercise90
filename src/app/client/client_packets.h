@@ -6,7 +6,7 @@ Read/Write packets for client
 #include "../packet.h"
 #include "../../interface/sys_events.h"
 
-internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
+internal i32 CL_WriteUnreliableSection(ByteBuffer* packet, C2S_Input* userInput)
 {
     u8* start = packet->ptrWrite;
     // Send ping
@@ -16,10 +16,15 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet)
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_elapsed;
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+	
+	// TODO: Encode userInput
+	packet->ptrWrite += COM_COPY(
+		userInput, packet->ptrWrite, userInput->header.size);
+	
     return (packet->ptrWrite - start);
 }
 
-internal void CL_WritePacket(f32 time)
+internal void CL_WritePacket(f32 time, C2S_Input* userInput)
 {
     #if 1
 	//printf("CL Write packet for user %d\n", g_ids.privateId);
@@ -40,7 +45,7 @@ internal void CL_WritePacket(f32 time)
 	//TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 	//	g_reliableStream.transmissions, packetSequence);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
-    i32 unreliableWritten = CL_WriteUnreliableSection(&packet);
+    i32 unreliableWritten = CL_WriteUnreliableSection(&packet, userInput);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
 	

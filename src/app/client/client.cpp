@@ -428,12 +428,16 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	{
 		printf("No player!\n");
 	}
-    
+	
     CLG_TickGame(&g_sim, deltaTime);
+	
+	C2S_Input cmd;
+	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_ticks);
+    
 	g_ticks++;
 	g_serverTick++;
     g_elapsed += deltaTime;
-    CL_WritePacket(g_elapsed);
+    CL_WritePacket(g_elapsed, &cmd);
 }
 
 void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)

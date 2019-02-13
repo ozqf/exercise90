@@ -11,6 +11,7 @@
 #define CMD_TYPE_S2C_SPAWN_ENTITY 252
 #define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
 #define CMD_TYPE_S2C_SYNC 250
+#define CMD_TYPE_C2S_INPUT 249
 
 struct CmdPing
 {
@@ -35,6 +36,34 @@ internal void Cmd_InitSync(S2C_Sync* cmd, i32 tick, i32 sequence, i32 simTick, i
     cmd->header.size = sizeof(S2C_Sync);
     cmd->simTick = simTick;
     cmd->jitterTickCount = jitterTickCount;
+}
+
+struct C2S_Input
+{
+	Command header;
+	SimActorInput input;
+	Vec3 avatarPos;
+};
+
+internal void Cmd_InitClientInput(
+	C2S_Input* cmd,
+	SimActorInput* input,
+	Vec3* avatarPos,
+	i32 tick
+	)
+{
+	*cmd = {};
+	Cmd_Prepare(&cmd->header, tick, 0);
+	cmd->header.type = CMD_TYPE_C2S_INPUT;
+	cmd->header.size = sizeof(C2S_Input);
+	if (input)
+	{
+		cmd->input = *input;
+	}
+	if (avatarPos)
+	{
+		cmd->avatarPos = *avatarPos;
+	}
 }
 
 struct S2C_SpawnEntity
