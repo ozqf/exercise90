@@ -25,3 +25,6 @@ void Transform_SetScaleZ(Transform* t, f32 scaleZ);
 f32 Transform_GetScaleX(Transform* t);
 f32 Transform_GetScaleY(Transform* t);
 f32 Transform_GetScaleZ(Transform* t);
+Vec3 Transform_GetForward(Transform* t);
+Vec3 Transform_GetLeft(Transform* t);
+Vec3 Transform_GetUp(Transform* t);

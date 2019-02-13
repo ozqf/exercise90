@@ -294,7 +294,9 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     //App_OffsetRenderObjects(&g_worldScene, 0, -10);
 
     i32 firstCLObject = g_worldScene.numObjects;
-    CL_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, interpolationTime);
+    CL_PopulateRenderScene(
+        &g_worldScene.cameraTransform,
+        &g_worldScene, g_worldScene.maxObjects, texIndex, interpolationTime);
     //App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
     
 

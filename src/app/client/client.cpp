@@ -37,6 +37,8 @@ internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
 
+internal Vec3 g_testHitPos = { 0, 2, 0 };
+
 // Menus
 internal i32 g_mainMenuOn;
 
@@ -440,16 +442,46 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_WritePacket(g_elapsed, &cmd);
 }
 
-void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
+void CL_PopulateRenderScene(Transform* cam, RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
 {
+    Transform t;
+    Transform_SetToIdentity(&t);
+    RendObj obj = {};
+    MeshData* cube = COM_GetCubeMesh();
 
+    // Vec3 forward = 
+    // {
+    //     -cam->rotation.zAxis.x,
+    //     -cam->rotation.zAxis.y,
+    //     -cam->rotation.zAxis.z
+    // };
+    Vec3 forward = Transform_GetForward(cam);
+    forward.x *= 12;
+    forward.y *= 12;
+    forward.z *= 12;
+
+    t.pos = 
+    {
+        cam->pos.x + forward.x,
+        cam->pos.y + forward.y,
+        cam->pos.z + forward.z,
+    };
+
+    // Hit test
+    RendObj_SetAsMesh(
+		&obj, *cube, 1, 0, 1, texIndex);
+    //t.pos = g_testHitPos;
+
+    RScene_AddRenderItem(scene, &t, &obj);
+
+    // Sim Entities
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {
+        if (scene->numObjects >= scene->maxObjects) { break; }
+
         SimEntity* ent = &g_sim.ents[j];
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
-
-        RendObj obj = {};
-        MeshData* cube = COM_GetCubeMesh();
+        
 		switch (ent->entType)
 		{
 			case SIM_ENT_TYPE_WORLD:
@@ -471,8 +503,7 @@ void CL_PopulateRenderScene(RenderScene* scene, i32 maxObjects, i32 texIndex, f3
 			} break;
 		}
         
-
-        Transform t = ent->t;
+        t = ent->t;
 		RendObj_InterpolatePosition(
                 &t.pos,
                 &ent->previousPos,

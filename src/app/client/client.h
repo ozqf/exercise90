@@ -17,6 +17,7 @@ void    CL_Tick(
 			f32 deltaTime,
 			u32 platformFrame);
 void    CL_PopulateRenderScene(
+			Transform* cam,
 			RenderScene* scene,
 			i32 maxObjects,
 			i32 texIndex,

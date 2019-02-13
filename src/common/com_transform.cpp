@@ -139,3 +139,34 @@ void Transform_SetByPosAndDegrees(Transform* t, Vec3* pos, Vec3* degrees)
 	Transform_RotateX(t, degrees->x * DEG2RAD);
     Transform_SetPosition(t, pos->x, pos->y, pos->z);
 }
+
+/////////////////////////////////////////////////////////////////////
+// Retrieve Orientation info
+/////////////////////////////////////////////////////////////////////
+
+Vec3 Transform_GetForward(Transform* t)
+{
+    return {
+        -t->rotation.zAxis.x,
+        -t->rotation.zAxis.y,
+        -t->rotation.zAxis.z
+    };
+}
+
+Vec3 Transform_GetLeft(Transform* t)
+{
+    return {
+        t->rotation.xAxis.x,
+        t->rotation.xAxis.y,
+        t->rotation.xAxis.z
+    };
+}
+
+Vec3 Transform_GetUp(Transform* t)
+{
+    return {
+        t->rotation.yAxis.x,
+        t->rotation.yAxis.y,
+        t->rotation.yAxis.z
+    };
+}
