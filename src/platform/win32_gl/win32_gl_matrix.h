@@ -39,7 +39,8 @@ void R_SetupOrthoProjection(f32 halfScreenHeight)
 	// printf("Setup ortho projection %.2f by %.2f, near %.2f far %.2f\n",
 	// 	halfWidth, halfHeight, prjNear, prjFar
 	// );
-	M4x4_SetOrthoProjection(prj, -halfWidth, halfWidth, -halfHeight, halfHeight, prjNear, prjFar);
+	M4x4_SetOrthoProjection(
+		prj, -halfWidth, halfWidth, -halfHeight, halfHeight, prjNear, prjFar);
 	//M4x4_SetOrthoProjection(prj, -0.5, 0.5, -0.5, 0.5, 0, 10);
 	//glOrtho(-0.5, 0.5, 0.5, 0.5, 0, 1000);
 	glLoadMatrixf(prj);
@@ -98,7 +99,8 @@ void R_SetupProjection(RenderSceneSettings* settings)
 ////////////////////////////////////////////////////////////////////
 
 // DO NOT CHANGE - This actually works!
-void R_SetViewModelMatrixByEuler(RenderSceneSettings* settings, Transform* view, Transform* model)
+void R_SetViewModelMatrixByEuler(
+	RenderSceneSettings* settings, Transform* view, Transform* model)
 {
 	
 	#if 0
@@ -449,7 +451,8 @@ void R_SetModelViewMatrix(RenderSceneSettings* settings, Transform *view, Transf
 // ModelView - Billboard
 // Faces the camera (more or less)
 ////////////////////////////////////////////////////////////////////
-void R_SetModelViewMatrix_Billboard(RenderSceneSettings* settings, Transform *view, Transform *model)
+void R_SetModelViewMatrix_Billboard(
+	RenderSceneSettings* settings, Transform *view, Transform *model)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

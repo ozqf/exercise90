@@ -91,7 +91,7 @@ void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude);
 void Vec3_CrossProduct(Vec3* a, Vec3* b, Vec3* result);
 f32 Vec3_DotProduct(Vec3* a, Vec3* b);
 void Vec3_NormaliseOrForward(Vec3* v);
-
+Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m);
 
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 3 OPERATIONS

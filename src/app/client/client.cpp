@@ -38,6 +38,7 @@ internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
 
 internal Vec3 g_testHitPos = { 0, 2, 0 };
+internal M4x4 g_matrix;
 
 // Menus
 internal i32 g_mainMenuOn;
@@ -92,6 +93,20 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
 	str->length = written;
 }
 
+internal void CL_WriteTransformDebug(ZStringHeader* str)
+{
+	char* chars = str->chars;
+	i32 written = 0;
+    f32* m = g_matrix.cells;
+    written += sprintf_s(chars, str->maxLength,
+        "MATRIX:\n%.3f, %.3f, %.3f, %.3f\n%.3f, %.3f, %.3f, %.3f\n%.3f, %.3f, %.3f, %.3f\n%.3f, %.3f, %.3f, %.3f\n",
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
+    );
+}
+
 internal void CL_WriteCameraDebug(ZStringHeader* str)
 {
 	
@@ -100,8 +115,8 @@ internal void CL_WriteCameraDebug(ZStringHeader* str)
 void CL_WriteDebugString(ZStringHeader* str)
 {
 	CL_WriteNetworkDebug(str);
-	
-	
+	CL_WriteTransformDebug(str);
+	CL_WriteCameraDebug(str);
 }
 
 internal void* CL_Malloc(i32 numBytes)
@@ -493,8 +508,8 @@ void CL_PopulateRenderScene(
 	percentX = (percentX * 2.0f) - 1.0f;
 	percentY = (percentY * 2.0f) - 1.0f;
 	
-	printf("Mouse scr Percent %.3f, %.3f\n",
-		percentX, percentY);
+	//printf("Mouse scr Percent %.3f, %.3f\n",
+	//	percentX, percentY);
 	
     Vec3 forward = Transform_GetForward(cam);
     //forward.x *= 0.5f;
@@ -525,13 +540,31 @@ void CL_PopulateRenderScene(
 	t.pos.x += up.x;
 	t.pos.y += up.y;
 	t.pos.z += up.z;
+    
+    Transform t2 = t;
+    t2.pos.x += forward.x;
+    t2.pos.y += forward.y;
+    t2.pos.z += forward.z;
+
+    Transform t3 = t2;
+    t3.pos.x += forward.x;
+    t3.pos.y += forward.y;
+    t3.pos.z += forward.z;
+    f32 m[16];
+    M4x4_SetToIdentity(m);
+    COM_SetupDefault3DProjection(m, scr.aspectRatio);
+    t3.pos = Vec3_MultiplyByM4x4(&t3.pos, m);
+    g_matrix = *(M4x4*)m;
 	
     RendObj_SetAsMesh(
 		&obj, *cube, 1, 0, 1, texIndex);
     //t.pos = g_testHitPos;
 
     RScene_AddRenderItem(scene, &t, &obj);
+    RScene_AddRenderItem(scene, &t2, &obj);
+    RScene_AddRenderItem(scene, &t3, &obj);
 
+    //////////////////////////////////////////////////////////////////////
     // Sim Entities
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {

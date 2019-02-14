@@ -144,10 +144,14 @@ void Vec3_NormaliseOrForward(Vec3* v)
     v->z = v->z /= mag;
 }
 
-Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m4x4)
+Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m)
 {
 	Vec3 r;
-	r.x = () + () + () + ();
+    f32 w = 1;
+    r = {};
+	r.x = (m[M4x4_X0] * v->x) + (m[M4x4_Y0] * v->y) + (m[M4x4_Z0] * v->z) + (m[M4x4_W0] * w);
+	r.y = (m[M4x4_X1] * v->x) + (m[M4x4_Y1] * v->y) + (m[M4x4_Z1] * v->z) + (m[M4x4_W1] * w);
+	r.z = (m[M4x4_X2] * v->x) + (m[M4x4_Y2] * v->y) + (m[M4x4_Z2] * v->z) + (m[M4x4_W2] * w);
 	return r;
 }
 
