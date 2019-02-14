@@ -10,6 +10,7 @@
 #define REND_CMD_TYPE_SET_VIEWPORT 2
 #define REND_CMD_TYPE_END 3
 #define REND_CMD_TYPE_DRAW 4
+#define REND_CMD_TYPE_PROJECTION 5
 
 struct RViewPort
 {
@@ -28,5 +29,6 @@ struct RenderCommand
 		RenderSceneSettings settings;
 		RViewPort viewPort;
 		RenderListItem drawItem;
+		M4x4 projection;
 	};
 };

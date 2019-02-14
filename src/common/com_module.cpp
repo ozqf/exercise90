@@ -21,10 +21,11 @@
 #include "com_bitpack.cpp"
 #include "com_net_types.cpp"
 
-#include "com_render_types.cpp"
 #include "com_collision.cpp"
 #include "com_heap/com_heap.cpp"
 #include "com_assets.cpp"
 #include "com_debug.cpp"
 #include "com_variables.cpp"
+#include "com_render/com_render_types.cpp"
+#include "com_render/com_render_utils.cpp"
 #include "com_debug.cpp"

@@ -22,6 +22,12 @@ void R_SetViewport(RViewPort* v)
     glViewport(v->viewPortX, v->viewPortY, v->viewPortWidth, v->viewPortHeight);
 }
 
+void R_ExecSetProjection(f32* m4x4)
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(m4x4);
+}
+
 void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
 {
     #if 1
@@ -55,6 +61,11 @@ void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
             {
 
             } break;
+			
+			case REND_CMD_TYPE_PROJECTION:
+			{
+				R_ExecSetProjection(cmd->projection.cells);
+			} break;
 		}
 	}
     #endif

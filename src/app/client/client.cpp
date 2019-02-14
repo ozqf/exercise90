@@ -596,10 +596,10 @@ void CL_GetRenderCommands(
     i32 nextCommand = 0;
 
     RenderCommand* cmd;
+    ScreenInfo info = App_GetScreenInfo();
 
     // setup scene
     cmd = &g_renderCommands[nextCommand++];
-
     cmd->type = REND_CMD_TYPE_SETTINGS;
     RenderSceneSettings* s = &cmd->settings;
     s->fov = 90;
@@ -607,6 +607,11 @@ void CL_GetRenderCommands(
     s->orthographicHalfHeight = 8;
     
 	CL_CopyCameraTransform(&cmd->settings.cameraTransform);
+
+    // setup projection - must be done after settings
+    cmd = &g_renderCommands[nextCommand++];
+    cmd->type = REND_CMD_TYPE_PROJECTION;
+    COM_SetupDefault3DProjection(cmd->projection.cells, 1);//info.aspectRatio);
 	
     /*Transform_SetToIdentity(&cmd->settings.cameraTransform);
     s->cameraTransform.pos.z = 18;
@@ -621,7 +626,6 @@ void CL_GetRenderCommands(
 	// Set viewport
 	cmd = &g_renderCommands[nextCommand++];
 	cmd->type = REND_CMD_TYPE_SET_VIEWPORT;
-	ScreenInfo info = App_GetScreenInfo();
 	cmd->viewPort.viewPortX = 0;//info.width / 2;
 	cmd->viewPort.viewPortY = 0;
 	cmd->viewPort.viewPortWidth = info.width;// / 2;

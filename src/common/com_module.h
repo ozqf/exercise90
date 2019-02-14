@@ -8,7 +8,7 @@
 #include "com_memory_utils.h"
 #include "com_string_utils.h"
 #include "com_command_types.h"
-#include "com_render_types.h"
+#include "com_render/com_render_types.h"
 #include "com_bitpack.h"
 #include "com_random.h"
 #include "com_maths.h"
@@ -24,6 +24,7 @@
 #include "com_variables.h"
 #include "com_text_command_buffer.h"
 #include "com_input.h"
+#include "com_render/com_render_utils.h"
 #include "com_debug.h"
 
 /*

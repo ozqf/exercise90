@@ -144,9 +144,16 @@ void Vec3_NormaliseOrForward(Vec3* v)
     v->z = v->z /= mag;
 }
 
+Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m4x4)
+{
+	Vec3 r;
+	r.x = () + () + () + ();
+	return r;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
-// VECTOR 3 OPERATIONS
+// VECTOR 4 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////
 
 f32 Vec4_Magnitude(Vec4* v)

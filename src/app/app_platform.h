@@ -277,7 +277,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     f32 interpolationTime = App_CalcInterpolationTime(
         g_simFrameAcculator, App_GetSimFrameInterval());
     
-    #if 0 // New route
+    #if 1 // New route
     RenderCommand* cmds;
     i32 numCommands;
     CL_GetRenderCommands(&cmds, &numCommands, texIndex, interpolationTime);
@@ -286,7 +286,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     #endif
 
-    #if 1 // Old route
+    #if 0 // Old route
     
     // offset blocks of render objects left or right to show SV and CL side by side
 
