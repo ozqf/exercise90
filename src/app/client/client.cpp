@@ -59,7 +59,7 @@ internal SimActorInput g_actorInput = {};
 
 i32 CL_IsRunning() { return g_isRunning; }
 
-void CL_WriteDebugString(ZStringHeader* str)
+internal void CL_WriteNetworkDebug(ZStringHeader* str)
 {
 	char* chars = str->chars;
 	i32 written = 0;
@@ -71,7 +71,8 @@ void CL_WriteDebugString(ZStringHeader* str)
     SimEntity* ent =  Sim_GetEnityBySerial(&g_sim, -1);
     if (ent)
     {
-        written += sprintf_s(chars + written, str->maxLength, "World vol pos Y: %.3f\n", ent->t.pos.y);
+        written += sprintf_s(chars + written, str->maxLength,
+			"World vol pos Y: %.3f\n", ent->t.pos.y);
     }
 	#if 0
 	// currently overflows debug text buffer:
@@ -82,12 +83,25 @@ void CL_WriteDebugString(ZStringHeader* str)
 		{
 			f32 time = rec->receivedTime - rec->sentTime;
 			written += sprintf_s(chars + written, str->maxLength,
-				"%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
+				"%.3f Sent: %.3f Rec: %.3f\n",
+				time, rec->sentTime, rec->receivedTime
             );
 		}
 	}
 	#endif
 	str->length = written;
+}
+
+internal void CL_WriteCameraDebug(ZStringHeader* str)
+{
+	
+}
+
+void CL_WriteDebugString(ZStringHeader* str)
+{
+	CL_WriteNetworkDebug(str);
+	
+	
 }
 
 internal void* CL_Malloc(i32 numBytes)
@@ -168,7 +182,8 @@ void CL_Init(ZNetAddress serverAddress)
         Buf_FromMalloc(CL_Malloc(cmdBufferSize), cmdBufferSize)
     );
 
-    i32 numRenderCommandBytes = sizeof(RenderCommand) * CL_MAX_RENDER_COMMANDS;
+    i32 numRenderCommandBytes = sizeof(RenderCommand) *
+		CL_MAX_RENDER_COMMANDS;
     u8* bytes = (u8*)CL_Malloc(numRenderCommandBytes);
     COM_SET_ZERO(bytes, numRenderCommandBytes);
 
@@ -211,7 +226,8 @@ internal void CL_ReadReliableCommands(NetStream* stream)
     }
 }
 #endif
-internal void CL_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
+internal void CL_ReadSystemEvents(
+	ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 {
     //printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
     u8* read = sysEvents->ptrStart;
@@ -288,7 +304,10 @@ internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
         {
             S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
-                prj->def.projType, prj->def.tick, prj->def.tick - CL_GetServerTick(), prj->header.tick
+                prj->def.projType,
+				prj->def.tick,
+				prj->def.tick - CL_GetServerTick(),
+				prj->header.tick
             );
             // flip diff to specify fast forwarding
             Sim_ExecuteProjectileSpawn(&g_sim, &prj->def, -tickDiff);
@@ -338,7 +357,8 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 	for (;;)
 	{
 		i32 sequence = stream->inputSequence;
-		Command* h = Stream_FindMessageBySequence(b->ptrStart, b->Written(), sequence);
+		Command* h = Stream_FindMessageBySequence(
+			b->ptrStart, b->Written(), sequence);
         // No commands to run
 		if (!h) { break; }
 
@@ -442,32 +462,70 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_WritePacket(g_elapsed, &cmd);
 }
 
-void CL_PopulateRenderScene(Transform* cam, RenderScene* scene, i32 maxObjects, i32 texIndex, f32 interpolateTime)
+void CL_PopulateRenderScene(
+	Transform* cam,
+	RenderScene* scene,
+	i32 maxObjects,
+	i32 texIndex,
+	f32 interpolateTime)
 {
     Transform t;
     Transform_SetToIdentity(&t);
     RendObj obj = {};
     MeshData* cube = COM_GetCubeMesh();
-
-    // Vec3 forward = 
-    // {
-    //     -cam->rotation.zAxis.x,
-    //     -cam->rotation.zAxis.y,
-    //     -cam->rotation.zAxis.z
-    // };
+	
+	
+    // Hit test
+	i32 mouseScrX = Input_GetActionValue(
+		&g_inputActions, "Mouse Pos X");
+	i32 mouseScrY = Input_GetActionValue(
+		&g_inputActions, "Mouse Pos Y");
+	ScreenInfo scr = App_GetScreenInfo();
+	
+	// screen pos in 0 to 1 range
+	f32 percentX = (f32)mouseScrX / (f32)scr.width;
+	f32 percentY = (f32)mouseScrY / (f32)scr.height;
+	
+	// flip y axis
+	percentY = (1 - percentY);
+	
+	// convert to -1 to +1 range
+	percentX = (percentX * 2.0f) - 1.0f;
+	percentY = (percentY * 2.0f) - 1.0f;
+	
+	printf("Mouse scr Percent %.3f, %.3f\n",
+		percentX, percentY);
+	
     Vec3 forward = Transform_GetForward(cam);
-    forward.x *= 12;
-    forward.y *= 12;
-    forward.z *= 12;
+    //forward.x *= 0.5f;
+    //forward.y *= 0.5f;
+    //forward.z *= 0.5f;
+	
+    Vec3 left = Transform_GetLeft(cam);
+    left.x *= (percentX * scr.aspectRatio);
+    left.y *= (percentX * scr.aspectRatio);
+    left.z *= (percentX * scr.aspectRatio);
+
+    Vec3 up = Transform_GetUp(cam);
+    up.x *= percentY;
+    up.y *= percentY;
+    up.z *= percentY;
 
     t.pos = 
     {
         cam->pos.x + forward.x,
         cam->pos.y + forward.y,
-        cam->pos.z + forward.z,
+        cam->pos.z + forward.z
     };
-
-    // Hit test
+	t.scale = { 0.2f, 0.2f, 0.2f };
+	t.pos.x += left.x;
+	t.pos.y += left.y;
+	t.pos.z += left.z;
+	
+	t.pos.x += up.x;
+	t.pos.y += up.y;
+	t.pos.z += up.z;
+	
     RendObj_SetAsMesh(
 		&obj, *cube, 1, 0, 1, texIndex);
     //t.pos = g_testHitPos;

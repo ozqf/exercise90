@@ -105,7 +105,8 @@ internal i32  App_Init()
     g_localServerAddress.port = APP_SERVER_LOOPBACK_PORT;
 
     // Render Scenes - orient camera
-    RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS);
+    RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
+		90, RENDER_PROJECTION_MODE_3D, 8);
     g_worldScene.cameraTransform.pos.z = 18;
     g_worldScene.cameraTransform.pos.y += 12;
     Transform_SetRotation(&g_worldScene.cameraTransform, -(45    * DEG2RAD), 0, 0);
