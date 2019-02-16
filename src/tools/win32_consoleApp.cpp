@@ -8,10 +8,11 @@
 #include <stdio.h>
 
 #include "../common/com_module.h"
+#include "tests/tests.h"
 
 // #include "../Platform/win32_system_include.h"
 
-#include "tests/test_command_stream.h"
+//#include "tests/test_command_stream.h"
 
 internal void Test_FatalError(char* message, char* heading)
 {
@@ -22,9 +23,9 @@ internal void Test_FatalError(char* message, char* heading)
 int main(i32 argc, char* argv[])
 {
     COM_SetFatalError(Test_FatalError);
-
-    TestCommandStream();
-    TestAcks();
+    Tests_Run(argc, argv);
+    //TestCommandStream();
+    //TestAcks();
     return 0;
 }
 
