@@ -70,6 +70,8 @@ struct Vec4;
 struct M3x3;
 struct M4x4;
 
+#define M4x4_CREATE(varName) M4x4 varName##; M4x4_SetToIdentity(##varName.cells##);
+
 //internal i32 g_z_inf = 0x7F800000;
 f32 ZINFINITY();
 
@@ -129,9 +131,9 @@ void M4x4_SetZ(f32* m, f32 z0, f32 z1, f32 z2, f32 z3);
 void M4x4_SetW(f32* m, f32 w0, f32 w1, f32 w2, f32 w3);
 void M4x4_Multiply(f32* m0, f32* m1, f32* result);
 void M4x4_Copy(f32* src, f32* tar);
-void M4x4_RotateX(f32* m, f32 degreesY);
-void M4x4_RotateY(f32* m, f32 degreesY);
-void M4x4_RotateZ(f32* m, f32 degreesY);
+void M4x4_RotateX(f32* m, f32 radiansX);
+void M4x4_RotateY(f32* m, f32 radiansY);
+void M4x4_RotateZ(f32* m, f32 radiansY);
 f32 M4x4_GetAngleX(f32* m);
 f32 M4x4_GetAngleY(f32* m);
 f32 M4x4_GetAngleZ(f32* m);
@@ -142,6 +144,7 @@ Vec3 M4x4_GetEulerAnglesDegrees(f32* m);
 void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw);
 void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom);
 void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f32 prjNear, f32 prjFar);
+void M4x4_SetToScaling(f32* m, f32 x, f32 y, f32 z);
 
 void M4x4_Invert(f32* src);
 void M4x4_ClearPosition(f32* src);

@@ -395,7 +395,6 @@ void M3x3_ClearTinyValues(f32* m, f32 cap)
 /////////////////////////////////////////////////////////////////////////////
 void M4x4_SetToIdentity(f32* m)
 {
-    *m = {};
     m[M4x4_X0] = 1;
     m[M4x4_X1] = 0;
     m[M4x4_X2] = 0;
@@ -607,6 +606,29 @@ void M4x4_ClearPosition(f32* src)
 //     Vec4_SetMagnitude(&mat->yAxis, y);
 //     Vec4_SetMagnitude(&mat->zAxis, z);
 // }
+
+void M4x4_SetToScaling(f32* m, f32 x, f32 y, f32 z)
+{
+    m[M4x4_X0] = x;
+    m[M4x4_X1] = 0;
+    m[M4x4_X2] = 0;
+    m[M4x4_X3] = 0;
+
+    m[M4x4_Y0] = 0;
+    m[M4x4_Y1] = y;
+    m[M4x4_Y2] = 0;
+    m[M4x4_Y3] = 0;
+
+    m[M4x4_Z0] = 0;
+    m[M4x4_Z1] = 0;
+    m[M4x4_Z2] = z;
+    m[M4x4_Z3] = 0;
+
+    m[M4x4_W0] = 0;
+    m[M4x4_W1] = 0;
+    m[M4x4_W2] = 0;
+    m[M4x4_W3] = 1;
+}
 
 void M4x4_RotateX(f32* m, f32 radiansX)
 {
