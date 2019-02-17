@@ -47,17 +47,36 @@ void Tests_Run(i32 argc, char* argv[])
     PrintM4x4(rotM.cells, 1, "RotM");
     Vec3 v = { 1, 0, 0 };
     PrintVec3(&v, "Vector");
-    Vec3 v90 = Vec3_MultiplyByM4x4(&v, rotM.cells);
-    PrintVec3(&v90, "Vector result");
+    // Rotate the vector by 45 degrees
+    Vec3 v_45 = Vec3_MultiplyByM4x4(&v, rotM.cells);
+    PrintVec3(&v_45, "Vector result");
 
+    // create another 45 degree rotation matrix
+    // now the vector is turned 90 degrees to align with the
+    // Y axis
     M4x4 rot2;
     M4x4_SetToIdentity(rot2.cells);
     M4x4_RotateY(rot2.cells, 45 * DEG2RAD);
     M4x4_Multiply(rotM.cells, rot2.cells, rot2.cells);
     PrintM4x4(rot2.cells, 1, "Rot2");
+    Vec3 v_90 = Vec3_MultiplyByM4x4(&v, rot2.cells);
+    PrintVec3(&v_90, "Vector");
+
+    // create a matrix combining the results of the two 45 degree
+    // rotations with another 90 degree rotation.
+    // vector is now flipped on x axis when multiplied by the matrix
+    M4x4_CREATE(rot3);
+    M4x4_RotateY(rot3.cells, 90 * DEG2RAD);
+    M4x4_Multiply(rot2.cells, rot3.cells, rot3.cells);
+    Vec3 v_180 = Vec3_MultiplyByM4x4(&v, rot3.cells);
+    PrintVec3(&v_180, "Vector");
 
     M4x4_CREATE(scaleM)
     M4x4_SetToScaling(scaleM.cells, 4, 4, 4);
+    M4x4_CREATE(rotAndScale)
+    M4x4_Multiply(rot3.cells, scaleM.cells, rotAndScale.cells);
+    Vec3 v_180AndScale = Vec3_MultiplyByM4x4(&v, rotAndScale.cells);
+    PrintVec3(&v_180AndScale, "Vector");
 }
 
 #endif

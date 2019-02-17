@@ -138,7 +138,7 @@ void R_SetViewModelMatrixByEuler(
 	glRotatef(modelRot.x, 1, 0, 0);
 	glRotatef(modelRot.z, 0, 0, 1);
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
-
+	/*
 	glPushMatrix();
 	glLoadIdentity();
 	#if 1
@@ -160,6 +160,7 @@ void R_SetViewModelMatrixByEuler(
 	}
 	#endif
 	glPopMatrix();
+	*/
 }
 
 // BROKEN
