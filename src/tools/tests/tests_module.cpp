@@ -31,15 +31,8 @@ internal void PrintVec3(Vec3* v, char* label)
     printf("%s: %.3f, %.3f, %.3f\n", label, v->x, v->y, v->z);
 }
 
-void Tests_Run(i32 argc, char* argv[])
+void MatrixBasics()
 {
-    M4x4 m = {};
-    COM_SetupDefault3DProjection(m.cells, 16.0f / 9.0f);
-    M4x4 I;
-    M4x4_SetToIdentity(I.cells);
-    PrintM4x4(m.cells,1, "A");
-    PrintM4x4(I.cells, 1, "I");
-
     printf("Rotation test\n");
     M4x4 rotM;
     M4x4_SetToIdentity(rotM.cells);
@@ -77,6 +70,21 @@ void Tests_Run(i32 argc, char* argv[])
     M4x4_Multiply(rot3.cells, scaleM.cells, rotAndScale.cells);
     Vec3 v_180AndScale = Vec3_MultiplyByM4x4(&v, rotAndScale.cells);
     PrintVec3(&v_180AndScale, "Vector");
+
+    M4x4_CREATE(translate)
+    M4x4
+}
+
+void Tests_Run(i32 argc, char* argv[])
+{
+    M4x4 m = {};
+    COM_SetupDefault3DProjection(m.cells, 16.0f / 9.0f);
+    M4x4 I;
+    M4x4_SetToIdentity(I.cells);
+    PrintM4x4(m.cells,1, "A");
+    PrintM4x4(I.cells, 1, "I");
+
+    
 }
 
 #endif
