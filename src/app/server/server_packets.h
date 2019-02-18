@@ -23,7 +23,10 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 		{
 			case SIM_ENT_TYPE_WANDERER:
 			{
-				
+				S2C_EntitySync cmd = {};
+				cmd.networkId = ent->id.serial;
+				cmd.pos = ent->t.pos;
+				cmd.vel = ent->velocity;
 			} break;
 		}
 	}
