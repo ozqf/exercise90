@@ -170,7 +170,7 @@ internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd)
 
 internal void SV_UserStartSync(User* user)
 {
-    APP_LOG(128, "SV - Begin sync for user %d\n", user->ids.privateId);
+    APP_PRINT(128, "SV - Begin sync for user %d\n", user->ids.privateId);
     NetStream* stream = &user->reliableStream;
 
     S2C_Sync sync;
@@ -183,20 +183,25 @@ internal void SV_UserStartSync(User* user)
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
         if (ent->isLocal) { continue; }
         S2C_SpawnEntity cmd = {};
+
         // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
         // is manually setting it ever required?
         Cmd_InitSpawnEntity(&cmd, g_ticks, 0);
+        
+        // TODO: Any entity specific spawning stuff here
         cmd.entType = (u8)ent->entType;
         cmd.networkId = ent->id.serial;
         cmd.pos = ent->t.pos;
         cmd.vel = ent->velocity;
         cmd.pitch = ent->pitch;
         cmd.yaw = ent->yaw;
+
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
-        APP_LOG(64, "  Write Entity %d\n", ent->id.serial);
+        APP_PRINT(64, "  Write Entity %d\n", ent->id.serial);
+        printf("  Write Entity %d\n", ent->id.serial);
     }
-    APP_LOG(64, "SV User %d has %d sync bytes\n",
+    APP_PRINT(64, "SV User %d has %d sync bytes\n",
         user->ids.privateId, stream->outputBuffer.Written());
 }
 
@@ -225,6 +230,23 @@ UserIds SV_CreateLocalUser()
     return id;
 }
 
+internal void SV_AddWanderer()
+{
+    SimEntityDef def = {};
+    def = {};
+    def.isLocal = 0;
+    def.serial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
+    printf("SV Reserver serial %d for Wanderer\n", def.serial);
+    def.pos[0] = COM_STDRandomInRange(-8, 8);
+    def.pos[1] = 0;
+    def.pos[2] = COM_STDRandomInRange(-8, 8);
+    def.entType = SIM_ENT_TYPE_WANDERER;
+    def.scale[0] = 1;
+    def.scale[1] = 1;
+    def.scale[2] = 1;
+    Sim_AddEntity(&g_sim, &def);   
+}
+
 internal void SV_LoadTestScene()
 {
     Sim_LoadScene(&g_sim, 0);
@@ -240,7 +262,11 @@ internal void SV_LoadTestScene()
     def.scale[1] = 1;
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
-	
+
+    for (i32 i = 0; i < 2; ++i)
+    {
+        SV_AddWanderer();
+    }
 }
 
 internal void SV_ListAllocs()

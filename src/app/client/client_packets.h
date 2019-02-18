@@ -56,6 +56,25 @@ internal void CL_WritePacket(f32 time, C2S_Input* userInput)
     #endif
 }
 
+internal i32 CL_ReadPacketUnreliableInput(ByteBuffer* buf, NetStream* stream)
+{
+    u8* read = buf->ptrStart;
+    u8* end = buf->ptrWrite;
+    while (read < end)
+    {
+        Command* h = (Command*)read;
+        i32 err = Cmd_Validate(h);
+        if (err != COM_ERROR_NONE)
+        {
+            return err;
+        }
+        Assert(!Cmd_Validate(h))
+        read += h->size;
+        Stream_EnqueueInput(stream, h);
+    }
+    return COM_ERROR_NONE;
+}
+
 internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
 {
     u8* read = buf->ptrStart;
@@ -75,7 +94,11 @@ internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
     return COM_ERROR_NONE;
 }
 
-internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream, f32 time)
+internal i32 CL_ReadPacket(
+    SysPacketEvent* ev,
+    NetStream* reliableStream,
+    NetStream* unreliableStream,
+    f32 time)
 {
     // -- Descriptor --
     i32 headerSize = sizeof(SysPacketEvent);
@@ -117,6 +140,13 @@ internal i32 CL_ReadPacket(SysPacketEvent* ev, NetStream* reliableStream, f32 ti
     //Cmd_PrintBuffer(reliableSection.ptrStart, reliableSection.Written());
 	
 	// -- unreliable section --
-	
+    ByteBuffer unreliableSection = {};
+    unreliableSection.ptrStart = data + p.unreliableOffset;
+    unreliableSection.ptrWrite =
+        unreliableSection.ptrStart +
+        p.numUnreliableBytes;
+    unreliableSection.ptrEnd = unreliableSection.ptrWrite;
+    CL_ReadPacketUnreliableInput(&unreliableSection, unreliableStream);
+
     return COM_ERROR_NONE;
 }

@@ -61,6 +61,13 @@ com_internal f32 COM_STDRandf32()
     return (f32)rand() / (f32)RAND_MAX;
 }
 
+
+com_internal f32 COM_STDRandomInRange(f32 min, f32 max)
+{
+    return COM_STDRandf32() * (max - min) + min;
+}
+
+
 void Vec3_ArraySet(f32* v, f32 x, f32 y, f32 z)
 {
     v[0] = x;

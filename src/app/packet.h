@@ -195,8 +195,13 @@ internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numByt
 	packet->ackBits = h->ackBits;
 	
 	packet->numReliableBytes = h->numReliableBytes;
-	packet->numUnreliableBytes = h->numUnreliableBytes;
 	packet->reliableOffset = (i32)(Packet_GetHeaderSize());
+
+	packet->numUnreliableBytes = h->numUnreliableBytes;
+	packet->unreliableOffset =
+		packet->reliableOffset +
+		packet->numReliableBytes +
+		sizeof(u32);
 	//printf("Reliable bytes: %d\n", packet->numReliableBytes);
 	//printf("Unreliable bytes: %d\n", packet->numUnreliableBytes);
 	

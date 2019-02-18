@@ -12,6 +12,21 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_elapsed;
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+	
+	for (i32 i = 0; i < g_sim.maxEnts; ++i)
+	{
+		SimEntity* ent = &g_sim.ents[i];
+		if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+        if (ent->isLocal) { continue; }
+		
+		switch (ent->entType)
+		{
+			case SIM_ENT_TYPE_WANDERER:
+			{
+				
+			} break;
+		}
+	}
     return (packet->ptrWrite - start);
 }
 

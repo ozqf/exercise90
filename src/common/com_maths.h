@@ -79,6 +79,7 @@ f32 ZINFINITY();
 f32 ZNaN();
 
 com_internal f32 COM_STDRandf32();
+com_internal f32 COM_STDRandomInRange(f32 min, f32 max);
 com_internal void COM_ClampF32(f32* val, f32 min, f32 max);
 com_internal void COM_ClampI32(i32* val, i32 min, i32 max);
 com_internal f32 COM_LerpF32(f32 start, f32 end, f32 lerp);

@@ -72,10 +72,13 @@ void MatrixBasics()
     PrintVec3(&v_180AndScale, "Vector");
 
     M4x4_CREATE(translate)
-    M4x4
+    M4x4_SetPosition(translate.cells, -1, 10, -64);
+    Vec3 v_translated = Vec3_MultiplyByM4x4(&v, translate.cells);
+    PrintM4x4(translate.cells, 0, "Translation matrix");
+    PrintVec3(&v_translated, "Translated Vector");
 }
 
-void Tests_Run(i32 argc, char* argv[])
+void ProjectionMatrix()
 {
     M4x4 m = {};
     COM_SetupDefault3DProjection(m.cells, 16.0f / 9.0f);
@@ -83,8 +86,11 @@ void Tests_Run(i32 argc, char* argv[])
     M4x4_SetToIdentity(I.cells);
     PrintM4x4(m.cells,1, "A");
     PrintM4x4(I.cells, 1, "I");
+}
 
-    
+void Tests_Run(i32 argc, char* argv[])
+{
+    MatrixBasics();
 }
 
 #endif

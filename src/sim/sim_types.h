@@ -68,6 +68,7 @@ struct SimEntity
     // physical
     Transform t;
     Vec3 previousPos;
+    f32 speed;
     Vec3 velocity;
     f32 pitch;
     f32 yaw;

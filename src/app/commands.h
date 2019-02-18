@@ -12,6 +12,7 @@
 #define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
 #define CMD_TYPE_S2C_SYNC 250
 #define CMD_TYPE_C2S_INPUT 249
+#define CMD_TYPE_S2C_SYNC_ENTITY 248
 
 struct CmdPing
 {
@@ -100,6 +101,15 @@ internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequen
     cmd->header.size = sizeof(S2C_SpawnProjectile);
     cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
 }
+
+struct S2C_EntitySync
+{
+	Command header;
+	i32 networkId;
+	Vec3 pos;
+	Vec3 rot;
+	Vec3 vel;
+};
 
 // SV -> CL
 struct S2C_Handshake

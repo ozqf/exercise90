@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server.h"
+#include <math.h>
 
 #define SVG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
     SVG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
@@ -8,6 +9,22 @@
 //internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
 SVG_DEFINE_ENT_UPDATE(Wanderer)
 {
+    if (ent->thinkTick <= 0)
+    {
+        ent->thinkTick += ent->thinkTime;
+        // random range of seconds between thinks
+        ent->thinkTime = COM_STDRandomInRange(1, 4);
+        // set a random movement vector
+        f32 radians = COM_STDRandomInRange(0, 360) * DEG2RAD;
+        ent->velocity.x = cosf(radians) * 3;
+        ent->velocity.z = sinf(radians) * 3;
+        printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
+    }
+    else
+    {
+        ent->thinkTick -= deltaTime;
+    }
+    
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }

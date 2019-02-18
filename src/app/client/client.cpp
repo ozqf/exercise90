@@ -212,7 +212,11 @@ void CL_Init(ZNetAddress serverAddress)
 
 void CL_Shutdown()
 {
-    // TODO: Free memory (:
+	for (i32 i = 0; i < g_numAllocations; ++i)
+	{
+		free(g_allocations[i]);
+	}
+	g_numAllocations = 0;
 }
 #if 0
 internal void CL_ReadReliableCommands(NetStream* stream)
@@ -263,7 +267,7 @@ internal void CL_ReadSystemEvents(
             {
 				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
-                CL_ReadPacket(packet, &g_reliableStream, g_elapsed);
+                CL_ReadPacket(packet, &g_reliableStream, &g_unreliableStream, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -335,6 +339,7 @@ internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 			);
 			
 			SimEntityDef def = {};
+			def.serial = spawn->networkId;
             def.birthTick = h->tick;
             def.entType = spawn->entType;
 			def.pos[0] = spawn->pos.x;

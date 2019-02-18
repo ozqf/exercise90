@@ -118,6 +118,7 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
 extern "C"
 i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
 {
+	// an id of zero is considered invalid
 	Assert(def->serial)
     return Sim_SpawnEntity(scene, def);
 }
