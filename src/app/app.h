@@ -19,7 +19,7 @@ ScreenInfo App_GetScreenInfo();
 
 
 // comment out to disable logging/printing by app layer
-//#define APP_FULL_LOGGING
+#define APP_FULL_LOGGING
 
 #ifdef APP_FULL_LOGGING
 #define APP_LOG(messageBufSize, format, ...) \
