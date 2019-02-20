@@ -75,10 +75,10 @@ internal i32 CL_ReadPacketUnreliableInput(ByteBuffer* buf, NetStream* stream)
     }
     return COM_ERROR_NONE;
 }
-t
+
 internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
 {
-    u8* read = buf->ptrSart;
+    u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
     while (read < end)
     {

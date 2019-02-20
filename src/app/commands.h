@@ -13,6 +13,7 @@
 #define CMD_TYPE_S2C_SYNC 250
 #define CMD_TYPE_C2S_INPUT 249
 #define CMD_TYPE_S2C_SYNC_ENTITY 248
+#define CMD_TYPE_PING 247
 
 struct CmdPing
 {
@@ -20,6 +21,14 @@ struct CmdPing
 	i32 pingSequence;
     f32 sendTime;
 };
+
+internal void Cmd_InitPing(CmdPing* cmd, i32 tick, i32 sequence, f32 time)
+{
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.type = CMD_TYPE_PING;
+    cmd->header.size = sizeof(CmdPing);
+    cmd->sendTime = time;
+}
 
 struct S2C_Sync
 {
@@ -110,6 +119,16 @@ struct S2C_EntitySync
 	Vec3 rot;
 	Vec3 vel;
 };
+
+internal void Cmd_WriteEntitySync(S2C_EntitySync* cmd, i32 tick, i32 sequence, SimEntity* ent)
+{
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
+    cmd->header.size = sizeof(S2C_EntitySync);
+    cmd->networkId = ent->id.serial;
+	cmd->pos = ent->t.pos;
+	cmd->vel = ent->velocity;
+}
 
 // SV -> CL
 struct S2C_Handshake

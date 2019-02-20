@@ -9,8 +9,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 	CmdPing ping = {};
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
-	Cmd_Prepare(&ping.header, g_ticks, 0);
-	ping.sendTime = g_elapsed;
+    Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
     packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
 	
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
@@ -23,10 +22,12 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 		{
 			case SIM_ENT_TYPE_WANDERER:
 			{
-				S2C_EntitySync cmd = {};
-				cmd.networkId = ent->id.serial;
-				cmd.pos = ent->t.pos;
-				cmd.vel = ent->velocity;
+                if (ent->entType == SIM_ENT_TYPE_WANDERER)
+                {
+                    S2C_EntitySync cmd = {};
+                    Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
+                    packet->ptrWrite += COM_COPY(&cmd, packet->ptrWrite, cmd.header.size);
+                }
 			} break;
 		}
 	}
@@ -98,7 +99,11 @@ internal void SV_WriteUserPacket(User* user, f32 time)
 	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
-	
+    if (unreliableWritten > 0)
+    {
+        APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);
+    }
+    
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
