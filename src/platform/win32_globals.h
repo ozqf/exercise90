@@ -76,7 +76,7 @@ global_variable win32_module_link g_rendererLink = {};
 global_variable win32_module_link g_soundLink = {};
 
 
-global_variable FILE* g_logFile;
+global_variable FILE* g_logFile = NULL;
 
 global_variable PlatformTime g_time;
 global_variable f32 g_fixedFrameAccumulator = 0;

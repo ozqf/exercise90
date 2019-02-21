@@ -69,7 +69,7 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
         g_serverTick, g_ticks, g_elapsed, g_acks.outputSequence,
 		g_acks.remoteSequence, g_ping, g_jitter
     );
-    SimEntity* ent =  Sim_GetEnityBySerial(&g_sim, -1);
+    SimEntity* ent =  Sim_GetEntityBySerial(&g_sim, -1);
     if (ent)
     {
         written += sprintf_s(chars + written, str->maxLength,
@@ -313,9 +313,9 @@ internal i32 CL_GetServerTick()
 	return g_serverTick;
 }
 
-internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
+internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 {
-    APP_LOG(64, "CL exec input seq %d\n", h->sequence);
+    //APP_LOG(64, "CL exec input seq %d\n", h->sequence);
 
 	switch (h->type)
 	{
@@ -368,6 +368,7 @@ internal void CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 			APP_PRINT(64, "CL Unknown command type %d\n", h->type);
 		} break;
 	}
+    return 1;
 }
 
 internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
@@ -383,9 +384,9 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 		if (!h) { break; }
 
 		i32 diff = h->tick - CL_GetServerTick();
-		APP_LOG(128, "CL Exec Cmd %d: Cmd Tick %d, Sync Tick %d (diff %d), CL Tick %d\n",
-			h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
-		);
+		//APP_LOG(128, "CL Exec Cmd %d: Cmd Tick %d, Sync Tick %d (diff %d), CL Tick %d\n",
+		//	h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
+		//);
 		
 		if (CL_IsCommandTickSensitive(h->type))
 		{
@@ -410,7 +411,10 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 		
 		i32 err = Cmd_Validate(h);
 		Assert(err == COM_ERROR_NONE)
-		CL_ExecReliableCommand(h, deltaTime, diff);
+		if (CL_ExecReliableCommand(h, deltaTime, diff))
+        {
+            Stream_DeleteCommand(b, h);
+        }
 	}
 	/*
 	// -- Unreliable commands --
@@ -446,6 +450,73 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 	*/
 }
 
+internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
+{
+	ByteBuffer* b = &stream->inputBuffer;
+    u8* read = b->ptrStart;
+	APP_LOG(128, "CL Run %d bytes of unreliable msgs\n",
+        b->Written());
+
+	while (read < b->ptrWrite)
+	{
+		i32 sequence = stream->inputSequence;
+		Command* h = (Command*)read;
+        i32 err = Cmd_Validate(h);
+		if (err != COM_ERROR_NONE)
+		{
+			APP_PRINT(128, "CL Run unreliable - unvalid cmd code %d\n", err);
+			Buf_Clear(b);
+			return;
+		}
+        
+		i32 diff = h->tick - CL_GetServerTick();
+		//APP_LOG(128, "CL Exec Cmd %d: Cmd Tick %d, Sync Tick %d (diff %d), CL Tick %d\n",
+		//	h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
+		//);
+        i32 executed = 0;
+        if (diff <= 0)
+        {
+            switch (h->type)
+            {
+                case CMD_TYPE_S2C_SYNC_ENTITY:
+                {
+                    S2C_EntitySync* cmd = (S2C_EntitySync*)h;
+                    SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
+                    if (!ent)
+                    {
+                        APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+                    }
+                    else
+                    {
+                        ent->t.pos = cmd->pos;
+                        executed = 1;
+                    }
+                } break;
+
+                case CMD_TYPE_PING:
+                {
+                    CmdPing* cmd = (CmdPing*)h;
+                    executed = 1;
+                } break;
+
+                default:
+                {
+                    APP_PRINT(64, "CL Unknown unreliable type %d\n", h->type);
+                } break;
+            }
+        }
+        
+        if (executed)
+        {
+            Stream_DeleteCommand(b, h);
+        }
+        else
+        {
+            read += h->size;
+        }
+    }
+}
+
 internal void CL_CalcPings(f32 deltaTime)
 {
 	g_ping = Ack_CalculateAverageDelay(&g_acks);
@@ -459,9 +530,11 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_ReadSystemEvents(sysEvents, deltaTime, platformFrame);
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
+    //CL_LogCommandBuffer(&g_unreliableStream.inputBuffer, "Unreliable input");
+    CL_RunUnreliableCommands(&g_unreliableStream, deltaTime);
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
     //CLG_HandlePlayerInput(NULL, &g_actorInput);
-	SimEntity* plyr = Sim_GetEnityBySerial(&g_sim, g_avatarSerial);
+	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
 	if (plyr)
 	{
 		plyr->input = g_actorInput;

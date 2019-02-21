@@ -22,7 +22,16 @@ internal f32 g_elapsed = 0;
 i32 SV_IsRunning() { return g_isRunning; }
 
 #include "server_game.h"
+#include "server_priority.h"
 #include "server_packets.h"
+
+internal void SV_PrintMsgSizes()
+{
+    APP_LOG(64, "SV sizeof ping: %d\n",
+        sizeof(CmdPing))
+    APP_LOG(64, "SV sizeof S2C_EntitySync: %d\n",
+        sizeof(S2C_EntitySync))
+}
 
 void SV_WriteDebugString(ZStringHeader* str)
 {
@@ -290,6 +299,8 @@ internal void SV_ListAllocs()
 void SV_Init()
 {
     APP_PRINT(64, "SV Init scene\n");
+
+    SV_PrintMsgSizes();
 
     // force time and ticks forward for debugging
     g_ticks = 1000;

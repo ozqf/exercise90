@@ -15,7 +15,7 @@ extern "C" i32      Sim_CalcEntityArrayBytes(i32 capacity);
 extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 
 // Entity list functions
-extern "C" SimEntity* Sim_GetEnityBySerial(SimScene* sim, i32 serial);
+extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerialGroup(SimScene* sim, i32 isLocal, i32 patternType);
 extern "C" i32      Sim_AddEntity(SimScene* sim, SimEntityDef* def);

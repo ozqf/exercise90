@@ -57,7 +57,7 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 }
 
 extern "C"
-SimEntity* Sim_GetEnityBySerial(SimScene* sim, i32 serial)
+SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial)
 {
     for (i32 i = 0; i < sim->maxEnts; ++i)
     {

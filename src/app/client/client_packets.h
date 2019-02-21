@@ -6,6 +6,26 @@ Read/Write packets for client
 #include "../packet.h"
 #include "../../interface/sys_events.h"
 
+internal void CL_LogCommandBuffer(ByteBuffer* b, char* label)
+{
+    APP_LOG(64, "CL %s contents\n", label);
+    u8* read = b->ptrStart;
+    u8* end = b->ptrWrite;
+    while (read < end)
+    {
+        Command* cmd = (Command*)read;
+        i32 err = Cmd_Validate(cmd);
+        if (err != COM_ERROR_NONE)
+        {
+            APP_LOG(64, "  cmd validate failed with code %d\n", err);
+            return;
+        }
+        read += cmd->size;
+        APP_LOG(128, "  Type %d Tick %d Size %d\n",
+            cmd->type, cmd->tick, cmd->size);
+    }
+}
+
 internal i32 CL_WriteUnreliableSection(ByteBuffer* packet, C2S_Input* userInput)
 {
     u8* start = packet->ptrWrite;
@@ -56,8 +76,10 @@ internal void CL_WritePacket(f32 time, C2S_Input* userInput)
     #endif
 }
 
-internal i32 CL_ReadPacketUnreliableInput(ByteBuffer* buf, NetStream* stream)
+internal i32 CL_ReadPacketUnreliableInput(
+    ByteBuffer* buf, NetStream* stream)
 {
+    //CL_LogCommandBuffer(buf, "Unreliable packet section");
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
     APP_LOG(128, "CL Reading %d unreliable bytes\n", (end -read));
@@ -69,9 +91,13 @@ internal i32 CL_ReadPacketUnreliableInput(ByteBuffer* buf, NetStream* stream)
         {
             return err;
         }
-        Assert(!Cmd_Validate(h))
         read += h->size;
-        Stream_EnqueueInput(stream, h);
+        i32 wrote = Stream_EnqueueUnreliableInput(stream, h);
+        if (wrote)
+        {
+            //APP_LOG(128, "CL Enqueue unreliable type %d size %d\n",
+            //    h->type, wrote);
+        }
     }
     return COM_ERROR_NONE;
 }
@@ -90,7 +116,7 @@ internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
         }
         Assert(!Cmd_Validate(h))
         read += h->size;
-        Stream_EnqueueInput(stream, h);
+        Stream_EnqueueReliableInput(stream, h);
     }
     return COM_ERROR_NONE;
 }
@@ -147,7 +173,11 @@ internal i32 CL_ReadPacket(
         unreliableSection.ptrStart +
         p.numUnreliableBytes;
     unreliableSection.ptrEnd = unreliableSection.ptrWrite;
-    CL_ReadPacketUnreliableInput(&unreliableSection, unreliableStream);
+    err = CL_ReadPacketUnreliableInput(&unreliableSection, unreliableStream);
+    if (err)
+    {
+        APP_PRINT(64, "CL err %d reading unreliable", err) 
+    }
 
     return COM_ERROR_NONE;
 }

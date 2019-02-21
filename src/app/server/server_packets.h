@@ -10,7 +10,8 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
     Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
-    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+    packet->ptrWrite += COM_COPY(
+        &ping, packet->ptrWrite, ping.header.size);
 	
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
 	{
@@ -26,7 +27,9 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
                 {
                     S2C_EntitySync cmd = {};
                     Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-                    packet->ptrWrite += COM_COPY(&cmd, packet->ptrWrite, cmd.header.size);
+                    packet->ptrWrite += COM_COPY(
+                        &cmd, packet->ptrWrite, cmd.header.size);
+                    APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
                 }
 			} break;
 		}

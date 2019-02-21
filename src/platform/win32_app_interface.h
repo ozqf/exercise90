@@ -97,12 +97,18 @@ void Platform_GetDateTime(DateTime* data)
 
 void Win32_Log(char* msg)
 {
-    fprintf(g_logFile, "%s", msg);
+    if (g_logFile)
+    {
+        fprintf(g_logFile, "%s", msg);
+    }
 }
 
 void Win32_Print(char* msg)
 {
-    fprintf(g_logFile, "%s", msg);
+    if (g_logFile)
+    {
+        fprintf(g_logFile, "%s", msg);
+    }
     printf("%s", msg);
 }
 

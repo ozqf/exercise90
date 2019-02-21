@@ -109,14 +109,33 @@ internal void Stream_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 n
 	}
 }
 
-internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
+// returns bytes written
+internal i32 Stream_EnqueueUnreliableInput(
+    NetStream* stream, Command* cmd)
 {
     //printf("CL Attempting to enqueue %d\n", cmd->sequence);
     i32 error = Cmd_Validate(cmd);
     if (error != COM_ERROR_NONE)
     {
         printf("STREAM cmd for enqueue is invalid. Code %d\n", error);
-        return;
+        return 0;
+    }
+    ByteBuffer* b = &stream->inputBuffer;
+    Assert(b->Space() >= cmd->size);
+        b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
+    return cmd->size;
+}
+
+// returns bytes written
+internal i32 Stream_EnqueueReliableInput(
+    NetStream* stream, Command* cmd)
+{
+    //printf("CL Attempting to enqueue %d\n", cmd->sequence);
+    i32 error = Cmd_Validate(cmd);
+    if (error != COM_ERROR_NONE)
+    {
+        printf("STREAM cmd for enqueue is invalid. Code %d\n", error);
+        return 0;
     }
     ByteBuffer* b = &stream->inputBuffer;
     //If the current input sequence is higher or the command is already
@@ -125,7 +144,7 @@ internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
     {
         //printf("    CL ignored input: sequence %d < %d\n",
         //    cmd->sequence, stream->inputSequence);
-        return;
+        return 0;
     }
     Command* current = Stream_FindMessageBySequence(
         stream->inputBuffer.ptrStart,
@@ -136,12 +155,13 @@ internal void Stream_EnqueueInput(NetStream* stream, Command* cmd)
         //printf("CL Enqueuing CMD %d\n", cmd->sequence);
         Assert(b->Space() >= cmd->size);
         b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
+        return cmd->size;
     }
     else
     {
         //printf("    CL ignored input: sequence %d already queued\n",
         //    cmd->sequence);
-        return;
+        return 0;
     }
 }
 

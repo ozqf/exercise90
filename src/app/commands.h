@@ -113,6 +113,7 @@ internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequen
 
 struct S2C_EntitySync
 {
+    // 20 + 4 + (3 x 4) + (3 x 4) + (3 x 4) bytes
 	Command header;
 	i32 networkId;
 	Vec3 pos;
