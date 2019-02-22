@@ -2,6 +2,7 @@
 #define TESTS_MODULE_CPP
 
 #include "../../common/com_module.h"
+#include "test_priority.h"
 
 #define TEST_ASSERT(expression, msg) \
 if (!(expression)) { printf("Failed: %s\n", msg##); } \
@@ -90,7 +91,8 @@ void ProjectionMatrix()
 
 void Tests_Run(i32 argc, char* argv[])
 {
-    MatrixBasics();
+    //MatrixBasics();
+    Test_Priority();
 }
 
 #endif
