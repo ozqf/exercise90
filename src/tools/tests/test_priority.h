@@ -9,8 +9,11 @@ internal void ListPriority(SVEntityLinkArray* list)
 		list->numLinks, list->maxLinks);
     for (i32 i = 0; i < list->numLinks; ++i)
     {
-        printf("%d Link id %d importance: %.3f\n",
-			i, list->links[i].id, list->links[i].importance);
+        printf("%d Link id %d priority %.3f importance: %.3f\n",
+			i, 
+			list->links[i].id,
+			list->links[i].priority,
+			list->links[i].importance);
     }
 }
 
@@ -32,10 +35,11 @@ internal void Test_Priority()
 	
 	SVEntityLinkArray list = {};
 	i32 maxLinks = 8;
-	list.links = (SVEntityLink*)malloc(sizeof(SVEntityLink) * maxLinks);
-	list.maxLinks = 8;
+	i32 bytes = sizeof(SVEntityLink) * maxLinks;
+	list.links = (SVEntityLink*)malloc(bytes);
+	COM_ZeroMemory((u8*)list.links, bytes);
 	
-	printf("Empty list:\n");
+	list.maxLinks = 8;
 	
 	SV_AddPriorityLink(&list, 1, 2);
 	SV_AddPriorityLink(&list, 2, 1);
@@ -45,6 +49,7 @@ internal void Test_Priority()
 	SV_AddPriorityLink(&list, 6, 4);
 	SV_AddPriorityLink(&list, 7, 5);
 	SV_AddPriorityLink(&list, 7, 5);
+	printf("Empty list:\n");
 	ListPriority(&list);
 	for (i32 i = 0; i < 10; ++i)
 	{
@@ -60,6 +65,7 @@ internal void Test_Priority()
 	);
 	ResetTopPriorityItems(&list, 3);
 	SV_TickPriorityQueue(list.links, list.numLinks);
+	printf("Ticked list:\n");
 	ListPriority(&list);
 	/*
     const i32 numLinks = 4;

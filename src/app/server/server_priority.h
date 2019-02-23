@@ -40,7 +40,8 @@ internal void SV_SwapEntityLinks(
 	
 }
 
-internal i32 SV_GetPriorityLinkIndexById(SVEntityLinkArray* list, i32 id)
+internal i32 SV_GetPriorityLinkIndexById(
+    SVEntityLinkArray* list, i32 id)
 {
 	for (i32 i = 0; i < list->numLinks; ++i)
 	{
@@ -52,7 +53,8 @@ internal i32 SV_GetPriorityLinkIndexById(SVEntityLinkArray* list, i32 id)
 	return -1;
 }
 
-internal void SV_AddPriorityLink(SVEntityLinkArray* list, i32 id, f32 priority)
+internal void SV_AddPriorityLink(
+    SVEntityLinkArray* list, i32 id, f32 priority)
 {
 	// Avoid duplicates
 	if (SV_GetPriorityLinkIndexById(list, id) != -1)
@@ -68,11 +70,13 @@ internal void SV_AddPriorityLink(SVEntityLinkArray* list, i32 id, f32 priority)
 		priority = 1;
 	}
 	list->numLinks++;
+    list->links[i] = {};
 	list->links[i].id = id;
 	list->links[i].priority = priority;
 }
 
-internal void SV_RemovePriorityLink(SVEntityLinkArray* list, i32 index)
+internal void SV_RemovePriorityLink(
+    SVEntityLinkArray* list, i32 index)
 {
 	if (index == -1) { return; }
 	i32 last = list->numLinks - 1;
@@ -114,12 +118,12 @@ Run every tick
 > Increment priority levels
 > Sort Priority Queue
 */
-internal void SV_TickPriorityQueue(SVEntityLink* links, i32 numLinks)
+internal void SV_TickPriorityQueue(
+    SVEntityLink* links, i32 numLinks)
 {
-	for (i32 i = 0; i < numLinks; ++i)
+    for (i32 i = 0; i < numLinks; ++i)
     {
         SVEntityLink* link = &links[i];
-        if (!link->inUse) { continue; }
         link->importance += link->priority;
     }
 	SV_BubbleSortPriorityQueue(links, numLinks);
