@@ -7,6 +7,7 @@
 
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
+    /*
     Vec3* pos = &ent->t.pos;
     ent->previousPos.x = pos->x;
     ent->previousPos.y = pos->y;
@@ -23,6 +24,7 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
     ent->t.pos.z += move.z;
     
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
+    */
 }
 
 CLG_DEFINE_ENT_UPDATE(Projectile)

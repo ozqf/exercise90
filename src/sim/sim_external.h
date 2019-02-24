@@ -195,19 +195,23 @@ void Sim_InitScene(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
+    f32 halfX = 10;
+    f32 halfY = 10;
+    f32 halfZ = 10;
+
     SimEntityDef def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.entType = SIM_ENT_TYPE_WORLD;
     def.pos[1] = -0.5f;
-    def.scale[0] = 20;
+    def.scale[0] = halfX * 2;
     def.scale[1] = 1;
-    def.scale[2] = 20;
+    def.scale[2] = halfZ * 2;
     
     Sim_AddEntity(sim, &def);
 
-    sim->boundaryMin = { -6, -6, -6 };
-    sim->boundaryMax = { 6, 6, 6 };
+    sim->boundaryMin = { -halfX, -halfY, -halfZ };
+    sim->boundaryMax = { halfX, halfY, halfZ };
 
 	return COM_ERROR_NONE;
 }

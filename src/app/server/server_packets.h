@@ -105,13 +105,17 @@ internal void SV_WriteUserPacket(User* user, f32 time)
     u32 ackBits = Ack_BuildOutgoingAckBits(&user->acks);
     Packet_StartWrite(&packet, user->ids.privateId, packetSequence, ack, ackBits, 0, 0, 0);
 	
-	// -- record packet payload -- 
+	// -- record packet payload and load reliable commands -- 
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
+    
     i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
 	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
+
+    // -- write mid-packet deserialise check and unreliable sync data -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
+    //i32 unreliableWritten = 0;
     if (unreliableWritten > 0)
     {
         APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);

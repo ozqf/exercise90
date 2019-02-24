@@ -18,7 +18,7 @@ SVG_DEFINE_ENT_UPDATE(Wanderer)
         f32 radians = COM_STDRandomInRange(0, 360) * DEG2RAD;
         ent->velocity.x = cosf(radians) * 3;
         ent->velocity.z = sinf(radians) * 3;
-        printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
+        //printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
     }
     else
     {

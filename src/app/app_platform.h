@@ -277,6 +277,12 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     f32 interpolationTime = App_CalcInterpolationTime(
         g_simFrameAcculator, App_GetSimFrameInterval());
     
+    if (interpolationTime > 1)
+    {
+        printf("APP Interpolate time %.3f > 1!\n", interpolationTime);
+        interpolationTime = 1;
+    }
+    
     #if 0 // New route
     RenderCommand* cmds;
     i32 numCommands;

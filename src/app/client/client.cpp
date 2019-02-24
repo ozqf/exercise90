@@ -40,6 +40,8 @@ internal ZNetAddress g_serverAddress;
 internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
 
+internal i32 g_interpolateRenderScene = 1;
+
 // Menus
 internal i32 g_mainMenuOn;
 
@@ -72,7 +74,7 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
 
 
     written += sprintf_s(chars + written, str->maxLength,
-			"%d Pending reliablebytes %d\n%d Pending unreliable bytes %d\n",
+			"=== Commands ===\n%d reliablebytes %d\n%d unreliable bytes %d\n",
             Stream_CountCommands(&g_reliableStream.inputBuffer),
             g_reliableStream.inputBuffer.Written(),
             Stream_CountCommands(&g_unreliableStream.inputBuffer),
@@ -428,38 +430,6 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
             Stream_DeleteCommand(b, h);
         }
 	}
-	/*
-	// -- Unreliable commands --
-	u8* read = buf->ptrStart;
-	u8* end = buf->ptrWrite;
-	while (read < end)
-	{
-		Command* h = (Command*)read;
-		i32 err = Cmd_Validate(h);
-		if (err != COM_ERROR_NONE)
-		{
-			printf("CL Error %d running input commands\n", err);
-			return;
-		}
-		read += h->size;
-		
-		switch(h->type)
-		{
-			case CMD_TYPE_S2C_SPAWN_ENTITY:
-			{
-				S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
-				printf("CL Spawn %d at %.3f, %.3f, %.3f\n",
-					spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
-				);
-			} break;
-			
-			default:
-			{
-				printf("CL Unknown command type %d\n", h->type);
-			} break;
-		}
-	}
-	*/
 }
 
 internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
@@ -477,7 +447,7 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
         i32 err = Cmd_Validate(h);
 		if (err != COM_ERROR_NONE)
 		{
-			APP_PRINT(128, "CL Run unreliable - unvalid cmd code %d\n", err);
+			APP_PRINT(128, "CL Run unreliable - invalid cmd code %d\n", err);
 			Buf_Clear(b);
 			return;
 		}
@@ -583,6 +553,7 @@ void CL_PopulateRenderScene(
 	
 	
     // Hit test
+    #if 0
 	i32 mouseScrX = Input_GetActionValue(
 		&g_inputActions, "Mouse Pos X");
 	i32 mouseScrY = Input_GetActionValue(
@@ -655,7 +626,7 @@ void CL_PopulateRenderScene(
     RScene_AddRenderItem(scene, &t, &obj);
     RScene_AddRenderItem(scene, &t2, &obj);
     RScene_AddRenderItem(scene, &t3, &obj);
-
+    #endif
     //////////////////////////////////////////////////////////////////////
     // Sim Entities
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
@@ -687,11 +658,18 @@ void CL_PopulateRenderScene(
 		}
         
         t = ent->t;
-		RendObj_InterpolatePosition(
+        if (g_interpolateRenderScene)
+        {
+            RendObj_InterpolatePosition(
                 &t.pos,
                 &ent->previousPos,
                 &ent->t.pos,
                 interpolateTime);
+        }
+        else
+        {
+            t.pos = ent->t.pos;
+        }
         RScene_AddRenderItem(scene, &t, &obj);
     }
 }
