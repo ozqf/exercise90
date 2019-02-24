@@ -225,37 +225,55 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
                 APP_LOG(128, "APP Unknown sys event type %d size %d\n", header->type, header->size);
             } break;
         }
-
     }
-	
+}
+
+internal void App_SimFrame(f32 interval)
+{
+    #if APP_DEBUG_LOG_FRAME_TIMING
+        APP_LOG(64, "App Sim tick %.8f\n", interval);
+    #endif
+    App_UpdateLoopbackSocket(&g_loopbackSocket, interval);
+    if (g_isRunningServer)
+    {
+        g_serverLoopback.Swap();
+	    Buf_Clear(g_serverLoopback.GetWrite());
+        SV_Tick(g_serverLoopback.GetRead(), interval);
+    }
+    if (g_isRunningClient)
+    {
+        g_clientLoopback.Swap();
+        Buf_Clear(g_clientLoopback.GetWrite());
+        CL_Tick(g_clientLoopback.GetRead(), interval, g_lastPlatformFrame);
+    }
 }
 
 internal void App_Update(PlatformTime* time)
 {
     g_simFrameAcculator += time->deltaTime;
-    //printf("App Accumulator %.4f\n", g_simFrameAcculator);
     f32 interval = App_GetSimFrameInterval();
+    #if APP_DEBUG_LOG_FRAME_TIMING
+        APP_LOG(128, "App Update DT: %.8f Accumulator: %.8f Interval: %.8f\n",
+            time->deltaTime,
+            g_simFrameAcculator,
+            interval
+            );
+    #endif
+    #if 1
+    while (g_simFrameAcculator > interval)
+    {
+        APP_LOG(64, "FRAME\n");
+        g_simFrameAcculator -= interval;
+		App_SimFrame(interval);
+    }
+    #endif
+    #if 0
     if (g_simFrameAcculator > interval)
     {
-        //printf("\n === APP TICK (%.4fs) ===\n", interval);
         g_simFrameAcculator -= interval;
-        
-		App_UpdateLoopbackSocket(&g_loopbackSocket, interval);
-		
-        if (g_isRunningServer)
-        {
-            g_serverLoopback.Swap();
-		    Buf_Clear(g_serverLoopback.GetWrite());
-            SV_Tick(g_serverLoopback.GetRead(), interval);
-        }
-
-        if (g_isRunningClient)
-        {
-            g_clientLoopback.Swap();
-            Buf_Clear(g_clientLoopback.GetWrite());
-            CL_Tick(g_clientLoopback.GetRead(), interval, g_lastPlatformFrame);
-        }
+		App_SimFrame(interval);
     }
+    #endif
 }
 
 internal void App_OffsetRenderObjects(RenderScene* scene, i32 firstItem, f32 x)
@@ -273,16 +291,16 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     char* texName = "textures\\white_bordered.bmp";
     //char* texName = "textures\\W33_5.bmp";
     i32 texIndex = Tex_GetTextureIndexByName(texName);
-    //f32 interpolationTime = 1;
+    f32 interval = App_GetSimFrameInterval();
     f32 interpolationTime = App_CalcInterpolationTime(
-        g_simFrameAcculator, App_GetSimFrameInterval());
-    
-    if (interpolationTime > 1)
-    {
-        printf("APP Interpolate time %.3f > 1!\n", interpolationTime);
-        interpolationTime = 1;
-    }
-    
+        g_simFrameAcculator, interval);
+    #if APP_DEBUG_LOG_FRAME_TIMING
+        APP_LOG(128, "APP Interpolate: %.8f Accumulator %.8f interval: %.8f\n",
+                interpolationTime,
+                g_simFrameAcculator,
+                interval
+            );
+    #endif
     #if 0 // New route
     RenderCommand* cmds;
     i32 numCommands;

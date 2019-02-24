@@ -40,7 +40,7 @@ internal ZNetAddress g_serverAddress;
 internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
 
-internal i32 g_interpolateRenderScene = 1;
+internal i32 g_interpolateRenderScene = 0;
 
 // Menus
 internal i32 g_mainMenuOn;
@@ -472,6 +472,7 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                     else
                     {
                         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
+                        ent->previousPos = ent->t.pos;
                         ent->t.pos = cmd->pos;
                         executed = 1;
                     }

@@ -67,6 +67,8 @@ internal RendObj g_serverDebugStrRenderer;
 internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 
+//#define APP_DEBUG_LOG_FRAME_TIMING
+
 internal i32 App_StartSession(i32 sessionType);
 
 void App_FatalError(char* msg, char* heading)
