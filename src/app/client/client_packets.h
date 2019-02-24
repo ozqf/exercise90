@@ -8,7 +8,7 @@ Read/Write packets for client
 
 internal void CL_LogCommandBuffer(ByteBuffer* b, char* label)
 {
-    APP_LOG(64, "CL %s contents\n", label);
+    APP_LOG(64, "CL %s contents (%d bytes)\n", label, b->Written());
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
     while (read < end)

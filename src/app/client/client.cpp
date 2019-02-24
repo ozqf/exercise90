@@ -69,12 +69,24 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
         g_serverTick, g_ticks, g_elapsed, g_acks.outputSequence,
 		g_acks.remoteSequence, g_ping, g_jitter
     );
+
+
+    written += sprintf_s(chars + written, str->maxLength,
+			"%d Pending reliablebytes %d\n%d Pending unreliable bytes %d\n",
+            Stream_CountCommands(&g_reliableStream.inputBuffer),
+            g_reliableStream.inputBuffer.Written(),
+            Stream_CountCommands(&g_unreliableStream.inputBuffer),
+            g_unreliableStream.inputBuffer.Written()
+            );
+
+    #if 0
     SimEntity* ent =  Sim_GetEntityBySerial(&g_sim, -1);
     if (ent)
     {
         written += sprintf_s(chars + written, str->maxLength,
 			"World vol pos Y: %.3f\n", ent->t.pos.y);
     }
+    #endif
 	#if 0
 	// currently overflows debug text buffer:
 	for (i32 i = 0; i < ACK_CAPACITY; ++i)
@@ -115,8 +127,8 @@ internal void CL_WriteCameraDebug(ZStringHeader* str)
 void CL_WriteDebugString(ZStringHeader* str)
 {
 	CL_WriteNetworkDebug(str);
-	CL_WriteTransformDebug(str);
-	CL_WriteCameraDebug(str);
+	//CL_WriteTransformDebug(str);
+	//CL_WriteCameraDebug(str);
 }
 
 internal void* CL_Malloc(i32 numBytes)
@@ -454,8 +466,9 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
     u8* read = b->ptrStart;
-	APP_LOG(128, "CL Run %d bytes of unreliable msgs\n",
-        b->Written());
+	//APP_LOG(128, "CL Run %d bytes of unreliable msgs\n",
+    //    b->Written());
+    //CL_LogCommandBuffer(b, "unreliable");
 
 	while (read < b->ptrWrite)
 	{
@@ -488,6 +501,7 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                     }
                     else
                     {
+                        //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
                         ent->t.pos = cmd->pos;
                         executed = 1;
                     }

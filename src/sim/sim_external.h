@@ -136,7 +136,7 @@ i32 Sim_ExecuteProjectileSpawn(
     SimProjectileSpawnDef* def,
 	i32 fastForwardTicks)
 {
-    i32 numProjectiles = 8;
+    i32 numProjectiles = 4;
 	f32 speed = 3.5f;
     i32 serial = def->firstSerial;
 	f32 radians = 0;

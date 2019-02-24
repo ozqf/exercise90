@@ -7,6 +7,25 @@
 #include "../common/com_module.h"
 #include "commands_base.h"
 
+internal i32 Stream_CountCommands(ByteBuffer* b)
+{
+    u8* read = b->ptrStart;
+    u8* end = b->ptrWrite;
+    i32 count = 0;
+    while (read < end)
+    {
+        Command* cmd = (Command*)read;
+        i32 err = Cmd_Validate(cmd);
+        if (err)
+        {
+            return -1;
+        }
+        read += cmd->size;
+        count++;
+    }
+    return count;
+}
+
 internal TransmissionRecord* Stream_AssignTransmissionRecord(
         TransmissionRecord* records,
         u32 sequence)

@@ -272,10 +272,12 @@ internal void SV_LoadTestScene()
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
 
-    for (i32 i = 0; i < 2; ++i)
+    i32 numWanderers = 20;
+    for (i32 i = 0; i < numWanderers; ++i)
     {
         SV_AddWanderer();
     }
+    printf("SV spawned %d wanderers\n", numWanderers);
 }
 
 internal void SV_ListAllocs()

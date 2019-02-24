@@ -4,6 +4,7 @@
 
 internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 {
+    i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
     // Send ping
 	CmdPing ping = {};
@@ -12,12 +13,17 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
     Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
     packet->ptrWrite += COM_COPY(
         &ping, packet->ptrWrite, ping.header.size);
-	
+	i32 syncMessagesWritten = 0;
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
 	{
 		SimEntity* ent = &g_sim.ents[i];
 		if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
         if (ent->isLocal) { continue; }
+		
+		if (packet->Space() < sizeof(S2C_EntitySync))
+		{
+			break;
+		}
 		
 		switch (ent->entType)
 		{
@@ -29,12 +35,16 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
                     Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
                     packet->ptrWrite += COM_COPY(
                         &cmd, packet->ptrWrite, cmd.header.size);
-                    APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
+                    //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
+					syncMessagesWritten++;
                 }
 			} break;
 		}
 	}
-    return (packet->ptrWrite - start);
+    i32 written = (packet->ptrWrite - start);
+    //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
+    //    syncMessagesWritten, written, capacity);
+    return written;
 }
 
 internal i32 SV_WriteReliableSection(
