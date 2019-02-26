@@ -27,17 +27,15 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 		
 		switch (ent->entType)
 		{
+            case SIM_ENT_TYPE_ACTOR:
 			case SIM_ENT_TYPE_WANDERER:
 			{
-                if (ent->entType == SIM_ENT_TYPE_WANDERER)
-                {
-                    S2C_EntitySync cmd = {};
-                    Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-                    packet->ptrWrite += COM_COPY(
-                        &cmd, packet->ptrWrite, cmd.header.size);
-                    //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
-					syncMessagesWritten++;
-                }
+                S2C_EntitySync cmd = {};
+                Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
+                packet->ptrWrite += COM_COPY(
+                    &cmd, packet->ptrWrite, cmd.header.size);
+                //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
+				syncMessagesWritten++;
 			} break;
 		}
 	}
@@ -146,12 +144,43 @@ internal void SV_WriteTestPacket()
     App_SendTo(0, &addr, buf, written);
 }
 
+internal void SV_ReadUnreliableSection(User* user, ByteBuffer* b)
+{
+    u8* read = b->ptrStart;
+    u8* end = b->ptrWrite;
+    while (read < end)
+    {
+        Command* header = (Command*)read;
+        i32 err = Cmd_Validate(header);
+        if (err)
+        {
+            APP_LOG(128, "SV read unreliable cmd failed %d\n", err);
+            return;
+        }
+        read += header->size;
+        switch (header->type)
+        {
+            case CMD_TYPE_C2S_INPUT:
+            {
+                C2S_Input* cmd = (C2S_Input*)header;
+                Sim_SetActorInput(&g_sim, &cmd->input, user->entSerial);
+            } break;
+
+            default:
+            {
+                APP_LOG(64, "SV Unknown unreliable cmd type %d\n",
+                    header->type);
+            } break;
+        }
+    }
+}
+
 internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
     u8* data = (u8*)(ev) + headerSize;
-    //printf("SV %d Packet bytes from %d\n", dataSize, ev->sender.port);
+    APP_LOG(64, "SV Read %d Packet bytes from %d\n", dataSize, ev->sender.port);
 
     PacketDescriptor p;
     i32 err = Packet_InitDescriptor(
@@ -184,11 +213,17 @@ internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
     i32 numPacketAcks = Ack_CheckIncomingAcks(
         &user->acks, p.ackSequence, p.ackBits, packetAcks, time);
 	
-	Stream_ProcessPacketAcks(&user->reliableStream, packetAcks, numPacketAcks);
+	Stream_ProcessPacketAcks(
+        &user->reliableStream, packetAcks, numPacketAcks);
 	
 	// -- reliable section --
 	
 	
 	// -- unreliable section --
-	
+	ByteBuffer b = {};
+    b.ptrStart = data + p.unreliableOffset;
+    b.ptrWrite = b.ptrStart + p.numUnreliableBytes;
+    b.ptrEnd = b.ptrWrite;
+    
+    SV_ReadUnreliableSection(user, &b);
 }

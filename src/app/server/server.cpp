@@ -237,7 +237,9 @@ internal void SV_SpawnUserAvatar(User* u)
 	u->entSerial = avatarSerial;
     def.serial = avatarSerial;
 	def.entType = SIM_ENT_TYPE_ACTOR;
+    def.pos[0] = -6;
     def.pos[1] = 0;
+    def.pos[2] = 6;
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
@@ -338,7 +340,7 @@ void SV_Init()
     i32 maxEnts = APP_MAX_ENTITIES;
     size = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
-    Sim_InitScene(&g_sim, mem, maxEnts);
+    Sim_Init(&g_sim, mem, maxEnts);
 	Sim_Reset(&g_sim);
     SV_LoadTestScene();
     //SV_ListAllocs();

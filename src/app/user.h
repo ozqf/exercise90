@@ -21,8 +21,9 @@ struct User
     UserIds ids;
     i32 state;
 	u32 flags;
-    i32 entSerial;
     i32 isLocal;
+
+    i32 entSerial;
 
     f32 ping;
     f32 jitter;

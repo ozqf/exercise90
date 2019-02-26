@@ -131,6 +131,18 @@ i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 }
 
 extern "C"
+i32 Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial)
+{
+    SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerial);
+    if (!ent)
+    {
+        return COM_ERROR_NOT_FOUND;
+    }
+    ent->input = *input;
+    return COM_ERROR_NONE;
+}
+
+extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
     SimProjectileSpawnDef* def,
@@ -180,7 +192,7 @@ void Sim_Reset(SimScene* sim)
 }
 
 extern "C"
-void Sim_InitScene(
+void Sim_Init(
             SimScene* sim,
             SimEntity* entityMemory,
             i32 maxEntities)

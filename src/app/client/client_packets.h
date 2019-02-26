@@ -26,7 +26,8 @@ internal void CL_LogCommandBuffer(ByteBuffer* b, char* label)
     }
 }
 
-internal i32 CL_WriteUnreliableSection(ByteBuffer* packet, C2S_Input* userInput)
+internal i32 CL_WriteUnreliableSection(
+    ByteBuffer* packet, C2S_Input* userInput)
 {
     u8* start = packet->ptrWrite;
     // Send ping
@@ -35,9 +36,11 @@ internal i32 CL_WriteUnreliableSection(ByteBuffer* packet, C2S_Input* userInput)
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks, 0);
 	ping.sendTime = g_elapsed;
-    packet->ptrWrite += COM_COPY(&ping, packet->ptrWrite, ping.header.size);
+    packet->ptrWrite += COM_COPY(
+        &ping, packet->ptrWrite, ping.header.size);
 	
 	// TODO: Encode userInput
+    APP_LOG(64, "CL Write input\n");
 	packet->ptrWrite += COM_COPY(
 		userInput, packet->ptrWrite, userInput->header.size);
 	
@@ -65,14 +68,17 @@ internal void CL_WritePacket(f32 time, C2S_Input* userInput)
 	//TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 	//	g_reliableStream.transmissions, packetSequence);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
-    i32 unreliableWritten = CL_WriteUnreliableSection(&packet, userInput);
+    i32 unreliableWritten = CL_WriteUnreliableSection(
+        &packet, userInput);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
 	
     App_SendTo(0, &g_serverAddress, buf, total);
     
 	//Packet_WriteFromStream(
-    //    &user->reliableStream, &user->unreliableStream, buf, 1400, g_elapsed, g_ticks, 0);
+    //    &user->reliableStream,
+    //    &user->unreliableStream,
+    //    buf, 1400, g_elapsed, g_ticks, 0);
     #endif
 }
 
@@ -102,7 +108,8 @@ internal i32 CL_ReadPacketUnreliableInput(
     return COM_ERROR_NONE;
 }
 
-internal i32 CL_ReadPacketReliableInput(ByteBuffer* buf, NetStream* stream)
+internal i32 CL_ReadPacketReliableInput(
+    ByteBuffer* buf, NetStream* stream)
 {
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
