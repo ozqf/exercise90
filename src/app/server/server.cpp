@@ -228,6 +228,22 @@ internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
     return user;
 }
 
+internal void SV_SpawnUserAvatar(User* u)
+{
+	SimEntityDef def = {};
+    def = {};
+    //def.isLocal = 1;
+	i32 avatarSerial = Sim_ReserveEntitySerial(&g_sim, 0);
+	u->entSerial = avatarSerial;
+    def.serial = avatarSerial;
+	def.entType = SIM_ENT_TYPE_ACTOR;
+    def.pos[1] = 0;
+    def.scale[0] = 1;
+    def.scale[1] = 1;
+    def.scale[2] = 1;
+    Sim_AddEntity(&g_sim, &def);
+}
+
 UserIds SV_CreateLocalUser()
 {
     ZNetAddress addr = {};
@@ -235,6 +251,7 @@ UserIds SV_CreateLocalUser()
     UserIds id = SV_GenerateUserId();
     User* u = SV_CreateUser(id, &addr);
     u->state = USER_STATE_SYNC;
+	SV_SpawnUserAvatar(u);
     SV_UserStartSync(u);
     return id;
 }

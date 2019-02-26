@@ -151,9 +151,12 @@ void CL_LoadTestScene()
 {
 	Sim_LoadScene(&g_sim, 0);
 	
-    SimEntityDef def = {};
-    #if 1
+	g_sim.boundaryMin = { -6, -6, -6 };
+    g_sim.boundaryMax = { 6, 6, 6 };
 	
+	// Add local test avatar
+	#if 0
+	SimEntityDef def = {};
     def = {};
     def.isLocal = 1;
 	g_avatarSerial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
@@ -164,11 +167,7 @@ void CL_LoadTestScene()
     def.scale[1] = 1;
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
-
-    g_sim.boundaryMin = { -6, -6, -6 };
-    g_sim.boundaryMax = { 6, 6, 6 };
-
-    #endif
+	#endif
 }
 
 // Public so that local user can be instantly set from outside
@@ -519,7 +518,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_RunUnreliableCommands(&g_unreliableStream, deltaTime);
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
     //CLG_HandlePlayerInput(NULL, &g_actorInput);
-	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
+	/*SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
 	if (plyr)
 	{
 		plyr->input = g_actorInput;
@@ -527,7 +526,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	else
 	{
 		printf("No player!\n");
-	}
+	}*/
 	
     CLG_TickGame(&g_sim, deltaTime);
 	
