@@ -24,7 +24,7 @@ internal i32 g_serverTick = 0;
 internal f32 g_ping;
 internal f32 g_jitter;
 
-internal i32 g_avatarSerial = -2;
+internal i32 g_avatarSerial = 0;
 
 #define CL_MAX_ALLOCATIONS 256
 internal void* g_allocations[CL_MAX_ALLOCATIONS];
@@ -45,12 +45,15 @@ internal i32 g_interpolateRenderScene = 0;
 // Menus
 internal i32 g_mainMenuOn;
 
-#define CL_MAX_INPUTS 256
-internal InputAction g_inputActionItems[CL_MAX_INPUTS];
+#define CL_MAX_INPUT_ACTIONS 256
+internal InputAction g_inputActionItems[CL_MAX_INPUT_ACTIONS];
 internal InputActionSet g_inputActions = {
     g_inputActionItems,
     0
 };
+
+// Buffer transmitted inputs
+internal C2S_Input g_sentCommands[CL_MAX_SENT_INPUT_COMMANDS];
 
 #define CL_MAX_RENDER_COMMANDS 1024
 internal RenderCommand* g_renderCommands;
@@ -367,7 +370,8 @@ internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
         {
             S2C_Sync* sync = (S2C_Sync*)h;
 			CL_SetServerTick(sync->simTick - APP_DEFAULT_JITTER_TICKS);
-			
+			g_avatarSerial = sync->avatarEntityId;
+            APP_PRINT(64, "CL Set avatar %d\n", g_avatarSerial);
             // Lets not do what the server tells us!
 			//g_serverTick = sync->simTick - sync->jitterTickCount;
 			APP_LOG(64, "/////////////////////////////////////////\n");
@@ -516,23 +520,29 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     //CL_LogCommandBuffer(&g_unreliableStream.inputBuffer, "Unreliable input");
     CL_RunUnreliableCommands(&g_unreliableStream, deltaTime);
+
+    // Update and store input
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
+
+	// Create and store input to server
+	C2S_Input cmd;
     //CLG_HandlePlayerInput(NULL, &g_actorInput);
-	/*SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
+	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
 	if (plyr)
 	{
 		plyr->input = g_actorInput;
+		cmd.avatarPos = plyr->t.pos;
 	}
 	else
 	{
 		printf("No player!\n");
-	}*/
+	}
+	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_ticks);
+	CL_StoreSentInputCommand(g_sentCommands, &cmd);
 	
+	// Run
     CLG_TickGame(&g_sim, deltaTime);
 	
-	C2S_Input cmd;
-	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_ticks);
-    
 	g_ticks++;
 	g_serverTick++;
     g_elapsed += deltaTime;
@@ -642,6 +652,12 @@ void CL_PopulateRenderScene(
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, 0.2f, 0.2f, 0.2f, texIndex);
+			} break;
+
+            case SIM_ENT_TYPE_PROJECTILE:
+			{
+				RendObj_SetAsMesh(
+					&obj, *cube, 1, 1, 0, texIndex);
 			} break;
 			
 			case SIM_ENT_TYPE_ACTOR:

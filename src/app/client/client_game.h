@@ -46,8 +46,22 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 	}
 }
 
+internal void CLG_SyncEntity()
+{
+
+}
+
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
+    if (ent->id.serial == g_avatarSerial)
+    {
+
+    }
+    else
+    {
+        
+    }
+    
 	Vec3 move = {};
 	f32 speed = 5.0f;
 	if (ent->input.buttons & ACTOR_INPUT_MOVE_FORWARD)

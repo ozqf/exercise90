@@ -183,7 +183,7 @@ internal void SV_UserStartSync(User* user)
     NetStream* stream = &user->reliableStream;
 
     S2C_Sync sync;
-    Cmd_InitSync(&sync, g_ticks, 0, g_ticks, 8);
+    Cmd_InitSync(&sync, g_ticks, 0, g_ticks, 8, user->entSerial);
     Stream_EnqueueOutput(stream, &sync.header);
     // start user command queue
     for (i32 j = 0; j < g_sim.maxEnts; ++j)

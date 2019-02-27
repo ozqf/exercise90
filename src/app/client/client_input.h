@@ -2,6 +2,24 @@
 
 #include "client.h"
 
+internal void CL_StoreSentInputCommand(C2S_Input* list, C2S_Input* input)
+{
+    i32 i =  input->header.tick % CL_MAX_SENT_INPUT_COMMANDS;
+    list[i] = *input;
+}
+
+internal C2S_Input* CL_RecallSentInputCommand(C2S_Input* list, i32 tick)
+{
+    i32 i = tick % CL_MAX_SENT_INPUT_COMMANDS;
+    C2S_Input* result = &list[i];
+    if (result->header.sentinel == 0
+        || result->header.tick != tick)
+    {
+        return NULL;
+    }
+    return result;
+}
+
 internal void CL_InitInputs(InputActionSet* actions)
 {
     Input_InitAction(actions, Z_INPUT_CODE_V, "Cycle Debug");
@@ -80,6 +98,7 @@ internal void CL_UpdateActorInput(InputActionSet* actions, SimActorInput* input)
 	}
 
     input->buttons = flags;
+
 
     //printf("Mouse pos %d, %d\n",
     //    Input_GetActionValue(actions, "Mouse Pos X"),

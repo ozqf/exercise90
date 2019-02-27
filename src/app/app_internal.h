@@ -18,9 +18,9 @@ internal AppPlatform g_platform = {};
 internal ScreenInfo g_screenInfo;
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
-internal i32 g_fakeLagMinMS = 50;
-internal i32 g_fakeLagMaxMS = 80;
-internal f32 g_fakeLoss = 0.05f;
+internal i32 g_fakeLagMinMS = 150;
+internal i32 g_fakeLagMaxMS = 250;
+internal f32 g_fakeLoss = 0.01f;
 
 internal u32 g_lastPlatformFrame = 0;
 

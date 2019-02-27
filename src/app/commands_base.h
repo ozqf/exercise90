@@ -25,7 +25,7 @@ struct Command
     i32 size;
 
     // Controls execution time and order
-    u32 tick;
+    i32 tick;
     i32 sequence;
 };
 

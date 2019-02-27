@@ -7,6 +7,7 @@
 #include "../stream.h"
 #include "../../interface/renderer_interface.h"
 
+#define CL_MAX_SENT_INPUT_COMMANDS 60
 
 void    CL_Init(ZNetAddress serverAddress);
 void    CL_Shutdown();
