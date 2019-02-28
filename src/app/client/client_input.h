@@ -4,6 +4,7 @@
 
 internal void CL_StoreSentInputCommand(C2S_Input* list, C2S_Input* input)
 {
+    printf("CL Store sent input for tick %d\n", input->header.tick);
     i32 i =  input->header.tick % CL_MAX_SENT_INPUT_COMMANDS;
     list[i] = *input;
 }

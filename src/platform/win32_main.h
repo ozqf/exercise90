@@ -470,17 +470,18 @@ int CALLBACK WinMain(
         CS_OWNDC // allocates a unique device context for each window in the window class
         | CS_HREDRAW | CS_VREDRAW;
 
-    Win32ResizeDIBSection(&globalBackBuffer, 1280, 720);
-
+    i32 windowWidth = 1280;
+    i32 windowHeight = 720;
+    //i32 windowWidth = 640;
+    //i32 windowHeight = 400;
+    Win32ResizeDIBSection(&globalBackBuffer, windowWidth, windowHeight);
+    
     //win32LoadXInput();
 
     WindowClass.lpfnWndProc = Win32_MainWindowCallback;
     WindowClass.hInstance = hInstance;
     //	WindowClass.hIcon
     WindowClass.lpszClassName = "Exercise90WindowClass";
-
-    i32 windowWidth = 640;//1280;
-    i32 windowHeight = 400;//720;
 
     RECT r;
     r.top = r.left = 0;

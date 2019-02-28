@@ -467,18 +467,19 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                 case CMD_TYPE_S2C_SYNC_ENTITY:
                 {
                     S2C_EntitySync* cmd = (S2C_EntitySync*)h;
-                    SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
-                    if (!ent)
-                    {
-                        APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
-                    }
-                    else
-                    {
-                        //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
-                        ent->previousPos = ent->t.pos;
-                        ent->t.pos = cmd->pos;
-                        executed = 1;
-                    }
+                    executed = CLG_SyncEntity(&g_sim, cmd);
+                    // SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
+                    // if (!ent)
+                    // {
+                    //     APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+                    // }
+                    // else
+                    // {
+                    //     //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
+                    //     ent->previousPos = ent->t.pos;
+                    //     ent->t.pos = cmd->pos;
+                    //     executed = 1;
+                    // }
                 } break;
 
                 case CMD_TYPE_PING:
@@ -537,7 +538,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	{
 		printf("No player!\n");
 	}
-	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_ticks);
+	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_serverTick);
 	CL_StoreSentInputCommand(g_sentCommands, &cmd);
 	
 	// Run

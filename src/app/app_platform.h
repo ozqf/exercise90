@@ -107,9 +107,9 @@ internal i32  App_Init()
     // Render Scenes - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
 		90, RENDER_PROJECTION_MODE_3D, 8);
-    g_worldScene.cameraTransform.pos.z = 18;
+    g_worldScene.cameraTransform.pos.z = 8;
     g_worldScene.cameraTransform.pos.y += 12;
-    Transform_SetRotation(&g_worldScene.cameraTransform, -(45    * DEG2RAD), 0, 0);
+    Transform_SetRotation(&g_worldScene.cameraTransform, -(67.5f    * DEG2RAD), 0, 0);
 
     // server and client areas currently acquiring their own memory
     App_StartSession(APP_SESSION_TYPE_SINGLE_PLAYER);

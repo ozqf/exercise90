@@ -46,9 +46,39 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 	}
 }
 
-internal void CLG_SyncEntity()
+// Return 1 if the command was successfull executed.
+internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
 {
-
+    i32 executed = 0;
+    SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
+    if (!ent)
+    {
+        APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+    }
+    else
+    {
+        if (cmd->networkId == g_avatarSerial)
+        {
+            C2S_Input* input = CL_RecallSentInputCommand(g_sentCommands, cmd->header.tick);
+            if (input == NULL)
+            {
+                printf("CL Sent input for tick %d not found!\n", cmd->header.tick);
+                return 1;
+            }
+            Vec3 pos = ent->t.pos;
+            printf("CL Sync avatar tick %d Local: %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n",
+                cmd->header.tick,
+                pos.x, pos.y, pos.z,
+                cmd->pos.x, cmd->pos.y, cmd->pos.z
+                );
+            return 1;
+        }
+        //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
+        ent->previousPos = ent->t.pos;
+        ent->t.pos = cmd->pos;
+        executed = 1;
+    }
+    return executed;
 }
 
 CLG_DEFINE_ENT_UPDATE(Actor)
