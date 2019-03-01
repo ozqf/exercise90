@@ -7,12 +7,24 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
     // Send ping
-	CmdPing ping = {};
+	//CmdPing ping = {};
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
-    Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
+    //Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
+    //packet->ptrWrite += COM_COPY(
+    //    &ping, packet->ptrWrite, ping.header.size);
+
+    // send input confirmation
+    S2C_InputResponse response = {};
+    Cmd_InitInputResponse(
+        &response,
+        g_ticks,
+        user->userInputSequence,
+        { 0, 0, 0 } // TODO: This param
+        );
     packet->ptrWrite += COM_COPY(
-        &ping, packet->ptrWrite, ping.header.size);
+        &response, packet->ptrWrite, response.header.size);
+
 	i32 syncMessagesWritten = 0;
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
 	{
@@ -163,6 +175,10 @@ internal void SV_ReadUnreliableSection(User* user, ByteBuffer* b)
             case CMD_TYPE_C2S_INPUT:
             {
                 C2S_Input* cmd = (C2S_Input*)header;
+                if (cmd->userInputSequence > user->userInputSequence)
+                {
+                    user->userInputSequence = cmd->userInputSequence;
+                }
                 Sim_SetActorInput(&g_sim, &cmd->input, user->entSerial);
             } break;
 

@@ -28,6 +28,7 @@ struct User
     f32 ping;
     f32 jitter;
     i32 smoothingTicks;
+    i32 userInputSequence;
 	
     ZNetAddress address;
 	AckStream acks;

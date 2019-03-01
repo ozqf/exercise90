@@ -14,6 +14,7 @@
 #define CMD_TYPE_C2S_INPUT 249
 #define CMD_TYPE_S2C_SYNC_ENTITY 248
 #define CMD_TYPE_PING 247
+#define CMD_TYPE_S2C_INPUT_RESPONSE 246
 
 struct CmdPing
 {
@@ -56,15 +57,38 @@ internal void Cmd_InitSync(
     cmd->avatarEntityId = avatarEntityId;
 }
 
+struct S2C_InputResponse
+{
+    Command header;
+    i32 lastUserInputSequence;
+    Vec3 latestAvatarPos;
+};
+
+internal void Cmd_InitInputResponse(
+    S2C_InputResponse* cmd,
+    i32 tick,
+    i32 lastInputSequence,
+    Vec3 avatarPos
+)
+{
+    Cmd_Prepare(&cmd->header, tick, 0);
+    cmd->header.type = CMD_TYPE_S2C_INPUT_RESPONSE;
+    cmd->header.size = sizeof(S2C_InputResponse);
+    cmd->lastUserInputSequence = lastInputSequence;
+    cmd->latestAvatarPos = avatarPos;
+}
+
 struct C2S_Input
 {
 	Command header;
+    i32 userInputSequence;
 	SimActorInput input;
 	Vec3 avatarPos;
 };
 
 internal void Cmd_InitClientInput(
 	C2S_Input* cmd,
+    i32 userInputSequence,
 	SimActorInput* input,
 	Vec3* avatarPos,
 	i32 tick
@@ -74,6 +98,7 @@ internal void Cmd_InitClientInput(
 	Cmd_Prepare(&cmd->header, tick, 0);
 	cmd->header.type = CMD_TYPE_C2S_INPUT;
 	cmd->header.size = sizeof(C2S_Input);
+    cmd->userInputSequence = userInputSequence;
 	if (input)
 	{
 		cmd->input = *input;

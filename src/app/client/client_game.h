@@ -46,7 +46,7 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 	}
 }
 
-// Return 1 if the command was successfull executed.
+// Return 1 if the command was successfully executed.
 internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
 {
     i32 executed = 0;
@@ -60,6 +60,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         if (cmd->networkId == g_avatarSerial)
         {
             C2S_Input* input = CL_RecallSentInputCommand(g_sentCommands, cmd->header.tick);
+            #if 0
             if (input == NULL)
             {
                 printf("CL Sent input for tick %d not found!\n", cmd->header.tick);
@@ -71,6 +72,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
                 pos.x, pos.y, pos.z,
                 cmd->pos.x, cmd->pos.y, cmd->pos.z
                 );
+            #endif
             return 1;
         }
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);

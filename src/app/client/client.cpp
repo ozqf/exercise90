@@ -36,6 +36,9 @@ internal NetStream g_unreliableStream;
 internal UserIds g_ids;
 internal AckStream g_acks;
 internal ZNetAddress g_serverAddress;
+internal i32 g_userInputSequence = 0;
+internal i32 g_latestUserInputAck = 0;
+internal Vec3 g_latestAvatarPos = {};
 
 internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
@@ -482,6 +485,21 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                     // }
                 } break;
 
+                case CMD_TYPE_S2C_INPUT_RESPONSE:
+                {
+                    S2C_InputResponse* cmd = (S2C_InputResponse*)h;
+                    if (g_latestUserInputAck < cmd->lastUserInputSequence)
+                    {
+                        g_latestUserInputAck = cmd->lastUserInputSequence;
+                        g_latestAvatarPos = cmd->latestAvatarPos;
+                        printf("CL response %d vs %d local. diff %d\n",
+                            cmd->lastUserInputSequence,
+                            g_userInputSequence,
+                            g_userInputSequence - cmd->lastUserInputSequence
+                            );
+                    }
+                } break;
+
                 case CMD_TYPE_PING:
                 {
                     CmdPing* cmd = (CmdPing*)h;
@@ -538,7 +556,12 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	{
 		printf("No player!\n");
 	}
-	Cmd_InitClientInput(&cmd, &g_actorInput, NULL, g_serverTick);
+	Cmd_InitClientInput(
+        &cmd,
+        g_userInputSequence++,
+        &g_actorInput,
+        NULL,
+        g_serverTick);
 	CL_StoreSentInputCommand(g_sentCommands, &cmd);
 	
 	// Run
