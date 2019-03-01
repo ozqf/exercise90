@@ -512,6 +512,7 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                     );
                     // Restore state
                     ent->t.pos = cmd->latestAvatarPos;
+                    ent->previousPos = cmd->latestAvatarPos;
 					if (replaySequence < 0) { replaySequence = 0;  }
                     // Replay frames
                     while (replaySequence <= (g_userInputSequence - 1))
