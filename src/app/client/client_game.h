@@ -83,18 +83,12 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     return executed;
 }
 
-CLG_DEFINE_ENT_UPDATE(Actor)
+internal void CLG_StepActor(
+    SimEntity* ent,
+    SimActorInput* input,
+    f32 deltaTime)
 {
-    if (ent->id.serial == g_avatarSerial)
-    {
-
-    }
-    else
-    {
-        
-    }
-    
-	Vec3 move = {};
+    Vec3 move = {};
 	f32 speed = 5.0f;
 	if (ent->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
 	{
@@ -116,6 +110,19 @@ CLG_DEFINE_ENT_UPDATE(Actor)
 	ent->t.pos.x += move.x;
 	ent->t.pos.y += move.y;
 	ent->t.pos.z += move.z;
+}
+
+CLG_DEFINE_ENT_UPDATE(Actor)
+{
+    CLG_StepActor(ent, &ent->input, deltaTime); 
+    if (ent->id.serial == g_avatarSerial)
+    {
+
+    }
+    else
+    {
+        
+    }
 }
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)

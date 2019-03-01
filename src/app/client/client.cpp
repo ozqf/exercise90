@@ -488,16 +488,44 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                 case CMD_TYPE_S2C_INPUT_RESPONSE:
                 {
                     S2C_InputResponse* cmd = (S2C_InputResponse*)h;
-                    if (g_latestUserInputAck < cmd->lastUserInputSequence)
+                    if (g_latestUserInputAck >= cmd->lastUserInputSequence)
                     {
-                        g_latestUserInputAck = cmd->lastUserInputSequence;
-                        g_latestAvatarPos = cmd->latestAvatarPos;
-                        printf("CL response %d vs %d local. diff %d\n",
-                            cmd->lastUserInputSequence,
-                            g_userInputSequence,
-                            g_userInputSequence - cmd->lastUserInputSequence
-                            );
+                        executed = 1;
+                        break;
                     }
+                    SimEntity* ent = Sim_GetEntityBySerial(
+                        &g_sim, g_avatarSerial);
+                    if (!ent) { break; }
+                    g_latestUserInputAck = cmd->lastUserInputSequence;
+                    g_latestAvatarPos = cmd->latestAvatarPos;
+                    i32 framesSinceResponse = g_userInputSequence - cmd->lastUserInputSequence;
+                    // printf("CL response %d vs %d local. diff %d\n",
+                    //     cmd->lastUserInputSequence,
+                    //     g_userInputSequence,
+                    //     framesSinceResponse
+                    //     );
+                    i32 replaySequence = cmd->lastUserInputSequence;
+                    printf("Replay %d inputs (%d to %d)\n",
+                        framesSinceResponse,
+                        replaySequence,
+                        g_userInputSequence
+                    );
+                    // Restore state
+                    ent->t.pos = cmd->latestAvatarPos;
+					if (replaySequence < 0) { replaySequence = 0;  }
+                    // Replay frames
+                    while (replaySequence <= (g_userInputSequence - 1))
+                    {
+                        C2S_Input* input = CL_RecallSentInputCommand(
+                            g_sentCommands, replaySequence);
+						//if (input != null)
+						//{
+							CLG_StepActor(ent, &input->input, input->deltaTime);
+						//}
+                        
+                        replaySequence++;
+                    }
+                    //printf("\n");
                 } break;
 
                 case CMD_TYPE_PING:
@@ -561,7 +589,8 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
         g_userInputSequence++,
         &g_actorInput,
         NULL,
-        g_serverTick);
+        g_serverTick,
+        deltaTime);
 	CL_StoreSentInputCommand(g_sentCommands, &cmd);
 	
 	// Run

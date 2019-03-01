@@ -2,19 +2,21 @@
 
 #include "client.h"
 
-internal void CL_StoreSentInputCommand(C2S_Input* list, C2S_Input* input)
+internal void CL_StoreSentInputCommand(
+    C2S_Input* list, C2S_Input* input)
 {
     printf("CL Store sent input for tick %d\n", input->header.tick);
-    i32 i =  input->header.tick % CL_MAX_SENT_INPUT_COMMANDS;
+    i32 i =  input->userInputSequence % CL_MAX_SENT_INPUT_COMMANDS;
     list[i] = *input;
 }
 
-internal C2S_Input* CL_RecallSentInputCommand(C2S_Input* list, i32 tick)
+internal C2S_Input* CL_RecallSentInputCommand(
+    C2S_Input* list, i32 sequence)
 {
-    i32 i = tick % CL_MAX_SENT_INPUT_COMMANDS;
+    i32 i = sequence % CL_MAX_SENT_INPUT_COMMANDS;
     C2S_Input* result = &list[i];
     if (result->header.sentinel == 0
-        || result->header.tick != tick)
+        || result->userInputSequence != sequence)
     {
         return NULL;
     }

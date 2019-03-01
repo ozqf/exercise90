@@ -15,12 +15,15 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
     //    &ping, packet->ptrWrite, ping.header.size);
 
     // send input confirmation
+    SimEntity* avatar = Sim_GetEntityBySerial(&g_sim, user->entSerial);
+    Vec3 pos = {};
+    if (avatar) { pos = avatar->t.pos; }
     S2C_InputResponse response = {};
     Cmd_InitInputResponse(
         &response,
         g_ticks,
         user->userInputSequence,
-        { 0, 0, 0 } // TODO: This param
+        pos
         );
     packet->ptrWrite += COM_COPY(
         &response, packet->ptrWrite, response.header.size);

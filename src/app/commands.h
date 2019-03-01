@@ -84,6 +84,7 @@ struct C2S_Input
     i32 userInputSequence;
 	SimActorInput input;
 	Vec3 avatarPos;
+    f32 deltaTime;
 };
 
 internal void Cmd_InitClientInput(
@@ -91,7 +92,8 @@ internal void Cmd_InitClientInput(
     i32 userInputSequence,
 	SimActorInput* input,
 	Vec3* avatarPos,
-	i32 tick
+	i32 tick,
+    f32 deltaTime
 	)
 {
 	*cmd = {};
@@ -99,6 +101,7 @@ internal void Cmd_InitClientInput(
 	cmd->header.type = CMD_TYPE_C2S_INPUT;
 	cmd->header.size = sizeof(C2S_Input);
     cmd->userInputSequence = userInputSequence;
+    cmd->deltaTime = deltaTime;
 	if (input)
 	{
 		cmd->input = *input;
