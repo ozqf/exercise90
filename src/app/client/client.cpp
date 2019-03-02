@@ -479,68 +479,8 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                 case CMD_TYPE_S2C_INPUT_RESPONSE:
                 {
                     S2C_InputResponse* cmd = (S2C_InputResponse*)h;
-                    if (g_latestUserInputAck >= cmd->lastUserInputSequence)
-                    {
-                        executed = 1;
-                        break;
-                    }
-                    SimEntity* ent = Sim_GetEntityBySerial(
-                        &g_sim, g_avatarSerial);
-                    if (!ent) { break; }
-                    g_latestUserInputAck = cmd->lastUserInputSequence;
-                    g_latestAvatarPos = cmd->latestAvatarPos;
-                    i32 framesSinceResponse = g_userInputSequence - cmd->lastUserInputSequence;
-
-                    // this is the input sequence matching the response. Replay will
-                    // occur from this point.
-                    
-                    
-                    // Restore state if necessary
-                    APP_LOG(128, "CL Replay %d frames\n", framesSinceResponse);
-                    // input 
-                    C2S_Input* sourceInput = CL_RecallSentInputCommand(
-                        g_sentCommands, cmd->lastUserInputSequence);
-                    
-                    Vec3 originalLocalPos = sourceInput->avatarPos;
-                    Vec3 currentLocalPos = ent->t.pos;
-                    Vec3 remotePos = cmd->latestAvatarPos;
-                    
-                    if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
-                    {
-                        APP_LOG(256,
-                            "  Correcting local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
-                            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
-                            remotePos.x, remotePos.y, remotePos.z
-                        );
-                        ent->t.pos = remotePos;
-                        ent->previousPos = remotePos;
-                    }
-                    else
-                    {
-                        APP_LOG(256,
-                            "  No correction for local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
-                            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
-                            remotePos.x, remotePos.y, remotePos.z
-                        );
-                        ent->t.pos = originalLocalPos;
-                        ent->previousPos = originalLocalPos;
-                    }
-                    
-
-                    // Replay frames
-                    i32 replaySequence = cmd->lastUserInputSequence;
-                    if (replaySequence < 0) { replaySequence = 0;  }
-                    i32 lastSequence = g_userInputSequence - 1;
-                    while (replaySequence <= lastSequence)
-                    {
-                        C2S_Input* input = CL_RecallSentInputCommand(
-                            g_sentCommands, replaySequence);
-						
-						CLG_StepActor(ent, &input->input, input->deltaTime);
-                        
-                        replaySequence++;
-                    }
-                    //printf("\n");
+                    CLG_SyncAvatar(cmd);
+                    executed = 1;
                 } break;
 
                 case CMD_TYPE_PING:
@@ -583,7 +523,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     //CL_LogCommandBuffer(&g_unreliableStream.inputBuffer, "Unreliable input");
     CL_RunUnreliableCommands(&g_unreliableStream, deltaTime);
 
-    // Update and store input
+    // Update input
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
 
 	// Create and store input to server

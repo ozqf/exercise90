@@ -112,6 +112,94 @@ internal void CLG_StepActor(
 	ent->t.pos.z += move.z;
 }
 
+internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
+{
+    if (g_latestUserInputAck >= cmd->lastUserInputSequence)
+    {
+        return;
+    }
+    SimEntity* ent = Sim_GetEntityBySerial(
+        &g_sim, g_avatarSerial);
+    if (!ent) { return; }
+    g_latestUserInputAck = cmd->lastUserInputSequence;
+    g_latestAvatarPos = cmd->latestAvatarPos;
+    i32 framesSinceResponse = g_userInputSequence - cmd->lastUserInputSequence;
+    // this is the input sequence matching the response. Replay will
+    // occur from this point.
+    
+    
+    // Restore state if necessary
+    APP_LOG(128, "CL Replay %d frames (%d to %d)\n",
+        framesSinceResponse,
+        cmd->lastUserInputSequence,
+        g_userInputSequence
+    );
+    // input 
+    C2S_Input* sourceInput = CL_RecallSentInputCommand(
+        g_sentCommands, cmd->lastUserInputSequence);
+    
+    Vec3 originalLocalPos = sourceInput->avatarPos;
+    Vec3 currentLocalPos = ent->t.pos;
+    Vec3 remotePos = cmd->latestAvatarPos;
+    
+    if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
+    {
+        APP_PRINT(256,
+            "  Correcting CL vs SV: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+            remotePos.x, remotePos.y, remotePos.z
+        );
+        ent->t.pos = remotePos;
+        ent->previousPos = remotePos;
+    }
+    else
+    {
+        APP_LOG(256,
+            "  No correction for local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+            remotePos.x, remotePos.y, remotePos.z
+        );
+        ent->t.pos = originalLocalPos;
+        ent->previousPos = originalLocalPos;
+    }
+    
+    // Replay frames
+    i32 replaySequence = cmd->lastUserInputSequence;
+    if (replaySequence < 0) { replaySequence = 0;  }
+    i32 lastSequence = g_userInputSequence;
+    //framesSinceResponse = 0;
+    #if 1
+    for (i32 i = 0; i <= framesSinceResponse; ++i)
+    {
+        replaySequence = cmd->lastUserInputSequence + i;
+        C2S_Input* input = CL_RecallSentInputCommand(
+            g_sentCommands, replaySequence);
+        if (!input) { continue; }
+		Vec3 before = ent->t.pos;
+		CLG_StepActor(ent, &input->input, input->deltaTime);
+		Vec3 after = ent->t.pos;
+		APP_LOG(256, "\t\tSeq %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
+			replaySequence,
+			before.x, before.y, before.z,
+			after.x, after.y, after.z
+			);
+    }
+    #endif
+    #if 0
+    // While loop version
+    while (replaySequence < lastSequence)
+    {
+        C2S_Input* input = CL_RecallSentInputCommand(
+            g_sentCommands, replaySequence);
+		
+		CLG_StepActor(ent, &input->input, input->deltaTime);
+        
+        replaySequence++;
+    }
+    #endif
+    //printf("\n");
+}
+
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
     CLG_StepActor(ent, &ent->input, deltaTime); 
