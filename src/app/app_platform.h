@@ -21,6 +21,11 @@ void App_SetMouseMode(ZMouseMode mode)
 	g_platform.SetMouseMode(mode);
 }
 
+void App_Error(char* msg, char* heading)
+{
+    g_platform.Error(msg, heading);
+}
+
 ScreenInfo App_GetScreenInfo()
 {
 	return g_screenInfo;

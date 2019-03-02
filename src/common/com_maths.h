@@ -8,10 +8,14 @@
 #define FULL_ROTATION_RADIANS (pi32 * 2)
 
 
-#define ZABS(value) (value = value >= 0 ? value : -value )
+#define ZABS(value) (value = (value >= 0 ? value : -value))
 #define ZMIN(x, y) ((x) < (y) ? (x) : (y))
 #define ZMAX(x, y) ((x) > (y) ? (x) : (y))
 
+internal f32 ZAbsf(f32 value)
+{
+    return value >= 0 ? value : -value;
+}
 
 //#define ArrayCount(array) (sizeof(array) / sizeof(array)[0]))
 
@@ -95,6 +99,7 @@ void Vec3_CrossProduct(Vec3* a, Vec3* b, Vec3* result);
 f32 Vec3_DotProduct(Vec3* a, Vec3* b);
 void Vec3_NormaliseOrForward(Vec3* v);
 Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m);
+i32 Vec3_AreDifferent(Vec3* a, Vec3* b, f32 epsilon);
 
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 3 OPERATIONS

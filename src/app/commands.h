@@ -57,6 +57,10 @@ internal void Cmd_InitSync(
     cmd->avatarEntityId = avatarEntityId;
 }
 
+// Server confirmation of a specific input command.
+// Must only be sent in response to a client input tick,
+// as the client will look this tick up to perform prediction
+// and corrections
 struct S2C_InputResponse
 {
     Command header;

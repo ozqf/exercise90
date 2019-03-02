@@ -5,7 +5,10 @@
 internal void CL_StoreSentInputCommand(
     C2S_Input* list, C2S_Input* input)
 {
-    //printf("CL Store sent input for tick %d\n", input->header.tick);
+    APP_LOG(256,
+        "CL Store sent input for tick %d - pos %.3f, %.3f, %.3f\n",
+        input->header.tick,
+        input->avatarPos.x, input->avatarPos.y, input->avatarPos.z);
     i32 i =  input->userInputSequence % CL_MAX_SENT_INPUT_COMMANDS;
     list[i] = *input;
 }

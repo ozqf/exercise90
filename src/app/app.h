@@ -15,6 +15,7 @@ void App_SendTo(i32 socketIndex, ZNetAddress* addr, u8* data, i32 dataSize);
 void App_Log(char* msg);
 void App_Print(char* msg);
 void App_SetMouseMode(ZMouseMode mode);
+void App_Error(char* msg, char* heading);
 ScreenInfo App_GetScreenInfo();
 
 

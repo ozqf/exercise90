@@ -162,6 +162,19 @@ Vec3 Vec3_MultiplyByM4x4(Vec3* v, f32* m)
 	return r;
 }
 
+// returns 1 if vectors are different
+i32 Vec3_AreDifferent(Vec3* a, Vec3* b, f32 epsilon)
+{
+    f32 diff;
+    diff = ZAbsf((b->x - a->x));
+    if (diff > epsilon) { return 1; }
+    diff = ZAbsf((b->y - a->y));
+    if (diff > epsilon) { return 1; }
+    diff = ZAbsf((b->z - a->z));
+    if (diff > epsilon) { return 1; }
+
+    return 0;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // VECTOR 4 OPERATIONS

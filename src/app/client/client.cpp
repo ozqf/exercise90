@@ -462,7 +462,9 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
 		i32 diff = h->tick - CL_GetServerTick();
 		//APP_LOG(128, "CL Exec Cmd %d: Cmd Tick %d, Sync Tick %d (diff %d), CL Tick %d\n",
 		//	h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
-		//);
+		//)
+		
+		// If executed, delete command from buffer
         i32 executed = 0;
         if (diff <= 0)
         {
@@ -488,21 +490,53 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                     g_latestUserInputAck = cmd->lastUserInputSequence;
                     g_latestAvatarPos = cmd->latestAvatarPos;
                     i32 framesSinceResponse = g_userInputSequence - cmd->lastUserInputSequence;
-                    i32 replaySequence = cmd->lastUserInputSequence;
 
-                    // Restore state
-                    ent->t.pos = cmd->latestAvatarPos;
-                    ent->previousPos = cmd->latestAvatarPos;
-					if (replaySequence < 0) { replaySequence = 0;  }
+                    // this is the input sequence matching the response. Replay will
+                    // occur from this point.
+                    
+                    
+                    // Restore state if necessary
+                    APP_LOG(128, "CL Replay %d frames\n", framesSinceResponse);
+                    // input 
+                    C2S_Input* sourceInput = CL_RecallSentInputCommand(
+                        g_sentCommands, cmd->lastUserInputSequence);
+                    
+                    Vec3 originalLocalPos = sourceInput->avatarPos;
+                    Vec3 currentLocalPos = ent->t.pos;
+                    Vec3 remotePos = cmd->latestAvatarPos;
+                    
+                    if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
+                    {
+                        APP_LOG(256,
+                            "  Correcting local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+                            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+                            remotePos.x, remotePos.y, remotePos.z
+                        );
+                        ent->t.pos = remotePos;
+                        ent->previousPos = remotePos;
+                    }
+                    else
+                    {
+                        APP_LOG(256,
+                            "  No correction for local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+                            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+                            remotePos.x, remotePos.y, remotePos.z
+                        );
+                        ent->t.pos = originalLocalPos;
+                        ent->previousPos = originalLocalPos;
+                    }
+                    
+
                     // Replay frames
-                    while (replaySequence <= (g_userInputSequence - 1))
+                    i32 replaySequence = cmd->lastUserInputSequence;
+                    if (replaySequence < 0) { replaySequence = 0;  }
+                    i32 lastSequence = g_userInputSequence - 1;
+                    while (replaySequence <= lastSequence)
                     {
                         C2S_Input* input = CL_RecallSentInputCommand(
                             g_sentCommands, replaySequence);
-						//if (input != null)
-						//{
-							CLG_StepActor(ent, &input->input, input->deltaTime);
-						//}
+						
+						CLG_StepActor(ent, &input->input, input->deltaTime);
                         
                         replaySequence++;
                     }
@@ -556,20 +590,21 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	C2S_Input cmd;
     //CLG_HandlePlayerInput(NULL, &g_actorInput);
 	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
+	Vec3 pos = {};
 	if (plyr)
 	{
 		plyr->input = g_actorInput;
-		cmd.avatarPos = plyr->t.pos;
+		pos = plyr->t.pos;
 	}
 	else
 	{
-		printf("No player!\n");
+		APP_LOG(64, "No player!\n");
 	}
 	Cmd_InitClientInput(
         &cmd,
         g_userInputSequence++,
         &g_actorInput,
-        NULL,
+        &pos,
         g_serverTick,
         deltaTime);
 	CL_StoreSentInputCommand(g_sentCommands, &cmd);
