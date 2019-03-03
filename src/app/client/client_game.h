@@ -162,6 +162,8 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
         ent->t.pos = originalLocalPos;
         ent->previousPos = originalLocalPos;
     }
+
+    ent->hasBeenPredicted = 1;
     
     // Replay frames
     i32 replaySequence = cmd->lastUserInputSequence;
@@ -178,8 +180,9 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
 		Vec3 before = ent->t.pos;
 		CLG_StepActor(ent, &input->input, input->deltaTime);
 		Vec3 after = ent->t.pos;
-		APP_LOG(256, "\t\tSeq %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
+		APP_LOG(256, "\t\tSeq %d Buttons %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
 			replaySequence,
+            input->input.buttons,
 			before.x, before.y, before.z,
 			after.x, after.y, after.z
 			);
@@ -202,7 +205,18 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
 
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
-    CLG_StepActor(ent, &ent->input, deltaTime); 
+    if (ent->hasBeenPredicted)
+    {
+        printf("  Skip tick of ent %d\n", ent->id.serial);
+        ent->hasBeenPredicted = 0;
+        return;
+    }
+    else
+    {
+        CLG_StepActor(ent, &ent->input, deltaTime); 
+    }
+    // local player specific stuff:
+    #if 0
     if (ent->id.serial == g_avatarSerial)
     {
 
@@ -211,6 +225,7 @@ CLG_DEFINE_ENT_UPDATE(Actor)
     {
         
     }
+    #endif
 }
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)

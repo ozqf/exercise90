@@ -74,6 +74,9 @@ struct SimEntity
     f32 yaw;
 	
 	SimActorInput input;
+
+    // runtime
+    i32 hasBeenPredicted;
 };
 
 struct SimEntityDef
