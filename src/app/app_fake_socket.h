@@ -61,8 +61,11 @@ struct FakeSocket
         //COM_ClampI32(&maxLagMS, 0, 1000);
 
         COM_ZeroMemory((u8*)this, sizeof(FakeSocket));
-        info.minMS = minLagMS;
-        info.maxMS = maxLagMS;
+
+        // Half the given round trip time to get the delay for
+        // an individual packet
+        info.minMS = minLagMS / 2;
+        info.maxMS = maxLagMS / 2;
         info.lossNormal = normalisedPacketLossChance;
     }
 
