@@ -49,7 +49,8 @@ internal i32 Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt)
     return -1;
 }
 
-internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
+internal SimEntity* Sim_GetFreeReplicatedEntity(
+    SimScene* scene, i32 newSerial)
 {
     SimEntity* ent = NULL;
     i32 slotIndex = -1;
@@ -61,7 +62,8 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial)
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
-	APP_LOG(64, "SIM assigned replicated ent serial %d (slot %d/%d)\n",
+	APP_LOG(64,
+        "SIM assigned replicated ent serial %d (slot %d/%d)\n",
         ent->id.serial, ent->id.slot.iteration, ent->id.slot.index);
     ent->isLocal = 0;
     return ent;

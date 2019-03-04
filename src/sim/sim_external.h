@@ -79,41 +79,30 @@ i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 extern "C"
 i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
 {
-    switch (patternType)
+    i32 count = Sim_GetProjectileCount(patternType);
+    i32 first;
+    i32 last;
+    if (isLocal)
     {
-        case SIM_PROJ_TYPE_TEST:
-        {
-            i32 first;
-            i32 last;
-            i32 count = 8;
-            if (isLocal)
-            {
-                first = scene->localEntitySequence;
-                last = first + count;
-                scene->localEntitySequence = last;
-                APP_LOG(128,
-                    "SIM Reserving %d local entity serials (%d to %d)\n",
-                    count, first, (last - 1)
-                    );
-            }
-            else
-            {
-                first = scene->remoteEntitySequence;
-                last = first + count;
-                scene->remoteEntitySequence = last;
-                APP_LOG(128,
-                    "SIM Reserving %d replicated entity serials (%d to %d)\n",
-                    count, first, (last - 1)
-                    );
-            }
-            return first;
-        }
-        default:
-        {
-            APP_LOG(128, "SIM Cannot reserve serials for pattern type %d\n", patternType);
-        } break;
+        first = scene->localEntitySequence;
+        last = first + count;
+        scene->localEntitySequence = last;
+        APP_LOG(128,
+            "SIM Reserving %d local entity serials (%d to %d)\n",
+            count, first, (last - 1)
+            );
     }
-    return COM_ERROR_BAD_INDEX;
+    else
+    {
+        first = scene->remoteEntitySequence;
+        last = first + count;
+        scene->remoteEntitySequence = last;
+        APP_LOG(128,
+            "SIM Reserving %d replicated entity serials (%d to %d)\n",
+            count, first, (last - 1)
+            );
+    }
+    return first;
 }
 
 extern "C"
@@ -149,31 +138,18 @@ i32 Sim_ExecuteProjectileSpawn(
     SimProjectileSpawnDef* def,
 	i32 fastForwardTicks)
 {
-    i32 numProjectiles = 4;
-	f32 speed = 3.5f;
-    i32 serial = def->firstSerial;
-	f32 radians = 0;
-	f32 step = FULL_ROTATION_RADIANS / (f32)numProjectiles;
-    for (i32 i = 0; i < numProjectiles; ++i)
+    SimProjectileType* type = Sim_GetProjectileType(def->projType);
+    switch (type->pattern)
     {
-        SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
-		ent->status = SIM_ENT_STATUS_IN_USE;
-		ent->entType = SIM_ENT_TYPE_PROJECTILE;
-		Transform_SetToIdentity(&ent->t);
-        ent->lifeTime = 6.0f;
-		ent->t.pos = def->pos;
-		ent->velocity.x = cosf(radians) * speed;
-		ent->velocity.y = 0;
-		ent->velocity.z = sinf(radians) * speed;
-        // if fastForwardTicks
-		ent->fastForwardTicks = fastForwardTicks;
-		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
-            serial,
-            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
-            ent->fastForwardTicks
-		);
-        serial++;
-		radians += step;
+        case SIM_PROJECTILE_PATTERN_RADIAL:
+        Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
+        break;
+        case SIM_PROJECTILE_PATTERN_SPREAD:
+        Sim_SpreadProjectilePattern(sim, def, type, fastForwardTicks);
+        break;
+        default:
+        Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
+        break;
     }
     return COM_ERROR_NONE;
 }
@@ -190,6 +166,7 @@ void Sim_Reset(SimScene* sim)
 	// replicated entity, oh well
 	sim->remoteEntitySequence = 1;
 	sim->localEntitySequence = -1;
+    Sim_InitProjectiles();
 }
 
 extern "C"

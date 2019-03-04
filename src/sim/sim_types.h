@@ -100,6 +100,7 @@ struct SimEntityDef
 
 #define SIM_PROJ_TYPE_NONE 0
 #define SIM_PROJ_TYPE_TEST 1
+
 struct SimProjectileSpawnDef
 {
     i32 firstSerial;
