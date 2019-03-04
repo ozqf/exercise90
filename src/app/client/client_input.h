@@ -53,6 +53,12 @@ internal void CL_InitInputs(InputActionSet* actions)
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_MOVE_Y, "Mouse Move Y");
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_1, "Attack1");
     Input_InitAction(actions, Z_INPUT_CODE_MOUSE_2, "Attack2");
+
+    // Robotron style shooting
+    Input_InitAction(actions, Z_INPUT_CODE_LEFT, "Shoot Left");
+    Input_InitAction(actions, Z_INPUT_CODE_RIGHT, "Shoot Right");
+    Input_InitAction(actions, Z_INPUT_CODE_UP, "Shoot Up");
+    Input_InitAction(actions, Z_INPUT_CODE_DOWN, "Shoot Down");
 }
 
 internal void CL_InputCheckButton(
@@ -79,6 +85,11 @@ internal void CL_UpdateActorInput(InputActionSet* actions, SimActorInput* input)
     CL_InputCheckButton(actions, "Move Backward", &flags, ACTOR_INPUT_MOVE_BACKWARD);
     CL_InputCheckButton(actions, "Move Left", &flags, ACTOR_INPUT_MOVE_LEFT);
     CL_InputCheckButton(actions, "Move Right", &flags, ACTOR_INPUT_MOVE_RIGHT);
+
+    CL_InputCheckButton(actions, "Shoot Up", &flags, ACTOR_INPUT_SHOOT_UP);
+    CL_InputCheckButton(actions, "Shoot Down", &flags, ACTOR_INPUT_SHOOT_DOWN);
+    CL_InputCheckButton(actions, "Shoot Left", &flags, ACTOR_INPUT_SHOOT_LEFT);
+    CL_InputCheckButton(actions, "Shoot Right", &flags, ACTOR_INPUT_SHOOT_RIGHT);
 
     f32 val;
 

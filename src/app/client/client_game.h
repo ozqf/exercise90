@@ -116,6 +116,10 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
 {
     if (g_latestUserInputAck >= cmd->lastUserInputSequence)
     {
+        APP_PRINT(64, "CL Ignore response %d (current %d)\n",
+            cmd->lastUserInputSequence,
+            g_latestUserInputAck
+        );
         return;
     }
     SimEntity* ent = Sim_GetEntityBySerial(
@@ -205,16 +209,7 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
 
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
-    if (ent->hasBeenPredicted)
-    {
-        printf("  Skip tick of ent %d\n", ent->id.serial);
-        ent->hasBeenPredicted = 0;
-        return;
-    }
-    else
-    {
-        CLG_StepActor(ent, &ent->input, deltaTime); 
-    }
+    CLG_StepActor(ent, &ent->input, deltaTime); 
     // local player specific stuff:
     #if 0
     if (ent->id.serial == g_avatarSerial)

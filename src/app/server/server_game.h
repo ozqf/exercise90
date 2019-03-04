@@ -74,6 +74,17 @@ SVG_DEFINE_ENT_UPDATE(Projectile)
 	}
 }
 
+internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
+{
+    // > identity if player.
+    //     If not just spawn with no faff, otherwise:
+    // > Calculate the frame command came from - how?
+    // > Retrieve entity position at that point
+    // > Spawn projectiles and enqueue replication command
+    // > fast forward projectiles to present
+    printf("SVG Shoot %.3f, %.3f\n", dir->x, dir->z);
+}
+
 SVG_DEFINE_ENT_UPDATE(Actor)
 {
 	Vec3 move = {};
@@ -98,6 +109,29 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 	ent->t.pos.x += move.x;
 	ent->t.pos.y += move.y;
 	ent->t.pos.z += move.z;
+
+    Vec3 shoot {};
+    if (ent->input.buttons & ACTOR_INPUT_SHOOT_LEFT)
+    {
+        shoot.x -= 1;
+    }
+    if (ent->input.buttons & ACTOR_INPUT_SHOOT_RIGHT)
+    {
+        shoot.x += 1;
+    }
+    if (ent->input.buttons & ACTOR_INPUT_SHOOT_UP)
+    {
+        shoot.z -= 1;
+    }
+    if (ent->input.buttons & ACTOR_INPUT_SHOOT_DOWN)
+    {
+        shoot.z += 1;
+    }
+    if (shoot.x != 0 || shoot.z != 0)
+    {
+        Vec3_Normalise(&shoot);
+        SVG_FireActorAttack(sim, ent, &shoot);
+    }
 }
 
 internal void SVG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)

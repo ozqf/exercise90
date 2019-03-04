@@ -11,6 +11,11 @@
 #define ACTOR_INPUT_ATTACK (1 << 6)
 #define ACTOR_INPUT_ATTACK2 (1 << 7)
 #define ACTOR_INPUT_MOVE_SPECIAL1 (1 << 8)
+
+#define ACTOR_INPUT_SHOOT_LEFT (1 << 27)
+#define ACTOR_INPUT_SHOOT_RIGHT (1 << 28)
+#define ACTOR_INPUT_SHOOT_UP (1 << 29)
+#define ACTOR_INPUT_SHOOT_DOWN (1 << 30)
 struct SimActorInput
 {
     u32 buttons;
