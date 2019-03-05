@@ -13,8 +13,8 @@ internal void Sim_InitProjectiles()
     SimProjectileType* t;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_NONE];
-    t->speed = 3.5f;
-    t->numProjectiles = 4;
+    t->speed = 15.0f;
+    t->numProjectiles = 1;
     t->lifeTime = 6.0f;
     t->pattern = SIM_PROJECTILE_PATTERN_NONE;
 
@@ -55,6 +55,38 @@ internal void Sim_InitProjectile(
 	ent->t.pos = *pos;
     ent->velocity = *velocity;
 	ent->fastForwardTicks = fastForwardTicks;
+}
+
+internal void Sim_NullProjectilePattern(
+    SimScene* sim,
+    SimProjectileSpawnDef* event,
+    SimProjectileType* type,
+    i32 fastForwardTicks)
+{
+    i32 serial = event->firstSerial;
+    f32 radians = atan2f(event->forward.z, event->forward.x);
+    for (i32 i = 0; i < type->numProjectiles; ++i)
+    {
+        Vec3 v = {};
+        v.x = cosf(radians) * type->speed;
+	    v.y = 0;
+	    v.z = sinf(radians) * type->speed;
+
+        SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
+		Sim_InitProjectile(
+            ent,
+            &event->pos,
+            &v,
+            type->lifeTime,
+            fastForwardTicks
+        );
+		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
+            serial,
+            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
+            ent->fastForwardTicks
+		);
+        serial++;
+    }
 }
 
 internal void Sim_RadialProjectilePattern(

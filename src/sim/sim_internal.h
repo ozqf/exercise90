@@ -16,6 +16,7 @@ struct SimProjectileType
     i32 numProjectiles;
     i32 pattern;
     f32 lifeTime;
+    f32 arcDegrees;
 };
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index);

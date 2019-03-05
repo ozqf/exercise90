@@ -69,6 +69,8 @@ struct SimEntity
     f32 thinkTick;
     f32 thinkTime;
 	f32 lifeTime;
+    f32 attackTick;
+    f32 attackTime;
 
     // physical
     Transform t;

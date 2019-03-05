@@ -148,7 +148,7 @@ i32 Sim_ExecuteProjectileSpawn(
         Sim_SpreadProjectilePattern(sim, def, type, fastForwardTicks);
         break;
         default:
-        Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
+        Sim_NullProjectilePattern(sim, def, type, fastForwardTicks);
         break;
     }
     return COM_ERROR_NONE;

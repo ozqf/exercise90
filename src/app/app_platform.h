@@ -281,6 +281,8 @@ internal void App_Update(PlatformTime* time)
     #endif
 }
 
+#if 0
+// offset blocks of render objects left or right to show SV and CL side by side
 internal void App_OffsetRenderObjects(RenderScene* scene, i32 firstItem, f32 x)
 {
     for (u32 i = (u32)firstItem; i < scene->numObjects; ++i)
@@ -289,6 +291,7 @@ internal void App_OffsetRenderObjects(RenderScene* scene, i32 firstItem, f32 x)
         item->transform.pos.x += x;
     }
 }
+#endif
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
@@ -317,10 +320,12 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     #if 1 // Old route
     
-    // offset blocks of render objects left or right to show SV and CL side by side
-
     g_worldScene.numObjects = 0;
-    SV_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, 1);
+    if (g_debugDrawServer)
+    {
+        SV_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, 1);
+    }
+    
     //App_OffsetRenderObjects(&g_worldScene, 0, -10);
 
     i32 firstCLObject = g_worldScene.numObjects;
@@ -339,6 +344,14 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
+    if (numTokens == 2 && !COM_CompareStrings(tokens[0], "DRAW"))
+    {
+        if (!COM_CompareStrings(tokens[1], "SV"))
+        {
+            g_debugDrawServer = !g_debugDrawServer;
+        }
+        return 1;
+    }
     if (g_isRunningServer && SV_ParseCommandString(str, tokens, numTokens)) { return 1; }
     if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }
     return 0;

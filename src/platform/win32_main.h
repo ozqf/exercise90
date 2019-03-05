@@ -405,8 +405,10 @@ int CALLBACK WinMain(
     );
 
     // Open log file
+    #if 0
     err = fopen_s(&g_logFile, logFileName, "w");
     if (err != 0) { Win32_ShowInitError(err); }
+    #endif
 
     // Spawn debugging windows cmd
     #if 1

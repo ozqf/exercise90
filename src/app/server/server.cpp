@@ -7,6 +7,12 @@
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
 
+struct SVEntityFrame
+{
+    i32 latestFrame;
+    Vec3 pos;
+};
+
 #define SV_MAX_MALLOCS 1024
 
 internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd);
@@ -19,6 +25,15 @@ internal SimScene g_sim;
 internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
+
+/*
+Record entity states for lag compensation rewind
+Local entities are not compensated.
+Access by Frame number, then entity slot.
+*/
+#define SV_NUM_POSITION_FRAMES_RECORDED 60
+internal SVEntityFrame* g_entityRecords = NULL;
+
 i32 SV_IsRunning() { return g_isRunning; }
 
 #include "server_game.h"
@@ -317,6 +332,18 @@ internal void SV_ListAllocs()
     printf("    Tally: %d bytes\n", tally);
 }
 
+internal void SV_ResetEntityPositionRecords()
+{
+    i32 bytesPerFrame = sizeof(SVEntityFrame) * APP_MAX_ENTITIES;
+    i32 bytesTotal = bytesPerFrame * SV_NUM_POSITION_FRAMES_RECORDED;
+    if (g_entityRecords == NULL)
+    {
+        g_entityRecords = (SVEntityFrame*)COM_Malloc(
+            &g_mallocs, bytesTotal, "Entity Frames");
+    }
+    COM_ZeroMemory((u8*)g_entityRecords, bytesTotal);
+}
+
 void SV_Init()
 {
     APP_PRINT(64, "SV Init scene\n");
@@ -335,7 +362,9 @@ void SV_Init()
     User* users = (User*)COM_Malloc(&g_mallocs, userBytes, "SV Users");
     g_users.items = users;
 
-    i32 size = KiloBytes(64);
+    SV_ResetEntityPositionRecords();
+
+    i32 size;// = KiloBytes(64);
 
     i32 maxEnts = APP_MAX_ENTITIES;
     size = Sim_CalcEntityArrayBytes(maxEnts);
@@ -343,7 +372,8 @@ void SV_Init()
     Sim_Init(&g_sim, mem, maxEnts);
 	Sim_Reset(&g_sim);
     SV_LoadTestScene();
-    //SV_ListAllocs();
+
+    SV_ListAllocs();
 }
 
 void SV_Shutdown()
