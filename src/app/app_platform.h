@@ -31,13 +31,14 @@ ScreenInfo App_GetScreenInfo()
 	return g_screenInfo;
 }
 
-/***************************************
-* Private
-***************************************/
-internal f32 App_GetSimFrameInterval()
+f32 App_GetSimFrameInterval()
 {
     return (1.0f / g_simFrameRate);
 }
+
+/***************************************
+* Private
+***************************************/
 
 internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 {

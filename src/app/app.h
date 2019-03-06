@@ -16,6 +16,7 @@ void App_Log(char* msg);
 void App_Print(char* msg);
 void App_SetMouseMode(ZMouseMode mode);
 void App_Error(char* msg, char* heading);
+f32 App_GetSimFrameInterval();
 ScreenInfo App_GetScreenInfo();
 
 

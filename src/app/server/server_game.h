@@ -76,13 +76,29 @@ SVG_DEFINE_ENT_UPDATE(Projectile)
 
 internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 {
-    // > identify if player...
-    //     ...If not just spawn with no faff, otherwise:
-    // > Calculate the frame command came from - how?
-    // > Retrieve entity position at that point
-    // > Spawn projectiles and enqueue replication command
-    // > fast forward projectiles to present
+    /*
+    > identify if player...
+        ...If not just spawn with no faff, otherwise:
+    > Calculate the frame command came from - how?
+         eg if server is on 12203 and CL on 11994:
+         Client is running 5 ticks of time + 4 ticks of jitter behind server
+         > Client has simulated forward 9 frame.a
+    > Retrieve entity position at that point
+    > Spawn projectiles and enqueue replication command
+    > fast forward projectiles to present
+    */
     //printf("SVG Shoot %.3f, %.3f\n", dir->x, dir->z);
+
+    i32 fastForwardTicks = 0;
+    User* u = User_FindByAvatarSerial(&g_users, ent->id.serial);
+    if (u)
+    {
+        // calculate fast-forward ticks
+        f32 time = u->ping * 0.5f;
+        fastForwardTicks = (i32)(time / App_GetSimFrameInterval());
+        fastForwardTicks += APP_DEFAULT_JITTER_TICKS;
+        printf("Prj fastforward - %d ticks\n", fastForwardTicks);
+    }
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
@@ -94,7 +110,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     Sim_ExecuteProjectileSpawn(sim, &def, 0);
 
     S2C_SpawnProjectile prj = {};
-    Cmd_Prepare(&prj.header, g_ticks, 0);
+    Cmd_Prepare(&prj.header, g_ticks - fastForwardTicks, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);

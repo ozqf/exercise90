@@ -72,6 +72,17 @@ internal void User_Free(UserList* users, User* user)
     user->state = USER_STATE_FREE;
 }
 
+internal User* User_FindByAvatarSerial(UserList* users, i32 serial)
+{
+    for (i32 i = 0; i < users->max; ++i)
+    {
+        User* user = &users->items[i];
+        if (user->state == USER_STATE_FREE) { continue; }
+        if (user->entSerial == serial) { return user; }
+    }
+    return NULL;
+}
+
 internal User* User_FindByPrivateId(UserList* users, i32 privateId)
 {
     for (i32 i = 0; i < users->max; ++i)

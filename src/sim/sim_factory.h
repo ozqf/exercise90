@@ -132,7 +132,7 @@ internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_ApplySpawnTransform(ent, def);
     ent->entType = def->entType;
-    ent->attackTime = 0.2f;
+    ent->attackTime = 0.1f;
     return COM_ERROR_NONE;
 }
 

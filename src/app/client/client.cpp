@@ -322,9 +322,15 @@ internal i32 CL_IsCommandTickSensitive(i32 cmdType)
 	return true;
 }
 
+/////////////////////////////////////////////////////////////
+// Configures this client's time-base relative
+// to the server.
+// Client will be ((ping / 2) + jitter delay) behind
+// the server
+/////////////////////////////////////////////////////////////
 internal void CL_SetServerTick(i32 value)
 {
-	g_serverTick = value;
+	g_serverTick = value - APP_DEFAULT_JITTER_TICKS;
 }
 
 // Can be changed during command execute so always retreive from here:
@@ -373,7 +379,7 @@ internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
         case CMD_TYPE_S2C_SYNC:
         {
             S2C_Sync* sync = (S2C_Sync*)h;
-			CL_SetServerTick(sync->simTick - APP_DEFAULT_JITTER_TICKS);
+			CL_SetServerTick(sync->simTick);
 			g_avatarSerial = sync->avatarEntityId;
             APP_PRINT(64, "CL Set avatar %d\n", g_avatarSerial);
             // Lets not do what the server tells us!
