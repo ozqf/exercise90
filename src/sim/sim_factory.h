@@ -133,7 +133,7 @@ internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
-    ent->attackTime = 0.1f;
+    ent->attackTime = 1.1f;
     return COM_ERROR_NONE;
 }
 
@@ -166,10 +166,10 @@ internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 
 internal i32 Sim_InitLineTrace(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-	printf("SIM Create line trace\n");
+	//printf("SIM Create line trace\n");
     Sim_InitEntity(ent, def);
     ent->entType = SIM_ENT_TYPE_LINE_TRACE;
-	ent->lifeTime = 2.0f;
+	ent->lifeTime = 1.0f;
     return COM_ERROR_NONE;
 }
 

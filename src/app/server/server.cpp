@@ -306,7 +306,7 @@ internal void SV_LoadTestScene()
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
 
-    i32 numWanderers = 10;
+    i32 numWanderers = 4;
     for (i32 i = 0; i < numWanderers; ++i)
     {
         SV_AddWanderer();

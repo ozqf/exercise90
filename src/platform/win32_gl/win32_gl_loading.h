@@ -14,7 +14,7 @@ void Win32_GetExtensions(Extensions* ex)
 	{
 		printf("REND Got proc Swap Interval\n");
 		// 1 == vsync on, 0 off
-		ex->SwapInterval(0);
+		ex->SwapInterval(1);
 	}
 	else
 	{

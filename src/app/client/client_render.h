@@ -99,6 +99,8 @@ void CL_PopulateRenderScene(
 
         SimEntity* ent = &g_sim.ents[j];
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
+
+        i32 interpolate = 1;
         
 		switch (ent->entType)
 		{
@@ -126,11 +128,14 @@ void CL_PopulateRenderScene(
                 Vec3* b = &ent->destination;
                 // move ray up slightly out of the floor
                 RendObj_SetAsLine(&obj,
-                    a->x, a->y + 0.2f, a->z, b->x, b->y + 0.2f, b->z,
-                    1, 0, 1, 1, 0, 1
+                    a->x, a->y + 0.2f, a->z,
+                    b->x, b->y + 0.2f, b->z,
+                    1, 0, 1,
+                    1, 1, 0
                 );
                 Transform_SetToIdentity(&t);
                 RScene_AddRenderItem(scene, &t, &obj);
+                interpolate = 0;
             } break;
 			
 			default:
@@ -140,18 +145,21 @@ void CL_PopulateRenderScene(
 			} break;
 		}
         
-        t = ent->t;
-        if (g_interpolateRenderScene)
+        if (interpolate)
         {
-            RendObj_InterpolatePosition(
-                &t.pos,
-                &ent->previousPos,
-                &ent->t.pos,
-                interpolateTime);
-        }
-        else
-        {
-            t.pos = ent->t.pos;
+            t = ent->t;
+            if (g_interpolateRenderScene)
+            {
+                RendObj_InterpolatePosition(
+                    &t.pos,
+                    &ent->previousPos,
+                    &ent->t.pos,
+                    interpolateTime);
+            }
+            else
+            {
+                t.pos = ent->t.pos;
+            }
         }
         RScene_AddRenderItem(scene, &t, &obj);
     }
