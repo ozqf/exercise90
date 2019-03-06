@@ -2,6 +2,19 @@
 
 #include "client.h"
 
+internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
+{
+    SimEntityDef def = {};
+    def.entType = SIM_ENT_TYPE_LINE_TRACE;
+    def.serial = Sim_ReserveEntitySerial(sim, 1);
+    def.isLocal = 1;
+    def.pos[0] = origin.x;
+    def.pos[1] = origin.y;
+    def.pos[2] = origin.z;
+    def.destination = dest;
+    i32 serial = Sim_AddEntity(sim, &def);
+}
+
 #define CLG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
     CLG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
 
@@ -84,6 +97,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
 }
 
 internal void CLG_StepActor(
+    SimScene* sim,
     SimEntity* ent,
     SimActorInput* input,
     f32 deltaTime)
@@ -110,9 +124,49 @@ internal void CLG_StepActor(
 	ent->t.pos.x += move.x;
 	ent->t.pos.y += move.y;
 	ent->t.pos.z += move.z;
+
+    //////////////////////////////////////////////////////////////
+    // Predicted shooting
+    //////////////////////////////////////////////////////////////
+    
+    if (ent->attackTick <= 0)
+    {
+        Vec3 shoot {};
+        if (ent->input.buttons & ACTOR_INPUT_SHOOT_LEFT)
+        {
+            shoot.x -= 1;
+        }
+        if (ent->input.buttons & ACTOR_INPUT_SHOOT_RIGHT)
+        {
+            shoot.x += 1;
+        }
+        if (ent->input.buttons & ACTOR_INPUT_SHOOT_UP)
+        {
+            shoot.z -= 1;
+        }
+        if (ent->input.buttons & ACTOR_INPUT_SHOOT_DOWN)
+        {
+            shoot.z += 1;
+        }
+        if (shoot.x != 0 || shoot.z != 0)
+        {
+            ent->attackTick = ent->attackTime;
+            Vec3_Normalise(&shoot);
+            Vec3 origin = ent->t.pos;
+            Vec3 dest;
+            dest.x = origin.x + (shoot.x * 10);
+            dest.y = origin.y + (shoot.y * 10);
+            dest.z = origin.z + (shoot.z * 10);
+            CLG_SpawnLineSegment(sim, origin, dest);
+        }
+    }
+    else
+    {
+        ent->attackTick -= deltaTime;
+    }
 }
 
-internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
+internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 {
     if (g_latestUserInputAck >= cmd->lastUserInputSequence)
     {
@@ -182,7 +236,7 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
             g_sentCommands, replaySequence);
         if (!input) { continue; }
 		Vec3 before = ent->t.pos;
-		CLG_StepActor(ent, &input->input, input->deltaTime);
+		CLG_StepActor(sim, ent, &input->input, input->deltaTime);
 		Vec3 after = ent->t.pos;
 		APP_LOG(256, "\t\tSeq %d Buttons %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
 			replaySequence,
@@ -209,7 +263,7 @@ internal void CLG_SyncAvatar(S2C_InputResponse* cmd)
 
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
-    CLG_StepActor(ent, &ent->input, deltaTime); 
+    CLG_StepActor(sim, ent, &ent->input, deltaTime); 
     // local player specific stuff:
     #if 0
     if (ent->id.serial == g_avatarSerial)
@@ -223,6 +277,15 @@ CLG_DEFINE_ENT_UPDATE(Actor)
     #endif
 }
 
+CLG_DEFINE_ENT_UPDATE(LineTrace)
+{
+    ent->lifeTime -= deltaTime;
+    if (ent->lifeTime <= 0)
+    {
+        Sim_RemoveEntity(sim, ent->id.serial);
+    }
+}
+
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
@@ -230,6 +293,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         case SIM_ENT_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
 		case SIM_ENT_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;

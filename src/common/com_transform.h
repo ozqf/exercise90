@@ -2,6 +2,8 @@
 
 #include "com_module.h"
 
+#define TRANSFORM_CREATE(varName) Transform varName##; Transform_SetToIdentity(&##varName##);
+
 void Transform_SetToIdentity(Transform* t);
 
 void Transform_ToM4x4(Transform* t, M4x4* result);

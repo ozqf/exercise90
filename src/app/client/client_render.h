@@ -119,6 +119,19 @@ void CL_PopulateRenderScene(
 				RendObj_SetAsMesh(
 					&obj, *cube, 0.2f, 1, 0.2f, texIndex);
 			} break;
+
+            case SIM_ENT_TYPE_LINE_TRACE:
+            {
+                Vec3* a = &ent->t.pos;
+                Vec3* b = &ent->destination;
+                // move ray up slightly out of the floor
+                RendObj_SetAsLine(&obj,
+                    a->x, a->y + 0.2f, a->z, b->x, b->y + 0.2f, b->z,
+                    1, 0, 1, 1, 0, 1
+                );
+                Transform_SetToIdentity(&t);
+                RScene_AddRenderItem(scene, &t, &obj);
+            } break;
 			
 			default:
 			{
@@ -163,6 +176,7 @@ void CL_GetRenderCommands(
 	i32 texIndex,
 	f32 interpolateTime)
 {
+    #if 0
     *cmds = g_renderCommands;
     *numCommands = 0;
 
@@ -236,5 +250,6 @@ void CL_GetRenderCommands(
     }
 
     *numCommands = nextCommand;
+    #endif
 }
 

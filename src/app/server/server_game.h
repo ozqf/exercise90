@@ -3,6 +3,19 @@
 #include "server.h"
 #include <math.h>
 
+internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
+{
+    SimEntityDef def = {};
+    def.entType = SIM_ENT_TYPE_LINE_TRACE;
+    def.serial = Sim_ReserveEntitySerial(sim, 1);
+    def.isLocal = 1;
+    def.pos[0] = origin.x;
+    def.pos[1] = origin.y;
+    def.pos[2] = origin.z;
+    def.destination = dest;
+    i32 serial = Sim_AddEntity(sim, &def);
+}
+
 #define SVG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
     SVG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
 
@@ -115,6 +128,23 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);
     SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+
+    /* Debug - Create a line trace */
+    Vec3 origin = ent->t.pos;
+    Vec3 dest {};
+    dest.x = (origin.x + (dir->x * 10));
+    dest.y = (origin.y + (dir->y * 10));
+    dest.z = (origin.z + (dir->z * 10));
+    SVG_SpawnLineSegment(sim, origin, dest);
+}
+
+SVG_DEFINE_ENT_UPDATE(LineTrace)
+{
+    ent->lifeTime -= deltaTime;
+    if (ent->lifeTime <= 0)
+    {
+        Sim_RemoveEntity(sim, ent->id.serial);
+    }
 }
 
 SVG_DEFINE_ENT_UPDATE(Actor)
@@ -182,6 +212,7 @@ internal void SVG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 		case SIM_ENT_TYPE_WANDERER: { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
 		case SIM_ENT_TYPE_ACTOR: { SVG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_TURRET: { SVG_UpdateTurret(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_LINE_TRACE: { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;

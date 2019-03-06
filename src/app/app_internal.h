@@ -67,7 +67,8 @@ internal RendObj g_serverDebugStrRenderer;
 internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 
-internal i32 g_debugDrawServer = 0;
+internal i32 g_debugDrawServerScene = 0;
+internal i32 g_debugDrawServerTests = 1;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
 

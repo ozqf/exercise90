@@ -31,7 +31,8 @@ struct SimActorInput
 #define SIM_ENT_TYPE_ACTOR 2
 #define SIM_ENT_TYPE_PROJECTILE 3
 #define SIM_ENT_TYPE_TURRET 4
-#define SIM_ENT_TYPE_WANDERER 5 
+#define SIM_ENT_TYPE_WANDERER 5
+#define SIM_ENT_TYPE_LINE_TRACE 6 
 
 
 #pragma pack(push, 1)
@@ -64,6 +65,7 @@ struct SimEntity
 	i32 fastForwardTicks;
     i32 birthTick;
     i32 deathTick;
+    Vec3 destination;
 
     // timing
     f32 thinkTick;
@@ -98,6 +100,7 @@ struct SimEntityDef
     f32 pos[3];
     f32 scale[3];
     f32 velocity[3];
+    Vec3 destination;
 };
 
 #define SIM_PROJ_TYPE_NONE 0

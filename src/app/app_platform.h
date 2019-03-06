@@ -321,21 +321,17 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     #if 1 // Old route
     
+    // Have to remember to do this or things explode:
     g_worldScene.numObjects = 0;
-    if (g_debugDrawServer)
-    {
-        SV_PopulateRenderScene(&g_worldScene, g_worldScene.maxObjects, texIndex, 1);
-    }
-    
-    //App_OffsetRenderObjects(&g_worldScene, 0, -10);
 
-    i32 firstCLObject = g_worldScene.numObjects;
+    SV_PopulateRenderScene(
+        &g_worldScene, g_worldScene.maxObjects, texIndex, 1,
+        g_debugDrawServerScene, g_debugDrawServerTests);
+    
     CL_PopulateRenderScene(
         &g_worldScene.cameraTransform,
         &g_worldScene, g_worldScene.maxObjects, texIndex, interpolationTime);
-    //App_OffsetRenderObjects(&g_worldScene, firstCLObject, 10);
     
-
     g_platform.RenderScene(&g_worldScene);
 
     App_WriteDebugStrings();
@@ -349,7 +345,7 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         if (!COM_CompareStrings(tokens[1], "SV"))
         {
-            g_debugDrawServer = !g_debugDrawServer;
+            g_debugDrawServerScene = !g_debugDrawServerScene;
         }
         return 1;
     }

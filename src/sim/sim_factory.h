@@ -90,9 +90,10 @@ internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
 ////////////////////////////////////////////////////////////////////
 // Entity initialisation
 ////////////////////////////////////////////////////////////////////
-internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
+internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
 {
     ent->birthTick = def->birthTick;
+    ent->destination = def->destination;
     //ent->deathTick = def->deathTick;
 	
     ent->t.pos.x =          def->pos[0];
@@ -130,7 +131,7 @@ internal void Sim_ApplySpawnTransform(SimEntity* ent, SimEntityDef* def)
 
 internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_ApplySpawnTransform(ent, def);
+    Sim_InitEntity(ent, def);
     ent->entType = def->entType;
     ent->attackTime = 0.1f;
     return COM_ERROR_NONE;
@@ -138,14 +139,14 @@ internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 
 internal i32 Sim_InitWanderer(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_ApplySpawnTransform(ent, def);
+    Sim_InitEntity(ent, def);
     ent->entType = def->entType;
     return COM_ERROR_NONE;
 }
 
 internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_ApplySpawnTransform(ent, def);
+    Sim_InitEntity(ent, def);
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
         def->pos[0], def->pos[1], def->pos[2]);
     ent->entType = def->entType;
@@ -156,10 +157,19 @@ internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* 
 
 internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_ApplySpawnTransform(ent, def);
+    Sim_InitEntity(ent, def);
     ent->entType = def->entType;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitLineTrace(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+	printf("SIM Create line trace\n");
+    Sim_InitEntity(ent, def);
+    ent->entType = SIM_ENT_TYPE_LINE_TRACE;
+	ent->lifeTime = 2.0f;
     return COM_ERROR_NONE;
 }
 
@@ -202,6 +212,10 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
         {
             return Sim_InitTurret(scene, ent, def);
         }
+		case SIM_ENT_TYPE_LINE_TRACE:
+		{
+			return Sim_InitLineTrace(scene, ent, def);
+		}
         case SIM_ENT_TYPE_NONE:
         {
             printf("SIM Cannot spawn, entity type not set!\n");

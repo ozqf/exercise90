@@ -463,9 +463,11 @@ void SV_PopulateRenderScene(
     RenderScene* scene,
     i32 maxObjects,
     i32 texIndex,
-    f32 interpolateTime)
+    f32 interpolateTime,
+    i32 g_debugDrawServerScene,
+    i32 g_debugDrawServerTests)
 {
-
+    if (!g_debugDrawServerScene && !g_debugDrawServerTests) { return; }
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {
         SimEntity* ent = &g_sim.ents[j];
@@ -475,9 +477,30 @@ void SV_PopulateRenderScene(
         //MeshData* cube = COM_GetCubeMesh();
         //RendObj_SetAsMesh(
         //    &obj, *cube, 1, 0, 0, texIndex);
-        RendObj_SetAsAABB(
-			&obj, 1, 1, 1, 0, 1, 0);
-        
-        RScene_AddRenderItem(scene, &ent->t, &obj);
+
+        switch(ent->entType)
+        {
+            case SIM_ENT_TYPE_LINE_TRACE:
+            {
+                if (!g_debugDrawServerTests) { break; }
+                Vec3* a = &ent->t.pos;
+                Vec3* b = &ent->destination;
+                // move ray up slightly out of the floor
+                RendObj_SetAsLine(&obj,
+                    a->x, a->y + 0.2f, a->z, b->x, b->y + 0.2f, b->z,
+                    1, 0, 0, 0, 1, 0
+                );
+                TRANSFORM_CREATE(t);
+                RScene_AddRenderItem(scene, &t, &obj);
+            } break;
+
+            default:
+            {
+                if (!g_debugDrawServerScene) { break; }
+                RendObj_SetAsAABB(
+			        &obj, 1, 1, 1, 0, 1, 0);
+                RScene_AddRenderItem(scene, &ent->t, &obj);
+            } break;
+        }
     }
 }

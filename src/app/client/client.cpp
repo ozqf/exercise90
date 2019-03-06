@@ -445,7 +445,8 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 	}
 }
 
-internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
+internal void CL_RunUnreliableCommands(
+    SimScene* sim, NetStream* stream, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
     u8* read = b->ptrStart;
@@ -485,7 +486,7 @@ internal void CL_RunUnreliableCommands(NetStream* stream, f32 deltaTime)
                 case CMD_TYPE_S2C_INPUT_RESPONSE:
                 {
                     S2C_InputResponse* cmd = (S2C_InputResponse*)h;
-                    CLG_SyncAvatar(cmd);
+                    CLG_SyncAvatar(sim, cmd);
                     executed = 1;
                 } break;
 
@@ -527,7 +528,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
     CL_CalcPings(deltaTime);
 	CL_RunReliableCommands(&g_reliableStream, deltaTime);
     //CL_LogCommandBuffer(&g_unreliableStream.inputBuffer, "Unreliable input");
-    CL_RunUnreliableCommands(&g_unreliableStream, deltaTime);
+    CL_RunUnreliableCommands(&g_sim, &g_unreliableStream, deltaTime);
 
     // Update input
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
