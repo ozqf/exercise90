@@ -80,6 +80,29 @@ SVG_DEFINE_ENT_UPDATE(Turret)
 SVG_DEFINE_ENT_UPDATE(Projectile)
 {
 	Sim_SimpleMove(ent, deltaTime);
+
+    // find victims
+    f32 width = 0.5f;
+    Vec3 p = ent->t.pos;
+    Vec3 min;
+    min.x = p.x - width;
+    min.y = p.y - width;
+    min.z = p.z - width;
+    Vec3 max;
+    max.x = p.x + width;
+    max.y = p.y + width;
+    max.z = p.z + width;
+
+    SimEntity* ents[16];
+    i32 overlaps = Sim_FindByAABB(
+        sim, min, max, ent->id.serial, ents, 16);
+    
+    for (i32 i = 0; i < overlaps; ++i)
+    {
+        SimEntity* victim = ents[i];
+        Sim_RemoveEntity(sim, victim->id.serial);
+    }
+
 	ent->lifeTime -= deltaTime;
 	if (ent->lifeTime < 0)
 	{

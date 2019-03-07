@@ -30,3 +30,12 @@ extern "C" i32      Sim_ExecuteProjectileSpawn(
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);
 extern "C" i32      Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max);
 extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
+
+extern "C"
+i32 Sim_FindByAABB(
+    SimScene* sim,
+    Vec3 boundsMin,
+    Vec3 boundsMax,
+    i32 ignoreSerial,
+    SimEntity** results,
+    i32 maxResults);

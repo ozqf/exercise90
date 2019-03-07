@@ -295,6 +295,7 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(&g_sim, 0);
 	
     // Place a test spawner
+    #if 0
     SimEntityDef def = {};
     def = {};
     def.isLocal = 1;
@@ -305,8 +306,8 @@ internal void SV_LoadTestScene()
     def.scale[1] = 1;
     def.scale[2] = 1;
     Sim_AddEntity(&g_sim, &def);
-
-    i32 numWanderers = 4;
+    #endif
+    i32 numWanderers = 6;
     for (i32 i = 0; i < numWanderers; ++i)
     {
         SV_AddWanderer();

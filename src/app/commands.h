@@ -15,6 +15,7 @@
 #define CMD_TYPE_S2C_SYNC_ENTITY 248
 #define CMD_TYPE_PING 247
 #define CMD_TYPE_S2C_INPUT_RESPONSE 246
+#define CMD_TYPE_S2C_REMOVE_ENTITY 245
 
 struct CmdPing
 {
@@ -149,6 +150,22 @@ internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequen
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.size = sizeof(S2C_SpawnProjectile);
     cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+}
+
+struct S2C_RemoveEntity
+{
+    Command header;
+    i32 entityId;
+};
+
+internal void Cmd_InitRemoveEntity(
+    S2C_RemoveEntity* cmd, i32 tick, i32 sequence, i32 entId)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.size = sizeof(S2C_RemoveEntity);
+    cmd->header.type = CMD_TYPE_S2C_REMOVE_ENTITY;
+    cmd->entityId = entId;
 }
 
 struct S2C_EntitySync
