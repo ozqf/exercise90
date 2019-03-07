@@ -101,6 +101,7 @@ SVG_DEFINE_ENT_UPDATE(Projectile)
     {
         SimEntity* victim = ents[i];
         Sim_RemoveEntity(sim, victim->id.serial);
+        ent->lifeTime = 0;
     }
 
 	ent->lifeTime -= deltaTime;

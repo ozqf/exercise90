@@ -107,12 +107,8 @@ u8 LineSegmentVsAABB_2D(
 u8 LineSegmentVsAABB(
     f32 lineOriginX, f32 lineOriginY, f32 lineOriginZ,
     f32 lineEndX, f32 lineEndY, f32 lineEndZ,
-    f32 boxMinX,
-    f32 boxMinY,
-    f32 boxMinZ,
-    f32 boxMaxX,
-    f32 boxMaxY,
-    f32 boxMaxZ,
+    f32 boxMinX, f32 boxMinY, f32 boxMinZ,
+    f32 boxMaxX, f32 boxMaxY, f32 boxMaxZ,
     f32 point[3]
 )
 {
