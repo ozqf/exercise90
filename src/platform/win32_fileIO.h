@@ -110,15 +110,6 @@ bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
  * PRIMITIVE FILE I/O B version
 /*********************************************************************/
 
-//#include <stdio.h>
-//#include <stdarg.h>
-
-//#include "win32_system_include.h"
-void BlockRefTest()
-{
-    //BlockRef ref = {};
-}
-
 extern "C"
 void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePath)
 {

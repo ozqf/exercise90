@@ -112,17 +112,6 @@ void Win32_SendMouseScreenPosition(ByteBuffer* cmdBuffer)
 
     Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
     Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
-    #if 0
-    PlatformEventHeader header = {};
-    header.type = PLATFORM_EVENT_CODE_INPUT;
-    header.size = sizeof(SysInputEvent);
-
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_X, mousePosX);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
-    
-    ev = NewInputEvent(Z_INPUT_CODE_MOUSE_POS_Y, mousePosY);
-    Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
-    #endif
 }
 
 void Win32_TickInput(ByteBuffer* cmdBuffer)
@@ -152,10 +141,6 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
         mouseMoveY = 0;
     }
 
-    //PlatformEventHeader header = {};
-    //header.type = PLATFORM_EVENT_CODE_INPUT;
-    //header.size = sizeof(SysInputEvent);
-
     SysInputEvent ev;
 
     Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
@@ -164,15 +149,9 @@ void Win32_TickInput(ByteBuffer* cmdBuffer)
     Sys_CreateInputEvent(&ev, Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
     Sys_EnqueueEvent(cmdBuffer, SYS_CAST_EVENT_TO_BASE(&ev));
 
-    //ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_X, mouseMoveX);
-    //Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
-    
-    //ev = NewInputEvent(Z_INPUT_CODE_MOUSE_MOVE_Y, mouseMoveY);
-    //Win32_WritePlatformCommand(cmdBuffer, (u8*)&ev, PLATFORM_EVENT_CODE_INPUT, sizeof(SysInputEvent));
-    
     Win32_SendMouseScreenPosition(cmdBuffer);
 }
-
+#if 0
 u32 Win32_StringToVKCode(char* string)
 {
     char str[64];
@@ -226,7 +205,7 @@ u32 Win32_StringToVKCode(char* string)
 
     return Z_INPUT_CODE_NULL;
 }
-
+#endif
 u32 Win32_KeyCode_To_Input_Code(u32 vkCode)
 {
     if (vkCode == 'A')              return Z_INPUT_CODE_A;

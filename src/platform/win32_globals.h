@@ -81,7 +81,6 @@ global_variable FILE* g_logFile = NULL;
 global_variable PlatformTime g_time;
 global_variable f32 g_fixedFrameAccumulator = 0;
 global_variable f32 g_fixedFrameTime = 1.0f / 60.0f;
-//global_variable f32 g_fixedFrameTime = 1.0f / 2.0f;
 
 global_variable HWND consoleHandle;
 
@@ -136,32 +135,6 @@ global_variable i32 g_numLaunchParams = 0;
 global_variable char g_textCommandBuffer[TEXT_COMMAND_BUFFER_SIZE];
 global_variable i32 g_textCommandBufferPosition = 0;
 
-#if 0
-void Win32_WritePlatformCommand(ByteBuffer* b, u8* source, u32 itemType, u32 itemSize)
-{
-    u32 used = b->ptrWrite - b->ptrStart;
-    u32 space = b->capacity - used;
-	if ((space - used) <= itemSize + sizeof(PlatformEventHeader))
-	{
-		printf("WIN32 No capacity left for platform command!\n");
-		return;
-	}
-    //Assert((space - used) > itemSize + sizeof(PlatformEventHeader));
-
-    PlatformEventHeader header = {};
-    header.type = itemType;
-    header.size = itemSize;
-
-	u32 numHeaderBytes = sizeof(PlatformEventHeader);
-
-    b->ptrWrite += COM_COPY(&header, b->ptrWrite, numHeaderBytes);
-    b->ptrWrite += COM_COPY(source, b->ptrWrite, itemSize);
-
-	// Trap to catch specific items being written
-	//Assert(itemType != 2);
-}
-#endif
-//void Win32_ParseTextCommand(char* str, i32 firstChar, i32 length);
 void Win32_EnqueueTextCommand(char* command);
 
 #define PLAT_LOG(messageBufSize, format, ...) \
