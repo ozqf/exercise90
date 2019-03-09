@@ -22,6 +22,7 @@ struct SimProjectileType
 internal SimProjectileType* Sim_GetProjectileType(i32 index);
 internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumber);
 internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial);
+internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial);
 internal i32        Sim_FreeEntityBySerial(SimScene* scene, i32 serial);
 internal i32        Sim_FindFreeSlot(SimScene* scene, i32 forLocalEnt);
 internal i32        Sim_EnqueueCommand(SimScene* sim, u8* ptr);

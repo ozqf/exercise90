@@ -85,7 +85,7 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
     if (isLocal)
     {
         first = scene->localEntitySequence;
-        last = first + count;
+        last = first - count;
         scene->localEntitySequence = last;
         APP_LOG(128,
             "SIM Reserving %d local entity serials (%d to %d)\n",

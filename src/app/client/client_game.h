@@ -223,6 +223,61 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
     //printf("\n");
 }
 
+internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
+{
+    /*
+    > identify if player...
+        ...If not just spawn with no faff, otherwise:
+    > Calculate the frame command came from - how?
+         eg if server is on 12203 and CL on 11994:
+         Client is running 5 ticks of time + 4 ticks of jitter behind server
+         > Client has simulated forward 9 frame.a
+    > Retrieve entity position at that point
+    > Spawn projectiles and enqueue replication command
+    > fast forward projectiles to present
+    */
+    //printf("SVG Shoot %.3f, %.3f\n", dir->x, dir->z);
+
+    i32 fastForwardTicks = 0;
+	#if 0
+    User* u = User_FindByAvatarSerial(&g_users, ent->id.serial);
+    if (u)
+    {
+        // calculate fast-forward ticks
+        f32 time = u->ping * 0.5f;
+        fastForwardTicks = (i32)(time / App_GetSimFrameInterval());
+        fastForwardTicks += APP_DEFAULT_JITTER_TICKS;
+        printf("Prj fastforward - %d ticks\n", fastForwardTicks);
+    }
+	#endif
+
+    SimProjectileSpawnDef def = {};
+    def.projType = SIM_PROJ_TYPE_NONE;
+    def.firstSerial = Sim_ReserveEntitySerial(sim, 1);
+    def.pos = ent->t.pos;
+    def.seedIndex = 0;
+    def.forward = *dir;
+    def.tick = g_ticks;
+    Sim_ExecuteProjectileSpawn(sim, &def, 0);
+	
+	#if 0
+    S2C_SpawnProjectile prj = {};
+    Cmd_Prepare(&prj.header, g_ticks - fastForwardTicks, 0);
+    prj.def = def;
+    prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    prj.header.size = sizeof(prj);
+    SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+	#endif
+
+    /* Debug - Create a line trace */
+    Vec3 origin = ent->t.pos;
+    Vec3 dest {};
+    dest.x = (origin.x + (dir->x * 10));
+    dest.y = (origin.y + (dir->y * 10));
+    dest.z = (origin.z + (dir->z * 10));
+    CLG_SpawnLineSegment(sim, origin, dest);
+}
+
 CLG_DEFINE_ENT_UPDATE(Actor)
 {
     // Movement
@@ -255,12 +310,13 @@ CLG_DEFINE_ENT_UPDATE(Actor)
         {
             ent->attackTick = ent->attackTime;
             Vec3_Normalise(&shoot);
-            Vec3 origin = ent->t.pos;
-            Vec3 dest;
-            dest.x = origin.x + (shoot.x * 10);
-            dest.y = origin.y + (shoot.y * 10);
-            dest.z = origin.z + (shoot.z * 10);
-            CLG_SpawnLineSegment(sim, origin, dest);
+			CLG_FireActorAttack(sim, ent, &shoot);
+            //Vec3 origin = ent->t.pos;
+            //Vec3 dest;
+            //dest.x = origin.x + (shoot.x * 10);
+            //dest.y = origin.y + (shoot.y * 10);
+            //dest.z = origin.z + (shoot.z * 10);
+            //CLG_SpawnLineSegment(sim, origin, dest);
         }
     }
     else
