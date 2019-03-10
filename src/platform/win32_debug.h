@@ -317,7 +317,7 @@ void InitDebug()
     item->transform.scale.x = 1;
     item->transform.scale.y = 0.05f;
     item->transform.scale.z = 1;
-    RendObj_SetAsColouredQuad(&item->obj, 0, 0, 0);
+    RendObj_SetAsColouredQuad(&item->obj, { 0, 0, 0, 1 });
     //RendObj_SetAsAsciCharArray(&item->obj, g_inputText.ptr, 256, 0.05f, 1, 1, 1, 1);
 
     

@@ -240,7 +240,11 @@ void R_RenderPrimitive(RenderSceneSettings* settings, Transform* camera, Transfo
 	{
 		case REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD:
 		{
-			R_RenderTestGeometry_ColouredQuad(prim->red, prim->green, prim->blue, prim->alpha);
+			R_RenderTestGeometry_ColouredQuad(
+				prim->colour.red,
+				prim->colour.green,
+				prim->colour.blue,
+				prim->colour.alpha);
 		} break;
 
 		case REND_PRIMITIVE_TYPE_RAINBOW_QUAD:
@@ -253,8 +257,8 @@ void R_RenderPrimitive(RenderSceneSettings* settings, Transform* camera, Transfo
 			Vec3 pos = objTransform->pos;
 			R_RenderAABBGeometry(
 				pos.x, pos.y, pos.z,
-				prim->sizeX, prim->sizeY, prim->sizeZ,
-				prim->red, prim->green, prim->blue);
+				prim->size.x, prim->size.y, prim->size.z,
+				prim->colour.red, prim->colour.green, prim->colour.blue);
 		} break;
 
 		default:
@@ -285,13 +289,13 @@ void R_RenderLine(RenderSceneSettings* settings, Transform* camera, Transform* o
 	// glVertex3f(1, 1, 1);
 	// glEnd();
 
-	glLineWidth(10.0);
+	glLineWidth(10.0); 
 	glBegin(GL_LINES);
 
-	glColor3f(line->colourA.x, line->colourA.y, line->colourA.z);
+	glColor3f(line->colourA.r, line->colourA.g, line->colourA.b);
 	glVertex3f(line->a.x, line->a.y, line->a.z);
 	
-	glColor3f(line->colourB.x, line->colourB.y, line->colourB.z);
+	glColor3f(line->colourB.r, line->colourB.g, line->colourB.b);
 	glVertex3f(line->b.x, line->b.y, line->b.z);
 	
 	glEnd();

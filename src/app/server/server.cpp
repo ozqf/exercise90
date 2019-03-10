@@ -487,9 +487,12 @@ void SV_PopulateRenderScene(
                 Vec3* a = &ent->t.pos;
                 Vec3* b = &ent->destination;
                 // move ray up slightly out of the floor
+                f32 offsetY = 0.2f;
                 RendObj_SetAsLine(&obj,
-                    a->x, a->y + 0.2f, a->z, b->x, b->y + 0.2f, b->z,
-                    1, 0, 0, 0, 1, 0
+                    { a->x, a->y + offsetY, a->z },
+                    { b->x, b->y + offsetY, b->z },
+                    { 1, 0, 0, 1 },
+                    { 0, 1, 0, 1 }
                 );
                 TRANSFORM_CREATE(t);
                 RScene_AddRenderItem(scene, &t, &obj);

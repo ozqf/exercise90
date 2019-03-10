@@ -68,6 +68,10 @@ union Colour
 	{
 		f32 red, green, blue, alpha;
 	};
+    struct
+	{
+		f32 r, g, b, a;
+	};
 };
 
 struct MeshData
@@ -93,13 +97,8 @@ struct Texture2DHeader
 struct RendObj_Primitive
 {
     i32 primitiveType;
-    f32 red;
-    f32 green;
-    f32 blue;
-    f32 alpha;
-    f32 sizeX;
-    f32 sizeY;
-    f32 sizeZ;
+    Colour colour;
+    Vec3 size;
 };
 
 struct RendObj_Billboard
@@ -135,8 +134,8 @@ struct RendObj_Line
 {
     Vec3 a;
     Vec3 b;
-    Vec3 colourA;
-    Vec3 colourB;
+    Colour colourA;
+    Colour colourB;
 };
 
 struct RendObj_AsciChar
@@ -199,9 +198,9 @@ struct RendObj
 
             case RENDOBJ_TYPE_PRIMITIVE:
             {
-                this->data.primitive.red = r;
-                this->data.primitive.green = g;
-                this->data.primitive.blue = b;
+                this->data.primitive.colour.r = r;
+                this->data.primitive.colour.g = g;
+                this->data.primitive.colour.b = b;
             }  break;
 
             case RENDOBJ_TYPE_BILLBOARD:
@@ -284,12 +283,12 @@ com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u
 // Init Render Objects
 ///////////////////////////////////////////////////////////////////
 
-com_internal void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex);
+com_internal void RendObj_SetAsMesh(RendObj* obj, MeshData mesh, Colour colour, i32 textureIndex);
 com_internal void RendObj_SetAsRainbowQuad(RendObj* obj);
 com_internal void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 sizeZ, f32 red, f32 green, f32 blue);
-com_internal void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue);
+com_internal void RendObj_SetAsColouredQuad(RendObj* obj, Colour colour);
 com_internal void RendObj_SetAsSprite(RendObj* obj, i32 mode, i32 textureIndex, f32 width, f32 height);
-com_internal void RendObj_SetAsLine(RendObj* obj, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 r0, f32 g0, f32 b0, f32 r1, f32 g1, f32 b1);
+com_internal void RendObj_SetAsLine(RendObj* obj, Vec3 origin, Vec3 destination, Colour colourA, Colour colourB);
 com_internal void RendObj_SetSpriteUVs(RendObj_Sprite* sprite, f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop);
 com_internal void RendObj_SetAsBillboard(RendObj* obj, f32 r, f32 g, f32 b, i32 textureIndex);
 com_internal void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter);

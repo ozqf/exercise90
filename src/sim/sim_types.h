@@ -55,6 +55,11 @@ struct SimEntId
     i32 serial;
 };
 
+struct SimEntDisplay
+{
+    Colour colour;
+};
+
 struct SimEntity
 {
     i32 status;
@@ -73,6 +78,8 @@ struct SimEntity
 	f32 lifeTime;
     f32 attackTick;
     f32 attackTime;
+
+    SimEntDisplay display;
 
     // physical
     Transform t;

@@ -107,19 +107,19 @@ void CL_PopulateRenderScene(
 			case SIM_ENT_TYPE_WORLD:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, 0.2f, 0.2f, 0.2f, texIndex);
+					&obj, *cube, { 0.2f, 0.2f, 0.2f, 1 }, texIndex);
 			} break;
 
             case SIM_ENT_TYPE_PROJECTILE:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, 1, 1, 0, texIndex);
+					&obj, *cube, { 1, 1, 0, 1 }, texIndex);
 			} break;
 			
 			case SIM_ENT_TYPE_ACTOR:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, 0.2f, 1, 0.2f, texIndex);
+					&obj, *cube, { 0.2f, 1, 0.2f, 1 }, texIndex);
 			} break;
 
             case SIM_ENT_TYPE_LINE_TRACE:
@@ -127,11 +127,12 @@ void CL_PopulateRenderScene(
                 Vec3* a = &ent->t.pos;
                 Vec3* b = &ent->destination;
                 // move ray up slightly out of the floor
+                f32 offsetY = 0.2f;
                 RendObj_SetAsLine(&obj,
-                    a->x, a->y + 0.2f, a->z,
-                    b->x, b->y + 0.2f, b->z,
-                    1, 0, 1,
-                    1, 1, 0
+                    { a->x, a->y + offsetY, a->z },
+                    { b->x, b->y + offsetY, b->z },
+                    { 1, 0, 1, 1 },
+                    { 1, 1, 0, 1 }
                 );
                 Transform_SetToIdentity(&t);
                 RScene_AddRenderItem(scene, &t, &obj);
@@ -141,7 +142,7 @@ void CL_PopulateRenderScene(
 			default:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, 0.3f, 0.3f, 1, texIndex);
+					&obj, *cube, { 0.3f, 0.3f, 1, 1 }, texIndex);
 			} break;
 		}
         

@@ -72,15 +72,17 @@ com_internal void RendObj_InterpolatePosition(
 }
 
 com_internal void RendObj_SetAsMesh(
-    RendObj* obj, MeshData mesh, f32 red, f32 green, f32 blue, i32 textureIndex)
+    RendObj* obj, MeshData mesh,
+    Colour colour,
+    i32 textureIndex)
 {
     obj->type = RENDOBJ_TYPE_MESH;
 
     RendObj_ColouredMesh* rend = &obj->data.mesh;
     rend->mesh = mesh;
-    rend->r = red;
-    rend->g = green;
-    rend->b = blue;
+    rend->r = colour.r;
+    rend->g = colour.g;
+    rend->b = colour.b;
     rend->textureIndex = textureIndex;   
 }
 
@@ -99,24 +101,20 @@ com_internal void RendObj_SetAsAABB(RendObj* obj, f32 sizeX, f32 sizeY, f32 size
     
     RendObj_Primitive* prim = &obj->data.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_AABB;
-    prim->sizeX = sizeX;
-    prim->sizeY = sizeY;
-    prim->sizeZ = sizeZ;
-    prim->red = red;
-    prim->green = green;
-    prim->blue = blue;
+    prim->size = { sizeX, sizeY, sizeZ };
+    prim->colour.red = red;
+    prim->colour.green = green;
+    prim->colour.blue = blue;
 }
 
-com_internal void RendObj_SetAsColouredQuad(RendObj* obj, f32 red, f32 green, f32 blue)
+com_internal void RendObj_SetAsColouredQuad(
+    RendObj* obj, Colour colour)
 {
     obj->type = RENDOBJ_TYPE_PRIMITIVE;
 
     RendObj_Primitive* prim = &obj->data.primitive;
     prim->primitiveType = REND_PRIMITIVE_TYPE_SINGLE_COLOUR_QUAD;
-    prim->red = red;
-    prim->green = green;
-    prim->blue = blue;
-    prim->alpha = 1;
+    prim->colour = colour;
 }
 
 com_internal void RendObj_SetAsSprite(RendObj* obj,
@@ -142,23 +140,25 @@ com_internal void RendObj_SetAsSprite(RendObj* obj,
     rend->a = 1;
 }
 
-com_internal void RendObj_SetAsLine(RendObj* obj,
-    f32 x0, f32 y0, f32 z0,
-    f32 x1, f32 y1, f32 z1,
-    f32 r0, f32 g0, f32 b0,
-    f32 r1, f32 g1, f32 b1
+com_internal void RendObj_SetAsLine(
+    RendObj* obj,
+    Vec3 origin,
+    Vec3 destination,
+    Colour colourA,
+    Colour colourB
     )
 {
     obj->type = RENDOBJ_TYPE_LINE;
     RendObj_Line* rend = &obj->data.line;
-    rend->a.x = x0; rend->a.y = y0; rend->a.z = z0;
-    rend->b.x = x1; rend->b.y = y1; rend->b.z = z1;
+    rend->a = origin;
+    rend->b = destination;
 
-    rend->colourA.x = r0; rend->colourA.y = g0; rend->colourA.z = b0;
-    rend->colourB.x = r1; rend->colourB.y = g1; rend->colourB.z = b1;
+    rend->colourA = colourA;
+    rend->colourB = colourB;
 }
 
-com_internal void RendObj_SetSpriteUVs(RendObj_Sprite* sprite,
+com_internal void RendObj_SetSpriteUVs(
+    RendObj_Sprite* sprite,
     f32 uvLeft, f32 uvRight, f32 uvBottom, f32 uvTop)
 {
     sprite->uvLeft = uvLeft;

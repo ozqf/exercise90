@@ -134,6 +134,7 @@ internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
     ent->attackTime = 1.1f;
+    ent->display.colour = { 0, 1, 0, 1 };
     return COM_ERROR_NONE;
 }
 
@@ -141,6 +142,7 @@ internal i32 Sim_InitWanderer(SimScene* scene, SimEntity* ent, SimEntityDef* def
 {
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
+    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
     return COM_ERROR_NONE;
 }
 
@@ -152,6 +154,7 @@ internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* 
     ent->entType = def->entType;
     // world volumes can't move (yet!)
     ent->velocity = {};
+    ent->display.colour = { 0.2f, 0.2f, 0.2f, 1 };
     return COM_ERROR_NONE;
 }
 
