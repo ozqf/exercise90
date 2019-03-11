@@ -295,7 +295,7 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(&g_sim, 0);
 	
     // Place a test spawner
-    #if 0
+    #if 1
     SimEntityDef def = {};
     def = {};
     def.isLocal = 1;

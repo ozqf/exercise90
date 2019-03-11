@@ -258,7 +258,9 @@ void R_RenderPrimitive(RenderSceneSettings* settings, Transform* camera, Transfo
 			R_RenderAABBGeometry(
 				pos.x, pos.y, pos.z,
 				prim->size.x, prim->size.y, prim->size.z,
-				prim->colour.red, prim->colour.green, prim->colour.blue);
+				prim->colour.red,
+				prim->colour.green, 
+				prim->colour.blue);
 		} break;
 
 		default:

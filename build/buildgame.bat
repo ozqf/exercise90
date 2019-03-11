@@ -16,11 +16,17 @@ if not exist buildGame mkdir buildGame
 cd buildGame
 del *.* /q
 
-@rem set compIn=../src/App/game/game_module.cpp ../src/App/app_module.cpp ../src/App/Physics/ZPhysics_module.cpp ../src/network/znet_module.cpp
-set in1=../src/network/znet_module.cpp ../src/common/com_module.cpp
-set in2=../src/app/app_module.cpp ../src/app/app_textures.cpp
-set in3=../src/sim/sim_module.cpp
-set in4=../src/app/server/server.cpp ../src/app/client/client.cpp
+@rem -- Common module input --
+set in1=../src/common/com_module.cpp
+
+@rem -- Main App input --
+@rem set in2=../src/app/app_module.cpp ../src/app/app_textures.cpp
+@rem set in3=../src/sim/sim_module.cpp ../src/network/znet_module.cpp
+@rem set in4=../src/app/server/server.cpp ../src/app/client/client.cpp
+
+@rem -- Stub App input --
+set in2=../src/app_stub/app_stub.cpp ../src/app/app_textures.cpp
+
 set compIn=%in1% %in2% %in3% %in4%
 
 set compOut=/Fe../bin/base/gamex86.dll
@@ -36,8 +42,15 @@ set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 @echo on
 @cl %compilerFlags% %compilerDefines% /LD %compIn% %compOut% %linkInput%
 
+@set compIn=
+@set compOut=
+@set int1=
+@set int2=
+@set int3=
+@set int4=
 @set compilerFlags=
 @set compilerDefines=
+@set linkInput=
 
 @cd..
 @cd build

@@ -138,6 +138,18 @@ void R_SetViewModelMatrixByEuler(
 	glRotatef(modelRot.x, 1, 0, 0);
 	glRotatef(modelRot.z, 0, 0, 1);
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
+	
+	// Print current View Model matrix for debugging
+	#if 1
+	GLfloat results[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, results);
+	printf("ViewModel Matrix\n");
+	printf("%f, %f, %f, %f\n", results[0], results[4], results[8], results[12]);
+	printf("%f, %f, %f, %f\n", results[1], results[5], results[9], results[13]);
+	printf("%f, %f, %f, %f\n", results[2], results[6], results[10], results[14]);
+	printf("%f, %f, %f, %f\n", results[3], results[7], results[11], results[15]);
+	printf("\n");
+	#endif
 	/*
 	glPushMatrix();
 	glLoadIdentity();

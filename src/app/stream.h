@@ -92,7 +92,8 @@ internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd)
 
 internal void Stream_DeleteCommandBySequence(ByteBuffer* b, i32 sequence)
 {
-	Command* cmd = Stream_FindMessageBySequence(b->ptrStart, b->Written(), sequence);
+	Command* cmd = Stream_FindMessageBySequence(
+        b->ptrStart, b->Written(), sequence);
 	if (cmd)
 	{
 		Stream_DeleteCommand(b, cmd);
