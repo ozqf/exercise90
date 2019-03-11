@@ -89,10 +89,101 @@ void ProjectionMatrix()
     PrintM4x4(I.cells, 1, "I");
 }
 
+// Return 1 if yes, 0 if values differ
+i32 M4x4_AreEqual(f32* a, f32* b, f32 epsilon)
+{
+    for (i32 i = 0; i < 16; ++i)
+    {
+        f32 diff = b[i] - a[i];
+        if (diff > epsilon || diff < -epsilon) { return 0; }
+    }
+    return 1;
+}
+
+void SetTestViewModelMatrix_1(M4x4* m)
+{
+    M4x4_SetToIdentity(m->cells);
+    m->w2 = -2;
+}
+
+void SetTestViewModelMatrix_2(M4x4* m)
+{
+    m->cells[0] = 0.707106531f;
+    m->cells[1] = 0.500000298f;
+    m->cells[2] = -0.499999970f;
+    m->cells[3] = 0.000000000f;
+
+    m->cells[4] = 0.000000000f;
+    m->cells[5] = 0.707106531f;
+    m->cells[6] = 0.707107008f;
+    m->cells[7] = 0.000000000f;
+
+    m->cells[8] = 0.707107008f;
+    m->cells[9] = -0.499999970f;
+    m->cells[10] = 0.499999642f;
+    m->cells[11] = 0.000000000f;
+
+	m->cells[12] = 0.000000000f;
+	m->cells[13] = 7.15255737e-07f;
+    m->cells[14] = -2.12132025f;
+	m->cells[15] = 1.00000000f;
+}
+
+void TestRenderMatrices()
+{
+    printf("Test Render Matrices\n");
+    M4x4_CREATE(projection);
+    f32 aspectRatio = 1.83549786f;
+    f32 prjNear = 0.1f;
+	f32 prjFar = 1000;
+	f32 prjLeft = -0.07f * aspectRatio;
+	f32 prjRight = 0.07f * aspectRatio;
+	f32 prjTop = 0.07f;
+	f32 prjBottom = -0.07f;
+    M4x4_SetProjection(projection.cells, prjNear, prjFar, prjLeft, prjRight, prjTop, prjBottom);
+    //PrintM4x4(projection.cells, 0, "Target projection matrix\n");
+
+    M4x4_CREATE(targetModelView);
+    SetTestViewModelMatrix_1(&targetModelView);
+    //SetTestViewModelMatrix_2(&targetModelView);
+    
+    PrintM4x4(targetModelView.cells, 0, "Target ViewModel matrix\n");
+
+    // Create the camera and model transforms for the scene:
+    TRANSFORM_CREATE(camera);
+    camera.pos.z = 1.5f;
+    camera.pos.y = 1.5f;
+    Transform_SetRotation(&camera, -(45    * DEG2RAD), 0, 0);
+
+    TRANSFORM_CREATE(model);
+    Transform_RotateY(&model, 45 * DEG2RAD);
+
+    // Now recalculate the target matrix
+    M4x4_CREATE(modelView)
+    COM_SetupViewModelMatrix(&modelView, &camera, &model);
+
+    PrintM4x4(modelView.cells, 0, "Taa daaaaa");
+
+    if (M4x4_AreEqual(targetModelView.cells, modelView.cells, F32_EPSILON))
+    {
+        printf("Yaaay\n");
+    }
+    else
+    {
+        i32 i = 0;
+        do
+        {
+            printf("\nBoooooo :(\n");
+        } while (i++ < 4);
+    }
+    
+}
+
 void Tests_Run(i32 argc, char* argv[])
 {
     //MatrixBasics();
-    Test_Priority();
+    TestRenderMatrices();
+    //Test_Priority();
 }
 
 #endif

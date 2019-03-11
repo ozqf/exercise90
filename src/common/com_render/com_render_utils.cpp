@@ -36,6 +36,21 @@ com_internal void COM_SetupDefault3DProjection(
 	COM_Setup3DProjection(m4x4, 90, 0.07f, 0.1f, 1000.0f, aspectRatio);
 }
 
+void M4x4_FlipRotation(f32* m)
+{
+	m[M4x4_X0] = -m[M4x4_X0];
+	m[M4x4_X1] = -m[M4x4_X1];
+	m[M4x4_X2] = -m[M4x4_X2];
+
+	m[M4x4_Y0] = -m[M4x4_Y0];
+	m[M4x4_Y1] = -m[M4x4_Y1];
+	m[M4x4_Y2] = -m[M4x4_Y2];
+
+	m[M4x4_Z0] = -m[M4x4_Z0];
+	m[M4x4_Z1] = -m[M4x4_Z1];
+	m[M4x4_Z2] = -m[M4x4_Z2];
+}
+
 extern "C"
 com_internal void COM_SetupViewModelMatrix(
 	M4x4* result, Transform* cameraTransform, Transform* modelTransform)
@@ -55,14 +70,23 @@ com_internal void COM_SetupViewModelMatrix(
 
 	So new method is to:
 	> ...invert the camera matrix?
-	> mulltiply with model matrix...
+	> multiply with model matrix...
 	> ...profit?
 	*/
 	M4x4 cam;
 	M4x4 model;
 	Transform_ToM4x4(cameraTransform, &cam);
+	M4x4_Invert(cam.cells);
 	Transform_ToM4x4(modelTransform, &model);
 	M4x4_SetToIdentity(result->cells);
+
+	//result->cells[M4x4_W0] = -cameraTransform->pos.x + modelTransform->pos.x;
+	//result->cells[M4x4_W1] = -cameraTransform->pos.y + modelTransform->pos.y;
+	//result->cells[M4x4_W2] = -cameraTransform->pos.z + modelTransform->pos.z;
+
+	//M4x4_ClearPosition(cam.cells);
+	// dumb
+	//M4x4_Multiply(result->cells, model.cells, result->cells);
 	M4x4_Multiply(cam.cells, model.cells, result->cells);
 
 }

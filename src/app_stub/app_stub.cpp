@@ -170,15 +170,20 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     // Render Scene - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
 		90, RENDER_PROJECTION_MODE_3D, 8);
+    #if 0
     g_worldScene.cameraTransform.pos.z = 1.5f;
     g_worldScene.cameraTransform.pos.y = 1.5f;
     Transform_SetRotation(&g_worldScene.cameraTransform, -(45    * DEG2RAD), 0, 0);
+    #endif
 
     // Add render object
     RendObj obj = {};
     RendObj_SetAsMesh(&obj, *cube, { 1, 0, 0, 1 }, texIndex);
     TRANSFORM_CREATE(t);
+    t.pos.z = -2;
+    #if 0
 	Transform_RotateY(&t, 45 * DEG2RAD);
+    #endif
 	
     RScene_AddRenderItem(&g_worldScene, &t, &obj);
 
