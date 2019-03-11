@@ -131,8 +131,8 @@ void CL_PopulateRenderScene(
                 RendObj_SetAsLine(&obj,
                     { a->x, a->y + offsetY, a->z },
                     { b->x, b->y + offsetY, b->z },
-                    { 1, 0, 1, 1 },
-                    { 1, 1, 0, 1 }
+                    { 0, 1, 0, 1 },
+                    { 0, 1, 0, 1 }
                 );
                 Transform_SetToIdentity(&t);
                 RScene_AddRenderItem(scene, &t, &obj);
