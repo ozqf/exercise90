@@ -6,11 +6,12 @@
 // TODO: Call render from application...? (might requiring moving console into app layer...?)
 
 #define REND_CMD_TYPE_NULL 0
-#define REND_CMD_TYPE_SETTINGS 1
-#define REND_CMD_TYPE_SET_VIEWPORT 2
-#define REND_CMD_TYPE_END 3
-#define REND_CMD_TYPE_DRAW 4
-#define REND_CMD_TYPE_PROJECTION 5
+#define REND_CMD_TYPE_PROJECTION 1
+#define REND_CMD_TYPE_MODELVIEW 2
+#define REND_CMD_TYPE_DRAW 3
+//#define REND_CMD_TYPE_SETTINGS 1
+//#define REND_CMD_TYPE_SET_VIEWPORT 2
+//#define REND_CMD_TYPE_END 3
 
 struct RViewPort
 {
@@ -23,12 +24,11 @@ struct RViewPort
 struct RenderCommand
 {
     i32 type;
-	
 	union
 	{
-		RenderSceneSettings settings;
-		RViewPort viewPort;
+		//RenderSceneSettings settings;
+		//RViewPort viewPort;
 		RenderListItem drawItem;
-		M4x4 projection;
+		M4x4 matrix;
 	};
 };

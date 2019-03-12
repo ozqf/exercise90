@@ -140,7 +140,7 @@ void R_SetViewModelMatrixByEuler(
 	glScalef(model->scale.x, model->scale.y, model->scale.z);
 	
 	// Print current View Model matrix for debugging
-	#if 1
+	#if 0
 	GLfloat results[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, results);
 	printf("ViewModel Matrix\n");

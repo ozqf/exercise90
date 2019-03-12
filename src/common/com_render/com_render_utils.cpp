@@ -68,8 +68,8 @@ com_internal void COM_SetupViewModelMatrix(
 	> rotate by model X angle
 	> rotate by model Y angle
 	*/
-	M4x4 camTrans;
 	M4x4 cam;
+	M4x4 camTrans;
 	M4x4 modelTrans;
 	M4x4 model;
 	
@@ -91,6 +91,7 @@ com_internal void COM_SetupViewModelMatrix(
 	model.wAxis.z = 0;
 
 	// camera rot * inverse camera pos * model pos * model rot
+	M4x4_SetToIdentity(result->cells);
 	M4x4_Multiply(result->cells, cam.cells, result->cells);
 	M4x4_Multiply(result->cells, camTrans.cells, result->cells);
 	M4x4_Multiply(result->cells, modelTrans.cells, result->cells);

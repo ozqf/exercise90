@@ -22,16 +22,45 @@ void R_SetViewport(RViewPort* v)
     glViewport(v->viewPortX, v->viewPortY, v->viewPortWidth, v->viewPortHeight);
 }
 
-void R_ExecSetProjection(f32* m4x4)
+void Exec_DrawObject(RendObj* obj)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(m4x4);
+	if (obj->type != RENDOBJ_TYPE_MESH) { return; }
+
+	#if 1
+	GLfloat results[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, results);
+	printf("Draw object ViewModel Matrix\n");
+	printf("%f, %f, %f, %f\n", results[0], results[4], results[8], results[12]);
+	printf("%f, %f, %f, %f\n", results[1], results[5], results[9], results[13]);
+	printf("%f, %f, %f, %f\n", results[2], results[6], results[10], results[14]);
+	printf("%f, %f, %f, %f\n", results[3], results[7], results[11], results[15]);
+	printf("\n");
+	#endif
+
+	RendObj_ColouredMesh* meshRend = &obj->data.mesh;
+	MeshData mesh = meshRend->mesh;
+	AssertAlways(mesh.verts != NULL);
+	AssertAlways(mesh.uvs != NULL);
+	AssertAlways(mesh.normals != NULL);
+
+	GLuint* texHandles = g_textureHandles;
+
+	glEnable(GL_TEXTURE_2D);
+	glColor3f(meshRend->r, meshRend->g, meshRend->b);
+
+	R_SetupTestTexture(meshRend->textureIndex);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, mesh.verts);
+	glTexCoordPointer(2, GL_FLOAT, 0, mesh.uvs);
+	glDrawArrays(GL_TRIANGLES, 0, mesh.numVerts);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
 {
     #if 1
-    RenderSceneSettings* settings = NULL;
+    //RenderSceneSettings* settings = NULL;
 	for (i32 i = 0; i < numCommands; ++i)
 	{
 		RenderCommand* cmd = &commands[i];
@@ -39,14 +68,29 @@ void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
 		{
             case REND_CMD_TYPE_DRAW:
 			{
+				Exec_DrawObject(&cmd->drawItem.obj);
+				#if 0
 				// Settings must have been read before draw calls can be run
 				Assert(settings)
 				
 				RenderListItem* item = &cmd->drawItem;
                 R_RenderEntity(settings, &settings->cameraTransform, item);
+				#endif
+			} break;
+
+			case REND_CMD_TYPE_MODELVIEW:
+            {
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixf(cmd->matrix.cells);
+            } break;
+			
+			case REND_CMD_TYPE_PROJECTION:
+			{
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixf(cmd->matrix.cells);
 			} break;
             
-            case REND_CMD_TYPE_SETTINGS:
+            /*case REND_CMD_TYPE_SETTINGS:
             {
                 settings = &cmd->settings;
                 R_ApplySceneSettings(settings);
@@ -55,17 +99,7 @@ void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
 			case REND_CMD_TYPE_SET_VIEWPORT:
             {
                 R_SetViewport(&cmd->viewPort);
-            } break;
-
-            case REND_CMD_TYPE_END:
-            {
-
-            } break;
-			
-			case REND_CMD_TYPE_PROJECTION:
-			{
-				R_ExecSetProjection(cmd->projection.cells);
-			} break;
+            } break;*/
 		}
 	}
     #endif

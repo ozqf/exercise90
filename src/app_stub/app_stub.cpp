@@ -179,16 +179,48 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     // Add render object
     RendObj obj = {};
     RendObj_SetAsMesh(&obj, *cube, { 1, 0, 0, 1 }, texIndex);
-    TRANSFORM_CREATE(t);
+    TRANSFORM_CREATE(modelTransform);
     //t.pos.z = -2;
     #if 1
-	Transform_RotateY(&t, 45 * DEG2RAD);
+	Transform_RotateY(&modelTransform, 45 * DEG2RAD);
     #endif
 	
-    RScene_AddRenderItem(&g_worldScene, &t, &obj);
+    #if 0 // Old stype
+    // Build scene
+    RScene_AddRenderItem(&g_worldScene, &modelTransform, &obj);
 
     // Render
     g_platform.RenderScene(&g_worldScene);
+    #endif
+    
+    #if 1 // New style
+    // Prepare command buffer
+    const int maxCommands = 16;
+    RenderCommand cmds[maxCommands];
+    COM_ZeroMemory((u8*)cmds, sizeof(RenderCommand) * maxCommands);
+    i32 nextCommandIndex = 0;
+
+    // --- Push commands ---
+    RenderCommand* cmd;
+
+    // Projection
+    cmd = &cmds[nextCommandIndex++];
+    cmd->type = REND_CMD_TYPE_PROJECTION;
+    COM_SetupDefault3DProjection(cmd->matrix.cells, info.aspectRatio);
+
+    // Object view model transform
+    cmd = &cmds[nextCommandIndex++];
+    cmd->type = REND_CMD_TYPE_MODELVIEW;
+    COM_SetupViewModelMatrix(
+        &cmd->matrix, &g_worldScene.cameraTransform, &modelTransform);
+
+    // Object draw
+    cmd = &cmds[nextCommandIndex++];
+    cmd->type = REND_CMD_TYPE_DRAW;
+    cmd->drawItem.obj = obj;
+
+    g_platform.SubmitRenderCommands(cmds, nextCommandIndex);
+    #endif
 }
 
 internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
