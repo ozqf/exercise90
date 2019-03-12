@@ -74,6 +74,7 @@ struct Vec4;
 struct M3x3;
 struct M4x4;
 
+#define M3x3_CREATE(varName) M3x3 varName##; M3x3_SetToIdentity(##varName.cells##);
 #define M4x4_CREATE(varName) M4x4 varName##; M4x4_SetToIdentity(##varName.cells##);
 
 //internal i32 g_z_inf = 0x7F800000;
@@ -151,6 +152,7 @@ void M4x4_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw);
 void M4x4_SetProjection(f32* m, f32 prjNear, f32 prjFar, f32 prjLeft, f32 prjRight, f32 prjTop, f32 prjBottom);
 void M4x4_SetOrthoProjection(f32* m, f32 left, f32 right, f32 top, f32 bottom, f32 prjNear, f32 prjFar);
 void M4x4_SetToScaling(f32* m, f32 x, f32 y, f32 z);
+void M4x4_SetToTranslation(f32* m, f32 x, f32 y, f32 z);
 
 void M4x4_Invert(f32* src);
 void M4x4_ClearPosition(f32* src);

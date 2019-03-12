@@ -67,18 +67,22 @@ com_internal void COM_SetupViewModelMatrix(
 	> rotate by model Z angle
 	> rotate by model X angle
 	> rotate by model Y angle
-
-	So new method is to:
-	> ...invert the camera matrix?
-	> multiply with model matrix...
-	> ...profit?
 	*/
+	M4x4 translation;
 	M4x4 cam;
 	M4x4 model;
 	Transform_ToM4x4(cameraTransform, &cam);
-	M4x4_Invert(cam.cells);
+
+	M4x4_SetToTranslation(
+		translation.cells, -cam.wAxis.x, -cam.wAxis.y, -cam.wAxis.z);
+
+	//M4x4_Invert(cam.cells);
 	Transform_ToM4x4(modelTransform, &model);
+	M4x4_RotateX(cam.cells, 90 * DEG2RAD);
 	M4x4_SetToIdentity(result->cells);
+	cam.wAxis.x = 0;//-cam.wAxis.x;
+	cam.wAxis.y = 0;//-cam.wAxis.y;
+	cam.wAxis.z = 0;//-cam.wAxis.z;
 
 	//result->cells[M4x4_W0] = -cameraTransform->pos.x + modelTransform->pos.x;
 	//result->cells[M4x4_W1] = -cameraTransform->pos.y + modelTransform->pos.y;
@@ -86,7 +90,10 @@ com_internal void COM_SetupViewModelMatrix(
 
 	//M4x4_ClearPosition(cam.cells);
 	// dumb
-	//M4x4_Multiply(result->cells, model.cells, result->cells);
-	M4x4_Multiply(cam.cells, model.cells, result->cells);
+	M4x4_Multiply(result->cells, cam.cells, result->cells);
+	M4x4_Multiply(result->cells, translation.cells, result->cells);
+	M4x4_Multiply(result->cells, model.cells, result->cells);
+
+	//M4x4_Multiply(cam.cells, model.cells, result->cells);
 
 }

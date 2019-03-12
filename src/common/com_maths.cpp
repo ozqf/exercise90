@@ -650,6 +650,14 @@ void M4x4_SetToScaling(f32* m, f32 x, f32 y, f32 z)
     m[M4x4_W3] = 1;
 }
 
+void M4x4_SetToTranslation(f32* m, f32 x, f32 y, f32 z)
+{
+    M4x4_SetToIdentity(m);
+    m[M4x4_W0] = x;
+    m[M4x4_W1] = y;
+    m[M4x4_W2] = z;
+}
+
 void M4x4_RotateX(f32* m, f32 radiansX)
 {
 	M4x4 rotM = {};

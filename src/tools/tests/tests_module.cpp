@@ -27,6 +27,15 @@ internal void PrintM4x4(f32* m, i32 rotationOnly, char* label)
     printf("----------------\n");
 }
 
+internal void PrintM3x3(f32* m, char* label)
+{
+    printf("--- %s ---\n", label);
+    printf("%.3f, %.3f, %.3f\n", m[0], m[3], m[6]);
+    printf("%.3f, %.3f, %.3f\n", m[1], m[4], m[7]);
+    printf("%.3f, %.3f, %.3f\n", m[2], m[5], m[8]);
+    printf("----------------\n");
+}
+
 internal void PrintVec3(Vec3* v, char* label)
 {
     printf("%s: %.3f, %.3f, %.3f\n", label, v->x, v->y, v->z);
@@ -95,7 +104,11 @@ i32 M4x4_AreEqual(f32* a, f32* b, f32 epsilon)
     for (i32 i = 0; i < 16; ++i)
     {
         f32 diff = b[i] - a[i];
-        if (diff > epsilon || diff < -epsilon) { return 0; }
+        if (diff > epsilon || diff < -epsilon)
+        {
+            printf("diff! %f\n", diff);
+            return 0;
+        }
     }
     return 1;
 }
@@ -144,39 +157,52 @@ void TestRenderMatrices()
     //PrintM4x4(projection.cells, 0, "Target projection matrix\n");
 
     M4x4_CREATE(targetModelView);
-    SetTestViewModelMatrix_1(&targetModelView);
-    //SetTestViewModelMatrix_2(&targetModelView);
+    //SetTestViewModelMatrix_1(&targetModelView);
+    SetTestViewModelMatrix_2(&targetModelView);
     
     PrintM4x4(targetModelView.cells, 0, "Target ViewModel matrix\n");
 
     // Create the camera and model transforms for the scene:
     TRANSFORM_CREATE(camera);
+    TRANSFORM_CREATE(model);
+
+    #if 1
     camera.pos.z = 1.5f;
     camera.pos.y = 1.5f;
     Transform_SetRotation(&camera, -(45    * DEG2RAD), 0, 0);
-
-    TRANSFORM_CREATE(model);
     Transform_RotateY(&model, 45 * DEG2RAD);
-
+    #endif
+    #if 0
+    model.pos.z = -2;
+    #endif
+    #if 1
     // Now recalculate the target matrix
     M4x4_CREATE(modelView)
     COM_SetupViewModelMatrix(&modelView, &camera, &model);
 
     PrintM4x4(modelView.cells, 0, "Taa daaaaa");
 
-    if (M4x4_AreEqual(targetModelView.cells, modelView.cells, F32_EPSILON))
+    if (M4x4_AreEqual(targetModelView.cells, modelView.cells, 0.00001f))
     {
         printf("Yaaay\n");
     }
     else
     {
-        i32 i = 0;
-        do
-        {
-            printf("\nBoooooo :(\n");
-        } while (i++ < 4);
+        printf("\nBoooooo :(\n");
     }
-    
+    #endif
+    M3x3_CREATE(rot)
+    M3x3_RotateX(camera.rotation.cells, 90  * DEG2RAD);
+    M3x3_Multiply(camera.rotation.cells, model.rotation.cells, rot.cells);
+    PrintM3x3(rot.cells, "Rotation (cam * model)");
+    /*
+    Wrong signs:
+    X_Z
+    Y_Y
+    Z_Z
+    */
+    //M3x3_Multiply(model.rotation.cells, camera.rotation.cells, rot.cells);
+    //PrintM3x3(rot.cells, "Rotation (model * cam)");
 }
 
 void Tests_Run(i32 argc, char* argv[])
