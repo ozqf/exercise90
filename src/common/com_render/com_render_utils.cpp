@@ -68,32 +68,31 @@ com_internal void COM_SetupViewModelMatrix(
 	> rotate by model X angle
 	> rotate by model Y angle
 	*/
-	M4x4 translation;
+	M4x4 camTrans;
 	M4x4 cam;
+	M4x4 modelTrans;
 	M4x4 model;
+	
+	// Camera rotation and translation
 	Transform_ToM4x4(cameraTransform, &cam);
-
-	M4x4_SetToTranslation(
-		translation.cells, -cam.wAxis.x, -cam.wAxis.y, -cam.wAxis.z);
-
-	//M4x4_Invert(cam.cells);
-	Transform_ToM4x4(modelTransform, &model);
 	M4x4_RotateX(cam.cells, 90 * DEG2RAD);
-	M4x4_SetToIdentity(result->cells);
-	cam.wAxis.x = 0;//-cam.wAxis.x;
-	cam.wAxis.y = 0;//-cam.wAxis.y;
-	cam.wAxis.z = 0;//-cam.wAxis.z;
+	M4x4_SetToTranslation(
+		camTrans.cells, -cam.wAxis.x, -cam.wAxis.y, -cam.wAxis.z);
+	cam.wAxis.x = 0;
+	cam.wAxis.y = 0;
+	cam.wAxis.z = 0;
 
-	//result->cells[M4x4_W0] = -cameraTransform->pos.x + modelTransform->pos.x;
-	//result->cells[M4x4_W1] = -cameraTransform->pos.y + modelTransform->pos.y;
-	//result->cells[M4x4_W2] = -cameraTransform->pos.z + modelTransform->pos.z;
+	// Model rotation and translation
+	Transform_ToM4x4(modelTransform, &model);
+	M4x4_SetToTranslation(
+		modelTrans.cells, model.wAxis.x, model.wAxis.y, model.wAxis.z);
+	model.wAxis.x = 0;
+	model.wAxis.y = 0;
+	model.wAxis.z = 0;
 
-	//M4x4_ClearPosition(cam.cells);
-	// dumb
+	// camera rot * inverse camera pos * model pos * model rot
 	M4x4_Multiply(result->cells, cam.cells, result->cells);
-	M4x4_Multiply(result->cells, translation.cells, result->cells);
+	M4x4_Multiply(result->cells, camTrans.cells, result->cells);
+	M4x4_Multiply(result->cells, modelTrans.cells, result->cells);
 	M4x4_Multiply(result->cells, model.cells, result->cells);
-
-	//M4x4_Multiply(cam.cells, model.cells, result->cells);
-
 }
