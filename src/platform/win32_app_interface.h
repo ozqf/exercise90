@@ -184,6 +184,7 @@ void Win32_InitPlatformInterface()
     g_plat2Rend = {};
     g_plat2Rend.Log = Win32_Log;
     g_plat2Rend.Print = Win32_Log;
+    g_plat2Rend.Error = Win32_Error;
 }
 
 void Win32_CloseAppLink()

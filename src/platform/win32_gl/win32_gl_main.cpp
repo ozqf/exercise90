@@ -43,6 +43,7 @@ i32 Win32_InitOpenGL(HWND window)
 	// TODO: More modern opengl: Context escalation via WGL_ARB_create_context
 	// https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
 	// https://hero.handmade.network/episode/code/day242/#2226
+	// https://mariuszbartosik.com/opengl-4-x-initialization-in-windows-without-a-framework/
 
 	if (g_openglRC == NULL)
 	{
@@ -52,7 +53,8 @@ i32 Win32_InitOpenGL(HWND window)
 
     if (wglMakeCurrent(windowContext, g_openglRC))
     {
-		Win32_GetExtensions(&g_extensions);
+		// This function will also escalate the context if possible
+		Win32_GetExtensions(windowContext, &g_extensions);
 	}
     else
     {

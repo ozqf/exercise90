@@ -2,14 +2,66 @@
 
 #include "win32_gl_module.cpp"
 
-void Win32_GetExtensions(Extensions* ex)
+internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 {
     *ex = {};
 
 	// Name of opengl extension when found in gl strings:
 	//char* extensionName = "WGL_EXT_swap_control";
 	#if 1
-	ex->SwapInterval = (wgl_swap_interval_ext*)wglGetProcAddress(PROCNAME_SWAP_INTERVAL);
+	ex->SwapInterval =
+		(wgl_swap_interval_ext*)wglGetProcAddress(PROCNAME_SWAP_INTERVAL);
+	ex->CreateContextAttribs =
+		(wglCreateContextAttribsARB*)wglGetProcAddress(PROCNAME_CREATE_CONTEXT_ATTRIBS);
+	if (ex->CreateContextAttribs)
+	{
+		// https://www.khronos.org/registry/OpenGL/extensions/ARB/WGL_ARB_create_context.txt
+		// Modern Opengl - escalate context
+		printf("REND Got create context attribs\n");
+
+		// No shared context (yet...?)
+		HGLRC shared = NULL;
+
+		// params
+		i32 openglMajorVersion = 3;
+		i32 openglMinorVersion = 0;
+		// Note: WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB flag causes
+		// old fixed function pipeline stuff to be disabled
+		i32 contextFlags =
+			WGL_CONTEXT_DEBUG_BIT_ARB ;//| WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
+		i32 profileMask = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+
+		int attribs[] =
+		{
+			WGL_CONTEXT_MAJOR_VERSION_ARB, openglMajorVersion,
+			WGL_CONTEXT_MINOR_VERSION_ARB, openglMinorVersion,
+			//WGL_CONTEXT_LAYER_PLANE_ARB, 0, // For overlays, not needed
+			WGL_CONTEXT_FLAGS_ARB, contextFlags,
+			WGL_CONTEXT_PROFILE_MASK_ARB, profileMask,
+			0
+		};
+		HGLRC modernGLRC = ex->CreateContextAttribs(windowContext, shared, attribs);
+		if (modernGLRC)
+		{
+			printf("\tOpengl Escalated\n");
+			wglMakeCurrent(windowContext, modernGLRC);
+			wglDeleteContext(g_openglRC);
+			g_openglRC = modernGLRC;
+		}
+		else
+		{
+			// Boom
+			g_platform.Error(
+				"Failed to acquire opengl 3 context",
+				"Opengl escalation failed");
+		}
+		
+	}
+	else
+	{
+		// antiquated opengl
+	}
+
 	if (ex->SwapInterval)
 	{
 		printf("REND Got proc Swap Interval\n");

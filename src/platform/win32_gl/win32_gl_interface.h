@@ -31,6 +31,7 @@ struct RendererPlatform
 {
     void (*Log)(char* msg);
     void (*Print)(char* msg);
+    void (*Error)(char* msg, char* title);
 };
 
 typedef RenderInterface (Func_LinkToRenderer)(RendererPlatform platform);
