@@ -26,7 +26,8 @@ void Exec_DrawObject(RendObj* obj)
 {
 	if (obj->type != RENDOBJ_TYPE_MESH) { return; }
 
-	#if 1
+	#if 0
+	// If you ever want to see the currently loaded matrix...
 	GLfloat results[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, results);
 	printf("Draw object ViewModel Matrix\n");
@@ -69,13 +70,6 @@ void R_Execute(RenderCommand* commands, i32 numCommands, PlatformTime* time)
             case REND_CMD_TYPE_DRAW:
 			{
 				Exec_DrawObject(&cmd->drawItem.obj);
-				#if 0
-				// Settings must have been read before draw calls can be run
-				Assert(settings)
-				
-				RenderListItem* item = &cmd->drawItem;
-                R_RenderEntity(settings, &settings->cameraTransform, item);
-				#endif
 			} break;
 
 			case REND_CMD_TYPE_MODELVIEW:

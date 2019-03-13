@@ -33,11 +33,16 @@ i32 Win32_InitOpenGL(HWND window)
 
 	// Apply the format we want
     SetPixelFormat(windowContext, suggestedPixelFormatIndex, &suggestedPixelFormat);
-
+	
 	// Create a context for our window
+	// ancient opengl 1.1 - default for windows :(
 	// HDC "HandleDeviceContext"
 	// HGLRC "HandleOpenGLRenderingContext"
 	g_openglRC = wglCreateContext(windowContext);
+
+	// TODO: More modern opengl: Context escalation via WGL_ARB_create_context
+	// https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
+	// https://hero.handmade.network/episode/code/day242/#2226
 
 	if (g_openglRC == NULL)
 	{
