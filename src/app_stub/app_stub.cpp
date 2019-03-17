@@ -112,6 +112,20 @@ internal i32  App_Init()
 
     // Assets
     Tex_Init(&g_heap, g_platform);
+    char* textures[] = 
+    {
+        "textures\\BitmapTest.bmp",
+        DEFAULT_CONSOLE_CHARSET_PATH,
+        "textures\\brbrick2.bmp",
+        "textures\\W33_5.bmp",
+        "textures\\COMP03_1.bmp",
+        "\0"
+    };
+    Tex_LoadTextureList(textures);
+    Tex_GenerateBW(DEFAULT_CONSOLE_CHARSET_PATH);
+    
+    g_platform.SetDebugInputTextureIndex(
+        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
 
     // Render Scenes - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,

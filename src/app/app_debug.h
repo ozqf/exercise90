@@ -25,7 +25,7 @@ internal void App_DebugInit()
         g_serverDebugStr.length,
         0.05f,
         TEXT_ALIGNMENT_TOP_LEFT,
-        Tex_GetTextureIndexByName("textures\\charset.bmp"),
+        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH),
         0, 1, 1
     );
 
@@ -46,7 +46,7 @@ internal void App_DebugInit()
         g_clientDebugStr.length,
         0.05f,
         TEXT_ALIGNMENT_TOP_LEFT,
-        Tex_GetTextureIndexByName("textures\\charset.bmp"),
+        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH),
         0, 1, 1
     );
 }

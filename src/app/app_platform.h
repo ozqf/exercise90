@@ -78,9 +78,23 @@ internal i32  App_Init()
     {
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
-
+    g_platform.
     // Assets
     Tex_Init(&g_heap, g_platform);
+    char** textures = 
+    {
+        "textures\\BitmapTest.bmp",
+        DEFAULT_CONSOLE_CHARSET_PATH,
+        "textures\\brbrick2.bmp",
+        "textures\\W33_5.bmp",
+        "textures\\COMP03_1.bmp",
+        "\0"
+    };
+    g_platform.Error("Bar", "Foo");
+    APP_PRINT(64, "App load texture list\n");
+    Tex_LoadTextureList(textures);
+    g_platform.SetDebugInputTextureIndex(
+        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
 
     // must be init AFTER textures as it needs teh console char sheet
     App_DebugInit();
@@ -353,7 +367,6 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }
     return 0;
 }
-
 
 /***************************************
 * Export Windows DLL functions

@@ -3,9 +3,7 @@
 //#include "app_module.h"
 #include "../common/com_module.h"
 #include "../interface/platform_interface.h"
-
-// internal data
-internal i32 Tex_LoadAndBindTexture(char *filePath);
+#include "app_textures.h"
 
 #define MAX_TEXTURES 128
 #define MAX_MESHES 128
@@ -48,6 +46,7 @@ i32 Tex_GetTextureIndexByName(char* textureName)
             return i;
         }
     }
+    printf("APP tex %s not found, loading\n", textureName);
     COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s not found, loading\n", textureName);
     return Tex_LoadAndBindTexture(textureName);
     //return -1;
@@ -107,8 +106,7 @@ internal BlockRef Tex_LoadTexture(char *filePath)
  * Read a texture onto the global heap and then immediately bind it
  * Returns the texture's index
  */
-#if 1
-internal i32 Tex_LoadAndBindTexture(char *filePath)
+i32 Tex_LoadAndBindTexture(char *filePath)
 {
     BlockRef ref = Tex_LoadTexture(filePath);
     Heap_GetBlockMemoryAddress(g_heap, &ref);
@@ -117,7 +115,7 @@ internal i32 Tex_LoadAndBindTexture(char *filePath)
     Tex_BindTexture(header);
     return header->index;
 }
-#endif
+
 /**
  * Upload all registered textures
  */
@@ -134,64 +132,135 @@ void Tex_Init(Heap* heap, AppPlatform platform)
 {
     g_heap = heap;
     g_platform = platform;
-    BlockRef ref;
-    Texture2DHeader *header;
+}
 
-    //AppInitTestTextures();
-
-    // 0
-    //Tex_RegisterTexture(&testBuffer, NULL);
-
-    // 1
-    //Tex_RegisterTexture(&testBuffer2, NULL);
-
-    // 2 - you get the picture
-    //Tex_RegisterTexture(&testBuffer3, NULL);
-
-    // 3 - Kinda icky this
-    ref = Tex_LoadTexture("textures\\BitmapTest.bmp");
-    Heap_GetBlockMemoryAddress(g_heap, &ref);
-    header = (Texture2DHeader *)ref.ptrMemory;
-    Tex_RegisterTexture(header, &ref);
-
-    // 4 - so, texture management sometime?
-    ref = Tex_LoadTexture("textures\\charset.bmp");
-    Heap_GetBlockMemoryAddress(g_heap, &ref);
-    header = (Texture2DHeader *)ref.ptrMemory;
-    Tex_RegisterTexture(header, &ref);
-
-    // 5 - can't be too hard...
-    ref = Tex_LoadTexture("textures\\brbrick2.bmp");
-    Heap_GetBlockMemoryAddress(g_heap, &ref);
-    header = (Texture2DHeader *)ref.ptrMemory;
-    Tex_RegisterTexture(header, &ref);
-
-    // 6 - right?
-    ref = Tex_LoadTexture("textures\\W33_5.bmp");
-    Heap_GetBlockMemoryAddress(g_heap, &ref);
-    header = (Texture2DHeader *)ref.ptrMemory;
-    Tex_RegisterTexture(header, &ref);
-
-    // 7 - plunging on
-    ref = Tex_LoadTexture("textures\\COMP03_1.bmp");
-    Heap_GetBlockMemoryAddress(g_heap, &ref);
-    header = (Texture2DHeader *)ref.ptrMemory;
-    Tex_RegisterTexture(header, &ref);
-
-    // ref = Tex_LoadTexture("BKEYA0.bmp");
-    // Heap_GetBlockMemoryAddress(g_heap, &ref);
-    // header = (Texture2DHeader *)ref.ptrMemory;
-    // Tex_RegisterTexture(header, &ref);
-
-    Tex_BindAll();
-
-    
-    g_platform.SetDebugInputTextureIndex(
-        Tex_GetTextureIndexByName("textures\\charset.bmp"));
+// Terminate texture list with an empty string
+void Tex_LoadTextureList(char** textures)
+{
+    printf("APP Load texture list\n");
+    i32 i = 0;
+    char* str = textures[i];
+    while (*str != '\0')
+    {
+        printf("Load and Bind texture %s\n", str);
+        Tex_LoadAndBindTexture(str);
+        str = textures[++i];
+    }
 }
 
 i32 Tex_RenderModuleReloaded()
 {
     Tex_BindAll();
     return COM_ERROR_NONE;
+}
+
+
+struct BW8x8Block
+{
+  // bit == x
+  // index == y
+  unsigned char pixels[8];
+};
+
+struct BWImage
+{
+  int numBlocksX;
+  int numBlocksY;
+  unsigned char *blocks;
+};
+
+internal i32 Tex_BWBlockIndex2BlockX(i32 blockIndex, i32 blocksWide)
+{
+    return blockIndex % blocksWide;
+}
+
+internal i32 Tex_BWBlockIndex2BlockY(i32 blockIndex, i32 blocksWide)
+{
+    return blockIndex / blocksWide;
+}
+
+void Tex_GenerateBW(char* sourceTextureName)
+{
+    i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
+    Texture2DHeader* h = &g_textureHandles.textureHeaders[texIndex];
+    printf("  Gen BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
+    i32 modWidth = h->width % 8;
+    i32 modHeight = h->height % 8;
+    if (modWidth || modHeight)
+    {
+        printf("  Cannot gen texture. width not divisible by 8\n");
+        return;
+    }
+    i32 blocksX = h->width / 8;
+    i32 blocksY = h->height / 8;
+    i32 totalBlocks = blocksX * blocksY;
+    i32 totalBytes = totalBlocks * 8;
+    printf("  Total blocks %d (%d by %d) - %d bytes\n",
+        totalBlocks, blocksX, blocksY, totalBytes);
+
+    BW8x8Block* blocks = (BW8x8Block*)malloc(totalBytes);
+    COM_SET_ZERO(blocks, totalBytes);
+    for (i32 i = 0; i < totalBlocks; ++i)
+    {
+        BW8x8Block* block = &blocks[i];
+        
+        i32 blockX = i % blocksX;
+        i32 blockY = i / blocksX;
+        
+        i32 firstPixelX = blockX * 8;
+        i32 firstPixelY = blockY * 8;
+
+        if (blockX == 15 && blockY == 15)
+        {
+            printf("First Pixel x/y: %d, %d\n", firstPixelX, firstPixelY);
+        }
+        // Go down bytes
+        for (i32 y = 0; y < 8; ++y)
+        {
+            i32 pixelY = firstPixelY + y;
+            u8 val = 0;
+            // Go across bits
+            for (i32 x = 0; x < 8; ++x)
+            {
+                i32 pixelX = firstPixelX + x;
+
+                // Sample colour in BMP
+                i32 sourcePixelIndex = pixelX + (pixelY * h->height);
+                u32 sourcePixel = h->ptrMemory[sourcePixelIndex];
+                u32_union* u32Bytes = (u32_union*)&sourcePixel;
+
+                val |= (1 << x);
+
+                if (blockX == 15 && blockY == 15)
+                {
+                    printf("Pixel: %d, %d: RGBA: %d, %d, %d, %d\n",
+                        pixelX, pixelY,
+                        u32Bytes->bytes[0],
+                        u32Bytes->bytes[1],
+                        u32Bytes->bytes[2],
+                        u32Bytes->bytes[3]
+                    );
+                }
+            }
+            block->pixels[y] = val;
+        }
+    }
+
+    // Print results
+
+    for (i32 i = 0; i < totalBlocks; ++i)
+    {
+        BW8x8Block* block = &blocks[i];
+        for (i32 y = 0; y < )
+    }
+
+    // for (i32 y = 0; y < blocksY; ++y)
+    // {
+    //     for (i32 x = 0; x < blocksX; ++x)
+    //     {
+    //         i32 index = x + (y * blocksY);
+    //         BW8x8Block* block = &blocks[index];
+    //         printf("%d, ", b)
+    //     }
+    // }
 }
