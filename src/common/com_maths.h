@@ -68,7 +68,7 @@ OpenGL uses column major, y/x matrices
 #define M4x4_W2 14
 #define M4x4_W3 15
 
-
+struct Point;
 struct Vec3;
 struct Vec4;
 struct M3x3;

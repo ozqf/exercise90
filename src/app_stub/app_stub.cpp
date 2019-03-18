@@ -81,7 +81,28 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 ***************************************/
 internal i32  g_isValid = 0;
 
-internal i32  App_Init()
+internal void GenTextureTests()
+{
+    BWImage img = {};
+    Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
+    Tex_CalcBWImageSizeFromBitmap(h, &img);
+
+	// Allocate memory for BW image header + blocks
+	// TODO: Clean this crap up urgh...
+	// > Calc required memory
+	// > Alloc
+	// > generate
+    i32 numBytes = sizeof(BWImage) + img.totalBytes;
+    u8* mem = (u8*)malloc(numBytes);
+    BWImage* ptrImg = (BWImage*)mem;
+	*ptrImg = img;
+    ptrImg->blocks = (BW8x8Block*)(mem + sizeof(BWImage));
+    COM_SET_ZERO(ptrImg->blocks, ptrImg->totalBytes);
+
+    Tex_GenerateBW(h, ptrImg);
+}
+
+internal i32 App_Init()
 {
     APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
     //App_Log("Test Log\n");
@@ -122,10 +143,7 @@ internal i32  App_Init()
         "\0"
     };
     Tex_LoadTextureList(textures);
-
-    Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
-    Tex_GenerateBW(h);
-    
+    GenTextureTests();
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
 

@@ -28,33 +28,45 @@ void COMTex_BMP2Internal(
 	}
 }
 
+i32 Tex_CalcInternalImageSizeFromBW(Texture2DHeader* h, BWImage* img);
 
-void Tex_GenerateBW(Texture2DHeader* h)
+i32 Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h, BWImage* img)
 {
-    
-    printf("  Gen BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
+    // validate source
+    if (!h->width || !h->height)
+    {
+        return COM_ERROR_BAD_ARGUMENT;
+    }
     i32 modWidth = h->width % 8;
     i32 modHeight = h->height % 8;
+    // Must be divisible by 8
     if (modWidth || modHeight)
     {
-        printf("  Cannot gen texture. width not divisible by 8\n");
-        return;
+        return COM_ERROR_BAD_ARGUMENT;
     }
-    i32 blocksX = h->width / 8;
-    i32 blocksY = h->height / 8;
-    i32 totalBlocks = blocksX * blocksY;
-    i32 totalBytes = totalBlocks * 8;
-    printf("  Total blocks %d (%d by %d) - %d bytes\n",
-        totalBlocks, blocksX, blocksY, totalBytes);
 
-    BW8x8Block* blocks = (BW8x8Block*)malloc(totalBytes);
-    COM_SET_ZERO(blocks, totalBytes);
+    printf("Init BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
+    *img = {};
+    img->numBlocksX = h->width / 8;
+    img->numBlocksY = h->height / 8;
+    img->totalBytes = (img->numBlocksX * img->numBlocksY) * 8;
+
+    printf("  Total blocks %d (%d by %d) - %d bytes\n",
+        (img->numBlocksX * img->numBlocksY), img->numBlocksX, img->numBlocksY, img->totalBytes);
+
+    return COM_ERROR_NONE;
+}
+
+void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
+{
+
+    i32 totalBlocks = img->numBlocksX * img->numBlocksY;
     for (i32 i = 0; i < totalBlocks; ++i)
     {
-        BW8x8Block* block = &blocks[i];
+        BW8x8Block* block = &img->blocks[i];
         
-        i32 blockX = i % blocksX;
-        i32 blockY = i / blocksX;
+        i32 blockX = i % img->numBlocksX;
+        i32 blockY = i / img->numBlocksY;
         
         i32 firstPixelX = blockX * 8;
         i32 firstPixelY = blockY * 8;
@@ -99,7 +111,7 @@ void Tex_GenerateBW(Texture2DHeader* h)
 
     for (i32 i = 0; i < totalBlocks; ++i)
     {
-        BW8x8Block* block = &blocks[i];
+        BW8x8Block* block = &img->blocks[i];
     }
 
     // for (i32 y = 0; y < blocksY; ++y)
