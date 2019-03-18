@@ -122,7 +122,9 @@ internal i32  App_Init()
         "\0"
     };
     Tex_LoadTextureList(textures);
-    Tex_GenerateBW(DEFAULT_CONSOLE_CHARSET_PATH);
+
+    Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
+    Tex_GenerateBW(h);
     
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));

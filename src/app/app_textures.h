@@ -8,4 +8,4 @@ void            Tex_DebugPrint();
 i32             Tex_GetTextureIndexByName(char* textureName);
 void            Tex_LoadTextureList(char** textures);
 i32             Tex_LoadAndBindTexture(char *filePath);
-void            Tex_GenerateBW(char* sourceTextureName);
+Texture2DHeader* Tex_GetTextureByName(char* textureName);

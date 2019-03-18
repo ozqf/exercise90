@@ -163,30 +163,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	tex->width = w;
 	tex->height = h;
 
-	// set to sentinel value
-	COM_SetMemory((u8*)pixels, targetImageBytes, 0xAB);
-
-	u32* destPixel = pixels;
-	u32* sourcePixel = sourcePixels;
-
-	// Convert colours to correct format
-	for (u32 i = 0; i < numPixels; ++i)
-	{
-		u8 alpha = (u8)(*sourcePixel);
-		u8 blue = (u8)(*sourcePixel >> 8);
-		u8 green = (u8)(*sourcePixel >> 16);
-		u8 red = (u8)(*sourcePixel >> 24);
-		u32_union u32Bytes;
-		u32Bytes.bytes[0] = red;
-		u32Bytes.bytes[1] = green;
-		u32Bytes.bytes[2] = blue;
-		u32Bytes.bytes[3] = alpha;
-		*destPixel = u32Bytes.value;
-
-		++destPixel;
-		++sourcePixel;
-	}
-
+	COMTex_BMP2Internal(sourcePixels, pixels, numPixels);
 }
 
 extern "C"

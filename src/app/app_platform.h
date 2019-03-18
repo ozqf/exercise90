@@ -79,7 +79,10 @@ internal i32  App_Init()
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
     g_platform.
+
+    ///////////////////////////////////////////////////////////////
     // Assets
+    ///////////////////////////////////////////////////////////////
     Tex_Init(&g_heap, g_platform);
     char** textures = 
     {
@@ -93,8 +96,17 @@ internal i32  App_Init()
     g_platform.Error("Bar", "Foo");
     APP_PRINT(64, "App load texture list\n");
     Tex_LoadTextureList(textures);
+
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
+
+    // proc gen textures here
+    //i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
+    //Texture2DHeader* h = &g_textureHandles.textureHeaders[texIndex];
+    Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
+    Tex_GenerateBW(h);
+
+    ///////////////////////////////////////////////////////////////
 
     // must be init AFTER textures as it needs teh console char sheet
     App_DebugInit();

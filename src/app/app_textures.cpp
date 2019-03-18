@@ -52,6 +52,12 @@ i32 Tex_GetTextureIndexByName(char* textureName)
     //return -1;
 }
 
+Texture2DHeader* Tex_GetTextureByName(char* textureName)
+{
+    i32 index = Tex_GetTextureIndexByName(textureName);
+    return &g_textureHandles.textureHeaders[index];
+}
+
 //////////////////////////////////////////////////////
 // Private
 //////////////////////////////////////////////////////
@@ -152,115 +158,4 @@ i32 Tex_RenderModuleReloaded()
 {
     Tex_BindAll();
     return COM_ERROR_NONE;
-}
-
-
-struct BW8x8Block
-{
-  // bit == x
-  // index == y
-  unsigned char pixels[8];
-};
-
-struct BWImage
-{
-  int numBlocksX;
-  int numBlocksY;
-  unsigned char *blocks;
-};
-
-internal i32 Tex_BWBlockIndex2BlockX(i32 blockIndex, i32 blocksWide)
-{
-    return blockIndex % blocksWide;
-}
-
-internal i32 Tex_BWBlockIndex2BlockY(i32 blockIndex, i32 blocksWide)
-{
-    return blockIndex / blocksWide;
-}
-
-void Tex_GenerateBW(char* sourceTextureName)
-{
-    i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
-    Texture2DHeader* h = &g_textureHandles.textureHeaders[texIndex];
-    printf("  Gen BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
-    i32 modWidth = h->width % 8;
-    i32 modHeight = h->height % 8;
-    if (modWidth || modHeight)
-    {
-        printf("  Cannot gen texture. width not divisible by 8\n");
-        return;
-    }
-    i32 blocksX = h->width / 8;
-    i32 blocksY = h->height / 8;
-    i32 totalBlocks = blocksX * blocksY;
-    i32 totalBytes = totalBlocks * 8;
-    printf("  Total blocks %d (%d by %d) - %d bytes\n",
-        totalBlocks, blocksX, blocksY, totalBytes);
-
-    BW8x8Block* blocks = (BW8x8Block*)malloc(totalBytes);
-    COM_SET_ZERO(blocks, totalBytes);
-    for (i32 i = 0; i < totalBlocks; ++i)
-    {
-        BW8x8Block* block = &blocks[i];
-        
-        i32 blockX = i % blocksX;
-        i32 blockY = i / blocksX;
-        
-        i32 firstPixelX = blockX * 8;
-        i32 firstPixelY = blockY * 8;
-
-        if (blockX == 15 && blockY == 15)
-        {
-            printf("First Pixel x/y: %d, %d\n", firstPixelX, firstPixelY);
-        }
-        // Go down bytes
-        for (i32 y = 0; y < 8; ++y)
-        {
-            i32 pixelY = firstPixelY + y;
-            u8 val = 0;
-            // Go across bits
-            for (i32 x = 0; x < 8; ++x)
-            {
-                i32 pixelX = firstPixelX + x;
-
-                // Sample colour in BMP
-                i32 sourcePixelIndex = pixelX + (pixelY * h->height);
-                u32 sourcePixel = h->ptrMemory[sourcePixelIndex];
-                u32_union* u32Bytes = (u32_union*)&sourcePixel;
-
-                val |= (1 << x);
-
-                if (blockX == 15 && blockY == 15)
-                {
-                    printf("Pixel: %d, %d: RGBA: %d, %d, %d, %d\n",
-                        pixelX, pixelY,
-                        u32Bytes->bytes[0],
-                        u32Bytes->bytes[1],
-                        u32Bytes->bytes[2],
-                        u32Bytes->bytes[3]
-                    );
-                }
-            }
-            block->pixels[y] = val;
-        }
-    }
-
-    // Print results
-
-    for (i32 i = 0; i < totalBlocks; ++i)
-    {
-        BW8x8Block* block = &blocks[i];
-        for (i32 y = 0; y < )
-    }
-
-    // for (i32 y = 0; y < blocksY; ++y)
-    // {
-    //     for (i32 x = 0; x < blocksX; ++x)
-    //     {
-    //         i32 index = x + (y * blocksY);
-    //         BW8x8Block* block = &blocks[index];
-    //         printf("%d, ", b)
-    //     }
-    // }
 }
