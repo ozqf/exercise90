@@ -30,21 +30,25 @@ void COMTex_BMP2Internal(
 
 i32 Tex_CalcInternalImageSizeFromBW(Texture2DHeader* h, BWImage* img);
 
-i32 Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h, BWImage* img)
+Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
 {
+    Point p;
     // validate source
     if (!h->width || !h->height)
     {
-        return COM_ERROR_BAD_ARGUMENT;
+        return {};
     }
     i32 modWidth = h->width % 8;
     i32 modHeight = h->height % 8;
     // Must be divisible by 8
     if (modWidth || modHeight)
     {
-        return COM_ERROR_BAD_ARGUMENT;
+        return {};
     }
-
+    p.x = h->width / 8;
+    p.y = h->height / 8;
+    return p;
+    /*
     printf("Init BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
     *img = {};
     img->numBlocksX = h->width / 8;
@@ -54,19 +58,19 @@ i32 Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h, BWImage* img)
     printf("  Total blocks %d (%d by %d) - %d bytes\n",
         (img->numBlocksX * img->numBlocksY), img->numBlocksX, img->numBlocksY, img->totalBytes);
 
-    return COM_ERROR_NONE;
+    return COM_ERROR_NONE;*/
 }
 
 void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
 {
 
-    i32 totalBlocks = img->numBlocksX * img->numBlocksY;
+    i32 totalBlocks = img->size.x * img->size.y;
     for (i32 i = 0; i < totalBlocks; ++i)
     {
         BW8x8Block* block = &img->blocks[i];
         
-        i32 blockX = i % img->numBlocksX;
-        i32 blockY = i / img->numBlocksY;
+        i32 blockX = i % img->size.x;
+        i32 blockY = i / img->size.y;
         
         i32 firstPixelX = blockX * 8;
         i32 firstPixelY = blockY * 8;

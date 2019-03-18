@@ -81,36 +81,35 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 ***************************************/
 internal i32  g_isValid = 0;
 
-internal void GenTextureTests()
+internal BWImage* GenTextureTests()
 {
-    BWImage img = {};
+    
     Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
-    Tex_CalcBWImageSizeFromBitmap(h, &img);
-
-	// Allocate memory for BW image header + blocks
-	// TODO: Clean this crap up urgh...
-	// > Calc required memory
+    Point blockDimensions = Tex_CalcBWImageSizeFromBitmap(h);
+    if (!blockDimensions.x || !blockDimensions.y)
+    {
+        return NULL;
+    }
+	
+    // > Calc required memory
 	// > Alloc
 	// > generate
-    i32 numBytes = sizeof(BWImage) + img.totalBytes;
+    i32 totalBlocks = blockDimensions.x * blockDimensions.y;
+    i32 numBytes = sizeof(BWImage) + (totalBlocks * sizeof(BW8x8Block));
     u8* mem = (u8*)malloc(numBytes);
-    BWImage* ptrImg = (BWImage*)mem;
-	*ptrImg = img;
-    ptrImg->blocks = (BW8x8Block*)(mem + sizeof(BWImage));
-    COM_SET_ZERO(ptrImg->blocks, ptrImg->totalBytes);
-
-    Tex_GenerateBW(h, ptrImg);
+    COM_ZeroMemory(mem, numBytes);
+    BWImage* img = (BWImage*)mem;
+    *img = {};
+    img->size = blockDimensions;
+    img->blocks = (BW8x8Block*)(mem + sizeof(BWImage));
+    Tex_GenerateBW(h, img);
+    return img;
 }
 
 internal i32 App_Init()
 {
     APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
-    //App_Log("Test Log\n");
-
-    //App_Win32_AttachErrorHandlers();
-
-    // Memory
-
+    
     // Acquiring an old 'heap object here. Various platform functions
     // still use it for loading assets so can't remove. Future allocations
     // should just use the basic malloc tracker until further notice

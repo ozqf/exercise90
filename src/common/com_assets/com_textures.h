@@ -11,13 +11,11 @@ struct BW8x8Block
 
 struct BWImage
 {
-  int numBlocksX;
-  int numBlocksY;
-  i32 totalBytes;
+  Point size;
   BW8x8Block* blocks;
 };
 
-i32       Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h, BWImage* img);
+Point     Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h);
 void      Tex_GenerateBW(Texture2DHeader* h, BWImage* dest);
 
 void      COMTex_BMP2Internal(
