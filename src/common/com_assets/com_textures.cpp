@@ -28,7 +28,44 @@ void COMTex_BMP2Internal(
 	}
 }
 
-i32 Tex_CalcInternalImageSizeFromBW(Texture2DHeader* h, BWImage* img);
+Point Tex_CalcInternalImageSizeFromBW(BWImage* img)
+{
+    Point p;
+    p.x = img->size.x * 8;
+    p.y = img->size.y * 8;
+    return p;
+}
+
+void Tex_BW2Bitmap(BWImage* img, Texture2DHeader* h)
+{
+    u32* firstPixel = h->ptrMemory;
+    i32 numBlocks = img->size.x * img->size.y;
+    for (i32 y = 0; y < img->size.y; ++y)
+    {
+        for (i32 x = 0; x < img->size.x; ++x)
+        {
+            i32 i = x + (y * img->size.x);
+            BW8x8Block* block = &img->blocks[i];
+            for (i32 byte = 0; byte < 8; ++byte)
+            {
+                for (i32 bit = 0; bit < 8; ++bit)
+                {
+                    u32 val = block->pixels[byte] & bit;
+                    i32 pixX = (x * 8) + bit;
+                    i32 pixY = (y * 8) + byte;
+                    u32 pixelIndex = pixX + (pixY * h->width);
+                    
+                    u32_union* u32Bytes = (u32_union*)&h->ptrMemory[pixelIndex];
+                    u32Bytes->bytes[0] = (u8)(255 * val);
+                    u32Bytes->bytes[1] = (u8)(255 * val);
+                    u32Bytes->bytes[2] = (u8)(255 * val);
+                    u32Bytes->bytes[3] = 255;
+                    
+                }
+            }
+        }
+    }
+}
 
 Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
 {
@@ -48,17 +85,6 @@ Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
     p.x = h->width / 8;
     p.y = h->height / 8;
     return p;
-    /*
-    printf("Init BW tex from %s\n Size %d, %d\n", h->name, h->width, h->height);
-    *img = {};
-    img->numBlocksX = h->width / 8;
-    img->numBlocksY = h->height / 8;
-    img->totalBytes = (img->numBlocksX * img->numBlocksY) * 8;
-
-    printf("  Total blocks %d (%d by %d) - %d bytes\n",
-        (img->numBlocksX * img->numBlocksY), img->numBlocksX, img->numBlocksY, img->totalBytes);
-
-    return COM_ERROR_NONE;*/
 }
 
 void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
@@ -128,4 +154,3 @@ void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
     //     }
     // }
 }
-

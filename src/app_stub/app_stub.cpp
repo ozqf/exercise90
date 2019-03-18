@@ -81,7 +81,7 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 ***************************************/
 internal i32  g_isValid = 0;
 
-internal BWImage* GenTextureTests()
+internal BWImage* EncodeBW()
 {
     
     Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
@@ -104,6 +104,21 @@ internal BWImage* GenTextureTests()
     img->blocks = (BW8x8Block*)(mem + sizeof(BWImage));
     Tex_GenerateBW(h, img);
     return img;
+}
+
+internal Texture2DHeader* DecodeBW(BWImage* img)
+{
+    Point size = Tex_CalcInternalImageSizeFromBW(img);
+    i32 numPixels = size.x * size.y;
+    i32 numBytes = sizeof(Texture2DHeader) + (numPixels * sizeof(u32));
+    printf("Decode tex %d by %d (%d bytes)\n", size.x, size.y, numBytes);
+    u8* mem = (u8*)malloc(numBytes);
+    Texture2DHeader* h = (Texture2DHeader*)mem;
+    h->width = size.x;
+    h->height = size.y;
+    h->ptrMemory = (u32*)(mem + sizeof(Texture2DHeader));
+    Tex_BW2Bitmap(img, h);
+    return h;
 }
 
 internal i32 App_Init()
@@ -142,7 +157,8 @@ internal i32 App_Init()
         "\0"
     };
     Tex_LoadTextureList(textures);
-    GenTextureTests();
+    BWImage* img = EncodeBW();
+    Texture2DHeader* tex = DecodeBW(img);
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
 
