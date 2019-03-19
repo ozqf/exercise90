@@ -8,4 +8,5 @@ void            Tex_DebugPrint();
 i32             Tex_GetTextureIndexByName(char* textureName);
 void            Tex_LoadTextureList(char** textures);
 i32             Tex_LoadAndBindTexture(char *filePath);
+void            Tex_BindTexture(Texture2DHeader *header);
 Texture2DHeader* Tex_GetTextureByName(char* textureName);

@@ -54,7 +54,8 @@ struct RenderListItem;
 // Scene container for render call each frame
 struct RenderScene;
 
-
+struct Texture2DHeader;
+typedef Texture2DHeader* Com_AllocateTexture(char* name, i32 width, i32 height);
 
 
 /****************************************************************
