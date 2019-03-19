@@ -34,6 +34,7 @@ struct AppPlatform
 	void (*SeekInFileFromStart)     (i32 fileId, u32 offset);
     i32 (*CloseFileForWriting)      (i32 fileId);
     void (*GetDateTime)             (DateTime* data);
+    i32 (*SaveBMP)                  (Texture2DHeader* header);
 
     // Input
     void (*SetMouseMode)            (enum ZMouseMode mode);

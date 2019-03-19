@@ -83,10 +83,11 @@ struct MeshData
     f32* normals;    
 };
 
+#define TEXTURE2D_MAX_NAME_LENGTH 31
 struct Texture2DHeader
 {
 	i32 index;
-	char name[32];
+	char name[(TEXTURE2D_MAX_NAME_LENGTH + 1)];
 	i32 width;
 	i32 height;
 	u32 *ptrMemory;

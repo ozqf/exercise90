@@ -109,16 +109,16 @@ com_internal void COM_CopyStringCount(const char *source, char *target, i32 coun
     *target = 0;
 }
 
-com_internal i32 COM_StrLenA(const char* str)
-{
-    i32 result = 0;
-    while (*str)
-    {
-        ++str;
-        ++result;
-    }
-    return result;
-}
+// com_internal i32 COM_StrLenA(const char* str)
+// {
+//     i32 result = 0;
+//     while (*str)
+//     {
+//         ++str;
+//         ++result;
+//     }
+//     return result;
+// }
 
 com_internal i32 COM_StrLen(const char* str)
 {

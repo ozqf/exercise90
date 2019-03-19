@@ -167,6 +167,8 @@ void Win32_InitPlatformInterface()
     platInterface.GetBaseDirectoryName = Platform_GetBaseDirectoryName;
     platInterface.GetDateTime = Platform_GetDateTime;
 
+    platInterface.SaveBMP = Win32_SaveBMP;
+
     platInterface.WriteTextCommand = Win32_EnqueueTextCommand;
 
     // Network setup

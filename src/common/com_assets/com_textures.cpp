@@ -28,6 +28,15 @@ void COMTex_BMP2Internal(
 	}
 }
 
+void Tex_BWSetAllPixels(BW8x8Block* block)
+{
+   for (i32 i = 0; i < 8; ++i)
+   {
+       block->pixels[i] = 255;
+   }
+}
+
+
 Point Tex_CalcInternalImageSizeFromBW(BWImage* img)
 {
     Point p;

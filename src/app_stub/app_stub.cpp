@@ -81,6 +81,27 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 ***************************************/
 internal i32  g_isValid = 0;
 
+internal i32 GenAndBindTestTexture()
+{
+    Point size = { 2, 2 };
+    i32 totalBlocks = size.x * size.y;
+    i32 numBytes = sizeof(BWImage) + (totalBlocks * sizeof(BW8x8Block));
+    u8* mem = (u8*)malloc(numBytes);
+    COM_ZeroMemory(mem, numBytes);
+    BWImage* img = (BWImage*)mem;
+    *img = {};
+    img->size = size;
+    img->blocks = (BW8x8Block*)(mem + sizeof(BWImage));
+
+    Tex_BWSetAllPixels(&img->blocks[0]);
+    Tex_BWSetAllPixels(&img->blocks[3]);
+
+    
+    //Texture2DHeader h;
+
+    return 0;
+}
+
 internal BWImage* EncodeBW()
 {
     
@@ -157,8 +178,11 @@ internal i32 App_Init()
         "\0"
     };
     Tex_LoadTextureList(textures);
+
     BWImage* img = EncodeBW();
     Texture2DHeader* tex = DecodeBW(img);
+    g_platform.SaveBMP(tex);
+
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
 

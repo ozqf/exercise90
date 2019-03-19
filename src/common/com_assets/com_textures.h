@@ -18,6 +18,7 @@ struct BWImage
 Point     Tex_CalcInternalImageSizeFromBW(BWImage* img);
 Point     Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h);
 void      Tex_BW2Bitmap(BWImage* img, Texture2DHeader* h);
+void      Tex_BWSetAllPixels(BW8x8Block* block);
 void      Tex_GenerateBW(Texture2DHeader* h, BWImage* dest);
 void      COMTex_BMP2Internal(
             u32* sourcePixels,

@@ -119,8 +119,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
     > Alloc space on heap
     > Read over file in heap block
     */
-
-	u8* fileOrigin = (u8*)mem.ptrMemory;
+    u8* fileOrigin = (u8*)mem.ptrMemory;
 	u8* reader = fileOrigin;
 
 	// Read file header
@@ -140,7 +139,7 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	//fseek(f, fileHeaderSize, SEEK_SET);
 	//fread_s((void*)&bmpHeader, bmpHeaderSize, 1, bmpHeaderSize, f);
 	COM_CopyMemory(reader, (u8*)&bmpHeader, sizeof(WINNTBITMAPHEADER));
-
+	 
 	i32 w = bmpHeader.Width;
 	i32 h = bmpHeader.Height;
 	u32 numPixels = w * h;
@@ -164,6 +163,25 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	tex->height = h;
 
 	COMTex_BMP2Internal(sourcePixels, pixels, numPixels);
+}
+
+extern "C"
+i32 Win32_SaveBMP(Texture2DHeader* tex)
+{
+	if (tex == NULL || tex->ptrMemory == NULL)
+	{
+		return COM_ERROR_BAD_ARGUMENT;
+	}
+	printf("PLAT: Save BMP\n");
+
+	WINBMPFILEHEADER fileHeader = {};
+
+	WINNTBITMAPHEADER bmpHeader = {};
+	bmpHeader.BitsPerPixel = 32;
+	bmpHeader.Width = tex->width;
+	bmpHeader.Height = tex->height;
+
+	return COM_ERROR_NONE;
 }
 
 extern "C"

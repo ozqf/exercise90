@@ -20,6 +20,10 @@ internal AppPlatform g_platform;
 internal Heap* g_heap;
 internal TextureHandles g_textureHandles;
 
+
+internal i32 Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref);
+
+
 //////////////////////////////////////////////////////
 // Public functions
 //////////////////////////////////////////////////////
@@ -58,6 +62,40 @@ Texture2DHeader* Tex_GetTextureByName(char* textureName)
     return &g_textureHandles.textureHeaders[index];
 }
 
+/**
+ * Upload a texture to the GPU
+ */
+void Tex_BindTexture(Texture2DHeader *header)
+{
+    g_platform.BindTexture(
+        header->ptrMemory,
+        header->width,
+        header->height,
+        header->index);
+    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s bound to index %d\n",
+        header->name, header->index);
+}
+
+Texture2DHeader* Tex_AllocateTexture(char* name, i32 width, i32 height)
+{
+    Assert(width > 0)
+    Assert(height > 0)
+    Assert(name)
+    Assert(COM_StrLen(name) < TEXTURE2D_MAX_NAME_LENGTH)
+    i32 bytesForPixels = sizeof(u32) * (width * height);
+    i32 totalBytes = bytesForPixels + sizeof(Texture2DHeader);
+    BlockRef ref;
+    Heap_Allocate(g_heap, &ref, totalBytes, name, 1);
+    Texture2DHeader* tex = (Texture2DHeader*)ref.ptrMemory;
+    COM_CopyStringLimited(name, tex->name, TEXTURE2D_MAX_NAME_LENGTH);
+    u32* pixels = (u32*)((u8*)ref.ptrMemory + sizeof(Texture2DHeader));
+    tex->ptrMemory = pixels;
+    tex->width = width;
+    tex->height = height;
+    Tex_RegisterTexture(tex, &ref);
+    return tex;
+}
+
 //////////////////////////////////////////////////////
 // Private
 //////////////////////////////////////////////////////
@@ -67,8 +105,7 @@ Texture2DHeader* Tex_GetTextureByName(char* textureName)
  * > header information will be copied and updated
  * > BlockRef should be a Heap block for a Texture2DHeader!
  */
-#if 1
-internal void Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
+internal i32 Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
 {
     i32 index = g_textureHandles.numTextures;
     header->index = index;
@@ -82,20 +119,7 @@ internal void Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
         g_textureHandles.blockRefs[index] = {};
     }
     g_textureHandles.numTextures++;
-}
-#endif
-/**
- * Upload a texture to the GPU
- */
-internal void Tex_BindTexture(Texture2DHeader *header)
-{
-    g_platform.BindTexture(
-        header->ptrMemory,
-        header->width,
-        header->height,
-        header->index);
-    COM_CALL_PRINT(g_platform.Log, 512, "APP tex %s bound to index %d\n",
-        header->name, header->index);
+    return index;
 }
 
 /**
