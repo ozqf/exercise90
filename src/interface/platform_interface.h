@@ -24,6 +24,7 @@ struct AppPlatform
     //i32 (*LoadDebugTextures)(Heap* heap);
     u8 (*LoadFileIntoHeap)          (Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure);
     void (*LoadTexture)             (Heap* heap, BlockRef* destRef, char* path);
+    Texture2DHeader* (*LoadTextureB) (Com_AllocateTexture callback, char* path);
     void (*BindTexture)             (void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
     // Need to know the base directory for writing files
     i32 (*GetBaseDirectoryName)     (char* buffer, i32 bufferSize);

@@ -62,6 +62,11 @@ void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 	Platform_LoadFileIntoHeap(heap, result, path, true);
 }
 
+Texture2DHeader* LoadTextureB (Com_AllocateTexture callback, char* path)
+{
+    return Win32_LoadTextureB(callback, path);
+}
+
 void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
 {
     if (g_rendererLink.moduleState == 1)
@@ -149,6 +154,7 @@ void Win32_InitPlatformInterface()
     platInterface.LoadFileIntoHeap = Platform_LoadFileIntoHeap;
     //platInterface.LoadDebugTextures = Platform_LoadDebugTextures;
     platInterface.LoadTexture = Platform_LoadTexture;
+    platInterface.LoadTextureB = Win32_LoadTextureB;
     platInterface.BindTexture = Platform_BindTexture;
     
     platInterface.SetMouseMode = Win32_SetMouseMode;

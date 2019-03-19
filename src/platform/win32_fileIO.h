@@ -204,6 +204,12 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
 }
 
 extern "C"
+Texture2DHeader* Win32_LoadTextureB (Com_AllocateTexture callback, char* path)
+{
+	return NULL;
+}
+
+extern "C"
 u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure)
 {
 	AssertAlways(destRef != NULL);
