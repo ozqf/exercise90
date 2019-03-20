@@ -2,6 +2,12 @@
 
 #include "com_textures.h"
 
+void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
+{
+	i32 bytesForPixels = sizeof(u32) * (tex->width * tex->height);
+	u8 pattern[4] = { col.r, col.g, col.b, col.a };
+	COM_SetMemoryPattern((u8*)tex->ptrMemory, bytesForPixels, pattern, 4);
+}
 
 void COMTex_BMP2Internal(
     u32* sourcePixels,

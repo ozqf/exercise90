@@ -10,3 +10,4 @@ void            Tex_LoadTextureList(char** textures);
 i32             Tex_LoadAndBindTexture(char *filePath);
 void            Tex_BindTexture(Texture2DHeader *header);
 Texture2DHeader* Tex_GetTextureByName(char* textureName);
+Texture2DHeader* Tex_AllocateTexture(char* name, i32 width, i32 height);

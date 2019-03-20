@@ -21,9 +21,12 @@ struct AppPlatform
     void (*Free)                    (MemoryBlock *mem);
     
     // Loading assets
-    //i32 (*LoadDebugTextures)(Heap* heap);
+    u32 (*MeasureFile)              (char* fileName);
+    ErrorCode (*LoadFileIntoMemory) (char* fileName, u8* destination, u32 capacity);
+
+    // Old Asset loading
     u8 (*LoadFileIntoHeap)          (Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure);
-    void (*LoadTexture)             (Heap* heap, BlockRef* destRef, char* path);
+    //void (*LoadTexture)             (Heap* heap, BlockRef* destRef, char* path);
     Texture2DHeader* (*LoadTextureB) (Com_AllocateTexture callback, char* path);
     void (*BindTexture)             (void* rgbaPixels, u32 width, u32 height, u32 textureIndex);
     // Need to know the base directory for writing files

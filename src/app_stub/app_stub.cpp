@@ -21,6 +21,8 @@ internal MallocList g_mallocs;
 internal RenderScene g_worldScene;
 internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
+internal i32 g_cubeTextureIndex = 0;
+
 // comment out to disable logging/printing by app layer
 #define APP_FULL_LOGGING
 
@@ -83,6 +85,7 @@ internal i32  g_isValid = 0;
 
 internal i32 GenAndBindTestTexture()
 {
+    /*
     Point size = { 2, 2 };
     i32 totalBlocks = size.x * size.y;
     i32 numBytes = sizeof(BWImage) + (totalBlocks * sizeof(BW8x8Block));
@@ -95,11 +98,10 @@ internal i32 GenAndBindTestTexture()
 
     Tex_BWSetAllPixels(&img->blocks[0]);
     Tex_BWSetAllPixels(&img->blocks[3]);
-
-    
-    //Texture2DHeader h;
-
-    return 0;
+    */
+    Texture2DHeader* h = Tex_AllocateTexture("test.bmp", 4, 4);
+    Tex_BindTexture(h);
+    return h->index;
 }
 
 internal BWImage* EncodeBW()
@@ -178,10 +180,14 @@ internal i32 App_Init()
         "\0"
     };
     Tex_LoadTextureList(textures);
-
-    BWImage* img = EncodeBW();
-    Texture2DHeader* tex = DecodeBW(img);
-    g_platform.SaveBMP(tex);
+    
+    char* texName = "textures\\white_bordered.bmp";
+    //char* texName = "textures\\W33_5.bmp";
+    g_cubeTextureIndex = Tex_GetTextureIndexByName(texName);
+    g_cubeTextureIndex = GenAndBindTestTexture();
+    //BWImage* img = EncodeBW();
+    //Texture2DHeader* tex = DecodeBW(img);
+    //g_platform.SaveBMP(tex);
 
     g_platform.SetDebugInputTextureIndex(
         Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
@@ -192,6 +198,12 @@ internal i32 App_Init()
     g_worldScene.cameraTransform.pos.z = 8;
     g_worldScene.cameraTransform.pos.y += 12;
     Transform_SetRotation(&g_worldScene.cameraTransform, -(67.5f    * DEG2RAD), 0, 0);
+
+    //char* sizeTestName = "\\sounds\\Shield_Pickup.wav";
+    char* sizeTestName = "\\gamex86.dll";
+    u32 sizeTest = g_platform.MeasureFile(sizeTestName);
+    APP_PRINT(256, "Size of %s: %d\n", sizeTestName, sizeTest);
+
 
     return COM_ERROR_NONE;
 }
@@ -232,9 +244,7 @@ internal void App_Update(PlatformTime* time)
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
-    char* texName = "textures\\white_bordered.bmp";
-    //char* texName = "textures\\W33_5.bmp";
-    i32 texIndex = Tex_GetTextureIndexByName(texName);
+    i32 texIndex = g_cubeTextureIndex;
     MeshData* cube = COM_GetCubeMesh();
     
     // Reset scene
@@ -251,7 +261,8 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     // Add render object
     RendObj obj = {};
-    RendObj_SetAsMesh(&obj, *cube, { 1, 0, 0, 1 }, texIndex);
+    //RendObj_SetAsMesh(&obj, *cube, { 1, 0, 0, 1 }, texIndex);
+    RendObj_SetAsMesh(&obj, *cube, { 1, 1, 1, 1 }, texIndex);
     TRANSFORM_CREATE(modelTransform);
     //t.pos.z = -2;
     #if 1

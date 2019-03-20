@@ -62,7 +62,7 @@ void Platform_LoadTexture(Heap* heap, BlockRef* result, char* path)
 	Platform_LoadFileIntoHeap(heap, result, path, true);
 }
 
-Texture2DHeader* LoadTextureB (Com_AllocateTexture callback, char* path)
+Texture2DHeader* LoadTextureB(Com_AllocateTexture callback, char* path)
 {
     return Win32_LoadTextureB(callback, path);
 }
@@ -151,9 +151,10 @@ void Win32_InitPlatformInterface()
 
     platInterface.Malloc = Platform_Alloc;
     platInterface.Free = Platform_Free;
+    platInterface.MeasureFile = Win32_MeasureFile;
     platInterface.LoadFileIntoHeap = Platform_LoadFileIntoHeap;
     //platInterface.LoadDebugTextures = Platform_LoadDebugTextures;
-    platInterface.LoadTexture = Platform_LoadTexture;
+    //platInterface.LoadTexture = Platform_LoadTexture;
     platInterface.LoadTextureB = Win32_LoadTextureB;
     platInterface.BindTexture = Platform_BindTexture;
     

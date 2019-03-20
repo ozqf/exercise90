@@ -110,6 +110,24 @@ bool32 Win32_WriteEntireFile(char *fileName, u32 memorySize, void *memory)
  * PRIMITIVE FILE I/O B version
 /*********************************************************************/
 
+void Win32_ReadBMPHeaders(
+	WINBMPFILEHEADER* fileHeader,
+	WINNTBITMAPHEADER* bmpHeader,
+	MemoryBlock mem)
+{
+	u8* fileOrigin = (u8*)mem.ptrMemory;
+	u8* reader = fileOrigin;
+
+	// Read file header
+	i32 fileHeaderSize = sizeof(WINBMPFILEHEADER);
+	reader += COM_CopyMemory(reader, (u8*)fileHeader, sizeof(WINBMPFILEHEADER));
+	AssertAlways(fileHeader->FileType == BMP_FILE_TYPE);
+
+	// Read bitmap header
+	i32 bmpHeaderSize = sizeof(WINNTBITMAPHEADER);
+	COM_CopyMemory(reader, (u8*)bmpHeader, sizeof(WINNTBITMAPHEADER));
+}
+
 extern "C"
 void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePath)
 {
@@ -119,27 +137,9 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
     > Alloc space on heap
     > Read over file in heap block
     */
-    u8* fileOrigin = (u8*)mem.ptrMemory;
-	u8* reader = fileOrigin;
-
-	// Read file header
 	WINBMPFILEHEADER fileHeader;
-	i32 fileHeaderSize = sizeof(fileHeader);
-	reader += COM_CopyMemory(reader, (u8*)&fileHeader, sizeof(WINBMPFILEHEADER));
-	//fread_s((void*)&fileHeader, fileHeaderSize, 1, fileHeaderSize, f);
-	AssertAlways(fileHeader.FileType == BMP_FILE_TYPE);
-
-
-	// Read bitmap header
 	WINNTBITMAPHEADER bmpHeader;
-	i32 bmpHeaderSize = sizeof(bmpHeader);
-
-	//reader = fileOrigin + fileHeader.
-
-	//fseek(f, fileHeaderSize, SEEK_SET);
-	//fread_s((void*)&bmpHeader, bmpHeaderSize, 1, bmpHeaderSize, f);
-	COM_CopyMemory(reader, (u8*)&bmpHeader, sizeof(WINNTBITMAPHEADER));
-	 
+	Win32_ReadBMPHeaders(&fileHeader, &bmpHeader, mem);
 	i32 w = bmpHeader.Width;
 	i32 h = bmpHeader.Height;
 	u32 numPixels = w * h;
@@ -151,6 +151,8 @@ void Win32_LoadBMP(Heap* heap, BlockRef* destRef, MemoryBlock mem, char* filePat
 	u32 targetImageBytes = sizeof(u32) * numPixels;
 	u32 targetSize = sizeof(Texture2DHeader) + targetImageBytes;
 
+	u8* fileOrigin = (u8*)mem.ptrMemory;
+	u8* reader = fileOrigin;
 	u32* sourcePixels = (u32*)(fileOrigin + fileHeader.BitmapOffset);
 
 	// Allocate space for results on Heap
@@ -204,9 +206,84 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
 }
 
 extern "C"
-Texture2DHeader* Win32_LoadTextureB (Com_AllocateTexture callback, char* path)
+Texture2DHeader* Win32_LoadTextureB(Com_AllocateTexture callback, char* fileName)
 {
-	return NULL;
+	DataFileEntryReader r = {};
+	if (Win32_FindDataFileEntry(fileName, &r) == 0)
+	{
+		// file not found in data files... abort
+		// TODO: Read from file system
+		return NULL;
+	}
+	if (!COM_CheckForFileExtension((char*)r.entry.fileName, ".bmp"))
+	{
+		// Not a bmp file
+		return NULL;
+	}
+
+	// Read file into staging area
+	MemoryBlock mem = {};
+	mem.size = r.entry.size;
+	void* ptr = malloc(mem.size);
+	mem.ptrMemory = ptr;
+	// mem.ptrMemory = malloc(mem.size);
+	fseek(r.handle, r.entry.offset, SEEK_SET);
+	fread(mem.ptrMemory, mem.size, 1, r.handle);
+
+	WINBMPFILEHEADER fileHeader;
+	WINNTBITMAPHEADER bmpHeader;
+	Win32_ReadBMPHeaders(&fileHeader, &bmpHeader, mem);
+	i32 w = bmpHeader.Width;
+	i32 h = bmpHeader.Height;
+	u32 numPixels = w * h;
+
+	// Measure required size and allocate
+	Texture2DHeader* tex = callback(fileName, w, h);
+	if (!tex) { return NULL; }
+
+	return tex;
+}
+
+extern "C"
+u32 Win32_MeasureFile(char* fileName)
+{
+	/*
+	> Find file in .dat, find size
+	> Prepare block on heap
+	> read file contents into heap block
+	> close
+	*/
+
+	DataFileEntryReader r = {};
+	if (Win32_FindDataFileEntry(fileName, &r) == 0)
+	{
+		// Read directly
+		char buf[256];
+		sprintf_s(buf, 256, "%s\\%s", g_baseDirectoryName, fileName);
+		FILE* f;
+		fopen_s(&f, buf, "rb");
+
+		if (f == NULL)
+		{
+			PLAT_PRINT(512, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+			return 0;
+		}
+
+		fseek(f, 0, SEEK_END);
+		u32 end = ftell(f);
+		fclose(f);
+		return end;
+	}
+	else
+	{
+		return r.entry.size;
+	}
+}
+
+extern "C"
+ErrorCode LoadFileIntoMemory(char* fileName, u8* destination, u32 capacity)
+{
+	return COM_ERROR_NONE;
 }
 
 extern "C"

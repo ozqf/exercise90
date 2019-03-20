@@ -92,6 +92,17 @@ Texture2DHeader* Tex_AllocateTexture(char* name, i32 width, i32 height)
     tex->ptrMemory = pixels;
     tex->width = width;
     tex->height = height;
+
+    // Set All Magenta
+	ColourU32 col;
+	col.r = 255;
+	col.g = 0;
+	col.b = 255;
+	col.a = 255;
+	COMTex_SetAllPixels(tex, col);
+    //u8 pattern[4] = { 255, 0, 255, 255 };
+    //COM_SetMemoryPattern((u8*)tex->ptrMemory, bytesForPixels, pattern, 4);
+	
     Tex_RegisterTexture(tex, &ref);
     return tex;
 }
@@ -128,7 +139,7 @@ internal i32 Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
 internal BlockRef Tex_LoadTexture(char *filePath)
 {
     BlockRef ref = {};
-    g_platform.LoadTexture(g_heap, &ref, filePath);
+    g_platform.LoadFileIntoHeap(g_heap, &ref, filePath, 0);
     return ref;
 }
 

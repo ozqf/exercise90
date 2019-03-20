@@ -40,6 +40,7 @@
 #define REND_PRIMITIVE_TYPE_AABB 2
 
 union Colour;
+union ColourU32;
 struct RendObj_Primitive;
 struct RendObj_Billboard;
 struct RendObj_Sprite;
@@ -72,6 +73,20 @@ union Colour
     struct
 	{
 		f32 r, g, b, a;
+	};
+};
+
+union ColourU32
+{
+	u32 value;
+	u8 array[4];
+	struct
+	{
+		u8 red, green, blue, alpha;
+	};
+    struct
+	{
+		u8 r, g, b, a;
 	};
 };
 
