@@ -78,7 +78,11 @@ union Colour
 
 union ColourU32
 {
-	u32 value;
+    struct
+    {
+        u32 value;
+    };
+    
 	u8 array[4];
 	struct
 	{

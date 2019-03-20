@@ -9,6 +9,77 @@ void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
 	COM_SetMemoryPattern((u8*)tex->ptrMemory, bytesForPixels, pattern, 4);
 }
 
+
+/*
+Single pixel line, uses integers.
+Not the same as the grid traversing algorithm used by Ray traces for collisions
+ */
+void TexDraw_Line(Texture2DHeader* tex, ColourU32 col, i32 x0, i32 y0, i32 x1, i32 y1)
+{
+	//y0 -= 20;
+	//y1 -= 20;
+	i32 dx = x1 - x0;
+	if (dx < 0) { dx *= -1; }	//abs
+	i32 dy = y1 - y0;
+	if (dy < 0) { dy *= -1; }	//abs
+	i32 plotX = x0;
+	i32 plotY = y0;
+	i32 n = 1 + dx + dy;
+	i32 x_inc;
+	i32 y_inc;
+	if (x1 > x0)
+	{
+		x_inc = 1;
+	}
+	else
+	{
+		x_inc = -1;
+	}
+	
+	if (y1 > y0)
+	{
+		y_inc = 1;
+	}
+	else
+	{
+		y_inc = -1;
+	}
+	i32 error = dx - dy;
+	dx *= 2;
+	dy *= 2;
+	
+	for (; n > 0; --n)
+	{
+		tex->ptrMemory[plotX + (plotY * tex->width)] = col.value;
+		
+		if (error > 0)
+		{
+			plotX += x_inc;
+			error -= dy;
+		}
+		else
+		{
+			plotY += y_inc;
+			error += dx;
+		}
+	}
+}
+
+void TexDraw_Outline(Texture2DHeader* tex, ColourU32 col)
+{
+    i32 x = 0;
+    i32 y = 0;
+    i32 end = tex->width;
+    // 
+    for (; x < end; ++x)
+    {
+        i32 index = x + (y * tex->width);
+        u32* pixel = &tex->ptrMemory[index];
+        *pixel = col.value;
+    }
+    y = tex->height - 1;
+}
+
 void COMTex_BMP2Internal(
     u32* sourcePixels,
     u32* destPixels,
