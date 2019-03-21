@@ -100,20 +100,18 @@ internal i32 GenAndBindTestTexture()
     Tex_BWSetAllPixels(&img->blocks[3]);
     */
     Texture2DHeader* h = Tex_AllocateTexture("test.bmp", 8, 8);
-    ColourU32 col;
-    col.r = 0;
-    col.g = 0;
-    col.b = 0;
-    col.a = 255;
+    ColourU32 col = { 0, 0, 0, 255 };
     //TexDraw_Outline(h, col);
-
+    TexDraw_FillRect(h, { 1, 1 }, { 6, 6}, { 0, 255, 0, 255 });
+    //TexDraw_FillRect(h, { -10, -10 }, { 20, 20 }, { 0, 255, 255, 255 });
+    #if 1
     TexDraw_Line(
-        h, col, 0, 0, h->width - 1, h->height - 1
+        h, { 255, 0, 0, 255 }, 0, 0, h->width - 1, h->height - 1
     );
     TexDraw_Line(
-        h, col, h->width - 1, 0, 0, h->height - 1
+        h, { 0, 0, 255, 255 }, h->width - 1, 0, 0, h->height - 1
     );
-
+    #endif
     Tex_BindTexture(h);
     return h->index;
 }

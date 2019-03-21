@@ -9,6 +9,25 @@ void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
 	COM_SetMemoryPattern((u8*)tex->ptrMemory, bytesForPixels, pattern, 4);
 }
 
+void TexDraw_FillRect(Texture2DHeader* tex, Point topLeft, Point size, ColourU32 col)
+{
+    i32 endX = size.x + topLeft.x;
+    i32 endY = size.y + topLeft.y;
+    if (topLeft.x < 0) { topLeft.x = 0; }
+    if (topLeft.y < 0) { topLeft.y = 0; }
+    if (endX <  tex->width) { endX = tex->width; }
+    if (endY <  tex->height) { endY = tex->height; }
+    printf("Fill rect %d, %d size %d, %d\n",
+        topLeft.x, topLeft.y, endX, endY
+    );
+    for (i32 y = topLeft.y; y < endY; ++y)
+    {
+        for (i32 x = topLeft.x; x < endX; ++x)
+        {
+            tex->ptrMemory[x + (y * tex->width)] = col.value;
+        }
+    }
+}
 
 /*
 Single pixel line, uses integers.

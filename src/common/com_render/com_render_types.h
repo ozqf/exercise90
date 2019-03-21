@@ -78,12 +78,7 @@ union Colour
 
 union ColourU32
 {
-    struct
-    {
-        u32 value;
-    };
-    
-	u8 array[4];
+    u8 array[4];
 	struct
 	{
 		u8 red, green, blue, alpha;
@@ -92,6 +87,10 @@ union ColourU32
 	{
 		u8 r, g, b, a;
 	};
+    struct
+    {
+        u32 value;
+    };
 };
 
 struct MeshData
