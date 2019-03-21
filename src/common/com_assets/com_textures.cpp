@@ -2,6 +2,32 @@
 
 #include "com_textures.h"
 
+// Convert a byte (0...255) to float (0...1)
+f32 COM_ByteToFloat(u8 byte)
+{
+    return (f32)byte / (f32)255;
+}
+
+// Convert a float (0...1) to byte (0...255)
+u8 COM_FloatToByte(f32 f)
+{
+    return (u8)(255 * f);
+}
+
+void TexDraw_Gradient(Texture2DHeader* tex)
+{
+    for (i32 y = 0; y < tex->height; ++y)
+    {
+        for (i32 x = 0; x < tex->width; ++x)
+        {
+            f32 lerp = (f32)x / (f32)tex->width;
+            ColourU32* pixel = (ColourU32*)&tex->ptrMemory[x + (y * tex->width)];
+            u8 value = COM_FloatToByte(lerp);
+            *pixel = { value,  value, value, 255 };
+        }
+    }
+}
+
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
 {
 	i32 bytesForPixels = sizeof(u32) * (tex->width * tex->height);
