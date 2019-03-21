@@ -99,12 +99,12 @@ internal i32 GenAndBindTestTexture()
     Tex_BWSetAllPixels(&img->blocks[0]);
     Tex_BWSetAllPixels(&img->blocks[3]);
     */
-    Texture2DHeader* h = Tex_AllocateTexture("test.bmp", 8, 8);
+    Texture2DHeader* h = Tex_AllocateTexture("test.bmp", 256, 256);
     ColourU32 col = { 0, 0, 0, 255 };
     //TexDraw_Outline(h, col);
     //TexDraw_FillRect(h, { 1, 1 }, { 6, 6}, { 0, 255, 0, 255 });
     //TexDraw_FillRect(h, { -10, -10 }, { 20, 20 }, { 0, 255, 255, 255 });
-    #if 1
+    #if 0
     TexDraw_Line(
         h, { 255, 0, 0, 255 }, 0, 0, h->width - 1, h->height - 1
     );
@@ -112,7 +112,7 @@ internal i32 GenAndBindTestTexture()
         h, { 0, 0, 255, 255 }, h->width - 1, 0, 0, h->height - 1
     );
     #endif
-    TexDraw_Gradient(h);
+    TexDraw_Gradient(h, 1);
     Tex_BindTexture(h);
     return h->index;
 }
@@ -267,8 +267,8 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
 		90, RENDER_PROJECTION_MODE_3D, 8);
     #if 1
-    g_worldScene.cameraTransform.pos.z = 1.5f;
-    g_worldScene.cameraTransform.pos.y = 1.5f;
+    g_worldScene.cameraTransform.pos.z = 1;
+    g_worldScene.cameraTransform.pos.y = 1;
     Transform_SetRotation(&g_worldScene.cameraTransform, -(45    * DEG2RAD), 0, 0);
     #endif
 

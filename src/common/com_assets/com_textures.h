@@ -16,7 +16,7 @@ struct BWImage
 };
 
 void    TexDraw_Outline(Texture2DHeader* tex, ColourU32 col);
-void TexDraw_Gradient(Texture2DHeader* tex);
+void    TexDraw_Gradient(Texture2DHeader* tex, i32 type);
 void    TexDraw_FillRect(
           Texture2DHeader* tex, Point topLeft, Point size, ColourU32 col);
 void    TexDraw_Line(

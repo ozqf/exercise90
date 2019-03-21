@@ -14,18 +14,41 @@ u8 COM_FloatToByte(f32 f)
     return (u8)(255 * f);
 }
 
-void TexDraw_Gradient(Texture2DHeader* tex)
+#define BEGIN_PIXEL_FUNCTION(functionName) \
+void TexDraw_##functionName##(Texture2DHeader* tex) \
+{ \
+    for (i32 y = 0; y < tex->height; ++y) \
+    { \
+        for (i32 x = 0; x < tex->width; ++x) \
+        { \
+            f32 lerpX = (f32)x / (f32)tex->width; \
+            f32 lerpY = (f32)y / (f32)tex->width; \
+            ColourU32* pixel = (ColourU32*)&tex->ptrMemory[x + (y * tex->width)]; \
+            f32 result;
+
+#define END_PIXEL_FUNCTION \
+u8 value = COM_FloatToByte(result); \
+*pixel = { value,  value, value, 255 }; \
+} } }
+
+BEGIN_PIXEL_FUNCTION(BasicGradient)
+result = lerpX;
+END_PIXEL_FUNCTION
+
+BEGIN_PIXEL_FUNCTION(CrudeSineGradient)
+//f32 f = sinf(lerpX * 10);
+f32 f = (1 + sinf(lerpX * 10)) / 2;
+result = f;
+END_PIXEL_FUNCTION
+
+BEGIN_PIXEL_FUNCTION(SineGradient)
+result = lerpX * lerpY;
+END_PIXEL_FUNCTION
+
+void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
 {
-    for (i32 y = 0; y < tex->height; ++y)
-    {
-        for (i32 x = 0; x < tex->width; ++x)
-        {
-            f32 lerp = (f32)x / (f32)tex->width;
-            ColourU32* pixel = (ColourU32*)&tex->ptrMemory[x + (y * tex->width)];
-            u8 value = COM_FloatToByte(lerp);
-            *pixel = { value,  value, value, 255 };
-        }
-    }
+    //TexDraw_BasicGradient(tex);
+    TexDraw_SineGradient(tex);
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
