@@ -37,8 +37,9 @@ END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(CrudeSineGradient)
 //f32 f = sinf(lerpX * 10);
-f32 f = (1 + sinf(lerpX * 10)) / 2;
-result = f;
+f32 a = (1 + sinf(lerpX * 24)) / 2;
+f32 b = Perlin_Get2d(lerpX * 5, lerpY * 5, 24, 12);
+result = (a * 0.6f) + (b * 0.4f);
 END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(SineGradient)
@@ -47,10 +48,19 @@ f32 b = Perlin_Get2d(lerpX, lerpY, 24, 12);
 result = (a * 0.7f) + (b * 0.3f);
 END_PIXEL_FUNCTION
 
+BEGIN_PIXEL_FUNCTION(Streaks)
+f32 noise = Perlin_Get2d((f32)(x * 5), (f32)(y * 5), 24, 24);
+f32 a = sinf((x + noise / 2) * 50);
+result = (1 + a)  / 2;
+END_PIXEL_FUNCTION
+
 void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
 {
     //TexDraw_BasicGradient(tex);
-    TexDraw_SineGradient(tex);
+    //TexDraw_CrudeSineGradient(tex);
+    //TexDraw_SineGradient(tex);
+    TexDraw_Streaks(tex);
+    
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
