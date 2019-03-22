@@ -25,5 +25,6 @@
 #include "com_text_command_buffer.h"
 #include "com_input.h"
 #include "com_render/com_render_utils.h"
+#include "com_assets/com_perlin.h"
 #include "com_assets/com_textures.h"
 #include "com_debug.h"

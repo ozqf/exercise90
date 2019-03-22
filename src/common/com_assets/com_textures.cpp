@@ -42,7 +42,9 @@ result = f;
 END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(SineGradient)
-result = lerpX * lerpY;
+f32 a = (lerpX * lerpY);
+f32 b = Perlin_Get2d(lerpX, lerpY, 24, 12);
+result = (a * 0.7f) + (b * 0.3f);
 END_PIXEL_FUNCTION
 
 void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
