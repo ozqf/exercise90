@@ -17,39 +17,40 @@ u8 COM_FloatToByte(f32 f)
 #define BEGIN_PIXEL_FUNCTION(functionName) \
 void TexDraw_##functionName##(Texture2DHeader* tex) \
 { \
-    for (i32 y = 0; y < tex->height; ++y) \
+    for (i32 pixelY = 0; pixelY < tex->height; ++pixelY) \
     { \
-        for (i32 x = 0; x < tex->width; ++x) \
+        for (i32 pixelX = 0; pixelX < tex->width; ++pixelX) \
         { \
-            f32 lerpX = (f32)x / (f32)tex->width; \
-            f32 lerpY = (f32)y / (f32)tex->width; \
-            ColourU32* pixel = (ColourU32*)&tex->ptrMemory[x + (y * tex->width)]; \
+            f32 x = (f32)pixelX / (f32)tex->width; \
+            f32 y = (f32)pixelY / (f32)tex->width; \
+            u32 pixelIndex = pixelX + (pixelY * tex->width); \
+            ColourU32* pixel = (ColourU32*)&tex->ptrMemory[pixelIndex]; \
             f32 result;
 
 #define END_PIXEL_FUNCTION \
 u8 value = COM_FloatToByte(result); \
-*pixel = { value,  value, value, 255 }; \
+*pixel = { value, value, value, 255 }; \
 } } }
 
 BEGIN_PIXEL_FUNCTION(BasicGradient)
-result = lerpX;
+result = x;
 END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(CrudeSineGradient)
 //f32 f = sinf(lerpX * 10);
-f32 a = (1 + sinf(lerpX * 24)) / 2;
-f32 b = Perlin_Get2d(lerpX * 5, lerpY * 5, 24, 12);
+f32 a = (1 + sinf(x * 24)) / 2;
+f32 b = Perlin_Get2d(x * 5, y * 5, 24, 12);
 result = (a * 0.6f) + (b * 0.4f);
 END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(SineGradient)
-f32 a = (lerpX * lerpY);
-f32 b = Perlin_Get2d(lerpX, lerpY, 24, 12);
+f32 a = (x * y);
+f32 b = Perlin_Get2d(x, y, 24, 12);
 result = (a * 0.7f) + (b * 0.3f);
 END_PIXEL_FUNCTION
 
 BEGIN_PIXEL_FUNCTION(Streaks)
-f32 noise = Perlin_Get2d((f32)(x * 5), (f32)(y * 5), 24, 24);
+f32 noise = Perlin_Get2d((f32)(x * 5), (f32)(y * 5), 2, 2);
 f32 a = sinf((x + noise / 2) * 50);
 result = (1 + a)  / 2;
 END_PIXEL_FUNCTION
@@ -60,7 +61,6 @@ void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
     //TexDraw_CrudeSineGradient(tex);
     //TexDraw_SineGradient(tex);
     TexDraw_Streaks(tex);
-    
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
