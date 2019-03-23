@@ -36,6 +36,12 @@ BEGIN_PIXEL_FUNCTION(BasicGradient)
 result = x;
 END_PIXEL_FUNCTION
 
+BEGIN_PIXEL_FUNCTION(DoubleSine)
+f32 a = (1 + sinf(x * 50 )) / 2;
+f32 b = (1 + sinf(y * 50 )) / 2;
+result = (a * 0.5f) + (b * 0.5f);
+END_PIXEL_FUNCTION
+
 BEGIN_PIXEL_FUNCTION(CrudeSineGradient)
 //f32 f = sinf(lerpX * 10);
 f32 a = (1 + sinf(x * 24)) / 2;
@@ -55,12 +61,29 @@ f32 a = sinf((x + noise / 2) * 50);
 result = (1 + a)  / 2;
 END_PIXEL_FUNCTION
 
+BEGIN_PIXEL_FUNCTION(DoubleStreaks)
+f32 noise = Perlin_Get2d((f32)(x * 5), (f32)(y * 5), 2, 2);
+f32 a = sinf((x + noise / 2) * 50);
+a = (1 + a)  / 2;
+f32 b = sinf((y + noise / 2) * 100 );
+b = (1 + b) / 2;
+result = (a * 0.5f) + (b * 0.5f);
+END_PIXEL_FUNCTION
+
+BEGIN_PIXEL_FUNCTION(Scatter)
+f32 noise = Perlin_Get2d((f32)(x * 5), (f32)(y * 5), 2, 2);
+result = noise > 0.5f ? 1.0f : 0.0f;
+END_PIXEL_FUNCTION
+
 void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
 {
     //TexDraw_BasicGradient(tex);
+    //TexDraw_DoubleSine(tex);
     //TexDraw_CrudeSineGradient(tex);
     //TexDraw_SineGradient(tex);
-    TexDraw_Streaks(tex);
+    //TexDraw_Streaks(tex);
+    //TexDraw_DoubleStreaks(tex);
+    TexDraw_Scatter(tex);
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
