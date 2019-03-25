@@ -69,19 +69,43 @@ void App_Error(char* msg, char* heading)
     g_platform.Error(msg, heading);
 }
 
-/***************************************
-* Private
-***************************************/
-
 internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 {
     return (accumulator / interval);
 }
 
-/***************************************
-* Define functions accessible to platform
-***************************************/
 internal i32  g_isValid = 0;
+
+void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
+{
+    u32* source = tex->ptrMemory;
+    i32 numPixels = tex->width * tex->height;
+    for (i32 i = 0; i < numPixels; i += 8)
+    {
+        // read eight pixel block
+        u8 result = 0;
+        for (i32 bit = 0; bit < 8; ++bit)
+        {
+            ColourU32 col = *((ColourU32*)(source));
+            if (col.r || col.g || col.b)
+            {
+                result |= (1 << bit);
+            }
+            source++;
+        }
+        *target = result;
+        target++;
+    }
+}
+
+void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
+{
+    u16 width = *(u16*)source;
+    source += sizeof(u16);
+    u16 height = *(u16*)source;
+    source += sizeof(u16);
+    
+}
 
 internal i32 GenAndBindTestTexture()
 {
@@ -99,7 +123,8 @@ internal i32 GenAndBindTestTexture()
     Tex_BWSetAllPixels(&img->blocks[0]);
     Tex_BWSetAllPixels(&img->blocks[3]);
     */
-    Texture2DHeader* h = Tex_AllocateTexture("test.bmp", 256, 256);
+    Texture2DHeader* h = Tex_AllocateTexture("test_source.bmp", 256, 256);
+    
     ColourU32 col = { 0, 0, 0, 255 };
     //TexDraw_Outline(h, col);
     //TexDraw_FillRect(h, { 1, 1 }, { 6, 6}, { 0, 255, 0, 255 });
@@ -112,8 +137,21 @@ internal i32 GenAndBindTestTexture()
         h, { 0, 0, 255, 255 }, h->width - 1, 0, 0, h->height - 1
     );
     #endif
-    TexDraw_Gradient(h, 1);
-    Tex_BindTexture(h);
+    //TexDraw_Gradient(h, 1);
+    i32 numBWPixels = Tex_CalcBytesForBWPixels(h->width, h->height);
+    i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
+    u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWPixels);
+    u8* bw = bwMem;
+    *(u16*)bw = (u16)h->width;
+    bw += sizeof(u16);
+    *(u16*)bw = (u16)h->height;
+    bw += sizeof(u16);
+
+    Tex_RGBA2BW(h, bw);
+
+    Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 256, 256);
+
+    Tex_BindTexture(result);
     return h->index;
 }
 

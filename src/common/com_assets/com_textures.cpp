@@ -82,8 +82,8 @@ void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
     //TexDraw_CrudeSineGradient(tex);
     //TexDraw_SineGradient(tex);
     //TexDraw_Streaks(tex);
-    //TexDraw_DoubleStreaks(tex);
-    TexDraw_Scatter(tex);
+    TexDraw_DoubleStreaks(tex);
+    //TexDraw_Scatter(tex);
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
@@ -183,6 +183,9 @@ void TexDraw_Outline(Texture2DHeader* tex, ColourU32 col)
     y = tex->height - 1;
 }
 
+/**
+ * Convert bmp file pixel byte order to opengl rgba
+ */
 void COMTex_BMP2Internal(
     u32* sourcePixels,
     u32* destPixels,
@@ -206,6 +209,23 @@ void COMTex_BMP2Internal(
 		++destPixels;
 		++sourcePixels;
 	}
+}
+
+///////////////////////////////////////////////////
+// Black and white bit-packed
+///////////////////////////////////////////////////
+i32 Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight)
+{
+    i32 modWidth = sourceWidth % 8;
+    i32 modHeight = sourceHeight % 8;
+    // Must be divisible by 8
+    if (modWidth || modHeight)
+    {
+        return -1;
+    }
+    i32 w = sourceWidth / 8;
+    i32 h = sourceHeight;
+    return w * h;
 }
 
 void Tex_BWSetAllPixels(BW8x8Block* block)

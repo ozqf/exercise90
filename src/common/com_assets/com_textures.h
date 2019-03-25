@@ -15,6 +15,7 @@ struct BWImage
   BW8x8Block* blocks;
 };
 
+i32 Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight);
 void    TexDraw_Outline(Texture2DHeader* tex, ColourU32 col);
 void    TexDraw_Gradient(Texture2DHeader* tex, i32 type);
 void    TexDraw_FillRect(
