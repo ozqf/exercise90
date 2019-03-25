@@ -82,8 +82,8 @@ void TexDraw_Gradient(Texture2DHeader* tex, i32 type)
     //TexDraw_CrudeSineGradient(tex);
     //TexDraw_SineGradient(tex);
     //TexDraw_Streaks(tex);
-    TexDraw_DoubleStreaks(tex);
-    //TexDraw_Scatter(tex);
+    //TexDraw_DoubleStreaks(tex);
+    TexDraw_Scatter(tex);
 }
 
 void COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col)
@@ -223,9 +223,7 @@ i32 Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight)
     {
         return -1;
     }
-    i32 w = sourceWidth / 8;
-    i32 h = sourceHeight;
-    return w * h;
+    return (sourceWidth * sourceHeight)/ 8;
 }
 
 void Tex_BWSetAllPixels(BW8x8Block* block)
