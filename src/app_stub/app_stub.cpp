@@ -80,6 +80,8 @@ void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
 {
     u32* source = tex->ptrMemory;
     i32 numPixels = tex->width * tex->height;
+    i32 pixelsRead = 0;
+    i32 blocksWritten = 0;
     for (i32 i = 0; i < numPixels; i += 8)
     {
         // read eight pixel block
@@ -92,10 +94,13 @@ void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
                 result |= (1 << bit);
             }
             source++;
+            pixelsRead++;
         }
+        blocksWritten++;
         *target = result;
         target++;
     }
+    printf("Read %d pixels, wrote %d blocks\n", pixelsRead, blocksWritten);
 }
 
 void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
@@ -105,8 +110,11 @@ void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
     u16 height = *(u16*)source;
     source += sizeof(u16);
     ColourU32* write = (ColourU32*)tex->ptrMemory;
+    u8* start = (u8*)tex->ptrMemory;
+    u8* end = start + (tex->width * tex->height * sizeof(u32));
     
     i32 numBlocks = (width * height) / 8;
+    i32 numPixels = 0;
     printf("Decoding BW img. %dx%d, %d blocks\n", width, height, numBlocks);
     for (i32 i = 0; i < numBlocks; ++i)
     {
@@ -115,19 +123,23 @@ void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
         for (i32 bit = 0; bit < 8; ++bit)
         {
             u32 mask = (1 << bit);
-            i32 val = *source & mask;
+            i32 val = source[i] & mask;
             if (val)
             {
-                write->value = INT_MAX;
+                write->value = UINT32_MAX;
             }
             else
             {
                 write->value = 0;
             }
+            numPixels++;
             // Step pixel
             write++;
         }
     }
+    i32 diff = (i32)write - (i32)end;
+    printf("  Set %d pixels\n", numPixels);
+    printf("Ended in place: %d. Diff %d\n", ((u8*)write == end), diff);
 }
 
 internal i32 GenAndBindTestTexture()
