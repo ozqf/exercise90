@@ -169,7 +169,7 @@ internal i32 GenAndBindTestTexture()
 {
     // 8x8 should convert down to eight bytes, each bit being a
     // horizontal strip of pixels
-    Point bitmapSize = { 8, 8 };
+    Point bitmapSize = { 16, 16 };
     i32 numBWStrips = Tex_CalcBytesForBWPixels(bitmapSize.x, bitmapSize.y);
     i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
     u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWStrips);
@@ -184,17 +184,45 @@ internal i32 GenAndBindTestTexture()
         bitmapSize.x, bitmapSize.y, numBWStrips);
     // Set pixels
     // single pixel border
+    COM_ZeroMemory(bw, numBWStrips);
     bw[0] = 255;
-    bw[1] = (1 << 7) | (1 << 0);
-    bw[2] = (1 << 7) | (1 << 0);
-    bw[3] = (1 << 7) | (1 << 0);
-    bw[4] = (1 << 7) | (1 << 0);
-    bw[5] = (1 << 7) | (1 << 0);
-    bw[6] = (1 << 7) | (1 << 0);
-    bw[7] = 255;
+    bw[1] = 255;
+    bw[2] = (1 << 0);
+    bw[3] = (1 << 7);
+    bw[4] = (1 << 0);
+    bw[5] = (1 << 7);
+    bw[6] = (1 << 0);
+    bw[7] = (1 << 7);
+
+    bw[8] = (1 << 0);
+    bw[9] = (1 << 7);
+    bw[10] = (1 << 0);
+    bw[11] = (1 << 7);
+    bw[12] = (1 << 0);
+    bw[13] = (1 << 7);
+    bw[14] = (1 << 0);
+    bw[15] = (1 << 7);
+    
+    bw[16] = (1 << 0);
+    bw[17] = (1 << 7);
+    bw[18] = (1 << 0);
+    bw[19] = (1 << 7);
+    bw[20] = (1 << 0);
+    bw[21] = (1 << 7);
+    bw[22] = (1 << 0);
+    bw[23] = (1 << 7);
+
+    bw[24] = (1 << 0);
+    bw[25] = (1 << 7);
+    bw[26] = (1 << 0);
+    bw[27] = (1 << 7);
+    bw[28] = (1 << 0);
+    bw[29] = (1 << 7);
+    bw[30] = 255;
+    bw[31] = 255;
 
     printf("BW bytes: ");
-    for (i32 i = 0; i < 8; ++i)
+    for (i32 i = 0; i < numBWStrips; ++i)
     {
         printf("%d, ", bw[i]);
     }
@@ -203,9 +231,9 @@ internal i32 GenAndBindTestTexture()
     // Allocate result texture and copy
     Texture2DHeader* result = Tex_AllocateTexture(
         "test_result.bmp", bitmapSize.x, bitmapSize.y);
-    //Tex_BW2BGBA(bwMem, result);
-    TexDraw_FillRect(result, { 0, 0 }, { 8, 8 }, { 255, 255, 255, 255 });
-    TexDraw_FillRect(result, { 1, 1 }, { 6, 6 }, { 0, 0, 0, 0 });
+    Tex_BW2BGBA(bwMem, result);
+    //TexDraw_FillRect(result, { 0, 0 }, { 8, 8 }, { 255, 255, 255, 255 });
+    //TexDraw_FillRect(result, { 1, 1 }, { 6, 6 }, { 0, 0, 0, 0 });
 
     Tex_RGBA2BW(result, bw);
 
