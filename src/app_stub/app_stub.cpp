@@ -124,14 +124,8 @@ void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
         {
             u32 mask = (1 << bit);
             i32 val = source[i] & mask;
-            if (val)
-            {
-                write->value = UINT32_MAX;
-            }
-            else
-            {
-                write->value = 0;
-            }
+            if (val) { write->value = UINT32_MAX; }
+            else { write->value = 0; }
             numPixels++;
             // Step pixel
             write++;
@@ -142,7 +136,91 @@ void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
     printf("Ended in place: %d. Diff %d\n", ((u8*)write == end), diff);
 }
 
+internal i32 GenAndBindBWTestTexture()
+{
+    Texture2DHeader* source = Tex_GetTextureByName("\\textures\\charset_128x128.bmp");
+
+    i32 numBWBlocks = Tex_CalcBytesForBWPixels(source->width, source->height);
+    i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
+    u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWBlocks);
+    u8* bw = bwMem;
+    *(u16*)bw = (u16)source->width;
+    bw += sizeof(u16);
+    *(u16*)bw = (u16)source->height;
+    bw += sizeof(u16);
+
+    Tex_RGBA2BW(source, bw);
+
+    u8* read = bwMem + (sizeof(u16) * 2);
+    printf("tex of size %dx%d has %d blocks:\n",
+        source->width,
+        source->height,
+        numBWBlocks);
+
+    // Alloc destination and Unpack B&W
+    Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 256, 256);
+    Tex_BW2BGBA(bwMem, result);
+    Tex_BindTexture(result);
+
+    return result->index;
+}
+
 internal i32 GenAndBindTestTexture()
+{
+    // 8x8 should convert down to eight bytes, each bit being a
+    // horizontal strip of pixels
+    Point bitmapSize = { 8, 8 };
+    i32 numBWStrips = Tex_CalcBytesForBWPixels(bitmapSize.x, bitmapSize.y);
+    i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
+    u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWStrips);
+    u8* bw = bwMem;
+    // Header stores width/height of result
+    *(u16*)bw = (u16)bitmapSize.x;
+    bw += sizeof(u16);
+    *(u16*)bw = (u16)bitmapSize.y;
+    bw += sizeof(u16);
+
+    printf("Num BW bytes for bitmap %d by %d: %d\n",
+        bitmapSize.x, bitmapSize.y, numBWStrips);
+    // Set pixels
+    // single pixel border
+    bw[0] = 255;
+    bw[1] = (1 << 7) | (1 << 0);
+    bw[2] = (1 << 7) | (1 << 0);
+    bw[3] = (1 << 7) | (1 << 0);
+    bw[4] = (1 << 7) | (1 << 0);
+    bw[5] = (1 << 7) | (1 << 0);
+    bw[6] = (1 << 7) | (1 << 0);
+    bw[7] = 255;
+
+    printf("BW bytes: ");
+    for (i32 i = 0; i < 8; ++i)
+    {
+        printf("%d, ", bw[i]);
+    }
+    printf("\n");
+
+    // Allocate result texture and copy
+    Texture2DHeader* result = Tex_AllocateTexture(
+        "test_result.bmp", bitmapSize.x, bitmapSize.y);
+    //Tex_BW2BGBA(bwMem, result);
+    TexDraw_FillRect(result, { 0, 0 }, { 8, 8 }, { 255, 255, 255, 255 });
+    TexDraw_FillRect(result, { 1, 1 }, { 6, 6 }, { 0, 0, 0, 0 });
+
+    Tex_RGBA2BW(result, bw);
+
+    printf("BW bytes: ");
+    for (i32 i = 0; i < 8; ++i)
+    {
+        printf("%d, ", bw[i]);
+    }
+    printf("\n");
+
+    Tex_BindTexture(result);
+    return result->index;
+}
+
+internal i32 GenAndBindTestTexture_Defunct()
 {
     /*
     Point size = { 2, 2 };
@@ -158,8 +236,8 @@ internal i32 GenAndBindTestTexture()
     Tex_BWSetAllPixels(&img->blocks[0]);
     Tex_BWSetAllPixels(&img->blocks[3]);
     */
-    //Texture2DHeader* h = Tex_AllocateTexture("test_source.bmp", 256, 256);
-    Texture2DHeader* source = Tex_GetTextureByName("\\textures\\charset_128x128.bmp");
+    Texture2DHeader* source = Tex_AllocateTexture(
+        "test_source.bmp", 256, 256);
     
     ColourU32 col = { 0, 0, 0, 255 };
     //TexDraw_Outline(h, col);
@@ -174,7 +252,8 @@ internal i32 GenAndBindTestTexture()
     );
     #endif
     //TexDraw_Gradient(h, 1);
-    i32 numBWBlocks = Tex_CalcBytesForBWPixels(source->width, source->height);
+    i32 numBWBlocks = Tex_CalcBytesForBWPixels(
+        source->width, source->height);
     i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
     u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWBlocks);
     u8* bw = bwMem;
@@ -206,7 +285,8 @@ internal i32 GenAndBindTestTexture()
     printf("\n");
     #endif
 
-    Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 256, 256);
+    Texture2DHeader* result = Tex_AllocateTexture(
+        "test_result.bmp", 256, 256);
 
     // Unpack B&W
     Tex_BW2BGBA(bwMem, result);

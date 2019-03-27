@@ -472,10 +472,10 @@ int CALLBACK WinMain(
         CS_OWNDC // allocates a unique device context for each window in the window class
         | CS_HREDRAW | CS_VREDRAW;
 
-    i32 windowWidth = 1280;
-    i32 windowHeight = 720;
-    //i32 windowWidth = 640;
-    //i32 windowHeight = 400;
+    //i32 windowWidth = 1280;
+    //i32 windowHeight = 720;
+    i32 windowWidth = 640;
+    i32 windowHeight = 400;
     Win32ResizeDIBSection(&globalBackBuffer, windowWidth, windowHeight);
     
     //win32LoadXInput();
