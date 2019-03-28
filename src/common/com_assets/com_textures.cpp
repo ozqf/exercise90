@@ -247,39 +247,6 @@ Point Tex_CalcInternalImageSizeFromBW(BWImage* img)
     return p;
 }
 
-#if 0
-void Tex_BW2Bitmap(BWImage* img, Texture2DHeader* h)
-{
-    u32* firstPixel = h->ptrMemory;
-    i32 numBlocks = img->size.x * img->size.y;
-    for (i32 y = 0; y < img->size.y; ++y)
-    {
-        for (i32 x = 0; x < img->size.x; ++x)
-        {
-            i32 i = x + (y * img->size.x);
-            BW8x8Block* block = &img->blocks[i];
-            for (i32 byte = 0; byte < 8; ++byte)
-            {
-                for (i32 bit = 0; bit < 8; ++bit)
-                {
-                    u32 val = block->pixels[byte] & bit;
-                    i32 pixX = (x * 8) + bit;
-                    i32 pixY = (y * 8) + byte;
-                    u32 pixelIndex = pixX + (pixY * h->width);
-                    
-                    u32_union* u32Bytes = (u32_union*)&h->ptrMemory[pixelIndex];
-                    u32Bytes->bytes[0] = (u8)(255 * val);
-                    u32Bytes->bytes[1] = (u8)(255 * val);
-                    u32Bytes->bytes[2] = (u8)(255 * val);
-                    u32Bytes->bytes[3] = 255;
-                    
-                }
-            }
-        }
-    }
-}
-#endif
-
 Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
 {
     Point p;
@@ -298,6 +265,39 @@ Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
     p.x = h->width / 8;
     p.y = h->height / 8;
     return p;
+}
+
+void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
+{
+    u16 width = *(u16*)source;
+    source += sizeof(u16);
+    u16 height = *(u16*)source;
+    source += sizeof(u16);
+    ColourU32* write = (ColourU32*)tex->ptrMemory;
+    u8* start = (u8*)tex->ptrMemory;
+    u8* end = start + (tex->width * tex->height * sizeof(u32));
+    
+    i32 numBlocks = (width * height) / 8;
+    i32 numPixels = 0;
+    printf("Decoding BW img. %dx%d, %d blocks\n", width, height, numBlocks);
+    for (i32 i = 0; i < numBlocks; ++i)
+    {
+
+        // Write eight colours to texture
+        for (i32 bit = 0; bit < 8; ++bit)
+        {
+            u32 mask = (1 << bit);
+            i32 val = source[i] & mask;
+            if (val) { write->value = UINT32_MAX; }
+            else { write->value = 0; }
+            numPixels++;
+            // Step pixel
+            write++;
+        }
+    }
+    i32 diff = (i32)write - (i32)end;
+    printf("  Set %d pixels\n", numPixels);
+    printf("Ended in place: %d. Diff %d\n", ((u8*)write == end), diff);
 }
 
 void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
@@ -366,4 +366,35 @@ void Tex_GenerateBW(Texture2DHeader* h, BWImage* img)
     //         printf("%d, ", b)
     //     }
     // }
+}
+
+/**
+ * Memory is sizeof(header) + bytes for pixels
+ * See Tex_CalcBitmapMemorySize
+ */
+com_internal Texture2DHeader* Tex_SetTextureHeader(
+    char* name, i32 width, i32 height, u8* memory)
+{
+    Texture2DHeader* tex = (Texture2DHeader*)memory;
+    COM_CopyStringLimited(name, tex->name, TEXTURE2D_MAX_NAME_LENGTH);
+    u32* pixels = (u32*)(memory + sizeof(Texture2DHeader));
+    tex->ptrMemory = pixels;
+    tex->width = width;
+    tex->height = height;
+
+    // Set All Magenta
+	ColourU32 col;
+	col.r = 255;
+	col.g = 0;
+	col.b = 255;
+	col.a = 255;
+	COMTex_SetAllPixels(tex, col);
+
+    return tex;
+}
+
+com_internal i32 Tex_CalcBitmapMemorySize(i32 width, i32 height)
+{
+    i32 bytesForPixels = sizeof(u32) * (width * height);
+    return bytesForPixels + sizeof(Texture2DHeader);
 }

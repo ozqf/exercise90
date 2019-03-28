@@ -194,6 +194,8 @@ void Win32_InitPlatformInterface()
     g_plat2Rend.Log = Win32_Log;
     g_plat2Rend.Print = Win32_Log;
     g_plat2Rend.Error = Win32_Error;
+    g_plat2Rend.Malloc = Platform_Alloc;
+    g_plat2Rend.Free = Platform_Free;
 }
 
 void Win32_CloseAppLink()

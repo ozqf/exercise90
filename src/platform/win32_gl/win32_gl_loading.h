@@ -78,8 +78,18 @@ internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 /**
  * Load a texture into a specific texture index
  */
-void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
+void R_BindTexture(
+	void* rgbaPixels, u32 width, u32 height, u32 textureIndex, i32 isInternal)
 {
+	if (isInternal)
+	{
+		Assert(textureIndex <= TEX_LAST_EMBEDDED_TEXTURE_INDEX)
+	}
+	else
+	{
+		Assert(textureIndex > TEX_LAST_EMBEDDED_TEXTURE_INDEX)
+	}
+	
 	/**
 	--- setup textures ---
 	> enable textures
@@ -105,7 +115,8 @@ void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 t
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 	#if 1
-	COM_CALL_PRINT(g_platform.Log, 512, "REND Binding texture index: %d - GLuint: %d.  Img size: %d / %d\n",
+	COM_CALL_PRINT(g_platform.Log, 512,
+		"REND Binding texture index: %d - GLuint: %d.  Img size: %d / %d\n",
 		textureIndex, texID, width, height
 	);
 	#endif
@@ -116,4 +127,9 @@ void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 t
         OutputDebugString(buf);
 	#endif
 	//return g_nextTexture++;
+}
+
+void Win32_Platform_R_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIndex)
+{
+	R_BindTexture(rgbaPixels, width, height, textureIndex, 0);
 }

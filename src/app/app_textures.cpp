@@ -82,27 +82,11 @@ Texture2DHeader* Tex_AllocateTexture(char* name, i32 width, i32 height)
     Assert(height > 0)
     Assert(name)
     Assert(COM_StrLen(name) < TEXTURE2D_MAX_NAME_LENGTH)
-    i32 bytesForPixels = sizeof(u32) * (width * height);
-    i32 totalBytes = bytesForPixels + sizeof(Texture2DHeader);
+
+    i32 totalBytes = Tex_CalcBitmapMemorySize(width, height);
     BlockRef ref;
     Heap_Allocate(g_heap, &ref, totalBytes, name, 1);
-    Texture2DHeader* tex = (Texture2DHeader*)ref.ptrMemory;
-    COM_CopyStringLimited(name, tex->name, TEXTURE2D_MAX_NAME_LENGTH);
-    u32* pixels = (u32*)((u8*)ref.ptrMemory + sizeof(Texture2DHeader));
-    tex->ptrMemory = pixels;
-    tex->width = width;
-    tex->height = height;
-
-    // Set All Magenta
-	ColourU32 col;
-	col.r = 255;
-	col.g = 0;
-	col.b = 255;
-	col.a = 255;
-	COMTex_SetAllPixels(tex, col);
-    //u8 pattern[4] = { 255, 0, 255, 255 };
-    //COM_SetMemoryPattern((u8*)tex->ptrMemory, bytesForPixels, pattern, 4);
-	
+    Texture2DHeader* tex = Tex_SetTextureHeader(name, width, height, (u8*)ref.ptrMemory);
     Tex_RegisterTexture(tex, &ref);
     return tex;
 }

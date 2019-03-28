@@ -107,39 +107,6 @@ void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
     printf("Read %d pixels, wrote %d blocks\n", pixelsRead, blocksWritten);
 }
 
-void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
-{
-    u16 width = *(u16*)source;
-    source += sizeof(u16);
-    u16 height = *(u16*)source;
-    source += sizeof(u16);
-    ColourU32* write = (ColourU32*)tex->ptrMemory;
-    u8* start = (u8*)tex->ptrMemory;
-    u8* end = start + (tex->width * tex->height * sizeof(u32));
-    
-    i32 numBlocks = (width * height) / 8;
-    i32 numPixels = 0;
-    printf("Decoding BW img. %dx%d, %d blocks\n", width, height, numBlocks);
-    for (i32 i = 0; i < numBlocks; ++i)
-    {
-
-        // Write eight colours to texture
-        for (i32 bit = 0; bit < 8; ++bit)
-        {
-            u32 mask = (1 << bit);
-            i32 val = source[i] & mask;
-            if (val) { write->value = UINT32_MAX; }
-            else { write->value = 0; }
-            numPixels++;
-            // Step pixel
-            write++;
-        }
-    }
-    i32 diff = (i32)write - (i32)end;
-    printf("  Set %d pixels\n", numPixels);
-    printf("Ended in place: %d. Diff %d\n", ((u8*)write == end), diff);
-}
-
 internal i32 GenAndBindBWTestTexture()
 {
     Texture2DHeader* source = Tex_GetTextureByName("\\textures\\charset_128x128.bmp");

@@ -29,9 +29,11 @@ struct RenderInterface
 
 struct RendererPlatform
 {
-    void (*Log)(char* msg);
-    void (*Print)(char* msg);
-    void (*Error)(char* msg, char* title);
+    void (*Log)     (char* msg);
+    void (*Print)   (char* msg);
+    void (*Error)   (char* msg, char* title);
+    u8   (*Malloc)  (MemoryBlock* mem, u32 bytesToAllocate);
+    void (*Free)    (MemoryBlock *mem);
 };
 
 typedef RenderInterface (Func_LinkToRenderer)(RendererPlatform platform);
