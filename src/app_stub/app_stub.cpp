@@ -76,6 +76,10 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 
 internal i32  g_isValid = 0;
 
+/**
+ * Target must already be allocated. Therefore header is omitted here and
+ * just pixels are written
+ */
 void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
 {
     u32* source = tex->ptrMemory;
@@ -158,15 +162,60 @@ internal i32 GenAndBindBWTestTexture()
         numBWBlocks);
 
     // Alloc destination and Unpack B&W
-    Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 256, 256);
+    Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 128, 128);
     Tex_BW2BGBA(bwMem, result);
     Tex_BindTexture(result);
-
+    
     return result->index;
 }
 
-internal i32 GenAndBindTestTexture()
+internal i32 GenAndBindTestTexture_SinglePixelBorder2()
 {
+    // Source texture
+    #if 0// Single pixel border
+    Point bitmapSize = { 16, 16 };
+    Texture2DHeader* source = Tex_AllocateTexture(
+        "test_source.bmp", bitmapSize.x, bitmapSize.y);
+
+    // Draw single pixel border directly onto texture
+    TexDraw_FillRect(source, { 0, 0 }, { 16, 16 }, { 255, 255, 255, 255 });
+    TexDraw_FillRect(source, { 1, 1 }, { 14, 14 }, { 0, 0, 0, 0 });
+    #endif
+
+    #if 1 // Charset
+    Texture2DHeader* source = Tex_GetTextureByName("\\textures\\charset_128x128.bmp");
+    Point bitmapSize = { source->width, source->height };
+    #endif
+
+    ////////////////////////////////////////
+    // B&W
+    ////////////////////////////////////////
+    i32 numBWStrips = Tex_CalcBytesForBWPixels(bitmapSize.x, bitmapSize.y);
+    i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
+    u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWStrips);
+    u8* bw = bwMem;
+    // Header stores width/height of result
+    *(u16*)bw = (u16)bitmapSize.x;
+    bw += sizeof(u16);
+    *(u16*)bw = (u16)bitmapSize.y;
+    bw += sizeof(u16);
+    // Copy source to B&W
+    Tex_RGBA2BW(source, bw);
+
+    // Destination texture
+    Texture2DHeader* result = Tex_AllocateTexture(
+        "test_result.bmp", bitmapSize.x, bitmapSize.y);
+
+    // Copy B&W to result
+    Tex_BW2BGBA(bwMem, result);
+
+    Tex_BindTexture(result);
+    return result->index;
+}
+
+internal i32 GenAndBindTestTexture_SinglePixelBorder()
+{
+    
     // 8x8 should convert down to eight bytes, each bit being a
     // horizontal strip of pixels
     Point bitmapSize = { 16, 16 };
@@ -183,8 +232,8 @@ internal i32 GenAndBindTestTexture()
     printf("Num BW bytes for bitmap %d by %d: %d\n",
         bitmapSize.x, bitmapSize.y, numBWStrips);
     // Set pixels
-    // single pixel border
     COM_ZeroMemory(bw, numBWStrips);
+    #if 1 // single pixel border
     bw[0] = 255;
     bw[1] = 255;
     bw[2] = (1 << 0);
@@ -227,18 +276,23 @@ internal i32 GenAndBindTestTexture()
         printf("%d, ", bw[i]);
     }
     printf("\n");
+    #endif
+
 
     // Allocate result texture and copy
     Texture2DHeader* result = Tex_AllocateTexture(
         "test_result.bmp", bitmapSize.x, bitmapSize.y);
     Tex_BW2BGBA(bwMem, result);
-    //TexDraw_FillRect(result, { 0, 0 }, { 8, 8 }, { 255, 255, 255, 255 });
-    //TexDraw_FillRect(result, { 1, 1 }, { 6, 6 }, { 0, 0, 0, 0 });
+
+    #if 0 // Draw single pixel border directly onto texture
+    TexDraw_FillRect(result, { 0, 0 }, { 16, 16 }, { 255, 255, 255, 255 });
+    TexDraw_FillRect(result, { 1, 1 }, { 14, 14 }, { 0, 0, 0, 0 });
+    #endif
 
     Tex_RGBA2BW(result, bw);
 
     printf("BW bytes: ");
-    for (i32 i = 0; i < 8; ++i)
+    for (i32 i = 0; i < numBWStrips; ++i)
     {
         printf("%d, ", bw[i]);
     }
@@ -246,6 +300,13 @@ internal i32 GenAndBindTestTexture()
 
     Tex_BindTexture(result);
     return result->index;
+}
+
+internal i32 GenAndBindTestTexture()
+{
+    //return GenAndBindBWTestTexture();
+    //return GenAndBindTestTexture_SinglePixelBorder();
+    return GenAndBindTestTexture_SinglePixelBorder2();
 }
 
 internal i32 GenAndBindTestTexture_Defunct()
