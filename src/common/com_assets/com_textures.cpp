@@ -247,6 +247,7 @@ Point Tex_CalcInternalImageSizeFromBW(BWImage* img)
     return p;
 }
 
+#if 0
 void Tex_BW2Bitmap(BWImage* img, Texture2DHeader* h)
 {
     u32* firstPixel = h->ptrMemory;
@@ -277,6 +278,7 @@ void Tex_BW2Bitmap(BWImage* img, Texture2DHeader* h)
         }
     }
 }
+#endif
 
 Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
 {

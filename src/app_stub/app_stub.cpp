@@ -192,7 +192,8 @@ internal i32 GenAndBindTestTexture_SinglePixelBorder2()
     ////////////////////////////////////////
     i32 numBWStrips = Tex_CalcBytesForBWPixels(bitmapSize.x, bitmapSize.y);
     i32 sizeOfBWHeader = sizeof(u16) + sizeof(u16);
-    u8* bwMem = (u8*)malloc(sizeOfBWHeader + numBWStrips);
+    i32 totalBytes = sizeOfBWHeader + numBWStrips;
+    u8* bwMem = (u8*)malloc(totalBytes);
     u8* bw = bwMem;
     // Header stores width/height of result
     *(u16*)bw = (u16)bitmapSize.x;
@@ -201,6 +202,22 @@ internal i32 GenAndBindTestTexture_SinglePixelBorder2()
     bw += sizeof(u16);
     // Copy source to B&W
     Tex_RGBA2BW(source, bw);
+
+    // Print B&W strips for copy/encoding
+    #if 0
+    printf("*** B&W encode ***\n");
+    printf("Bytes (including header): %d/%d, Num strips: %d\n",
+        bitmapSize.x, bitmapSize.y, numBWStrips);
+    for (i32 i = 0; i < totalBytes; ++i)
+    {
+        printf("%d,", bwMem[i]);
+        if ((i != 0) && !(i % 16))
+        {
+            printf("\n");
+        }
+    }
+    printf("\n");
+    #endif
 
     // Destination texture
     Texture2DHeader* result = Tex_AllocateTexture(
@@ -213,6 +230,20 @@ internal i32 GenAndBindTestTexture_SinglePixelBorder2()
     return result->index;
 }
 
+internal i32 GenAndBind128x128BWTexture()
+{
+    Point bitmapSize = { 128, 128 };
+    Texture2DHeader* result = Tex_AllocateTexture(
+        "test_result.bmp", bitmapSize.x, bitmapSize.y);
+
+    // Copy B&W to result
+    Tex_BW2BGBA(Embed_GetCharset128x128BW(), result);
+
+    Tex_BindTexture(result);
+    return result->index;
+}
+
+#if 0
 internal i32 GenAndBindTestTexture_SinglePixelBorder()
 {
     
@@ -302,13 +333,6 @@ internal i32 GenAndBindTestTexture_SinglePixelBorder()
     return result->index;
 }
 
-internal i32 GenAndBindTestTexture()
-{
-    //return GenAndBindBWTestTexture();
-    //return GenAndBindTestTexture_SinglePixelBorder();
-    return GenAndBindTestTexture_SinglePixelBorder2();
-}
-
 internal i32 GenAndBindTestTexture_Defunct()
 {
     /*
@@ -387,7 +411,8 @@ internal i32 GenAndBindTestTexture_Defunct()
 
     return result->index;
 }
-
+#endif
+#if 0
 internal BWImage* EncodeBW()
 {
     
@@ -426,6 +451,15 @@ internal Texture2DHeader* DecodeBW(BWImage* img)
     h->ptrMemory = (u32*)(mem + sizeof(Texture2DHeader));
     Tex_BW2Bitmap(img, h);
     return h;
+}
+#endif
+
+internal i32 GenAndBindTestTexture()
+{
+    //return GenAndBindBWTestTexture();
+    //return GenAndBindTestTexture_SinglePixelBorder();
+    return GenAndBind128x128BWTexture();
+    //return GenAndBindTestTexture_SinglePixelBorder2();
 }
 
 internal i32 App_Init()

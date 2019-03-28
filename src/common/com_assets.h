@@ -16,3 +16,4 @@ com_internal void SharedAssets_Init();
 
 com_internal MeshData* COM_GetCubeMesh();
 com_internal MeshData* COM_GetInverseCubeMesh();
+com_internal u8* Embed_GetCharset128x128BW();
