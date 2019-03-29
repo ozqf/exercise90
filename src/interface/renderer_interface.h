@@ -1,6 +1,15 @@
 #pragma once
-
+/**
+ * Render system public data
+ * 
+ */
 #include "../common/com_module.h"
+
+#define REND_NUM_TEXTURE_HANDLES 128
+// emdedded textures reserve the higher end of the handles list
+// see public interface for Ids
+//#define EMBED_TEX_DEBUG_INDEX 127
+#define EMBED_TEX_CHARSET_INDEX 126
 
 // TODO: Re-implement renderer using command buffer instead of scene object
 // TODO: Call render from application...? (might requiring moving console into app layer...?)

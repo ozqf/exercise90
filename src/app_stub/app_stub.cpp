@@ -5,6 +5,7 @@
 #include "../common/com_defines.h"
 #include "../interface/app_interface.h"
 #include "../interface/platform_interface.h"
+#include "../interface/renderer_interface.h"
 #include "../app/app_textures.h"
 
 #include "../interface/sys_events.h"
@@ -468,8 +469,12 @@ internal i32 App_Init()
     
     char* texName = "textures\\white_bordered.bmp";
     //char* texName = "textures\\W33_5.bmp";
-    g_cubeTextureIndex = Tex_GetTextureIndexByName(texName);
-    g_cubeTextureIndex = GenAndBindTestTexture();
+
+
+    //g_cubeTextureIndex = Tex_GetTextureIndexByName(texName);
+    //g_cubeTextureIndex = GenAndBindTestTexture();
+    
+    
     //BWImage* img = EncodeBW();
     //Texture2DHeader* tex = DecodeBW(img);
     //g_platform.SaveBMP(tex);
@@ -529,7 +534,8 @@ internal void App_Update(PlatformTime* time)
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
-    i32 texIndex = g_cubeTextureIndex;
+    //i32 texIndex = g_cubeTextureIndex;
+    i32 texIndex = EMBED_TEX_CHARSET_INDEX;
     MeshData* cube = COM_GetCubeMesh();
     
     // Reset scene

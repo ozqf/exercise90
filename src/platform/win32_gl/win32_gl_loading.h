@@ -81,14 +81,14 @@ internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 void R_BindTexture(
 	void* rgbaPixels, u32 width, u32 height, u32 textureIndex, i32 isInternal)
 {
-	if (isInternal)
+	/*if (isInternal)
 	{
 		Assert(textureIndex <= TEX_LAST_EMBEDDED_TEXTURE_INDEX)
 	}
 	else
 	{
 		Assert(textureIndex > TEX_LAST_EMBEDDED_TEXTURE_INDEX)
-	}
+	}*/
 	
 	/**
 	--- setup textures ---

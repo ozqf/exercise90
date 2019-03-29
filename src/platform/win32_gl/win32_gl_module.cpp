@@ -58,15 +58,14 @@ internal f32 win32_aspectRatio = 0;
 internal Extensions g_extensions = {};
 
 // assets
-#define NUM_TEST_TEXTURES 128
-GLuint g_textureHandles[NUM_TEST_TEXTURES];
 #define NUM_TEST_VERTEX_BUFFER_OBJECTS 128
 GLuint g_vboHandles[NUM_TEST_VERTEX_BUFFER_OBJECTS];
 
-#define TEX_LAST_EMBEDDED_TEXTURE_INDEX 0
+//#define TEX_LAST_EMBEDDED_TEXTURE_INDEX 0
+
+GLuint g_textureHandles[REND_NUM_TEXTURE_HANDLES];
 
 #define TEX_CHARSET_NAME "charset_128x128_bw"
-#define TEX_CHARSET_INDEX 0
 internal Texture2DHeader* tex_charset;
 
 //////////////////////////////////////////////////////////////////////////

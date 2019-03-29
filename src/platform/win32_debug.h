@@ -10,6 +10,8 @@
 
 #include "win32_module.cpp"
 
+#include "../interface/renderer_interface.h"
+
 /****************************************************************
 Create a command window for debug output
 ****************************************************************/
@@ -81,9 +83,9 @@ RenderScene g_debugScene;
 
 void Win32_SetDebugInputTextureIndex(i32 index)
 {
-    RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
-    c->textureIndex = index;
-    PLAT_LOG(64, "PLATFORM Set Console texture index %d\n", index);
+    //RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
+    //c->textureIndex = index;
+    //PLAT_LOG(64, "PLATFORM Set Console texture index %d\n", index);
 }
 
 char g_lastDebugChar = 0;
@@ -335,7 +337,10 @@ void InitDebug()
     g_debugScene.numObjects = 2;
     g_debugScene.maxObjects = 2;
 
-
+    // Set texture index to charset
+    RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
+    c->textureIndex = EMBED_TEX_CHARSET_INDEX;
+    //PLAT_LOG(64, "PLATFORM Set Console texture index %d\n", index);
 }
 
 #endif
