@@ -44,10 +44,10 @@ set linkInput=../lib/bullet/ZBulletPhysicsWrapper.lib
 
 @set compIn=
 @set compOut=
-@set in1=
-@set in2=
-@set in3=
-@set in4=
+@set int1=
+@set int2=
+@set int3=
+@set int4=
 @set compilerFlags=
 @set compilerDefines=
 @set linkInput=

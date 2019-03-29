@@ -78,13 +78,12 @@ internal i32  App_Init()
     {
         Heap_Init(&g_heap, mem.ptrMemory, mem.size);
     }
-    g_platform.
 
     ///////////////////////////////////////////////////////////////
     // Assets
     ///////////////////////////////////////////////////////////////
     Tex_Init(&g_heap, g_platform);
-    char** textures = 
+    char * textures[] = 
     {
         "textures\\BitmapTest.bmp",
         DEFAULT_CONSOLE_CHARSET_PATH,
@@ -93,7 +92,7 @@ internal i32  App_Init()
         "textures\\COMP03_1.bmp",
         "\0"
     };
-    g_platform.Error("Bar", "Foo");
+    //g_platform.Error("Bar", "Foo");
     APP_PRINT(64, "App load texture list\n");
     Tex_LoadTextureList(textures);
 
@@ -104,7 +103,7 @@ internal i32  App_Init()
     //i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
     //Texture2DHeader* h = &g_textureHandles.textureHeaders[texIndex];
     Texture2DHeader* h = Tex_GetTextureByName(DEFAULT_CONSOLE_CHARSET_PATH);
-    Tex_GenerateBW(h);
+    //Tex_GenerateBW(h);
 
     ///////////////////////////////////////////////////////////////
 

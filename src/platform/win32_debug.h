@@ -174,7 +174,14 @@ void Win32_DebugReadKey(u32 VKCode, WPARAM wParam, LPARAM lParam)
 #endif
     //printf("> %c\n", c);
 
-    RendObj_SetAsAsciCharArray(&g_rendDebugItems[1].obj, g_inputText.ptr, g_inputText.position, 0.05f, TEXT_ALIGNMENT_TOP_LEFT, 1, 1, 1, 1);
+    RendObj_SetAsAsciCharArray(
+        &g_rendDebugItems[1].obj,
+        g_inputText.ptr,
+        g_inputText.position,
+        0.05f,
+        TEXT_ALIGNMENT_TOP_LEFT,
+        EMBED_TEX_CHARSET_INDEX,
+        1, 1, 1);
 }
 
 

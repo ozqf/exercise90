@@ -432,7 +432,10 @@ internal i32 GenAndBindTestTexture()
 
 internal i32 App_Init()
 {
-    i32 err = g_platform.WriteAllTextToFile("c:\\games\\test.txt", "This is a test");
+    // Quick file write test!
+    i32 err = g_platform.WriteAllTextToFile("test.txt", "This is a test");
+    
+    
     APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
     
     // Acquiring an old 'heap object here. Various platform functions
@@ -466,7 +469,7 @@ internal i32 App_Init()
         "textures\\COMP03_1.bmp",
         "\0"
     };
-    Tex_LoadTextureList(textures);
+    //Tex_LoadTextureList(textures);
     
     char* texName = "textures\\white_bordered.bmp";
     //char* texName = "textures\\W33_5.bmp";
