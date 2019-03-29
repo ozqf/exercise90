@@ -117,6 +117,23 @@ void Win32_Print(char* msg)
     printf("%s", msg);
 }
 
+internal i32 Win32_WriteAllTextToFile(char* fileName, char* contents)
+{
+    FILE* f;
+    i32 err = fopen_s(&f, fileName, "w");
+    if (err)
+    {
+        printf("Write all text Error code %d\n", err);
+        //Win32_Error(fileName, "Error writing text file");
+        return COM_ERROR_UNKNOWN;
+    }
+
+    fprintf(f, "%s", contents);
+
+    fclose(f);
+    return COM_ERROR_NONE;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // Sound
@@ -173,6 +190,7 @@ void Win32_InitPlatformInterface()
 	platInterface.SeekInFileFromStart = Platform_SeekInFileFromStart;
     platInterface.GetBaseDirectoryName = Platform_GetBaseDirectoryName;
     platInterface.GetDateTime = Platform_GetDateTime;
+    platInterface.WriteAllTextToFile = Win32_WriteAllTextToFile;
 
     platInterface.SaveBMP = Win32_SaveBMP;
 

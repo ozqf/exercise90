@@ -40,6 +40,8 @@ struct AppPlatform
     void (*GetDateTime)             (DateTime* data);
     i32 (*SaveBMP)                  (Texture2DHeader* header);
 
+    i32 (*WriteAllTextToFile)       (char* fileName, char* contents);
+
     // Input
     void (*SetMouseMode)            (enum ZMouseMode mode);
 
