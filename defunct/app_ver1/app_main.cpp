@@ -218,7 +218,7 @@ i32 App_Shutdown()
     MemoryBlock mem = {};
     mem.ptrMemory = g_heap.ptrMemory;
     mem.size = g_heap.size;
-    platform.Platform_Free(&mem);
+    platform.Win32_Free(&mem);
 
     return 1;
 }

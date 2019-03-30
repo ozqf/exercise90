@@ -29,6 +29,7 @@ void Win32_Log(char* msg);
 
 // Last as it probably calls into the others
 #include "win32_app_interface.h"
+#include "win32_links.h"
 #include "win32_main.h"
 
 #endif

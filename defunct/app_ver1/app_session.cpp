@@ -156,7 +156,7 @@ i32 App_WriteStateToFile(
         printf("Recording frames to \"%s\"\n", fileName);
     }
 
-    platform.Platform_Free(&mem);
+    platform.Win32_Free(&mem);
 
     return fileId;
 }
