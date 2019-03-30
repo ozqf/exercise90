@@ -15,6 +15,7 @@ void Win32_Log(char* msg);
 #include "../common/com_module.h"
 #include "win32_net/win32_net_module.cpp"
 
+void Win32_ExecuteCommandLine(i32 argc, char** argv);
 
 #include "win32_types.h"
 #include "win32_globals.h"
@@ -25,11 +26,11 @@ void Win32_Log(char* msg);
 #include "win32_data.h"
 #include "win32_fileIO.h"
 #include "win32_gl/win32_gl_interface.h"
-#include "win32_commands.h"
 
 // Last as it probably calls into the others
 #include "win32_app_interface.h"
 #include "win32_links.h"
+#include "win32_commands.h"
 #include "win32_main.h"
 
 #endif

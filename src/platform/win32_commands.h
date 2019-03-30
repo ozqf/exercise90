@@ -25,6 +25,23 @@ u8 TextExec_Quit(char* text, char** tokens, i32 numTokens)
     return 1;
 }
 
+TEXT_COMMAND_HANDLER(Game)
+{
+    switch (numTokens)
+    {
+        case 2:
+        Win32_LinkToApplication(&g_appLink, tokens[1]);
+        break;
+        case 1:
+        PLAT_PRINT(64, "  Must specify a game directory\n");
+        break;
+        default:
+        PLAT_PRINT(64, "  Too many tokens\n");
+        break;
+    }
+    return 1;
+}
+
 TEXT_COMMAND_HANDLER(Version)
 {
     PLAT_PRINT(64, "--- VERSIONS ---\n");
@@ -163,6 +180,7 @@ void Win32_BuildTextCommandList()
     Win32_AddTextCommand("KEYCODES", 1, 1, TextExec_KeyCodes);
     Win32_AddTextCommand("LAPTOP", 1, 1, TextExec_Laptop);
     Win32_AddTextCommand("MARK", 1, 1, TextExec_Mark);
+    Win32_AddTextCommand("GAME", 1, 2, TextExec_Game);
 }
 
 /**********************************************************************

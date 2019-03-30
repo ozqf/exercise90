@@ -80,7 +80,7 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
 }
 
 internal i32  g_isValid = 0;
-
+#if 0
 internal i32 GenAndBindBWTestTexture()
 {
     Texture2DHeader* source = Tex_GetTextureByName("\\textures\\charset_128x128.bmp");
@@ -125,7 +125,7 @@ internal i32 GenAndBind128x128BWTexture()
     Tex_BindTexture(result);
     return result->index;
 }
-
+#endif
 internal i32 GenAndBindTestTexture()
 {
     Texture2DHeader* tex = Tex_AllocateTexture(
@@ -200,14 +200,6 @@ internal i32 App_Init()
     //g_cubeTextureIndex = Tex_GetTextureIndexByName(texName);
     g_cubeTextureIndex = GenAndBindTestTexture();
     
-    
-    //BWImage* img = EncodeBW();
-    //Texture2DHeader* tex = DecodeBW(img);
-    //g_platform.SaveBMP(tex);
-
-    g_platform.SetDebugInputTextureIndex(
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
-
     // Render Scenes - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
 		90, RENDER_PROJECTION_MODE_3D, 8);
