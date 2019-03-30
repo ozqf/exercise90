@@ -100,7 +100,7 @@ internal i32 GenAndBindBWTestTexture()
 
     // Alloc destination and Unpack B&W
     Texture2DHeader* result = Tex_AllocateTexture("test_result.bmp", 128, 128);
-    Tex_BW2BGBA(bwMem, result);
+    Tex_BW2BGBA(bwMem, result, { 0, 0, 0, 255 }, { 255, 255, 255, 255 });
     Tex_BindTexture(result);
     
     return result->index;
@@ -113,7 +113,10 @@ internal i32 GenAndBind128x128BWTexture()
         "test_result.bmp", bitmapSize.x, bitmapSize.y);
 
     // Copy B&W to result
-    Tex_BW2BGBA(Embed_GetCharset128x128BW(), result);
+    Tex_BW2BGBA(
+        Embed_GetCharset128x128BW(),
+        result,
+        { 0, 0, 0, 255 }, { 255, 255, 255, 255 });
 
     Tex_BindTexture(result);
     return result->index;

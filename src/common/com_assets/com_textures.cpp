@@ -298,7 +298,8 @@ Point Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h)
     return p;
 }
 
-void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
+void Tex_BW2BGBA(
+    u8* source, Texture2DHeader* tex, ColourU32 off, ColourU32 on)
 {
     u16 width = *(u16*)source;
     source += sizeof(u16);
@@ -319,8 +320,8 @@ void Tex_BW2BGBA(u8* source, Texture2DHeader* tex)
         {
             u32 mask = (1 << bit);
             i32 val = source[i] & mask;
-            if (val) { write->value = UINT32_MAX; }
-            else { write->value = 0; }
+            if (val) { write->value = on.value; }
+            else { write->value = off.value; }
             numPixels++;
             // Step pixel
             write++;

@@ -14,7 +14,10 @@ internal void Win32_R_InitEmbeddedTextures(RendererPlatform* platform)
         TEX_CHARSET_NAME, bitmapSize.x, bitmapSize.y, (u8*)mem.ptrMemory);
 
     // Copy B&W to result
-    Tex_BW2BGBA(Embed_GetCharset128x128BW(), tex_charset);
+    Tex_BW2BGBA(
+        Embed_GetCharset128x128BW(),
+        tex_charset,
+        { 255, 255, 255, 255 }, { 0, 0, 0, 255 });
 
     R_BindTexture(
         tex_charset->ptrMemory,

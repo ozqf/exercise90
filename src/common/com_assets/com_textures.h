@@ -18,7 +18,8 @@ struct BWImage
 // B&W encoding (for embedding textures)
 i32     Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight);
 void    Tex_RGBA2BW(Texture2DHeader* tex, u8* target);
-void    Tex_BW2BGBA(u8* source, Texture2DHeader* tex);
+void    Tex_BW2BGBA(
+  u8* source, Texture2DHeader* tex, ColourU32 off, ColourU32 on);
 void    Tex_BWSetAllPixels(BW8x8Block* block);
 
 void    TexDraw_Outline(Texture2DHeader* tex, ColourU32 col);
