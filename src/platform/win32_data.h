@@ -184,7 +184,7 @@ void Win32_LoadDataFiles()
 	// Possibly reloading. close any datafiles currently open
 	PLAT_LOG(64, "PLATFORM: Recreate Data File Handles\n");
 	Win32_CloseDataFiles();
-	Win32_ScanForDataFiles(NULL, g_dataFiles, PLATFORM_MAX_DATA_FILES, g_baseDirectoryName);
+	Win32_ScanForDataFiles(NULL, g_dataFiles, PLATFORM_MAX_DATA_FILES, g_gameName);
 
 	//Win32_FindDataFileEntry(NULL, "charset.bmp");
 }

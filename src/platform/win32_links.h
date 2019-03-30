@@ -77,13 +77,30 @@ void Win32_CloseAppLink()
 ///////////////////////////////////////////////////////////
 // Link to App
 ///////////////////////////////////////////////////////////
-u8 Win32_LinkToApplication()
+u8 Win32_LinkToApplication(win32_module_link* link, char* appName)
 {
-    PLAT_LOG(64, "PLATFORM Link to App\n");
+    PLAT_LOG(128, "PLATFORM Link to App %s\n", appName);
     if (g_app.isValid == 1)
     {
         Win32_CloseAppLink();
     }
+    // Set paths
+    sprintf_s(g_gameName, MAX_GAME_NAME_LENGTH, "%s", appName);
+    sprintf_s(
+        g_gamePath,
+        MAX_GAME_PATH_LENGTH,
+        "%s/%s",
+        g_gameName,
+        DEFAULT_GAME_DLL_NAME);
+    sprintf_s(
+        g_gamePathCopy,
+        MAX_GAME_PATH_LENGTH,
+        "%s/%s",
+        g_gameName,
+        DEFAULT_GAME_DLL_COPY_NAME);
+    g_appLink.path = g_gamePath;
+    g_appLink.pathForCopy = g_gamePathCopy;
+
     Win32_CopyFile(g_appLink.path, g_appLink.pathForCopy);
     g_appLink.moduleHandle = LoadLibraryA(g_appLink.pathForCopy);
     if (g_appLink.moduleHandle != NULL)

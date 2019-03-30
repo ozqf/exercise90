@@ -123,7 +123,7 @@ internal i32 Tex_RegisterTexture(Texture2DHeader *header, BlockRef *ref)
 internal BlockRef Tex_LoadTexture(char *filePath)
 {
     BlockRef ref = {};
-    g_platform.LoadFileIntoHeap(g_heap, &ref, filePath, 0);
+    g_platform.LoadFileIntoHeap(g_heap, &ref, filePath, 1);
     return ref;
 }
 

@@ -545,7 +545,7 @@ int CALLBACK WinMain(
             SharedAssets_Init();
             
 #if 1
-            if (!Win32_LinkToApplication())
+            if (!Win32_LinkToApplication(&g_appLink, PLATFORM_DEFAULT_GAME_NAME))
             {
                 MessageBox(0, "Failed to init sound", "Error", MB_OK | MB_ICONINFORMATION);
                 return 1;
@@ -605,7 +605,7 @@ int CALLBACK WinMain(
                     g_appLink.checkTick = 0.1f;
                     if (Win32_CheckFileModified(g_appLink.path, &g_appLink.timestamp))
                     {
-                        Win32_LinkToApplication();
+                        Win32_LinkToApplication(&g_appLink, g_gameName);
                     }
                 }
                 

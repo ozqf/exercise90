@@ -259,13 +259,13 @@ u32 Win32_MeasureFile(char* fileName)
 	{
 		// Read directly
 		char buf[256];
-		sprintf_s(buf, 256, "%s\\%s", g_baseDirectoryName, fileName);
+		sprintf_s(buf, 256, "%s\\%s", g_gameName, fileName);
 		FILE* f;
 		fopen_s(&f, buf, "rb");
 
 		if (f == NULL)
 		{
-			PLAT_PRINT(512, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+			PLAT_PRINT(512, "PLATFORM Failed to find file to measure \"%s\\%s\"\n", g_gameName, fileName);
 			return 0;
 		}
 
@@ -302,7 +302,7 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 	{
 		// Read directly
 		char buf[256];
-		sprintf_s(buf, 256, "%s\\%s", g_baseDirectoryName, fileName);
+		sprintf_s(buf, 256, "%s\\%s", g_gameName, fileName);
 		FILE* f;
 		fopen_s(&f, buf, "rb");
 
@@ -311,12 +311,16 @@ u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 
 			//assertOnFailure = 1;
 			if (assertOnFailure)
 			{
-				sprintf_s(buf, 256, "PLATFORM CRITICAL Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+				sprintf_s(buf, 256,
+					"PLATFORM CRITICAL Failed to find file \"%s\\%s\"\n",
+					g_gameName, fileName);
 				Win32_Error(buf, "File Not Found");
 			}
 			else
 			{
-				PLAT_PRINT(512, "PLATFORM Failed to find file \"%s\\%s\"\n", g_baseDirectoryName, fileName);
+				PLAT_PRINT(512,
+					"PLATFORM Failed to find file \"%s\\%s\"\n",
+					g_gameName, fileName);
 				return 0;
 			}
 			

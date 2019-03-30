@@ -13,14 +13,12 @@
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
 
-#define PLATFORM_BASE_DIR "base"
-
-#define PLATFORM_PATH_BASE_GAME "base/gamex86.dll";
-#define PLATFORM_PATH_BASE_GAME_COPY "base/gamex86copy.dll";
-#define PLATFORM_PATH_REND "win32gl.dll";
-#define PLATFORM_PATH_REND_COPY "win32glcopy.dll";
-#define PLATFORM_PATH_SND "win32sound.dll";
-#define PLATFORM_PATH_SND_COPY "win32soundcopy.dll";
+#define PLATFORM_PATH_BASE_GAME "base/gamex86.dll"
+#define PLATFORM_PATH_BASE_GAME_COPY "base/gamex86copy.dll"
+#define PLATFORM_PATH_REND "win32gl.dll"
+#define PLATFORM_PATH_REND_COPY "win32glcopy.dll"
+#define PLATFORM_PATH_SND "win32sound.dll"
+#define PLATFORM_PATH_SND_COPY "win32soundcopy.dll"
 
 /****************************************************************
 STRUCTS
@@ -97,7 +95,15 @@ global_variable HWND consoleHandle;
 #define PLATFORM_MAX_DATA_FILES 64
 static DataFile g_dataFiles[PLATFORM_MAX_DATA_FILES];
 static i32 g_nextDataFileIndex = 0;
-static char* g_baseDirectoryName = PLATFORM_BASE_DIR;
+
+#define MAX_GAME_PATH_LENGTH (MAX_GAME_NAME_LENGTH + 16)
+
+internal char g_gameName[MAX_GAME_NAME_LENGTH];
+internal char g_gamePath[MAX_GAME_PATH_LENGTH];
+internal char g_gamePathCopy[MAX_GAME_PATH_LENGTH];
+//internal char* g_baseDirectoryName = PLATFORM_DEFAULT_GAME_NAME;
+
+
 
 // system handles etc
 global_variable HWND appWindow;

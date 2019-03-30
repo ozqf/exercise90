@@ -83,7 +83,7 @@ void Platform_SetDebugInputTextureIndex(i32 i)
 // Copy the base name into the given buffer
 i32 Platform_GetBaseDirectoryName(char* buffer, i32 bufferSize)
 {
-    return COM_CopyStringLimited(g_baseDirectoryName, buffer, bufferSize);
+    return COM_CopyStringLimited(g_gameName, buffer, bufferSize);
 }
 
 void Platform_GetDateTime(DateTime* data)
