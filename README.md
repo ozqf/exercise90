@@ -1,5 +1,7 @@
 # Exercise 90
-A simple fps as a learning exercise in C, opengl and games/engines generally.
+A simple fps as a learning exercise in C, low level programming, networking, opengl and games/engines generally.
+
+Being the result of a learning experience it has a lot of large or small experiments and different ways of doing things. Where possible these have been limited to the app_stub and tools sections.
 
 ## Build instructions
 

@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+ * Stripped down App for easier working on render
+ * 
+ */
 #include <stdio.h>
 
 #include "../common/com_defines.h"
