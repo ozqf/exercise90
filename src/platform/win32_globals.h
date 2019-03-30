@@ -13,6 +13,13 @@
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
 
+#define PLATFORM_PATH_BASE_GAME "base/gamex86.dll";
+#define PLATFORM_PATH_BASE_GAME_COPY "base/gamex86copy.dll";
+#define PLATFORM_PATH_REND "win32gl.dll";
+#define PLATFORM_PATH_REND_COPY "win32glcopy.dll";
+#define PLATFORM_PATH_SND "win32sound.dll";
+#define PLATFORM_PATH_SND_COPY "win32soundcopy.dll";
+
 /****************************************************************
 STRUCTS
 ****************************************************************/
