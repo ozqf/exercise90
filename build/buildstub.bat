@@ -9,11 +9,11 @@
 cd..
 if not exist bin mkdir bin
 cd bin
-if not exist base mkdir base
+if not exist stub mkdir stub
 cd..
 
-if not exist buildGame mkdir buildGame
-cd buildGame
+if not exist buildStub mkdir buildStub
+cd buildStub
 del *.* /q
 
 @rem -- Common module input --
@@ -29,7 +29,7 @@ set in2=../src/app_stub/app_stub.cpp ../src/app/app_textures.cpp
 
 set compIn=%in1% %in2% %in3% %in4%
 
-set compOut=/Fe../bin/base/gamex86.dll
+set compOut=/Fe../bin/stub/gamex86.dll
 
 @rem /EHsc to avoid exception handling issues.
 @rem Warnings as Errors

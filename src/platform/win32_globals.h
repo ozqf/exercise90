@@ -13,6 +13,8 @@
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
 
+#define PLATFORM_BASE_DIR "base"
+
 #define PLATFORM_PATH_BASE_GAME "base/gamex86.dll";
 #define PLATFORM_PATH_BASE_GAME_COPY "base/gamex86copy.dll";
 #define PLATFORM_PATH_REND "win32gl.dll";
@@ -95,7 +97,7 @@ global_variable HWND consoleHandle;
 #define PLATFORM_MAX_DATA_FILES 64
 static DataFile g_dataFiles[PLATFORM_MAX_DATA_FILES];
 static i32 g_nextDataFileIndex = 0;
-static char* g_baseDirectoryName = "base";
+static char* g_baseDirectoryName = PLATFORM_BASE_DIR;
 
 // system handles etc
 global_variable HWND appWindow;

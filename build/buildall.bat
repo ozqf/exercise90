@@ -14,4 +14,6 @@
 @call buildsound.bat
 
 @call buildgame.bat
+
+@call buildstub.bat
 @rem @PAUSE
