@@ -215,6 +215,37 @@ void COMTex_BMP2Internal(
 	}
 }
 
+/**
+ * Target must already be allocated. Therefore header is omitted here and
+ * just pixels are written
+ */
+void Tex_RGBA2BW(Texture2DHeader* tex, u8* target)
+{
+    u32* source = tex->ptrMemory;
+    i32 numPixels = tex->width * tex->height;
+    i32 pixelsRead = 0;
+    i32 blocksWritten = 0;
+    for (i32 i = 0; i < numPixels; i += 8)
+    {
+        // read eight pixel block
+        u8 result = 0;
+        for (i32 bit = 0; bit < 8; ++bit)
+        {
+            ColourU32 col = *((ColourU32*)(source));
+            if (col.r || col.g || col.b)
+            {
+                result |= (1 << bit);
+            }
+            source++;
+            pixelsRead++;
+        }
+        blocksWritten++;
+        *target = result;
+        target++;
+    }
+    printf("Read %d pixels, wrote %d blocks\n", pixelsRead, blocksWritten);
+}
+
 ///////////////////////////////////////////////////
 // Black and white bit-packed
 ///////////////////////////////////////////////////

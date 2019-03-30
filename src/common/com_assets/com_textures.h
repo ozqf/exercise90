@@ -15,7 +15,12 @@ struct BWImage
   BW8x8Block* blocks;
 };
 
-i32 Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight);
+// B&W encoding (for embedding textures)
+i32     Tex_CalcBytesForBWPixels(i32 sourceWidth, i32 sourceHeight);
+void    Tex_RGBA2BW(Texture2DHeader* tex, u8* target);
+void    Tex_BW2BGBA(u8* source, Texture2DHeader* tex);
+void    Tex_BWSetAllPixels(BW8x8Block* block);
+
 void    TexDraw_Outline(Texture2DHeader* tex, ColourU32 col);
 void    TexDraw_Gradient(Texture2DHeader* tex, i32 type);
 void    TexDraw_FillRect(
@@ -25,11 +30,11 @@ void    TexDraw_Line(
           ColourU32 col,
           i32 x0, i32 y0, i32 x1, i32 y1);
 
-void 	  COMTex_SetAllPixels(Texture2DHeader* tex, ColourU32 col);
+void 	    TexDraw_SetAllPixels(Texture2DHeader* tex, ColourU32 col);
+
 Point     Tex_CalcInternalImageSizeFromBW(BWImage* img);
 Point     Tex_CalcBWImageSizeFromBitmap(Texture2DHeader* h);
-void      Tex_BW2BGBA(u8* source, Texture2DHeader* tex);
-void      Tex_BWSetAllPixels(BW8x8Block* block);
+
 void      Tex_GenerateBW(Texture2DHeader* h, BWImage* dest);
 void      COMTex_BMP2Internal(
             u32* sourcePixels,
