@@ -91,9 +91,10 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     }
 }
 
-SVG_DEFINE_ENT_UPDATE(Projectile)
+internal i32 SVG_StepProjectile(
+    SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
-	Sim_SimpleMove(ent, deltaTime);
+    Sim_SimpleMove(ent, deltaTime);
 
     // find victims
     f32 width = 0.5f;
@@ -122,7 +123,22 @@ SVG_DEFINE_ENT_UPDATE(Projectile)
 	if (ent->lifeTime < 0)
 	{
         SVG_HandleEntityDeath(sim, ent, NULL, 0);
+        return 0;
 	}
+    return 1;
+}
+
+SVG_DEFINE_ENT_UPDATE(Projectile)
+{
+    while(ent->fastForwardTicks > 0)
+    {
+        ent->fastForwardTicks--;
+        if (!SVG_StepProjectile(sim, ent, deltaTime))
+        {
+            return;
+        }
+    }
+	SVG_StepProjectile(sim, ent, deltaTime);
 }
 
 internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
@@ -132,8 +148,10 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         ...If not just spawn with no faff, otherwise:
     > Calculate the frame command came from - how?
          eg if server is on 12203 and CL on 11994:
-         Client is running 5 ticks of time + 4 ticks of jitter behind server
-         > Client has simulated forward 9 frame.a
+         Client is running 5 ticks of time + 4 ticks of jitter
+            behind server
+         > Client has simulated forward 9 frames to match it's server
+            position at this moment
     > Retrieve entity position at that point
     > Spawn projectiles and enqueue replication command
     > fast forward projectiles to present
@@ -145,11 +163,12 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     if (u)
     {
         // calculate fast-forward ticks
-        f32 time = u->ping * 0.5f;
+        f32 time = u->ping;// * 0.5f;
         fastForwardTicks = (i32)(time / App_GetSimFrameInterval());
         fastForwardTicks += APP_DEFAULT_JITTER_TICKS;
         printf("Prj fastforward - %d ticks\n", fastForwardTicks);
     }
+    u32 eventTick = g_ticks - fastForwardTicks;
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
@@ -158,10 +177,10 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.seedIndex = 0;
     def.forward = *dir;
     def.tick = g_ticks;
-    Sim_ExecuteProjectileSpawn(sim, &def, 0);
+    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks / 2);
 
     S2C_SpawnProjectile prj = {};
-    Cmd_Prepare(&prj.header, g_ticks - fastForwardTicks, 0);
+    Cmd_Prepare(&prj.header, eventTick, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);
