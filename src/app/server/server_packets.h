@@ -27,7 +27,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
         );
     packet->ptrWrite += COM_COPY(
         &response, packet->ptrWrite, response.header.size);
-
+    APP_LOG(128, "SV Write ent sync for: ");
 	i32 syncMessagesWritten = 0;
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
 	{
@@ -39,7 +39,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 		{
 			break;
 		}
-		
+        APP_LOG(32, "%d, ", ent->id.serial);
 		switch (ent->entType)
 		{
             case SIM_ENT_TYPE_ACTOR:
@@ -54,6 +54,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 			} break;
 		}
 	}
+    APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);
     //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
     //    syncMessagesWritten, written, capacity);

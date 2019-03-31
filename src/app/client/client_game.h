@@ -68,6 +68,8 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     if (!ent)
     {
         APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+        // Must return executed or this dead command will stay in the buffer!
+        executed = 1;
     }
     else
     {

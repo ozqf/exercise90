@@ -3,6 +3,20 @@
 #include "server.h"
 #include <math.h>
 
+internal void SVG_HandleEntityDeath(
+    SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style)
+{
+	APP_LOG(128, "SV Remove ent %d\n", victim->id.serial);
+    
+    S2C_RemoveEntity cmd = {};
+    Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
+    SV_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+
+	// Remove Ent AFTER command as sim may
+	// clear entity details immediately
+	Sim_RemoveEntity(sim, victim->id.serial);
+}
+
 internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntityDef def = {};
@@ -100,14 +114,14 @@ SVG_DEFINE_ENT_UPDATE(Projectile)
     for (i32 i = 0; i < overlaps; ++i)
     {
         SimEntity* victim = ents[i];
-        Sim_RemoveEntity(sim, victim->id.serial);
+        SVG_HandleEntityDeath(sim, victim, ent, 0);
         ent->lifeTime = 0;
     }
 
 	ent->lifeTime -= deltaTime;
 	if (ent->lifeTime < 0)
 	{
-		Sim_RemoveEntity(sim, ent->id.serial);
+        SVG_HandleEntityDeath(sim, ent, NULL, 0);
 	}
 }
 

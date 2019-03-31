@@ -245,9 +245,9 @@ internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
         SimEntIndex slot = ent->id.slot;
         APP_LOG(64, "SIM Removing ent %d (slot %d/%d)\n",
             entitySerialNumber, slot.iteration, slot.index);
-        
+        u16 iteration = ent->id.slot.iteration + 1;
         *ent = {};
-        ent->id.slot.iteration++;
+        ent->id.slot.iteration = iteration;
         return COM_ERROR_NONE;
     }
     else

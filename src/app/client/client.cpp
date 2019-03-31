@@ -339,7 +339,8 @@ internal i32 CL_GetServerTick()
 	return g_serverTick;
 }
 
-internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
+internal i32 CL_ExecReliableCommand(
+    SimScene* sim, Command* h, f32 deltaTime, i32 tickDiff)
 {
     //APP_LOG(64, "CL exec input seq %d\n", h->sequence);
 
@@ -355,7 +356,7 @@ internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 				prj->header.tick
             );
             // flip diff to specify fast forwarding
-            Sim_ExecuteProjectileSpawn(&g_sim, &prj->def, -tickDiff);
+            Sim_ExecuteProjectileSpawn(sim, &prj->def, -tickDiff);
         } break;
 		case CMD_TYPE_S2C_SPAWN_ENTITY:
 		{
@@ -374,8 +375,14 @@ internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
 			def.velocity[0] = spawn->vel.x;
 			def.velocity[1] = spawn->vel.y;
 			def.velocity[2] = spawn->vel.z;
-			Sim_AddEntity(&g_sim, &def);
+			Sim_AddEntity(sim, &def);
 		} break;
+        case CMD_TYPE_S2C_REMOVE_ENTITY:
+        {
+            S2C_RemoveEntity* cmd = (S2C_RemoveEntity*)h;
+            Sim_RemoveEntity(sim, cmd->entityId);
+            APP_PRINT(64, "CL Remove Ent %d\n", cmd->entityId);
+        } break;
         case CMD_TYPE_S2C_SYNC:
         {
             S2C_Sync* sync = (S2C_Sync*)h;
@@ -398,7 +405,8 @@ internal i32 CL_ExecReliableCommand(Command* h, f32 deltaTime, i32 tickDiff)
     return 1;
 }
 
-internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
+internal void CL_RunReliableCommands(
+    SimScene* sim, NetStream* stream, f32 deltaTime)
 {
 	ByteBuffer* b = &stream->inputBuffer;
 	
@@ -438,7 +446,7 @@ internal void CL_RunReliableCommands(NetStream* stream, f32 deltaTime)
 		
 		i32 err = Cmd_Validate(h);
 		Assert(err == COM_ERROR_NONE)
-		if (CL_ExecReliableCommand(h, deltaTime, diff))
+		if (CL_ExecReliableCommand(sim, h, deltaTime, diff))
         {
             Stream_DeleteCommand(b, h);
         }
@@ -471,7 +479,7 @@ internal void CL_RunUnreliableCommands(
 		//	h->sequence, h->tick, CL_GetServerTick(), diff, g_ticks
 		//)
 		
-		// If executed, delete command from buffer
+		// If executed,   delete command from buffer
         i32 executed = 0;
         if (diff <= 0)
         {
@@ -480,7 +488,7 @@ internal void CL_RunUnreliableCommands(
                 case CMD_TYPE_S2C_SYNC_ENTITY:
                 {
                     S2C_EntitySync* cmd = (S2C_EntitySync*)h;
-                    executed = CLG_SyncEntity(&g_sim, cmd);
+                    executed = CLG_SyncEntity(sim, cmd);
                 } break;
 
                 case CMD_TYPE_S2C_INPUT_RESPONSE:
@@ -526,7 +534,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
         g_ticks, g_serverTick, g_elapsed);
     CL_ReadSystemEvents(sysEvents, deltaTime, platformFrame);
     CL_CalcPings(deltaTime);
-	CL_RunReliableCommands(&g_reliableStream, deltaTime);
+	CL_RunReliableCommands(&g_sim, &g_reliableStream, deltaTime);
     //CL_LogCommandBuffer(&g_unreliableStream.inputBuffer, "Unreliable input");
     CL_RunUnreliableCommands(&g_sim, &g_unreliableStream, deltaTime);
 
