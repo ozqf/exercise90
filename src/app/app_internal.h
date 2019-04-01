@@ -18,8 +18,8 @@ internal AppPlatform g_platform = {};
 internal ScreenInfo g_screenInfo;
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
-internal i32 g_fakeLagMinMS = 200;
-internal i32 g_fakeLagMaxMS = 400;
+internal i32 g_fakeLagMinMS = 500;
+internal i32 g_fakeLagMaxMS = 500;
 internal f32 g_fakeLoss = 0.05f;
 
 internal u32 g_lastPlatformFrame = 0;
@@ -67,7 +67,7 @@ internal RendObj g_serverDebugStrRenderer;
 internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 
-internal i32 g_debugDrawServerScene = 0;
+internal i32 g_debugDrawServerScene = 1;
 internal i32 g_debugDrawServerTests = 1;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING

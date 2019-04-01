@@ -134,10 +134,10 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 {
     if (g_latestUserInputAck >= cmd->lastUserInputSequence)
     {
-        APP_PRINT(64, "CL Ignore response %d (current %d)\n",
-            cmd->lastUserInputSequence,
-            g_latestUserInputAck
-        );
+        // APP_PRINT(64, "CL Ignore response %d (current %d)\n",
+        //     cmd->lastUserInputSequence,
+        //     g_latestUserInputAck
+        // );
         return;
     }
     SimEntity* ent = Sim_GetEntityBySerial(

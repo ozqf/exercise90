@@ -73,7 +73,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         def.pos = ent->t.pos;
         def.seedIndex = 0;
         def.forward = { 1, 0, 0 };
-        // frame the event occurred is recorded
+        // frame the event occurred on is recorded
         def.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
 			sim, &def, 0
@@ -160,15 +160,29 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 
     i32 fastForwardTicks = 0;
     User* u = User_FindByAvatarSerial(&g_users, ent->id.serial);
-    if (u)
+    if (u && g_lagCompensateProjectiles)
     {
         // calculate fast-forward ticks
+        // TODO: Tune these and figure out which of these is best
+        i32 ticksEllapsed = 0;
+        i32 diff = 0;
+        // By estimating current lag - not super accurate
         f32 time = u->ping;// * 0.5f;
-        fastForwardTicks = (i32)(time / App_GetSimFrameInterval());
-        fastForwardTicks += APP_DEFAULT_JITTER_TICKS;
-        printf("Prj fastforward - %d ticks\n", fastForwardTicks);
+        ticksEllapsed = (i32)(time / App_GetSimFrameInterval());
+        ticksEllapsed += APP_DEFAULT_JITTER_TICKS * 2;
+        #if 0
+        fastForwardTicks = ticksEllapsed;
+        #endif
+
+        // By diffing from client's last stated frame
+        diff = g_ticks - u->latestServerTick;
+        #if 0
+        fastForwardTicks = diff;
+        #endif
+        printf("Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
+            u->ping, ticksEllapsed, diff);
     }
-    u32 eventTick = g_ticks - fastForwardTicks;
+    i32 eventTick = g_ticks - fastForwardTicks;
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
@@ -177,10 +191,11 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.seedIndex = 0;
     def.forward = *dir;
     def.tick = g_ticks;
-    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks / 2);
+    Sim_ExecuteProjectileSpawn(sim, &def, 0);//fastForwardTicks / 2);
 
+    // Replicate
     S2C_SpawnProjectile prj = {};
-    Cmd_Prepare(&prj.header, eventTick, 0);
+    Cmd_Prepare(&prj.header, g_ticks, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);

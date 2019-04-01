@@ -25,6 +25,7 @@ internal SimScene g_sim;
 internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
+internal i32 g_lagCompensateProjectiles = 0;
 
 /*
 Record entity states for lag compensation rewind
@@ -491,8 +492,8 @@ void SV_PopulateRenderScene(
                 RendObj_SetAsLine(&obj,
                     { a->x, a->y + offsetY, a->z },
                     { b->x, b->y + offsetY, b->z },
-                    { 1, 0, 0, 1 },
-                    { 0, 1, 0, 1 }
+                    { 1, 0, 1, 1 },
+                    { 1, 0, 1, 1 }
                 );
                 TRANSFORM_CREATE(t);
                 RScene_AddRenderItem(scene, &t, &obj);

@@ -27,6 +27,7 @@ struct User
 
     f32 ping;
     f32 jitter;
+    i32 latestServerTick;
     i32 smoothingTicks;
     i32 userInputSequence;
 	

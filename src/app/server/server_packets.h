@@ -183,6 +183,10 @@ internal void SV_ReadUnreliableSection(User* user, ByteBuffer* b)
                 {
                     user->userInputSequence = cmd->userInputSequence;
                 }
+                if (cmd->header.tick > user->latestServerTick)
+                {
+                    user->latestServerTick = cmd->header.tick;
+                }
                 Sim_SetActorInput(&g_sim, &cmd->input, user->entSerial);
             } break;
 
