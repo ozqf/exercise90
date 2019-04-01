@@ -56,7 +56,8 @@ struct RenderListItem;
 struct RenderScene;
 
 struct Texture2DHeader;
-typedef Texture2DHeader* Com_AllocateTexture(char* name, i32 width, i32 height);
+typedef Texture2DHeader* Com_AllocateTexture(
+    char* name, i32 width, i32 height);
 
 
 /****************************************************************
@@ -75,6 +76,15 @@ union Colour
 		f32 r, g, b, a;
 	};
 };
+
+#define COL_U32_WHITE { 1, 1, 1, 1 }
+#define COL_U32_BLACK { 0, 0, 0, 1 }
+#define COL_U32_RED { 1, 0, 0, 1 }
+#define COL_U32_GREEN { 0, 1, 0, 1 }
+#define COL_U32_BLUE { 0, 0, 1, 1 }
+#define COL_U32_YELLOW { 1, 1, 0, 1 }
+#define COL_U32_CYAN { 0, 1, 1, 1 }
+#define COL_U32_PURPLE { 1, 0, 1, 1 }
 
 union ColourU32
 {

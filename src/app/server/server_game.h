@@ -176,8 +176,8 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 
         // By diffing from client's last stated frame
         diff = g_ticks - u->latestServerTick;
-        #if 0
-        fastForwardTicks = diff;
+        #if 1
+        fastForwardTicks = diff + APP_DEFAULT_JITTER_TICKS;
         #endif
         printf("Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
             u->ping, ticksEllapsed, diff);
@@ -191,11 +191,11 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.seedIndex = 0;
     def.forward = *dir;
     def.tick = g_ticks;
-    Sim_ExecuteProjectileSpawn(sim, &def, 0);//fastForwardTicks / 2);
+    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks / 2);
 
     // Replicate
     S2C_SpawnProjectile prj = {};
-    Cmd_Prepare(&prj.header, g_ticks, 0);
+    Cmd_Prepare(&prj.header, eventTick, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);

@@ -13,13 +13,13 @@ internal void Sim_InitProjectiles()
     SimProjectileType* t;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_NONE];
-    t->speed = 15.0f;
+    t->speed = 10.0f;
     t->numProjectiles = 1;
     t->lifeTime = 2.0f;
     t->pattern = SIM_PROJECTILE_PATTERN_NONE;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_TEST];
-    t->speed = 3.5f;
+    t->speed = 10.0f;
     t->numProjectiles = 4;
     t->lifeTime = 6.0f;
     t->pattern = SIM_PROJECTILE_PATTERN_RADIAL;
