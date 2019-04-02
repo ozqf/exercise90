@@ -185,7 +185,7 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, 
 	Vec3 a = { -halfX, -halfY, -halfZ };
 	Vec3 b = { halfX, halfY, halfZ };
 
-	glLineWidth(2.0);
+	glLineWidth(4.0);
 	glBegin(GL_LINES);
 	//glColor3f(red, green, blue);
 	glColor3f(1, 0, 0);
