@@ -68,15 +68,18 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     if (!ent)
     {
         APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
-        // Must return executed or this dead command will stay in the buffer!
+        // Must return executed or this dead command will stay
+        // in the buffer!
         executed = 1;
     }
     else
     {
         if (cmd->networkId == g_avatarSerial)
         {
-            C2S_Input* input = CL_RecallSentInputCommand(g_sentCommands, cmd->header.tick);
             #if 0
+            C2S_Input* input = CL_RecallSentInputCommand(
+                g_sentCommands, cmd->header.tick);
+            
             if (input == NULL)
             {
                 printf("CL Sent input for tick %d not found!\n", cmd->header.tick);

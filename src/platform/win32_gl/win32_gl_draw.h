@@ -54,14 +54,16 @@ void R_SetupLights(RenderSceneSettings* settings, Transform* model)
 		pos[2] = 0;
 		pos[3] = 0;
 		glLightfv(GL_LIGHT0, GL_POSITION, pos);
-		//printf("Light pos %.2f, %.2f, %.2f, %.2f\n", pos[0], pos[1], pos[2], pos[3]);
+		//printf("Light pos %.2f, %.2f, %.2f, %.2f\n",
+		//	pos[0], pos[1], pos[2], pos[3]);
 	}
 }
 
 ////////////////////////////////////////////////////////////////////
 // Draw Quad
 ////////////////////////////////////////////////////////////////////
-void R_DrawSpriteGeometry(f32 posX, f32 posY, f32 posZ, RendObj_Sprite* sprite)
+void R_DrawSpriteGeometry(
+	f32 posX, f32 posY, f32 posZ, RendObj_Sprite* sprite)
 {
 	f32 hw = sprite->width * 0.5f;
 	f32 hh = sprite->height * 0.5f;
@@ -175,19 +177,19 @@ void R_RenderTestGeometry_ColouredQuad(f32 r, f32 g, f32 b, f32 a)
     glEnd();
 }
 
-void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, f32 red, f32 green, f32 blue)
+void R_RenderAABBGeometry(
+	f32 x, f32 y, f32 z,
+	f32 sizeX, f32 sizeY, f32 sizeZ,
+	f32 red, f32 green, f32 blue)
 {
 	f32 halfX = sizeX / 2;
 	f32 halfY = sizeY / 2;
 	f32 halfZ = sizeZ / 2;
-	// Vec3 a = { x - halfX, y - halfY, z - halfZ };
-	// Vec3 b = { x + halfX, y + halfY, z + halfZ };
 	Vec3 a = { -halfX, -halfY, -halfZ };
 	Vec3 b = { halfX, halfY, halfZ };
 
 	glLineWidth(4.0);
 	glBegin(GL_LINES);
-	//glColor3f(red, green, blue);
 	glColor3f(1, 0, 0);
 	// front face
 	glVertex3f(a.x, a.y, a.z);
@@ -230,7 +232,11 @@ void R_RenderAABBGeometry(f32 x, f32 y, f32 z, f32 sizeX, f32 sizeY, f32 sizeZ, 
 	glEnd();
 }
 
-void R_RenderPrimitive(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderPrimitive(
+	RenderSceneSettings* settings,
+	Transform* camera,
+	Transform* objTransform,
+	RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
 	R_SetModelViewMatrix(settings, camera, objTransform);
@@ -275,21 +281,15 @@ glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 to switch on,
 glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 */
-void R_RenderLine(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderLine(
+	RenderSceneSettings* settings,
+	Transform* camera,
+	Transform* objTransform,
+	RendObj* obj)
 {
 	glDisable(GL_TEXTURE_2D);
-	//DebugBreak();
 	R_SetModelViewMatrix(settings, camera, objTransform);
 	RendObj_Line* line = &obj->data.line;
-	//glDisable(GL_DEPTH_TEST);
-	//glTranslatef(0.0f,0.0f,-10.0f);
-
-	// glLineWidth(10.0);
-	// glBegin(GL_LINES);
-	// glColor3f(1, 1, 1);
-	// glVertex3f(-1, -1, -1);
-	// glVertex3f(1, 1, 1);
-	// glEnd();
 
 	glLineWidth(10.0); 
 	glBegin(GL_LINES);
@@ -301,30 +301,29 @@ void R_RenderLine(RenderSceneSettings* settings, Transform* camera, Transform* o
 	glVertex3f(line->b.x, line->b.y, line->b.z);
 	
 	glEnd();
-	//glEnable(GL_DEPTH_TEST);
 }
 
 void R_RenderAsciChar(RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
 
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	RendObj_AsciChar* c = &obj->data.asciChar;
 	R_SetupTestTexture(c->textureIndex);
-	R_LoadAsciCharGeometry(c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, 0, 0, 8, win32_aspectRatio);
+	R_LoadAsciCharGeometry(
+		c->asciChar, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS,
+		0, 0, 8, win32_aspectRatio);
 }
 
-void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
+void R_RenderAsciCharArray(
+	RenderSceneSettings* settings,
+	Transform* camera,
+	Transform* objTransform,
+	RendObj* obj)
 {
 	glEnable(GL_TEXTURE_2D);
-
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
 	if (settings->projectionMode == RENDER_PROJECTION_MODE_IDENTITY)
@@ -335,9 +334,7 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	{
 		R_SetModelViewMatrix(settings, camera, objTransform);
 	}
-	//glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
-	//glTranslatef(objTransform->pos.x, objTransform->pos.y, objTransform->pos.z);
-	
+		
 	RendObj_AsciCharArray* c = &obj->data.charArray;
 	R_SetupTestTexture(c->textureIndex);
 	Vec3 pos = objTransform->pos;
@@ -355,11 +352,6 @@ void R_RenderAsciCharArray(RenderSceneSettings* settings, Transform* camera, Tra
 	data.blue = c->b;
 	
 	R_LoadAsciCharArrayGeometry(settings, &data);
-
-	// R_LoadAsciCharArrayGeometry(
-	// 	settings,
-	// 	c->chars, ZTXT_CONSOLE_CHAR_SHEET_WIDTH_PIXELS, c->alignmentMode,
-	// 	pos.x, pos.y, c->size, win32_aspectRatio);
 }
 
 void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
@@ -367,7 +359,6 @@ void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transfo
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1, 1, 1);
 	R_SetModelViewMatrix_Billboard(settings, camera, objTransform);
-	//R_SetModelViewMatrix(settings, camera, objTransform);
 	RendObj_Billboard* b = &obj->data.billboard;
 	R_SetupTestTexture(b->textureIndex);
 	R_RenderTestGeometry_ColouredQuad(b->r, b->g, b->b, b->a);
@@ -375,7 +366,6 @@ void R_RenderBillboard(RenderSceneSettings* settings, Transform* camera, Transfo
 
 void R_RenderSprite(RenderSceneSettings* settings, Transform* camera, Transform* objTransform, RendObj* obj)
 {
-	//DebugBreak();
 	glEnable(GL_TEXTURE_2D);
 	RendObj_Sprite* sprite = &obj->data.sprite;
 	switch (sprite->mode)
@@ -402,7 +392,6 @@ void R_RenderSprite(RenderSceneSettings* settings, Transform* camera, Transform*
 			glScalef(objTransform->scale.x, objTransform->scale.y, objTransform->scale.z);
 			
 			R_SetupTestTexture(sprite->textureIndex);
-			//R_RenderTestGeometry_RainbowQuad();
 			R_DrawSpriteGeometry(pos.x, pos.y, pos.z, sprite);
 
 		} break;
@@ -429,8 +418,6 @@ void R_RenderMesh(RenderSceneSettings* settings, Transform* camera, Transform* o
 	R_SetModelViewMatrix(settings, camera, objTransform);
 	
 	R_SetupTestTexture(meshRend->textureIndex);
-	
-	//f32* meshVerts = mesh->verts;
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, mesh.verts);
@@ -495,8 +482,7 @@ void R_RenderScene(RenderScene* scene)
 	{
 		glEnable(GL_LIGHTING);
 	}
-	//R_SetupOrthoProjection(8);
-    for (u32 i = 0; i < scene->numObjects; ++i)
+	for (u32 i = 0; i < scene->numObjects; ++i)
     {
 		if (scene->sceneItems[i].obj.flags & RENDOBJ_FLAG_DEBUG)
 		{
@@ -505,9 +491,4 @@ void R_RenderScene(RenderScene* scene)
 		}
         R_RenderEntity(&scene->settings, &scene->cameraTransform, &scene->sceneItems[i]);
     }
-
-	// for (u32 i = 0; i < scene->numUIObjects; ++i)
-	// {
-	// 	R_RenderEntity(&scene->cameraTransform, &scene->uiItems[i]);
-	// }
 }

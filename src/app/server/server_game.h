@@ -183,19 +183,14 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         f32 time = u->ping;// * 0.5f;
         ticksEllapsed = (i32)(time / App_GetSimFrameInterval());
         ticksEllapsed += APP_DEFAULT_JITTER_TICKS * 2;
-        #if 0
+        #if 1
         fastForwardTicks = ticksEllapsed;
         #endif
  
         // By diffing from client's last stated frame
         diff = g_ticks - u->latestServerTick;
-        #if 1
-        //fastForwardTicks = diff + APP_DEFAULT_JITTER_TICKS;
-        //fastForwardTicks /= 2;
-        fastForwardTicks = (diff / 2);
+        #if 0
         fastForwardTicks = diff;
-        //fastForwardTicks -= (APP_DEFAULT_JITTER_TICKS / 2);
-        //fastForwardTicks += diff;
         #endif
         printf("Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
             u->ping, ticksEllapsed, diff);

@@ -69,7 +69,8 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(
     return ent;
 }
 
-internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial)
+internal SimEntity* Sim_GetFreeLocalEntity(
+    SimScene* scene, i32 newSerial)
 {
     SimEntity* ent = NULL;
     i32 slotIndex = -1;
@@ -129,16 +130,18 @@ internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
     }
 }
 
-internal i32 Sim_InitActor(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+internal i32 Sim_InitActor(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
-    ent->attackTime = 1.1f;
+    ent->attackTime = 0.2f;
     ent->display.colour = { 0, 1, 0, 1 };
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitWanderer(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+internal i32 Sim_InitWanderer(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
@@ -146,7 +149,8 @@ internal i32 Sim_InitWanderer(SimScene* scene, SimEntity* ent, SimEntityDef* def
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+internal i32 Sim_InitWorldVolume(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
@@ -158,7 +162,8 @@ internal i32 Sim_InitWorldVolume(SimScene* scene, SimEntity* ent, SimEntityDef* 
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+internal i32 Sim_InitTurret(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
     ent->entType = def->entType;
@@ -167,7 +172,8 @@ internal i32 Sim_InitTurret(SimScene* scene, SimEntity* ent, SimEntityDef* def)
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitLineTrace(SimScene* scene, SimEntity* ent, SimEntityDef* def)
+internal i32 Sim_InitLineTrace(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
 	//printf("SIM Create line trace\n");
     Sim_InitEntity(ent, def);
@@ -176,7 +182,8 @@ internal i32 Sim_InitLineTrace(SimScene* scene, SimEntity* ent, SimEntityDef* de
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
+internal i32 Sim_SpawnEntity(
+    SimScene* scene, SimEntityDef* def)
 {
     SimEntity* ent;
     if (def->isLocal)
@@ -237,9 +244,11 @@ internal i32 Sim_SpawnEntity(SimScene* scene, SimEntityDef* def)
     //return COM_ERROR_NONE;
 }
 
-internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
+internal i32 Sim_RecycleEntity(
+    SimScene* sim, i32 entitySerialNumber)
 {
-    SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerialNumber);
+    SimEntity* ent = Sim_FindEntityBySerialNumber(
+        sim, entitySerialNumber);
     if (ent)
     {
         SimEntIndex slot = ent->id.slot;
@@ -252,7 +261,8 @@ internal i32 Sim_RecycleEntity(SimScene* sim, i32 entitySerialNumber)
     }
     else
     {
-        APP_PRINT(64, "SIM Found no ent %d to remove\n", entitySerialNumber);
+        APP_PRINT(64, "SIM Found no ent %d to remove\n",
+            entitySerialNumber);
         return COM_ERROR_BAD_ARGUMENT;
     }
 }
