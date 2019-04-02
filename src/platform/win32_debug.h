@@ -26,10 +26,16 @@ struct Win32_TextInput
 
 KeyConversion g_keyConversions[32];
 
+// Windows Virtual Keyboard
 #define VK_CODE_BACKSPACE 8
 #define VK_CODE_ENTER 13
 #define VK_CODE_SHIFT 16
 #define VK_CODE_SPACE 32
+
+#define VK_CODE_LEFT 0x25
+#define VK_CODE_RIGHT 0x26
+#define VK_CODE_UP 0x27
+#define VK_CODE_DOWN 0x28
 
 #define VK_CODE_0 48
 #define VK_CODE_1 49
@@ -53,6 +59,19 @@ KeyConversion g_keyConversions[32];
 #define VK_CODE_SQUARE_BACKSLASH 220
 #define VK_CODE_SQUARE_BRACKET_RIGHT 221
 #define VK_CODE_HASH 222
+
+#define VK_CODE_F1 0x70
+#define VK_CODE_F2 0x71
+#define VK_CODE_F3 0x72
+#define VK_CODE_F4 0x73
+#define VK_CODE_F5 0x74
+#define VK_CODE_F6 0x75
+#define VK_CODE_F7 0x76
+#define VK_CODE_F8 0x77
+#define VK_CODE_F9 0x78
+#define VK_CODE_F10 0x79
+#define VK_CODE_F11 0x7A
+#define VK_CODE_F12 0x7B
 
 u32 Win32_ConvertVKCode(u32 VKCode, u16 shift)
 {

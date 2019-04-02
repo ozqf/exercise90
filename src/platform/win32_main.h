@@ -197,6 +197,12 @@ LRESULT CALLBACK Win32_MainWindowCallback(
             Win32_ToggleDebugInput();
             break;
         }
+        // F3 - panic button
+        if (VKCode == 0x72 && wasDown)
+        {
+            Win32_Shutdown();
+            break;
+        }
         if (g_debugInputActive && isDown)
         {
             Win32_DebugReadKey(VKCode, wParam, lParam);

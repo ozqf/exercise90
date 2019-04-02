@@ -156,6 +156,19 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     > Spawn projectiles and enqueue replication command
     > fast forward projectiles to present
     */
+
+    /*
+	500ms round trip lag == (250ms / 16ms) or 15.625 ticks since player pressed button
+		plus a few frames for player's jitter.
+    Event occurred at client tick. Therefore server must fast-forward the projectile
+        by (server tick) - (client tick) ticks.
+	eg server tick 100, client event from tick 80:
+	> Server must fast-forward 20 ticks.
+	> All clients are informed the event occurred on tick 80 and will also fast-forward
+	
+	If Prj moves at 15 units a second, at 60fps, 0.25 per frame, 20 frames == 5 units
+	
+    */
     //printf("SVG Shoot %.3f, %.3f\n", dir->x, dir->z);
 
     i32 fastForwardTicks = 0;
@@ -177,12 +190,16 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         // By diffing from client's last stated frame
         diff = g_ticks - u->latestServerTick;
         #if 1
-        fastForwardTicks = diff + APP_DEFAULT_JITTER_TICKS;
+        //fastForwardTicks = diff + APP_DEFAULT_JITTER_TICKS;
+        //fastForwardTicks /= 2;
+        fastForwardTicks = diff / 2;
+        fastForwardTicks -= 3;
         #endif
         printf("Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
             u->ping, ticksEllapsed, diff);
     }
     i32 eventTick = g_ticks - fastForwardTicks;
+    printf("SV CurTick %d eventTick %d fastforward %d\n", g_ticks, eventTick, fastForwardTicks);
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
@@ -191,7 +208,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.seedIndex = 0;
     def.forward = *dir;
     def.tick = g_ticks;
-    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks / 2);
+    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
 
     // Replicate
     S2C_SpawnProjectile prj = {};
