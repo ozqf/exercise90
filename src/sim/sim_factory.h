@@ -261,7 +261,7 @@ internal i32 Sim_RecycleEntity(
     }
     else
     {
-        APP_PRINT(64, "SIM Found no ent %d to remove\n",
+        APP_LOG(64, "SIM Found no ent %d to remove\n",
             entitySerialNumber);
         return COM_ERROR_BAD_ARGUMENT;
     }

@@ -18,9 +18,12 @@ internal AppPlatform g_platform = {};
 internal ScreenInfo g_screenInfo;
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
-internal i32 g_fakeLagMinMS = 500;
+
+// 
+internal i32 g_fakeLagMinMS = 300;
 internal i32 g_fakeLagMaxMS = 500;
-internal f32 g_fakeLoss = 0.05f;
+// 0 to 1 values.
+internal f32 g_fakeLoss = 0.2f;
 
 internal u32 g_lastPlatformFrame = 0;
 
@@ -28,16 +31,6 @@ internal Heap g_heap;
 
 internal i32 g_isRunningClient = 0;
 internal i32 g_isRunningServer = 0;
-
-// fake socket (port 666)
-// Local server reads from this
-// Local client sends to this
-//internal FakeSocket g_localServerSocket;
-
-// fake socket (port 667)
-// Local client reads from this
-// Local server sends to this
-//internal FakeSocket g_localClientSocket;
 
 internal FakeSocket g_loopbackSocket;
 
@@ -68,7 +61,8 @@ internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 
 internal i32 g_debugDrawServerScene = 1;
-internal i32 g_debugDrawServerTests = 1;
+internal i32 g_debugDrawServerTests = 0;
+internal i32 g_debugDrawClientPredictions = 1;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
 

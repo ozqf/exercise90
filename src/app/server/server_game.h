@@ -179,23 +179,30 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         // TODO: Tune these and figure out which of these is best
         i32 ticksEllapsed = 0;
         i32 diff = 0;
-        // By estimating current lag
+
+
+        // 1: By estimating current lag
+        // Works well until jitter is introduced, and then becomes
+        // inaccurate (though test jitter is excessive...)
         f32 time = u->ping;// * 0.5f;
         ticksEllapsed = (i32)(time / App_GetSimFrameInterval());
-        ticksEllapsed += APP_DEFAULT_JITTER_TICKS * 2;
-        #if 1
+        //ticksEllapsed += APP_DEFAULT_JITTER_TICKS;
+        #if 0
         fastForwardTicks = ticksEllapsed;
         #endif
  
-        // By diffing from client's last stated frame
+        // 2: By diffing from client's last stated frame
+        // Works well but is this exploitable...? Trust client's tick value
         diff = g_ticks - u->latestServerTick;
-        #if 0
+        #if 1
         fastForwardTicks = diff;
         #endif
         printf(
             "Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
             u->ping, ticksEllapsed, diff);
     }
+
+    // Declare when the event took place:
     i32 eventTick = g_ticks - fastForwardTicks;
     printf("SV CurTick %d eventTick %d fastforward %d\n",
         g_ticks, eventTick, fastForwardTicks);

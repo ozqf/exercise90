@@ -22,6 +22,20 @@ struct SimProjectileType
     Vec3 scale;
 };
 
+struct SimSpawnPatternItem
+{
+	i32 entSerial;
+	Vec3 pos;
+	Vec3 forward;
+};
+
+struct SimSpawnPatternDef
+{
+	i32 pattern;
+	i32 numItems;
+	f32 radius;
+};
+
 internal SimProjectileType* Sim_GetProjectileType(i32 index);
 internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumber);
 internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial);
