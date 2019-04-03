@@ -73,6 +73,8 @@ struct Vec3
     // f32 &operator[](int index) { return ((&x)[index]); }
 };
 
+com_internal const Vec3 vec3_zero = { }; 
+
 struct Vec4
 {
     union 

@@ -179,7 +179,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         // TODO: Tune these and figure out which of these is best
         i32 ticksEllapsed = 0;
         i32 diff = 0;
-        // By estimating current lag - not super accurate
+        // By estimating current lag
         f32 time = u->ping;// * 0.5f;
         ticksEllapsed = (i32)(time / App_GetSimFrameInterval());
         ticksEllapsed += APP_DEFAULT_JITTER_TICKS * 2;
@@ -192,11 +192,13 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         #if 0
         fastForwardTicks = diff;
         #endif
-        printf("Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
+        printf(
+            "Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
             u->ping, ticksEllapsed, diff);
     }
     i32 eventTick = g_ticks - fastForwardTicks;
-    printf("SV CurTick %d eventTick %d fastforward %d\n", g_ticks, eventTick, fastForwardTicks);
+    printf("SV CurTick %d eventTick %d fastforward %d\n",
+        g_ticks, eventTick, fastForwardTicks);
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
@@ -290,15 +292,21 @@ SVG_DEFINE_ENT_UPDATE(Actor)
     }
 }
 
-internal void SVG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
+internal void SVG_TickEntity(
+    SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->entType)
     {
-		case SIM_ENT_TYPE_PROJECTILE: { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
-		case SIM_ENT_TYPE_WANDERER: { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
-		case SIM_ENT_TYPE_ACTOR: { SVG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_TURRET: { SVG_UpdateTurret(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_LINE_TRACE: { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
+		case SIM_ENT_TYPE_PROJECTILE:
+        { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
+		case SIM_ENT_TYPE_WANDERER:
+        { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
+		case SIM_ENT_TYPE_ACTOR:
+        { SVG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_TURRET:
+        { SVG_UpdateTurret(sim, ent, deltaTime); } break;
+        case SIM_ENT_TYPE_LINE_TRACE:
+        { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_ENT_TYPE_WORLD: { } break;
         case SIM_ENT_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;

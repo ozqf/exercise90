@@ -257,7 +257,7 @@ internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 	#endif
 
     SimProjectileSpawnDef def = {};
-    def.projType = SIM_PROJ_TYPE_NONE;
+    def.projType = SIM_PROJ_TYPE_PLAYER_PREDICTION;
     def.firstSerial = Sim_ReserveEntitySerial(sim, 1);
     def.pos = ent->t.pos;
     def.seedIndex = 0;

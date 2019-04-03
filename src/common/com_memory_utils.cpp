@@ -178,6 +178,19 @@ com_internal void COM_ZeroMemory(u8 *ptr, u32 numBytes)
     while ((u32)ptr < endPoint) { *ptr++ = 0; }
 }
 
+// Check if every byte in this memory is zero
+com_internal i32 COM_IsZeroed(u8 *ptr, u32 numBytes)
+{
+    u32 endPoint = (u32) ptr + numBytes;
+    u32 total = 0;
+    while ((u32)ptr < endPoint)
+    {
+        total += *ptr;
+        *ptr++;
+    }
+    return !total;
+}
+
 com_internal void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val)
 {
     u32 endPoint = (u32) ptr + numBytes;

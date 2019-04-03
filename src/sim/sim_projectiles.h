@@ -18,6 +18,13 @@ internal void Sim_InitProjectiles()
     t->lifeTime = 2.0f;
     t->pattern = SIM_PROJECTILE_PATTERN_NONE;
 
+    t = &g_prjTypes[SIM_PROJ_TYPE_PLAYER_PREDICTION];
+    t->speed = 10.0f;
+    t->numProjectiles = 1;
+    t->lifeTime = 2.0f;
+    t->pattern = SIM_PROJECTILE_PATTERN_NONE;
+    t->scale = { 0.5f, 0.5f, 0.5f };
+
     t = &g_prjTypes[SIM_PROJ_TYPE_TEST];
     t->speed = 10.0f;
     t->numProjectiles = 4;
@@ -45,15 +52,20 @@ internal void Sim_InitProjectile(
     SimEntity* ent,
     Vec3* pos,
     Vec3* velocity,
-    f32 lifeTime,
+    SimProjectileType* type,
     i32 fastForwardTicks)
 {
     ent->status = SIM_ENT_STATUS_IN_USE;
 	ent->entType = SIM_ENT_TYPE_PROJECTILE;
 	Transform_SetToIdentity(&ent->t);
-    ent->lifeTime = lifeTime;
+    if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
+    {
+        ent->t.scale = type->scale;
+    }
 	ent->t.pos = *pos;
     ent->velocity = *velocity;
+
+    ent->lifeTime = type->lifeTime;
 	ent->fastForwardTicks = fastForwardTicks;
 }
 
@@ -77,7 +89,7 @@ internal void Sim_NullProjectilePattern(
             ent,
             &event->pos,
             &v,
-            type->lifeTime,
+            type,
             fastForwardTicks
         );
 		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
@@ -118,7 +130,7 @@ internal void Sim_RadialProjectilePattern(
             ent,
             &event->pos,
             &v,
-            type->lifeTime,
+            type,
             fastForwardTicks
         );
 		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",

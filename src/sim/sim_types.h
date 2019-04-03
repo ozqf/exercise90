@@ -111,7 +111,8 @@ struct SimEntityDef
 };
 
 #define SIM_PROJ_TYPE_NONE 0
-#define SIM_PROJ_TYPE_TEST 1
+#define SIM_PROJ_TYPE_PLAYER_PREDICTION 1
+#define SIM_PROJ_TYPE_TEST 2
 
 struct SimProjectileSpawnDef
 {

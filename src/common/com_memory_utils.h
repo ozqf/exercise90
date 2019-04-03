@@ -56,6 +56,7 @@ com_internal u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes);
 // returns 1 if two blocks of memory are identical. 0 if otherwise.
 com_internal i32 COM_CompareMemory(u8* ptrA, u8* ptrB, u32 numBytes);
 com_internal void COM_ZeroMemory(u8 *ptr, u32 numBytes);
+com_internal i32 COM_IsZeroed(u8 *ptr, u32 numBytes);
 com_internal void COM_SetMemory(u8 *ptr, u32 numBytes, u8 val);
 com_internal u32 COM_GetI32Sentinel();
 /**

@@ -17,6 +17,9 @@ struct SimProjectileType
     i32 pattern;
     f32 lifeTime;
     f32 arcDegrees;
+
+    ColourU32 colour;
+    Vec3 scale;
 };
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index);
