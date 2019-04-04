@@ -23,7 +23,7 @@ extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
 extern "C" i32      Sim_ExecuteProjectileSpawn(
                         SimScene* sim,
-                        SimProjectileSpawnDef* def,
+                        SimProjectileSpawnEvent* def,
 						i32 fastForwardTicks);
 
 // Entity behaviour

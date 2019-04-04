@@ -135,11 +135,11 @@ i32 Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial)
 extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
-    SimProjectileSpawnDef* def,
+    SimProjectileSpawnEvent* def,
 	i32 fastForwardTicks)
 {
     SimProjectileType* type = Sim_GetProjectileType(def->projType);
-    switch (type->pattern)
+    switch (type->patternDef.pattern)
     {
         case SIM_PROJECTILE_PATTERN_RADIAL:
         Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
@@ -166,7 +166,7 @@ void Sim_Reset(SimScene* sim)
 	// replicated entity, oh well
 	sim->remoteEntitySequence = 1;
 	sim->localEntitySequence = -1;
-    Sim_InitProjectiles();
+    Sim_InitProjectileTypes();
 }
 
 extern "C"
@@ -199,6 +199,10 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.scale[2] = halfZ * 2;
     
     Sim_AddEntity(sim, &def);
+
+    halfX -= 1;
+    halfY -= 1;
+    halfZ -= 1;
 
     sim->boundaryMin = { -halfX, -halfY, -halfZ };
     sim->boundaryMax = { halfX, halfY, halfZ };

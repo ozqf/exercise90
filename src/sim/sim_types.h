@@ -114,7 +114,7 @@ struct SimEntityDef
 #define SIM_PROJ_TYPE_PLAYER_PREDICTION 1
 #define SIM_PROJ_TYPE_TEST 2
 
-struct SimSpawnDef
+struct SimSpawnBase
 {
     Vec3 pos;
     Vec3 forward;
@@ -122,9 +122,9 @@ struct SimSpawnDef
     i32 tick;
 };
 
-struct SimProjectileSpawnDef
+struct SimProjectileSpawnEvent
 {
-    SimSpawnDef base;
+    SimSpawnBase base;
     u8 projType;
     u8 seedIndex;
 };

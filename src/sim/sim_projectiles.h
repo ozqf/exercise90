@@ -6,7 +6,7 @@
 
 internal SimProjectileType g_prjTypes[SIM_MAX_PROJECTILE_TYPES];
 
-internal void Sim_InitProjectiles()
+internal void Sim_InitProjectileTypes()
 {
     i32 bytes = sizeof(SimProjectileType) * SIM_MAX_PROJECTILE_TYPES;
     COM_ZeroMemory((u8*)g_prjTypes, bytes);
@@ -14,22 +14,22 @@ internal void Sim_InitProjectiles()
 
     t = &g_prjTypes[SIM_PROJ_TYPE_NONE];
     t->speed = 10.0f;
-    t->numProjectiles = 1;
+    t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->pattern = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_NONE;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_PLAYER_PREDICTION];
     t->speed = 10.0f;
-    t->numProjectiles = 1;
+    t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->pattern = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_NONE;
     t->scale = { 0.5f, 0.5f, 0.5f };
 
     t = &g_prjTypes[SIM_PROJ_TYPE_TEST];
     t->speed = 10.0f;
-    t->numProjectiles = 4;
+    t->patternDef.numItems = 4;
     t->lifeTime = 6.0f;
-    t->pattern = SIM_PROJECTILE_PATTERN_RADIAL;
+    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_RADIAL;
 }
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index)
@@ -45,7 +45,7 @@ internal i32 Sim_GetProjectileCount(i32 index)
     {
         return 0;
     }
-    return (Sim_GetProjectileType(index))->numProjectiles;
+    return (Sim_GetProjectileType(index))->patternDef.numItems;
 }
 
 internal void Sim_InitProjectile(
@@ -71,13 +71,13 @@ internal void Sim_InitProjectile(
 
 internal void Sim_NullProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnDef* event,
+    SimProjectileSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
     i32 serial = event->base.firstSerial;
     f32 radians = atan2f(event->base.forward.z, event->base.forward.x);
-    for (i32 i = 0; i < type->numProjectiles; ++i)
+    for (i32 i = 0; i < type->patternDef.numItems; ++i)
     {
         Vec3 v = {};
         v.x = cosf(radians) * type->speed;
@@ -101,9 +101,44 @@ internal void Sim_NullProjectilePattern(
     }
 }
 
+internal void Sim_SpawnProjectiles(
+    SimScene* sim,
+    SimProjectileSpawnEvent* event,
+    SimProjectileType* type,
+    i32 fastForwardTicks
+)
+{
+    i32 isLocal = (event->base.firstSerial < 0);
+
+    SimSpawnPatternItem items[64];
+    i32 count = Sim_CreateSpawnPattern(
+        &event->base, &type->patternDef, items, event->base.firstSerial, isLocal);
+    
+    for (i32 i = 0; i < count; ++i)
+    {
+        SimSpawnPatternItem* item = &items[i];
+		SimEntity* ent;
+		if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
+		else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
+
+        Vec3 v = {};
+        v.x = item->forward.x * type->speed;
+        v.y = item->forward.y * type->speed;
+        v.z = item->forward.z * type->speed;
+        
+		Sim_InitProjectile(
+            ent,
+            &item->pos,
+            &v,
+            type,
+            fastForwardTicks
+        );
+    }
+}
+
 internal void Sim_RadialProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnDef* event,
+    SimProjectileSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
@@ -112,9 +147,9 @@ internal void Sim_RadialProjectilePattern(
 	i32 isLocal = (event->base.firstSerial < 0);
 	i32 increment = isLocal ? -1 : 1;
 	f32 radians = 0;
-	f32 step = FULL_ROTATION_RADIANS / (f32)type->numProjectiles;
+	f32 step = FULL_ROTATION_RADIANS / (f32)type->patternDef.numItems;
 	
-    for (i32 i = 0; i < type->numProjectiles; ++i)
+    for (i32 i = 0; i < type->patternDef.numItems; ++i)
     {
         Vec3 v = {};
         v.x = cosf(radians) * type->speed;
@@ -145,7 +180,7 @@ internal void Sim_RadialProjectilePattern(
 
 internal void Sim_SpreadProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnDef* event,
+    SimProjectileSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {

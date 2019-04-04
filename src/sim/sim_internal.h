@@ -10,18 +10,6 @@
 #define SIM_PROJECTILE_PATTERN_SPREAD 1
 #define SIM_PROJECTILE_PATTERN_RADIAL 2
 
-struct SimProjectileType
-{
-    f32 speed;
-    i32 numProjectiles;
-    i32 pattern;
-    f32 lifeTime;
-    f32 arcDegrees;
-
-    ColourU32 colour;
-    Vec3 scale;
-};
-
 struct SimSpawnPatternItem
 {
 	i32 entSerial;
@@ -34,6 +22,20 @@ struct SimSpawnPatternDef
 	i32 pattern;
 	i32 numItems;
 	f32 radius;
+};
+
+struct SimProjectileType
+{
+    // Characterics of each projectile
+    f32 speed;
+    f32 lifeTime;
+    f32 arcDegrees;
+
+    ColourU32 colour;
+    Vec3 scale;
+
+    // Characterics of how this projectile is spawned
+    SimSpawnPatternDef patternDef;
 };
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index);

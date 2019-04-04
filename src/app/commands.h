@@ -141,7 +141,7 @@ internal void Cmd_InitSpawnEntity(S2C_SpawnEntity* cmd, i32 tick, i32 sequence)
 struct S2C_SpawnProjectile
 {
     Command header;
-    SimProjectileSpawnDef def;
+    SimProjectileSpawnEvent def;
 };
 
 internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequence)

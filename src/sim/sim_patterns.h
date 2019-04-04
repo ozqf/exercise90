@@ -1,8 +1,9 @@
 #pragma once
 
 #include "sim_internal.h"
-internal void Sim_CreateRadialPattern(
-	SimSpawnDef* event,
+
+internal i32 Sim_CreateRadialPattern(
+	SimSpawnBase* event,
 	SimSpawnPatternDef* def,
 	SimSpawnPatternItem* items,
 	i32 serial,
@@ -21,13 +22,15 @@ internal void Sim_CreateRadialPattern(
 		radians += step;
 		serial += serialIncrement;
 	}
+	return def->numItems;
 }
 
 /*
+Returns number of results
 Results array MUST have the capacity of items specified in the def
 */
-internal void Sim_CreateSpawnPattern(
-	SimSpawnDef* event,
+internal i32 Sim_CreateSpawnPattern(
+	SimSpawnBase* event,
 	SimSpawnPatternDef* def,
 	SimSpawnPatternItem* results,
 	i32 firstSerial,
@@ -38,7 +41,7 @@ internal void Sim_CreateSpawnPattern(
 		case SIM_PROJECTILE_PATTERN_RADIAL:
 		{
 			//
-			Sim_CreateRadialPattern(event, def, results,
+			return Sim_CreateRadialPattern(event, def, results,
 				firstSerial, isLocal);
 		} break;
 		
@@ -52,5 +55,5 @@ internal void Sim_CreateSpawnPattern(
 			//
 		} break;
 	}
-	
+	return 0;
 }

@@ -62,7 +62,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     {
         ent->thinkTick += ent->thinkTime;
         // think
-        SimProjectileSpawnDef def = {};
+        SimProjectileSpawnEvent def = {};
         def.projType = SIM_PROJ_TYPE_TEST;
         def.base.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
         if (def.base.firstSerial == -1)
@@ -207,7 +207,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     printf("SV CurTick %d eventTick %d fastforward %d\n",
         g_ticks, eventTick, fastForwardTicks);
 
-    SimProjectileSpawnDef def = {};
+    SimProjectileSpawnEvent def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
     def.base.pos = ent->t.pos;

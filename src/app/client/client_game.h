@@ -231,14 +231,14 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 {
     /* Debug - Fire a local projectile to see how it matches the server */
-    #if 0
-    SimProjectileSpawnDef def = {};
+    #if 1
+    SimProjectileSpawnEvent def = {};
     def.projType = SIM_PROJ_TYPE_PLAYER_PREDICTION;
-    def.firstSerial = Sim_ReserveEntitySerial(sim, 1);
-    def.pos = ent->t.pos;
+    def.base.firstSerial = Sim_ReserveEntitySerial(sim, 1);
+    def.base.pos = ent->t.pos;
     def.seedIndex = 0;
-    def.forward = *dir;
-    def.tick = g_ticks;
+    def.base.forward = *dir;
+    def.base.tick = g_ticks;
     Sim_ExecuteProjectileSpawn(sim, &def, 0);
     #endif
 	
