@@ -173,7 +173,7 @@ void CL_LoadTestScene()
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
-    Sim_AddEntity(&g_sim, &def);
+    Sim_RestoreEntity(&g_sim, &def);
 	#endif
 }
 
@@ -375,7 +375,7 @@ internal i32 CL_ExecReliableCommand(
 			def.velocity[0] = spawn->vel.x;
 			def.velocity[1] = spawn->vel.y;
 			def.velocity[2] = spawn->vel.z;
-			Sim_AddEntity(sim, &def);
+			Sim_RestoreEntity(sim, &def);
 		} break;
         case CMD_TYPE_S2C_REMOVE_ENTITY:
         {

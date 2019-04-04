@@ -106,7 +106,7 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
 }
 
 extern "C"
-i32 Sim_AddEntity(SimScene* scene, SimEntityDef* def)
+i32 Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 {
 	// an id of zero is considered invalid
 	Assert(def->serial)
@@ -200,7 +200,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.scale[1] = 1;
     def.scale[2] = halfZ * 2;
     
-    Sim_AddEntity(sim, &def);
+    Sim_RestoreEntity(sim, &def);
 
     halfX -= 1;
     halfY -= 1;

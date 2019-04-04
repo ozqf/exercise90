@@ -12,7 +12,7 @@ internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
     def.pos[1] = origin.y;
     def.pos[2] = origin.z;
     def.destination = dest;
-    i32 serial = Sim_AddEntity(sim, &def);
+    i32 serial = Sim_RestoreEntity(sim, &def);
     printf("CL Spawn line segment\n");
 }
 

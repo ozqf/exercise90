@@ -259,7 +259,7 @@ internal void SV_SpawnUserAvatar(User* u)
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
-    Sim_AddEntity(&g_sim, &def);
+    Sim_RestoreEntity(&g_sim, &def);
 }
 
 UserIds SV_CreateLocalUser()
@@ -288,7 +288,7 @@ internal void SV_AddWanderer()
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
-    Sim_AddEntity(&g_sim, &def);   
+    Sim_RestoreEntity(&g_sim, &def);   
 }
 
 internal void SV_LoadTestScene()
@@ -308,7 +308,7 @@ internal void SV_LoadTestScene()
     def.scale[0] = 1;
     def.scale[1] = 1;
     def.scale[2] = 1;
-    Sim_AddEntity(&g_sim, &def);
+    Sim_RestoreEntity(&g_sim, &def);
     #endif
     i32 numWanderers = 6;
     for (i32 i = 0; i < numWanderers; ++i)
