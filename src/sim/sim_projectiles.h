@@ -75,8 +75,8 @@ internal void Sim_NullProjectilePattern(
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
-    i32 serial = event->firstSerial;
-    f32 radians = atan2f(event->forward.z, event->forward.x);
+    i32 serial = event->base.firstSerial;
+    f32 radians = atan2f(event->base.forward.z, event->base.forward.x);
     for (i32 i = 0; i < type->numProjectiles; ++i)
     {
         Vec3 v = {};
@@ -87,7 +87,7 @@ internal void Sim_NullProjectilePattern(
         SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
 		Sim_InitProjectile(
             ent,
-            &event->pos,
+            &event->base.pos,
             &v,
             type,
             fastForwardTicks
@@ -107,9 +107,9 @@ internal void Sim_RadialProjectilePattern(
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
-    i32 serial = event->firstSerial;
+    i32 serial = event->base.firstSerial;
 	// increment is positive if remote, negative if local
-	i32 isLocal = (event->firstSerial < 0);
+	i32 isLocal = (event->base.firstSerial < 0);
 	i32 increment = isLocal ? -1 : 1;
 	f32 radians = 0;
 	f32 step = FULL_ROTATION_RADIANS / (f32)type->numProjectiles;
@@ -128,7 +128,7 @@ internal void Sim_RadialProjectilePattern(
 		
 		Sim_InitProjectile(
             ent,
-            &event->pos,
+            &event->base.pos,
             &v,
             type,
             fastForwardTicks

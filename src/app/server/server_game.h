@@ -64,17 +64,17 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         // think
         SimProjectileSpawnDef def = {};
         def.projType = SIM_PROJ_TYPE_TEST;
-        def.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
-        if (def.firstSerial == -1)
+        def.base.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
+        if (def.base.firstSerial == -1)
         {
             APP_PRINT(64, "SVG Turret failed to acquire ent serials\n");
             return;
         }
-        def.pos = ent->t.pos;
+        def.base.pos = ent->t.pos;
         def.seedIndex = 0;
-        def.forward = { 1, 0, 0 };
+        def.base.forward = { 1, 0, 0 };
         // frame the event occurred on is recorded
-        def.tick = g_ticks;
+        def.base.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
 			sim, &def, 0
 		);
@@ -209,11 +209,11 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 
     SimProjectileSpawnDef def = {};
     def.projType = SIM_PROJ_TYPE_NONE;
-    def.firstSerial = Sim_ReserveEntitySerial(sim, 0);
-    def.pos = ent->t.pos;
+    def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
+    def.base.pos = ent->t.pos;
+    def.base.forward = *dir;
+    def.base.tick = g_ticks;
     def.seedIndex = 0;
-    def.forward = *dir;
-    def.tick = g_ticks;
     Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
 
     // Replicate

@@ -114,14 +114,19 @@ struct SimEntityDef
 #define SIM_PROJ_TYPE_PLAYER_PREDICTION 1
 #define SIM_PROJ_TYPE_TEST 2
 
-struct SimProjectileSpawnDef
+struct SimSpawnDef
 {
+    Vec3 pos;
+    Vec3 forward;
     i32 firstSerial;
     i32 tick;
+};
+
+struct SimProjectileSpawnDef
+{
+    SimSpawnDef base;
     u8 projType;
     u8 seedIndex;
-    Vec3 pos;
-	Vec3 forward;
 };
 #if 0
 // For block allocated entity storage
