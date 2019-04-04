@@ -139,7 +139,9 @@ i32 Sim_ExecuteProjectileSpawn(
 	i32 fastForwardTicks)
 {
     SimProjectileType* type = Sim_GetProjectileType(def->projType);
-    switch (type->patternDef.pattern)
+    Assert(type)
+    Sim_SpawnProjectiles(sim, def, type, fastForwardTicks);
+    /*switch (type->patternDef.patternId)
     {
         case SIM_PROJECTILE_PATTERN_RADIAL:
         Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
@@ -150,7 +152,7 @@ i32 Sim_ExecuteProjectileSpawn(
         default:
         Sim_NullProjectilePattern(sim, def, type, fastForwardTicks);
         break;
-    }
+    }*/
     return COM_ERROR_NONE;
 }
 

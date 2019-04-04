@@ -6,6 +6,9 @@
 
 internal SimProjectileType g_prjTypes[SIM_MAX_PROJECTILE_TYPES];
 
+/*
+Define all entity types here
+*/
 internal void Sim_InitProjectileTypes()
 {
     i32 bytes = sizeof(SimProjectileType) * SIM_MAX_PROJECTILE_TYPES;
@@ -16,20 +19,20 @@ internal void Sim_InitProjectileTypes()
     t->speed = 10.0f;
     t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_NONE;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_PLAYER_PREDICTION];
     t->speed = 10.0f;
     t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_NONE;
     t->scale = { 0.5f, 0.5f, 0.5f };
 
     t = &g_prjTypes[SIM_PROJ_TYPE_TEST];
     t->speed = 10.0f;
     t->patternDef.numItems = 4;
     t->lifeTime = 6.0f;
-    t->patternDef.pattern = SIM_PROJECTILE_PATTERN_RADIAL;
+    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_RADIAL;
 }
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index)
@@ -39,6 +42,10 @@ internal SimProjectileType* Sim_GetProjectileType(i32 index)
     return &g_prjTypes[index];
 }
 
+/*
+Necessary to reserve blocks of contiguous entity serial numbers when
+spawning deterministic groups
+*/
 internal i32 Sim_GetProjectileCount(i32 index)
 {
     if (index < 0 || index >= SIM_MAX_PROJECTILE_TYPES)
@@ -67,38 +74,6 @@ internal void Sim_InitProjectile(
 
     ent->lifeTime = type->lifeTime;
 	ent->fastForwardTicks = fastForwardTicks;
-}
-
-internal void Sim_NullProjectilePattern(
-    SimScene* sim,
-    SimProjectileSpawnEvent* event,
-    SimProjectileType* type,
-    i32 fastForwardTicks)
-{
-    i32 serial = event->base.firstSerial;
-    f32 radians = atan2f(event->base.forward.z, event->base.forward.x);
-    for (i32 i = 0; i < type->patternDef.numItems; ++i)
-    {
-        Vec3 v = {};
-        v.x = cosf(radians) * type->speed;
-	    v.y = 0;
-	    v.z = sinf(radians) * type->speed;
-
-        SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
-		Sim_InitProjectile(
-            ent,
-            &event->base.pos,
-            &v,
-            type,
-            fastForwardTicks
-        );
-		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
-            serial,
-            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
-            ent->fastForwardTicks
-		);
-        serial++;
-    }
 }
 
 internal void Sim_SpawnProjectiles(
@@ -133,6 +108,39 @@ internal void Sim_SpawnProjectiles(
             type,
             fastForwardTicks
         );
+    }
+}
+#if 0
+internal void Sim_NullProjectilePattern(
+    SimScene* sim,
+    SimProjectileSpawnEvent* event,
+    SimProjectileType* type,
+    i32 fastForwardTicks)
+{
+    i32 serial = event->base.firstSerial;
+    f32 radians = atan2f(event->base.forward.z, event->base.forward.x);
+    for (i32 i = 0; i < type->patternDef.numItems; ++i)
+    {
+        Vec3 v = {};
+        v.x = cosf(radians) * type->speed;
+	    v.y = 0;
+	    v.z = sinf(radians) * type->speed;
+
+        SimEntity* ent = Sim_GetFreeReplicatedEntity(sim, serial);
+		Sim_InitProjectile(
+            ent,
+            &event->base.pos,
+            &v,
+            type,
+            fastForwardTicks
+        );
+		APP_LOG(256,
+            "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
+            serial,
+            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
+            ent->fastForwardTicks
+		);
+        serial++;
     }
 }
 
@@ -186,3 +194,4 @@ internal void Sim_SpreadProjectilePattern(
 {
 
 }
+#endif

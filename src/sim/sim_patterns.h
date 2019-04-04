@@ -14,9 +14,19 @@ internal i32 Sim_CreateRadialPattern(
 	f32 step = FULL_ROTATION_RADIANS / (f32)def->numItems;
 	for(i32 i = 0; i < def->numItems; ++i)
 	{
-		//
-		items[i].pos.x = event->pos.x + cosf(radians) * def->radius;
-		items[i].pos.z = event->pos.z + sinf(radians) * def->radius;
+		// TODO 2D! Once new system is implemented make this work in 3D
+		Vec3 dir =
+		{
+			cosf(radians),
+			0,
+			sinf(radians)
+		};
+		items[i].forward.x = dir.x;
+		items[i].forward.y = dir.y;
+		items[i].forward.z = dir.z;
+		items[i].pos.x = event->pos.x + (dir.x * def->radius);
+		items[i].pos.y = event->pos.y + (dir.y * def->radius);
+		items[i].pos.z = event->pos.z + (dir.z * def->radius);
 		items[i].entSerial = serial;
 
 		radians += step;
@@ -36,7 +46,7 @@ internal i32 Sim_CreateSpawnPattern(
 	i32 firstSerial,
 	i32 isLocal)
 {
-	switch (def->pattern)
+	switch (def->patternId)
 	{
 		case SIM_PROJECTILE_PATTERN_RADIAL:
 		{
@@ -47,7 +57,10 @@ internal i32 Sim_CreateSpawnPattern(
 		
 		case SIM_PROJ_TYPE_NONE:
 		{
-			//
+			results[0].pos = event->pos;
+			results[0].forward = event->forward;
+			results[0].entSerial = event->firstSerial;
+			return 1;
 		} break;
 
 		default:

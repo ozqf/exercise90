@@ -19,7 +19,7 @@ struct SimSpawnPatternItem
 
 struct SimSpawnPatternDef
 {
-	i32 pattern;
+	i32 patternId;
 	i32 numItems;
 	f32 radius;
 };
