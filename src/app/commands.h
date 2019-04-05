@@ -8,7 +8,7 @@
 #define CMD_TYPE_IMPULSE 255
 #define CMD_TYPE_S2C_HANDSHAKE 254
 #define CMD_TYPE_S2C_SET_SCENE 253
-#define CMD_TYPE_S2C_SPAWN_ENTITY 252
+#define CMD_TYPE_S2C_RESTORE_ENTITY 252
 #define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
 #define CMD_TYPE_S2C_SYNC 250
 #define CMD_TYPE_C2S_INPUT 249
@@ -57,6 +57,10 @@ internal void Cmd_InitSync(
     cmd->jitterTickCount = jitterTickCount;
     cmd->avatarEntityId = avatarEntityId;
 }
+
+//////////////////////////////////////////////////////////////////////
+// Client movement sync
+//////////////////////////////////////////////////////////////////////
 
 // Server confirmation of a specific input command.
 // Must only be sent in response to a client input tick,
@@ -117,7 +121,14 @@ internal void Cmd_InitClientInput(
 	}
 }
 
-struct S2C_SpawnEntity
+///////////////////////////////////////////////////////////////////////////
+// Individual Entity State commands
+///////////////////////////////////////////////////////////////////////////
+/**
+ * Restore the extact client state of a specific Entity
+ * Should be used for bring 
+ */
+struct S2C_RestoreEntity
 {
     Command header;
     // All data that must be replicated to spawn this entity
@@ -130,26 +141,12 @@ struct S2C_SpawnEntity
     f32 yaw;
 };
 
-internal void Cmd_InitSpawnEntity(S2C_SpawnEntity* cmd, i32 tick, i32 sequence)
+internal void Cmd_InitRestoreEntity(S2C_RestoreEntity* cmd, i32 tick, i32 sequence)
 {
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick, sequence);
-    cmd->header.size = sizeof(S2C_SpawnEntity);
-    cmd->header.type = CMD_TYPE_S2C_SPAWN_ENTITY;
-}
-
-struct S2C_SpawnProjectile
-{
-    Command header;
-    SimProjectileSpawnEvent def;
-};
-
-internal void Cmd_InitSpawnEntity(S2C_SpawnProjectile* cmd, i32 tick, i32 sequence)
-{
-    *cmd = {};
-    Cmd_Prepare(&cmd->header, tick, sequence);
-    cmd->header.size = sizeof(S2C_SpawnProjectile);
-    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    cmd->header.size = sizeof(S2C_RestoreEntity);
+    cmd->header.type = CMD_TYPE_S2C_RESTORE_ENTITY;
 }
 
 struct S2C_RemoveEntity
@@ -188,14 +185,56 @@ internal void Cmd_WriteEntitySync(S2C_EntitySync* cmd, i32 tick, i32 sequence, S
 	cmd->vel = ent->velocity;
 }
 
-// SV -> CL
+///////////////////////////////////////////////////////////////////////////
+// Bulk Entity events
+///////////////////////////////////////////////////////////////////////////
+struct S2C_SpawnProjectiles
+{
+    Command header;
+    SimProjectileSpawnEvent def;
+};
+
+internal void Cmd_InitProjectileSpawn(
+    S2C_SpawnProjectiles* cmd,
+    SimProjectileSpawnEvent* event,
+    i32 tick, i32 sequence)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.size = sizeof(S2C_SpawnProjectiles);
+    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    cmd->def = *event;
+}
+
+struct S2C_SpawnEnemies
+{
+    Command header;
+    SimEnemySpawnEvent def;
+};
+
+internal void Cmd_InitEnemySpawn(
+    S2C_SpawnEnemies* cmd,
+    SimEnemySpawnEvent* event,
+    i32 tick, i32 sequence)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.size = sizeof(S2C_SpawnProjectiles);
+    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    cmd->def = *event;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Connection control and sync
+///////////////////////////////////////////////////////////////////////////
 struct S2C_Handshake
 {
     Command header;
     i32 privateId;
 };
 
-internal void Cmd_InitHandshake(S2C_Handshake* cmd, i32 tick, i32 sequence, i32 privateId)
+internal void Cmd_InitHandshake(
+    S2C_Handshake* cmd, i32 tick, i32 sequence, i32 privateId)
 {
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick, sequence);
@@ -216,7 +255,8 @@ struct CmdSetScene
     i32 sceneId;
 };
 
-internal void Cmd_InitSetScene(CmdSetScene* cmd, i32 tick, i32 sequence, i32 sceneId)
+internal void Cmd_InitSetScene(
+    CmdSetScene* cmd, i32 tick, i32 sequence, i32 sceneId)
 {
     *cmd = {};
     Cmd_Prepare((Command*)&cmd->header, tick, sequence);

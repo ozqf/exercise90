@@ -207,11 +207,11 @@ internal void SV_UserStartSync(User* user)
         SimEntity* ent = &g_sim.ents[j];
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
         if (ent->isLocal) { continue; }
-        S2C_SpawnEntity cmd = {};
+        S2C_RestoreEntity cmd = {};
 
         // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
         // is manually setting it ever required?
-        Cmd_InitSpawnEntity(&cmd, g_ticks, 0);
+        Cmd_InitRestoreEntity(&cmd, g_ticks, 0);
         
         // TODO: Any entity specific spawning stuff here
         cmd.entType = (u8)ent->entType;

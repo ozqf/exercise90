@@ -140,19 +140,34 @@ i32 Sim_ExecuteProjectileSpawn(
 {
     SimProjectileType* type = Sim_GetProjectileType(def->projType);
     Assert(type)
-    Sim_SpawnProjectiles(sim, def, type, fastForwardTicks);
-    /*switch (type->patternDef.patternId)
+    //Sim_SpawnProjectiles(sim, def, type, fastForwardTicks);
+    i32 isLocal = (def->base.firstSerial < 0);
+
+    SimSpawnPatternItem items[64];
+    i32 count = Sim_CreateSpawnPattern(
+        &def->base, &type->patternDef, items, def->base.firstSerial, isLocal);
+    
+    for (i32 i = 0; i < count; ++i)
     {
-        case SIM_PROJECTILE_PATTERN_RADIAL:
-        Sim_RadialProjectilePattern(sim, def, type, fastForwardTicks);
-        break;
-        case SIM_PROJECTILE_PATTERN_SPREAD:
-        Sim_SpreadProjectilePattern(sim, def, type, fastForwardTicks);
-        break;
-        default:
-        Sim_NullProjectilePattern(sim, def, type, fastForwardTicks);
-        break;
-    }*/
+        SimSpawnPatternItem* item = &items[i];
+		SimEntity* ent;
+		if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
+		else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
+
+        Vec3 v = {};
+        v.x = item->forward.x * type->speed;
+        v.y = item->forward.y * type->speed;
+        v.z = item->forward.z * type->speed;
+        
+		Sim_InitProjectile(
+            ent,
+            &item->pos,
+            &v,
+            type,
+            fastForwardTicks
+        );
+    }
+
     return COM_ERROR_NONE;
 }
 

@@ -128,6 +128,14 @@ struct SimProjectileSpawnEvent
     u8 projType;
     u8 seedIndex;
 };
+
+
+struct SimEnemySpawnEvent
+{
+    SimSpawnBase base;
+    u8 enemyType;
+    u8 seedIndex;
+};
 #if 0
 // For block allocated entity storage
 struct SimEntBlock

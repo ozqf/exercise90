@@ -78,11 +78,10 @@ SVG_DEFINE_ENT_UPDATE(Turret)
 		Sim_ExecuteProjectileSpawn(
 			sim, &def, 0
 		);
-        S2C_SpawnProjectile prj = {};
-        Cmd_Prepare(&prj.header, g_ticks, 0);
-        prj.def = def;
-        prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
-        prj.header.size = sizeof(prj);
+
+        // Replicate!
+        S2C_SpawnProjectiles prj = {};
+        Cmd_InitProjectileSpawn(&prj, &def, g_ticks, 0);
 		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
     }
     else
@@ -217,7 +216,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
 
     // Replicate
-    S2C_SpawnProjectile prj = {};
+    S2C_SpawnProjectiles prj = {};
     Cmd_Prepare(&prj.header, eventTick, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;

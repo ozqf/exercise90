@@ -348,7 +348,7 @@ internal i32 CL_ExecReliableCommand(
 	{
         case CMD_TYPE_S2C_SPAWN_PROJECTILE:
         {
-            S2C_SpawnProjectile* prj = (S2C_SpawnProjectile*)h;
+            S2C_SpawnProjectiles* prj = (S2C_SpawnProjectiles*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
                 prj->def.projType,
 				prj->def.base.tick,
@@ -358,9 +358,9 @@ internal i32 CL_ExecReliableCommand(
             // flip diff to specify fast forwarding
             Sim_ExecuteProjectileSpawn(sim, &prj->def, -tickDiff);
         } break;
-		case CMD_TYPE_S2C_SPAWN_ENTITY:
+		case CMD_TYPE_S2C_RESTORE_ENTITY:
 		{
-			S2C_SpawnEntity* spawn = (S2C_SpawnEntity*)h;
+			S2C_RestoreEntity* spawn = (S2C_RestoreEntity*)h;
 			APP_LOG(64, "CL Spawn %d at %.3f, %.3f, %.3f\n",
 				spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
 			);
