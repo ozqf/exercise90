@@ -6,37 +6,6 @@
 #include <math.h>
 // Internal Sim module functions/data
 
-#define SIM_PROJECTILE_PATTERN_NONE 0
-#define SIM_PROJECTILE_PATTERN_SPREAD 1
-#define SIM_PROJECTILE_PATTERN_RADIAL 2
-
-struct SimSpawnPatternItem
-{
-	i32 entSerial;
-	Vec3 pos;
-	Vec3 forward;
-};
-
-struct SimSpawnPatternDef
-{
-	i32 patternId;
-	i32 numItems;
-	f32 radius;
-};
-
-struct SimProjectileType
-{
-    // Characterics of each projectile
-    f32 speed;
-    f32 lifeTime;
-    f32 arcDegrees;
-
-    ColourU32 colour;
-    Vec3 scale;
-
-    // Characterics of how this projectile is spawned
-    SimSpawnPatternDef patternDef;
-};
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index);
 internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumber);

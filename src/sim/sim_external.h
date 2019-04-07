@@ -105,12 +105,26 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
     return first;
 }
 
+/**
+ * Restore the exact state of a single entity
+ * (create it if it doesn't exist)
+ */
 extern "C"
 i32 Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 {
 	// an id of zero is considered invalid
 	Assert(def->serial)
-    return Sim_SpawnEntity(scene, def);
+    SimEntity* ent = Sim_GetEntityBySerial(scene, def->serial);
+    if (ent)
+    {
+        // TODO: This code!
+        ILLEGAL_CODE_PATH
+        return COM_ERROR_NOT_IMPLEMENTED;
+    }
+    else
+    {
+        return Sim_SpawnEntity(scene, def);
+    }
 }
 
 extern "C"
@@ -121,7 +135,10 @@ i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 }
 
 extern "C"
-i32 Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial)
+i32 Sim_SetActorInput(
+    SimScene* sim,
+    SimActorInput* input,
+    i32 entitySerial)
 {
     SimEntity* ent = Sim_FindEntityBySerialNumber(sim, entitySerial);
     if (!ent)
@@ -129,6 +146,33 @@ i32 Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial)
         return COM_ERROR_NOT_FOUND;
     }
     ent->input = *input;
+    return COM_ERROR_NONE;
+}
+
+extern "C"
+i32 Sim_ExecuteEnemySpawn(
+    SimScene* sim,
+    SimEnemySpawnEvent* event,
+	i32 fastForwardTicks,
+    SimEntity** results)
+{
+    i32 isLocal = (event->base.firstSerial < 0);
+
+    SimSpawnPatternItem items[64];
+    i32 count = Sim_CreateSpawnPattern(
+        &event->base,
+        &event->patternDef,
+        items,
+        event->base.firstSerial,
+        isLocal);
+    
+    for (i32 i = 0; i < event->patternDef.numItems; ++i)
+    {
+        SimSpawnPatternItem* item = &items[i];
+        SimEntityDef def = {};
+        def.pos = items->pos;
+    }
+    
     return COM_ERROR_NONE;
 }
 
@@ -210,10 +254,10 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.entType = SIM_ENT_TYPE_WORLD;
-    def.pos[1] = -0.5f;
-    def.scale[0] = halfX * 2;
-    def.scale[1] = 1;
-    def.scale[2] = halfZ * 2;
+    def.pos.y = -0.5f;
+    def.scale.x = halfX * 2;
+    def.scale.y = 1;
+    def.scale.z = halfZ * 2;
     
     Sim_RestoreEntity(sim, &def);
 

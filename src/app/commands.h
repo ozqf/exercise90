@@ -24,7 +24,8 @@ struct CmdPing
     f32 sendTime;
 };
 
-internal void Cmd_InitPing(CmdPing* cmd, i32 tick, i32 sequence, f32 time)
+internal void Cmd_InitPing(
+    CmdPing* cmd, i32 tick, i32 sequence, f32 time)
 {
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.type = CMD_TYPE_PING;
@@ -125,8 +126,8 @@ internal void Cmd_InitClientInput(
 // Individual Entity State commands
 ///////////////////////////////////////////////////////////////////////////
 /**
- * Restore the extact client state of a specific Entity
- * Should be used for bring 
+ * Restore the extact client state of a specific Entity.
+ * Try to use bulk spawn commands instead possible
  */
 struct S2C_RestoreEntity
 {
@@ -141,7 +142,8 @@ struct S2C_RestoreEntity
     f32 yaw;
 };
 
-internal void Cmd_InitRestoreEntity(S2C_RestoreEntity* cmd, i32 tick, i32 sequence)
+internal void Cmd_InitRestoreEntity(
+    S2C_RestoreEntity* cmd, i32 tick, i32 sequence)
 {
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick, sequence);
@@ -167,7 +169,6 @@ internal void Cmd_InitRemoveEntity(
 
 struct S2C_EntitySync
 {
-    // 20 + 4 + (3 x 4) + (3 x 4) + (3 x 4) bytes
 	Command header;
 	i32 networkId;
 	Vec3 pos;
@@ -175,7 +176,8 @@ struct S2C_EntitySync
 	Vec3 vel;
 };
 
-internal void Cmd_WriteEntitySync(S2C_EntitySync* cmd, i32 tick, i32 sequence, SimEntity* ent)
+internal void Cmd_WriteEntitySync(
+    S2C_EntitySync* cmd, i32 tick, i32 sequence, SimEntity* ent)
 {
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;

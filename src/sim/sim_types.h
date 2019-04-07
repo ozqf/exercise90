@@ -104,10 +104,41 @@ struct SimEntityDef
     
     i32 isLocal;
     i32 entType;
-    f32 pos[3];
-    f32 scale[3];
-    f32 velocity[3];
+    Vec3 pos;
+    Vec3 scale;
+    Vec3 velocity;
     Vec3 destination;
+};
+
+#define SIM_PROJECTILE_PATTERN_NONE 0
+#define SIM_PROJECTILE_PATTERN_SPREAD 1
+#define SIM_PROJECTILE_PATTERN_RADIAL 2
+struct SimSpawnPatternItem
+{
+	i32 entSerial;
+	Vec3 pos;
+	Vec3 forward;
+};
+
+struct SimSpawnPatternDef
+{
+	i32 patternId;
+	i32 numItems;
+	f32 radius;
+};
+
+struct SimProjectileType
+{
+    // Characterics of each projectile
+    f32 speed;
+    f32 lifeTime;
+    f32 arcDegrees;
+
+    ColourU32 colour;
+    Vec3 scale;
+
+    // Characterics of how this projectile is spawned
+    SimSpawnPatternDef patternDef;
 };
 
 #define SIM_PROJ_TYPE_NONE 0
@@ -133,6 +164,7 @@ struct SimProjectileSpawnEvent
 struct SimEnemySpawnEvent
 {
     SimSpawnBase base;
+    SimSpawnPatternDef patternDef;
     u8 enemyType;
     u8 seedIndex;
 };

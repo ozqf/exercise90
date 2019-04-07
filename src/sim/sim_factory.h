@@ -97,30 +97,22 @@ internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
     ent->destination = def->destination;
     //ent->deathTick = def->deathTick;
 	
-    ent->t.pos.x =          def->pos[0];
-    ent->t.pos.y =          def->pos[1];
-    ent->t.pos.z =          def->pos[2];
-    ent->previousPos.x =    def->pos[0];
-    ent->previousPos.y =    def->pos[1];
-    ent->previousPos.z =    def->pos[2];
-    ent->velocity.x =       def->velocity[0];
-    ent->velocity.y =       def->velocity[1];
-    ent->velocity.z =       def->velocity[2];
+    ent->t.pos =          def->pos;
+    ent->previousPos =    def->pos;
+    ent->velocity =         def->velocity;
 
 
     i32 badScale = 0;
-    if (def->scale[0] == 0
-        || def->scale[1] == 0
-        || def->scale[2] == 0)
+    if (def->scale.x == 0
+        || def->scale.y == 0
+        || def->scale.z == 0)
     {
         //printf("  bad scale\n");
         badScale = 1;
     }
     if (!badScale)
     {
-        ent->t.scale.x = def->scale[0];
-        ent->t.scale.y = def->scale[1];
-        ent->t.scale.z = def->scale[2];
+        ent->t.scale = def->scale;
     }
     else
     {
@@ -154,7 +146,7 @@ internal i32 Sim_InitWorldVolume(
 {
     Sim_InitEntity(ent, def);
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
-        def->pos[0], def->pos[1], def->pos[2]);
+        def->pos.x, def->pos.y, def->pos.z);
     ent->entType = def->entType;
     // world volumes can't move (yet!)
     ent->velocity = {};

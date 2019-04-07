@@ -15,7 +15,8 @@ struct SVEntityFrame
 
 #define SV_MAX_MALLOCS 1024
 
-internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd);
+internal void SV_EnqueueCommandForAllUsers(
+    UserList* users, Command* cmd);
 
 internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
 internal MallocList g_mallocs;
@@ -65,7 +66,9 @@ void SV_WriteDebugString(ZStringHeader* str)
     if (user)
     {
         AckStream* acks = &user->acks;
-        written += sprintf_s(chars + written, str->maxLength - written,
+        written += sprintf_s(
+            chars + written,
+            str->maxLength - written,
             "-- Local Client %d --\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
             user->ids.privateId,
             acks->outputSequence,
@@ -73,7 +76,9 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ping,
 			user->jitter
 		);
-        written += sprintf_s(chars + written, str->maxLength - written,
+        written += sprintf_s(
+            chars + written,
+            str->maxLength - written,
             "\tOutbytes: %d\n",
             user->reliableStream.outputBuffer.Written()
 		);
@@ -94,7 +99,8 @@ void SV_WriteDebugString(ZStringHeader* str)
     }
     else
     {
-        written += sprintf_s(chars + written, str->maxLength - written,
+        written += sprintf_s(
+            chars + written, str->maxLength - written,
             "No local client found\n");
     }
     str->length = written;
@@ -118,7 +124,8 @@ u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
 			}
 			else
 			{
-				APP_PRINT(256, "\tUnknown entity type %s\n", tokens[1]);
+				APP_PRINT(256, "\tUnknown entity type %s\n",
+                    tokens[1]);
 			}
 			return 1;
 		}
@@ -133,7 +140,10 @@ internal i32 SV_IsPrivateIdInUse(i32 id)
     for (i32 i = 0; i < g_users.max; ++i)
     {
         User* u = &g_users.items[i];
-
+        if (u->ids.privateId == id)
+        {
+            return 1;
+        }
     }
     return 0;
 }
@@ -166,7 +176,8 @@ internal UserIds SV_GenerateUserId()
     return &g_platformInput;
 }*/
 
-internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
+internal void SV_AllocateUserStream(
+    NetStream* stream, i32 capacityPerBuffer)
 {
     if (stream->initialised) { return; }
     stream->initialised = 1;
@@ -175,12 +186,13 @@ internal void SV_AllocateUserStream(NetStream* stream, i32 capacityPerBuffer)
         capacityPerBuffer
     );
     stream->outputBuffer = Buf_FromMalloc(
-        COM_Malloc(&g_mallocs, capacityPerBuffer, "User Input"),
+        COM_Malloc(&g_mallocs, capacityPerBuffer, "User Output"),
         capacityPerBuffer
     );
 }
 
-internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd)
+internal void SV_EnqueueCommandForAllUsers(
+    UserList* users, Command* cmd)
 {
 	for (i32 i = 0; i < users->max; ++i)
 	{
@@ -195,7 +207,8 @@ internal void SV_EnqueueCommandForAllUsers(UserList* users, Command* cmd)
 
 internal void SV_UserStartSync(User* user)
 {
-    APP_PRINT(128, "SV - Begin sync for user %d\n", user->ids.privateId);
+    APP_PRINT(128, "SV - Begin sync for user %d\n",
+        user->ids.privateId);
     NetStream* stream = &user->reliableStream;
 
     S2C_Sync sync;
@@ -223,10 +236,9 @@ internal void SV_UserStartSync(User* user)
 
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
-        APP_PRINT(64, "  Write Entity %d\n", ent->id.serial);
-        printf("  Write Entity %d\n", ent->id.serial);
+        APP_LOG(64, "  Write Entity %d\n", ent->id.serial);
     }
-    APP_PRINT(64, "SV User %d has %d sync bytes\n",
+    APP_LOG(64, "SV User %d has %d sync bytes\n",
         user->ids.privateId, stream->outputBuffer.Written());
 }
 
@@ -253,12 +265,8 @@ internal void SV_SpawnUserAvatar(User* u)
 	u->entSerial = avatarSerial;
     def.serial = avatarSerial;
 	def.entType = SIM_ENT_TYPE_ACTOR;
-    def.pos[0] = -6;
-    def.pos[1] = 0;
-    def.pos[2] = 6;
-    def.scale[0] = 1;
-    def.scale[1] = 1;
-    def.scale[2] = 1;
+    def.pos = { -6, 0, 6 };
+    def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
 }
 
@@ -281,13 +289,11 @@ internal void SV_AddWanderer()
     def.isLocal = 0;
     def.serial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
     printf("SV Reserver serial %d for Wanderer\n", def.serial);
-    def.pos[0] = COM_STDRandomInRange(-8, 8);
-    def.pos[1] = 0;
-    def.pos[2] = COM_STDRandomInRange(-8, 8);
+    def.pos.x = COM_STDRandomInRange(-8, 8);
+    def.pos.y = 0;
+    def.pos.z = COM_STDRandomInRange(-8, 8);
     def.entType = SIM_ENT_TYPE_WANDERER;
-    def.scale[0] = 1;
-    def.scale[1] = 1;
-    def.scale[2] = 1;
+    def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);   
 }
 
@@ -301,13 +307,9 @@ internal void SV_LoadTestScene()
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    def.pos[0] = -10;
-    def.pos[1] = 0;
-    def.pos[2] = 10;
+    def.pos = { -10, 0, 10 };
     def.entType = SIM_ENT_TYPE_TURRET;
-    def.scale[0] = 1;
-    def.scale[1] = 1;
-    def.scale[2] = 1;
+    def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
     #endif
     i32 numWanderers = 6;

@@ -369,12 +369,8 @@ internal i32 CL_ExecReliableCommand(
 			def.serial = spawn->networkId;
             def.birthTick = h->tick;
             def.entType = spawn->entType;
-			def.pos[0] = spawn->pos.x;
-			def.pos[1] = spawn->pos.y;
-			def.pos[2] = spawn->pos.z;
-			def.velocity[0] = spawn->vel.x;
-			def.velocity[1] = spawn->vel.y;
-			def.velocity[2] = spawn->vel.z;
+			def.pos = spawn->pos;
+			def.velocity = spawn->vel;
 			Sim_RestoreEntity(sim, &def);
 		} break;
         case CMD_TYPE_S2C_REMOVE_ENTITY:
