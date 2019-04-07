@@ -153,8 +153,7 @@ extern "C"
 i32 Sim_ExecuteEnemySpawn(
     SimScene* sim,
     SimEnemySpawnEvent* event,
-	i32 fastForwardTicks,
-    SimEntity** results)
+	i32 fastForwardTicks)
 {
     i32 isLocal = (event->base.firstSerial < 0);
 
@@ -166,11 +165,15 @@ i32 Sim_ExecuteEnemySpawn(
         event->base.firstSerial,
         isLocal);
     
+    SimEntityDef def = {};
+    def.entType = event->enemyType;
+
     for (i32 i = 0; i < event->patternDef.numItems; ++i)
     {
         SimSpawnPatternItem* item = &items[i];
-        SimEntityDef def = {};
+        def.serial = item->entSerial;
         def.pos = items->pos;
+        Sim_RestoreEntity(sim, &def);
     }
     
     return COM_ERROR_NONE;

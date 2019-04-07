@@ -60,27 +60,29 @@ SVG_DEFINE_ENT_UPDATE(Turret)
     {
         ent->thinkTick += ent->thinkTime;
         // think
+        // Spawn projectiles
+        #if 1
         SimProjectileSpawnEvent def = {};
         def.projType = SIM_PROJ_TYPE_TEST;
         def.base.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
-        if (def.base.firstSerial == -1)
-        {
-            APP_PRINT(64, "SVG Turret failed to acquire ent serials\n");
-            return;
-        }
         def.base.pos = ent->t.pos;
         def.seedIndex = 0;
-        def.base.forward = { 1, 0, 0 };
+        def.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
         def.base.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
 			sim, &def, 0
 		);
-
         // Replicate!
         S2C_SpawnProjectiles prj = {};
         Cmd_InitProjectileSpawn(&prj, &def, g_ticks, 0);
 		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+        #endif
+        #if 0
+        SimEnemySpawnEvent event {};
+        event.enemyType = SIM_ENT_TYPE_WANDERER;
+        event.base.firstSerial = Sim_ReserveEntitySerialGroup(sim ,0, SIM_PROJECTILE_PATTERN_RADIAL)
+        #endif
     }
     else
     {
