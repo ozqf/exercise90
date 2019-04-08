@@ -77,9 +77,9 @@ i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 }
 
 extern "C"
-i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
+i32 Sim_ReserveEntitySerials(
+    SimScene* scene, i32 isLocal, i32 count)
 {
-    i32 count = Sim_GetProjectileCount(patternType);
     i32 first;
     i32 last;
     if (isLocal)
@@ -103,6 +103,14 @@ i32 Sim_ReserveEntitySerialGroup(SimScene* scene, i32 isLocal, i32 patternType)
             );
     }
     return first;
+}
+
+extern "C"
+i32 Sim_ReserveSerialsForProjectiles(
+    SimScene* sim, i32 isLocal, i32 projectileSpawnTime)
+{
+    i32 count = Sim_GetProjectileCount(projectileSpawnTime);
+    return Sim_ReserveEntitySerials(sim, isLocal, count);
 }
 
 /**

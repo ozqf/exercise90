@@ -61,7 +61,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         ent->thinkTick += ent->thinkTime;
         // think
         // Spawn projectiles
-        #if 1
+        #if 0
         SimProjectileSpawnEvent def = {};
         def.projType = SIM_PROJ_TYPE_TEST;
         def.base.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
@@ -78,10 +78,13 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         Cmd_InitProjectileSpawn(&prj, &def, g_ticks, 0);
 		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
         #endif
-        #if 0
+        #if 1
         SimEnemySpawnEvent event {};
         event.enemyType = SIM_ENT_TYPE_WANDERER;
-        event.base.firstSerial = Sim_ReserveEntitySerialGroup(sim ,0, SIM_PROJECTILE_PATTERN_RADIAL)
+        event.base.firstSerial = Sim_ReserveEntitySerials(
+            sim, 0, 8);
+        event.base.pos = ent->t.pos;
+        event.base.forward = ent->t.pos;
         #endif
     }
     else

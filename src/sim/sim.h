@@ -17,7 +17,10 @@ extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 // Entity list functions
 extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
-extern "C" i32      Sim_ReserveEntitySerialGroup(SimScene* sim, i32 isLocal, i32 patternType);
+extern "C" i32      Sim_ReserveEntitySerials(
+                        SimScene* scene, i32 isLocal, i32 count);
+extern "C" i32      Sim_ReserveSerialsForProjectiles(SimScene* sim, i32 isLocal, i32 projectileSpawnTime);
+
 extern "C" i32      Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
