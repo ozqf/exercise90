@@ -231,13 +231,14 @@ internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     /* Debug - Fire a local projectile to see how it matches the server */
     #if 1
     SimProjectileSpawnEvent def = {};
-    def.projType = SIM_PROJ_TYPE_PLAYER_PREDICTION;
+    def.projType = SIM_FACTORY_TYPE_PROJ_PREDICTION;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 1);
     def.base.pos = ent->t.pos;
     def.seedIndex = 0;
     def.base.forward = *dir;
     def.base.tick = g_ticks;
-    Sim_ExecuteProjectileSpawn(sim, &def, 0);
+    Sim_ExecuteEnemySpawn()
+    //Sim_ExecuteProjectileSpawn(sim, &def, 0);
     #endif
 	
     /* Debug - Create a line trace */

@@ -7,7 +7,7 @@
 // Internal Sim module functions/data
 
 
-internal SimProjectileType* Sim_GetProjectileType(i32 index);
+//internal SimProjectileType* Sim_GetProjectileType(i32 index);
 internal SimEntity* Sim_FindEntityBySerialNumber(SimScene* scene, i32 serialNumber);
 internal SimEntity* Sim_GetFreeReplicatedEntity(SimScene* scene, i32 newSerial);
 internal SimEntity* Sim_GetFreeLocalEntity(SimScene* scene, i32 newSerial);

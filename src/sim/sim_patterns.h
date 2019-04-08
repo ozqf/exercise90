@@ -55,7 +55,7 @@ internal i32 Sim_CreateSpawnPattern(
 				firstSerial, isLocal);
 		} break;
 		
-		case SIM_PROJ_TYPE_NONE:
+		case SIM_PATTERN_NONE:
 		{
 			results[0].pos = event->pos;
 			results[0].forward = event->forward;

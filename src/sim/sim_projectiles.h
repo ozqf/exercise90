@@ -2,10 +2,31 @@
 
 #include "sim_internal.h"
 
-#define SIM_MAX_PROJECTILE_TYPES 256
+//#define SIM_MAX_PROJECTILE_TYPES 256
 
-internal SimProjectileType g_prjTypes[SIM_MAX_PROJECTILE_TYPES];
+//internal SimProjectileType g_prjTypes[SIM_MAX_PROJECTILE_TYPES];
 
+internal void Sim_InitProjectile(
+    SimEntity* ent,
+    Vec3* pos,
+    Vec3* velocity,
+    SimProjectileType* type,
+    i32 fastForwardTicks)
+{
+    ent->status = SIM_ENT_STATUS_IN_USE;
+	ent->tickType = SIM_TICK_TYPE_PROJECTILE;
+	Transform_SetToIdentity(&ent->t);
+    if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
+    {
+        ent->t.scale = type->scale;
+    }
+	ent->t.pos = *pos;
+    ent->velocity = *velocity;
+
+    ent->lifeTime = type->lifeTime;
+	ent->fastForwardTicks = fastForwardTicks;
+}
+#if 0
 /*
 Define all entity types here
 */
@@ -55,33 +76,11 @@ internal i32 Sim_GetProjectileCount(i32 index)
     return (Sim_GetProjectileType(index))->patternDef.numItems;
 }
 
-internal void Sim_InitProjectile(
-    SimEntity* ent,
-    Vec3* pos,
-    Vec3* velocity,
-    SimProjectileType* type,
-    i32 fastForwardTicks)
-{
-    ent->status = SIM_ENT_STATUS_IN_USE;
-	ent->tickType = SIM_TICK_TYPE_PROJECTILE;
-	Transform_SetToIdentity(&ent->t);
-    if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
-    {
-        ent->t.scale = type->scale;
-    }
-	ent->t.pos = *pos;
-    ent->velocity = *velocity;
-
-    ent->lifeTime = type->lifeTime;
-	ent->fastForwardTicks = fastForwardTicks;
-}
-
 internal void Sim_SpawnProjectiles(
     SimScene* sim,
     SimProjectileSpawnEvent* event,
     SimProjectileType* type,
-    i32 fastForwardTicks
-)
+    i32 fastForwardTicks)
 {
     i32 isLocal = (event->base.firstSerial < 0);
 
@@ -110,6 +109,7 @@ internal void Sim_SpawnProjectiles(
         );
     }
 }
+#endif
 #if 0
 internal void Sim_NullProjectilePattern(
     SimScene* sim,

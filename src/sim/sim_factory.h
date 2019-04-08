@@ -174,17 +174,75 @@ internal i32 Sim_InitLineTrace(
     return COM_ERROR_NONE;
 }
 
+internal i32 Sim_InitProjBase(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    SimProjectileType t;
+    t.speed = 10.0f;
+    t.patternDef.numItems = 1;
+    t.lifeTime = 2.0f;
+    t.patternDef.patternId = SIM_PATTERN_NONE;
+
+    Sim_InitProjectile(
+        ent,
+        &def->pos,
+        &def->velocity,
+        &t,
+        def->fastForwardTicks);
+
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitProjPrediction(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    SimProjectileType t;
+    t.speed = 10.0f;
+    t.patternDef.numItems = 1;
+    t.lifeTime = 2.0f;
+    t.patternDef.patternId = SIM_PATTERN_NONE;
+    t.scale = { 0.5f, 0.5f, 0.5f };
+
+    Sim_InitProjectile(
+        ent,
+        &def->pos,
+        &def->velocity,
+        &t,
+        def->fastForwardTicks);
+
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitProjTest(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    SimProjectileType t;
+    t.speed = 10.0f;
+    t.patternDef.numItems = 4;
+    t.lifeTime = 6.0f;
+    t.patternDef.patternId = SIM_PATTERN_RADIAL;
+
+    Sim_InitProjectile(
+        ent,
+        &def->pos,
+        &def->velocity,
+        &t,
+        def->fastForwardTicks);
+
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_SpawnEntity(
-    SimScene* scene, SimEntityDef* def)
+    SimScene* sim, SimEntityDef* def)
 {
     SimEntity* ent;
     if (def->isLocal)
     {
-        ent = Sim_GetFreeLocalEntity(scene, def->serial);
+        ent = Sim_GetFreeLocalEntity(sim, def->serial);
     }
     else
     {
-        ent = Sim_GetFreeReplicatedEntity(scene, def->serial);
+        ent = Sim_GetFreeReplicatedEntity(sim, def->serial);
     }
     if (!ent)
     {
@@ -200,27 +258,23 @@ internal i32 Sim_SpawnEntity(
 
     switch (def->factoryType)
     {
+        case SIM_FACTORY_TYPE_PROJECTILE_BASE:
+            return Sim_InitProjBase(sim, ent, def);
+        case SIM_FACTORY_TYPE_PROJ_PREDICTION:
+            return Sim_InitProjBase(sim, ent, def);
+        case SIM_FACTORY_TYPE_PROJ_TEST:
+            return Sim_InitProjBase(sim, ent, def);
         case SIM_FACTORY_TYPE_ACTOR:
-        {
-            return Sim_InitActor(scene, ent, def);
-        } break;
+            return Sim_InitActor(sim, ent, def);
         case SIM_FACTORY_TYPE_WANDERER:
-        {
-            return Sim_InitWanderer(scene, ent, def);
-        }
+            return Sim_InitWanderer(sim, ent, def);
         case SIM_FACTORY_TYPE_WORLD:
-        {
-            return Sim_InitWorldVolume(scene, ent, def);
-        }
+            return Sim_InitWorldVolume(sim, ent, def);
         case SIM_FACTORY_TYPE_TURRET:
-        {
-            return Sim_InitTurret(scene, ent, def);
-        }
-		case SIM_FACTORY_TYPE_LINE_TRACE:
-		{
-			return Sim_InitLineTrace(scene, ent, def);
-		}
-        case SIM_FACTORY_TYPE_NONE:
+            return Sim_InitTurret(sim, ent, def);
+        case SIM_FACTORY_TYPE_LINE_TRACE:
+		    return Sim_InitLineTrace(sim, ent, def);
+		case SIM_FACTORY_TYPE_NONE:
         {
             printf("SIM Cannot spawn, entity type not set!\n");
             ILLEGAL_CODE_PATH

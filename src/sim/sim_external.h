@@ -104,7 +104,7 @@ i32 Sim_ReserveEntitySerials(
     }
     return first;
 }
-
+/*
 extern "C"
 i32 Sim_ReserveSerialsForProjectiles(
     SimScene* sim, i32 isLocal, i32 projectileSpawnTime)
@@ -112,7 +112,7 @@ i32 Sim_ReserveSerialsForProjectiles(
     i32 count = Sim_GetProjectileCount(projectileSpawnTime);
     return Sim_ReserveEntitySerials(sim, isLocal, count);
 }
-
+*/
 /**
  * Restore the exact state of a single entity
  * (create it if it doesn't exist)
@@ -186,7 +186,7 @@ i32 Sim_ExecuteEnemySpawn(
     
     return COM_ERROR_NONE;
 }
-
+#if 0
 extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
@@ -225,7 +225,7 @@ i32 Sim_ExecuteProjectileSpawn(
 
     return COM_ERROR_NONE;
 }
-
+#endif
 extern "C"
 void Sim_Reset(SimScene* sim)
 {
@@ -238,7 +238,7 @@ void Sim_Reset(SimScene* sim)
 	// replicated entity, oh well
 	sim->remoteEntitySequence = 1;
 	sim->localEntitySequence = -1;
-    Sim_InitProjectileTypes();
+    //Sim_InitProjectileTypes();
 }
 
 extern "C"

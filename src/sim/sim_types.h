@@ -87,6 +87,7 @@ struct SimEntity
 struct SimEntityDef
 {
     i32 serial;
+    i32 fastForwardTicks;
 
     i32 birthTick;
     //i32 deathTick;  // Die on a predetermined tick
