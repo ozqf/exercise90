@@ -20,7 +20,7 @@ internal void SVG_HandleEntityDeath(
 internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntityDef def = {};
-    def.entType = SIM_ENT_TYPE_LINE_TRACE;
+    def.factoryType = SIM_FACTORY_TYPE_LINE_TRACE;
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
     def.pos = origin;
@@ -80,7 +80,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         #endif
         #if 1
         SimEnemySpawnEvent event {};
-        event.enemyType = SIM_ENT_TYPE_WANDERER;
+        event.enemyType = SIM_FACTORY_TYPE_WANDERER;
         event.base.firstSerial = Sim_ReserveEntitySerials(
             sim, 0, 8);
         event.base.pos = ent->t.pos;
@@ -304,20 +304,20 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 internal void SVG_TickEntity(
     SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
-    switch (ent->entType)
+    switch (ent->tickType)
     {
-		case SIM_ENT_TYPE_PROJECTILE:
+		case SIM_FACTORY_TYPE_PROJECTILE:
         { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
-		case SIM_ENT_TYPE_WANDERER:
+		case SIM_FACTORY_TYPE_WANDERER:
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
-		case SIM_ENT_TYPE_ACTOR:
+		case SIM_FACTORY_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_TURRET:
+        case SIM_FACTORY_TYPE_TURRET:
         { SVG_UpdateTurret(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_LINE_TRACE:
+        case SIM_FACTORY_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_WORLD: { } break;
-        case SIM_ENT_TYPE_NONE: { } break;
+        case SIM_FACTORY_TYPE_WORLD: { } break;
+        case SIM_FACTORY_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
     }
 }

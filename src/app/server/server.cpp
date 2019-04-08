@@ -227,7 +227,7 @@ internal void SV_UserStartSync(User* user)
         Cmd_InitRestoreEntity(&cmd, g_ticks, 0);
         
         // TODO: Any entity specific spawning stuff here
-        cmd.entType = (u8)ent->entType;
+        cmd.factoryType = (u8)ent->factoryType;
         cmd.networkId = ent->id.serial;
         cmd.pos = ent->t.pos;
         cmd.vel = ent->velocity;
@@ -264,7 +264,7 @@ internal void SV_SpawnUserAvatar(User* u)
 	i32 avatarSerial = Sim_ReserveEntitySerial(&g_sim, 0);
 	u->entSerial = avatarSerial;
     def.serial = avatarSerial;
-	def.entType = SIM_ENT_TYPE_ACTOR;
+	def.factoryType = SIM_FACTORY_TYPE_ACTOR;
     def.pos = { -6, 0, 6 };
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
@@ -292,7 +292,7 @@ internal void SV_AddWanderer()
     def.pos.x = COM_STDRandomInRange(-8, 8);
     def.pos.y = 0;
     def.pos.z = COM_STDRandomInRange(-8, 8);
-    def.entType = SIM_ENT_TYPE_WANDERER;
+    def.factoryType = SIM_FACTORY_TYPE_WANDERER;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);   
 }
@@ -308,7 +308,7 @@ internal void SV_LoadTestScene()
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
     def.pos = { -10, 0, 10 };
-    def.entType = SIM_ENT_TYPE_TURRET;
+    def.factoryType = SIM_FACTORY_TYPE_TURRET;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
     #endif
@@ -484,9 +484,9 @@ void SV_PopulateRenderScene(
         //RendObj_SetAsMesh(
         //    &obj, *cube, 1, 0, 0, texIndex);
 
-        switch(ent->entType)
+        switch(ent->tickType)
         {
-            case SIM_ENT_TYPE_LINE_TRACE:
+            case SIM_TICK_TYPE_LINE_TRACE:
             {
                 if (!g_debugDrawServerTests) { break; }
                 Vec3* a = &ent->t.pos;

@@ -48,7 +48,7 @@ internal i32 Sim_CreateSpawnPattern(
 {
 	switch (def->patternId)
 	{
-		case SIM_PROJECTILE_PATTERN_RADIAL:
+		case SIM_PATTERN_RADIAL:
 		{
 			//
 			return Sim_CreateRadialPattern(event, def, results,

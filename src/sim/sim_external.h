@@ -174,7 +174,7 @@ i32 Sim_ExecuteEnemySpawn(
         isLocal);
     
     SimEntityDef def = {};
-    def.entType = event->enemyType;
+    def.factoryType = event->enemyType;
 
     for (i32 i = 0; i < event->patternDef.numItems; ++i)
     {
@@ -264,7 +264,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     SimEntityDef def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
-	def.entType = SIM_ENT_TYPE_WORLD;
+	def.factoryType = SIM_FACTORY_TYPE_WORLD;
     def.pos.y = -0.5f;
     def.scale.x = halfX * 2;
     def.scale.y = 1;

@@ -5,7 +5,7 @@
 internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntityDef def = {};
-    def.entType = SIM_ENT_TYPE_LINE_TRACE;
+    def.factoryType = SIM_FACTORY_TYPE_LINE_TRACE;
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
     def.pos = origin;
@@ -303,14 +303,14 @@ CLG_DEFINE_ENT_UPDATE(LineTrace)
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
-    switch (ent->entType)
+    switch (ent->tickType)
     {
-        case SIM_ENT_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
-		case SIM_ENT_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
-        case SIM_ENT_TYPE_WORLD: { } break;
-        case SIM_ENT_TYPE_NONE: { } break;
+        case SIM_FACTORY_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
+        case SIM_FACTORY_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
+		case SIM_FACTORY_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_FACTORY_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
+        case SIM_FACTORY_TYPE_WORLD: { } break;
+        case SIM_FACTORY_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
     }
 }

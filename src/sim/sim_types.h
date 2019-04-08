@@ -22,19 +22,6 @@ struct SimActorInput
     Vec3 degrees;
 };
 
-#define SIM_ENT_STATUS_FREE 0
-#define SIM_ENT_STATUS_RESERVED 1
-#define SIM_ENT_STATUS_IN_USE 2
-
-#define SIM_ENT_TYPE_NONE 0
-#define SIM_ENT_TYPE_WORLD 1
-#define SIM_ENT_TYPE_ACTOR 2
-#define SIM_ENT_TYPE_PROJECTILE 3
-#define SIM_ENT_TYPE_TURRET 4
-#define SIM_ENT_TYPE_WANDERER 5
-#define SIM_ENT_TYPE_LINE_TRACE 6 
-
-
 #pragma pack(push, 1)
 union SimEntIndex
 {
@@ -65,7 +52,9 @@ struct SimEntity
     i32 status;
     i32 isLocal;
     SimEntId id;
-    i32 entType;
+
+    i32 factoryType;
+    i32 tickType;
 	
 	i32 fastForwardTicks;
     i32 birthTick;
@@ -103,16 +92,13 @@ struct SimEntityDef
     //i32 deathTick;  // Die on a predetermined tick
     
     i32 isLocal;
-    i32 entType;
+    i32 factoryType;
     Vec3 pos;
     Vec3 scale;
     Vec3 velocity;
     Vec3 destination;
 };
 
-#define SIM_PROJECTILE_PATTERN_NONE 0
-#define SIM_PROJECTILE_PATTERN_SPREAD 1
-#define SIM_PROJECTILE_PATTERN_RADIAL 2
 struct SimSpawnPatternItem
 {
 	i32 entSerial;
@@ -140,10 +126,6 @@ struct SimProjectileType
     // Characterics of how this projectile is spawned
     SimSpawnPatternDef patternDef;
 };
-
-#define SIM_PROJ_TYPE_NONE 0
-#define SIM_PROJ_TYPE_PLAYER_PREDICTION 1
-#define SIM_PROJ_TYPE_TEST 2
 
 struct SimSpawnBase
 {

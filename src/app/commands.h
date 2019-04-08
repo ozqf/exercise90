@@ -135,7 +135,7 @@ struct S2C_RestoreEntity
     // All data that must be replicated to spawn this entity
     // have to be here. The rest is client side
     i32 networkId;
-    u8 entType;
+    u8 factoryType;
     Vec3 pos;
 	Vec3 vel;
     f32 pitch;

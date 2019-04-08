@@ -40,10 +40,10 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 			break;
 		}
         APP_LOG(32, "%d, ", ent->id.serial);
-		switch (ent->entType)
+		switch (ent->tickType)
 		{
-            case SIM_ENT_TYPE_ACTOR:
-			case SIM_ENT_TYPE_WANDERER:
+            case SIM_TICK_TYPE_ACTOR:
+			case SIM_TICK_TYPE_WANDERER:
 			{
                 S2C_EntitySync cmd = {};
                 Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);

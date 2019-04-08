@@ -23,7 +23,7 @@ i32 Sim_FindByAABB(
         if (ent->status != SIM_ENT_STATUS_IN_USE
             || ent->id.serial == ignoreSerial)
         { continue; }
-        if (ent->entType != SIM_ENT_TYPE_WANDERER)
+        if (ent->tickType != SIM_TICK_TYPE_WANDERER)
         { continue; }
         // expand bounds by entity size and
         // then point test
@@ -73,7 +73,7 @@ i32 Sim_FindByRaycast(
         if (ent->status != SIM_ENT_STATUS_IN_USE
             || ent->id.serial == ignoreSerial)
         { continue; }
-        if (ent->entType != SIM_ENT_TYPE_WANDERER)
+        if (ent->tickType != SIM_TICK_TYPE_WANDERER)
         { continue; }
         // create aabb for ent and line test
         Vec3* p = &ent->t.pos;

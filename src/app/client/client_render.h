@@ -102,27 +102,27 @@ void CL_PopulateRenderScene(
 
         i32 interpolate = 1;
         
-		switch (ent->entType)
+		switch (ent->tickType)
 		{
-			case SIM_ENT_TYPE_WORLD:
+			case SIM_TICK_TYPE_WORLD:
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, { 0.2f, 0.2f, 0.2f, 1 }, texIndex);
 			} break;
 
-            case SIM_ENT_TYPE_PROJECTILE:
+            case SIM_TICK_TYPE_PROJECTILE:
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, { 1, 1, 0, 1 }, texIndex);
 			} break;
 			
-			case SIM_ENT_TYPE_ACTOR:
+			case SIM_TICK_TYPE_ACTOR:
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, { 0.2f, 1, 0.2f, 1 }, texIndex);
 			} break;
 
-            case SIM_ENT_TYPE_LINE_TRACE:
+            case SIM_TICK_TYPE_LINE_TRACE:
             {
                 Vec3* a = &ent->t.pos;
                 Vec3* b = &ent->destination;

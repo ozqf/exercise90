@@ -126,7 +126,7 @@ internal i32 Sim_InitActor(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->entType = def->entType;
+    ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->attackTime = 0.2f;
     ent->display.colour = { 0, 1, 0, 1 };
     return COM_ERROR_NONE;
@@ -136,7 +136,7 @@ internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->entType = def->entType;
+    ent->tickType = SIM_TICK_TYPE_WANDERER;
     ent->display.colour = { 0.2f, 0.2f, 1, 1 };
     return COM_ERROR_NONE;
 }
@@ -147,7 +147,7 @@ internal i32 Sim_InitWorldVolume(
     Sim_InitEntity(ent, def);
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
         def->pos.x, def->pos.y, def->pos.z);
-    ent->entType = def->entType;
+    ent->tickType = SIM_TICK_TYPE_WORLD;
     // world volumes can't move (yet!)
     ent->velocity = {};
     ent->display.colour = { 0.2f, 0.2f, 0.2f, 1 };
@@ -158,7 +158,7 @@ internal i32 Sim_InitTurret(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->entType = def->entType;
+    ent->tickType = SIM_TICK_TYPE_TURRET;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
     return COM_ERROR_NONE;
@@ -169,7 +169,7 @@ internal i32 Sim_InitLineTrace(
 {
 	//printf("SIM Create line trace\n");
     Sim_InitEntity(ent, def);
-    ent->entType = SIM_ENT_TYPE_LINE_TRACE;
+    ent->tickType = SIM_TICK_TYPE_LINE_TRACE;
 	ent->lifeTime = 1.0f;
     return COM_ERROR_NONE;
 }
@@ -195,30 +195,32 @@ internal i32 Sim_SpawnEntity(
     
     Assert(ent)
     ent->status = SIM_ENT_STATUS_IN_USE;
+    // Record factory type so we know how this entity was initialised
+    ent->factoryType = def->factoryType;
 
-    switch (def->entType)
+    switch (def->factoryType)
     {
-        case SIM_ENT_TYPE_ACTOR:
+        case SIM_FACTORY_TYPE_ACTOR:
         {
             return Sim_InitActor(scene, ent, def);
         } break;
-        case SIM_ENT_TYPE_WANDERER:
+        case SIM_FACTORY_TYPE_WANDERER:
         {
             return Sim_InitWanderer(scene, ent, def);
         }
-        case SIM_ENT_TYPE_WORLD:
+        case SIM_FACTORY_TYPE_WORLD:
         {
             return Sim_InitWorldVolume(scene, ent, def);
         }
-        case SIM_ENT_TYPE_TURRET:
+        case SIM_FACTORY_TYPE_TURRET:
         {
             return Sim_InitTurret(scene, ent, def);
         }
-		case SIM_ENT_TYPE_LINE_TRACE:
+		case SIM_FACTORY_TYPE_LINE_TRACE:
 		{
 			return Sim_InitLineTrace(scene, ent, def);
 		}
-        case SIM_ENT_TYPE_NONE:
+        case SIM_FACTORY_TYPE_NONE:
         {
             printf("SIM Cannot spawn, entity type not set!\n");
             ILLEGAL_CODE_PATH
@@ -227,7 +229,7 @@ internal i32 Sim_SpawnEntity(
 
         default:
         {
-            printf("SIM Unknown entity type %d\n", def->entType);
+            printf("SIM Unknown entity type %d\n", def->factoryType);
             ILLEGAL_CODE_PATH
             return COM_ERROR_BAD_ARGUMENT;
         } break;

@@ -168,7 +168,7 @@ void CL_LoadTestScene()
     def.isLocal = 1;
 	g_avatarSerial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
     def.serial = g_avatarSerial;
-	def.entType = SIM_ENT_TYPE_ACTOR;
+	def.tickType = SIM_ENT_TYPE_ACTOR;
     def.pos[1] = 0;
     def.scale[0] = 1;
     def.scale[1] = 1;
@@ -368,7 +368,7 @@ internal i32 CL_ExecReliableCommand(
 			SimEntityDef def = {};
 			def.serial = spawn->networkId;
             def.birthTick = h->tick;
-            def.entType = spawn->entType;
+            def.factoryType = spawn->factoryType;
 			def.pos = spawn->pos;
 			def.velocity = spawn->vel;
 			Sim_RestoreEntity(sim, &def);

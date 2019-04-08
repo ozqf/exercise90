@@ -19,20 +19,20 @@ internal void Sim_InitProjectileTypes()
     t->speed = 10.0f;
     t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.patternId = SIM_PATTERN_NONE;
 
     t = &g_prjTypes[SIM_PROJ_TYPE_PLAYER_PREDICTION];
     t->speed = 10.0f;
     t->patternDef.numItems = 1;
     t->lifeTime = 2.0f;
-    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_NONE;
+    t->patternDef.patternId = SIM_PATTERN_NONE;
     t->scale = { 0.5f, 0.5f, 0.5f };
 
     t = &g_prjTypes[SIM_PROJ_TYPE_TEST];
     t->speed = 10.0f;
     t->patternDef.numItems = 4;
     t->lifeTime = 6.0f;
-    t->patternDef.patternId = SIM_PROJECTILE_PATTERN_RADIAL;
+    t->patternDef.patternId = SIM_PATTERN_RADIAL;
 }
 
 internal SimProjectileType* Sim_GetProjectileType(i32 index)
@@ -63,7 +63,7 @@ internal void Sim_InitProjectile(
     i32 fastForwardTicks)
 {
     ent->status = SIM_ENT_STATUS_IN_USE;
-	ent->entType = SIM_ENT_TYPE_PROJECTILE;
+	ent->tickType = SIM_TICK_TYPE_PROJECTILE;
 	Transform_SetToIdentity(&ent->t);
     if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
     {
