@@ -22,6 +22,7 @@ internal void Sim_InitProjectile(
     }
 	ent->t.pos = *pos;
     ent->velocity = *velocity;
+    ent->speed = type->speed;
 
     ent->lifeTime = type->lifeTime;
 	ent->fastForwardTicks = fastForwardTicks;

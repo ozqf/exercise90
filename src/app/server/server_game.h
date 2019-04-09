@@ -25,7 +25,7 @@ internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
     def.isLocal = 1;
     def.pos = origin;
     def.destination = dest;
-    i32 serial = Sim_RestoreEntity(sim, &def);
+    Sim_RestoreEntity(sim, &def);
 }
 
 #define SVG_DEFINE_ENT_UPDATE(entityTypeName) internal void \

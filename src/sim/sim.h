@@ -51,7 +51,7 @@ extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);
 //extern "C" i32      Sim_ReserveSerialsForProjectiles(SimScene* sim, i32 isLocal, i32 projectileSpawnTime);
 
-extern "C" i32      Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
+extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
 extern "C" i32      Sim_ExecuteProjectileSpawn(

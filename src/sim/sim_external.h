@@ -118,7 +118,7 @@ i32 Sim_ReserveSerialsForProjectiles(
  * (create it if it doesn't exist)
  */
 extern "C"
-i32 Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
+SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 {
 	// an id of zero is considered invalid
 	Assert(def->serial)
@@ -127,11 +127,12 @@ i32 Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
     {
         // TODO: This code!
         ILLEGAL_CODE_PATH
-        return COM_ERROR_NOT_IMPLEMENTED;
+        return NULL;
     }
     else
     {
-        return Sim_SpawnEntity(scene, def);
+        ent = Sim_SpawnEntity(scene, def);
+        return ent;
     }
 }
 
@@ -210,17 +211,17 @@ i32 Sim_ExecuteProjectileSpawn(
 		//if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
 		//else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
         
-        f32 speed = 15.0f;
         SimEntityDef entDef = {};
         entDef.factoryType = event->factoryType;
         entDef.serial = item->entSerial;
         entDef.pos = item->pos;
         entDef.scale = { 1, 1, 1 };
-        entDef.velocity.x = item->forward.x * speed;
-        entDef.velocity.y = item->forward.y * speed;
-        entDef.velocity.z = item->forward.z * speed;
         entDef.fastForwardTicks = fastForwardTicks;
-        Sim_RestoreEntity(sim, &entDef);
+        SimEntity* ent = Sim_RestoreEntity(sim, &entDef);
+
+        ent->velocity.x = item->forward.x * ent->speed;
+        ent->velocity.y = item->forward.y * ent->speed;
+        ent->velocity.z = item->forward.z * ent->speed;
 
         #if 0
         Vec3 v = {};

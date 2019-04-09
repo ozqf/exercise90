@@ -234,7 +234,7 @@ internal i32 Sim_InitProjTest(
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_SpawnEntity(
+internal SimEntity* Sim_SpawnEntity(
     SimScene* sim, SimEntityDef* def)
 {
     SimEntity* ent;
@@ -258,40 +258,42 @@ internal i32 Sim_SpawnEntity(
     // Record factory type so we know how this entity was initialised
     ent->factoryType = def->factoryType;
 
+    ErrorCode err;
+
     switch (def->factoryType)
     {
         case SIM_FACTORY_TYPE_PROJECTILE_BASE:
-            return Sim_InitProjBase(sim, ent, def);
+            err =  Sim_InitProjBase(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_PREDICTION:
-            return Sim_InitProjBase(sim, ent, def);
+            err =  Sim_InitProjBase(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_TEST:
-            return Sim_InitProjBase(sim, ent, def);
+            err =  Sim_InitProjBase(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
-            return Sim_InitActor(sim, ent, def);
+            err =  Sim_InitActor(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:
-            return Sim_InitWanderer(sim, ent, def);
+            err =  Sim_InitWanderer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
-            return Sim_InitWorldVolume(sim, ent, def);
+            err =  Sim_InitWorldVolume(sim, ent, def); break;
         case SIM_FACTORY_TYPE_TURRET:
-            return Sim_InitTurret(sim, ent, def);
+            err =  Sim_InitTurret(sim, ent, def);
         case SIM_FACTORY_TYPE_LINE_TRACE:
-		    return Sim_InitLineTrace(sim, ent, def);
+		    err =  Sim_InitLineTrace(sim, ent, def); break;
 		case SIM_FACTORY_TYPE_NONE:
         {
             printf("SIM Cannot spawn, entity type not set!\n");
-            ILLEGAL_CODE_PATH
-            return COM_ERROR_BAD_ARGUMENT;
+            
+            return NULL;
         } break;
 
         default:
         {
             printf("SIM Unknown entity type %d\n", def->factoryType);
             ILLEGAL_CODE_PATH
-            return COM_ERROR_BAD_ARGUMENT;
+            return NULL;
         } break;
     }
 
-    //return COM_ERROR_NONE;
+    return ent;
 }
 
 internal i32 Sim_RecycleEntity(

@@ -10,8 +10,7 @@ internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
     def.isLocal = 1;
     def.pos = origin;
     def.destination = dest;
-    i32 serial = Sim_RestoreEntity(sim, &def);
-    printf("CL Spawn line segment\n");
+    Sim_RestoreEntity(sim, &def);
 }
 
 #define CLG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
