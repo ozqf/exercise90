@@ -305,8 +305,9 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->tickType)
     {
-        case SIM_TICK_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
+		case SIM_TICK_TYPE_BOUNCER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
+		case SIM_TICK_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;

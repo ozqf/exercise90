@@ -132,16 +132,6 @@ internal i32 Sim_InitActor(
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitWanderer(
-    SimScene* scene, SimEntity* ent, SimEntityDef* def)
-{
-    Sim_InitEntity(ent, def);
-    ent->speed = 3;
-    ent->tickType = SIM_TICK_TYPE_WANDERER;
-    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
-    return COM_ERROR_NONE;
-}
-
 internal i32 Sim_InitWorldVolume(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
@@ -177,6 +167,32 @@ internal i32 Sim_InitLineTrace(
     return COM_ERROR_NONE;
 }
 
+///////////////////////////////////////////////////////
+// Enemies
+///////////////////////////////////////////////////////
+internal i32 Sim_InitWanderer(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_InitEntity(ent, def);
+    ent->speed = 3;
+    ent->tickType = SIM_TICK_TYPE_WANDERER;
+    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitBouncer(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_InitEntity(ent, def);
+    ent->speed = 3;
+    ent->tickType = SIM_TICK_TYPE_BOUNCER;
+    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    return COM_ERROR_NONE;
+}
+
+///////////////////////////////////////////////////////
+// Projectiles
+///////////////////////////////////////////////////////
 internal i32 Sim_InitProjBase(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
@@ -275,6 +291,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitActor(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:
             err =  Sim_InitWanderer(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_BOUNCER:
+            err =  Sim_InitBouncer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
         case SIM_FACTORY_TYPE_TURRET:

@@ -23,18 +23,26 @@ i32 Sim_FindByAABB(
         if (ent->status != SIM_ENT_STATUS_IN_USE
             || ent->id.serial == ignoreSerial)
         { continue; }
-        if (ent->tickType != SIM_TICK_TYPE_WANDERER)
+        if (ent->tickType != SIM_TICK_TYPE_WANDERER
+            && ent->tickType != SIM_TICK_TYPE_BOUNCER
+            )
         { continue; }
         // expand bounds by entity size and
         // then point test
+        Vec3 halfSize = 
+        {
+            ent->t.scale.x,
+            ent->t.scale.y,
+            ent->t.scale.z
+        };
         Vec3 min;
-        min.x = boundsMin.x - 0.5f;
-        min.y = boundsMin.y - 0.5f;
-        min.z = boundsMin.z - 0.5f;
+        min.x = boundsMin.x - halfSize.x;
+        min.y = boundsMin.y - halfSize.y;
+        min.z = boundsMin.z - halfSize.z;
         Vec3 max;
-        max.x = boundsMax.x + 0.5f;
-        max.y = boundsMax.y + 0.5f;
-        max.z = boundsMax.z + 0.5f;
+        max.x = boundsMax.x + halfSize.x;
+        max.y = boundsMax.y + halfSize.y;
+        max.z = boundsMax.z + halfSize.z;
         Vec3* p = &ent->t.pos;
         if (p->x < min.x || p->x > max.x) { continue; }
         if (p->y < min.y || p->y > max.y) { continue; }
