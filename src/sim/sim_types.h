@@ -139,7 +139,8 @@ struct SimSpawnBase
 struct SimProjectileSpawnEvent
 {
     SimSpawnBase base;
-    u8 projType;
+    SimSpawnPatternDef patternDef;
+    u8 factoryType;
     u8 seedIndex;
 };
 

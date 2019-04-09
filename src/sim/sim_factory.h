@@ -182,6 +182,7 @@ internal i32 Sim_InitProjBase(
     t.patternDef.numItems = 1;
     t.lifeTime = 2.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
+    t.scale = { 1, 1, 1 };
 
     Sim_InitProjectile(
         ent,
@@ -221,6 +222,7 @@ internal i32 Sim_InitProjTest(
     t.patternDef.numItems = 4;
     t.lifeTime = 6.0f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
+    t.scale = { 1, 1, 1 };
 
     Sim_InitProjectile(
         ent,

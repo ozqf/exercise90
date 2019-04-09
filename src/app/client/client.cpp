@@ -350,7 +350,7 @@ internal i32 CL_ExecReliableCommand(
         {
             S2C_SpawnProjectiles* prj = (S2C_SpawnProjectiles*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
-                prj->def.projType,
+                prj->def.factoryType,
 				prj->def.base.tick,
 				prj->def.base.tick - CL_GetServerTick(),
 				prj->header.tick

@@ -210,7 +210,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         g_ticks, eventTick, fastForwardTicks);
 
     SimProjectileSpawnEvent def = {};
-    def.projType = SIM_PROJ_TYPE_NONE;
+    def.factoryType = SIM_FACTORY_TYPE_PROJECTILE_BASE;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
     def.base.pos = ent->t.pos;
     def.base.forward = *dir;
@@ -306,18 +306,18 @@ internal void SVG_TickEntity(
 {
     switch (ent->tickType)
     {
-		case SIM_FACTORY_TYPE_PROJECTILE:
+		case SIM_TICK_TYPE_PROJECTILE:
         { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
-		case SIM_FACTORY_TYPE_WANDERER:
+		case SIM_TICK_TYPE_WANDERER:
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
-		case SIM_FACTORY_TYPE_ACTOR:
+		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_FACTORY_TYPE_TURRET:
+        case SIM_TICK_TYPE_TURRET:
         { SVG_UpdateTurret(sim, ent, deltaTime); } break;
-        case SIM_FACTORY_TYPE_LINE_TRACE:
+        case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
-        case SIM_FACTORY_TYPE_WORLD: { } break;
-        case SIM_FACTORY_TYPE_NONE: { } break;
+        case SIM_TICK_TYPE_WORLD: { } break;
+        case SIM_TICK_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
     }
 }

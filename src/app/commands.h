@@ -190,6 +190,7 @@ internal void Cmd_WriteEntitySync(
 ///////////////////////////////////////////////////////////////////////////
 // Bulk Entity events
 ///////////////////////////////////////////////////////////////////////////
+#if 1
 struct S2C_SpawnProjectiles
 {
     Command header;
@@ -207,15 +208,16 @@ internal void Cmd_InitProjectileSpawn(
     cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     cmd->def = *event;
 }
-
-struct S2C_SpawnEnemies
+#endif
+#if 0
+struct S2C_PatternSpawn
 {
     Command header;
     SimEnemySpawnEvent def;
 };
 
-internal void Cmd_InitEnemySpawn(
-    S2C_SpawnEnemies* cmd,
+internal void Cmd_InitPattenSpawn(
+    S2C_PatternSpawn* cmd,
     SimEnemySpawnEvent* event,
     i32 tick, i32 sequence)
 {
@@ -225,7 +227,7 @@ internal void Cmd_InitEnemySpawn(
     cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     cmd->def = *event;
 }
-
+#endif
 ///////////////////////////////////////////////////////////////////////////
 // Connection control and sync
 ///////////////////////////////////////////////////////////////////////////

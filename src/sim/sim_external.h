@@ -156,7 +156,7 @@ i32 Sim_SetActorInput(
     ent->input = *input;
     return COM_ERROR_NONE;
 }
-
+#if 0
 extern "C"
 i32 Sim_ExecuteEnemySpawn(
     SimScene* sim,
@@ -186,29 +186,43 @@ i32 Sim_ExecuteEnemySpawn(
     
     return COM_ERROR_NONE;
 }
-#if 0
+#endif
+#if 1
 extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
-    SimProjectileSpawnEvent* def,
+    SimProjectileSpawnEvent* event,
 	i32 fastForwardTicks)
 {
-    SimProjectileType* type = Sim_GetProjectileType(def->projType);
-    Assert(type)
-    //Sim_SpawnProjectiles(sim, def, type, fastForwardTicks);
-    i32 isLocal = (def->base.firstSerial < 0);
+    //SimProjectileType* type = Sim_GetProjectileType(event->projType);
+    Assert(event->factoryType)
+    //Sim_SpawnProjectiles(sim, event, type, fastForwardTicks);
+    i32 isLocal = (event->base.firstSerial < 0);
 
     SimSpawnPatternItem items[64];
     i32 count = Sim_CreateSpawnPattern(
-        &def->base, &type->patternDef, items, def->base.firstSerial, isLocal);
+        &event->base, &event->patternDef, items, event->base.firstSerial, isLocal);
     
     for (i32 i = 0; i < count; ++i)
     {
         SimSpawnPatternItem* item = &items[i];
-		SimEntity* ent;
-		if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
-		else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
+		//SimEntity* ent;
+		//if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
+		//else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
+        
+        f32 speed = 15.0f;
+        SimEntityDef entDef = {};
+        entDef.factoryType = event->factoryType;
+        entDef.serial = item->entSerial;
+        entDef.pos = item->pos;
+        entDef.scale = { 1, 1, 1 };
+        entDef.velocity.x = item->forward.x * speed;
+        entDef.velocity.y = item->forward.y * speed;
+        entDef.velocity.z = item->forward.z * speed;
+        entDef.fastForwardTicks = fastForwardTicks;
+        Sim_RestoreEntity(sim, &entDef);
 
+        #if 0
         Vec3 v = {};
         v.x = item->forward.x * type->speed;
         v.y = item->forward.y * type->speed;
@@ -221,6 +235,7 @@ i32 Sim_ExecuteProjectileSpawn(
             type,
             fastForwardTicks
         );
+        #endif
     }
 
     return COM_ERROR_NONE;
