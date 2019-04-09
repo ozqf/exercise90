@@ -112,8 +112,8 @@ void CL_PopulateRenderScene(
 
             case SIM_TICK_TYPE_PROJECTILE:
 			{
-                printf("PRJ SCALE %.3f, %.3f, %.3f\n",
-                    ent->t.scale.x, ent->t.scale.y, ent->t.scale.z);
+                //printf("PRJ SCALE %.3f, %.3f, %.3f\n",
+                //    ent->t.scale.x, ent->t.scale.y, ent->t.scale.z);
 				RendObj_SetAsMesh(
 					&obj, *cube, { 1, 1, 0, 1 }, texIndex);
 			} break;

@@ -41,8 +41,8 @@ SVG_DEFINE_ENT_UPDATE(Wanderer)
         ent->thinkTime = COM_STDRandomInRange(1, 4);
         // set a random movement vector
         f32 radians = COM_STDRandomInRange(0, 360) * DEG2RAD;
-        ent->velocity.x = cosf(radians) * 3;
-        ent->velocity.z = sinf(radians) * 3;
+        ent->velocity.x = cosf(radians) * ent->speed;
+        ent->velocity.z = sinf(radians) * ent->speed;
         //printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
     }
     else
@@ -61,24 +61,28 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         ent->thinkTick += ent->thinkTime;
         // think
         // Spawn projectiles
-        #if 0
-        SimProjectileSpawnEvent def = {};
-        def.projType = SIM_PROJ_TYPE_TEST;
-        def.base.firstSerial = Sim_ReserveEntitySerialGroup(sim, 0, SIM_PROJ_TYPE_TEST);
-        def.base.pos = ent->t.pos;
-        def.seedIndex = 0;
-        def.base.forward = { 0, 0, 1 };
+        #if 1
+        SimProjectileSpawnEvent event = {};
+        //vent.factoryType = SIM_FACTORY_TYPE_PROJ_TEST;
+        event.factoryType = SIM_FACTORY_TYPE_WANDERER;
+        event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
+        event.base.pos = ent->t.pos;
+        event.patternDef.numItems = 4;
+        event.patternDef.patternId = SIM_PATTERN_RADIAL;
+        event.patternDef.radius = 1.5f;
+        event.seedIndex = 0;
+        event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
-        def.base.tick = g_ticks;
+        event.base.tick = g_ticks;
 		Sim_ExecuteProjectileSpawn(
-			sim, &def, 0
+			sim, &event, 0
 		);
         // Replicate!
         S2C_SpawnProjectiles prj = {};
-        Cmd_InitProjectileSpawn(&prj, &def, g_ticks, 0);
+        Cmd_InitProjectileSpawn(&prj, &event, g_ticks, 0);
 		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
         #endif
-        #if 1
+        #if 0
         SimEnemySpawnEvent event {};
         event.enemyType = SIM_FACTORY_TYPE_WANDERER;
         event.base.firstSerial = Sim_ReserveEntitySerials(
@@ -117,6 +121,7 @@ internal i32 SVG_StepProjectile(
     for (i32 i = 0; i < overlaps; ++i)
     {
         SimEntity* victim = ents[i];
+		Assert(victim->id.serial)
         SVG_HandleEntityDeath(sim, victim, ent, 0);
         ent->lifeTime = 0;
     }
@@ -317,7 +322,7 @@ internal void SVG_TickEntity(
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
-        case SIM_TICK_TYPE_NONE: { } break;
+        //case SIM_TICK_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;
     }
 }

@@ -42,7 +42,7 @@ i32 Sim_FindByAABB(
         count++;
         if (results)
         {
-            results[resultIndex] = ent;
+            results[resultIndex++] = ent;
             if (count >= maxResults)
             {
                 break;

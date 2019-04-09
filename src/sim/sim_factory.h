@@ -136,6 +136,7 @@ internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
+    ent->speed = 3;
     ent->tickType = SIM_TICK_TYPE_WANDERER;
     ent->display.colour = { 0.2f, 0.2f, 1, 1 };
     return COM_ERROR_NONE;
@@ -161,6 +162,8 @@ internal i32 Sim_InitTurret(
     ent->tickType = SIM_TICK_TYPE_TURRET;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
+    printf("Spawned turret, Ticktype %d Vel %.3f, %.3f, %.3f\n",
+        ent->tickType, ent->velocity.x, ent->velocity.y, ent->velocity.z);
     return COM_ERROR_NONE;
 }
 
@@ -265,9 +268,9 @@ internal SimEntity* Sim_SpawnEntity(
         case SIM_FACTORY_TYPE_PROJECTILE_BASE:
             err =  Sim_InitProjBase(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_PREDICTION:
-            err =  Sim_InitProjBase(sim, ent, def); break;
+            err =  Sim_InitProjPrediction(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_TEST:
-            err =  Sim_InitProjBase(sim, ent, def); break;
+            err =  Sim_InitProjTest(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:
@@ -275,7 +278,7 @@ internal SimEntity* Sim_SpawnEntity(
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
         case SIM_FACTORY_TYPE_TURRET:
-            err =  Sim_InitTurret(sim, ent, def);
+			err = Sim_InitTurret(sim, ent, def); break;
         case SIM_FACTORY_TYPE_LINE_TRACE:
 		    err =  Sim_InitLineTrace(sim, ent, def); break;
 		case SIM_FACTORY_TYPE_NONE:
