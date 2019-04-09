@@ -30,6 +30,9 @@
 #define SIM_PATTERN_SPREAD 1
 #define SIM_PATTERN_RADIAL 2
 
+#define SIM_ENT_FLAG_SHOOTABLE (1 << 0)
+#define SIM_ENT_FLAG_POSITION_SYNC (1 << 1)
+
 #include "sim_types.h"
 
 // Scene management

@@ -70,6 +70,8 @@ struct SimEntity
 
     SimEntDisplay display;
 
+    u32 flags;
+
     // physical
     Transform t;
     Vec3 previousPos;

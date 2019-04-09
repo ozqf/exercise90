@@ -129,6 +129,7 @@ internal i32 Sim_InitActor(
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->attackTime = 0.2f;
     ent->display.colour = { 0, 1, 0, 1 };
+    ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
 }
 
@@ -177,6 +178,8 @@ internal i32 Sim_InitWanderer(
     ent->speed = 3;
     ent->tickType = SIM_TICK_TYPE_WANDERER;
     ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    ent->flags = SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
 }
 
@@ -187,6 +190,8 @@ internal i32 Sim_InitBouncer(
     ent->speed = 3;
     ent->tickType = SIM_TICK_TYPE_BOUNCER;
     ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    ent->flags = SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
 }
 

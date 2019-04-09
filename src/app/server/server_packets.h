@@ -40,7 +40,16 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 			break;
 		}
         APP_LOG(32, "%d, ", ent->id.serial);
-		switch (ent->tickType)
+        if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
+        {
+            S2C_EntitySync cmd = {};
+            Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
+            packet->ptrWrite += COM_COPY(
+                &cmd, packet->ptrWrite, cmd.header.size);
+            //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
+		    syncMessagesWritten++;
+        }
+		/*switch (ent->tickType)
 		{
             case SIM_TICK_TYPE_ACTOR:
 			case SIM_TICK_TYPE_WANDERER:
@@ -52,7 +61,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
                 //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
 				syncMessagesWritten++;
 			} break;
-		}
+		}*/
 	}
     APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);

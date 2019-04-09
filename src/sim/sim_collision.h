@@ -23,10 +23,9 @@ i32 Sim_FindByAABB(
         if (ent->status != SIM_ENT_STATUS_IN_USE
             || ent->id.serial == ignoreSerial)
         { continue; }
-        if (ent->tickType != SIM_TICK_TYPE_WANDERER
-            && ent->tickType != SIM_TICK_TYPE_BOUNCER
-            )
-        { continue; }
+        
+        if (!(ent->flags & SIM_ENT_FLAG_SHOOTABLE)) { continue; }
+
         // expand bounds by entity size and
         // then point test
         Vec3 halfSize = 
