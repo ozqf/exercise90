@@ -297,27 +297,28 @@ internal void SV_AddWanderer()
     Sim_RestoreEntity(&g_sim, &def);   
 }
 
-//internal void SV_AddSpawner
-
-internal void SV_LoadTestScene()
+internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
 {
-    Sim_LoadScene(&g_sim, 0);
-	
-    // Place a test spawner
-    #if 1
     SimEntityDef def = {};
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    // bottom left
-    def.pos = { -10, 0, 10 };
-    // middle
-    def.pos = { 0, 0, 0 };
-    def.childFactoryType = SIM_FACTORY_TYPE_BOUNCER;
+    def.pos = pos;
+    def.childFactoryType = factoryType;
     def.factoryType = SIM_FACTORY_TYPE_TURRET;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
-    #endif
+}
+
+internal void SV_LoadTestScene()
+{
+    SimScene* sim = &g_sim;
+    Sim_LoadScene(sim, 0);
+	
+    // Place a test spawner
+    SV_AddSpawner(sim, { -6, 0, 0 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 6, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+    
     i32 numWanderers = 6;
     for (i32 i = 0; i < numWanderers; ++i)
     {

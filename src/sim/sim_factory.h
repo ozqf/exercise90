@@ -185,7 +185,7 @@ internal i32 Sim_InitSeeker(
     Sim_InitEntity(ent, def);
     ent->speed = 3;
     ent->tickType = SIM_TICK_TYPE_SEEKER;
-    ent->display.colour = { 0.6f, 0.6f, 1, 1 };
+    ent->display.colour = { 1, 0.2f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -290,6 +290,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitProjTest(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_SEEKER:
+            err =  Sim_InitSeeker(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:
             err =  Sim_InitWanderer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_BOUNCER:
