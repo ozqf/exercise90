@@ -61,25 +61,21 @@ extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);
-//extern "C" i32      Sim_ReserveSerialsForProjectiles(SimScene* sim, i32 isLocal, i32 projectileSpawnTime);
-
 extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
 extern "C" i32      Sim_ExecuteProjectileSpawn(
                         SimScene* sim,
-                        SimProjectileSpawnEvent* def,
+                        SimBulkSpawnEvent* def,
 						i32 fastForwardTicks);
-//extern "C" i32      Sim_ExecuteEnemySpawn(
-//                        SimScene* sim,
-//                        SimEnemySpawnEvent* event,
-//	                    i32 fastForwardTicks);
 
 // Entity behaviour
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);
 extern "C" i32      Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max);
 extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
 
+// Searching/Querying
+extern "C" i32        Sim_IsEntInPlay(SimEntity* ent);
 extern "C" SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject);
 
 extern "C"

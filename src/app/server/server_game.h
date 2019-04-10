@@ -93,7 +93,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // think
         // Spawn projectiles
         #if 1
-        SimProjectileSpawnEvent event = {};
+        SimBulkSpawnEvent event = {};
         //vent.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
         //event.factoryType = SIM_FACTORY_TYPE_WANDERER;
         event.factoryType = ent->childFactoryType;
@@ -110,8 +110,8 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 			sim, &event, 0
 		);
         // Replicate!
-        S2C_SpawnProjectiles prj = {};
-        Cmd_InitProjectileSpawn(&prj, &event, g_ticks, 0);
+        S2C_BulkSpawn prj = {};
+        Cmd_InitBulkSpawn(&prj, &event, g_ticks, 0);
 		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
         #endif
         #if 0
@@ -246,7 +246,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     printf("SV CurTick %d eventTick %d fastforward %d\n",
         g_ticks, eventTick, fastForwardTicks);
 
-    SimProjectileSpawnEvent def = {};
+    SimBulkSpawnEvent def = {};
     def.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
     def.base.pos = ent->t.pos;
@@ -256,7 +256,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
 
     // Replicate
-    S2C_SpawnProjectiles prj = {};
+    S2C_BulkSpawn prj = {};
     Cmd_Prepare(&prj.header, eventTick, 0);
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;

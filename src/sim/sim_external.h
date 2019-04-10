@@ -56,12 +56,27 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
 }
 
+extern "C"
+i32 Sim_IsEntInPlay(SimEntity* ent)
+{
+    return (ent->status == SIM_ENT_STATUS_IN_USE);
+}
+
 /**
  * Returns NULL if no suitable target can be found
  */
 extern "C"
 SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
 {
+    for (i32 i = 0; i < sim->maxEnts; ++i)
+    {
+        SimEntity* ent = &sim->ents[i];
+        if (ent->status != SIM_ENT_STATUS_IN_USE)
+        { continue; }
+        if (ent->factoryType != SIM_FACTORY_TYPE_ACTOR)
+        { continue; }
+        return ent;
+    }
     return NULL;
 }
 
@@ -201,7 +216,7 @@ i32 Sim_ExecuteEnemySpawn(
 extern "C"
 i32 Sim_ExecuteProjectileSpawn(
     SimScene* sim,
-    SimProjectileSpawnEvent* event,
+    SimBulkSpawnEvent* event,
 	i32 fastForwardTicks)
 {
     //SimProjectileType* type = Sim_GetProjectileType(event->projType);

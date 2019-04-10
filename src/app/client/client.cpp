@@ -348,7 +348,7 @@ internal i32 CL_ExecReliableCommand(
 	{
         case CMD_TYPE_S2C_SPAWN_PROJECTILE:
         {
-            S2C_SpawnProjectiles* prj = (S2C_SpawnProjectiles*)h;
+            S2C_BulkSpawn* prj = (S2C_BulkSpawn*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
                 prj->def.factoryType,
 				prj->def.base.tick,

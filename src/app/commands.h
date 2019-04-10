@@ -191,39 +191,20 @@ internal void Cmd_WriteEntitySync(
 // Bulk Entity events
 ///////////////////////////////////////////////////////////////////////////
 #if 1
-struct S2C_SpawnProjectiles
+struct S2C_BulkSpawn
 {
     Command header;
-    SimProjectileSpawnEvent def;
+    SimBulkSpawnEvent def;
 };
 
-internal void Cmd_InitProjectileSpawn(
-    S2C_SpawnProjectiles* cmd,
-    SimProjectileSpawnEvent* event,
+internal void Cmd_InitBulkSpawn(
+    S2C_BulkSpawn* cmd,
+    SimBulkSpawnEvent* event,
     i32 tick, i32 sequence)
 {
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick, sequence);
-    cmd->header.size = sizeof(S2C_SpawnProjectiles);
-    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
-    cmd->def = *event;
-}
-#endif
-#if 0
-struct S2C_PatternSpawn
-{
-    Command header;
-    SimEnemySpawnEvent def;
-};
-
-internal void Cmd_InitPattenSpawn(
-    S2C_PatternSpawn* cmd,
-    SimEnemySpawnEvent* event,
-    i32 tick, i32 sequence)
-{
-    *cmd = {};
-    Cmd_Prepare(&cmd->header, tick, sequence);
-    cmd->header.size = sizeof(S2C_SpawnProjectiles);
+    cmd->header.size = sizeof(S2C_BulkSpawn);
     cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     cmd->def = *event;
 }

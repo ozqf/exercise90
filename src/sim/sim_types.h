@@ -146,21 +146,13 @@ struct SimSpawnBase
     u8 seedIndex;
 };
 
-struct SimProjectileSpawnEvent
+struct SimBulkSpawnEvent
 {
     SimSpawnBase base;
     SimSpawnPatternDef patternDef;
     u8 factoryType;
 };
 
-
-struct SimEnemySpawnEvent
-{
-    SimSpawnBase base;
-    SimSpawnPatternDef patternDef;
-    u8 enemyType;
-    u8 seedIndex;
-};
 #if 0
 // For block allocated entity storage
 struct SimEntBlock

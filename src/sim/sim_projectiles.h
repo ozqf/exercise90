@@ -79,7 +79,7 @@ internal i32 Sim_GetProjectileCount(i32 index)
 
 internal void Sim_SpawnProjectiles(
     SimScene* sim,
-    SimProjectileSpawnEvent* event,
+    SimBulkSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
@@ -114,7 +114,7 @@ internal void Sim_SpawnProjectiles(
 #if 0
 internal void Sim_NullProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnEvent* event,
+    SimBulkSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
@@ -147,7 +147,7 @@ internal void Sim_NullProjectilePattern(
 
 internal void Sim_RadialProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnEvent* event,
+    SimBulkSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
@@ -189,7 +189,7 @@ internal void Sim_RadialProjectilePattern(
 
 internal void Sim_SpreadProjectilePattern(
     SimScene* sim,
-    SimProjectileSpawnEvent* event,
+    SimBulkSpawnEvent* event,
     SimProjectileType* type,
     i32 fastForwardTicks)
 {
