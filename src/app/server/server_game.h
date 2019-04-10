@@ -243,6 +243,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 	
     */
     //printf("SVG Shoot %.3f, %.3f\n", dir->x, dir->z);
+    const i32 verbose = 0;
 
     i32 fastForwardTicks = 0;
     User* u = User_FindByAvatarSerial(&g_users, ent->id.serial);
@@ -270,15 +271,22 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         #if 1
         fastForwardTicks = diff;
         #endif
-        printf(
-            "Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
-            u->ping, ticksEllapsed, diff);
+        if (verbose)
+        {
+            printf(
+                "Prj ping %.3f, ticksEllapsed - %d ticks (diff %d)\n",
+                u->ping, ticksEllapsed, diff);
+        }
+        
     }
 
     // Declare when the event took place:
     i32 eventTick = g_ticks - fastForwardTicks;
-    printf("SV CurTick %d eventTick %d fastforward %d\n",
-        g_ticks, eventTick, fastForwardTicks);
+    if (verbose)
+    {
+        printf("SV CurTick %d eventTick %d fastforward %d\n",
+            g_ticks, eventTick, fastForwardTicks);
+    }
 
     SimBulkSpawnEvent def = {};
     def.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;

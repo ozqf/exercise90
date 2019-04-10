@@ -132,6 +132,7 @@ internal void CLG_StepActor(
 
 internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 {
+    const i32 verbose = 0;
     if (g_latestUserInputAck >= cmd->lastUserInputSequence)
     {
         // APP_PRINT(64, "CL Ignore response %d (current %d)\n",
@@ -151,11 +152,15 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
     
     
     // Restore state if necessary
-    APP_LOG(128, "CL Replay %d frames (%d to %d)\n",
-        framesSinceResponse,
-        cmd->lastUserInputSequence,
-        g_userInputSequence
-    );
+    if (verbose)
+    {
+        APP_LOG(128, "CL Replay %d frames (%d to %d)\n",
+            framesSinceResponse,
+            cmd->lastUserInputSequence,
+            g_userInputSequence
+        );
+    }
+    
     // input 
     C2S_Input* sourceInput = CL_RecallSentInputCommand(
         g_sentCommands, cmd->lastUserInputSequence);
@@ -166,21 +171,28 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
     
     if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
     {
-        APP_PRINT(256,
-            "  Correcting CL vs SV: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
-            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
-            remotePos.x, remotePos.y, remotePos.z
-        );
+        if (verbose)
+        {
+            APP_PRINT(256,
+                "  Correcting CL vs SV: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+                originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+                remotePos.x, remotePos.y, remotePos.z
+            );
+        }
         ent->t.pos = remotePos;
         ent->previousPos = remotePos;
     }
     else
     {
-        APP_LOG(256,
-            "  No correction for local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
-            originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
-            remotePos.x, remotePos.y, remotePos.z
-        );
+        if (verbose)
+        {
+            APP_LOG(256,
+                "  No correction for local vs server positions: %.3f, %.3f, %.3f vs %.3f, %.3f, %.3f\n",
+                originalLocalPos.x, originalLocalPos.y, originalLocalPos.z,
+                remotePos.x, remotePos.y, remotePos.z
+            );
+        }
+        
         ent->t.pos = originalLocalPos;
         ent->previousPos = originalLocalPos;
     }
@@ -202,12 +214,16 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 		Vec3 before = ent->t.pos;
 		CLG_StepActor(sim, ent, &input->input, input->deltaTime);
 		Vec3 after = ent->t.pos;
-		APP_LOG(256, "\t\tSeq %d Buttons %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
-			replaySequence,
-            input->input.buttons,
-			before.x, before.y, before.z,
-			after.x, after.y, after.z
+        if (verbose)
+        {
+            APP_LOG(256, "\t\tSeq %d Buttons %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
+			    replaySequence,
+                input->input.buttons,
+			    before.x, before.y, before.z,
+			    after.x, after.y, after.z
 			);
+        }
+		
     }
     #endif
     #if 0

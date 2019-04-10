@@ -23,6 +23,7 @@ Crucial changes:
 
 #### Rebuild TODO
 
+* Implement error message asserts in server, client and sim modules
 * Priority queue for synchronising large entity counts.
 * Reimplement socket functions and connection management.
     * Multiple players testing
