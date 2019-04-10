@@ -53,8 +53,14 @@ struct SimEntity
     i32 isLocal;
     SimEntId id;
 
-    i32 factoryType;
+    simFactoryType factoryType;
     i32 tickType;
+
+    // Relationships
+    simFactoryType childFactoryType;
+    SimEntId parentId;
+    i32 childCount;
+    i32 maxChildCount;
 	
 	i32 fastForwardTicks;
     i32 birthTick;
@@ -92,10 +98,11 @@ struct SimEntityDef
     i32 fastForwardTicks;
 
     i32 birthTick;
-    //i32 deathTick;  // Die on a predetermined tick
     
     i32 isLocal;
-    i32 factoryType;
+    simFactoryType factoryType;
+    simFactoryType childFactoryType;
+
     Vec3 pos;
     Vec3 scale;
     Vec3 velocity;

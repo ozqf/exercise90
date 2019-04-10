@@ -7,6 +7,8 @@
 #define SIM_ENT_STATUS_IN_USE 2
 
 // Spawn functions
+typedef u8 simFactoryType;
+
 #define SIM_FACTORY_TYPE_NONE 0
 #define SIM_FACTORY_TYPE_WORLD 1
 #define SIM_FACTORY_TYPE_ACTOR 2

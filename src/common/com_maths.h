@@ -130,6 +130,8 @@ Vec3 M3x3_GetEulerAnglesRadians(f32* m);
 Vec3 M3x3_GetEulerAnglesDegrees(f32* m);
 void M3x3_SetEulerAnglesByRadians(f32* m, f32 roll, f32 pitch, f32 yaw);
 
+void M3x3_CopyFromM4x4(f32* m3x3, f32* m4x4);
+
 /////////////////////////////////////////////////////////////////////////////
 // M4x4 OPERATIONS
 /////////////////////////////////////////////////////////////////////////////

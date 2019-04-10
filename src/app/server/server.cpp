@@ -297,6 +297,8 @@ internal void SV_AddWanderer()
     Sim_RestoreEntity(&g_sim, &def);   
 }
 
+//internal void SV_AddSpawner
+
 internal void SV_LoadTestScene()
 {
     Sim_LoadScene(&g_sim, 0);
@@ -311,6 +313,7 @@ internal void SV_LoadTestScene()
     def.pos = { -10, 0, 10 };
     // middle
     def.pos = { 0, 0, 0 };
+    def.childFactoryType = SIM_FACTORY_TYPE_BOUNCER;
     def.factoryType = SIM_FACTORY_TYPE_TURRET;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);

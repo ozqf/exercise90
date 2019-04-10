@@ -85,7 +85,7 @@ SVG_DEFINE_ENT_UPDATE(Bouncer)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
-SVG_DEFINE_ENT_UPDATE(Turret)
+SVG_DEFINE_ENT_UPDATE(Spawner)
 {
     if (ent->thinkTick <= 0.0f)
     {
@@ -96,7 +96,7 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         SimProjectileSpawnEvent event = {};
         //vent.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
         //event.factoryType = SIM_FACTORY_TYPE_WANDERER;
-        event.factoryType = SIM_FACTORY_TYPE_BOUNCER;
+        event.factoryType = ent->childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
         event.base.pos = ent->t.pos;
         event.patternDef.numItems = 4;
@@ -354,7 +354,7 @@ internal void SVG_TickEntity(
 		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_TURRET:
-        { SVG_UpdateTurret(sim, ent, deltaTime); } break;
+        { SVG_UpdateSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;

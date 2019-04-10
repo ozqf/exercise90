@@ -41,6 +41,7 @@ MACROS
 //#define com_internal static
 #ifndef com_internal
 #define com_internal
+
 #endif
 
 // Quick cross platform assert. Read from address zero if expression is false

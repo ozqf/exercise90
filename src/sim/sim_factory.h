@@ -89,39 +89,23 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 }
 
 ////////////////////////////////////////////////////////////////////
-// Entity initialisation
+// Shared Entity initialisation
 ////////////////////////////////////////////////////////////////////
 internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
 {
-    ent->birthTick = def->birthTick;
-    ent->destination = def->destination;
-    //ent->deathTick = def->deathTick;
-	
+    ent->birthTick =      def->birthTick;
     ent->t.pos =          def->pos;
     ent->previousPos =    def->pos;
-    ent->velocity =         def->velocity;
+    ent->destination =    def->destination;
+    ent->velocity =       def->velocity;
+    ent->childFactoryType = def->childFactoryType;
 
-
-    i32 badScale = 0;
-    if (def->scale.x == 0
-        || def->scale.y == 0
-        || def->scale.z == 0)
-    {
-        //printf("  bad scale\n");
-        badScale = 1;
-    }
-    if (!badScale)
-    {
-        ent->t.scale = def->scale;
-    }
-    else
-    {
-        ent->t.scale.x = 1;
-        ent->t.scale.y = 1;
-        ent->t.scale.z = 1;
-    }
+    Transform_SetScaleSafe(&ent->t, def->scale);
 }
 
+////////////////////////////////////////////////////////////////////
+// Entity initialisation
+////////////////////////////////////////////////////////////////////
 internal i32 Sim_InitActor(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
@@ -153,7 +137,7 @@ internal i32 Sim_InitTurret(
     ent->tickType = SIM_TICK_TYPE_TURRET;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
-    printf("Spawned turret, Ticktype %d Vel %.3f, %.3f, %.3f\n",
+    printf("Spawned Spawner, Ticktype %d Vel %.3f, %.3f, %.3f\n",
         ent->tickType, ent->velocity.x, ent->velocity.y, ent->velocity.z);
     return COM_ERROR_NONE;
 }
