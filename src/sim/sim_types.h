@@ -35,10 +35,15 @@ union SimEntIndex
 };
 #pragma pack(pop)
 
+// Note: A serial of 0 should be considered null
+// and that this Entity Id relates to no entity, even if
+// the slot is set.
 struct SimEntId
 {
-    // location in entity blocks
+    // Location in local entity memory
+    // Will differ between client and server!
     SimEntIndex slot;
+    // unique, replicated Id.
     i32 serial;
 };
 

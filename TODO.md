@@ -9,13 +9,13 @@ Goal:
 * Keep It Simple Stupid
 
 Crucial changes:
+**All Done**:
 * Allow for side-by-side physics, so that server <-> client can be tested in the same exe?
     (rendered ontop of each other)
 * More generalised message system. Same systems used in network buffers and app/scene
     * Internal message are just structs.
     * Message must include timing information!
-    * Separation between application Messages and packet Messages. Only packet messages
-        should have anything fiddly for compression later!
+    * Separation between application Messages and packet Messages. Only packet messages should have anything fiddly for compression later!
 * Separate Scene compile unit and internal logic.
     * Scene has it's own command queue run when it ticks. Application is responsible
         for feeding events in.
@@ -23,20 +23,25 @@ Crucial changes:
 
 #### Rebuild TODO
 
+* Priority queue for synchronising large entity counts.
+* Reimplement socket functions and connection management.
+    * Multiple players testing
+* Server game state changes
+    * Changing levels, pregame (intro/warmup), game, postgame (scores).
+* More enemy types
+* Player weapon switching (will need syncing)
+* Some basic GFX
+* Some basic Sound.
+
 **DONE** * Separate client and server sims and render scenes.
 Defunct: * Simulation tick and input commands (moving commands out to client/server)
-* Command Flow:
+**ALL DONE** * Command Flow:
 	* Reliable/unreliable stream systems:
 		* Enqueue reliable commands (iterate sequence)
 		* Dequeue reliable commands (by sequence).
 		* Delete consumed messages
-* Attach Physics engine
+* *Deferred* Attach Physics engine
 * Basic biped entity
-
-
-* Proper shutdown of ZNet when session ends
-
-
 
 
 ### Networking GameScene
@@ -181,10 +186,10 @@ This struct should ONLY hold the state of the current entity scene!
 
 #### Execution
 * Implement unreliable messages component of packet
-* Homogenise command headers between game commands and stream commands to be interchangable.
-	* Add timestamp for execution and jitter control...?
-* Pass valid command types from input stream to app buffer (eg only add client suitable commands when running a client).
-* Consider replacing the app read/write buffers with the global server stream (questionable due to
+* *Done* Homogenise command headers between game commands and stream commands to be interchangable.
+	* *Done via comparing ticks* Add timestamp for execution and jitter control...?
+* *Done* Pass valid command types from input stream to app buffer (eg only add client suitable commands when running a client).
+* *Done* Consider replacing the app read/write buffers with the global server stream (questionable due to
     the way that the buffers flip).
 
 #### Fundamental network streams
