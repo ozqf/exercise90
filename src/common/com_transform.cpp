@@ -86,9 +86,13 @@ com_internal void  Transform_SetScaleF(Transform* t, f32 scaleX, f32 scaleY, f32
 // Avoid zero scales
 com_internal void  Transform_SetScaleSafe(Transform* t, Vec3 scale)
 {
-    if (t->scale.x != 0 && t->scale.y != 0 && t->scale.z != 0)
+    if (scale.x != 0 && scale.y != 0 && scale.z != 0)
     {
         t->scale = scale;
+    }
+    else
+    {
+        t->scale = { 1, 1, 1 };
     }
 }
 

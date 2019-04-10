@@ -294,7 +294,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.scale.x = halfX * 2;
     def.scale.y = 1;
     def.scale.z = halfZ * 2;
-    
+
     Sim_RestoreEntity(sim, &def);
 
     halfX -= 1;
