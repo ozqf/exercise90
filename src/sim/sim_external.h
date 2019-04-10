@@ -59,7 +59,11 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 extern "C"
 i32 Sim_IsEntInPlay(SimEntity* ent)
 {
-    return (ent->status == SIM_ENT_STATUS_IN_USE);
+    return
+    (
+        ent->status == SIM_ENT_STATUS_IN_USE
+        && ent->id.serial != 0
+    );
 }
 
 /**
@@ -89,6 +93,18 @@ SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial)
         SimEntity* ent = &sim->ents[i];
         if (ent->status == SIM_ENT_STATUS_FREE) { continue; }
         if (ent->id.serial == serial) { return ent; }
+    }
+    return NULL;
+}
+
+extern "C"
+SimEntity* Sim_GetEntityByIndex(SimScene* sim, SimEntIndex index)
+{
+    SimEntity* ent = &sim->ents[index.index];
+    if (ent->id.slot.iteration == index.iteration
+        && ent->id.serial != 0)
+    {
+        return ent;
     }
     return NULL;
 }

@@ -58,6 +58,7 @@ extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 
 // Entity list functions
 extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
+extern "C" SimEntity* Sim_GetEntityByIndex(SimScene* sim, SimEntIndex index);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);

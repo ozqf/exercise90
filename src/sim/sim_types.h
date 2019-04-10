@@ -57,8 +57,9 @@ struct SimEntity
     i32 tickType;
 
     // Relationships
+    SimEntId targetId;  // current enemy
+    SimEntId parentId;  // Who spawned this entity
     simFactoryType childFactoryType;
-    SimEntId parentId;
     i32 childCount;
     i32 maxChildCount;
 	

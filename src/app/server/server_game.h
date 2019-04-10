@@ -12,6 +12,27 @@ internal SimEntity* SVG_FindAndValidateTarget(SimScene* sim, SimEntity* ent)
     > Validate Target Ent.
     */
    SimEntity* target = NULL;
+   if (ent->targetId.serial == 0)
+   {
+       // Try to find a new target
+       target = Sim_FindTargetForEnt(sim, ent);
+       if (target == NULL) { return NULL; }
+       ent->targetId = target->id;
+       return target;
+   }
+   else
+   {
+       // Check current target and clear if invalidated
+       target = Sim_GetEntityByIndex(sim, ent->targetId.slot);
+       // check target is still okay
+       if (target == NULL || !Sim_IsEntInPlay(target))
+       {
+           ent->targetId = {};
+           return NULL;
+       }
+       return target;
+   }
+   
 }
 
 internal void SVG_HandleEntityDeath(
@@ -70,6 +91,19 @@ SVG_DEFINE_ENT_UPDATE(Seeker)
     SimEntity* target = Sim_FindTargetForEnt(sim, ent);
     if (target)
     {
+        Vec3 toTarget = 
+        {
+            target->t.pos.x - ent->t.pos.x,
+            target->t.pos.y - ent->t.pos.y,
+            target->t.pos.z - ent->t.pos.z,
+        };
+        Vec3_Normalise(&toTarget);
+        ent->velocity =
+        {
+            toTarget.x * ent->speed,
+            toTarget.y * ent->speed,
+            toTarget.z * ent->speed,
+        };
         Sim_SimpleMove(ent, deltaTime);
         Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
     }
