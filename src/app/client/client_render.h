@@ -144,7 +144,7 @@ void CL_PopulateRenderScene(
 			default:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, { 0.3f, 0.3f, 1, 1 }, texIndex);
+					&obj, *cube, ent->display.colour, texIndex);
 			} break;
 		}
         

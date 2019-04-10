@@ -83,6 +83,8 @@ f32 ZINFINITY();
 //internal i32 g_z_nan = 0x7F800001;
 f32 ZNaN();
 
+com_internal i32 COM_STDRandI32();
+com_internal u8 COM_STDRandU8();
 com_internal f32 COM_STDRandf32();
 com_internal f32 COM_STDRandomInRange(f32 min, f32 max);
 com_internal void COM_ClampF32(f32* val, f32 min, f32 max);

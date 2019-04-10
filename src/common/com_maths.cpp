@@ -56,11 +56,21 @@ com_internal f32 COM_CapAngleDegrees(f32 angle)
     return angle;
 }
 
+// Wrap rand for now...
+com_internal i32 COM_STDRandI32()
+{
+    return rand();
+}
+
+com_internal u8 COM_STDRandU8()
+{
+    return rand() % UINT8_MAX;
+}
+
 com_internal f32 COM_STDRandf32()
 {
     return (f32)rand() / (f32)RAND_MAX;
 }
-
 
 com_internal f32 COM_STDRandomInRange(f32 min, f32 max)
 {

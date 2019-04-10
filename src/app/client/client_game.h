@@ -228,12 +228,12 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
 internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 {
     /* Debug - Fire a local projectile to see how it matches the server */
-    #if 1
+    #if 0
     SimProjectileSpawnEvent def = {};
     def.factoryType = SIM_FACTORY_TYPE_PROJ_PREDICTION;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 1);
     def.base.pos = ent->t.pos;
-    def.seedIndex = 0;
+    def.base.seedIndex = 0;
     def.base.forward = *dir;
     def.base.tick = g_ticks;
     //Sim_ExecuteEnemySpawn()
@@ -306,7 +306,8 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
     switch (ent->tickType)
     {
         case SIM_TICK_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
-		case SIM_TICK_TYPE_BOUNCER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
+		case SIM_TICK_TYPE_BOUNCER: { } break;
+        case SIM_TICK_TYPE_SEEKER: { } break;
 		case SIM_TICK_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;

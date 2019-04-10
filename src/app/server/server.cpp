@@ -307,7 +307,10 @@ internal void SV_LoadTestScene()
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
+    // bottom left
     def.pos = { -10, 0, 10 };
+    // middle
+    def.pos = { 0, 0, 0 };
     def.factoryType = SIM_FACTORY_TYPE_TURRET;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);

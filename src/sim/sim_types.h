@@ -136,6 +136,7 @@ struct SimSpawnBase
     Vec3 forward;
     i32 firstSerial;
     i32 tick;
+    u8 seedIndex;
 };
 
 struct SimProjectileSpawnEvent
@@ -143,7 +144,6 @@ struct SimProjectileSpawnEvent
     SimSpawnBase base;
     SimSpawnPatternDef patternDef;
     u8 factoryType;
-    u8 seedIndex;
 };
 
 

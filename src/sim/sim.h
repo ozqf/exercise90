@@ -6,6 +6,7 @@
 #define SIM_ENT_STATUS_RESERVED 1
 #define SIM_ENT_STATUS_IN_USE 2
 
+// Spawn functions
 #define SIM_FACTORY_TYPE_NONE 0
 #define SIM_FACTORY_TYPE_WORLD 1
 #define SIM_FACTORY_TYPE_ACTOR 2
@@ -14,9 +15,11 @@
 #define SIM_FACTORY_TYPE_WANDERER 5
 #define SIM_FACTORY_TYPE_LINE_TRACE 6
 #define SIM_FACTORY_TYPE_PROJ_PREDICTION 7
-#define SIM_FACTORY_TYPE_PROJ_TEST 8
+#define SIM_FACTORY_TYPE_PROJ_PLAYER 8
 #define SIM_FACTORY_TYPE_BOUNCER 9
+#define SIM_FACTORY_TYPE_SEEKER 10
 
+// Update functions
 #define SIM_TICK_TYPE_NONE 0
 #define SIM_TICK_TYPE_WORLD 1
 #define SIM_TICK_TYPE_ACTOR 2
@@ -24,12 +27,18 @@
 #define SIM_TICK_TYPE_TURRET 4
 #define SIM_TICK_TYPE_WANDERER 5
 #define SIM_TICK_TYPE_LINE_TRACE 6
-#define SIM_TICK_TYPE_BOUNCER 7 
+#define SIM_TICK_TYPE_BOUNCER 7
+#define SIM_TICK_TYPE_SEEKER 9
 
+// Spawn pattern types.
 #define SIM_PATTERN_NONE 0
 #define SIM_PATTERN_SPREAD 1
 #define SIM_PATTERN_RADIAL 2
+#define SIM_PATTERN_SCATTER 3
+#define SIM_PATTERN_LINE 4
+#define SIM_PATTERN_CIRCLE 5
 
+// Sim Entity flags
 #define SIM_ENT_FLAG_SHOOTABLE (1 << 0)
 #define SIM_ENT_FLAG_POSITION_SYNC (1 << 1)
 
@@ -68,6 +77,8 @@ extern "C" i32      Sim_ExecuteProjectileSpawn(
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);
 extern "C" i32      Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max);
 extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
+
+extern "C" SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject);
 
 extern "C"
 i32 Sim_FindByAABB(

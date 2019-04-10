@@ -20,7 +20,7 @@ struct ZNetLagSimInfo
 
     i32 RollDelay()
     {
-        f32 num = COM_Randf32(&this->randomIndex);
+        f32 num = COM_Randf32(this->randomIndex++);
         return (i32)((f32)(maxMS - minMS) * num) + minMS;
     }
 };

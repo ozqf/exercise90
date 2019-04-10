@@ -4,7 +4,7 @@
 
 #define COM_RANDOM_NUMBER_TABLE_SIZE 512
 
-i32 COM_GetPRNGCount() { return COM_RANDOM_NUMBER_TABLE_SIZE; }
+com_internal i32 COM_GetPRNGCount() { return COM_RANDOM_NUMBER_TABLE_SIZE; }
 
 com_internal f32 com_random[COM_RANDOM_NUMBER_TABLE_SIZE] = {
 	0.001251f,
@@ -521,8 +521,10 @@ com_internal f32 com_random[COM_RANDOM_NUMBER_TABLE_SIZE] = {
 	0.656758f
 };
 
-f32 COM_Randf32(i32* index)
+com_internal f32 COM_Randf32(i32 index)
 {
+	return com_random[index % COM_RANDOM_NUMBER_TABLE_SIZE];
+	#if 0
 	if (*index < 0 || *index >= COM_RANDOM_NUMBER_TABLE_SIZE)
 	{
 		*index = 0;
@@ -535,4 +537,5 @@ f32 COM_Randf32(i32* index)
     // *index++;    // Does not increment pointed value
     //++*index;     // works
     return result;
+	#endif
 }

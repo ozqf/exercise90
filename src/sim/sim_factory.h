@@ -175,9 +175,9 @@ internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->speed = 3;
+    ent->speed = 1;
     ent->tickType = SIM_TICK_TYPE_WANDERER;
-    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -187,9 +187,21 @@ internal i32 Sim_InitBouncer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->speed = 3;
+    ent->speed = 4;
     ent->tickType = SIM_TICK_TYPE_BOUNCER;
-    ent->display.colour = { 0.2f, 0.2f, 1, 1 };
+    ent->display.colour = { 0.7f, 0.7f, 1, 1 };
+    ent->flags = SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC;
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitSeeker(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_InitEntity(ent, def);
+    ent->speed = 3;
+    ent->tickType = SIM_TICK_TYPE_SEEKER;
+    ent->display.colour = { 0.6f, 0.6f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -222,7 +234,7 @@ internal i32 Sim_InitProjPrediction(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     SimProjectileType t;
-    t.speed = 10.0f;
+    t.speed = 25.0f;
     t.patternDef.numItems = 1;
     t.lifeTime = 2.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
@@ -242,7 +254,7 @@ internal i32 Sim_InitProjTest(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     SimProjectileType t;
-    t.speed = 10.0f;
+    t.speed = 25.0f;
     t.patternDef.numItems = 4;
     t.lifeTime = 6.0f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
@@ -290,7 +302,7 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitProjBase(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_PREDICTION:
             err =  Sim_InitProjPrediction(sim, ent, def); break;
-        case SIM_FACTORY_TYPE_PROJ_TEST:
+        case SIM_FACTORY_TYPE_PROJ_PLAYER:
             err =  Sim_InitProjTest(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;

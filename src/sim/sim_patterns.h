@@ -35,6 +35,39 @@ internal i32 Sim_CreateRadialPattern(
 	return def->numItems;
 }
 
+internal i32 Sim_CreateScatterPattern(
+	SimSpawnBase* event,
+	SimSpawnPatternDef* def,
+	SimSpawnPatternItem* items,
+	i32 serial,
+	i32 isLocal)
+{
+	i32 serialIncrement = isLocal ? -1 : 1;
+	f32 radians = 0;
+	i32 randomIndex = event->seedIndex;
+	for(i32 i = 0; i < def->numItems; ++i)
+	{
+		radians = COM_Randf32(randomIndex++) * (2 * pi32);
+		// TODO 2D! Once new system is implemented make this work in 3D
+		Vec3 dir =
+		{
+			cosf(radians),
+			0,
+			sinf(radians)
+		};
+		items[i].forward.x = dir.x;
+		items[i].forward.y = dir.y;
+		items[i].forward.z = dir.z;
+		items[i].pos.x = event->pos.x + (dir.x * def->radius);
+		items[i].pos.y = event->pos.y + (dir.y * def->radius);
+		items[i].pos.z = event->pos.z + (dir.z * def->radius);
+		items[i].entSerial = serial;
+
+		serial += serialIncrement;
+	}
+	return def->numItems;
+}
+
 /*
 Returns number of results
 Results array MUST have the capacity of items specified in the def
@@ -51,8 +84,14 @@ internal i32 Sim_CreateSpawnPattern(
 		case SIM_PATTERN_RADIAL:
 		{
 			//
-			return Sim_CreateRadialPattern(event, def, results,
-				firstSerial, isLocal);
+			return Sim_CreateRadialPattern(
+				event, def, results, firstSerial, isLocal);
+		} break;
+
+		case SIM_PATTERN_SCATTER:
+		{
+			return Sim_CreateScatterPattern(
+				event, def, results, firstSerial, isLocal);
 		} break;
 		
 		case SIM_PATTERN_NONE:
@@ -65,7 +104,7 @@ internal i32 Sim_CreateSpawnPattern(
 
 		default:
 		{
-			//
+			ILLEGAL_CODE_PATH
 		} break;
 	}
 	return 0;

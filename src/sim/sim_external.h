@@ -56,6 +56,15 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
 }
 
+/**
+ * Returns NULL if no suitable target can be found
+ */
+extern "C"
+SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
+{
+    return NULL;
+}
+
 extern "C"
 SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial)
 {

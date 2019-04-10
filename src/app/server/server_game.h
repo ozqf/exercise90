@@ -3,6 +3,17 @@
 #include "server.h"
 #include <math.h>
 
+// Returns target if found
+internal SimEntity* SVG_FindAndValidateTarget(SimScene* sim, SimEntity* ent)
+{
+    /*
+    > if no target Id => get a target Id and retrieve Ent
+    > if target Id => retrieve Ent
+    > Validate Target Ent.
+    */
+   SimEntity* target = NULL;
+}
+
 internal void SVG_HandleEntityDeath(
     SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style)
 {
@@ -54,6 +65,20 @@ SVG_DEFINE_ENT_UPDATE(Wanderer)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
+SVG_DEFINE_ENT_UPDATE(Seeker)
+{
+    SimEntity* target = Sim_FindTargetForEnt(sim, ent);
+    if (target)
+    {
+        Sim_SimpleMove(ent, deltaTime);
+        Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
+    }
+    else
+    {
+        ent->velocity = { 0, 0, 0 };
+    }
+}
+
 SVG_DEFINE_ENT_UPDATE(Bouncer)
 {
     Sim_SimpleMove(ent, deltaTime);
@@ -69,15 +94,15 @@ SVG_DEFINE_ENT_UPDATE(Turret)
         // Spawn projectiles
         #if 1
         SimProjectileSpawnEvent event = {};
-        //vent.factoryType = SIM_FACTORY_TYPE_PROJ_TEST;
-        event.factoryType = SIM_FACTORY_TYPE_WANDERER;
+        //vent.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
+        //event.factoryType = SIM_FACTORY_TYPE_WANDERER;
         event.factoryType = SIM_FACTORY_TYPE_BOUNCER;
         event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
         event.base.pos = ent->t.pos;
         event.patternDef.numItems = 4;
-        event.patternDef.patternId = SIM_PATTERN_RADIAL;
+        event.patternDef.patternId = SIM_PATTERN_SCATTER;
         event.patternDef.radius = 1.5f;
-        event.seedIndex = 0;
+        event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
         event.base.tick = g_ticks;
@@ -222,12 +247,12 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         g_ticks, eventTick, fastForwardTicks);
 
     SimProjectileSpawnEvent def = {};
-    def.factoryType = SIM_FACTORY_TYPE_PROJECTILE_BASE;
+    def.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
     def.base.pos = ent->t.pos;
     def.base.forward = *dir;
     def.base.tick = g_ticks;
-    def.seedIndex = 0;
+    def.base.seedIndex = COM_STDRandU8();
     Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
 
     // Replicate
@@ -320,6 +345,8 @@ internal void SVG_TickEntity(
     {
 		case SIM_TICK_TYPE_PROJECTILE:
         { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_SEEKER:
+        { SVG_UpdateSeeker(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_WANDERER:
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_BOUNCER:
