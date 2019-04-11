@@ -126,7 +126,7 @@ void CL_PopulateRenderScene(
 
             case SIM_TICK_TYPE_LINE_TRACE:
             {
-                Vec3* a = &ent->t.pos;
+                Vec3* a = &ent->body.t.pos;
                 Vec3* b = &ent->destination;
                 // move ray up slightly out of the floor
                 f32 offsetY = 0.2f;
@@ -150,18 +150,18 @@ void CL_PopulateRenderScene(
         
         if (interpolate)
         {
-            t = ent->t;
+            t = ent->body.t;
             if (g_interpolateRenderScene)
             {
                 RendObj_InterpolatePosition(
                     &t.pos,
                     &ent->previousPos,
-                    &ent->t.pos,
+                    &ent->body.t.pos,
                     interpolateTime);
             }
             else
             {
-                t.pos = ent->t.pos;
+                t.pos = ent->body.t.pos;
             }
         }
         RScene_AddRenderItem(scene, &t, &obj);
@@ -198,7 +198,7 @@ void CL_GetRenderCommands(
 
     // setup scene
     cmd = &g_renderCommands[nextCommand++];
-    cmd->type = REND_CMD_TYPE_SETTINGS;
+    cmd->body.type = REND_CMD_TYPE_SETTINGS;
     RenderSceneSettings* s = &cmd->settings;
     s->fov = 90;
     s->projectionMode = RENDER_PROJECTION_MODE_3D;
@@ -208,7 +208,7 @@ void CL_GetRenderCommands(
 
     // setup projection - must be done after settings
     cmd = &g_renderCommands[nextCommand++];
-    cmd->type = REND_CMD_TYPE_PROJECTION;
+    cmd->body.type = REND_CMD_TYPE_PROJECTION;
     COM_SetupDefault3DProjection(cmd->projection.cells, 1);//info.aspectRatio);
 	
     /*Transform_SetToIdentity(&cmd->settings.cameraTransform);
@@ -223,7 +223,7 @@ void CL_GetRenderCommands(
 	
 	// Set viewport
 	cmd = &g_renderCommands[nextCommand++];
-	cmd->type = REND_CMD_TYPE_SET_VIEWPORT;
+	cmd->body.type = REND_CMD_TYPE_SET_VIEWPORT;
 	cmd->viewPort.viewPortX = 0;//info.width / 2;
 	cmd->viewPort.viewPortY = 0;
 	cmd->viewPort.viewPortWidth = info.width;// / 2;
@@ -246,11 +246,11 @@ void CL_GetRenderCommands(
 		RendObj_SetAsAABB(
 			&obj, 1, 1, 1, 0, 1, 0);
 
-        Transform t = ent->t;
+        Transform t = ent->body.t;
         RendObj_InterpolatePosition(
                 &t.pos,
                 &ent->previousPos,
-                &ent->t.pos,
+                &ent->body.t.pos,
                 interpolateTime);
         
         // Add to command list

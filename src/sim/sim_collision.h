@@ -30,9 +30,9 @@ i32 Sim_FindByAABB(
         // then point test
         Vec3 halfSize = 
         {
-            ent->t.scale.x,
-            ent->t.scale.y,
-            ent->t.scale.z
+            ent->body.t.scale.x,
+            ent->body.t.scale.y,
+            ent->body.t.scale.z
         };
         Vec3 min;
         min.x = boundsMin.x - halfSize.x;
@@ -42,7 +42,7 @@ i32 Sim_FindByAABB(
         max.x = boundsMax.x + halfSize.x;
         max.y = boundsMax.y + halfSize.y;
         max.z = boundsMax.z + halfSize.z;
-        Vec3* p = &ent->t.pos;
+        Vec3* p = &ent->body.t.pos;
         if (p->x < min.x || p->x > max.x) { continue; }
         if (p->y < min.y || p->y > max.y) { continue; }
         if (p->z < min.z || p->z > max.z) { continue; }
@@ -83,7 +83,7 @@ i32 Sim_FindByRaycast(
         if (ent->tickType != SIM_TICK_TYPE_WANDERER)
         { continue; }
         // create aabb for ent and line test
-        Vec3* p = &ent->t.pos;
+        Vec3* p = &ent->body.t.pos;
         Vec3 min;
         min.x = p->x - 0.5f;
         min.y = p->y - 0.5f;

@@ -19,7 +19,7 @@ internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
     /*
-    Vec3* pos = &ent->t.pos;
+    Vec3* pos = &ent->body.t.pos;
     ent->previousPos.x = pos->x;
     ent->previousPos.y = pos->y;
     ent->previousPos.z = pos->z;
@@ -30,9 +30,9 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
         ent->velocity.z * deltaTime
     };
     
-    ent->t.pos.x += move.x;
-    ent->t.pos.y += move.y;
-    ent->t.pos.z += move.z;
+    ent->body.t.pos.x += move.x;
+    ent->body.t.pos.y += move.y;
+    ent->body.t.pos.z += move.z;
     
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
     */
@@ -82,7 +82,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
                 printf("CL Sent input for tick %d not found!\n", cmd->header.tick);
                 return 1;
             }
-            Vec3 pos = ent->t.pos;
+            Vec3 pos = ent->body.t.pos;
             printf("CL Sync avatar tick %d Local: %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n",
                 cmd->header.tick,
                 pos.x, pos.y, pos.z,
@@ -92,8 +92,8 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             return 1;
         }
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
-        ent->previousPos = ent->t.pos;
-        ent->t.pos = cmd->pos;
+        ent->previousPos = ent->body.t.pos;
+        ent->body.t.pos = cmd->pos;
         executed = 1;
     }
     return executed;
@@ -123,10 +123,10 @@ internal void CLG_StepActor(
 	{
 		move.x += speed * deltaTime;
 	}
-	ent->previousPos = ent->t.pos;
-	ent->t.pos.x += move.x;
-	ent->t.pos.y += move.y;
-	ent->t.pos.z += move.z;
+	ent->previousPos = ent->body.t.pos;
+	ent->body.t.pos.x += move.x;
+	ent->body.t.pos.y += move.y;
+	ent->body.t.pos.z += move.z;
 
 }
 
@@ -166,7 +166,7 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
         g_sentCommands, cmd->lastUserInputSequence);
     
     Vec3 originalLocalPos = sourceInput->avatarPos;
-    Vec3 currentLocalPos = ent->t.pos;
+    Vec3 currentLocalPos = ent->body.t.pos;
     Vec3 remotePos = cmd->latestAvatarPos;
     
     if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
@@ -179,7 +179,7 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
                 remotePos.x, remotePos.y, remotePos.z
             );
         }
-        ent->t.pos = remotePos;
+        ent->body.t.pos = remotePos;
         ent->previousPos = remotePos;
     }
     else
@@ -193,7 +193,7 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
             );
         }
         
-        ent->t.pos = originalLocalPos;
+        ent->body.t.pos = originalLocalPos;
         ent->previousPos = originalLocalPos;
     }
 
@@ -211,9 +211,9 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
         C2S_Input* input = CL_RecallSentInputCommand(
             g_sentCommands, replaySequence);
         if (!input) { continue; }
-		Vec3 before = ent->t.pos;
+		Vec3 before = ent->body.t.pos;
 		CLG_StepActor(sim, ent, &input->input, input->deltaTime);
-		Vec3 after = ent->t.pos;
+		Vec3 after = ent->body.t.pos;
         if (verbose)
         {
             APP_LOG(256, "\t\tSeq %d Buttons %d: %.3f, %.3f, %.3f to %.3f, %.3f, %.3f\n",
@@ -248,7 +248,7 @@ internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     SimBulkSpawnEvent def = {};
     def.factoryType = SIM_FACTORY_TYPE_PROJ_PREDICTION;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 1);
-    def.base.pos = ent->t.pos;
+    def.base.pos = ent->body.t.pos;
     def.base.seedIndex = 0;
     def.base.forward = *dir;
     def.base.tick = g_ticks;
@@ -258,7 +258,7 @@ internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 	
     /* Debug - Create a line trace */
     #if 0
-    Vec3 origin = ent->t.pos;
+    Vec3 origin = ent->body.t.pos;
     Vec3 dest {};
     dest.x = (origin.x + (dir->x * 10));
     dest.y = (origin.y + (dir->y * 10));

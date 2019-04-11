@@ -229,7 +229,7 @@ internal void SV_UserStartSync(User* user)
         // TODO: Any entity specific spawning stuff here
         cmd.factoryType = (u8)ent->factoryType;
         cmd.networkId = ent->id.serial;
-        cmd.pos = ent->t.pos;
+        cmd.pos = ent->body.t.pos;
         cmd.vel = ent->velocity;
         cmd.pitch = ent->pitch;
         cmd.yaw = ent->yaw;
@@ -496,7 +496,7 @@ void SV_PopulateRenderScene(
             case SIM_TICK_TYPE_LINE_TRACE:
             {
                 if (!g_debugDrawServerTests) { break; }
-                Vec3* a = &ent->t.pos;
+                Vec3* a = &ent->body.t.pos;
                 Vec3* b = &ent->destination;
                 // move ray up slightly out of the floor
                 f32 offsetY = 0.2f;
@@ -515,7 +515,7 @@ void SV_PopulateRenderScene(
                 if (!g_debugDrawServerScene) { break; }
                 RendObj_SetAsAABB(
 			        &obj, 1, 1, 1, 0, 1, 0);
-                RScene_AddRenderItem(scene, &ent->t, &obj);
+                RScene_AddRenderItem(scene, &ent->body.t, &obj);
             } break;
         }
     }

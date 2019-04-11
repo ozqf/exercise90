@@ -12,22 +12,22 @@ internal SimEntity* SVG_FindAndValidateTarget(SimScene* sim, SimEntity* ent)
     > Validate Target Ent.
     */
    SimEntity* target = NULL;
-   if (ent->targetId.serial == 0)
+   if (ent->relationships.targetId.serial == 0)
    {
        // Try to find a new target
        target = Sim_FindTargetForEnt(sim, ent);
        if (target == NULL) { return NULL; }
-       ent->targetId = target->id;
+       ent->relationships.targetId = target->id;
        return target;
    }
    else
    {
        // Check current target and clear if invalidated
-       target = Sim_GetEntityByIndex(sim, ent->targetId.slot);
+       target = Sim_GetEntityByIndex(sim, ent->relationships.targetId.slot);
        // check target is still okay
        if (target == NULL || !Sim_IsEntInPlay(target))
        {
-           ent->targetId = {};
+           ent->relationships.targetId = {};
            return NULL;
        }
        return target;
@@ -93,9 +93,9 @@ SVG_DEFINE_ENT_UPDATE(Seeker)
     {
         Vec3 toTarget = 
         {
-            target->t.pos.x - ent->t.pos.x,
-            target->t.pos.y - ent->t.pos.y,
-            target->t.pos.z - ent->t.pos.z,
+            target->body.t.pos.x - ent->body.t.pos.x,
+            target->body.t.pos.y - ent->body.t.pos.y,
+            target->body.t.pos.z - ent->body.t.pos.z,
         };
         Vec3_Normalise(&toTarget);
         ent->velocity =
@@ -119,8 +119,14 @@ SVG_DEFINE_ENT_UPDATE(Bouncer)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
+com_internal2 void Foo()
+{
+
+}
+
 SVG_DEFINE_ENT_UPDATE(Spawner)
 {
+    
     if (ent->thinkTick <= 0.0f)
     {
         ent->thinkTick += ent->thinkTime;
@@ -128,11 +134,9 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // Spawn projectiles
         #if 1
         SimBulkSpawnEvent event = {};
-        //vent.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
-        //event.factoryType = SIM_FACTORY_TYPE_WANDERER;
-        event.factoryType = ent->childFactoryType;
+        event.factoryType = ent->relationships.childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
-        event.base.pos = ent->t.pos;
+        event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = 4;
         event.patternDef.patternId = SIM_PATTERN_SCATTER;
         event.patternDef.radius = 1.5f;
@@ -153,8 +157,8 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.enemyType = SIM_FACTORY_TYPE_WANDERER;
         event.base.firstSerial = Sim_ReserveEntitySerials(
             sim, 0, 8);
-        event.base.pos = ent->t.pos;
-        event.base.forward = ent->t.pos;
+        event.base.pos = ent->body.t.pos;
+        event.base.forward = ent->body.t.pos;
         #endif
     }
     else
@@ -170,7 +174,7 @@ internal i32 SVG_StepProjectile(
 
     // find victims
     f32 width = 0.5f;
-    Vec3 p = ent->t.pos;
+    Vec3 p = ent->body.t.pos;
     Vec3 min;
     min.x = p.x - width;
     min.y = p.y - width;
@@ -291,7 +295,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     SimBulkSpawnEvent def = {};
     def.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
     def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
-    def.base.pos = ent->t.pos;
+    def.base.pos = ent->body.t.pos;
     def.base.forward = *dir;
     def.base.tick = g_ticks;
     def.base.seedIndex = COM_STDRandU8();
@@ -306,7 +310,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
 
     /* Debug - Create a line trace */
-    Vec3 origin = ent->t.pos;
+    Vec3 origin = ent->body.t.pos;
     Vec3 dest {};
     dest.x = (origin.x + (dir->x * 10));
     dest.y = (origin.y + (dir->y * 10));
@@ -343,10 +347,10 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 	{
 		move.x += speed * deltaTime;
 	}
-	ent->previousPos = ent->t.pos;
-	ent->t.pos.x += move.x;
-	ent->t.pos.y += move.y;
-	ent->t.pos.z += move.z;
+	ent->previousPos = ent->body.t.pos;
+	ent->body.t.pos.x += move.x;
+	ent->body.t.pos.y += move.y;
+	ent->body.t.pos.z += move.z;
 
     if (ent->attackTick <= 0)
     {

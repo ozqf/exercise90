@@ -61,13 +61,15 @@ struct SimEntity
     simFactoryType factoryType;
     i32 tickType;
 
-    // Relationships
-    SimEntId targetId;  // current enemy
-    SimEntId parentId;  // Who spawned this entity
-    simFactoryType childFactoryType;
-    i32 childCount;
-    i32 maxChildCount;
-	
+    struct 
+    {
+        SimEntId targetId;  // current enemy
+        SimEntId parentId;  // Who spawned this entity
+        simFactoryType childFactoryType;
+        i32 childCount;
+        i32 maxChildCount;
+    } relationships;
+    
 	i32 fastForwardTicks;
     i32 birthTick;
     i32 deathTick;
@@ -85,13 +87,17 @@ struct SimEntity
     u32 flags;
 
     // physical
-    Transform t;
+    struct
+    {
+        Transform t;
+    } body;
+
     Vec3 previousPos;
-    f32 speed;
-    Vec3 velocity;
-    f32 pitch;
-    f32 yaw;
-	
+        f32 speed;
+        Vec3 velocity;
+        f32 pitch;
+        f32 yaw;
+    
 	SimActorInput input;
 
     // runtime

@@ -548,7 +548,7 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	if (plyr)
 	{
 		plyr->input = g_actorInput;
-		pos = plyr->t.pos;
+		pos = plyr->body.t.pos;
 	}
 	else
 	{

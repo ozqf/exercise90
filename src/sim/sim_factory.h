@@ -94,13 +94,13 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
 {
     ent->birthTick =      def->birthTick;
-    ent->t.pos =          def->pos;
+    ent->body.t.pos =          def->pos;
     ent->previousPos =    def->pos;
     ent->destination =    def->destination;
     ent->velocity =       def->velocity;
-    ent->childFactoryType = def->childFactoryType;
+    ent->relationships.childFactoryType = def->childFactoryType;
 
-    Transform_SetScaleSafe(&ent->t, def->scale);
+    Transform_SetScaleSafe(&ent->body.t, def->scale);
 }
 
 ////////////////////////////////////////////////////////////////////

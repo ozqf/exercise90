@@ -183,7 +183,7 @@ internal void Cmd_WriteEntitySync(
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
     cmd->header.size = sizeof(S2C_EntitySync);
     cmd->networkId = ent->id.serial;
-	cmd->pos = ent->t.pos;
+	cmd->pos = ent->body.t.pos;
 	cmd->vel = ent->velocity;
 }
 

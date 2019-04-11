@@ -15,12 +15,12 @@ internal void Sim_InitProjectile(
 {
     ent->status = SIM_ENT_STATUS_IN_USE;
 	ent->tickType = SIM_TICK_TYPE_PROJECTILE;
-	Transform_SetToIdentity(&ent->t);
+	Transform_SetToIdentity(&ent->body.t);
     if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
     {
-        ent->t.scale = type->scale;
+        ent->body.t.scale = type->scale;
     }
-	ent->t.pos = *pos;
+	ent->body.t.pos = *pos;
     ent->velocity = *velocity;
     ent->speed = type->speed;
 
@@ -138,7 +138,7 @@ internal void Sim_NullProjectilePattern(
 		APP_LOG(256,
             "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
             serial,
-            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
+            ent->body.t.pos.x, ent->body.t.pos.y, ent->body.t.pos.z,
             ent->fastForwardTicks
 		);
         serial++;
@@ -179,7 +179,7 @@ internal void Sim_RadialProjectilePattern(
         );
 		APP_LOG(256, "SIM prj %d: pos %.3f, %.3f, %.3f. Fast-forward: %d\n",
             serial,
-            ent->t.pos.x, ent->t.pos.y, ent->t.pos.z,
+            ent->body.t.pos.x, ent->body.t.pos.y, ent->body.t.pos.z,
             ent->fastForwardTicks
 		);
         serial += increment;
