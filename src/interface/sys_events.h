@@ -55,8 +55,9 @@ static i32 Sys_ValidateEvent(SysEvent* ev)
 
 static void Sys_EnqueueEvent(ByteBuffer* buf, SysEvent* ev)
 {
-    Assert(Sys_ValidateEvent(ev) == COM_ERROR_NONE)
-    Assert(buf->Space() >= ev->size)
+    ErrorCode err = Sys_ValidateEvent(ev);
+    COM_ASSERT(err == COM_ERROR_NONE, "Invalid SysEvent")
+    COM_ASSERT(buf->Space() >= ev->size, "No space for SysEvent")
     //printf("SYS Enqueue ev %d size %d\n", ev->type, ev->size);
     buf->ptrWrite += COM_COPY(ev, buf->ptrWrite, ev->size);
 }

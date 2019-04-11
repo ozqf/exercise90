@@ -35,12 +35,12 @@ internal void App_UpdateLoopbackSocket(FakeSocket* socket, f32 deltaTime)
 		
 		if (addr.port == APP_CLIENT_LOOPBACK_PORT)
 		{
-			Assert(g_isRunningClient)
+			COM_ASSERT(g_isRunningClient, "Not running a client!")
 			Sys_WritePacketEvent(g_clientLoopback.GetWrite(), socketIndex, &addr, data, dataSize);
 		}
 		else if(addr.port == APP_SERVER_LOOPBACK_PORT)
 		{
-			Assert(g_isRunningServer)
+			COM_ASSERT(g_isRunningServer, "Not running a server!")
 			Sys_WritePacketEvent(g_serverLoopback.GetWrite(), socketIndex, &addr, data, dataSize);
 		}
 		else

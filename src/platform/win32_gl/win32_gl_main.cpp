@@ -8,7 +8,7 @@ i32 Win32_InitOpenGL(HWND window)
     //Win32_InitTestScene();
 	
 	g_window = window;
-	Assert(g_window);
+	COM_ASSERT(g_window, "Window handle is null");
 
 	HDC windowContext = GetDC(g_window);
     /** 
@@ -48,7 +48,7 @@ i32 Win32_InitOpenGL(HWND window)
 	if (g_openglRC == NULL)
 	{
 		MessageBox(0, "wglCreateContext failed", "Error", MB_OK | MB_ICONINFORMATION);
-		AssertAlways(false);
+		ILLEGAL_CODE_PATH
 	}
 
     if (wglMakeCurrent(windowContext, g_openglRC))
@@ -61,7 +61,7 @@ i32 Win32_InitOpenGL(HWND window)
         GLenum err = glGetError();
         
         MessageBox(0, "wglMakeCurrentFailed", "Error", MB_OK | MB_ICONINFORMATION);
-        AssertAlways(false);
+        ILLEGAL_CODE_PATH
     }
 
     ReleaseDC(g_window, windowContext);

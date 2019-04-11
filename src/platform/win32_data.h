@@ -2,12 +2,14 @@
 
 #include "../common/com_module.h"
 
+#include "win32_module.cpp"
+
 void Win32_DebugLogDataManifest(i32 printAsWellAsLog)
 {
 	for (i32 i = g_nextDataFileIndex - 1; i >= 0; --i)
 	{
 		DataFile file = g_dataFiles[i];
-		Assert(file.handle);
+		COM_ASSERT(file.handle, "File handle is null");
 		if (printAsWellAsLog)
 		{
 			PLAT_PRINT(64, "--- data file %d ---\n", i);
@@ -44,7 +46,7 @@ void Win32_DebugLogDataManifest(i32 printAsWellAsLog)
 // File path should be something like textures/tex.bmp
 u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)
 {
-	Assert(reader);
+	COM_ASSERT(reader, "DataFileEntryReader is null");
 	char* path = filePath;
 	// data file entry paths are stored with an opening backslash.
 	// if the request didn't include one we should skip it when comparing
@@ -56,7 +58,7 @@ u8 Win32_FindDataFileEntry(char* filePath, DataFileEntryReader* reader)
 	for (i32 i = g_nextDataFileIndex - 1; i >= 0; --i)
 	{
 		DataFile file = g_dataFiles[i];
-		Assert(file.handle);
+		COM_ASSERT(file.handle, "File handle is null");
 		u32 offset = file.header.fileListOffset;
 		fseek(file.handle, file.header.fileListOffset, SEEK_SET);
 		DataFileDiskEntry entry = {};
@@ -86,7 +88,7 @@ void Win32_AddDataFileHandle(char* filePath)
 	DataFile dFile = {};
 	
 	fopen_s(&dFile.handle, filePath, "rb");
-	Assert(dFile.handle != NULL);
+	COM_ASSERT(dFile.handle != NULL, "Data file handle is null");
 
 	i32 end;
 	fseek(dFile.handle, 0, SEEK_END);
@@ -117,17 +119,19 @@ void Win32_AddDataFileHandle(char* filePath)
 	g_dataFiles[g_nextDataFileIndex] = dFile;
 	g_nextDataFileIndex++;
 
-	Assert((g_nextDataFileIndex + 1) < PLATFORM_MAX_DATA_FILES);
+	COM_ASSERT((g_nextDataFileIndex + 1) < PLATFORM_MAX_DATA_FILES,
+		"Too many data files");
 }
 
 /**
  * returns number of data file handles established
  */
-i32 Win32_ScanForDataFiles(Heap* heap, DataFile* results, i32 maxResults, char* path)
+i32 Win32_ScanForDataFiles(
+	Heap* heap, DataFile* results, i32 maxResults, char* path)
 {
 	char currentDir[256];
 	u32 dirStrSize = GetCurrentDirectory(256, currentDir);
-	Assert(dirStrSize > 0);
+	COM_ASSERT(dirStrSize > 0, "Current directory name overflow");
 
 	char searchPath[256];
 	sprintf_s(searchPath, 256, "%s\\%s\\*", currentDir, path);

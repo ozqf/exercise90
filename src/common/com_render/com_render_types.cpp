@@ -13,7 +13,7 @@ com_internal void RScene_AddRenderItem(
     f32 x, f32 y, f32 z,
     f32 scaleX, f32 scaleY, f32 scaleZ)
 {
-    Assert(scene->numObjects < scene->maxObjects);
+    COM_ASSERT(scene->numObjects < scene->maxObjects, "No capacity for render item");
     RenderListItem* item = &scene->sceneItems[scene->numObjects];
     scene->numObjects++;
     Transform_SetToIdentity(&item->transform);
@@ -28,7 +28,7 @@ com_internal void RScene_AddRenderItem(
 
 com_internal void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
 {
-    Assert(scene->numObjects < scene->maxObjects);
+    COM_ASSERT(scene->numObjects < scene->maxObjects, "No capacity for render item");
     RenderListItem* item = &scene->sceneItems[scene->numObjects];
     scene->numObjects++;
     item->transform = *t;

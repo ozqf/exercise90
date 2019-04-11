@@ -37,6 +37,7 @@ com_internal float COM_LinearEase(
     return changeInValue * currentIteration / totalIterations + startValue;
 }
 
+// TODO: Change to using modulo or something...
 com_internal f32 COM_CapAngleDegrees(f32 angle)
 {
     u32 loopCount = 0;
@@ -44,14 +45,14 @@ com_internal f32 COM_CapAngleDegrees(f32 angle)
     {
         angle -= 360;
         loopCount++;
-        Assert(loopCount < 99999);
+        COM_ASSERT(loopCount < 99999, "Loop ran away");
     }
     loopCount = 0;
     while (angle < 0)
     {
         angle += 360;
         loopCount++;
-        Assert(loopCount < 99999);
+        COM_ASSERT(loopCount < 99999, "Loop ran away");
     }
     return angle;
 }

@@ -45,6 +45,11 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
     return (accumulator / interval);
 }
 
+internal void App_Fatal(char* msg, char* heading)
+{
+	g_platform.Error(msg, heading);
+}
+
 /***************************************
 * Define functions accessible to platform
 ***************************************/
@@ -54,8 +59,9 @@ internal i32  App_Init()
 {
     APP_LOG(128, "App initialising. Build data %s - %s\n", __DATE__, __TIME__);
     //App_Log("Test Log\n");
-
+	
     //App_Win32_AttachErrorHandlers();
+	COM_SetFatalError(App_Fatal);
 
     // Memory
 
@@ -71,7 +77,7 @@ internal i32  App_Init()
     if (!g_platform.Malloc(&mem, mainMemorySize))
     {
         APP_LOG(128, "APP Platform malloc failed\n");
-        Assert(false);
+		COM_ASSERT(0, "APP Platform malloc failed");
         return 0;
     }
     else
@@ -232,7 +238,9 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
     while (read < end)
     {
         SysEvent* header = (SysEvent*)read;
-        Assert(Sys_ValidateEvent(header) == COM_ERROR_NONE)
+        COM_ASSERT(
+			Sys_ValidateEvent(header) == COM_ERROR_NONE,
+			"Error reading system event header")
         read += header->size;
 		
         switch (header->type)

@@ -56,7 +56,9 @@ internal Command* Stream_FindMessageBySequence(u8* ptr, i32 numBytes, i32 sequen
     while (read < end)
     {
         Command* header = (Command*)read;
-        Assert(Cmd_Validate(header) == COM_ERROR_NONE)
+        ErrorCode err = Cmd_Validate(header);
+        COM_ASSERT(err == COM_ERROR_NONE,
+            "Invalid command")
         if (header->sequence == sequence)
         { 
             return header;
@@ -74,12 +76,13 @@ internal Command* Stream_FindMessageBySequence(u8* ptr, i32 numBytes, i32 sequen
  */
 internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd)
 {
-    Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
+    ErrorCode err = Cmd_Validate(cmd); 
+    COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
     u8* start = b->ptrStart;
     u8* bufEnd = start + b->Written();
     u8* cmdPtr = (u8*)cmd;
-    Assert(cmdPtr >= start)
-    Assert(cmdPtr < bufEnd)
+    COM_ASSERT(cmdPtr >= start, "Cmd position < buffer start")
+    COM_ASSERT(cmdPtr < bufEnd, "Cmd position > buffer end")
 
     i32 bytesToDelete = cmd->size;
 	u8* copyBlockDest = (u8*)cmd;
@@ -141,10 +144,10 @@ internal i32 Stream_EnqueueUnreliableInput(
         return 0;
     }
     ByteBuffer* b = &stream->inputBuffer;
-    Assert(b->Space() >= cmd->size);
-        b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
+    COM_ASSERT(b->Space() >= cmd->size, "Unreliable stream is full");
+    b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
     return cmd->size;
-}
+} 
 
 // returns bytes written
 internal i32 Stream_EnqueueReliableInput(
@@ -173,7 +176,7 @@ internal i32 Stream_EnqueueReliableInput(
     if (current == NULL)
     {
         //printf("CL Enqueuing CMD %d\n", cmd->sequence);
-        Assert(b->Space() >= cmd->size);
+        COM_ASSERT(b->Space() >= cmd->size, "Reliable stream is full");
         b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
         return cmd->size;
     }
@@ -195,7 +198,7 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
     }
     cmd->sequence = stream->outputSequence++;
     ByteBuffer* b = &stream->outputBuffer;
-    Assert(b->Space() >= cmd->size);
+    COM_ASSERT(b->Space() >= cmd->size, "Not space for output Cmd");
     // TODO: Replace direct copy with customised encoding functions when protocol is ready for it
     b->ptrWrite += COM_CopyMemory((u8*)cmd, b->ptrWrite, cmd->size);
 }

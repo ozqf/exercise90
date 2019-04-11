@@ -129,7 +129,9 @@ void ZNet_SendDisconnectCommand(ZNet* net, ZNetConnection* conn, char* msg)
 u32 ZNet_GetNextSequenceNumber(ZNetHandle* handle, i32 connId)
 {
 	ZNet* net = (ZNet*)handle;
-	Assert(handle->memSize == sizeof(ZNet))
+	COM_ASSERT(
+		handle->memSize == sizeof(ZNet),
+		"Net handle invalid size")
 	ZNetConnection* conn = ZNet_GetConnectionById(net, connId);
 	NET_ASSERT(net, (connId != 0), "Get Next Packet Sequence: Connection Id is zero");
 	NET_ASSERT(net, conn, "Get Next Packet Sequence: Connection could not be found\n");

@@ -73,9 +73,11 @@ internal Win32_Socket g_connections[MAX_SOCKETS];
 
 Win32_Socket* WNet_GetActiveSocket(i32 socketIndex)
 {
-    Assert((socketIndex >= 0 && socketIndex < MAX_SOCKETS));
+    COM_ASSERT((socketIndex >= 0 && socketIndex < MAX_SOCKETS),
+        "Socket index out of bounds");
     Win32_Socket* winSock = &g_connections[socketIndex];
-	Assert(winSock->isActive)
+	COM_ASSERT(winSock->isActive,
+        "Winsock is not active")
     return winSock;
 }
 
@@ -193,7 +195,7 @@ i32 WNet_ReadSocket_OldTest(i32 socketIndex)
 i32 Net_Read(i32 socketIndex, ZNetAddress* sender,  MemoryBlock* buffer)
 {
     Win32_Socket* winSock = WNet_GetActiveSocket(socketIndex);
-    Assert(winSock);
+    COM_ASSERT(winSock, "Failed to acquire socket");
     // optional struct to store the sender's address
     sockaddr_in fromAddress;
 
@@ -374,7 +376,8 @@ i32 Net_OpenSocket(u16 port, u16* portResult)
 
 i32 Net_CloseSocket(i32 socketIndex)
 {
-    Assert((socketIndex >= 0 && socketIndex < MAX_SOCKETS))
+    COM_ASSERT((socketIndex >= 0 && socketIndex < MAX_SOCKETS),
+        "Close socket - index out of bounds")
     Win32_Socket* sock = &g_connections[socketIndex];
     i32 result = -1;
     if (sock->isActive)

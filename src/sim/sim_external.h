@@ -161,7 +161,7 @@ extern "C"
 SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 {
 	// an id of zero is considered invalid
-	Assert(def->serial)
+	COM_ASSERT(def->serial, "Restoring entity with Serial 0")
     SimEntity* ent = Sim_GetEntityBySerial(scene, def->serial);
     if (ent)
     {
@@ -179,7 +179,7 @@ SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 extern "C"
 i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 {
-	Assert(serialNumber)
+	COM_ASSERT(serialNumber, "Removing entity with serial 0")
     return Sim_RecycleEntity(scene, serialNumber);
 }
 
@@ -236,7 +236,7 @@ i32 Sim_ExecuteProjectileSpawn(
 	i32 fastForwardTicks)
 {
     //SimProjectileType* type = Sim_GetProjectileType(event->projType);
-    Assert(event->factoryType)
+    COM_ASSERT(event->factoryType, "Bulk spawn factory type is 0")
     //Sim_SpawnProjectiles(sim, event, type, fastForwardTicks);
     i32 isLocal = (event->base.firstSerial < 0);
 

@@ -5,7 +5,7 @@
 com_internal u32 SafeTruncateUInt64(u64 value)
 {
 	// TODO: Defines for max value
-	Assert(value <= 0xFFFFFFFF);
+	COM_ASSERT(value <= 0xFFFFFFFF, "Truncate U64 overflow");
 	u32 result = (u32)value;
 	return result;
 }
@@ -20,14 +20,14 @@ com_internal u32 SafeTruncateUInt64(u64 value)
  */
 com_internal u32 COM_WriteByte(u8 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *target = value;
     return sizeof(u8);
 }
 
 com_internal void COM_WriteByte(u8 value, u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     **target = value;
     *target++;
 }
@@ -37,7 +37,7 @@ com_internal void COM_WriteByte(u8 value, u8** target)
  */
 com_internal u32 COM_WriteI16(i16 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *(i16*)target = value;
     return sizeof(u16);
 }
@@ -47,7 +47,7 @@ com_internal u32 COM_WriteI16(i16 value, u8* target)
  */
 com_internal u32 COM_WriteU16(u16 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *(u16*)target = value;
     return sizeof(u16);
 }
@@ -57,7 +57,7 @@ com_internal u32 COM_WriteU16(u16 value, u8* target)
  */
 com_internal u32 COM_WriteI32(i32 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *(i32*)target = value;
     return sizeof(i32);
 }
@@ -67,7 +67,7 @@ com_internal u32 COM_WriteI32(i32 value, u8* target)
  */
 com_internal u32 COM_WriteU32(u32 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *(u32*)target = value;
     return sizeof(u32);
 }
@@ -77,7 +77,7 @@ com_internal u32 COM_WriteU32(u32 value, u8* target)
  */
 com_internal u32 COM_WriteF32(f32 value, u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     *(f32*)target = value;
     return sizeof(f32);
 }
@@ -87,7 +87,7 @@ com_internal u32 COM_WriteF32(f32 value, u8* target)
  */
 com_internal u8 COM_ReadByte(u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     u8 result = *(u8*)*target;
     *target += sizeof(u8);
     return result;
@@ -95,7 +95,7 @@ com_internal u8 COM_ReadByte(u8** target)
 
 com_internal u16 COM_ReadU16(u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     u16 result = *(u16*)*target;
     *target += sizeof(u16);
     return result;
@@ -106,7 +106,7 @@ com_internal u16 COM_ReadU16(u8** target)
  */
 com_internal i32 COM_ReadI32(u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     i32 result = *(i32*)*target;
     *target += sizeof(i32);
     return result;
@@ -114,7 +114,7 @@ com_internal i32 COM_ReadI32(u8** target)
 
 com_internal u32 COM_ReadU32(u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     u32 result = *(u32*)*target;
     *target += sizeof(u32);
     return result;
@@ -122,7 +122,7 @@ com_internal u32 COM_ReadU32(u8** target)
 
 com_internal f32 COM_ReadF32(u8** target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     f32 result = *(f32*)*target;
     *target += sizeof(f32);
     return result;
@@ -133,7 +133,7 @@ com_internal f32 COM_ReadF32(u8** target)
  */
 com_internal i32 COM_PeekI32(u8* target)
 {
-	Assert(target != NULL);
+	COM_ASSERT(target != NULL, "Target is null");
     i32 result = *(i32*)target;
     return sizeof(i32);
 }
@@ -143,8 +143,8 @@ com_internal i32 COM_PeekI32(u8* target)
  */
 com_internal u32 COM_CopyMemory(u8* source, u8* target, u32 numBytes)
 {
-	Assert(source != NULL);
-	Assert(target != NULL);
+	COM_ASSERT(source != NULL, "Source is null");
+	COM_ASSERT(target != NULL, "Target is null");
     u32 progress = 0;
     while (progress < numBytes)
     {
@@ -214,7 +214,7 @@ com_internal u32 COM_GetI32Sentinel()
 com_internal void COM_SetMemoryPattern(u8* ptr, u32 numBytes, u8* pattern, u32 patternSize)
 {
     u32 numCopies = numBytes / patternSize;
-    AssertAlways((numBytes % patternSize) == 0);
+    COM_ASSERT((numBytes % patternSize) == 0, "Pattern size invalid");
     u32 endPoint = (u32) ptr + numBytes;
     for (u32 i = 0; i < numCopies; ++i)
     {

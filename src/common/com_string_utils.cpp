@@ -303,8 +303,8 @@ com_internal i32 COM_StripTrailingInteger(char* text, char separator, i32 failur
  */
 com_internal u8 COM_CheckForFileExtension(const char* filePath, const char* extension)
 {
-    Assert(filePath != NULL);
-    Assert(extension != NULL);
+    COM_ASSERT(filePath != NULL, "Check extension sent null file path");
+    COM_ASSERT(extension != NULL, "Check extension sent null extension");
 
     // Calc length of filename so it can be read backwards
     i32 fileNameLength = 0;

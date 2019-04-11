@@ -172,7 +172,7 @@ internal i32 App_Init()
     if (!g_platform.Malloc(&mem, mainMemorySize))
     {
         APP_LOG(128, "APP Platform malloc failed\n");
-        Assert(false);
+        ILLEGAL_CODE_PATH
         return 0;
     }
     else

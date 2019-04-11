@@ -236,7 +236,7 @@ i32 Win32_ExecuteTextCommand(char* command)
     char tokensBuffer[256];
     // pointers to start of each token in tokensBuffer
     char *tokens[32];
-    AssertAlways(COM_StrLen(command) < 256);
+    COM_ASSERT(COM_StrLen(command) < 256, "Text command too long")
     COM_CopyString(command, commandCopy);
 
     i32 tokensCount = COM_ReadTokens(commandCopy, tokensBuffer, tokens);

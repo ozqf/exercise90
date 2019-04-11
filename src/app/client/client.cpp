@@ -142,7 +142,8 @@ void CL_WriteDebugString(ZStringHeader* str)
 
 internal void* CL_Malloc(i32 numBytes)
 {
-    Assert(g_numAllocations < CL_MAX_ALLOCATIONS)
+    COM_ASSERT(g_numAllocations < CL_MAX_ALLOCATIONS,
+        "No space to record malloc")
     i32 index = g_numAllocations++;
     g_allocations[index] = malloc(numBytes);
     g_bytesAllocated += numBytes;
@@ -180,7 +181,8 @@ void CL_LoadTestScene()
 // Public so that local user can be instantly set from outside
 void CL_SetLocalUser(UserIds ids)
 {
-    Assert(g_clientState == CLIENT_STATE_REQUESTING)
+    COM_ASSERT(g_clientState == CLIENT_STATE_REQUESTING,
+        "Client is not requesting a connection")
     APP_LOG(64, "CL Set local user public %d private %d\n",
         ids.publicId, ids.privateId
     );
@@ -193,7 +195,8 @@ void CL_SetLocalUser(UserIds ids)
 ////////////////////////////////////////////////////////////////////
 void CL_Init(ZNetAddress serverAddress)
 {
-    Assert(g_clientState == CLIENT_STATE_NONE)
+    COM_ASSERT(g_clientState == CLIENT_STATE_NONE,
+        "Client State is not clear")
     APP_PRINT(32, "CL Init scene\n");
     g_serverAddress = serverAddress;
 	g_clientState = CLIENT_STATE_REQUESTING;
@@ -247,8 +250,8 @@ internal void CL_ReadReliableCommands(NetStream* stream)
     while (read < end)
     {
         Command* header = (Command*)read;
-        Assert(header->sentinel == CMD_SENTINEL)
-        Assert(header->size > 0)
+        COM_ASSERT(header->sentinel == CMD_SENTINEL)
+        COM_ASSERT(header->size > 0)
         read += header->size;
         switch (header->type)
         {
@@ -441,7 +444,7 @@ internal void CL_RunReliableCommands(
 		stream->inputSequence++;
 		
 		i32 err = Cmd_Validate(h);
-		Assert(err == COM_ERROR_NONE)
+		COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
 		if (CL_ExecReliableCommand(sim, h, deltaTime, diff))
         {
             Stream_DeleteCommand(b, h);

@@ -121,7 +121,8 @@ void Win32_ReadBMPHeaders(
 	// Read file header
 	i32 fileHeaderSize = sizeof(WINBMPFILEHEADER);
 	reader += COM_CopyMemory(reader, (u8*)fileHeader, sizeof(WINBMPFILEHEADER));
-	AssertAlways(fileHeader->FileType == BMP_FILE_TYPE);
+	COM_ASSERT(fileHeader->FileType == BMP_FILE_TYPE,
+		"File is not a bitmap");
 
 	// Read bitmap header
 	i32 bmpHeaderSize = sizeof(WINNTBITMAPHEADER);
@@ -200,8 +201,8 @@ void Win32_CopyFile(char* sourcePath, char* targetPath)
     );
     */
     BOOL cancel = false;
-	Assert(sourcePath);
-	Assert(targetPath);
+	COM_ASSERT(sourcePath, "Source path is null");
+	COM_ASSERT(targetPath, "Target path is null");
     CopyFileEx(sourcePath, targetPath, NULL, NULL, &cancel, 0);
 }
 
@@ -289,7 +290,7 @@ ErrorCode LoadFileIntoMemory(char* fileName, u8* destination, u32 capacity)
 extern "C"
 u8  Platform_LoadFileIntoHeap(Heap* heap, BlockRef* destRef, char* fileName, u8 assertOnFailure)
 {
-	AssertAlways(destRef != NULL);
+	COM_ASSERT(destRef != NULL, "Destination BlockRef is null");
 	/*
 	> Find file in .dat, find size
 	> Prepare block on heap
@@ -437,7 +438,8 @@ i32 Platform_WriteToFile(i32 fileId, u8* ptr, u32 numBytes)
 
 i32 Platform_CloseFileForWriting(i32 fileId)
 {
-	Assert(g_appReadFiles[fileId] != NULL);
+	COM_ASSERT(g_appReadFiles[fileId] != NULL,
+		"FileId is not assigned to an open file handle");
 	fclose(g_appReadFiles[fileId]);
 	g_appReadFiles[fileId] = NULL;
 	return 1;

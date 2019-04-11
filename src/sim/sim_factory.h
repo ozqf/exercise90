@@ -273,7 +273,7 @@ internal SimEntity* Sim_SpawnEntity(
         );
     }
     
-    Assert(ent)
+    COM_ASSERT(ent, "No free Entity")
     ent->status = SIM_ENT_STATUS_IN_USE;
     // Record factory type so we know how this entity was initialised
     ent->factoryType = def->factoryType;

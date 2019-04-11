@@ -130,7 +130,7 @@ internal InputAction* Input_FindAction(InputAction* actions, i32 numActions, cha
 internal i32 Input_GetActionValue(InputAction* actions, i32 numActions, char* actionName)
 {
     InputAction* action = Input_FindAction(actions, numActions, actionName);
-    Assert(action != NULL);
+    COM_ASSERT(action != NULL, actionName);
     return action->value;
 }
 
@@ -142,7 +142,7 @@ internal i32 Input_GetActionValue(InputActionSet* actions, char* actionName)
 internal u8 Input_CheckActionToggledOn(InputActionSet* actions, char* actionName, u32 frameNumber)
 {
     InputAction* action = Input_FindAction(actions->actions, actions->count, actionName);
-    Assert(action != NULL);
+    COM_ASSERT(action != NULL, actionName);
     
     return (action->value != 0 && action->lastFrame == frameNumber);
 }
@@ -150,7 +150,7 @@ internal u8 Input_CheckActionToggledOn(InputActionSet* actions, char* actionName
 internal u8 Input_CheckActionToggledOff(InputActionSet* actions, char* actionName, u32 frameNumber)
 {
     InputAction* action = Input_FindAction(actions->actions, actions->count, actionName);
-    Assert(action != NULL);
+    COM_ASSERT(action != NULL, actionName);
     
     return (action->value == 0 && action->lastFrame == frameNumber);
 }

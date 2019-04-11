@@ -113,7 +113,7 @@ HeapBlock *Heap_FindBlockByLabel(Heap *heap, char* label)
 com_internal MemoryBlock Heap_GetMemoryById(Heap* heap, u32 id)
 {
     HeapBlock* block = Heap_FindBlock(heap, id);
-    Assert(block != NULL);
+    COM_ASSERT(block != NULL, "Cannot get memory by Id - Heap Block is null");
 
     MemoryBlock result = {};
     result.ptrMemory = block->mem.ptrMemory;
@@ -132,7 +132,7 @@ com_internal void* Heap_GetBlockMemoryAddress(Heap *heap, BlockRef *BlockRef)
 
     // Mismatch. Update the Reference address
     HeapBlock* block = Heap_FindBlock(heap, BlockRef->id);
-    Assert(block != NULL);
+    COM_ASSERT(block != NULL, "Cannot get block memory address - Block is null");
     void* newAddress = block->mem.ptrMemory;
 
     if (newAddress == NULL)
@@ -334,7 +334,7 @@ bool Heap_RemoveBlockById(Heap *heap, i32 id)
 com_internal void Heap_Free(Heap *heap, u32 id)
 {
 	HeapBlock* block = Heap_FindBlock(heap, id);
-	Assert(block != NULL);
+	COM_ASSERT(block != NULL, "Cannot free, block is null");
     Heap_RemoveBlock(heap, block);
 }
 
@@ -346,7 +346,7 @@ com_internal void Heap_Free(Heap *heap, u32 id)
  */
 u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, u8 clearToZero)
 {
-    Assert(heap != NULL);
+    COM_ASSERT(heap != NULL, "Cannot allocate - heap is null");
 // #if VERBOSE
 //     printf("> HEAP ALLOC %d bytes\n", objectSize);
 // #endif
@@ -360,7 +360,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
 //         printf("  First alloc Heap space: %d vs volume size: %d\n", heapSpace, volumeSize);
 // #endif
 //         printf("Vol Size (%d) < Heap Space (%d)?\n", volumeSize, heapSpace);
-        AssertAlways(volumeSize <= heapSpace);
+        COM_ASSERT(volumeSize <= heapSpace, "Cannot allocate - No capacity");
 
         newBlock = (HeapBlock *)heap->ptrMemory;
         *newBlock = {};
@@ -394,7 +394,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
                 if (count > 9999)
                 {
                     //printf("Block scan ran away... aborting");
-                    AssertAlways(false);
+                    COM_ASSERT(false, "Heap space search ran away");
                     break;
                 }
                 space = Heap_CalcSpaceAfterBlock(heap, iterator);
@@ -422,7 +422,7 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
                     iterator = iterator->mem.next;
                     // If space check failed and no more blocks are available
                     // then the heap is full... realloc or crash
-                    AssertAlways(iterator != NULL);
+                    COM_ASSERT(iterator != NULL, "Cannot allocate - Heap is full");
                 }
                 count++;
             }
@@ -460,9 +460,9 @@ u32 Heap_Allocate(Heap *heap, BlockRef *bRef, uint32_t objectSize, char *label, 
 
 com_internal void Heap_InitBlockRef(Heap* heap, BlockRef* bRef, i32 blockId)
 {
-    Assert(bRef != NULL);
+    COM_ASSERT(bRef != NULL, "BlockRef is null");
     HeapBlock* block = Heap_FindBlock(heap, blockId);
-    Assert(block != NULL);
+    COM_ASSERT(block != NULL, "Block is null");
     if (block == NULL)
     {
         return;

@@ -9,6 +9,7 @@
 
 // implementations
 #include "com_types.cpp"
+#include "com_error.cpp"
 #include "com_string_utils.cpp"
 #include "com_memory_utils.cpp"
 #include "com_maths.cpp"

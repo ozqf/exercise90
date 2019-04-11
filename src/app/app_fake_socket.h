@@ -125,7 +125,7 @@ struct FakeSocket
         
         i32 space = sizeof(FakeSocketPacketHeader) + numBytes;
         FakeSocketPacketHeader* h = (FakeSocketPacketHeader*)malloc(space);
-        Assert(h);
+        COM_ASSERT(h, "Failed to allocate packet buffer");
         h->address = *address;
 		h->socketIndex = socketIndex;
         h->size = numBytes;

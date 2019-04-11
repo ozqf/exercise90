@@ -40,9 +40,9 @@ void Exec_DrawObject(RendObj* obj)
 
 	RendObj_ColouredMesh* meshRend = &obj->data.mesh;
 	MeshData mesh = meshRend->mesh;
-	AssertAlways(mesh.verts != NULL);
-	AssertAlways(mesh.uvs != NULL);
-	AssertAlways(mesh.normals != NULL);
+	COM_ASSERT(mesh.verts != NULL, "Mesh verts are null");
+	COM_ASSERT(mesh.uvs != NULL, "Mesh UVs are null");
+	COM_ASSERT(mesh.normals != NULL, "Mesh normals are null");
 
 	GLuint* texHandles = g_textureHandles;
 

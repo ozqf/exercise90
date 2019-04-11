@@ -116,12 +116,9 @@ internal i32 CL_ReadPacketReliableInput(
     while (read < end)
     {
         Command* h = (Command*)read;
-        i32 err = Cmd_Validate(h);
-        if (err != COM_ERROR_NONE)
-        {
-            return err;
-        }
-        Assert(!Cmd_Validate(h))
+        ErrorCode err = Cmd_Validate(h);
+        COM_ASSERT(err == COM_ERROR_NONE, "Invalid cmd")
+        
         read += h->size;
         Stream_EnqueueReliableInput(stream, h);
     }

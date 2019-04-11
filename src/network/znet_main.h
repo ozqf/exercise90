@@ -86,7 +86,8 @@ i32 ZNet_StartSession(
         #endif
         case NETMODE_CLIENT:
         {
-            Assert(remotePeerAddress);
+            COM_ASSERT(remotePeerAddress,
+                "Remote peer address is null");
             printf("ZNet - CLIENT\n");
             if (remotePeerAddress->port == 666)
             {

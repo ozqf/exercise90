@@ -187,7 +187,7 @@ internal i32 SVG_StepProjectile(
     for (i32 i = 0; i < overlaps; ++i)
     {
         SimEntity* victim = ents[i];
-		Assert(victim->id.serial)
+		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
         SVG_HandleEntityDeath(sim, victim, ent, 0);
         ent->lifeTime = 0;
     }

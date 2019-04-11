@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "com_defines.h"
+#include "com_error.h"
 #include "com_types.h"
 #include "com_memory_utils.h"
 #include "com_string_utils.h"

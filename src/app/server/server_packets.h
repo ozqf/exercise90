@@ -81,7 +81,9 @@ internal i32 SV_WriteReliableSection(
     while(read < end)
     {
         Command* cmd = (Command*)read;
-        Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
+        COM_ASSERT(
+			Cmd_Validate(cmd) == COM_ERROR_NONE,
+			"Invalid reliable command")
         i32 size = cmd->size;
         read += size;
         if (cmd->size > space) { numCommandsNotWritten++; continue; }
@@ -91,7 +93,9 @@ internal i32 SV_WriteReliableSection(
 		
 		// Record message
 		rec->reliableMessageIds[rec->numReliableMessages++] = cmd->sequence;
-		Assert(rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES)
+		COM_ASSERT(
+            rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES,
+            "Too many messages in packet to record")
     }
     if (numCommandsNotWritten > 0)
     {

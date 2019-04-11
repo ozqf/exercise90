@@ -19,14 +19,14 @@ void COM_SetVar(Var* source, Var* vars, i32* numVars, i32 maxVars)
 	Var* target = COM_GetVar(vars, *numVars, source->name);
 	if (target == NULL)
 	{
-		printf("Creating var %s as %s\n", source->name, source->value);
-		Assert(*numVars < maxVars);
+		//printf("Creating var %s as %s\n", source->name, source->value);
+		COM_ASSERT(*numVars < maxVars, "No space left for Var");
 		target = &vars[*numVars];
 		*numVars += 1;
 	}
 	else
 	{
-		printf("Patching var %s to %s\n", source->name, source->value);
+		//printf("Patching var %s to %s\n", source->name, source->value);
 	}
 	*target = *source;
 }

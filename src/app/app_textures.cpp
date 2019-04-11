@@ -78,10 +78,12 @@ void Tex_BindTexture(Texture2DHeader *header)
 
 Texture2DHeader* Tex_AllocateTexture(char* name, i32 width, i32 height)
 {
-    Assert(width > 0)
-    Assert(height > 0)
-    Assert(name)
-    Assert(COM_StrLen(name) < TEXTURE2D_MAX_NAME_LENGTH)
+    COM_ASSERT(width > 0, "Texture width < 0")
+    COM_ASSERT(height > 0, "Texture height < 0")
+    COM_ASSERT(name, "Null name for new texture")
+    COM_ASSERT(
+        COM_StrLen(name) < TEXTURE2D_MAX_NAME_LENGTH,
+        "New texture name is too long")
 
     i32 totalBytes = Tex_CalcBitmapMemorySize(width, height);
     BlockRef ref;

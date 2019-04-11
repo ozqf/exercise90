@@ -307,7 +307,7 @@ internal ByteBuffer ZNet_GetPacketWriteBuffer()
 void ZNet_Init(ZNetHandle* handle, ZNetPlatformFunctions platform, ZNetOutputInterface outputInterface, i32 simMode)
 {
     printf("ZNet Initialising... ");
-    Assert(handle->memSize == sizeof(ZNet))
+    COM_ASSERT(handle->memSize == sizeof(ZNet), "Provided memory too small for ZNet data")
     ZNET_HANDLE_2_NET(handle)
 	COM_ZeroMemory((u8*)net, sizeof(ZNet));
     net->platform = platform;

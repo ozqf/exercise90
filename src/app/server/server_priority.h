@@ -64,7 +64,7 @@ internal void SV_AddPriorityLink(
 	}
 	
 	i32 i = list->numLinks;
-	Assert(i < list->maxLinks)
+	COM_ASSERT(i < list->maxLinks, "No free entity links")
 	if (priority < 1)
 	{
 		priority = 1;

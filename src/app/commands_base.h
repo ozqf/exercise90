@@ -40,8 +40,9 @@ internal inline i32 Cmd_Validate(Command* cmd)
 
 internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
 {
-    Assert(!Cmd_Validate(cmd))
-    Assert(b->Space() >= cmd->size)
+    ErrorCode err = Cmd_Validate(cmd);
+    COM_ASSERT(!err, "Command failed validation")
+    COM_ASSERT(b->Space() >= cmd->size, "No space for command")
     b->ptrWrite += COM_COPY(cmd, b->ptrWrite, cmd->size);
 }
 
