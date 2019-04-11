@@ -95,10 +95,11 @@ internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
 {
     ent->birthTick =      def->birthTick;
     ent->body.t.pos =          def->pos;
-    ent->previousPos =    def->pos;
+    ent->body.previousPos =    def->pos;
     ent->destination =    def->destination;
-    ent->velocity =       def->velocity;
+    ent->body.velocity =       def->velocity;
     ent->relationships.childFactoryType = def->childFactoryType;
+    ent->relationships.parentId.serial = def->parentSerial;
 
     Transform_SetScaleSafe(&ent->body.t, def->scale);
 }
@@ -125,7 +126,7 @@ internal i32 Sim_InitWorldVolume(
         def->pos.x, def->pos.y, def->pos.z);
     ent->tickType = SIM_TICK_TYPE_WORLD;
     // world volumes can't move (yet!)
-    ent->velocity = {};
+    ent->body.velocity = {};
     ent->display.colour = { 0.2f, 0.2f, 0.2f, 1 };
     return COM_ERROR_NONE;
 }
@@ -137,8 +138,11 @@ internal i32 Sim_InitTurret(
     ent->tickType = SIM_TICK_TYPE_TURRET;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
+    ent->relationships.childSpawnCount = 4;
+    ent->relationships.maxLiveChildren = 4;
+    ent->relationships.totalChildren = 8;
     printf("Spawned Spawner, Ticktype %d Vel %.3f, %.3f, %.3f\n",
-        ent->tickType, ent->velocity.x, ent->velocity.y, ent->velocity.z);
+        ent->tickType, ent->body.velocity.x, ent->body.velocity.y, ent->body.velocity.z);
     return COM_ERROR_NONE;
 }
 
@@ -159,7 +163,7 @@ internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->speed = 1;
+    ent->body.speed = 1;
     ent->tickType = SIM_TICK_TYPE_WANDERER;
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
@@ -171,7 +175,7 @@ internal i32 Sim_InitBouncer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->speed = 4;
+    ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_BOUNCER;
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
@@ -183,7 +187,7 @@ internal i32 Sim_InitSeeker(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->speed = 3;
+    ent->body.speed = 3;
     ent->tickType = SIM_TICK_TYPE_SEEKER;
     ent->display.colour = { 1, 0.2f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE

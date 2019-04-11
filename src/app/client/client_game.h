@@ -92,7 +92,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             return 1;
         }
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
-        ent->previousPos = ent->body.t.pos;
+        ent->body.previousPos = ent->body.t.pos;
         ent->body.t.pos = cmd->pos;
         executed = 1;
     }
@@ -123,7 +123,7 @@ internal void CLG_StepActor(
 	{
 		move.x += speed * deltaTime;
 	}
-	ent->previousPos = ent->body.t.pos;
+	ent->body.previousPos = ent->body.t.pos;
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;
@@ -180,7 +180,7 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
             );
         }
         ent->body.t.pos = remotePos;
-        ent->previousPos = remotePos;
+        ent->body.previousPos = remotePos;
     }
     else
     {
@@ -194,7 +194,7 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
         }
         
         ent->body.t.pos = originalLocalPos;
-        ent->previousPos = originalLocalPos;
+        ent->body.previousPos = originalLocalPos;
     }
 
     ent->hasBeenPredicted = 1;

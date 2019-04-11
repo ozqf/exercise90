@@ -155,7 +155,7 @@ void CL_PopulateRenderScene(
             {
                 RendObj_InterpolatePosition(
                     &t.pos,
-                    &ent->previousPos,
+                    &ent->body.previousPos,
                     &ent->body.t.pos,
                     interpolateTime);
             }

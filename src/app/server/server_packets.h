@@ -17,7 +17,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
     // send input confirmation
     SimEntity* avatar = Sim_GetEntityBySerial(&g_sim, user->entSerial);
     Vec3 pos = {};
-    if (avatar) { pos = avatar->previousPos; }
+    if (avatar) { pos = avatar->body.previousPos; }
     S2C_InputResponse response = {};
     Cmd_InitInputResponse(
         &response,

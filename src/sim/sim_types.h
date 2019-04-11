@@ -66,8 +66,10 @@ struct SimEntity
         SimEntId targetId;  // current enemy
         SimEntId parentId;  // Who spawned this entity
         simFactoryType childFactoryType;
-        i32 childCount;
-        i32 maxChildCount;
+        i32 childSpawnCount;
+        i32 liveChildren;
+        i32 maxLiveChildren;
+        i32 totalChildren;
     } relationships;
     
 	i32 fastForwardTicks;
@@ -90,13 +92,12 @@ struct SimEntity
     struct
     {
         Transform t;
-    } body;
-
-    Vec3 previousPos;
+        Vec3 previousPos;
         f32 speed;
         Vec3 velocity;
         f32 pitch;
         f32 yaw;
+    } body;
     
 	SimActorInput input;
 
@@ -107,6 +108,7 @@ struct SimEntity
 struct SimEntityDef
 {
     i32 serial;
+    i32 parentSerial;
     i32 fastForwardTicks;
 
     i32 birthTick;
@@ -154,6 +156,7 @@ struct SimSpawnBase
     Vec3 pos;
     Vec3 forward;
     i32 firstSerial;
+    i32 sourceSerial;
     i32 tick;
     u8 seedIndex;
 };

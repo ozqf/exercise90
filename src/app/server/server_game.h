@@ -44,6 +44,12 @@ internal void SVG_HandleEntityDeath(
     Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
     SV_EnqueueCommandForAllUsers(&g_users, &cmd.header);
 
+    SimEntity* parent = Sim_GetEntityBySerial(
+        sim, victim->relationships.parentId.serial);
+    if (parent != NULL)
+    {
+        parent->relationships.liveChildren--;
+    }
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
 	Sim_RemoveEntity(sim, victim->id.serial);
@@ -73,8 +79,8 @@ SVG_DEFINE_ENT_UPDATE(Wanderer)
         ent->thinkTime = COM_STDRandomInRange(1, 4);
         // set a random movement vector
         f32 radians = COM_STDRandomInRange(0, 360) * DEG2RAD;
-        ent->velocity.x = cosf(radians) * ent->speed;
-        ent->velocity.z = sinf(radians) * ent->speed;
+        ent->body.velocity.x = cosf(radians) * ent->body.speed;
+        ent->body.velocity.z = sinf(radians) * ent->body.speed;
         //printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
     }
     else
@@ -98,18 +104,18 @@ SVG_DEFINE_ENT_UPDATE(Seeker)
             target->body.t.pos.z - ent->body.t.pos.z,
         };
         Vec3_Normalise(&toTarget);
-        ent->velocity =
+        ent->body.velocity =
         {
-            toTarget.x * ent->speed,
-            toTarget.y * ent->speed,
-            toTarget.z * ent->speed,
+            toTarget.x * ent->body.speed,
+            toTarget.y * ent->body.speed,
+            toTarget.z * ent->body.speed,
         };
         Sim_SimpleMove(ent, deltaTime);
         Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
     }
     else
     {
-        ent->velocity = { 0, 0, 0 };
+        ent->body.velocity = { 0, 0, 0 };
     }
 }
 
@@ -119,14 +125,16 @@ SVG_DEFINE_ENT_UPDATE(Bouncer)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
-com_internal2 void Foo()
-{
-
-}
-
+//////////////////////////////////////////////////////
+// Spawner
+//////////////////////////////////////////////////////
 SVG_DEFINE_ENT_UPDATE(Spawner)
 {
-    
+    i32 spawnSpaces = ent->relationships.maxLiveChildren - 
+        ent->relationships.liveChildren;
+    if (spawnSpaces < ent->relationships.childSpawnCount)
+    { return; }
+
     if (ent->thinkTick <= 0.0f)
     {
         ent->thinkTick += ent->thinkTime;
@@ -137,16 +145,20 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.factoryType = ent->relationships.childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
         event.base.pos = ent->body.t.pos;
-        event.patternDef.numItems = 4;
+        event.patternDef.numItems = ent->relationships.childSpawnCount;
         event.patternDef.patternId = SIM_PATTERN_SCATTER;
         event.patternDef.radius = 1.5f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
         event.base.tick = g_ticks;
+        event.base.sourceSerial = ent->id.serial;
 		Sim_ExecuteProjectileSpawn(
 			sim, &event, 0
 		);
+
+        ent->relationships.liveChildren += ent->relationships.childSpawnCount;
+
         // Replicate!
         S2C_BulkSpawn prj = {};
         Cmd_InitBulkSpawn(&prj, &event, g_ticks, 0);
@@ -347,7 +359,7 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 	{
 		move.x += speed * deltaTime;
 	}
-	ent->previousPos = ent->body.t.pos;
+	ent->body.previousPos = ent->body.t.pos;
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;

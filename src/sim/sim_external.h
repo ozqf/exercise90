@@ -14,14 +14,14 @@ extern "C"
 void Sim_SimpleMove(SimEntity* ent, f32 deltaTime)
 {
     Vec3* pos = &ent->body.t.pos;
-    ent->previousPos.x = pos->x;
-    ent->previousPos.y = pos->y;
-    ent->previousPos.z = pos->z;
+    ent->body.previousPos.x = pos->x;
+    ent->body.previousPos.y = pos->y;
+    ent->body.previousPos.z = pos->z;
     Vec3 move =
     {
-        ent->velocity.x * deltaTime,
-        ent->velocity.y * deltaTime,
-        ent->velocity.z * deltaTime
+        ent->body.velocity.x * deltaTime,
+        ent->body.velocity.y * deltaTime,
+        ent->body.velocity.z * deltaTime
     };
     
     ent->body.t.pos.x += move.x;
@@ -46,14 +46,14 @@ extern "C"
 void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->body.t.pos;
-    if (p->x < min->x) { p->x = min->x; ent->velocity.x = -ent->velocity.x; }
-    if (p->x > max->x) { p->x = max->x; ent->velocity.x = -ent->velocity.x; }
+    if (p->x < min->x) { p->x = min->x; ent->body.velocity.x = -ent->body.velocity.x; }
+    if (p->x > max->x) { p->x = max->x; ent->body.velocity.x = -ent->body.velocity.x; }
 
-    if (p->y < min->y) { p->y = min->y; ent->velocity.y = -ent->velocity.y; }
-    if (p->y > max->y) { p->y = max->y; ent->velocity.y = -ent->velocity.y; }
+    if (p->y < min->y) { p->y = min->y; ent->body.velocity.y = -ent->body.velocity.y; }
+    if (p->y > max->y) { p->y = max->y; ent->body.velocity.y = -ent->body.velocity.y; }
 
-    if (p->z < min->z) { p->z = min->z; ent->velocity.z = -ent->velocity.z; }
-    if (p->z > max->z) { p->z = max->z; ent->velocity.z = -ent->velocity.z; }
+    if (p->z < min->z) { p->z = min->z; ent->body.velocity.z = -ent->body.velocity.z; }
+    if (p->z > max->z) { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
 }
 
 extern "C"
@@ -257,11 +257,12 @@ i32 Sim_ExecuteProjectileSpawn(
         entDef.pos = item->pos;
         entDef.scale = { 1, 1, 1 };
         entDef.fastForwardTicks = fastForwardTicks;
+        entDef.parentSerial = event->base.sourceSerial;
         SimEntity* ent = Sim_RestoreEntity(sim, &entDef);
 
-        ent->velocity.x = item->forward.x * ent->speed;
-        ent->velocity.y = item->forward.y * ent->speed;
-        ent->velocity.z = item->forward.z * ent->speed;
+        ent->body.velocity.x = item->forward.x * ent->body.speed;
+        ent->body.velocity.y = item->forward.y * ent->body.speed;
+        ent->body.velocity.z = item->forward.z * ent->body.speed;
 
         #if 0
         Vec3 v = {};

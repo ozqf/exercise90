@@ -230,9 +230,9 @@ internal void SV_UserStartSync(User* user)
         cmd.factoryType = (u8)ent->factoryType;
         cmd.networkId = ent->id.serial;
         cmd.pos = ent->body.t.pos;
-        cmd.vel = ent->velocity;
-        cmd.pitch = ent->pitch;
-        cmd.yaw = ent->yaw;
+        cmd.vel = ent->body.velocity;
+        cmd.pitch = ent->body.pitch;
+        cmd.yaw = ent->body.yaw;
 
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);

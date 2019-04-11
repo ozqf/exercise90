@@ -21,8 +21,8 @@ internal void Sim_InitProjectile(
         ent->body.t.scale = type->scale;
     }
 	ent->body.t.pos = *pos;
-    ent->velocity = *velocity;
-    ent->speed = type->speed;
+    ent->body.velocity = *velocity;
+    ent->body.speed = type->speed;
 
     ent->lifeTime = type->lifeTime;
 	ent->fastForwardTicks = fastForwardTicks;
