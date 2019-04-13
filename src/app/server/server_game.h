@@ -143,11 +143,12 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         #if 1
         SimBulkSpawnEvent event = {};
         event.factoryType = ent->relationships.childFactoryType;
-        event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, 4);
+        event.base.firstSerial = Sim_ReserveEntitySerials(
+            sim, 0, ent->relationships.childSpawnCount);
         event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = ent->relationships.childSpawnCount;
-        event.patternDef.patternId = SIM_PATTERN_SCATTER;
-        event.patternDef.radius = 1.5f;
+        event.patternDef.patternId = SIM_PATTERN_RADIAL;
+        event.patternDef.radius = 2.5f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded

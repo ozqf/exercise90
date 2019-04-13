@@ -174,5 +174,4 @@ void Win32_Error(char *msg, char *title)
 	printf("FATAL: %s: %s\n", title, msg);
     MessageBox(0, msg, title, MB_OK | MB_ICONINFORMATION);
 	DebugBreak();
-	ILLEGAL_CODE_PATH
 }

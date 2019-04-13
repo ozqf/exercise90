@@ -161,19 +161,12 @@ extern "C"
 SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
 {
 	// an id of zero is considered invalid
-	COM_ASSERT(def->serial, "Restoring entity with Serial 0")
+	COM_ASSERT(def->serial, "Restoring entity with Serial 0");
     SimEntity* ent = Sim_GetEntityBySerial(scene, def->serial);
-    if (ent)
-    {
-        // TODO: This code!
-        ILLEGAL_CODE_PATH
-        return NULL;
-    }
-    else
-    {
-        ent = Sim_SpawnEntity(scene, def);
-        return ent;
-    }
+    // TODO: Handle this!
+    COM_ASSERT(ent == NULL, "Entity already exists!")
+    ent = Sim_SpawnEntity(scene, def);
+    return ent;
 }
 
 extern "C"
