@@ -131,11 +131,11 @@ internal i32 Sim_InitWorldVolume(
     return COM_ERROR_NONE;
 }
 
-internal i32 Sim_InitTurret(
+internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_InitEntity(ent, def);
-    ent->tickType = SIM_TICK_TYPE_TURRET;
+    ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->thinkTime = 4;//1.25f;
 	ent->lifeTime = 10;
     ent->relationships.childSpawnCount = 4;
@@ -302,8 +302,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitBouncer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
-        case SIM_FACTORY_TYPE_TURRET:
-			err = Sim_InitTurret(sim, ent, def); break;
+        case SIM_TICK_TYPE_SPAWNER:
+			err = Sim_InitSpawner(sim, ent, def); break;
         case SIM_FACTORY_TYPE_LINE_TRACE:
 		    err =  Sim_InitLineTrace(sim, ent, def); break;
 		case SIM_FACTORY_TYPE_NONE:

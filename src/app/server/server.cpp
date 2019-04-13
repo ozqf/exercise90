@@ -305,7 +305,7 @@ internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
     def.pos = pos;
     def.childFactoryType = factoryType;
-    def.factoryType = SIM_FACTORY_TYPE_TURRET;
+    def.factoryType = SIM_TICK_TYPE_SPAWNER;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
 }

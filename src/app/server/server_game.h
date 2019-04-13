@@ -411,7 +411,7 @@ internal void SVG_TickEntity(
         { SVG_UpdateBouncer(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_TICK_TYPE_TURRET:
+        case SIM_TICK_TYPE_SPAWNER:
         { SVG_UpdateSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
