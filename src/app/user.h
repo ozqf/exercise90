@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/com_module.h"
+#include "priority_queue.h"
 
 #define USER_STATE_FREE 0
 #define USER_STATE_SYNC 1
@@ -35,12 +36,15 @@ struct User
 	AckStream acks;
     NetStream reliableStream;
     NetStream unreliableStream;
+    // Priority queue stuff
+    SVEntityLinkArray entSync;
+
     // Clients are considered in sync mode until their acknowledged
     // reliable message queue Id is >= to this.
     // Set to u32 max value when client first connects.
     // Set properly after all sync messages have been buffered for 
     // transmission.
-    u32 syncCompleteMessageId;
+    u32 userMapLoadCompleteMsgId;
 };
 
 struct UserList

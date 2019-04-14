@@ -2,7 +2,8 @@
 
 #include "server.h"
 
-internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
+internal i32 SV_WriteUnreliableSection(
+    SimScene* sim, User* user, ByteBuffer* packet)
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
@@ -27,8 +28,29 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
         );
     packet->ptrWrite += COM_COPY(
         &response, packet->ptrWrite, response.header.size);
-    APP_LOG(128, "SV Write ent sync for: ");
-	i32 syncMessagesWritten = 0;
+
+    // ENTITY SYNC
+    #if 1
+    SVEntityLink* links = user->entSync.links;
+    i32 numLinks = user->entSync.numLinks;
+    // most of the time there will be too many entities
+    // for one packet and this for loop will never complete
+    for (i32 i = 0; i < numLinks; ++i)
+    {
+        if (packet->Space() < sizeof(S2C_EntitySync))
+        { break; }
+        SVEntityLink* link = &links[i];
+        
+        SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
+        S2C_EntitySync cmd = {};
+        Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
+        packet->ptrWrite += COM_COPY(
+            &cmd, packet->ptrWrite, cmd.header.size);
+    }
+    #endif
+    #if 0
+    //APP_LOG(128, "SV Write ent sync for: ");
+	//i32 syncMessagesWritten = 0;
 	for (i32 i = 0; i < g_sim.maxEnts; ++i)
 	{
 		SimEntity* ent = &g_sim.ents[i];
@@ -39,7 +61,7 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
 		{
 			break;
 		}
-        APP_LOG(32, "%d, ", ent->id.serial);
+        //APP_LOG(32, "%d, ", ent->id.serial);
         if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
         {
             S2C_EntitySync cmd = {};
@@ -49,21 +71,9 @@ internal i32 SV_WriteUnreliableSection(User* user, ByteBuffer* packet)
             //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
 		    syncMessagesWritten++;
         }
-		/*switch (ent->tickType)
-		{
-            case SIM_TICK_TYPE_ACTOR:
-			case SIM_TICK_TYPE_WANDERER:
-			{
-                S2C_EntitySync cmd = {};
-                Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-                packet->ptrWrite += COM_COPY(
-                    &cmd, packet->ptrWrite, cmd.header.size);
-                //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
-				syncMessagesWritten++;
-			} break;
-		}*/
 	}
-    APP_LOG(8, "\n");
+    #endif
+    //APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);
     //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
     //    syncMessagesWritten, written, capacity);
@@ -105,7 +115,7 @@ internal i32 SV_WriteReliableSection(
     return (capacity - space);
 }
 
-internal void SV_WriteUserPacket(User* user, f32 time)
+internal void SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
 {
     #if 1
 	//printf("SV Write packet for user %d\n", user->ids.privateId);
@@ -141,7 +151,7 @@ internal void SV_WriteUserPacket(User* user, f32 time)
 
     // -- write mid-packet deserialise check and unreliable sync data -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
-    i32 unreliableWritten = SV_WriteUnreliableSection(user, &packet);
+    i32 unreliableWritten = SV_WriteUnreliableSection(sim, user, &packet);
     //i32 unreliableWritten = 0;
     if (unreliableWritten > 0)
     {

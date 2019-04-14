@@ -10,9 +10,9 @@ During packet construction:
 	until no space is left.
 Repeat
 default priority is 1. If a type of object requires more synchronisation
-than others, increase it's priority value so it accumulates importance faster
+than others, increase its priority value so it accumulates importance faster
 */
-#include "../../common/com_defines.h"
+#include "../common/com_module.h"
 
 struct SVEntityLink
 {
@@ -29,15 +29,9 @@ struct SVEntityLinkArray
 	i32 maxLinks;
 };
 
-internal void SV_SwapEntityLinks(
-    SVEntityLink* a,
-    SVEntityLink* b)
+internal i32 SV_CalcEntityLinkArrayBytes(i32 numEntities)
 {
-    SVEntityLink temp;
-    temp = *a;
-    *a = *b;
-    *b = temp;
-	
+    return sizeof(SVEntityLink) * numEntities;
 }
 
 internal i32 SV_GetPriorityLinkIndexById(
@@ -75,7 +69,18 @@ internal void SV_AddPriorityLink(
 	list->links[i].priority = priority;
 }
 
-internal void SV_RemovePriorityLink(
+internal void SV_SwapEntityLinks(
+    SVEntityLink* a,
+    SVEntityLink* b)
+{
+    SVEntityLink temp;
+    temp = *a;
+    *a = *b;
+    *b = temp;
+	
+}
+
+internal void SV_RemovePriorityLinkByIndex(
     SVEntityLinkArray* list, i32 index)
 {
 	if (index == -1) { return; }
@@ -85,6 +90,18 @@ internal void SV_RemovePriorityLink(
 	list->numLinks -= 1;
 }
 
+internal void SV_RemovePriorityLinkBySerial(
+    SVEntityLinkArray* list, i32 id)
+{
+    for (i32 i = 0; i < list->numLinks; ++i)
+    {
+        if (list->links[i].id == id)
+        {
+            SV_RemovePriorityLinkByIndex(list, i);
+        }
+    }
+}
+
 internal i32 SV_CompareLink(SVEntityLink* a, SVEntityLink* b)
 {
     if (a->importance < b->importance) { return -1; }
@@ -92,6 +109,9 @@ internal i32 SV_CompareLink(SVEntityLink* a, SVEntityLink* b)
     return 0;
 }
 
+/**
+ * The ultimate sorting algorithm
+ */
 internal void SV_BubbleSortPriorityQueue(
     SVEntityLink* links, i32 numLinks)
 {

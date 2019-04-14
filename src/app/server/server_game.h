@@ -50,6 +50,7 @@ internal void SVG_HandleEntityDeath(
     {
         parent->relationships.liveChildren--;
     }
+    SV_RemoveEntityLinkForAllUsers(&g_users, victim->id.serial);
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
 	Sim_RemoveEntity(sim, victim->id.serial);
@@ -322,6 +323,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);
     SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+
 
     /* Debug - Create a line trace */
     Vec3 origin = ent->body.t.pos;
