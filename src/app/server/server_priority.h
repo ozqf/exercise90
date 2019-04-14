@@ -92,7 +92,6 @@ internal i32 SV_CompareLink(SVEntityLink* a, SVEntityLink* b)
     return 0;
 }
 
-// Bubble Sort
 internal void SV_BubbleSortPriorityQueue(
     SVEntityLink* links, i32 numLinks)
 {

@@ -158,7 +158,8 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 			sim, &event, 0
 		);
 
-        ent->relationships.liveChildren += ent->relationships.childSpawnCount;
+        ent->relationships.liveChildren += 
+            ent->relationships.childSpawnCount;
 
         // Replicate!
         S2C_BulkSpawn prj = {};
