@@ -134,7 +134,7 @@ internal i32 Sim_InitWorldVolume(
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    i32 count = 32;
+    i32 count = 128;
     Sim_InitEntity(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->thinkTime = 2;//1.25f;

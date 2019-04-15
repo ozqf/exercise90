@@ -234,10 +234,16 @@ i32 Sim_ExecuteBulkSpawn(
     //Sim_SpawnProjectiles(sim, event, type, fastForwardTicks);
     i32 isLocal = (event->base.firstSerial < 0);
 
-    SimSpawnPatternItem items[64];
+    SimSpawnPatternItem items[255];
+    COM_ASSERT(event->patternDef.numItems < 256,
+        "Pattern items > 255")
     i32 count = Sim_CreateSpawnPattern(
-        &event->base, &event->patternDef, items, event->base.firstSerial, isLocal);
-    
+        &event->base,
+        &event->patternDef,
+        items,
+        event->base.firstSerial,
+        isLocal);
+    COM_ASSERT(count > 0, "Pattern count underflow")
     for (i32 i = 0; i < count; ++i)
     {
         SimSpawnPatternItem* item = &items[i];
@@ -311,9 +317,9 @@ void Sim_Init(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
-    f32 halfX = 10;
-    f32 halfY = 10;
-    f32 halfZ = 10;
+    f32 halfX = 20;
+    f32 halfY = 20;
+    f32 halfZ = 20;
 
     SimEntityDef def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
