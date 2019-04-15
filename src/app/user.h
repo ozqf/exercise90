@@ -31,6 +31,7 @@ struct User
     i32 latestServerTick;
     i32 smoothingTicks;
     i32 userInputSequence;
+    i32 syncRateHertz;
 	
     ZNetAddress address;
 	AckStream acks;

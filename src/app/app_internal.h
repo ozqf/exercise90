@@ -60,7 +60,7 @@ internal RendObj g_serverDebugStrRenderer;
 internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 
-internal i32 g_debugDrawServerScene = 1;
+internal i32 g_debugDrawServerScene = 0;
 internal i32 g_debugDrawServerTests = 0;
 internal i32 g_debugDrawClientPredictions = 1;
 

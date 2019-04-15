@@ -46,6 +46,7 @@ internal i32 SV_WriteUnreliableSection(
         Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
         packet->ptrWrite += COM_COPY(
             &cmd, packet->ptrWrite, cmd.header.size);
+        link->importance = 0;
     }
     #endif
     #if 0

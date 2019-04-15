@@ -195,7 +195,7 @@ internal i32 App_StartSession(i32 sessionType)
                 APP_SERVER_LOOPBACK_PORT);*/
             //g_localServerSocket.isActive = 1;
             SV_Init();
-            UserIds ids = SV_CreateLocalUser();
+            UserIds ids = SVU_CreateLocalUser();
             g_isRunningServer = 1;
 
             /*ZNet_StartSession(

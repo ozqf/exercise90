@@ -253,7 +253,7 @@ internal void CLG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.base.forward = *dir;
     def.base.tick = g_ticks;
     //Sim_ExecuteEnemySpawn()
-    Sim_ExecuteProjectileSpawn(sim, &def, 0);
+    Sim_ExecuteBulkSpawn(sim, &def, 0);
     #endif
 	
     /* Debug - Create a line trace */

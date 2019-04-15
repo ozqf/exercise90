@@ -359,7 +359,8 @@ internal i32 CL_ExecReliableCommand(
 				prj->header.tick
             );
             // flip diff to specify fast forwarding
-            Sim_ExecuteProjectileSpawn(sim, &prj->def, -tickDiff);
+            i32 flags;
+            Sim_ExecuteBulkSpawn(sim, &prj->def, -tickDiff, &flags);
         } break;
 		case CMD_TYPE_S2C_RESTORE_ENTITY:
 		{

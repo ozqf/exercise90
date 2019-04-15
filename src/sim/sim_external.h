@@ -223,10 +223,11 @@ i32 Sim_ExecuteEnemySpawn(
 #endif
 #if 1
 extern "C"
-i32 Sim_ExecuteProjectileSpawn(
+i32 Sim_ExecuteBulkSpawn(
     SimScene* sim,
     SimBulkSpawnEvent* event,
-	i32 fastForwardTicks)
+	i32 fastForwardTicks,
+    i32* spawnedEntityFlags)
 {
     //SimProjectileType* type = Sim_GetProjectileType(event->projType);
     COM_ASSERT(event->factoryType, "Bulk spawn factory type is 0")
@@ -252,6 +253,9 @@ i32 Sim_ExecuteProjectileSpawn(
         entDef.fastForwardTicks = fastForwardTicks;
         entDef.parentSerial = event->base.sourceSerial;
         SimEntity* ent = Sim_RestoreEntity(sim, &entDef);
+        
+        // TODO: Hack to find out whether we need to do priority queue syncing of this entity
+        *spawnedEntityFlags = ent->flags;
 
         ent->body.velocity.x = item->forward.x * ent->body.speed;
         ent->body.velocity.y = item->forward.y * ent->body.speed;

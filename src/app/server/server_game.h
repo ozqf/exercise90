@@ -42,7 +42,7 @@ internal void SVG_HandleEntityDeath(
     
     S2C_RemoveEntity cmd = {};
     Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
-    SV_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+    SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
 
     SimEntity* parent = Sim_GetEntityBySerial(
         sim, victim->relationships.parentId.serial);
@@ -50,7 +50,7 @@ internal void SVG_HandleEntityDeath(
     {
         parent->relationships.liveChildren--;
     }
-    SV_RemoveEntityLinkForAllUsers(&g_users, victim->id.serial);
+    SVU_RemoveEntityLinkForAllUsers(&g_users, victim->id.serial);
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
 	Sim_RemoveEntity(sim, victim->id.serial);
@@ -155,8 +155,9 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // frame the event occurred on is recorded
         event.base.tick = g_ticks;
         event.base.sourceSerial = ent->id.serial;
-		Sim_ExecuteProjectileSpawn(
-			sim, &event, 0
+        i32 flags;
+		Sim_ExecuteBulkSpawn(
+			sim, &event, 0, &flags
 		);
 
         ent->relationships.liveChildren += 
@@ -165,7 +166,12 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // Replicate!
         S2C_BulkSpawn prj = {};
         Cmd_InitBulkSpawn(&prj, &event, g_ticks, 0);
-		SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+		SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
+        if (flags & SIM_ENT_FLAG_POSITION_SYNC)
+        {
+            SVU_AddBulkEntityLinksForAllUsers(
+                &g_users, event.base.firstSerial, event.patternDef.numItems);
+        }
         #endif
         #if 0
         SimEnemySpawnEvent event {};
@@ -314,7 +320,8 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     def.base.forward = *dir;
     def.base.tick = g_ticks;
     def.base.seedIndex = COM_STDRandU8();
-    Sim_ExecuteProjectileSpawn(sim, &def, fastForwardTicks);
+    i32 flags;
+    Sim_ExecuteBulkSpawn(sim, &def, fastForwardTicks, &flags);
 
     // Replicate
     S2C_BulkSpawn prj = {};
@@ -322,7 +329,13 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     prj.def = def;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);
-    SV_EnqueueCommandForAllUsers(&g_users, &prj.header);
+    SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
+
+    if (flags & SIM_ENT_FLAG_POSITION_SYNC)
+    {
+        SVU_AddBulkEntityLinksForAllUsers(
+            &g_users, def.base.firstSerial, def.patternDef.numItems);
+    }
 
 
     /* Debug - Create a line trace */

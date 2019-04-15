@@ -4,7 +4,7 @@
 #include "server.cpp"
 
 
-internal i32 SV_CreateSalt()
+internal i32 SVU_CreateSalt()
 {
     i32 result = 0;
     do
@@ -14,7 +14,7 @@ internal i32 SV_CreateSalt()
     return result;
 }
 
-internal i32 SV_IsPrivateIdInUse(i32 id)
+internal i32 SVU_IsPrivateIdInUse(i32 id)
 {
     for (i32 i = 0; i < g_users.max; ++i)
     {
@@ -27,18 +27,18 @@ internal i32 SV_IsPrivateIdInUse(i32 id)
     return 0;
 }
 
-internal UserIds SV_GenerateUserId()
+internal UserIds SVU_GenerateUserId()
 {
     UserIds newId;
     do
     {
-        newId.privateId = SV_CreateSalt();
-    } while (SV_IsPrivateIdInUse(newId.privateId));
+        newId.privateId = SVU_CreateSalt();
+    } while (SVU_IsPrivateIdInUse(newId.privateId));
     newId.publicId = g_users.nextPublicId++;
     return newId;
 }
 
-internal void SV_AllocateUserStream(
+internal void SVU_AllocateUserStream(
     NetStream* stream, i32 capacityPerBuffer)
 {
     if (stream->initialised) { return; }
@@ -53,7 +53,7 @@ internal void SV_AllocateUserStream(
     );
 }
 
-internal void SV_EnqueueCommandForAllUsers(
+internal void SVU_EnqueueCommandForAllUsers(
     UserList* users, Command* cmd)
 {
 	for (i32 i = 0; i < users->max; ++i)
@@ -67,20 +67,27 @@ internal void SV_EnqueueCommandForAllUsers(
 	}
 }
 
-internal void SV_AddEntityLinkForAllUsers(
-    UserList* users, SimEntity* ent, i32 priority)
+internal void SVU_AddEntityLinkForAllUsers(
+    UserList* users, i32 entSerial, i32 priority)
 {
-    if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
-    { return; }
     for (i32 i = 0; i < users->max; ++i)
     {
         User* user = &users->items[i];
         if (user->state == USER_STATE_FREE) { continue; }
-        SV_AddPriorityLink(&user->entSync, ent->id.serial, 1);
+        SV_AddPriorityLink(&user->entSync, entSerial, 1);
     }
 }
 
-internal void SV_RemoveEntityLinkForAllUsers(
+internal void SVU_AddBulkEntityLinksForAllUsers(
+    UserList* users, i32 firstSerial, i32 numEntities)
+{
+    for (i32 i = 0; i < numEntities; ++i)
+    {
+        SVU_AddEntityLinkForAllUsers(users, firstSerial++, 1);
+    }
+}
+
+internal void SVU_RemoveEntityLinkForAllUsers(
     UserList* users, i32 entSerial)
 {
     for (i32 i = 0; i < g_users.max; ++i)
@@ -91,7 +98,7 @@ internal void SV_RemoveEntityLinkForAllUsers(
     }
 }
 
-internal void SV_UserStartSync(User* user)
+internal void SVU_UserStartSync(User* user)
 {
     APP_PRINT(128, "SV - Begin sync for user %d\n",
         user->ids.privateId);
@@ -134,13 +141,13 @@ internal void SV_UserStartSync(User* user)
         user->ids.privateId, stream->outputBuffer.Written());
 }
 
-internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
+internal User* SVU_CreateUser(UserIds ids, ZNetAddress* addr)
 {
     User* user = User_GetFree(&g_users);
     user->ids = ids;
     user->address = *addr;
-    SV_AllocateUserStream(&user->reliableStream, KiloBytes(64));
-    SV_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
+    SVU_AllocateUserStream(&user->reliableStream, KiloBytes(64));
+    SVU_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
 
     user->entSync = {};
     user->entSync.links = (SVEntityLink*)COM_Malloc(
@@ -149,6 +156,7 @@ internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
         "EntLinks");
     user->entSync.maxLinks = APP_MAX_ENTITIES;
     user->entSync.numLinks = 0;
+    user->syncRateHertz = APP_CLIENT_SYNC_RATE_10HZ;
 
     APP_LOG(64, "SV creating new user public %d private %d\n",
         ids.publicId, ids.privateId
@@ -156,7 +164,7 @@ internal User* SV_CreateUser(UserIds ids, ZNetAddress* addr)
     return user;
 }
 
-internal void SV_SpawnUserAvatar(User* u)
+internal void SVU_SpawnUserAvatar(User* u)
 {
 	SimEntityDef def = {};
     def = {};
@@ -170,14 +178,14 @@ internal void SV_SpawnUserAvatar(User* u)
     Sim_RestoreEntity(&g_sim, &def);
 }
 
-UserIds SV_CreateLocalUser()
+UserIds SVU_CreateLocalUser()
 {
     ZNetAddress addr = {};
     addr.port = APP_CLIENT_LOOPBACK_PORT;
-    UserIds id = SV_GenerateUserId();
-    User* u = SV_CreateUser(id, &addr);
+    UserIds id = SVU_GenerateUserId();
+    User* u = SVU_CreateUser(id, &addr);
     u->state = USER_STATE_SYNC;
-	SV_SpawnUserAvatar(u);
-    SV_UserStartSync(u);
+	SVU_SpawnUserAvatar(u);
+    SVU_UserStartSync(u);
     return id;
 }

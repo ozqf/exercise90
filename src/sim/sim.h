@@ -65,10 +65,11 @@ extern "C" i32      Sim_ReserveEntitySerials(
 extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
-extern "C" i32      Sim_ExecuteProjectileSpawn(
+extern "C" i32      Sim_ExecuteBulkSpawn(
                         SimScene* sim,
                         SimBulkSpawnEvent* def,
-						i32 fastForwardTicks);
+						i32 fastForwardTicks,
+                        i32* spawnedEntityFlags);
 
 // Entity behaviour
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);

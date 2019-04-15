@@ -16,7 +16,7 @@ struct SVEntityFrame
 
 #define SV_MAX_MALLOCS 1024
 
-//internal void SV_EnqueueCommandForAllUsers(
+//internal void SVU_EnqueueCommandForAllUsers(
 //    UserList* users, Command* cmd);
 
 internal MallocItem g_mallocItems[SV_MAX_MALLOCS];
@@ -294,10 +294,28 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 
 internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 {
-	for (i32 i = 0; i < g_users.max; ++i)
+    for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];
 		if (user->state == USER_STATE_FREE) { continue; }
+
+        // force sending rate
+        switch (user->syncRateHertz)
+        {
+            case APP_CLIENT_SYNC_RATE_30HZ:
+            if (g_ticks % 2 != 0) { continue; }
+            break;
+            case APP_CLIENT_SYNC_RATE_20HZ:
+            if (g_ticks % 3 != 0) { continue; }
+            break;
+            case APP_CLIENT_SYNC_RATE_10HZ:
+            if (g_ticks % 6 != 0) { continue; }
+            break;
+            case APP_CLIENT_SYNC_RATE_60HZ:
+            default:
+            break;
+        }
+
 		SV_TickPriorityQueue(
             user->entSync.links,
             user->entSync.numLinks);
