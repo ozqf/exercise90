@@ -313,20 +313,24 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
             g_ticks, eventTick, fastForwardTicks);
     }
 
-    SimBulkSpawnEvent def = {};
-    def.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
-    def.base.firstSerial = Sim_ReserveEntitySerial(sim, 0);
-    def.base.pos = ent->body.t.pos;
-    def.base.forward = *dir;
-    def.base.tick = g_ticks;
-    def.base.seedIndex = COM_STDRandU8();
+    i32 numProjectiles = 5;
+    SimBulkSpawnEvent event = {};
+    event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
+    event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, numProjectiles);
+    event.patternDef.patternId = SIM_PATTERN_SPREAD;
+    event.patternDef.numItems = numProjectiles;
+    event.patternDef.radius = 1;
+    event.base.pos = ent->body.t.pos;
+    event.base.forward = *dir;
+    event.base.tick = g_ticks;
+    event.base.seedIndex = COM_STDRandU8();
     i32 flags;
-    Sim_ExecuteBulkSpawn(sim, &def, fastForwardTicks, &flags);
+    Sim_ExecuteBulkSpawn(sim, &event, fastForwardTicks, &flags);
 
     // Replicate
     S2C_BulkSpawn prj = {};
     Cmd_Prepare(&prj.header, eventTick, 0);
-    prj.def = def;
+    prj.def = event;
     prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
     prj.header.size = sizeof(prj);
     SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
@@ -334,7 +338,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     if (flags & SIM_ENT_FLAG_POSITION_SYNC)
     {
         SVU_AddBulkEntityLinksForAllUsers(
-            &g_users, def.base.firstSerial, def.patternDef.numItems);
+            &g_users, event.base.firstSerial, event.patternDef.numItems);
     }
 
 

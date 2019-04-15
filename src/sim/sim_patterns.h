@@ -68,6 +68,50 @@ internal i32 Sim_CreateScatterPattern(
 	return def->numItems;
 }
 
+internal i32 Sim_CreateSpreadPattern(
+	SimSpawnBase* event,
+	SimSpawnPatternDef* def,
+	SimSpawnPatternItem* items,
+	i32 serial,
+	i32 isLocal)
+{
+	i32 serialIncrement = isLocal ? -1 : 1;
+	f32 radians = 0;
+	i32 randomIndex = event->seedIndex;
+	i32 i = 0;
+	if (def->numItems % 2 != 0)
+	{
+		// Odd number spread, one pellet goes dead centre
+		items[i].pos.x = event->pos.x;
+		items[i].pos.y = event->pos.y;
+		items[i].pos.z = event->pos.z;
+		items[i].forward.x = event->forward.x;
+		items[i].forward.y = 0;
+		items[i].forward.z = event->forward.z;
+		items[i].entSerial = serial;
+		serial += serialIncrement;
+		i++;
+	}
+	f32 forwardRadians = 0;//atan2f(event->forward.z, event->forward.x);
+	// step 1 / (5 + 1) = 
+	f32 step = def->radius / (def->numItems + 1);
+	radians = forwardRadians - (def->radius / 2);
+	for(; i < def->numItems; ++i)
+	{
+		items[i].pos.x = event->pos.x;
+		items[i].pos.y = event->pos.y;
+		items[i].pos.z = event->pos.z;
+		items[i].forward.x = cosf(radians);
+		items[i].forward.y = 0;
+		items[i].forward.z = sinf(radians);
+		items[i].entSerial = serial;
+
+		serial += serialIncrement;
+		radians += step;
+	}
+	return def->numItems;
+}
+
 /*
 Returns number of results
 Results array MUST have the capacity of items specified in the def
@@ -93,6 +137,12 @@ internal i32 Sim_CreateSpawnPattern(
 			return Sim_CreateScatterPattern(
 				event, def, results, firstSerial, isLocal);
 		} break;
+
+		case SIM_PATTERN_SPREAD:
+		{
+			return Sim_CreateSpreadPattern(
+				event, def, results, firstSerial, isLocal);
+		} break;
 		
 		case SIM_PATTERN_NONE:
 		{
@@ -104,7 +154,7 @@ internal i32 Sim_CreateSpawnPattern(
 
 		default:
 		{
-			ILLEGAL_CODE_PATH
+			COM_ASSERT(0, "Unknown Pattern type")
 		} break;
 	}
 	return 0;
