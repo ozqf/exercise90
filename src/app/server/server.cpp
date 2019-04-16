@@ -170,7 +170,7 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(sim, 0);
 	
     // Place a test spawner
-    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { 6, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
     
     i32 numWanderers = 6;

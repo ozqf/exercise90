@@ -205,11 +205,29 @@ void TestRenderMatrices()
     //PrintM3x3(rot.cells, "Rotation (model * cam)");
 }
 
+void Tests_SpreadPattern()
+{
+    i32 numItems = 2;
+    f32 forwardRadians = 0;
+    f32 arc = 1;
+    printf("Firing %d projectiles, forward %.2f degrees, arc %.3f degrees\n",
+        numItems, forwardRadians * RAD2DEG, arc * RAD2DEG);
+    
+    f32 step = arc / (numItems - 1);
+    f32 radians = forwardRadians - (arc / 2.0f);
+    for (i32 i = 0; i < numItems; ++i)
+    {
+        printf("%d - %.3f\n", i, radians);
+        radians += step;
+    }
+}
+
 void Tests_Run(i32 argc, char* argv[])
 {
     //MatrixBasics();
-    TestRenderMatrices();
+    //TestRenderMatrices();
     //Test_Priority();
+    Tests_SpreadPattern();
 }
 
 #endif

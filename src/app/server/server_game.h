@@ -1,6 +1,6 @@
 #pragma once
 
-#include "server.h"
+#include "server.cpp"
 #include <math.h>
 
 // Returns target if found
@@ -313,13 +313,15 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
             g_ticks, eventTick, fastForwardTicks);
     }
 
-    i32 numProjectiles = 5;
+    i32 numProjectiles = 3;
+    
     SimBulkSpawnEvent event = {};
     event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
     event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, numProjectiles);
     event.patternDef.patternId = SIM_PATTERN_SPREAD;
     event.patternDef.numItems = numProjectiles;
-    event.patternDef.radius = 1;
+    event.patternDef.radius = 0;
+    event.patternDef.arc = 0.25f;
     event.base.pos = ent->body.t.pos;
     event.base.forward = *dir;
     event.base.tick = g_ticks;

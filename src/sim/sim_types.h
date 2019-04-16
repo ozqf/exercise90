@@ -135,6 +135,7 @@ struct SimSpawnPatternDef
 	i32 patternId;
 	i32 numItems;
 	f32 radius;
+    f32 arc;
 };
 
 struct SimProjectileType

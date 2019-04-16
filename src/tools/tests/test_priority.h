@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../common/com_module.h"
-#include "../../app/server/server_priority.h"
+#include "../../app/priority_queue.h"
 
 internal void ListPriority(SVEntityLinkArray* list)
 {
@@ -55,11 +55,11 @@ internal void Test_Priority()
 	{
 		SV_TickPriorityQueue(list.links, list.numLinks);
 	}
-	SV_RemovePriorityLink(
+	SV_RemovePriorityLinkByIndex(
 		&list,
 		SV_GetPriorityLinkIndexById(&list, 4)
 	);
-	SV_RemovePriorityLink(
+	SV_RemovePriorityLinkByIndex(
 		&list,
 		SV_GetPriorityLinkIndexById(&list, 2)
 	);
