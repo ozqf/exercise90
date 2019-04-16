@@ -20,6 +20,7 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_PROJ_PLAYER 8
 #define SIM_FACTORY_TYPE_BOUNCER 9
 #define SIM_FACTORY_TYPE_SEEKER 10
+#define SIM_FACTORY_TYPE_RUBBLE 11
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0
@@ -43,6 +44,7 @@ typedef u8 simFactoryType;
 // Sim Entity flags
 #define SIM_ENT_FLAG_SHOOTABLE (1 << 0)
 #define SIM_ENT_FLAG_POSITION_SYNC (1 << 1)
+#define SIM_ENT_FLAG_MOVE_AVOID (1 << 2)
 
 #include "sim_types.h"
 
@@ -88,3 +90,8 @@ i32 Sim_FindByAABB(
     i32 ignoreSerial,
     SimEntity** results,
     i32 maxResults);
+
+extern "C"
+Vec3 Sim_BuildAvoidVector(
+    SimScene* sim,
+    SimEntity* mover);

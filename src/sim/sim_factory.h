@@ -91,7 +91,8 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 ////////////////////////////////////////////////////////////////////
 // Shared Entity initialisation
 ////////////////////////////////////////////////////////////////////
-internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
+internal void Sim_SetEntityBase(
+    SimEntity* ent, SimEntityDef* def)
 {
     ent->birthTick =      def->birthTick;
     ent->body.t.pos =          def->pos;
@@ -110,9 +111,9 @@ internal void Sim_InitEntity(SimEntity* ent, SimEntityDef* def)
 internal i32 Sim_InitActor(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
-    ent->attackTime = 0.2f;
+    ent->attackTime = 0.1f;
     ent->display.colour = { 0, 1, 0, 1 };
     ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -121,7 +122,7 @@ internal i32 Sim_InitActor(
 internal i32 Sim_InitWorldVolume(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
         def->pos.x, def->pos.y, def->pos.z);
     ent->tickType = SIM_TICK_TYPE_WORLD;
@@ -135,7 +136,7 @@ internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     i32 count = 128;
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->thinkTime = 2;//1.25f;
 	ent->lifeTime = 10;
@@ -151,7 +152,7 @@ internal i32 Sim_InitLineTrace(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
 	//printf("SIM Create line trace\n");
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_LINE_TRACE;
 	ent->lifeTime = 1.0f;
     return COM_ERROR_NONE;
@@ -163,7 +164,7 @@ internal i32 Sim_InitLineTrace(
 internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->body.speed = 1;
     ent->tickType = SIM_TICK_TYPE_WANDERER;
     ent->display.colour = { 1, 0, 1, 1 };
@@ -172,10 +173,22 @@ internal i32 Sim_InitWanderer(
     return COM_ERROR_NONE;
 }
 
+internal i32 Sim_InitRubble(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_SetEntityBase(ent, def);
+    ent->body.speed = 4;
+    ent->tickType = SIM_TICK_TYPE_NONE;
+    ent->display.colour = { 0.7f, 0.7f, 1, 1 };
+    ent->flags = SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC;
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_InitBouncer(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_BOUNCER;
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
@@ -187,12 +200,14 @@ internal i32 Sim_InitBouncer(
 internal i32 Sim_InitSeeker(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
-    Sim_InitEntity(ent, def);
+    Sim_SetEntityBase(ent, def);
     ent->body.speed = 3;
     ent->tickType = SIM_TICK_TYPE_SEEKER;
     ent->display.colour = { 1, 0.2f, 1, 1 };
-    ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
+    ent->flags =
+          SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_MOVE_AVOID;
     return COM_ERROR_NONE;
 }
 
@@ -223,7 +238,7 @@ internal i32 Sim_InitProjPrediction(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     SimProjectileType t;
-    t.speed = 25.0f;
+    t.speed = 45.0f;
     t.patternDef.numItems = 1;
     t.lifeTime = 2.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
@@ -243,7 +258,7 @@ internal i32 Sim_InitProjTest(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     SimProjectileType t;
-    t.speed = 25.0f;
+    t.speed = 45.0f;
     t.patternDef.numItems = 4;
     t.lifeTime = 6.0f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
@@ -301,6 +316,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitWanderer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_BOUNCER:
             err =  Sim_InitBouncer(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_RUBBLE:
+            err = Sim_InitRubble(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
         case SIM_TICK_TYPE_SPAWNER:

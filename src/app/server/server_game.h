@@ -105,6 +105,11 @@ SVG_DEFINE_ENT_UPDATE(Seeker)
             target->body.t.pos.z - ent->body.t.pos.z,
         };
         Vec3_Normalise(&toTarget);
+        Vec3 avoid = Sim_BuildAvoidVector(sim, ent);
+        toTarget.x += avoid.x;
+        toTarget.y += avoid.y;
+        toTarget.z += avoid.z;
+        Vec3_Normalise(&toTarget);
         ent->body.velocity =
         {
             toTarget.x * ent->body.speed,
@@ -149,7 +154,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = ent->relationships.childSpawnCount;
         event.patternDef.patternId = SIM_PATTERN_RADIAL;
-        event.patternDef.radius = 2.5f;
+        event.patternDef.radius = 10.5f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
@@ -194,29 +199,45 @@ internal i32 SVG_StepProjectile(
     Sim_SimpleMove(ent, deltaTime);
 
     // find victims
-    f32 width = 0.5f;
+    Vec3 halfSize =
+    {
+        ent->body.t.scale.x / 2,
+        ent->body.t.scale.y / 2,
+        ent->body.t.scale.z / 2
+    };
     Vec3 p = ent->body.t.pos;
     Vec3 min;
-    min.x = p.x - width;
-    min.y = p.y - width;
-    min.z = p.z - width;
+    min.x = p.x - halfSize.x;
+    min.y = p.y - halfSize.y;
+    min.z = p.z - halfSize.z;
     Vec3 max;
-    max.x = p.x + width;
-    max.y = p.y + width;
-    max.z = p.z + width;
+    max.x = p.x + halfSize.x;
+    max.y = p.y + halfSize.y;
+    max.z = p.z + halfSize.z;
 
     SimEntity* ents[16];
     i32 overlaps = Sim_FindByAABB(
         sim, min, max, ent->id.serial, ents, 16);
     
+    if (overlaps > 0)
+    {
+        SimEntity* victim = ents[0];
+		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
+        SVG_HandleEntityDeath(sim, victim, ent, 0);
+        ent->lifeTime = 0;
+    }
+    #if 0
     for (i32 i = 0; i < overlaps; ++i)
     {
         SimEntity* victim = ents[i];
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
         SVG_HandleEntityDeath(sim, victim, ent, 0);
         ent->lifeTime = 0;
-    }
 
+        // TODO Checks for mitigate, health etc.
+        break;
+    }
+    #endif
 	ent->lifeTime -= deltaTime;
 	if (ent->lifeTime < 0)
 	{
@@ -317,7 +338,8 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     
     SimBulkSpawnEvent event = {};
     event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
-    event.base.firstSerial = Sim_ReserveEntitySerials(sim, 0, numProjectiles);
+    event.base.firstSerial = Sim_ReserveEntitySerials(
+        sim, 0, numProjectiles);
     event.patternDef.patternId = SIM_PATTERN_SPREAD;
     event.patternDef.numItems = numProjectiles;
     event.patternDef.radius = 0;
@@ -340,7 +362,9 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     if (flags & SIM_ENT_FLAG_POSITION_SYNC)
     {
         SVU_AddBulkEntityLinksForAllUsers(
-            &g_users, event.base.firstSerial, event.patternDef.numItems);
+            &g_users,
+            event.base.firstSerial,
+            event.patternDef.numItems);
     }
 
 
@@ -439,8 +463,9 @@ internal void SVG_TickEntity(
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
+        case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;
-        default: { ILLEGAL_CODE_PATH } break;
+        default: { COM_ASSERT(0, "Unknown Ent Tick Type"); } break;
     }
 }
 

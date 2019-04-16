@@ -113,3 +113,52 @@ i32 Sim_FindByRaycast(
     }
     return count;
 }
+
+extern "C"
+Vec3 Sim_BuildAvoidVector(
+    SimScene* sim,
+    SimEntity* mover)
+{
+    Vec3 halfSize =
+    {
+        mover->body.t.scale.x / 2,
+        mover->body.t.scale.y / 2,
+        mover->body.t.scale.z / 2
+    };
+    Vec3 p = mover->body.t.pos;
+    Vec3 min;
+    min.x = p.x - halfSize.x;
+    min.y = p.y - halfSize.y;
+    min.z = p.z - halfSize.z;
+    Vec3 max;
+    max.x = p.x + halfSize.x;
+    max.y = p.y + halfSize.y;
+    max.z = p.z + halfSize.z;
+
+    const i32 maxResults = 32;
+    SimEntity* results[maxResults];
+    i32 numOverlaps = Sim_FindByAABB(sim, min, max, mover->id.serial, results, maxResults);
+    if (numOverlaps == 0) { return { }; }
+    Vec3 result = {};
+    Vec3 origin = mover->body.t.pos;
+    for (i32 i = 0; i < numOverlaps; ++i)
+    {
+        SimEntity* ent = results[i];
+        if (!(ent->flags & SIM_ENT_FLAG_MOVE_AVOID)) { continue; }
+        Vec3 other = ent->body.t.pos;
+        Vec3 diff =
+        {
+            origin.x - other.x,
+            origin.y - other.y,
+            origin.z - other.z
+        };
+        Vec3_Normalise(&diff);
+        result.x += diff.x;
+        result.y += diff.y;
+        result.z += diff.z;
+    }
+    //result.x /= numOverlaps;
+    //result.y /= numOverlaps;
+    //result.z /= numOverlaps;
+    return result;
+}

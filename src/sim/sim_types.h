@@ -97,6 +97,7 @@ struct SimEntity
         Vec3 velocity;
         f32 pitch;
         f32 yaw;
+        Vec3 halfSize;
     } body;
     
 	SimActorInput input;
