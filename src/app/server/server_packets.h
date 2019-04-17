@@ -1,6 +1,6 @@
 #pragma once
 
-#include "server.h"
+#include "server.cpp"
 
 internal i32 SV_WriteUnreliableSection(
     SimScene* sim, User* user, ByteBuffer* packet)

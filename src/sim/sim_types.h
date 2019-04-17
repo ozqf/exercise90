@@ -61,6 +61,9 @@ struct SimEntity
     simFactoryType factoryType;
     i32 tickType;
 
+    // Only useful for debugging
+    u8 priority;
+
     struct 
     {
         SimEntId targetId;  // current enemy

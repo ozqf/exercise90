@@ -101,7 +101,7 @@ internal void Sim_SetEntityBase(
     ent->body.velocity =       def->velocity;
     ent->relationships.childFactoryType = def->childFactoryType;
     ent->relationships.parentId.serial = def->parentSerial;
-
+    ent->priority = 1;
     Transform_SetScaleSafe(&ent->body.t, def->scale);
 }
 
@@ -203,7 +203,7 @@ internal i32 Sim_InitSeeker(
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 3;
     ent->tickType = SIM_TICK_TYPE_SEEKER;
-    ent->display.colour = { 1, 0.2f, 1, 1 };
+    ent->display.colour = { 0, 1, 1, 1 };
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC

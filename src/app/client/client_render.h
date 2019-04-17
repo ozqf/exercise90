@@ -93,6 +93,7 @@ void CL_PopulateRenderScene(
     #endif
     //////////////////////////////////////////////////////////////////////
     // Sim Entities
+    
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
     {
         if (scene->numObjects >= scene->maxObjects) { break; }
@@ -104,6 +105,20 @@ void CL_PopulateRenderScene(
         
 		switch (ent->tickType)
 		{
+            case SIM_TICK_TYPE_SEEKER:
+            {
+                //COM_ASSERT(0, "Render Seeker")
+				Colour c = 
+				{
+                    ent->display.colour.r * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
+                    ent->display.colour.g * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
+                    ent->display.colour.b * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
+                    1
+				};
+				RendObj_SetAsMesh(
+					&obj, *cube, c, texIndex);
+                
+            } break;
 			case SIM_TICK_TYPE_WORLD:
 			{
 				RendObj_SetAsMesh(

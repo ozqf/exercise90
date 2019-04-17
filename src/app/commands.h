@@ -174,10 +174,14 @@ struct S2C_EntitySync
 	Vec3 pos;
 	Vec3 rot;
 	Vec3 vel;
+    u8 priority;
 };
 
 internal void Cmd_WriteEntitySync(
-    S2C_EntitySync* cmd, i32 tick, i32 sequence, SimEntity* ent)
+    S2C_EntitySync* cmd,
+    i32 tick,
+    i32 sequence,
+    SimEntity* ent)
 {
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
@@ -185,6 +189,7 @@ internal void Cmd_WriteEntitySync(
     cmd->networkId = ent->id.serial;
 	cmd->pos = ent->body.t.pos;
 	cmd->vel = ent->body.velocity;
+    cmd->priority = ent->priority;
 }
 
 ///////////////////////////////////////////////////////////////////////////

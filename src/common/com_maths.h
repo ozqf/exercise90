@@ -98,6 +98,7 @@ com_internal f32 COM_CapAngleDegrees(f32 angle);
 f32 Vec3_Magnitude(Vec3* v);
 void Vec3_Normalise(Vec3* v);
 void Vec3_SetMagnitude(Vec3* v, f32 newMagnitude);
+f32 Vec3_Distance(Vec3 a, Vec3 b);
 void Vec3_CrossProduct(Vec3* a, Vec3* b, Vec3* result);
 f32 Vec3_DotProduct(Vec3* a, Vec3* b);
 void Vec3_NormaliseOrForward(Vec3* v);

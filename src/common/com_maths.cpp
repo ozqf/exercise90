@@ -116,6 +116,11 @@ void Vec3_Normalise(Vec3* v)
     v->z /= vectorMagnitude;
 }
 
+f32 Vec3_Distance(Vec3 a, Vec3 b)
+{
+    return Vec3_Magnitudef(b.x - a.x, b.y - a.y, b.z - a.z);
+}
+
 Vec3 Vec3_CreateUnitVector(Vec3* v)
 {
     Vec3 r = {};

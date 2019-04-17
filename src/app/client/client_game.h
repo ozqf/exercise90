@@ -94,6 +94,12 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
         ent->body.previousPos = ent->body.t.pos;
         ent->body.t.pos = cmd->pos;
+        ent->priority = cmd->priority;
+        if (ent->priority == 0 && ent->factoryType == SIM_FACTORY_TYPE_SEEKER)
+        {
+            printf("CL Priority 0 for seeker\n");
+        }
+        //COM_ASSERT(ent->priority > 0, "CL read priority of 0")
         executed = 1;
     }
     return executed;

@@ -18,8 +18,8 @@ struct SVEntityLink
 {
     i32 inUse;
     i32 id;
-    f32 priority;
-    f32 importance;
+    u8 priority;
+    i32 importance;
 };
 
 struct SVEntityLinkArray
@@ -48,7 +48,7 @@ internal i32 SV_GetPriorityLinkIndexById(
 }
 
 internal void SV_AddPriorityLink(
-    SVEntityLinkArray* list, i32 id, f32 priority)
+    SVEntityLinkArray* list, i32 id, u8 priority)
 {
 	// Avoid duplicates
 	if (SV_GetPriorityLinkIndexById(list, id) != -1)

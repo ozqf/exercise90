@@ -17,7 +17,7 @@ ScreenInfo App_GetScreenInfo();
 /////////////////////////////////////////////////////////////////
 // MACROS
 /////////////////////////////////////////////////////////////////
-#define APP_MAX_ENTITIES 512
+#define APP_MAX_ENTITIES 1024
 
 #define APP_CLIENT_SYNC_RATE_60HZ 0
 #define APP_CLIENT_SYNC_RATE_30HZ 1
