@@ -3,7 +3,7 @@
 #include "../common/com_module.h"
 
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 8
+#define SIM_NET_MAX_PRIORITY 3
 
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1

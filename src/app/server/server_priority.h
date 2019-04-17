@@ -11,6 +11,8 @@ internal void SVP_CalculatePriorities(
     SimScene* sim, SimEntity* subject, SVEntityLink* links, i32 numLinks)
 {
     Vec3 pos = subject->body.t.pos;
+    f32 closest = ZINFINITY(), furthest = 0;
+    // Scan over links, finding nearest and furthest
     // Do in reverse so links can be removed
     for (i32 i = numLinks - 1; i >= 0; --i)
     {
@@ -19,7 +21,22 @@ internal void SVP_CalculatePriorities(
         COM_ASSERT(ent, "Linked entity is null")
         Vec3 entPos = ent->body.t.pos;
         f32 dist = Vec3_Distance(pos, entPos);
-        const f32 maxDist = 25;
+        link->distance = dist;
+        if (dist > furthest) { furthest = dist; }
+        if (dist < closest) { closest = dist; }
+    }
+
+    // Find each link's place in the group
+    for (i32 i = numLinks - 1; i >= 0; --i)
+    {
+        SVEntityLink* link = &links[i];
+        SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
+        COM_ASSERT(ent, "Linked entity is null")
+
+        // Calculate range based priority by comparing to distance
+        // of other entities.
+        f32 dist = link->distance;
+        const f32 maxDist = 15;
 		f32 f = ((SIM_NET_MAX_PRIORITY - 1) * (1 - (dist / maxDist)));
         #if 1
         if (dist > maxDist)

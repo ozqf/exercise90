@@ -23,7 +23,7 @@ internal f32 g_simFrameAcculator = 0;
 internal i32 g_fakeLagMinMS = 150;
 internal i32 g_fakeLagMaxMS = 200;
 // 0 to 1 values.
-internal f32 g_fakeLoss = 0.2f;
+internal f32 g_fakeLoss = 0.1f;
 
 internal u32 g_lastPlatformFrame = 0;
 

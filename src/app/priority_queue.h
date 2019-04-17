@@ -16,10 +16,13 @@ than others, increase its priority value so it accumulates importance faster
 
 struct SVEntityLink
 {
-    i32 inUse;
-    i32 id;
+    i32 inUse;          // TODO: Remove, not necessary
+    i32 id;             // Serial number of related entity
     u8 priority;
     i32 importance;
+
+    // used for calculating priority
+    f32 distance;
 };
 
 struct SVEntityLinkArray
