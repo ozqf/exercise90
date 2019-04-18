@@ -36,9 +36,19 @@ internal void SVP_CalculatePriorities(
         // Calculate range based priority by comparing to distance
         // of other entities.
         f32 dist = link->distance;
+		
+		f32 furthestZeroBased = furthest - closest;
+		f32 distZeroBased = dist - closest;
+		f32 multiplier = distZeroBased / furthestZeroBased;
+		
+		link->priority = (u8)((SIM_NET_MAX_PRIORITY - 1) * (1 - multiplier));
+		link->priority += 1;
+		ent->priority = link->priority;
+		
+		#if 0
         const f32 maxDist = 15;
 		f32 f = ((SIM_NET_MAX_PRIORITY - 1) * (1 - (dist / maxDist)));
-        #if 1
+        
         if (dist > maxDist)
         {
             link->priority = SIM_NET_MIN_PRIORITY;
@@ -69,6 +79,8 @@ internal void SVP_CalculatePriorities(
             ent->priority = SIM_NET_MAX_PRIORITY;
         }
         #endif
+		
+		// For debugging, to visualise priority
         ent->priority = link->priority;
     }
 }
