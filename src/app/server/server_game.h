@@ -389,7 +389,7 @@ SVG_DEFINE_ENT_UPDATE(LineTrace)
 SVG_DEFINE_ENT_UPDATE(Actor)
 {
 	Vec3 move = {};
-	f32 speed = 5.0f;
+	f32 speed = ent->body.speed;//5.0f;
 	if (ent->input.buttons & ACTOR_INPUT_MOVE_FORWARD)
 	{
 		move.z -= speed * deltaTime;

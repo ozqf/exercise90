@@ -94,11 +94,11 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 internal void Sim_SetEntityBase(
     SimEntity* ent, SimEntityDef* def)
 {
-    ent->birthTick =      def->birthTick;
-    ent->body.t.pos =          def->pos;
-    ent->body.previousPos =    def->pos;
-    ent->destination =    def->destination;
-    ent->body.velocity =       def->velocity;
+    ent->birthTick = def->birthTick;
+    ent->body.t.pos = def->pos;
+    ent->body.previousPos = def->pos;
+    ent->destination = def->destination;
+    ent->body.velocity = def->velocity;
     ent->relationships.childFactoryType = def->childFactoryType;
     ent->relationships.parentId.serial = def->parentSerial;
     ent->priority = 1;
@@ -114,6 +114,7 @@ internal i32 Sim_InitActor(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->attackTime = 0.1f;
+    ent->body.speed = 6.0f;
     ent->display.colour = { 0, 1, 0, 1 };
     ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;

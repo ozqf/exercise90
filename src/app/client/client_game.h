@@ -112,7 +112,7 @@ internal void CLG_StepActor(
     f32 deltaTime)
 {
     Vec3 move = {};
-	f32 speed = 5.0f;
+	f32 speed = ent->body.speed;//5.0f;
 	if (input->buttons & ACTOR_INPUT_MOVE_FORWARD)
 	{
 		move.z -= speed * deltaTime;

@@ -171,10 +171,11 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(sim, 0);
 	
     // Place a test spawner
-    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
-    SV_AddSpawner(sim, { -6, 0, -6 }, SIM_FACTORY_TYPE_SEEKER);
-    SV_AddSpawner(sim, { 6, 0, -6 }, SIM_FACTORY_TYPE_SEEKER);
+    SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+    SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
     
     i32 numWanderers = 6;
     for (i32 i = 0; i < numWanderers; ++i)

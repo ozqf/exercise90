@@ -317,7 +317,7 @@ void Sim_Init(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
-    f32 halfX = 20;
+    f32 halfX = 30;
     f32 halfY = 20;
     f32 halfZ = 20;
 
