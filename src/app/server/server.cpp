@@ -68,11 +68,14 @@ void SV_WriteDebugString(ZStringHeader* str)
     if (user)
     {
         AckStream* acks = &user->acks;
+        i32 bytesTotal = User_SumBandwidth(user);
+        i32 kiloBits = (bytesTotal * 8) / 1024;
         written += sprintf_s(
             chars + written,
             str->maxLength - written,
-            "-- Local Client %d --\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
+            "-- Local Client %d --\nBandwidth: %dkBits/s\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
             user->ids.privateId,
+            kiloBits,
             acks->outputSequence,
             acks->remoteSequence,
             user->ping,
@@ -171,13 +174,16 @@ internal void SV_LoadTestScene()
     Sim_LoadScene(sim, 0);
 	
     // Place a test spawner
-    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
-    SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
-    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
-    SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
-    SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
     
-    i32 numWanderers = 6;
+    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
+    SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_WANDERER);
+    
+    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
+    SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+
+    i32 numWanderers = 0;
     for (i32 i = 0; i < numWanderers; ++i)
     {
         SV_AddWanderer();
@@ -309,6 +315,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             SVP_CalculatePriorities(
                 sim, avatar, user->entSync.links, user->entSync.numLinks);
         }
+        user->bandwidthRecords[g_ticks % USER_NUM_BANDWIDTH_RECORDS] = 0;
         // force sending rate
         switch (user->syncRateHertz)
         {
@@ -329,7 +336,9 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 		SV_TickPriorityQueue(
             user->entSync.links,
             user->entSync.numLinks);
-		SV_WriteUserPacket(sim, user, g_elapsed);
+        
+        user->bandwidthRecords[g_ticks % USER_NUM_BANDWIDTH_RECORDS] = 
+            SV_WriteUserPacket(sim, user, g_elapsed);
 	}
 }
 

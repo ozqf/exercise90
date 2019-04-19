@@ -116,9 +116,9 @@ internal i32 SV_WriteReliableSection(
     return (capacity - space);
 }
 
-internal void SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
+// Returns bytes sent
+internal i32 SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
 {
-    #if 1
 	//printf("SV Write packet for user %d\n", user->ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
@@ -163,7 +163,8 @@ internal void SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
     App_SendTo(0, &user->address, buf, total);
-    #endif
+    printf("SV Sent %d bytes\n", total);
+    return total;
 }
 
 

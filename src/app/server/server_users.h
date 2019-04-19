@@ -98,7 +98,7 @@ internal void SVU_RemoveEntityLinkForAllUsers(
     }
 }
 
-internal void SVU_UserStartSync(User* user)
+internal void SVU_StartUserSync(User* user)
 {
     APP_PRINT(128, "SV - Begin sync for user %d\n",
         user->ids.privateId);
@@ -189,6 +189,6 @@ UserIds SVU_CreateLocalUser()
     User* u = SVU_CreateUser(id, &addr);
     u->state = USER_STATE_SYNC;
 	SVU_SpawnUserAvatar(u);
-    SVU_UserStartSync(u);
+    SVU_StartUserSync(u);
     return id;
 }

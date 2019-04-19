@@ -3,6 +3,8 @@
 #include "../common/com_module.h"
 #include "priority_queue.h"
 
+#define USER_NUM_BANDWIDTH_RECORDS 60
+
 #define USER_STATE_FREE 0
 #define USER_STATE_SYNC 1
 #define USER_STATE_OBSERVING 2
@@ -46,6 +48,8 @@ struct User
     // Set properly after all sync messages have been buffered for 
     // transmission.
     u32 userMapLoadCompleteMsgId;
+
+    i32 bandwidthRecords[USER_NUM_BANDWIDTH_RECORDS];
 };
 
 struct UserList
@@ -58,6 +62,16 @@ struct UserList
     // 0 == no local client
     i32 localUserId = 0;
 };
+
+internal i32 User_SumBandwidth(User* u)
+{
+    i32 total = 0;
+    for (i32 i = 0; i < USER_NUM_BANDWIDTH_RECORDS; ++i)
+    {
+        total += u->bandwidthRecords[i];
+    }
+    return total;
+}
 
 internal User* User_GetFree(UserList* users)
 {

@@ -20,10 +20,10 @@ internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 
 // 
-internal i32 g_fakeLagMinMS = 150;
-internal i32 g_fakeLagMaxMS = 200;
+internal i32 g_fakeLagMinMS = 200;
+internal i32 g_fakeLagMaxMS = 300;
 // 0 to 1 values.
-internal f32 g_fakeLoss = 0.1f;
+internal f32 g_fakeLoss = 0.2f;
 
 internal u32 g_lastPlatformFrame = 0;
 
@@ -63,6 +63,7 @@ internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 internal i32 g_debugDrawServerScene = 0;
 internal i32 g_debugDrawServerTests = 0;
 internal i32 g_debugDrawClientPredictions = 1;
+internal i32 g_debugText = 1;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
 
