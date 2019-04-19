@@ -9,7 +9,7 @@ internal void ListPriority(SVEntityLinkArray* list)
 		list->numLinks, list->maxLinks);
     for (i32 i = 0; i < list->numLinks; ++i)
     {
-        printf("%d Link id %d priority %.3f importance: %.3f\n",
+        printf("%d Link id %d priority %d importance: %d\n",
 			i, 
 			list->links[i].id,
 			list->links[i].priority,

@@ -3,6 +3,7 @@
 
 #include "../../common/com_module.h"
 #include "test_priority.h"
+#include "test_introspection.h"
 
 #define TEST_ASSERT(expression, msg) \
 if (!(expression)) { printf("Failed: %s\n", msg##); } \
@@ -227,7 +228,8 @@ void Tests_Run(i32 argc, char* argv[])
     //MatrixBasics();
     //TestRenderMatrices();
     //Test_Priority();
-    Tests_SpreadPattern();
+    //Tests_SpreadPattern();
+    Test_Introspection();
 }
 
 #endif
