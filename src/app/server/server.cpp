@@ -17,6 +17,9 @@ struct SVEntityFrame
 
 #define SV_MAX_MALLOCS 1024
 
+#define SV_PACKET_MAX_BYTES 1400
+#define SV_PACKET_RELIABLE_MAX_BYTES 700
+
 //internal void SVU_EnqueueCommandForAllUsers(
 //    UserList* users, Command* cmd);
 
@@ -289,7 +292,7 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 				{
 					continue;
 				}
-                SV_ReadPacket(packet, g_elapsed);
+                SVP_ReadPacket(packet, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -315,7 +318,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             SVP_CalculatePriorities(
                 sim, avatar, user->entSync.links, user->entSync.numLinks);
         }
-        user->bandwidthRecords[g_ticks % USER_NUM_BANDWIDTH_RECORDS] = 0;
+        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = {};
         // force sending rate
         switch (user->syncRateHertz)
         {
@@ -337,8 +340,8 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             user->entSync.links,
             user->entSync.numLinks);
         
-        user->bandwidthRecords[g_ticks % USER_NUM_BANDWIDTH_RECORDS] = 
-            SV_WriteUserPacket(sim, user, g_elapsed);
+        PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
+        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
 	}
 }
 

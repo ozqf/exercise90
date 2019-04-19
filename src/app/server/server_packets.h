@@ -2,8 +2,8 @@
 
 #include "server.cpp"
 
-internal i32 SV_WriteUnreliableSection(
-    SimScene* sim, User* user, ByteBuffer* packet)
+internal i32 SVP_WriteUnreliableSection(
+    SimScene* sim, User* user, ByteBuffer* packet, PacketStats* stats)
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
@@ -28,7 +28,7 @@ internal i32 SV_WriteUnreliableSection(
         );
     packet->ptrWrite += COM_COPY(
         &response, packet->ptrWrite, response.header.size);
-
+    stats->numUnreliableMessages += 1;
     // ENTITY SYNC
     #if 1
     SVEntityLink* links = user->entSync.links;
@@ -47,6 +47,8 @@ internal i32 SV_WriteUnreliableSection(
         packet->ptrWrite += COM_COPY(
             &cmd, packet->ptrWrite, cmd.header.size);
         link->importance = 0;
+
+        stats->numUnreliableMessages += 1;
     }
     #endif
     #if 0
@@ -76,13 +78,18 @@ internal i32 SV_WriteUnreliableSection(
     #endif
     //APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);
+    stats->unreliableBytes = written;
     //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
     //    syncMessagesWritten, written, capacity);
     return written;
 }
 
-internal i32 SV_WriteReliableSection(
-    User* user, ByteBuffer* packet, i32 capacity, TransmissionRecord* rec)
+internal i32 SVP_WriteReliableSection(
+    User* user,
+    ByteBuffer* packet,
+    i32 capacity,
+    TransmissionRecord* rec,
+    PacketStats* stats)
 {
     i32 space = capacity;
     ByteBuffer* cmds = &user->reliableStream.outputBuffer;
@@ -101,6 +108,7 @@ internal i32 SV_WriteReliableSection(
         
         packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
         space -= size;
+        stats->numReliableMessages += 1;
 		
 		// Record message
 		rec->reliableMessageIds[rec->numReliableMessages++] = cmd->sequence;
@@ -113,23 +121,24 @@ internal i32 SV_WriteReliableSection(
         APP_LOG(128, "SV no space for %d commands to user %d (%d bytes in output)\n",
             numCommandsNotWritten, user->ids.privateId, cmds->Written());
     }
+    stats->numReliableSkipped = numCommandsNotWritten;
     return (capacity - space);
 }
 
-// Returns bytes sent
-internal i32 SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
+// Returns packet statistics
+internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 {
 	//printf("SV Write packet for user %d\n", user->ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
 	
 	// enqueue
 	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
-	
-	const i32 packetSize = 1400;
+	PacketStats stats = {};
+	const i32 packetSize = SV_PACKET_MAX_BYTES;
 	// unreliable may use whatever space is remaining, but
 	// we always want to send *some* unreliable sync info.
 	// so leave some space.
-	const i32 reliableAllocation = 1000;
+	const i32 reliableAllocation = SV_PACKET_RELIABLE_MAX_BYTES;
 	
 	// Record packet transmission for ack
 	u32 packetSequence = user->acks.outputSequence++;
@@ -147,12 +156,14 @@ internal i32 SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
     
-    i32 reliableWritten = SV_WriteReliableSection(user, &packet, reliableAllocation, rec);
+    i32 reliableWritten = SVP_WriteReliableSection(
+        user, &packet, reliableAllocation, rec, &stats);
 	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
 
     // -- write mid-packet deserialise check and unreliable sync data -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
-    i32 unreliableWritten = SV_WriteUnreliableSection(sim, user, &packet);
+    i32 unreliableWritten = SVP_WriteUnreliableSection(
+        sim, user, &packet, &stats);
     //i32 unreliableWritten = 0;
     if (unreliableWritten > 0)
     {
@@ -162,13 +173,16 @@ internal i32 SV_WriteUserPacket(SimScene* sim, User* user, f32 time)
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
+    stats.packetSize = total;
+    stats.reliableBytes = reliableWritten;
+    stats.unreliableBytes = unreliableWritten;
     App_SendTo(0, &user->address, buf, total);
     printf("SV Sent %d bytes\n", total);
-    return total;
+    return stats;
 }
 
 
-internal void SV_WriteTestPacket()
+internal void SVP_WriteTestPacket()
 {
     // Make a packet, no messages just a header
     u8 buf[1400];
@@ -185,7 +199,7 @@ internal void SV_WriteTestPacket()
     App_SendTo(0, &addr, buf, written);
 }
 
-internal void SV_ReadUnreliableSection(User* user, ByteBuffer* b)
+internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
 {
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
@@ -224,7 +238,7 @@ internal void SV_ReadUnreliableSection(User* user, ByteBuffer* b)
     }
 }
 
-internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
+internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
@@ -274,5 +288,5 @@ internal void SV_ReadPacket(SysPacketEvent* ev, f32 time)
     b.ptrWrite = b.ptrStart + p.numUnreliableBytes;
     b.ptrEnd = b.ptrWrite;
     
-    SV_ReadUnreliableSection(user, &b);
+    SVP_ReadUnreliableSection(user, &b);
 }

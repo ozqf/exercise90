@@ -53,16 +53,20 @@ internal void App_DebugInit()
 
 internal void App_WriteDebugStrings()
 {
-    SV_WriteDebugString(&g_serverDebugStr);
-    CL_WriteDebugString(&g_clientDebugStr);
-
     g_debugScene.numObjects = 0;
     // Transform position on screen
     Transform t = {};
-    t.pos.x = -1;
     t.pos.y = 1;
-    RScene_AddRenderItem(&g_debugScene, &t, &g_serverDebugStrRenderer);
-
-    t.pos.x = 0;
-    RScene_AddRenderItem(&g_debugScene, &t, &g_clientDebugStrRenderer);
+    if (g_debugTextServer)
+    {
+        t.pos.x = -1;
+        SV_WriteDebugString(&g_serverDebugStr);
+        RScene_AddRenderItem(&g_debugScene, &t, &g_serverDebugStrRenderer);
+    }
+    if (g_debugTextClient)
+    {
+        t.pos.x = 0;
+        CL_WriteDebugString(&g_clientDebugStr);
+        RScene_AddRenderItem(&g_debugScene, &t, &g_clientDebugStrRenderer);
+    }
 }

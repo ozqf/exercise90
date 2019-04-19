@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../common/com_module.h"
+#include "packet.h"
 #include "priority_queue.h"
 
-#define USER_NUM_BANDWIDTH_RECORDS 60
+#define USER_NUM_PACKET_STATS 60
 
 #define USER_STATE_FREE 0
 #define USER_STATE_SYNC 1
@@ -49,7 +50,7 @@ struct User
     // transmission.
     u32 userMapLoadCompleteMsgId;
 
-    i32 bandwidthRecords[USER_NUM_BANDWIDTH_RECORDS];
+    PacketStats packetStats[USER_NUM_PACKET_STATS];
 };
 
 struct UserList
@@ -66,9 +67,9 @@ struct UserList
 internal i32 User_SumBandwidth(User* u)
 {
     i32 total = 0;
-    for (i32 i = 0; i < USER_NUM_BANDWIDTH_RECORDS; ++i)
+    for (i32 i = 0; i < USER_NUM_PACKET_STATS; ++i)
     {
-        total += u->bandwidthRecords[i];
+        total += u->packetStats[i].packetSize;
     }
     return total;
 }

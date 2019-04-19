@@ -367,10 +367,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     
     g_platform.RenderScene(&g_worldScene);
 
-    if (g_debugText)
-    {
-        App_WriteDebugStrings();
-    }
+    App_WriteDebugStrings();
     
     g_platform.RenderScene(&g_debugScene);
     #endif

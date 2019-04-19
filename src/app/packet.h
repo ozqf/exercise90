@@ -60,6 +60,16 @@ struct PacketHeader
     u16 numUnreliableBytes;
 };
 
+struct PacketStats
+{
+    i32 packetSize;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+};
+
 internal i32 Packet_GetHeaderSize()
 {
     return sizeof(PacketHeader);

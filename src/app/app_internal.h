@@ -63,7 +63,8 @@ internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 internal i32 g_debugDrawServerScene = 0;
 internal i32 g_debugDrawServerTests = 0;
 internal i32 g_debugDrawClientPredictions = 1;
-internal i32 g_debugText = 1;
+internal i32 g_debugTextServer = 1;
+internal i32 g_debugTextClient = 0;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
 
