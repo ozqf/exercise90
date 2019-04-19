@@ -70,6 +70,9 @@ internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 #define SVG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
     SVG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
 
+//////////////////////////////////////////////////////
+// ENEMIES
+//////////////////////////////////////////////////////
 //internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
 SVG_DEFINE_ENT_UPDATE(Wanderer)
 {

@@ -159,8 +159,8 @@ void CL_LoadTestScene()
 {
 	Sim_LoadScene(&g_sim, 0);
 	
-	g_sim.boundaryMin = { -6, -6, -6 };
-    g_sim.boundaryMax = { 6, 6, 6 };
+	//g_sim.boundaryMin = { -6, -6, -6 };
+    //g_sim.boundaryMax = { 6, 6, 6 };
 	
 	// Add local test avatar
 	#if 0
