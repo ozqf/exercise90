@@ -16,6 +16,17 @@ struct TransmissionRecord
 	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
 };
 
+struct StreamStats
+{
+	i32 numPackets;
+	i32 totalBytes;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+};
+
 #define MAX_TRANSMISSION_RECORDS 33
 struct NetStream
 {

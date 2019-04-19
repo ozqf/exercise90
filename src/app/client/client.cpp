@@ -380,6 +380,7 @@ internal i32 CL_ExecReliableCommand(
         case CMD_TYPE_S2C_REMOVE_ENTITY:
         {
             S2C_RemoveEntity* cmd = (S2C_RemoveEntity*)h;
+            CLG_HandleEntityDeath(&g_sim, cmd->entityId);
             Sim_RemoveEntity(sim, cmd->entityId);
             //APP_PRINT(64, "CL Remove Ent %d\n", cmd->entityId);
         } break;

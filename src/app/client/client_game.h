@@ -13,8 +13,34 @@ internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
     Sim_RestoreEntity(sim, &def);
 }
 
+internal void CLG_HandleEntityDeath(SimScene* sim, i32 serial)
+{
+    SimEntity* ent = Sim_GetEntityBySerial(sim, serial);
+    if (!ent) { return; }
+    switch (ent->deathType)
+    {
+        case SIM_DEATH_GFX_EXPLOSION:
+        {
+            SimEntityDef def = {};
+            def.factoryType = SIM_FACTORY_TYPE_EXPLOSION;
+            def.pos = ent->body.t.pos;
+            def.serial = Sim_ReserveEntitySerial(sim, 1);
+            Sim_RestoreEntity(sim, &def);
+        } break;
+    }
+}
+
 #define CLG_DEFINE_ENT_UPDATE(entityTypeName) internal void \
     CLG_Update##entityTypeName##(SimScene* sim, SimEntity* ent, f32 deltaTime)
+
+CLG_DEFINE_ENT_UPDATE(Explosion)
+{
+    ent->lifeTime -= deltaTime;
+    if (ent->lifeTime <= 0)
+    {
+        Sim_RemoveEntity(sim, ent->id.serial);
+    }
+}
 
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
@@ -333,6 +359,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 		case SIM_TICK_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_EXPLOSION: { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         default: { ILLEGAL_CODE_PATH } break;

@@ -88,6 +88,7 @@ struct SimEntity
     f32 attackTime;
 
     SimEntDisplay display;
+    u8 deathType;
 
     u32 flags;
 

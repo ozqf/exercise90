@@ -16,7 +16,7 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_WORLD 1
 #define SIM_FACTORY_TYPE_ACTOR 2
 #define SIM_FACTORY_TYPE_PROJECTILE_BASE 3
-#define SIM_TICK_TYPE_SPAWNER 4
+#define SIM_FACTORY_TYPE_SPAWNER 4
 #define SIM_FACTORY_TYPE_WANDERER 5
 #define SIM_FACTORY_TYPE_LINE_TRACE 6
 #define SIM_FACTORY_TYPE_PROJ_PREDICTION 7
@@ -24,6 +24,7 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_BOUNCER 9
 #define SIM_FACTORY_TYPE_SEEKER 10
 #define SIM_FACTORY_TYPE_RUBBLE 11
+#define SIM_FACTORY_TYPE_EXPLOSION 12
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0
@@ -35,6 +36,8 @@ typedef u8 simFactoryType;
 #define SIM_TICK_TYPE_LINE_TRACE 6
 #define SIM_TICK_TYPE_BOUNCER 7
 #define SIM_TICK_TYPE_SEEKER 9
+#define SIM_TICK_TYPE_EXPLOSION 10
+#define SIM_TICK_TYPE_SPAWN 11
 
 // Spawn pattern types.
 #define SIM_PATTERN_NONE 0
@@ -48,6 +51,9 @@ typedef u8 simFactoryType;
 #define SIM_ENT_FLAG_SHOOTABLE (1 << 0)
 #define SIM_ENT_FLAG_POSITION_SYNC (1 << 1)
 #define SIM_ENT_FLAG_MOVE_AVOID (1 << 2)
+
+#define SIM_DEATH_GFX_NONE 0
+#define SIM_DEATH_GFX_EXPLOSION 1
 
 #include "sim_types.h"
 

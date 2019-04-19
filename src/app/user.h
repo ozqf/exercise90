@@ -2,6 +2,7 @@
 
 #include "../common/com_module.h"
 #include "packet.h"
+#include "stream.h"
 #include "priority_queue.h"
 
 #define USER_NUM_PACKET_STATS 60
@@ -64,14 +65,21 @@ struct UserList
     i32 localUserId = 0;
 };
 
-internal i32 User_SumBandwidth(User* u)
+internal void User_SumPacketStats(User* u, StreamStats* stream)
 {
-    i32 total = 0;
+    *stream = {};
     for (i32 i = 0; i < USER_NUM_PACKET_STATS; ++i)
     {
-        total += u->packetStats[i].packetSize;
+        PacketStats* stats = &u->packetStats[i];
+        if (stats->packetSize == 0){continue;}
+        stream->numPackets++;
+        stream->totalBytes += stats->packetSize;
+        stream->reliableBytes += stats->reliableBytes;
+        stream->unreliableBytes += stats->unreliableBytes;
+        stream->numReliableMessages += stats->numReliableMessages;
+        stream->numReliableSkipped += stats->numReliableSkipped;
+        stream->numUnreliableMessages += stats->numUnreliableMessages;
     }
-    return total;
 }
 
 internal User* User_GetFree(UserList* users)

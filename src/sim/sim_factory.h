@@ -171,6 +171,7 @@ internal i32 Sim_InitWanderer(
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
+    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
 
@@ -183,6 +184,7 @@ internal i32 Sim_InitRubble(
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
+    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
 
@@ -195,6 +197,7 @@ internal i32 Sim_InitBouncer(
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
+    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
 
@@ -209,6 +212,21 @@ internal i32 Sim_InitSeeker(
           SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC
         | SIM_ENT_FLAG_MOVE_AVOID;
+    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
+    return COM_ERROR_NONE;
+}
+
+///////////////////////////////////////////////////////
+// GFX
+///////////////////////////////////////////////////////
+internal i32 Sim_InitExplosion(
+    SimScene* sim, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_SetEntityBase(ent, def);
+    ent->tickType = SIM_TICK_TYPE_EXPLOSION;
+    ent->display.colour = { 1, 1, 0, 1 };
+    ent->lifeTime = 0.5f;
+    ent->body.t.scale = { 2, 1, 2 };
     return COM_ERROR_NONE;
 }
 
@@ -309,6 +327,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitProjPrediction(sim, ent, def); break;
         case SIM_FACTORY_TYPE_PROJ_PLAYER:
             err =  Sim_InitProjTest(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_EXPLOSION:
+            err = Sim_InitExplosion(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;
         case SIM_FACTORY_TYPE_SEEKER:
@@ -321,7 +341,7 @@ internal SimEntity* Sim_SpawnEntity(
             err = Sim_InitRubble(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
-        case SIM_TICK_TYPE_SPAWNER:
+        case SIM_FACTORY_TYPE_SPAWNER:
 			err = Sim_InitSpawner(sim, ent, def); break;
         case SIM_FACTORY_TYPE_LINE_TRACE:
 		    err =  Sim_InitLineTrace(sim, ent, def); break;
@@ -335,7 +355,7 @@ internal SimEntity* Sim_SpawnEntity(
         default:
         {
             printf("SIM Unknown entity type %d\n", def->factoryType);
-            ILLEGAL_CODE_PATH
+            COM_ASSERT(0, "Sim Unknown entity type");
             return NULL;
         } break;
     }

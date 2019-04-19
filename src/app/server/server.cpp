@@ -71,25 +71,47 @@ void SV_WriteDebugString(ZStringHeader* str)
     if (user)
     {
         AckStream* acks = &user->acks;
-        i32 bytesTotal = User_SumBandwidth(user);
-        i32 kiloBits = (bytesTotal * 8) / 1024;
+        
+        // title
         written += sprintf_s(
             chars + written,
             str->maxLength - written,
-            "-- Local Client %d --\nBandwidth: %dkBits/s\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
-            user->ids.privateId,
-            kiloBits,
+            "-- Local Client %d --\n",
+            user->ids.privateId
+		);
+        // Bandwidth
+        StreamStats stats = {};
+        User_SumPacketStats(user, &stats);
+        if (stats.numPackets > 0)
+        {
+            i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
+            i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
+            i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
+            written += sprintf_s(
+                chars + written,
+                str->maxLength - written,
+                "Total: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                kbpsTotal,
+                reliableKbps,
+                unreliableKbps,
+                user->reliableStream.outputBuffer.Written(),
+                stats.numReliableMessages / stats.numPackets,
+                stats.numUnreliableMessages / stats.numPackets,
+                stats.totalBytes / stats.numPackets
+		    );
+        }
+        #if 0
+        // Sequencing/jitter
+        written += sprintf_s(
+            chars + written,
+            str->maxLength - written,
+            "Output seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
             acks->outputSequence,
             acks->remoteSequence,
             user->ping,
 			user->jitter
-		);
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
-            "\tOutbytes: %d\n",
-            user->reliableStream.outputBuffer.Written()
-		);
+        );
+        #endif
         #if 0
 		// currently overflows debug text buffer:
         for (i32 j = 0; j < ACK_CAPACITY; ++j)
@@ -166,7 +188,7 @@ internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
     def.pos = pos;
     def.childFactoryType = factoryType;
-    def.factoryType = SIM_TICK_TYPE_SPAWNER;
+    def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
     def.scale = { 1, 1, 1 };
     Sim_RestoreEntity(&g_sim, &def);
 }
