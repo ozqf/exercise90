@@ -79,8 +79,10 @@ SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
         { continue; }
         if (ent->factoryType != SIM_FACTORY_TYPE_ACTOR)
         { continue; }
+        subject->relationships.targetId = ent->id;
         return ent;
     }
+    subject->relationships.targetId = {};
     return NULL;
 }
 

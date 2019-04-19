@@ -77,22 +77,8 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     {
         if (cmd->networkId == g_avatarSerial)
         {
-            #if 0
-            C2S_Input* input = CL_RecallSentInputCommand(
-                g_sentCommands, cmd->header.tick);
-            
-            if (input == NULL)
-            {
-                printf("CL Sent input for tick %d not found!\n", cmd->header.tick);
-                return 1;
-            }
-            Vec3 pos = ent->body.t.pos;
-            printf("CL Sync avatar tick %d Local: %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n",
-                cmd->header.tick,
-                pos.x, pos.y, pos.z,
-                cmd->pos.x, cmd->pos.y, cmd->pos.z
-                );
-            #endif
+            // Do NOT sync the client's avatar here.
+            // There's a special command for that!
             return 1;
         }
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
@@ -100,11 +86,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         ent->body.t.pos = cmd->pos;
         ent->priority = cmd->priority;
         ent->body.velocity = cmd->vel;
-        if (ent->priority == 0 && ent->factoryType == SIM_FACTORY_TYPE_SEEKER)
-        {
-            printf("CL Priority 0 for seeker\n");
-        }
-        //COM_ASSERT(ent->priority > 0, "CL read priority of 0")
+        ent->relationships.targetId.serial = cmd->targetId;
         executed = 1;
     }
     return executed;
@@ -333,6 +315,7 @@ CLG_DEFINE_ENT_UPDATE(LineTrace)
 //////////////////////////////////////////////////////
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
+    if (!g_tickEnemies) { return; }
     /*
     Vec3* pos = &ent->body.t.pos;
     ent->previousPos.x = pos->x;
@@ -355,28 +338,83 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
+CLG_DEFINE_ENT_UPDATE(Seeker)
+{
+    if (!g_tickEnemies) { return; }
+    i32 targetId = ent->relationships.targetId.serial;
+    if (targetId != 0)
+    {
+        SimEntity* target = Sim_GetEntityBySerial(sim, targetId);
+        if (target != NULL)
+        {
+            Vec3 toTarget = 
+            {
+                target->body.t.pos.x - ent->body.t.pos.x,
+                target->body.t.pos.y - ent->body.t.pos.y,
+                target->body.t.pos.z - ent->body.t.pos.z,
+            };
+            Vec3_Normalise(&toTarget);
+            Vec3 avoid = Sim_BuildAvoidVector(sim, ent);
+            toTarget.x += avoid.x;
+            toTarget.y += avoid.y;
+            toTarget.z += avoid.z;
+            Vec3_Normalise(&toTarget);
+            ent->body.velocity =
+            {
+                toTarget.x * ent->body.speed,
+                toTarget.y * ent->body.speed,
+                toTarget.z * ent->body.speed,
+            };
+        }
+    }
+    Sim_SimpleMove(ent, deltaTime);
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
+}
 
 CLG_DEFINE_ENT_UPDATE(Bouncer)
 {
+    if (!g_tickEnemies) { return; }
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
+}
+
+CLG_DEFINE_ENT_UPDATE(Dart)
+{
+    if (!g_tickEnemies) { return; }
+    Vec3 previousPos = ent->body.t.pos;
+    Sim_SimpleMove(ent, deltaTime);
+    if (!Sim_InBounds(ent, &sim->boundaryMin, &sim->boundaryMax))
+    {
+        ent->body.velocity.x *= -1;
+        ent->body.velocity.y *= -1;
+        ent->body.velocity.z *= -1;
+        ent->body.t.pos = previousPos;
+    }
 }
 
 internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
     switch (ent->tickType)
     {
-        case SIM_TICK_TYPE_PROJECTILE: { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_PROJECTILE:
+        { CLG_UpdateProjectile(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_BOUNCER:
         { CLG_UpdateBouncer(sim, ent, deltaTime); } break;
-        case SIM_TICK_TYPE_SEEKER: { } break;
-		case SIM_TICK_TYPE_WANDERER: { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
-		case SIM_TICK_TYPE_ACTOR: { CLG_UpdateActor(sim, ent, deltaTime); } break;
-        case SIM_TICK_TYPE_LINE_TRACE: { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
-        case SIM_TICK_TYPE_EXPLOSION: { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_SEEKER:
+        { CLG_UpdateSeeker(sim, ent, deltaTime); } break;
+		case SIM_TICK_TYPE_WANDERER:
+        { CLG_UpdateWanderer(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_DART:
+        { CLG_UpdateDart(sim, ent, deltaTime); } break;
+		case SIM_TICK_TYPE_ACTOR:
+        { CLG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_LINE_TRACE:
+        { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_EXPLOSION:
+        { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
-        default: { ILLEGAL_CODE_PATH } break;
+        default: { COM_ASSERT(0, "Client - unknown entity tick type") } break;
     }
 }
 

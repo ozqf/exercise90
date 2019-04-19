@@ -200,13 +200,14 @@ internal void SV_LoadTestScene()
 	
     // Place a test spawner
     
-    //SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
-    SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
+    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    //SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
     SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_WANDERER);
     
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
-    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+    SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
 
     i32 numWanderers = 0;
     for (i32 i = 0; i < numWanderers; ++i)

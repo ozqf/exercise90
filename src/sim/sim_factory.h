@@ -201,6 +201,19 @@ internal i32 Sim_InitBouncer(
     return COM_ERROR_NONE;
 }
 
+internal i32 Sim_InitDart(
+    SimScene* scene, SimEntity* ent, SimEntityDef* def)
+{
+    Sim_SetEntityBase(ent, def);
+    ent->body.speed = 5;
+    ent->tickType = SIM_TICK_TYPE_DART;
+    ent->display.colour = { 1, 0.7f, 0.3f, 1 };
+    ent->flags = SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC;
+    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_InitSeeker(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
@@ -337,6 +350,8 @@ internal SimEntity* Sim_SpawnEntity(
             err =  Sim_InitWanderer(sim, ent, def); break;
         case SIM_FACTORY_TYPE_BOUNCER:
             err =  Sim_InitBouncer(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_DART:
+            err = Sim_InitDart(sim, ent, def); break;
         case SIM_FACTORY_TYPE_RUBBLE:
             err = Sim_InitRubble(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:

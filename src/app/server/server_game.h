@@ -119,19 +119,32 @@ SVG_DEFINE_ENT_UPDATE(Seeker)
             toTarget.y * ent->body.speed,
             toTarget.z * ent->body.speed,
         };
-        Sim_SimpleMove(ent, deltaTime);
-        Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
     }
     else
     {
         ent->body.velocity = { 0, 0, 0 };
     }
+    Sim_SimpleMove(ent, deltaTime);
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
 SVG_DEFINE_ENT_UPDATE(Bouncer)
 {
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
+}
+
+SVG_DEFINE_ENT_UPDATE(Dart)
+{
+    Vec3 previousPos = ent->body.t.pos;
+    Sim_SimpleMove(ent, deltaTime);
+    if (!Sim_InBounds(ent, &sim->boundaryMin, &sim->boundaryMax))
+    {
+        ent->body.velocity.x *= -1;
+        ent->body.velocity.y *= -1;
+        ent->body.velocity.z *= -1;
+        ent->body.t.pos = previousPos;
+    }
 }
 
 //////////////////////////////////////////////////////
@@ -459,6 +472,8 @@ internal void SVG_TickEntity(
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_BOUNCER:
         { SVG_UpdateBouncer(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_DART:
+        { SVG_UpdateDart(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWNER:

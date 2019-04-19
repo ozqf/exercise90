@@ -3,7 +3,7 @@
 #include "../common/com_module.h"
 
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 16
+#define SIM_NET_MAX_PRIORITY 4
 
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1
@@ -24,7 +24,8 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_BOUNCER 9
 #define SIM_FACTORY_TYPE_SEEKER 10
 #define SIM_FACTORY_TYPE_RUBBLE 11
-#define SIM_FACTORY_TYPE_EXPLOSION 12
+#define SIM_FACTORY_TYPE_DART 12
+#define SIM_FACTORY_TYPE_EXPLOSION 13
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0
@@ -36,8 +37,9 @@ typedef u8 simFactoryType;
 #define SIM_TICK_TYPE_LINE_TRACE 6
 #define SIM_TICK_TYPE_BOUNCER 7
 #define SIM_TICK_TYPE_SEEKER 9
-#define SIM_TICK_TYPE_EXPLOSION 10
-#define SIM_TICK_TYPE_SPAWN 11
+#define SIM_TICK_TYPE_DART 10
+#define SIM_TICK_TYPE_EXPLOSION 11
+#define SIM_TICK_TYPE_ENEMY_SPAWN 12
 
 // Spawn pattern types.
 #define SIM_PATTERN_NONE 0

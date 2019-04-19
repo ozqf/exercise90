@@ -174,6 +174,7 @@ struct S2C_EntitySync
 	Vec3 pos;
 	Vec3 rot;
 	Vec3 vel;
+    i32 targetId;
     u8 priority;
 };
 
@@ -190,6 +191,7 @@ internal void Cmd_WriteEntitySync(
 	cmd->pos = ent->body.t.pos;
 	cmd->vel = ent->body.velocity;
     cmd->priority = ent->priority;
+    cmd->targetId = ent->relationships.targetId.serial;
 }
 
 ///////////////////////////////////////////////////////////////////////////

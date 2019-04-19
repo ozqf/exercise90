@@ -44,6 +44,7 @@ internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
 
 internal i32 g_interpolateRenderScene = 0;
+internal i32 g_tickEnemies = 1;
 
 // Menus
 internal i32 g_mainMenuOn;
