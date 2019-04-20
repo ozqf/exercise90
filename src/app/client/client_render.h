@@ -105,10 +105,10 @@ void CL_PopulateRenderScene(
         
 		switch (ent->tickType)
 		{
-            case SIM_TICK_TYPE_WANDERER:
-            case SIM_TICK_TYPE_BOUNCER:
-            case SIM_TICK_TYPE_DART:
-            case SIM_TICK_TYPE_SEEKER:
+            case SIM_FACTORY_TYPE_WANDERER:
+            case SIM_FACTORY_TYPE_BOUNCER:
+            case SIM_FACTORY_TYPE_DART:
+            case SIM_FACTORY_TYPE_SEEKER:
             {
                 //COM_ASSERT(0, "Render Seeker")
 				Colour c = 
@@ -122,7 +122,7 @@ void CL_PopulateRenderScene(
 					&obj, *cube, c, texIndex);
                 
             } break;
-			case SIM_TICK_TYPE_WORLD:
+			case SIM_FACTORY_TYPE_WORLD:
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, { 0.2f, 0.2f, 0.2f, 1 }, texIndex);
@@ -136,13 +136,13 @@ void CL_PopulateRenderScene(
 					&obj, *cube, { 1, 1, 0, 1 }, texIndex);
 			} break;
 			
-			case SIM_TICK_TYPE_ACTOR:
+			case SIM_FACTORY_TYPE_ACTOR:
 			{
 				RendObj_SetAsMesh(
 					&obj, *cube, { 0.2f, 1, 0.2f, 1 }, texIndex);
 			} break;
 
-            case SIM_TICK_TYPE_LINE_TRACE:
+            case SIM_FACTORY_TYPE_LINE_TRACE:
             {
                 Vec3* a = &ent->body.t.pos;
                 Vec3* b = &ent->destination;

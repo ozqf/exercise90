@@ -210,6 +210,22 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
     }
 }
 
+//////////////////////////////////////////////////////
+// Spawner
+//////////////////////////////////////////////////////
+SVG_DEFINE_ENT_UPDATE(Spawn)
+{
+    if (ent->thinkTick <= 0)
+    {
+        ent->tickType = SIM_TICK_TYPE_DART;
+    }
+    else
+    {
+        ent->thinkTick -= deltaTime;
+    }
+    
+}
+
 internal i32 SVG_StepProjectile(
     SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
@@ -484,6 +500,8 @@ internal void SVG_TickEntity(
         { SVG_UpdateSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_SPAWN:
+        { SVG_UpdateSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;

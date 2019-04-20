@@ -206,7 +206,8 @@ internal i32 Sim_InitDart(
 {
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 5;
-    ent->tickType = SIM_TICK_TYPE_DART;
+    ent->tickType = SIM_TICK_TYPE_SPAWN;
+    ent->thinkTick = 2.0f;
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;

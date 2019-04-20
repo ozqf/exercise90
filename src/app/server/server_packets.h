@@ -177,7 +177,6 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     stats.reliableBytes = reliableWritten;
     stats.unreliableBytes = unreliableWritten;
     App_SendTo(0, &user->address, buf, total);
-    printf("SV Sent %d bytes\n", total);
     return stats;
 }
 

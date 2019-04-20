@@ -376,6 +376,7 @@ internal i32 CL_ExecReliableCommand(
             def.factoryType = spawn->factoryType;
 			def.pos = spawn->pos;
 			def.velocity = spawn->vel;
+            def.fastForwardTicks = -tickDiff;
 			Sim_RestoreEntity(sim, &def);
 		} break;
         case CMD_TYPE_S2C_REMOVE_ENTITY:

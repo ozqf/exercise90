@@ -310,6 +310,20 @@ CLG_DEFINE_ENT_UPDATE(LineTrace)
     }
 }
 
+CLG_DEFINE_ENT_UPDATE(Spawn)
+{
+    if (ent->thinkTick <= 0)
+    {
+        ent->tickType = SIM_TICK_TYPE_DART;
+    }
+    else
+    {
+        ent->thinkTick -= deltaTime;
+    }
+    
+}
+
+
 //////////////////////////////////////////////////////
 // ENEMIES
 //////////////////////////////////////////////////////
@@ -408,6 +422,8 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         { CLG_UpdateDart(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR:
         { CLG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_SPAWN:
+        { CLG_UpdateSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:

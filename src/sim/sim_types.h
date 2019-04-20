@@ -76,9 +76,12 @@ struct SimEntity
         i32 totalChildren;
     } relationships;
     
+    // This entity was spawned in the past this many ticks ago
+    // and needs to catch up
 	i32 fastForwardTicks;
     i32 birthTick;
     i32 deathTick;
+    // An abritrary position this entity is moving toward
     Vec3 destination;
 
     // timing
