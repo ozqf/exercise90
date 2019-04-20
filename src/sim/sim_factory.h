@@ -114,7 +114,7 @@ internal i32 Sim_InitActor(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->attackTime = 0.1f;
-    ent->body.speed = 6.0f;
+    ent->body.speed = 5.5f;
     ent->display.colour = { 0, 1, 0, 1 };
     ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -218,7 +218,7 @@ internal i32 Sim_InitSeeker(
     SimScene* scene, SimEntity* ent, SimEntityDef* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 3;
+    ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SEEKER;
     ent->display.colour = { 0, 1, 1, 1 };
     ent->flags =

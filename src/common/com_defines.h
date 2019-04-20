@@ -21,6 +21,9 @@ PRIMITIVE TYPES
 
 #define bool32 uint32_t
 
+#define YES 1
+#define NO 0
+
 static_assert(sizeof(i8) == 1, "Code requires i8 size == 1");
 static_assert(sizeof(u8) == 1, "Code requires u8 size == 1");
 static_assert(sizeof(i16) == 2, "Code requires i16 size == 2");

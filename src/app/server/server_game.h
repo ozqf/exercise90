@@ -4,7 +4,8 @@
 #include <math.h>
 
 // Returns target if found
-internal SimEntity* SVG_FindAndValidateTarget(SimScene* sim, SimEntity* ent)
+internal SimEntity* SVG_FindAndValidateTarget(
+    SimScene* sim, SimEntity* ent)
 {
     /*
     > if no target Id => get a target Id and retrieve Ent
@@ -170,7 +171,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = ent->relationships.childSpawnCount;
         event.patternDef.patternId = SIM_PATTERN_RADIAL;
-        event.patternDef.radius = 10.5f;
+        event.patternDef.radius = 6.0f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
@@ -235,12 +236,15 @@ internal i32 SVG_StepProjectile(
     i32 overlaps = Sim_FindByAABB(
         sim, min, max, ent->id.serial, ents, 16);
     
-    if (overlaps > 0)
+    for (i32 i = 0; i < overlaps; ++i)
     {
-        SimEntity* victim = ents[0];
+        // TODO: For now just hit first valid entity in list
+        SimEntity* victim = ents[i];
+        if (Sim_IsEntTargetable(victim) == NO) { continue; }
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
         SVG_HandleEntityDeath(sim, victim, ent, 0);
         ent->lifeTime = 0;
+        break;
     }
     #if 0
     for (i32 i = 0; i < overlaps; ++i)

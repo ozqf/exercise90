@@ -56,14 +56,29 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     if (p->z > max->z) { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
 }
 
+////////////////////////////////////////////////////////////
+// Targetting and validation
+////////////////////////////////////////////////////////////
+
+// If no then this ent must be ignored by all other entities
 extern "C"
 i32 Sim_IsEntInPlay(SimEntity* ent)
 {
-    return
-    (
-        ent->status == SIM_ENT_STATUS_IN_USE
-        && ent->id.serial != 0
-    );
+    if (ent == NULL) { return NO; }
+    if (ent->id.serial == 0) { return NO; }
+    if (ent->status != SIM_ENT_STATUS_IN_USE) { return NO; }
+    if ((ent->flags & SIM_ENT_FLAG_OUT_OF_PLAY)) { return NO; }
+    return YES;
+}
+
+// If no then this ent cannot be attacked
+extern "C"
+i32 Sim_IsEntTargetable(SimEntity* ent)
+{
+    if (Sim_IsEntInPlay(ent) == NO) { return NO; }
+    if (!(ent->flags & SIM_ENT_FLAG_SHOOTABLE)) { return NO; }
+    if ((ent->flags & SIM_ENT_FLAG_OUT_OF_PLAY)) { return NO; }
+    return YES;
 }
 
 /**
@@ -75,7 +90,7 @@ SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
     for (i32 i = 0; i < sim->maxEnts; ++i)
     {
         SimEntity* ent = &sim->ents[i];
-        if (ent->status != SIM_ENT_STATUS_IN_USE)
+        if (Sim_IsEntInPlay(ent) == NO)
         { continue; }
         if (ent->factoryType != SIM_FACTORY_TYPE_ACTOR)
         { continue; }

@@ -24,7 +24,7 @@ i32 Sim_FindByAABB(
             || ent->id.serial == ignoreSerial)
         { continue; }
         
-        if (!(ent->flags & SIM_ENT_FLAG_SHOOTABLE)) { continue; }
+        if (Sim_IsEntInPlay(ent) == NO) { continue; }
 
         // expand bounds by entity size and
         // then point test

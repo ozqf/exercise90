@@ -105,6 +105,9 @@ void CL_PopulateRenderScene(
         
 		switch (ent->tickType)
 		{
+            case SIM_TICK_TYPE_WANDERER:
+            case SIM_TICK_TYPE_BOUNCER:
+            case SIM_TICK_TYPE_DART:
             case SIM_TICK_TYPE_SEEKER:
             {
                 //COM_ASSERT(0, "Render Seeker")

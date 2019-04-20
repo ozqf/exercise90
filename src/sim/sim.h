@@ -3,7 +3,7 @@
 #include "../common/com_module.h"
 
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 4
+#define SIM_NET_MAX_PRIORITY 16
 
 #define SIM_ENT_STATUS_FREE 0
 #define SIM_ENT_STATUS_RESERVED 1
@@ -50,9 +50,11 @@ typedef u8 simFactoryType;
 #define SIM_PATTERN_CIRCLE 5
 
 // Sim Entity flags
-#define SIM_ENT_FLAG_SHOOTABLE (1 << 0)
-#define SIM_ENT_FLAG_POSITION_SYNC (1 << 1)
-#define SIM_ENT_FLAG_MOVE_AVOID (1 << 2)
+#define SIM_ENT_FLAG_OUT_OF_PLAY (1 << 0)
+#define SIM_ENT_FLAG_SHOOTABLE (1 << 1)
+#define SIM_ENT_FLAG_POSITION_SYNC (1 << 2)
+#define SIM_ENT_FLAG_MOVE_AVOID (1 << 3)
+#define SIM_ENT_FLAG_TARGET_SEEKING (1 << 4)
 
 #define SIM_DEATH_GFX_NONE 0
 #define SIM_DEATH_GFX_EXPLOSION 1
@@ -92,6 +94,7 @@ extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
 // Searching/Querying
 extern "C" i32        Sim_IsEntInPlay(SimEntity* ent);
 extern "C" SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject);
+extern "C" i32        Sim_IsEntTargetable(SimEntity* ent);
 
 extern "C"
 i32 Sim_FindByAABB(
