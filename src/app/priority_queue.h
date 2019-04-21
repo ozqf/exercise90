@@ -12,7 +12,7 @@ Repeat
 default priority is 1. If a type of object requires more synchronisation
 than others, increase its priority value so it accumulates importance faster
 */
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 struct SVEntityLink
 {

@@ -3,7 +3,7 @@
  * Render system public data
  * 
  */
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 #define REND_NUM_TEXTURE_HANDLES 128
 // emdedded textures reserve the higher end of the handles list

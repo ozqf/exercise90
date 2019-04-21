@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 // 2 to the power of N bits - 1:
 #define SIX_BIT_MASK 63

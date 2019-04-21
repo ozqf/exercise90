@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 void COM_PrintBits(i32 val, u8 printNewLine)
 {

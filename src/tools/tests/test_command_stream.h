@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "../../app/commands.h"
 #include "../../app/stream.h"
 #include "../../app/packet.h"

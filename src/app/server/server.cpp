@@ -2,7 +2,7 @@
 #define SERVER_CPP
 
 #include <stdlib.h>
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "server.h"
 #include "../packet.h"
 #include "../../interface/sys_events.h"

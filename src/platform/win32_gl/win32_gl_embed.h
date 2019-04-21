@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 
 internal void Win32_R_InitEmbeddedTextures(RendererPlatform* platform)
 {

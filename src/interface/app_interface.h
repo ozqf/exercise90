@@ -3,7 +3,7 @@
 // App data visible to platform
 //////////////////////////////////////////////////////////////////////
 #include <stdio.h>
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "sys_events.h"
 #include "platform_interface.h"
 

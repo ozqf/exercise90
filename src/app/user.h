@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "packet.h"
 #include "stream.h"
 #include "priority_queue.h"

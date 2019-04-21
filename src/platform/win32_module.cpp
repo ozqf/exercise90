@@ -12,7 +12,7 @@ void Win32_Print(char* msg);
 void Win32_Log(char* msg);
 
 // modules
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "win32_net/win32_net_module.cpp"
 
 void Win32_ExecuteCommandLine(i32 argc, char** argv);

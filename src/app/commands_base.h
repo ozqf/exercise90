@@ -2,7 +2,7 @@
 /*
 Header only - base for command structs.
 */
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "app.h"
 #include "../sim/sim.h"
 

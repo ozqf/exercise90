@@ -3,7 +3,7 @@
 Defines event queue from platform resources
 (input, packets, OS messages etc) to App modules
 */
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 #define SYS_EVENT_SENTINEL 0xDEADBEEF
 #define SYS_EVENT_NULL 0

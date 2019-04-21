@@ -1,7 +1,7 @@
 #ifndef TESTS_MODULE_CPP
 #define TESTS_MODULE_CPP
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "test_priority.h"
 #include "test_introspection.h"
 

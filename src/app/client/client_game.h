@@ -137,14 +137,11 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
     SimEntity* ent = Sim_GetEntityBySerial(
         &g_sim, g_avatarSerial);
     if (!ent) { return; }
+    
     g_latestUserInputAck = cmd->lastUserInputSequence;
     g_latestAvatarPos = cmd->latestAvatarPos;
     i32 framesSinceResponse = g_userInputSequence - cmd->lastUserInputSequence;
-    // this is the input sequence matching the response. Replay will
-    // occur from this point.
     
-    
-    // Restore state if necessary
     if (verbose)
     {
         APP_LOG(128, "CL Replay %d frames (%d to %d)\n",
@@ -154,7 +151,8 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
         );
     }
     
-    // input 
+    // this is the input sequence matching the response. Replay will
+    // occur from this point.
     C2S_Input* sourceInput = CL_RecallSentInputCommand(
         g_sentCommands, cmd->lastUserInputSequence);
     
@@ -164,6 +162,10 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
     
     if (Vec3_AreDifferent(&originalLocalPos, &remotePos, F32_EPSILON))
     {
+        // Server disagrees with our recorded position at this time.
+        // Therefore we must correct.
+        ent->body.t.pos = remotePos;
+        ent->body.previousPos = remotePos;
         if (verbose)
         {
             APP_PRINT(256,
@@ -172,8 +174,6 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
                 remotePos.x, remotePos.y, remotePos.z
             );
         }
-        ent->body.t.pos = remotePos;
-        ent->body.previousPos = remotePos;
     }
     else
     {
@@ -190,7 +190,8 @@ internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
         ent->body.previousPos = originalLocalPos;
     }
 
-    ent->hasBeenPredicted = 1;
+    // Mark that this entity has been moved this frame already
+    //ent->hasBeenPredicted = 1;
     
     // Replay frames
     i32 replaySequence = cmd->lastUserInputSequence;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../com_module.h"
+#include "../common.h"
 
 
 #define BLOCK_HEADER_SIZE sizeof(HeapBlock)

@@ -6,7 +6,7 @@ Very basic meshes/textures embedded in source
 */
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 // .h but should be invisible to other modules
 #include "com_assets/primitive_quad.h"

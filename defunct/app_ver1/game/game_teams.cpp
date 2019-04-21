@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 
 u8 Game_AttackIsValid(i32 attackingTeam, i32 defendingTeam)
 {

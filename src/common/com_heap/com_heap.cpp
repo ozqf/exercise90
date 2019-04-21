@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "../com_module.h"
+#include "../common.h"
 
 #include "com_heap_types.h"
 

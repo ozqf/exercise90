@@ -3,7 +3,7 @@
 #include <gl/gl.h>
 #include <math.h>
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "win32_main.h"
 
 void Win32_DrawScreenSpaceTest1()

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ZQF_COMMON_H
+#define ZQF_COMMON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,3 +30,5 @@
 #include "com_assets/com_perlin.h"
 #include "com_assets/com_textures.h"
 #include "com_debug.h"
+
+#endif // ZQF_COMMON_H

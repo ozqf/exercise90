@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 #define TRANSFORM_CREATE(varName) Transform varName##; \
 Transform_SetToIdentity(&##varName##);

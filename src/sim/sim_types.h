@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 #define ACTOR_INPUT_MOVE_FORWARD (1 << 0)
 #define ACTOR_INPUT_MOVE_BACKWARD (1 << 1)
@@ -111,7 +111,7 @@ struct SimEntity
 	SimActorInput input;
 
     // runtime
-    i32 hasBeenPredicted;
+    //i32 hasBeenPredicted;
 };
 
 struct SimEntityDef

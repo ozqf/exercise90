@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 #define SIM_NET_MIN_PRIORITY 1
 #define SIM_NET_MAX_PRIORITY 16

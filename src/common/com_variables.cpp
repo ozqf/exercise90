@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 Var* COM_GetVar(Var* vars, i32 numVars, char* name)
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 //#include "app_module.h"
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "../interface/platform_interface.h"
 #include "app_textures.h"
 

@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "tests/tests.h"
 
 // #include "../Platform/win32_system_include.h"

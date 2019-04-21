@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 #define NET_CONNECTION_STATE_NONE 0
 #define NET_CONNECTION_STATE_REQUESTING 1

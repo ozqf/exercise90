@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 #define pi32 3.14159265359f
 #define DEG2RAD 3.141593f / 180.0f

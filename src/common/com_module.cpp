@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#include "com_module.h"
+#include "common.h"
 
 // implementations
 #include "com_types.cpp"

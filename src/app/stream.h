@@ -4,7 +4,7 @@
 // Does not do anything related to packets or compression
 // other than store transmission records.
 ///////////////////////////////////////////////////////////
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "commands_base.h"
 
 internal i32 Stream_CountCommands(ByteBuffer* b)

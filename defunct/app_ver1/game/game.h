@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "../Physics/ZPhysics_interface.h"
 
 #include "game_types.h"

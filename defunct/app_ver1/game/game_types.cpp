@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "../app_network_types.h"
 #include "game_entComponentBase.h"
 

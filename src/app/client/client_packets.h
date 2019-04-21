@@ -2,7 +2,7 @@
 /*
 Read/Write packets for client
 */
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "../packet.h"
 #include "../../interface/sys_events.h"
 

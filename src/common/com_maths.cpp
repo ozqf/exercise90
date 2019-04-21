@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 #include <stdlib.h>
 #include <math.h>
 

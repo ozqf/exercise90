@@ -8,7 +8,7 @@ Each ack response contains 33 acks made up of two u32s:
 > 32 bits each representing the highest sequence number minus n, where n is the bit number (0 to 31)
 Records of transmission or reception are stored in rolling arrays
 */
-#include "com_module.h"
+#include "common.h"
 
 #define ACK_CAPACITY 128
 // +1 due to ack number (1) + ackbits (32)

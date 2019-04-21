@@ -6,7 +6,7 @@ Very basic meshes/textures embedded in source
 */
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 // com_internal f32 g_prim_quadVerts[];
 // com_internal f32 g_prim_quadUVs[];

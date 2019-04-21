@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 
 #define COLLISION_LAYER_WORLD (1 << 0)
 #define COLLISION_LAYER_ACTOR (1 << 1)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 // returns 0 if no errors found
 u8 COM_ValidateTextCommandHandler(char* name, i32 minTokens, i32 maxTokens, ZParseTextCommand func)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 i32 COM_ReadTokens(char* source, char* destination, char** tokens)
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 enum ZMouseMode { Free = 0, Captured = 1 };
 

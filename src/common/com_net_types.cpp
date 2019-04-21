@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/com_module.h"
+#include "../common/common.h"
 
 ZNetAddress COM_LocalHost(u16 port)
 {

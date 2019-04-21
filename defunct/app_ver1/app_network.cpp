@@ -6,7 +6,7 @@
  * the client/server command streams that go into/out of the
  * game state
  */
-#include "../common/com_module.h"
+#include "../common/common.h"
 #include "app_network_types.h"
 #include "app_network_stream.cpp"
 

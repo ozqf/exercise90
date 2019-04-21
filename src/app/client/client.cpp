@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "../../common/com_module.h"
+#include "../../common/common.h"
 #include "client.h"
 #include "../../interface/sys_events.h"
 #include "../../interface/renderer_interface.h"

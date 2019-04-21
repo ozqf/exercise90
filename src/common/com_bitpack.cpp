@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_module.h"
+#include "common.h"
 
 u8 COM_IsFlagDifferent(u32 flagsA, u32 flagsB, u32 flag)
 {
