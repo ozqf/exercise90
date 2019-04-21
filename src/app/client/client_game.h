@@ -4,7 +4,7 @@
 
 internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def.factoryType = SIM_FACTORY_TYPE_LINE_TRACE;
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
@@ -21,7 +21,7 @@ internal void CLG_HandleEntityDeath(SimScene* sim, i32 serial)
     {
         case SIM_DEATH_GFX_EXPLOSION:
         {
-            SimEntityDef def = {};
+            SimEntSpawnData def = {};
             def.factoryType = SIM_FACTORY_TYPE_EXPLOSION;
             def.pos = ent->body.t.pos;
             def.serial = Sim_ReserveEntitySerial(sim, 1);

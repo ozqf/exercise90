@@ -3,10 +3,16 @@
 #include "../../common/common.h"
 ||
 
-struct SimEntInstance
+struct SimEntity
 {
     Transform t;
+    i32 lastThink
     i32 nextThink;
+    u8 thinkIndex;
+    i32 activeFlags;
+    i32 typeIndex;
+
+    SimEntityType* ptrType;
 };
 
 struct SimEntityType
@@ -15,7 +21,7 @@ struct SimEntityType
     i32 thinkIndex;
     i32 thinkTime;
 
-    i32 flags;
+    i32 staticFlags;
     Vec3 scale;
 
     Colour colourA;

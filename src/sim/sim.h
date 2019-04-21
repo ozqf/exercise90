@@ -77,7 +77,7 @@ extern "C" SimEntity* Sim_GetEntityByIndex(SimScene* sim, SimEntIndex index);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);
-extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntityDef* def);
+extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntSpawnData* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
 extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
 extern "C" i32      Sim_ExecuteBulkSpawn(

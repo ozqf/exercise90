@@ -60,6 +60,7 @@ struct SimEntity
 
     simFactoryType factoryType;
     i32 tickType;
+    i32 coreTickType;
 
     // Only useful for debugging
     u8 priority;
@@ -114,7 +115,7 @@ struct SimEntity
     //i32 hasBeenPredicted;
 };
 
-struct SimEntityDef
+struct SimEntSpawnData
 {
     i32 serial;
     i32 parentSerial;

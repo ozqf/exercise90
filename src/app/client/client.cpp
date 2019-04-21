@@ -165,7 +165,7 @@ void CL_LoadTestScene()
 	
 	// Add local test avatar
 	#if 0
-	SimEntityDef def = {};
+	SimEntSpawnData def = {};
     def = {};
     def.isLocal = 1;
 	g_avatarSerial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
@@ -370,7 +370,7 @@ internal i32 CL_ExecReliableCommand(
 				spawn->networkId, spawn->pos.x, spawn->pos.y, spawn->pos.z
 			);
 			
-			SimEntityDef def = {};
+			SimEntSpawnData def = {};
 			def.serial = spawn->networkId;
             def.birthTick = h->tick;
             def.factoryType = spawn->factoryType;

@@ -59,7 +59,7 @@ internal void SVG_HandleEntityDeath(
 
 internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def.factoryType = SIM_FACTORY_TYPE_LINE_TRACE;
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;

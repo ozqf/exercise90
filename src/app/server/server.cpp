@@ -167,7 +167,7 @@ u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
 
 internal void SV_AddWanderer()
 {
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def = {};
     def.isLocal = 0;
     def.serial = Sim_ReserveEntitySerial(&g_sim, def.isLocal);
@@ -182,7 +182,7 @@ internal void SV_AddWanderer()
 
 internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
 {
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def = {};
     def.isLocal = 1;
     def.serial = Sim_ReserveEntitySerial(&g_sim, 1);

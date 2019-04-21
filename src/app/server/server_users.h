@@ -169,7 +169,7 @@ internal User* SVU_CreateUser(UserIds ids, ZNetAddress* addr)
 
 internal void SVU_SpawnUserAvatar(User* u)
 {
-	SimEntityDef def = {};
+	SimEntSpawnData def = {};
     def = {};
     //def.isLocal = 1;
 	i32 avatarSerial = Sim_ReserveEntitySerial(&g_sim, 0);

@@ -175,7 +175,7 @@ i32 Sim_ReserveSerialsForProjectiles(
  * (create it if it doesn't exist)
  */
 extern "C"
-SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntityDef* def)
+SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntSpawnData* def)
 {
 	// an id of zero is considered invalid
 	COM_ASSERT(def->serial, "Restoring entity with Serial 0");
@@ -224,7 +224,7 @@ i32 Sim_ExecuteEnemySpawn(
         event->base.firstSerial,
         isLocal);
     
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def.factoryType = event->enemyType;
 
     for (i32 i = 0; i < event->patternDef.numItems; ++i)
@@ -268,7 +268,7 @@ i32 Sim_ExecuteBulkSpawn(
 		//if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
 		//else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
         
-        SimEntityDef entDef = {};
+        SimEntSpawnData entDef = {};
         entDef.factoryType = event->factoryType;
         entDef.serial = item->entSerial;
         entDef.pos = item->pos;
@@ -338,7 +338,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     f32 halfY = 20;
     f32 halfZ = 20;
 
-    SimEntityDef def = {};
+    SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.factoryType = SIM_FACTORY_TYPE_WORLD;
