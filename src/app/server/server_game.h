@@ -217,10 +217,12 @@ SVG_DEFINE_ENT_UPDATE(Spawn)
 {
     if (ent->thinkTick <= 0)
     {
-        ent->tickType = SIM_TICK_TYPE_DART;
+        ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
+        ent->tickType = ent->coreTickType;
     }
     else
     {
+        ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
         ent->thinkTick -= deltaTime;
     }
     

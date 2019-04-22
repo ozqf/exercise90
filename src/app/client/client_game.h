@@ -313,9 +313,13 @@ CLG_DEFINE_ENT_UPDATE(LineTrace)
 
 CLG_DEFINE_ENT_UPDATE(Spawn)
 {
+    if (ent->fastForwardTicks > 0)
+    {
+        printf("CL Fast forward ent by %d!\n", ent->fastForwardTicks);
+    }
     if (ent->thinkTick <= 0)
     {
-        ent->tickType = SIM_TICK_TYPE_DART;
+        ent->tickType = ent->coreTickType;
     }
     else
     {
@@ -444,17 +448,4 @@ internal void CLG_TickGame(SimScene* sim, f32 deltaTime)
 
         CLG_TickEntity(sim, ent, deltaTime);
     }
-}
-
-internal void CLG_HandlePlayerInput(SimEntity* ent, SimActorInput* input)
-{
-    if (input->buttons & ACTOR_INPUT_MOVE_FORWARD)
-    {
-        printf("Move Forward\n");
-    }
-    if (input->buttons & ACTOR_INPUT_MOVE_BACKWARD)
-    {
-        printf("Move Backward\n");
-    }
-    //printf("CL Cam angles: %.1f, %.1f\n", input->degrees.y, input->degrees.x);
 }

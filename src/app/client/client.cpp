@@ -546,7 +546,6 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 
 	// Create and store input to server
 	C2S_Input cmd;
-    //CLG_HandlePlayerInput(NULL, &g_actorInput);
 	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
 	Vec3 pos = {};
 	if (plyr)

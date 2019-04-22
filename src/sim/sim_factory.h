@@ -113,6 +113,7 @@ internal i32 Sim_InitActor(
 {
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
+    ent->coreTickType = SIM_TICK_TYPE_ACTOR;
     ent->attackTime = 0.1f;
     ent->body.speed = 5.5f;
     ent->display.colour = { 0, 1, 0, 1 };
@@ -127,6 +128,7 @@ internal i32 Sim_InitWorldVolume(
     APP_PRINT(256, "SIM Spawning world volume at %.3f, %.3f, %.3f\n",
         def->pos.x, def->pos.y, def->pos.z);
     ent->tickType = SIM_TICK_TYPE_WORLD;
+    ent->coreTickType = SIM_TICK_TYPE_WORLD;
     // world volumes can't move (yet!)
     ent->body.velocity = {};
     ent->display.colour = { 0.2f, 0.2f, 0.2f, 1 };
@@ -139,6 +141,7 @@ internal i32 Sim_InitSpawner(
     i32 count = 128;
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
+    ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
     ent->thinkTime = 2;//1.25f;
 	ent->lifeTime = 10;
     ent->relationships.childSpawnCount = count;
@@ -155,6 +158,7 @@ internal i32 Sim_InitLineTrace(
 	//printf("SIM Create line trace\n");
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_LINE_TRACE;
+    ent->coreTickType = SIM_TICK_TYPE_LINE_TRACE;
 	ent->lifeTime = 1.0f;
     return COM_ERROR_NONE;
 }
@@ -167,7 +171,9 @@ internal i32 Sim_InitWanderer(
 {
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 1;
-    ent->tickType = SIM_TICK_TYPE_WANDERER;
+    ent->tickType = SIM_TICK_TYPE_SPAWN;
+    ent->coreTickType = SIM_TICK_TYPE_WANDERER;
+    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -180,7 +186,9 @@ internal i32 Sim_InitRubble(
 {
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_NONE;
+    ent->tickType = SIM_TICK_TYPE_SPAWN;
+    ent->coreTickType = SIM_TICK_TYPE_NONE;
+    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -193,7 +201,9 @@ internal i32 Sim_InitBouncer(
 {
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_BOUNCER;
+    ent->tickType = SIM_TICK_TYPE_SPAWN;
+    ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
+    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -207,7 +217,8 @@ internal i32 Sim_InitDart(
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 5;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->thinkTick = 1.0f;
+    ent->coreTickType = SIM_TICK_TYPE_DART;
+    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -220,7 +231,9 @@ internal i32 Sim_InitSeeker(
 {
     Sim_SetEntityBase(ent, def);
     ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_SEEKER;
+    ent->tickType = SIM_TICK_TYPE_SPAWN;
+    ent->coreTickType = SIM_TICK_TYPE_SEEKER;
+    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->display.colour = { 0, 1, 1, 1 };
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE
@@ -238,6 +251,7 @@ internal i32 Sim_InitExplosion(
 {
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_EXPLOSION;
+    ent->coreTickType = SIM_TICK_TYPE_EXPLOSION;
     ent->display.colour = { 1, 1, 0, 1 };
     ent->lifeTime = 0.5f;
     ent->body.t.scale = { 2, 1, 2 };

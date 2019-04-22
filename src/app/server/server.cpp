@@ -200,9 +200,11 @@ internal void SV_LoadTestScene()
 	
     // Place a test spawner
     // -10 Z == further away
-    //SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
+
     //SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
-    //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+    SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
     //SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_DART);
     
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
