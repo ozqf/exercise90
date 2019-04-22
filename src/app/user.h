@@ -50,7 +50,7 @@ struct User
     // Set properly after all sync messages have been buffered for 
     // transmission.
     u32 userMapLoadCompleteMsgId;
-
+    StreamStats streamStats;
     PacketStats packetStats[USER_NUM_PACKET_STATS];
 };
 
@@ -65,9 +65,9 @@ struct UserList
     i32 localUserId = 0;
 };
 
-internal void User_SumPacketStats(User* u, StreamStats* stream)
+internal StreamStats* User_SumPacketStats(User* u)
 {
-    *stream = {};
+    StreamStats* stream = &u->streamStats;
     for (i32 i = 0; i < USER_NUM_PACKET_STATS; ++i)
     {
         PacketStats* stats = &u->packetStats[i];
@@ -80,6 +80,7 @@ internal void User_SumPacketStats(User* u, StreamStats* stream)
         stream->numReliableSkipped += stats->numReliableSkipped;
         stream->numUnreliableMessages += stats->numUnreliableMessages;
     }
+    return stream;
 }
 
 internal User* User_GetFree(UserList* users)

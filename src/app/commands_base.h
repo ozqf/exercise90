@@ -21,7 +21,7 @@ struct Command
     // for alignment checking
     i32 sentinel;
     // Type and Size must be set by the implementing command
-    i32 type;
+    u8 type;
     i32 size;
 
     // Controls execution time and order

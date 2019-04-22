@@ -80,13 +80,12 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ids.privateId
 		);
         // Bandwidth
-        StreamStats stats = {};
-        User_SumPacketStats(user, &stats);
-        if (stats.numPackets > 0)
+        StreamStats* stats = User_SumPacketStats(user);
+        if (stats->numPackets > 0)
         {
-            i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
-            i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
-            i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
+            i32 kbpsTotal = (stats->totalBytes * 8) / 1024;
+            i32 reliableKbps = (stats->reliableBytes * 8) / 1024;
+            i32 unreliableKbps = (stats->unreliableBytes * 8) / 1024;
             written += sprintf_s(
                 chars + written,
                 str->maxLength - written,
@@ -95,10 +94,20 @@ void SV_WriteDebugString(ZStringHeader* str)
                 reliableKbps,
                 unreliableKbps,
                 user->reliableStream.outputBuffer.Written(),
-                stats.numReliableMessages / stats.numPackets,
-                stats.numUnreliableMessages / stats.numPackets,
-                stats.totalBytes / stats.numPackets
+                stats->numReliableMessages / stats->numPackets,
+                stats->numUnreliableMessages / stats->numPackets,
+                stats->totalBytes / stats->numPackets
 		    );
+        }
+        for (i32 i = 0; i < 256; ++i)
+        {
+            i32 count = stats->commandCounts[i];
+            if (count == 0) { continue; }
+            written += sprintf_s(
+                chars + written,
+                str->maxLength - written,
+                "\tType %d: %d\n",
+                i, count);
         }
         #if 0
         // Sequencing/jitter
@@ -367,6 +376,11 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
+        // Add up command stats here
+        for (i32 j = 0; j < 256; ++j)
+        {
+            user->streamStats.commandCounts[j] += stats.commandCounts[j];
+        }
 	}
 }
 

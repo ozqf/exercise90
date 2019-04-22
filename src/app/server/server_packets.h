@@ -112,6 +112,7 @@ internal i32 SVP_WriteReliableSection(
 		
 		// Record message
 		rec->reliableMessageIds[rec->numReliableMessages++] = cmd->sequence;
+        stats->commandCounts[cmd->type] += 1;
 		COM_ASSERT(
             rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES,
             "Too many messages in packet to record")

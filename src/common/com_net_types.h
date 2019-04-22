@@ -25,6 +25,8 @@ struct StreamStats
 	i32 numReliableMessages;
 	i32 numReliableSkipped;
 	i32 numUnreliableMessages;
+	
+	i32 commandCounts[256];
 };
 
 #define MAX_TRANSMISSION_RECORDS 33
