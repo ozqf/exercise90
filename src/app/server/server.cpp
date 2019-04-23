@@ -60,8 +60,8 @@ void SV_WriteDebugString(ZStringHeader* str)
     char* chars = str->chars;
     i32 written = 0;
     written += sprintf_s(chars, str->maxLength,
-        "SERVER:\nTick: %d\nElapsed: %.3f\n",
-        g_ticks, g_elapsed
+        "SERVER:\nTick: %d\nElapsed: %.3f\nNext remote ent: %d\n",
+        g_ticks, g_elapsed, g_sim.remoteEntitySequence
     );
     
     // TODO: Just showing local user for now
@@ -80,6 +80,7 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ids.privateId
 		);
         // Bandwidth
+        #if 0
         StreamStats* stats = User_SumPacketStats(user);
         if (stats->numPackets > 0)
         {
@@ -109,6 +110,7 @@ void SV_WriteDebugString(ZStringHeader* str)
                 "\tType %d: %d\n",
                 i, count);
         }
+        #endif
         #if 0
         // Sequencing/jitter
         written += sprintf_s(
@@ -209,11 +211,11 @@ internal void SV_LoadTestScene()
 	
     // Place a test spawner
     // -10 Z == further away
-    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    //SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
 
     //SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
-    SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+    //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
     //SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_DART);
     
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);

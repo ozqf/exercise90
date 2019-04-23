@@ -36,6 +36,13 @@ f32 App_GetSimFrameInterval()
     return (1.0f / g_simFrameRate);
 }
 
+i32 App_CalcTickInterval(f32 seconds)
+{
+    f32 result = seconds / App_GetSimFrameInterval();
+    // round
+    return (i32)(result + 0.5f);
+}
+
 /***************************************
 * Private
 ***************************************/

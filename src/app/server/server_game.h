@@ -175,7 +175,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
-        event.base.tick = g_ticks;
+        event.base.tick = sim->tick;
         event.base.sourceSerial = ent->id.serial;
         i32 flags;
 		Sim_ExecuteBulkSpawn(
@@ -215,7 +215,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 //////////////////////////////////////////////////////
 SVG_DEFINE_ENT_UPDATE(Spawn)
 {
-    if (ent->thinkTick <= 0)
+    if (ent->timing.nextThink >= sim->tick)
     {
         ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
         ent->tickType = ent->coreTickType;
@@ -223,8 +223,19 @@ SVG_DEFINE_ENT_UPDATE(Spawn)
     else
     {
         ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
-        ent->thinkTick -= deltaTime;
+        f32 time = (f32)ent->timing.lastThink / (f32)ent->timing.nextThink;
     }
+    
+    // if (ent->thinkTick <= 0)
+    // {
+    //     ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
+    //     ent->tickType = ent->coreTickType;
+    // }
+    // else
+    // {
+    //     ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
+    //     ent->thinkTick -= deltaTime;
+    // }
     
 }
 
@@ -503,7 +514,8 @@ internal void SVG_TickEntity(
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
-        { SVG_UpdateSpawn(sim, ent, deltaTime); } break;
+        //{ SVG_UpdateSpawn(sim, ent, deltaTime); } break;
+        { Sim_TickSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;
@@ -520,4 +532,5 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 
         SVG_TickEntity(sim, ent, deltaTime);
     }
+    sim->tick++;
 }

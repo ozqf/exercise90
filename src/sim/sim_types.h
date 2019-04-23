@@ -85,6 +85,11 @@ struct SimEntity
     // An abritrary position this entity is moving toward
     Vec3 destination;
 
+    struct
+    {
+        i32 lastThink;
+        i32 nextThink;
+    } timing;
     // timing
     f32 thinkTick;
     f32 thinkTime;
@@ -197,7 +202,7 @@ struct SimScene
     i32 remoteEntitySequence;
     i32 localEntitySequence;
     i32 cmdSequence;
-    u32 tick;
+    i32 tick;
 
     Vec3 boundaryMin;
     Vec3 boundaryMax;

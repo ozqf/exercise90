@@ -313,6 +313,7 @@ CLG_DEFINE_ENT_UPDATE(LineTrace)
 
 CLG_DEFINE_ENT_UPDATE(Spawn)
 {
+    /*
     if (ent->fastForwardTicks > 0)
     {
         printf("CL Fast forward ent by %d!\n", ent->fastForwardTicks);
@@ -325,7 +326,7 @@ CLG_DEFINE_ENT_UPDATE(Spawn)
     {
         ent->thinkTick -= deltaTime;
     }
-    
+    */
 }
 
 
@@ -428,7 +429,8 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 		case SIM_TICK_TYPE_ACTOR:
         { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
-        { CLG_UpdateSpawn(sim, ent, deltaTime); } break;
+        //{ CLG_UpdateSpawn(sim, ent, deltaTime); } break;
+        { Sim_TickSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:
@@ -448,4 +450,5 @@ internal void CLG_TickGame(SimScene* sim, f32 deltaTime)
 
         CLG_TickEntity(sim, ent, deltaTime);
     }
+    sim->tick++;
 }

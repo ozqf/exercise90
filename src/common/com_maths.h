@@ -90,6 +90,11 @@ com_internal f32 COM_STDRandomInRange(f32 min, f32 max);
 com_internal void COM_ClampF32(f32* val, f32 min, f32 max);
 com_internal void COM_ClampI32(i32* val, i32 min, i32 max);
 com_internal f32 COM_LerpF32(f32 start, f32 end, f32 lerp);
+com_internal float COM_LinearEase(
+    f32 currentIteration,
+    f32 startValue,
+    f32 changeInValue,
+    f32 totalIterations);
 com_internal f32 COM_CapAngleDegrees(f32 angle);
 
 /////////////////////////////////////////////////////////////////////////////

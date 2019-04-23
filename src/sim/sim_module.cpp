@@ -11,3 +11,4 @@
 #include "sim_projectiles.h"
 #include "sim_factory.h"
 #include "sim_external.h"
+#include "sim_ticks.h"

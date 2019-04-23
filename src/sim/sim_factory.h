@@ -139,6 +139,7 @@ internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     i32 count = 128;
+    //i32 count = 1;
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
@@ -219,10 +220,17 @@ internal i32 Sim_InitDart(
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_DART;
     ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
+    ent->timing.lastThink = ent->birthTick;
+    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
+    //printf("Spawn dart on tick %d birth %d last %d next %d\n",
+    //    scene->tick,
+    //    ent->birthTick,
+    //    ent->timing.lastThink,
+    //    ent->timing.nextThink);
     return COM_ERROR_NONE;
 }
 

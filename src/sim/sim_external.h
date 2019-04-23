@@ -250,7 +250,7 @@ i32 Sim_ExecuteBulkSpawn(
     COM_ASSERT(event->factoryType, "Bulk spawn factory type is 0")
     //Sim_SpawnProjectiles(sim, event, type, fastForwardTicks);
     i32 isLocal = (event->base.firstSerial < 0);
-
+    
     SimSpawnPatternItem items[255];
     COM_ASSERT(event->patternDef.numItems < 256,
         "Pattern items > 255")
@@ -273,6 +273,7 @@ i32 Sim_ExecuteBulkSpawn(
         entDef.serial = item->entSerial;
         entDef.pos = item->pos;
         entDef.scale = { 1, 1, 1 };
+        entDef.birthTick = sim->tick - fastForwardTicks;
         entDef.fastForwardTicks = fastForwardTicks;
         entDef.parentSerial = event->base.sourceSerial;
         SimEntity* ent = Sim_RestoreEntity(sim, &entDef);

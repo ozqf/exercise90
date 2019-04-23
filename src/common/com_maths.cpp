@@ -24,7 +24,8 @@ com_internal void COM_ClampI32(i32* val, i32 min, i32 max)
 
 com_internal f32 COM_LerpF32(f32 start, f32 end, f32 lerp)
 {
-    return start + lerp * (end - start);
+    //return start + lerp * (end - start);
+    return start + ((end - start) * lerp);
 }
 
 
