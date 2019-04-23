@@ -174,7 +174,8 @@ internal i32 Sim_InitWanderer(
     ent->body.speed = 1;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_WANDERER;
-    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
+    ent->timing.lastThink = ent->birthTick;
+    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -189,7 +190,8 @@ internal i32 Sim_InitRubble(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_NONE;
-    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
+    ent->timing.lastThink = ent->birthTick;
+    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -204,7 +206,8 @@ internal i32 Sim_InitBouncer(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
-    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
+    ent->timing.lastThink = ent->birthTick;
+    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -219,7 +222,6 @@ internal i32 Sim_InitDart(
     ent->body.speed = 5;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_DART;
-    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
     ent->timing.lastThink = ent->birthTick;
     ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
@@ -241,7 +243,8 @@ internal i32 Sim_InitSeeker(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_SEEKER;
-    ent->thinkTick = SIM_DEFAULT_SPAWN_DELAY;
+    ent->timing.lastThink = ent->birthTick;
+    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0, 1, 1, 1 };
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE

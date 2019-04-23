@@ -91,7 +91,7 @@ struct SimEntity
         i32 nextThink;
     } timing;
     // timing
-    f32 thinkTick;
+    //f32 thinkTick;
     f32 thinkTime;
 	f32 lifeTime;
     f32 attackTick;

@@ -77,22 +77,18 @@ internal void SVG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 //internal void SVG_UpdateWanderer(SimScene* sim, SimEntity* ent, f32 deltaTime)
 SVG_DEFINE_ENT_UPDATE(Wanderer)
 {
-    if (ent->thinkTick <= 0)
+    if (ent->timing.nextThink >= sim->tick)
     {
-        ent->thinkTick += ent->thinkTime;
-        // random range of seconds between thinks
-        ent->thinkTime = COM_STDRandomInRange(1, 4);
-        // set a random movement vector
+        ent->timing.lastThink = ent->timing.nextThink;
+        
+        ent->timing.nextThink += (i32)COM_STDRandomInRange(
+            (f32)App_CalcTickInterval(1),
+            (f32)App_CalcTickInterval(6)
+        );
         f32 radians = COM_STDRandomInRange(0, 360) * DEG2RAD;
         ent->body.velocity.x = cosf(radians) * ent->body.speed;
         ent->body.velocity.z = sinf(radians) * ent->body.speed;
-        //printf("SV Wanderer move: %.3f, %.3f\n", ent->velocity.x, ent->velocity.z);
     }
-    else
-    {
-        ent->thinkTick -= deltaTime;
-    }
-    
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
@@ -158,9 +154,10 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
     if (spawnSpaces < ent->relationships.childSpawnCount)
     { return; }
 
-    if (ent->thinkTick <= 0.0f)
+    if (sim->tick >= ent->timing.nextThink)
     {
-        ent->thinkTick += ent->thinkTime;
+        ent->timing.lastThink = ent->timing.nextThink;
+        ent->timing.nextThink += App_CalcTickInterval(2);
         // think
         // Spawn projectiles
         #if 1
@@ -203,10 +200,6 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.pos = ent->body.t.pos;
         event.base.forward = ent->body.t.pos;
         #endif
-    }
-    else
-    {
-        ent->thinkTick -= deltaTime;
     }
 }
 
