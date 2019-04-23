@@ -94,7 +94,7 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 internal void Sim_SetEntityBase(
     SimEntity* ent, SimEntSpawnData* def)
 {
-    ent->birthTick = def->birthTick;
+    ent->timing.birthTick = def->birthTick;
     ent->body.t.pos = def->pos;
     ent->body.previousPos = def->pos;
     ent->destination = def->destination;
@@ -143,8 +143,6 @@ internal i32 Sim_InitSpawner(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
-    ent->thinkTime = 2;//1.25f;
-	ent->lifeTime = 10;
     ent->relationships.childSpawnCount = count;
     ent->relationships.maxLiveChildren = count;
     ent->relationships.totalChildren = count;
@@ -160,7 +158,7 @@ internal i32 Sim_InitLineTrace(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_LINE_TRACE;
     ent->coreTickType = SIM_TICK_TYPE_LINE_TRACE;
-	ent->lifeTime = 1.0f;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(2);
     return COM_ERROR_NONE;
 }
 
@@ -174,8 +172,8 @@ internal i32 Sim_InitWanderer(
     ent->body.speed = 1;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_WANDERER;
-    ent->timing.lastThink = ent->birthTick;
-    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
+    ent->timing.lastThink = ent->timing.birthTick;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -190,8 +188,8 @@ internal i32 Sim_InitRubble(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_NONE;
-    ent->timing.lastThink = ent->birthTick;
-    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
+    ent->timing.lastThink = ent->timing.birthTick;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -206,8 +204,8 @@ internal i32 Sim_InitBouncer(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
-    ent->timing.lastThink = ent->birthTick;
-    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
+    ent->timing.lastThink = ent->timing.birthTick;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -222,8 +220,8 @@ internal i32 Sim_InitDart(
     ent->body.speed = 5;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_DART;
-    ent->timing.lastThink = ent->birthTick;
-    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
+    ent->timing.lastThink = ent->timing.birthTick;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -243,8 +241,8 @@ internal i32 Sim_InitSeeker(
     ent->body.speed = 4;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_SEEKER;
-    ent->timing.lastThink = ent->birthTick;
-    ent->timing.nextThink = ent->birthTick + App_CalcTickInterval(1.5f);
+    ent->timing.lastThink = ent->timing.birthTick;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0, 1, 1, 1 };
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE
@@ -264,7 +262,7 @@ internal i32 Sim_InitExplosion(
     ent->tickType = SIM_TICK_TYPE_EXPLOSION;
     ent->coreTickType = SIM_TICK_TYPE_EXPLOSION;
     ent->display.colour = { 1, 1, 0, 1 };
-    ent->lifeTime = 0.5f;
+    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(0.5f);
     ent->body.t.scale = { 2, 1, 2 };
     return COM_ERROR_NONE;
 }
@@ -281,6 +279,9 @@ internal i32 Sim_InitProjBase(
     t.lifeTime = 2.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
     t.scale = { 1, 1, 1 };
+
+    // must set birth tick here
+    ent->timing.birthTick = def->birthTick;
 
     Sim_InitProjectile(
         ent,
@@ -302,6 +303,9 @@ internal i32 Sim_InitProjPrediction(
     t.patternDef.patternId = SIM_PATTERN_NONE;
     t.scale = { 0.5f, 0.5f, 0.5f };
 
+    // must set birth tick here
+    ent->timing.birthTick = def->birthTick;
+
     Sim_InitProjectile(
         ent,
         &def->pos,
@@ -321,6 +325,9 @@ internal i32 Sim_InitProjTest(
     t.lifeTime = 6.0f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
     t.scale = { 1, 1, 1 };
+
+    // must set birth tick here
+    ent->timing.birthTick = def->birthTick;
 
     Sim_InitProjectile(
         ent,

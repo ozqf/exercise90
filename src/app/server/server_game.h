@@ -265,23 +265,11 @@ internal i32 SVG_StepProjectile(
         if (Sim_IsEntTargetable(victim) == NO) { continue; }
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
         SVG_HandleEntityDeath(sim, victim, ent, 0);
-        ent->lifeTime = 0;
+        ent->timing.nextThink = sim->tick;
         break;
     }
-    #if 0
-    for (i32 i = 0; i < overlaps; ++i)
-    {
-        SimEntity* victim = ents[i];
-		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
-        SVG_HandleEntityDeath(sim, victim, ent, 0);
-        ent->lifeTime = 0;
-
-        // TODO Checks for mitigate, health etc.
-        break;
-    }
-    #endif
-	ent->lifeTime -= deltaTime;
-	if (ent->lifeTime < 0)
+    
+	if (sim->tick >= ent->timing.nextThink)
 	{
         SVG_HandleEntityDeath(sim, ent, NULL, 0);
         return 0;
@@ -291,9 +279,9 @@ internal i32 SVG_StepProjectile(
 
 SVG_DEFINE_ENT_UPDATE(Projectile)
 {
-    while(ent->fastForwardTicks > 0)
+    while(ent->timing.fastForwardTicks > 0)
     {
-        ent->fastForwardTicks--;
+        ent->timing.fastForwardTicks--;
         if (!SVG_StepProjectile(sim, ent, deltaTime))
         {
             return;
@@ -421,8 +409,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 
 SVG_DEFINE_ENT_UPDATE(LineTrace)
 {
-    ent->lifeTime -= deltaTime;
-    if (ent->lifeTime <= 0)
+    if (sim->tick >= ent->timing.nextThink)
     {
         Sim_RemoveEntity(sim, ent->id.serial);
     }

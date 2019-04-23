@@ -25,8 +25,9 @@ internal void Sim_InitProjectile(
     ent->body.velocity = *velocity;
     ent->body.speed = type->speed;
 
-    ent->lifeTime = type->lifeTime;
-	ent->fastForwardTicks = fastForwardTicks;
+    ent->timing.nextThink = ent->timing.birthTick +
+        App_CalcTickInterval(type->lifeTime);
+	ent->timing.fastForwardTicks = fastForwardTicks;
 }
 #if 0
 /*

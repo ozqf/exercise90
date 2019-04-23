@@ -23,6 +23,7 @@ internal void CLG_HandleEntityDeath(SimScene* sim, i32 serial)
         {
             SimEntSpawnData def = {};
             def.factoryType = SIM_FACTORY_TYPE_EXPLOSION;
+            def.birthTick = sim->tick;
             def.pos = ent->body.t.pos;
             def.serial = Sim_ReserveEntitySerial(sim, 1);
             Sim_RestoreEntity(sim, &def);
@@ -35,8 +36,7 @@ internal void CLG_HandleEntityDeath(SimScene* sim, i32 serial)
 
 CLG_DEFINE_ENT_UPDATE(Explosion)
 {
-    ent->lifeTime -= deltaTime;
-    if (ent->lifeTime <= 0)
+    if (sim->tick >= ent->timing.nextThink)
     {
         Sim_RemoveEntity(sim, ent->id.serial);
     }
@@ -44,16 +44,16 @@ CLG_DEFINE_ENT_UPDATE(Explosion)
 
 CLG_DEFINE_ENT_UPDATE(Projectile)
 {
-	i32 numSteps = 1 + ent->fastForwardTicks;
-    ent->fastForwardTicks = 0;
+	i32 numSteps = 1 + ent->timing.fastForwardTicks;
+    ent->timing.fastForwardTicks = 0;
     //APP_LOG(64, "CL Prj %d steps: %d\n", ent->id.serial, numSteps);
 	if (numSteps < 1) { numSteps = 1; }
 	while (numSteps)
 	{
 		numSteps--;
 		Sim_SimpleMove(ent, deltaTime);
-		ent->lifeTime -= deltaTime;
-		if (ent->lifeTime < 0)
+        
+		if (sim->tick >= ent->timing.nextThink)
 		{
 			Sim_RemoveEntity(sim, ent->id.serial);
 			return;
@@ -304,8 +304,7 @@ CLG_DEFINE_ENT_UPDATE(Actor)
 
 CLG_DEFINE_ENT_UPDATE(LineTrace)
 {
-    ent->lifeTime -= deltaTime;
-    if (ent->lifeTime <= 0)
+    if (sim->tick >= ent->timing.nextThink)
     {
         Sim_RemoveEntity(sim, ent->id.serial);
     }

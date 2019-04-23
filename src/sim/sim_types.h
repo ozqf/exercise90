@@ -62,9 +62,6 @@ struct SimEntity
     i32 tickType;
     i32 coreTickType;
 
-    // Only useful for debugging
-    u8 priority;
-
     struct 
     {
         // TODO: For the client only the serial of targetid is safe. Slot is not!
@@ -77,11 +74,6 @@ struct SimEntity
         i32 totalChildren;
     } relationships;
     
-    // This entity was spawned in the past this many ticks ago
-    // and needs to catch up
-	i32 fastForwardTicks;
-    i32 birthTick;
-    i32 deathTick;
     // An abritrary position this entity is moving toward
     Vec3 destination;
 
@@ -89,11 +81,13 @@ struct SimEntity
     {
         i32 lastThink;
         i32 nextThink;
+
+        i32 birthTick;
+        // This entity was spawned in the past this many ticks ago
+        // and needs to catch up
+	    i32 fastForwardTicks;
     } timing;
-    // timing
-    //f32 thinkTick;
-    f32 thinkTime;
-	f32 lifeTime;
+
     f32 attackTick;
     f32 attackTime;
 
@@ -116,8 +110,8 @@ struct SimEntity
     
 	SimActorInput input;
 
-    // runtime
-    //i32 hasBeenPredicted;
+    // Only useful for debugging
+    u8 priority;
 };
 
 struct SimEntSpawnData
