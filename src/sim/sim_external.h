@@ -5,7 +5,8 @@ sim.h implementation
 #include "sim.h"
 
 extern "C"
-i32 Sim_CalcEntityArrayBytes(i32 capacity) { return (sizeof(SimEntity) * capacity); }
+i32 Sim_CalcEntityArrayBytes(i32 capacity)
+{ return (sizeof(SimEntity) * capacity); }
 
 extern "C"
 i32 Sim_GetFrameNumber(SimScene* sim){ return sim->tick; }
@@ -33,27 +34,33 @@ extern "C"
 i32 Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->body.t.pos;
-    if (p->x < min->x) { return 0; }
-    if (p->x > max->x) { return 0; }
-    if (p->y < min->y) { return 0; }
-    if (p->y > max->y) { return 0; }
-    if (p->z < min->z) { return 0; }
-    if (p->z > max->z) { return 0; }
-    return 1;
+    if (p->x < min->x) { return NO; }
+    if (p->x > max->x) { return NO; }
+    if (p->y < min->y) { return NO; }
+    if (p->y > max->y) { return NO; }
+    if (p->z < min->z) { return NO; }
+    if (p->z > max->z) { return NO; }
+    return YES;
 }
 
 extern "C"
 void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
 {
     Vec3* p = &ent->body.t.pos;
-    if (p->x < min->x) { p->x = min->x; ent->body.velocity.x = -ent->body.velocity.x; }
-    if (p->x > max->x) { p->x = max->x; ent->body.velocity.x = -ent->body.velocity.x; }
+    if (p->x < min->x)
+    { p->x = min->x; ent->body.velocity.x = -ent->body.velocity.x; }
+    if (p->x > max->x)
+    { p->x = max->x; ent->body.velocity.x = -ent->body.velocity.x; }
 
-    if (p->y < min->y) { p->y = min->y; ent->body.velocity.y = -ent->body.velocity.y; }
-    if (p->y > max->y) { p->y = max->y; ent->body.velocity.y = -ent->body.velocity.y; }
+    if (p->y < min->y)
+    { p->y = min->y; ent->body.velocity.y = -ent->body.velocity.y; }
+    if (p->y > max->y)
+    { p->y = max->y; ent->body.velocity.y = -ent->body.velocity.y; }
 
-    if (p->z < min->z) { p->z = min->z; ent->body.velocity.z = -ent->body.velocity.z; }
-    if (p->z > max->z) { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
+    if (p->z < min->z)
+    { p->z = min->z; ent->body.velocity.z = -ent->body.velocity.z; }
+    if (p->z > max->z)
+    { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
 }
 
 ////////////////////////////////////////////////////////////
@@ -75,10 +82,8 @@ i32 Sim_IsEntInPlay(SimEntity* ent)
 extern "C"
 i32 Sim_IsEntTargetable(SimEntity* ent)
 {
-    if (Sim_IsEntInPlay(ent) == NO) { return NO; }
     if (!(ent->flags & SIM_ENT_FLAG_SHOOTABLE)) { return NO; }
-    if ((ent->flags & SIM_ENT_FLAG_OUT_OF_PLAY)) { return NO; }
-    return YES;
+    return Sim_IsEntInPlay(ent);
 }
 
 /**
@@ -161,15 +166,7 @@ i32 Sim_ReserveEntitySerials(
     }
     return first;
 }
-/*
-extern "C"
-i32 Sim_ReserveSerialsForProjectiles(
-    SimScene* sim, i32 isLocal, i32 projectileSpawnTime)
-{
-    i32 count = Sim_GetProjectileCount(projectileSpawnTime);
-    return Sim_ReserveEntitySerials(sim, isLocal, count);
-}
-*/
+
 /**
  * Restore the exact state of a single entity
  * (create it if it doesn't exist)
@@ -209,38 +206,7 @@ i32 Sim_SetActorInput(
     ent->input = *input;
     return COM_ERROR_NONE;
 }
-#if 0
-extern "C"
-i32 Sim_ExecuteEnemySpawn(
-    SimScene* sim,
-    SimEnemySpawnEvent* event,
-	i32 fastForwardTicks)
-{
-    i32 isLocal = (event->base.firstSerial < 0);
 
-    SimSpawnPatternItem items[64];
-    i32 count = Sim_CreateSpawnPattern(
-        &event->base,
-        &event->patternDef,
-        items,
-        event->base.firstSerial,
-        isLocal);
-    
-    SimEntSpawnData def = {};
-    def.factoryType = event->enemyType;
-
-    for (i32 i = 0; i < event->patternDef.numItems; ++i)
-    {
-        SimSpawnPatternItem* item = &items[i];
-        def.serial = item->entSerial;
-        def.pos = items->pos;
-        Sim_RestoreEntity(sim, &def);
-    }
-    
-    return COM_ERROR_NONE;
-}
-#endif
-#if 1
 extern "C"
 i32 Sim_ExecuteBulkSpawn(
     SimScene* sim,
@@ -248,9 +214,7 @@ i32 Sim_ExecuteBulkSpawn(
 	i32 fastForwardTicks,
     i32* spawnedEntityFlags)
 {
-    //SimProjectileType* type = Sim_GetProjectileType(event->projType);
     COM_ASSERT(event->factoryType, "Bulk spawn factory type is 0")
-    //Sim_SpawnProjectiles(sim, event, type, fastForwardTicks);
     i32 isLocal = (event->base.firstSerial < 0);
     
     SimSpawnPatternItem items[255];
@@ -266,10 +230,7 @@ i32 Sim_ExecuteBulkSpawn(
     for (i32 i = 0; i < count; ++i)
     {
         SimSpawnPatternItem* item = &items[i];
-		//SimEntity* ent;
-		//if (isLocal) { ent = Sim_GetFreeLocalEntity(sim, item->entSerial); }
-		//else { ent = Sim_GetFreeReplicatedEntity(sim, item->entSerial); }
-        
+		
         SimEntSpawnData entDef = {};
         entDef.factoryType = event->factoryType;
         entDef.serial = item->entSerial;
@@ -280,32 +241,19 @@ i32 Sim_ExecuteBulkSpawn(
         entDef.parentSerial = event->base.sourceSerial;
         SimEntity* ent = Sim_RestoreEntity(sim, &entDef);
         
-        // TODO: Hack to find out whether we need to do priority queue syncing of this entity
-        *spawnedEntityFlags = ent->flags;
-
         ent->body.velocity.x = item->forward.x * ent->body.speed;
         ent->body.velocity.y = item->forward.y * ent->body.speed;
         ent->body.velocity.z = item->forward.z * ent->body.speed;
-
-        #if 0
-        Vec3 v = {};
-        v.x = item->forward.x * type->speed;
-        v.y = item->forward.y * type->speed;
-        v.z = item->forward.z * type->speed;
         
-		Sim_InitProjectile(
-            ent,
-            &item->pos,
-            &v,
-            type,
-            fastForwardTicks
-        );
-        #endif
+        // TODO: Hack! Find Better way to return new entity info
+        // The caller needs to know whether or not to track these
+        // entities for priority queue sync.
+        *spawnedEntityFlags = ent->flags;
     }
 
     return COM_ERROR_NONE;
 }
-#endif
+
 extern "C"
 void Sim_Reset(SimScene* sim)
 {
@@ -318,7 +266,6 @@ void Sim_Reset(SimScene* sim)
 	// replicated entity, oh well
 	sim->remoteEntitySequence = 1;
 	sim->localEntitySequence = -1;
-    //Sim_InitProjectileTypes();
 }
 
 extern "C"

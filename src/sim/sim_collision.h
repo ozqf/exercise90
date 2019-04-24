@@ -157,8 +157,5 @@ Vec3 Sim_BuildAvoidVector(
         result.y += diff.y;
         result.z += diff.z;
     }
-    //result.x /= numOverlaps;
-    //result.y /= numOverlaps;
-    //result.z /= numOverlaps;
     return result;
 }

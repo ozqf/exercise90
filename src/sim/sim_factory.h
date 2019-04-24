@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+> Manages SimEntity pool
+> Performs new entity configuration
+*/
 #include "sim.h"
 
 ////////////////////////////////////////////////////////////////////
@@ -146,8 +150,11 @@ internal i32 Sim_InitSpawner(
     ent->relationships.childSpawnCount = count;
     ent->relationships.maxLiveChildren = count;
     ent->relationships.totalChildren = count;
-    printf("Spawned Spawner, Ticktype %d Vel %.3f, %.3f, %.3f\n",
-        ent->tickType, ent->body.velocity.x, ent->body.velocity.y, ent->body.velocity.z);
+    //printf("Spawned Spawner, Ticktype %d Vel %.3f, %.3f, %.3f\n",
+    //    ent->tickType,
+    //    ent->body.velocity.x,
+    //    ent->body.velocity.y,
+    //    ent->body.velocity.z);
     return COM_ERROR_NONE;
 }
 

@@ -3,7 +3,7 @@
 #include "../common/common.h"
 
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 16
+#define SIM_NET_MAX_PRIORITY 8
 
 #define SIM_DEFAULT_SPAWN_DELAY 1.5
 
@@ -83,7 +83,8 @@ extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);
 extern "C" SimEntity* Sim_RestoreEntity(SimScene* sim, SimEntSpawnData* def);
 extern "C" i32      Sim_RemoveEntity(SimScene* sim, i32 serialNumber);
-extern "C" i32      Sim_SetActorInput(SimScene* sim, SimActorInput* input, i32 entitySerial);
+extern "C" i32      Sim_SetActorInput(
+    SimScene* sim, SimActorInput* input, i32 entitySerial);
 extern "C" i32      Sim_ExecuteBulkSpawn(
                         SimScene* sim,
                         SimBulkSpawnEvent* def,

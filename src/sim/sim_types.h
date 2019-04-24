@@ -64,7 +64,8 @@ struct SimEntity
 
     struct 
     {
-        // TODO: For the client only the serial of targetid is safe. Slot is not!
+        // TODO: For the client only the serial of targetid is safe.
+        // Slot is not!!
         SimEntId targetId;  // current enemy
         SimEntId parentId;  // Who spawned this entity
         simFactoryType childFactoryType;

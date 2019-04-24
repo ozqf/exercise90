@@ -76,7 +76,6 @@ internal i32 Sim_CreateSpreadPattern(
 	i32 isLocal)
 {
 	i32 serialIncrement = isLocal ? -1 : 1;
-	#if 1
 	f32 forwardRadians = atan2f(event->forward.z, event->forward.x);
 	
 	if (def->numItems == 1)
@@ -115,42 +114,6 @@ internal i32 Sim_CreateSpreadPattern(
         radians += step;
 		serial += serialIncrement;
     }
-	#endif
-	#if 0
-	f32 radians = 0;
-	i32 randomIndex = event->seedIndex;
-	i32 i = 0;
-	if (def->numItems % 2 != 0)
-	{
-		// Odd number spread, one pellet goes dead centre
-		items[i].pos.x = event->pos.x;
-		items[i].pos.y = event->pos.y;
-		items[i].pos.z = event->pos.z;
-		items[i].forward.x = event->forward.x;
-		items[i].forward.y = 0;
-		items[i].forward.z = event->forward.z;
-		items[i].entSerial = serial;
-		serial += serialIncrement;
-		i++;
-	}
-	f32 forwardRadians = 0;//atan2f(event->forward.z, event->forward.x);
-	// step 1 / (5 + 1) = 
-	f32 step = def->radius / (def->numItems + 1);
-	radians = forwardRadians - (def->radius / 2);
-	for(; i < def->numItems; ++i)
-	{
-		items[i].pos.x = event->pos.x;
-		items[i].pos.y = event->pos.y;
-		items[i].pos.z = event->pos.z;
-		items[i].forward.x = cosf(radians);
-		items[i].forward.y = 0;
-		items[i].forward.z = sinf(radians);
-		items[i].entSerial = serial;
-
-		serial += serialIncrement;
-		radians += step;
-	}
-	#endif
 	return def->numItems;
 }
 
