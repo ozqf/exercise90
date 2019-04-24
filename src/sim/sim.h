@@ -11,6 +11,8 @@
 #define SIM_ENT_STATUS_RESERVED 1
 #define SIM_ENT_STATUS_IN_USE 2
 
+#define SIM_ENT_NULL_SERIAL 0
+
 // Spawn functions
 typedef u8 simFactoryType;
 

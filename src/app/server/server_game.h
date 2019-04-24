@@ -10,10 +10,10 @@ internal SimEntity* SVG_FindAndValidateTarget(
     /*
     > if no target Id => get a target Id and retrieve Ent
     > if target Id => retrieve Ent
-    > Validate Target Ent.
+    > Validate Target Ent. 
     */
    SimEntity* target = NULL;
-   if (ent->relationships.targetId.serial == 0)
+   if (ent->relationships.targetId.serial == SIM_ENT_NULL_SERIAL)
    {
        // Try to find a new target
        target = Sim_FindTargetForEnt(sim, ent);
@@ -26,7 +26,7 @@ internal SimEntity* SVG_FindAndValidateTarget(
        // Check current target and clear if invalidated
        target = Sim_GetEntityByIndex(sim, ent->relationships.targetId.slot);
        // check target is still okay
-       if (target == NULL || !Sim_IsEntInPlay(target))
+       if (Sim_IsEntInPlay(target) == NO)
        {
            ent->relationships.targetId = {};
            return NULL;

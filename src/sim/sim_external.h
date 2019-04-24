@@ -65,7 +65,7 @@ extern "C"
 i32 Sim_IsEntInPlay(SimEntity* ent)
 {
     if (ent == NULL) { return NO; }
-    if (ent->id.serial == 0) { return NO; }
+    if (ent->id.serial == SIM_ENT_NULL_SERIAL) { return NO; }
     if (ent->status != SIM_ENT_STATUS_IN_USE) { return NO; }
     if ((ent->flags & SIM_ENT_FLAG_OUT_OF_PLAY)) { return NO; }
     return YES;
@@ -104,7 +104,7 @@ SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
 extern "C"
 SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial)
 {
-    if (serial == 0) { return NULL; }
+    if (serial == SIM_ENT_NULL_SERIAL) { return NULL; }
     for (i32 i = 0; i < sim->maxEnts; ++i)
     {
         SimEntity* ent = &sim->ents[i];
@@ -178,7 +178,8 @@ extern "C"
 SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntSpawnData* def)
 {
 	// an id of zero is considered invalid
-	COM_ASSERT(def->serial, "Restoring entity with Serial 0");
+	COM_ASSERT(def->serial != SIM_ENT_NULL_SERIAL,
+        "Restoring entity with null Serial");
     SimEntity* ent = Sim_GetEntityBySerial(scene, def->serial);
     // TODO: Handle this!
     COM_ASSERT(ent == NULL, "Entity already exists!")
@@ -189,7 +190,8 @@ SimEntity* Sim_RestoreEntity(SimScene* scene, SimEntSpawnData* def)
 extern "C"
 i32 Sim_RemoveEntity(SimScene* scene, i32 serialNumber)
 {
-	COM_ASSERT(serialNumber, "Removing entity with serial 0")
+	COM_ASSERT(serialNumber != SIM_ENT_NULL_SERIAL,
+        "Removing entity with null serial")
     return Sim_RecycleEntity(scene, serialNumber);
 }
 
