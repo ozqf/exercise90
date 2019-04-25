@@ -36,6 +36,8 @@ internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
 
+internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_10HZ;
+
 internal i32 g_debugFlags = SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
 /*
@@ -186,6 +188,29 @@ u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
 		APP_PRINT(64, "SV incorrect token count for spawn\n");
 		return 1;
 	}
+    else if (numTokens == 2 && !COM_CompareStrings(tokens[0], "RATE"))
+    {
+        i32 value = COM_AsciToInt32(tokens[1]);
+        switch (value)
+        {
+            case 10:
+            g_maxSyncRate = APP_CLIENT_SYNC_RATE_10HZ;
+            return 1;
+            case 20:
+            g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
+            return 1;
+            case 30:
+            g_maxSyncRate = APP_CLIENT_SYNC_RATE_30HZ;
+            return 1;
+            case 60:
+            g_maxSyncRate = APP_CLIENT_SYNC_RATE_60HZ;
+            return 1;
+
+            default:
+            printf("Invalid sync rate %d\n", value);
+            break;
+        }
+    }
     return 0;
 }
 
@@ -369,7 +394,17 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         }
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = {};
         // force sending rate
-        switch (user->syncRateHertz)
+        i32 rate;
+        if (user->syncRateHertz < g_maxSyncRate)
+        {
+            rate = user->syncRateHertz;
+        }
+        else
+        {
+            rate = g_maxSyncRate;
+        }
+        
+        switch (rate)
         {
             case APP_CLIENT_SYNC_RATE_30HZ:
             if (g_ticks % 2 != 0) { continue; }
