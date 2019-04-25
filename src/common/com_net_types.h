@@ -25,6 +25,17 @@ struct StreamStats
 	i32 numReliableMessages;
 	i32 numReliableSkipped;
 	i32 numUnreliableMessages;
+
+	struct
+	{
+		i32 numPackets;
+		i32 totalBytes;
+    	i32 reliableBytes;
+    	i32 unreliableBytes;
+		i32 numReliableMessages;
+		i32 numReliableSkipped;
+		i32 numUnreliableMessages;
+	} lastSecond;
 	
 	i32 commandCounts[256];
 };

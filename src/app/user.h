@@ -68,17 +68,29 @@ struct UserList
 internal StreamStats* User_SumPacketStats(User* u)
 {
     StreamStats* stream = &u->streamStats;
+    stream->lastSecond = {};
+    i32 numValid = 0;
     for (i32 i = 0; i < USER_NUM_PACKET_STATS; ++i)
     {
         PacketStats* stats = &u->packetStats[i];
         if (stats->packetSize == 0){continue;}
+        numValid++;
         stream->numPackets++;
+        // Totals
         stream->totalBytes += stats->packetSize;
         stream->reliableBytes += stats->reliableBytes;
         stream->unreliableBytes += stats->unreliableBytes;
         stream->numReliableMessages += stats->numReliableMessages;
         stream->numReliableSkipped += stats->numReliableSkipped;
         stream->numUnreliableMessages += stats->numUnreliableMessages;
+
+        // last second
+        stream->lastSecond.totalBytes += stats->packetSize;
+        stream->lastSecond.reliableBytes += stats->reliableBytes;
+        stream->lastSecond.unreliableBytes += stats->unreliableBytes;
+        stream->lastSecond.numReliableMessages += stats->numReliableMessages;
+        stream->lastSecond.numReliableSkipped += stats->numReliableSkipped;
+        stream->lastSecond.numUnreliableMessages += stats->numUnreliableMessages;
     }
     return stream;
 }

@@ -15,6 +15,9 @@ struct SVEntityFrame
     Vec3 pos;
 };
 
+#define SV_DEBUG_TIMING (1 << 0)
+#define SV_DEBUG_USER_BANDWIDTH (1 << 1)
+
 #define SV_MAX_MALLOCS 1024
 
 #define SV_PACKET_MAX_BYTES 1400
@@ -32,6 +35,8 @@ internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
+
+internal i32 g_debugFlags = SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
 /*
 Record entity states for lag compensation rewind
@@ -59,10 +64,14 @@ void SV_WriteDebugString(ZStringHeader* str)
 {
     char* chars = str->chars;
     i32 written = 0;
-    written += sprintf_s(chars, str->maxLength,
-        "SERVER:\nTick: %d\nElapsed: %.3f\nNext remote ent: %d\n",
-        g_ticks, g_elapsed, g_sim.remoteEntitySequence
-    );
+    if (g_debugFlags & SV_DEBUG_TIMING)
+    {
+        written += sprintf_s(chars, str->maxLength,
+            "SERVER:\nTick: %d\nElapsed: %.3f\nNext remote ent: %d\n",
+            g_ticks, g_elapsed, g_sim.remoteEntitySequence
+        );
+    }
+    
     
     // TODO: Just showing local user for now
     ZNetAddress addr = {};
@@ -80,63 +89,67 @@ void SV_WriteDebugString(ZStringHeader* str)
             user->ids.privateId
 		);
         // Bandwidth
-        #if 0
-        StreamStats* stats = User_SumPacketStats(user);
-        if (stats->numPackets > 0)
+        if (g_debugFlags & SV_DEBUG_USER_BANDWIDTH)
         {
-            i32 kbpsTotal = (stats->totalBytes * 8) / 1024;
-            i32 reliableKbps = (stats->reliableBytes * 8) / 1024;
-            i32 unreliableKbps = (stats->unreliableBytes * 8) / 1024;
-            written += sprintf_s(
-                chars + written,
-                str->maxLength - written,
-                "Total: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
-                kbpsTotal,
-                reliableKbps,
-                unreliableKbps,
-                user->reliableStream.outputBuffer.Written(),
-                stats->numReliableMessages / stats->numPackets,
-                stats->numUnreliableMessages / stats->numPackets,
-                stats->totalBytes / stats->numPackets
-		    );
-        }
-        for (i32 i = 0; i < 256; ++i)
-        {
-            i32 count = stats->commandCounts[i];
-            if (count == 0) { continue; }
-            written += sprintf_s(
-                chars + written,
-                str->maxLength - written,
-                "\tType %d: %d\n",
-                i, count);
-        }
-        #endif
-        #if 0
-        // Sequencing/jitter
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
-            "Output seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
-            acks->outputSequence,
-            acks->remoteSequence,
-            user->ping,
-			user->jitter
-        );
-        #endif
-        #if 0
-		// currently overflows debug text buffer:
-        for (i32 j = 0; j < ACK_CAPACITY; ++j)
-        {
-            AckRecord* rec = &acks->awaitingAck[j];
-            if (rec->acked)
+            #if 1
+            StreamStats* stats = User_SumPacketStats(user);
+            if (stats->numPackets > 0)
             {
-                f32 time = rec->receivedTime - rec->sentTime;
-                written += sprintf_s(chars + written, str->maxLength - written,
-                    "%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
-                );
+                i32 kbpsTotal = (stats->lastSecond.totalBytes * 8) / 1024;
+                i32 reliableKbps = (stats->lastSecond.reliableBytes * 8) / 1024;
+                i32 unreliableKbps = (stats->lastSecond.unreliableBytes * 8) / 1024;
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "Total: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    kbpsTotal,
+                    reliableKbps,
+                    unreliableKbps,
+                    user->reliableStream.outputBuffer.Written(),
+                    stats->lastSecond.numReliableMessages / stats->numPackets,
+                    stats->lastSecond.numUnreliableMessages / stats->numPackets,
+                    stats->lastSecond.totalBytes / stats->numPackets
+		        );
             }
+            for (i32 i = 0; i < 256; ++i)
+            {
+                i32 count = stats->commandCounts[i];
+                if (count == 0) { continue; }
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "\tType %d: %d\n",
+                    i, count);
+            }
+            #endif
+            #if 0
+            // Sequencing/jitter
+            written += sprintf_s(
+                chars + written,
+                str->maxLength - written,
+                "Output seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
+                acks->outputSequence,
+                acks->remoteSequence,
+                user->ping,
+		    	user->jitter
+            );
+            #endif
+            #if 0
+		    // currently overflows debug text buffer:
+            for (i32 j = 0; j < ACK_CAPACITY; ++j)
+            {
+                AckRecord* rec = &acks->awaitingAck[j];
+                if (rec->acked)
+                {
+                    f32 time = rec->receivedTime - rec->sentTime;
+                    written += sprintf_s(chars + written, str->maxLength - written,
+                        "%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
+                    );
+                }
+            }
+		    #endif
         }
-		#endif
+        
     }
     else
     {
@@ -211,7 +224,7 @@ internal void SV_LoadTestScene()
 	
     // Place a test spawner
     // -10 Z == further away
-    SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    //SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
 
     //SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
