@@ -82,6 +82,19 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             return 1;
         }
         //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
+        Vec3 currentPos =
+        {
+            ent->body.t.pos.x + ent->body.error.x,
+            ent->body.t.pos.y + ent->body.error.y,
+            ent->body.t.pos.z + ent->body.error.z,
+        };
+        //ent->body.error.x = cmd->pos.x - currentPos.x;
+        //ent->body.error.y = cmd->pos.y - currentPos.y;
+        //ent->body.error.z = cmd->pos.z - currentPos.z;
+        ent->body.error.x = currentPos.x - cmd->pos.x;
+        ent->body.error.y = currentPos.y - cmd->pos.y;
+        ent->body.error.z = currentPos.z - cmd->pos.z;
+        ent->body.errorRate = 0.95f;
         ent->body.previousPos = ent->body.t.pos;
         ent->body.t.pos = cmd->pos;
         ent->priority = cmd->priority;

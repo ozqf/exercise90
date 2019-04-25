@@ -101,7 +101,7 @@ void CL_PopulateRenderScene(
         SimEntity* ent = &g_sim.ents[j];
         if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
 
-        i32 interpolate = 1;
+        i32 copyPosition = 1;
         
 		switch (ent->tickType)
 		{
@@ -156,7 +156,7 @@ void CL_PopulateRenderScene(
                 );
                 Transform_SetToIdentity(&t);
                 RScene_AddRenderItem(scene, &t, &obj);
-                interpolate = 0;
+                copyPosition = 0;
             } break;
 			
 			default:
@@ -166,7 +166,7 @@ void CL_PopulateRenderScene(
 			} break;
 		}
         
-        if (interpolate)
+        if (copyPosition)
         {
             t = ent->body.t;
             if (g_interpolateRenderScene)
@@ -180,8 +180,18 @@ void CL_PopulateRenderScene(
             else
             {
                 t.pos = ent->body.t.pos;
+                t.pos.x += ent->body.error.x;
+                t.pos.y += ent->body.error.y;
+                t.pos.z += ent->body.error.z;
+
+                f32 rate = ent->body.errorRate;
+                if (rate < 0.01f) { rate = 0.0f; }
+                ent->body.error.x *= rate;
+                ent->body.error.y *= rate;
+                ent->body.error.z *= rate;
             }
         }
+        
         RScene_AddRenderItem(scene, &t, &obj);
     }
 }

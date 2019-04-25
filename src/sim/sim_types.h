@@ -96,12 +96,15 @@ struct SimEntity
     u8 deathType;
 
     u32 flags;
+    u32 localFlags;
 
     // physical
     struct
     {
         Transform t;
         Vec3 previousPos;
+        Vec3 error;
+        f32 errorRate;
         f32 speed;
         Vec3 velocity;
         f32 pitch;

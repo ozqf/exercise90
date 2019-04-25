@@ -1,6 +1,8 @@
 #ifndef ZQF_COMMON_H
 #define ZQF_COMMON_H
-
+/*
+Data structures and code shared between all modules
+*/
 #include <stdio.h>
 #include <stdlib.h>
 

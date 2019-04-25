@@ -156,8 +156,8 @@ internal User* SVU_CreateUser(UserIds ids, ZNetAddress* addr)
         "EntLinks");
     user->entSync.maxLinks = APP_MAX_ENTITIES;
     user->entSync.numLinks = 0;
-    //user->syncRateHertz = APP_CLIENT_SYNC_RATE_10HZ;
-    user->syncRateHertz = APP_CLIENT_SYNC_RATE_20HZ;
+    user->syncRateHertz = APP_CLIENT_SYNC_RATE_10HZ;
+    //user->syncRateHertz = APP_CLIENT_SYNC_RATE_20HZ;
     //user->syncRateHertz = APP_CLIENT_SYNC_RATE_30HZ;
     //user->syncRateHertz = APP_CLIENT_SYNC_RATE_60HZ;
 
