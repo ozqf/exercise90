@@ -20,10 +20,10 @@ ScreenInfo App_GetScreenInfo();
 /////////////////////////////////////////////////////////////////
 #define APP_MAX_ENTITIES 2048
 
-#define APP_CLIENT_SYNC_RATE_60HZ 0
-#define APP_CLIENT_SYNC_RATE_30HZ 1
-#define APP_CLIENT_SYNC_RATE_20HZ 2
-#define APP_CLIENT_SYNC_RATE_10HZ 3
+#define APP_CLIENT_SYNC_RATE_60HZ 60
+#define APP_CLIENT_SYNC_RATE_30HZ 30
+#define APP_CLIENT_SYNC_RATE_20HZ 20
+#define APP_CLIENT_SYNC_RATE_10HZ 10
 
 #define APP_MAX_USERS 16
 #define APP_DEFAULT_SOCKET_INDEX 0

@@ -144,6 +144,7 @@ internal i32 Sim_InitSpawner(
 {
     i32 count = 128;
     //i32 count = 1;
+    //i32 count = 20;
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
@@ -213,7 +214,7 @@ internal i32 Sim_InitBouncer(
     ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
     ent->timing.lastThink = ent->timing.birthTick;
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 0.7f, 0.7f, 1, 1 };
+    ent->display.colour = { 0.5f, 0.5f, 0.7f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
@@ -229,6 +230,7 @@ internal i32 Sim_InitDart(
     ent->coreTickType = SIM_TICK_TYPE_DART;
     ent->timing.lastThink = ent->timing.birthTick;
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
+    //ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC;
@@ -250,7 +252,7 @@ internal i32 Sim_InitSeeker(
     ent->coreTickType = SIM_TICK_TYPE_SEEKER;
     ent->timing.lastThink = ent->timing.birthTick;
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 0, 1, 1, 1 };
+    ent->display.colour = { 0, 0.7f, 0.7f, 1 };
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC

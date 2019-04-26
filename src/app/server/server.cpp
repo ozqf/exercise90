@@ -69,8 +69,8 @@ void SV_WriteDebugString(ZStringHeader* str)
     if (g_debugFlags & SV_DEBUG_TIMING)
     {
         written += sprintf_s(chars, str->maxLength,
-            "SERVER:\nTick: %d\nElapsed: %.3f\nNext remote ent: %d\n",
-            g_ticks, g_elapsed, g_sim.remoteEntitySequence
+            "SERVER:\nTick: %d\nElapsed: %.3f\nMax Rate %d\nNext remote ent: %d\n",
+            g_ticks, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
         );
     }
     
@@ -103,7 +103,8 @@ void SV_WriteDebugString(ZStringHeader* str)
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "Total: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    user->syncRateHertz,
                     kbpsTotal,
                     reliableKbps,
                     unreliableKbps,
@@ -164,7 +165,7 @@ void SV_WriteDebugString(ZStringHeader* str)
 
 u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
-	if (COM_CompareStrings(tokens[0], "SPAWN"))
+	if (!COM_CompareStrings(tokens[0], "SPAWN"))
 	{
 		if (numTokens == 1)
 		{
@@ -191,6 +192,7 @@ u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
     else if (numTokens == 2 && !COM_CompareStrings(tokens[0], "RATE"))
     {
         i32 value = COM_AsciToInt32(tokens[1]);
+        printf("SV Set Sync rate %d\n", value);
         switch (value)
         {
             case 10:
@@ -210,6 +212,7 @@ u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
             printf("Invalid sync rate %d\n", value);
             break;
         }
+        return 1;
     }
     return 0;
 }
@@ -249,16 +252,17 @@ internal void SV_LoadTestScene()
 	
     // Place a test spawner
     // -10 Z == further away
-    //SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
     //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
 
     //SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_WANDERER);
-    //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
     //SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_DART);
     
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
-    SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
-    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
+    //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+
+    SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+    SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+    SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
 
     i32 numWanderers = 0;
     for (i32 i = 0; i < numWanderers; ++i)

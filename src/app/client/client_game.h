@@ -100,6 +100,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         ent->priority = cmd->priority;
         ent->body.velocity = cmd->vel;
         ent->relationships.targetId.serial = cmd->targetId;
+        ent->clientOnly.lastSync = sim->tick;
         executed = 1;
     }
     return executed;

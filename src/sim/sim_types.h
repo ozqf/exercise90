@@ -116,6 +116,11 @@ struct SimEntity
 
     // Only useful for debugging
     u8 priority;
+    struct
+    {
+        i32 lastSync;
+    } clientOnly;
+    
 };
 
 struct SimEntSpawnData

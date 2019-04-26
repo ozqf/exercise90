@@ -103,21 +103,41 @@ void CL_PopulateRenderScene(
 
         i32 copyPosition = 1;
         
-		switch (ent->tickType)
+		switch (ent->factoryType)
 		{
-            case SIM_FACTORY_TYPE_WANDERER:
             case SIM_FACTORY_TYPE_BOUNCER:
+            case SIM_FACTORY_TYPE_WANDERER:
             case SIM_FACTORY_TYPE_DART:
             case SIM_FACTORY_TYPE_SEEKER:
             {
                 //COM_ASSERT(0, "Render Seeker")
-				Colour c = 
+                const i32 glowFrames = 90;
+                i32 diff = g_sim.tick - ent->clientOnly.lastSync;
+                f32 percent;
+                percent = (f32)diff / (f32)glowFrames;
+                if (percent > 2) { percent = 2; }
+                //printf("Percent %f\n", percent);
+                Colour c = 
+				{
+                    COM_LerpF32(ent->display.colour.r, 0, percent),
+                    COM_LerpF32(ent->display.colour.g, 0, percent),
+                    COM_LerpF32(ent->display.colour.b, 0, percent),
+                    1
+				};
+                /*Colour c = 
+				{
+                    COM_LerpF32(1, ent->display.colour.r, percent),
+                    COM_LerpF32(1, ent->display.colour.g, percent),
+                    COM_LerpF32(1, ent->display.colour.b, percent),
+                    1
+				};*/
+				/*Colour c = 
 				{
                     ent->display.colour.r * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
                     ent->display.colour.g * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
                     ent->display.colour.b * ((f32)ent->priority / (f32)SIM_NET_MAX_PRIORITY),
                     1
-				};
+				};*/
 				RendObj_SetAsMesh(
 					&obj, *cube, c, texIndex);
                 
@@ -128,7 +148,9 @@ void CL_PopulateRenderScene(
 					&obj, *cube, { 0.2f, 0.2f, 0.2f, 1 }, texIndex);
 			} break;
 
-            case SIM_TICK_TYPE_PROJECTILE:
+            case SIM_FACTORY_TYPE_PROJ_PLAYER:
+            case SIM_FACTORY_TYPE_PROJ_PREDICTION:
+            case SIM_FACTORY_TYPE_PROJECTILE_BASE:
 			{
                 //printf("PRJ SCALE %.3f, %.3f, %.3f\n",
                 //    ent->t.scale.x, ent->t.scale.y, ent->t.scale.z);
