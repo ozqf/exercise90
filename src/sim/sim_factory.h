@@ -119,8 +119,8 @@ internal i32 Sim_InitActor(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->coreTickType = SIM_TICK_TYPE_ACTOR;
-    ent->attackTime = 0.1f;
-    ent->body.speed = 5.5f;
+    ent->attackTime = 0.05f;
+    ent->body.speed = 6.0f;
     ent->display.colour = { 0, 1, 0, 1 };
     ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
