@@ -444,9 +444,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             break;
         }
 
-		SV_TickPriorityQueue(
-            user->entSync.links,
-            user->entSync.numLinks);
+		SV_TickPriorityQueue(&user->entSync);
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;

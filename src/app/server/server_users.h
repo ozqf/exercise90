@@ -94,7 +94,8 @@ internal void SVU_RemoveEntityLinkForAllUsers(
     {
         User* u = &g_users.items[i];
         if (u->state == USER_STATE_FREE) { continue; }
-        SV_RemovePriorityLinkBySerial(&u->entSync, entSerial);
+        //SV_RemovePriorityLinkBySerial(&u->entSync, entSerial);
+        SV_FlagLinkAsDead(&u->entSync, entSerial);
     }
 }
 

@@ -81,26 +81,39 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             // There's a special command for that!
             return 1;
         }
-        //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
-        Vec3 currentPos =
+        if (cmd->type == S2C_ENTITY_SYNC_TYPE_UPDATE)
         {
-            ent->body.t.pos.x + ent->body.error.x,
-            ent->body.t.pos.y + ent->body.error.y,
-            ent->body.t.pos.z + ent->body.error.z,
-        };
-        //ent->body.error.x = cmd->pos.x - currentPos.x;
-        //ent->body.error.y = cmd->pos.y - currentPos.y;
-        //ent->body.error.z = cmd->pos.z - currentPos.z;
-        ent->body.error.x = currentPos.x - cmd->pos.x;
-        ent->body.error.y = currentPos.y - cmd->pos.y;
-        ent->body.error.z = currentPos.z - cmd->pos.z;
-        ent->body.errorRate = 0.95f;
-        ent->body.previousPos = ent->body.t.pos;
-        ent->body.t.pos = cmd->pos;
-        ent->priority = cmd->priority;
-        ent->body.velocity = cmd->vel;
-        ent->relationships.targetId.serial = cmd->targetId;
-        ent->clientOnly.lastSync = sim->tick;
+            //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
+            Vec3 currentPos =
+            {
+                ent->body.t.pos.x + ent->body.error.x,
+                ent->body.t.pos.y + ent->body.error.y,
+                ent->body.t.pos.z + ent->body.error.z,
+            };
+            //ent->body.error.x = cmd->pos.x - currentPos.x;
+            //ent->body.error.y = cmd->pos.y - currentPos.y;
+            //ent->body.error.z = cmd->pos.z - currentPos.z;
+            ent->body.error.x = currentPos.x - cmd->update.pos.x;
+            ent->body.error.y = currentPos.y - cmd->update.pos.y;
+            ent->body.error.z = currentPos.z - cmd->update.pos.z;
+            ent->body.errorRate = 0.95f;
+            ent->body.previousPos = ent->body.t.pos;
+            ent->body.t.pos = cmd->update.pos;
+            ent->priority = cmd->update.priority;
+            ent->body.velocity = cmd->update.vel;
+            ent->relationships.targetId.serial = cmd->update.targetId;
+            ent->clientOnly.lastSync = sim->tick;
+        }
+        else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+        {
+            Sim_RemoveEntity(sim, cmd->networkId);
+        }
+        else
+        {
+            COM_ASSERT(0, "Unknown entity sync type\n");
+        }
+        
+        
         executed = 1;
     }
     return executed;

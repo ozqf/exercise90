@@ -46,16 +46,27 @@ internal i32 SVP_WriteUnreliableSection(
         stats->numUnreliableMessages += 1;
 
         SVEntityLink* link = &links[i];
-        SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
+        i32 serial = link->id;
+        SimEntity* ent = Sim_GetEntityBySerial(sim, serial);
         S2C_EntitySync cmd = {};
-        Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-        packet->ptrWrite += COM_COPY(
-            &cmd, packet->ptrWrite, cmd.header.size);
+        if (ent)
+        {
+            Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, 0, ent);
+            packet->ptrWrite += COM_COPY(
+                &cmd, packet->ptrWrite, cmd.header.size);
+        }
+        else
+        {
+            // No entity? must be dead!
+            Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, 0, link->id);
+        }
+        
+        
 
         // Reset importance, add to transmission record
         link->importance = 0;
         link->lastPacketSent = rec->sequence;
-        rec->syncIds[rec->numSyncMessages] = ent->id.serial;
+        rec->syncIds[rec->numSyncMessages] = serial;
         rec->numSyncMessages += 1;
         if (rec->numSyncMessages == MAX_PACKET_SYNC_MESSAGES)
         { break; }

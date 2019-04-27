@@ -167,18 +167,33 @@ internal void Cmd_InitRemoveEntity(
     cmd->entityId = entId;
 }
 
+#define S2C_ENTITY_SYNC_TYPE_UPDATE 0
+#define S2C_ENTITY_SYNC_TYPE_DEATH 1
+
 struct S2C_EntitySync
 {
 	Command header;
 	i32 networkId;
-	Vec3 pos;
-	Vec3 rot;
-	Vec3 vel;
-    i32 targetId;
-    f32 priority;
+    u8 type;
+    union
+    {
+        struct
+        {
+            Vec3 pos;
+	        Vec3 rot;
+	        Vec3 vel;
+            i32 targetId;
+            f32 priority;
+        } update;
+        struct
+        {
+            Vec3 pos;
+        } death;
+        
+    };
 };
 
-internal void Cmd_WriteEntitySync(
+internal void Cmd_WriteEntitySyncAsUpdate(
     S2C_EntitySync* cmd,
     i32 tick,
     i32 sequence,
@@ -188,10 +203,24 @@ internal void Cmd_WriteEntitySync(
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
     cmd->header.size = sizeof(S2C_EntitySync);
     cmd->networkId = ent->id.serial;
-	cmd->pos = ent->body.t.pos;
-	cmd->vel = ent->body.velocity;
-    cmd->priority = ent->priority;
-    cmd->targetId = ent->relationships.targetId.serial;
+    cmd->type = S2C_ENTITY_SYNC_TYPE_UPDATE;
+	cmd->update.pos = ent->body.t.pos;
+	cmd->update.vel = ent->body.velocity;
+    cmd->update.priority = ent->priority;
+    cmd->update.targetId = ent->relationships.targetId.serial;
+}
+
+internal void Cmd_WriteEntitySyncAsDeath(
+    S2C_EntitySync* cmd,
+    i32 tick,
+    i32 sequence,
+    i32 entitySerial)
+{
+    Cmd_Prepare(&cmd->header, tick, sequence);
+    cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
+    cmd->header.size = sizeof(S2C_EntitySync);
+    cmd->type = S2C_ENTITY_SYNC_TYPE_DEATH;
+    cmd->networkId = entitySerial;
 }
 
 ///////////////////////////////////////////////////////////////////////////

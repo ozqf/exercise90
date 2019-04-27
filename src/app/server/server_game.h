@@ -41,9 +41,9 @@ internal void SVG_HandleEntityDeath(
 {
 	APP_LOG(128, "SV Remove ent %d\n", victim->id.serial);
     
-    S2C_RemoveEntity cmd = {};
-    Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
-    SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+    //S2C_RemoveEntity cmd = {};
+    //Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
+    //SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
 
     SimEntity* parent = Sim_GetEntityBySerial(
         sim, victim->relationships.parentId.serial);

@@ -14,10 +14,13 @@ than others, increase its priority value so it accumulates importance faster
 */
 #include "../common/common.h"
 
+#define ENT_LINK_STATUS_ACTIVE 0
+#define ENT_LINK_STATUS_DEAD 1
+
 struct SVEntityLink
 {
-    i32 inUse;          // TODO: Remove, not necessary
     i32 id;             // Serial number of related entity
+    u8 status;
     f32 basePriority;
     f32 priority;
     f32 importance;
@@ -46,7 +49,7 @@ internal void SV_UpdateSyncAcks(
 {
     //printf("Update sync acks (%d links, %d ids)\n",
     //    list->numLinks, numSyncIds);
-    for (i32 i = 0; i < list->numLinks; ++i)
+    for (i32 i = list->numLinks - 1; i >= 0; --i)
     {
         SVEntityLink* link = &list->links[i];
         for (i32 j = 0; j < numSyncIds; ++j)
@@ -122,6 +125,17 @@ internal void SV_RemovePriorityLinkByIndex(
 	list->numLinks -= 1;
 }
 
+internal void SV_FlagLinkAsDead(SVEntityLinkArray* list, i32 id)
+{
+    for (i32 i = 0; i < list->numLinks; ++i)
+    {
+        if (list->links[i].id == id)
+        {
+            list->links[i].status = ENT_LINK_STATUS_DEAD;
+        }
+    }
+}
+
 internal void SV_RemovePriorityLinkBySerial(
     SVEntityLinkArray* list, i32 id)
 {
@@ -170,12 +184,17 @@ Run every tick
 > Sort Priority Queue
 */
 internal void SV_TickPriorityQueue(
-    SVEntityLink* links, i32 numLinks)
+    SVEntityLinkArray* list)
 {
-    for (i32 i = 0; i < numLinks; ++i)
+    for (i32 i = list->numLinks - 1; i >= 0; --i)
     {
-        SVEntityLink* link = &links[i];
+        SVEntityLink* link = &list->links[i];
         link->importance += link->priority;
+        if (link->status == ENT_LINK_STATUS_DEAD &&
+            link->lastPacketAck >= link->lastPacketSent)
+        {
+            SV_RemovePriorityLinkByIndex(list, i);
+        }
     }
-	SV_BubbleSortPriorityQueue(links, numLinks);
+	SV_BubbleSortPriorityQueue(list->links, list->numLinks);
 }
