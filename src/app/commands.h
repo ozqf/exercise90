@@ -175,7 +175,7 @@ struct S2C_EntitySync
 	Vec3 rot;
 	Vec3 vel;
     i32 targetId;
-    u8 priority;
+    f32 priority;
 };
 
 internal void Cmd_WriteEntitySync(

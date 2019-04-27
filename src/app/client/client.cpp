@@ -361,7 +361,8 @@ internal i32 CL_ExecReliableCommand(
             );
             // flip diff to specify fast forwarding
             i32 flags;
-            Sim_ExecuteBulkSpawn(sim, &prj->def, -tickDiff, &flags);
+            f32 priority;
+            Sim_ExecuteBulkSpawn(sim, &prj->def, -tickDiff, &flags, &priority);
         } break;
 		case CMD_TYPE_S2C_RESTORE_ENTITY:
 		{

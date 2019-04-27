@@ -114,8 +114,8 @@ struct SimEntity
     
 	SimActorInput input;
 
-    // Only useful for debugging
-    u8 priority;
+    f32 priority;
+    f32 basePriority;
     struct
     {
         i32 lastSync;

@@ -18,8 +18,9 @@ struct SVEntityLink
 {
     i32 inUse;          // TODO: Remove, not necessary
     i32 id;             // Serial number of related entity
-    u8 priority;
-    i32 importance;
+    f32 basePriority;
+    f32 priority;
+    f32 importance;
 
     // used for calculating priority
     f32 distance;
@@ -51,7 +52,7 @@ internal i32 SV_GetPriorityLinkIndexById(
 }
 
 internal void SV_AddPriorityLink(
-    SVEntityLinkArray* list, i32 id, u8 priority)
+    SVEntityLinkArray* list, i32 id, f32 priority)
 {
 	// Avoid duplicates
 	if (SV_GetPriorityLinkIndexById(list, id) != -1)
@@ -70,6 +71,7 @@ internal void SV_AddPriorityLink(
     list->links[i] = {};
 	list->links[i].id = id;
 	list->links[i].priority = priority;
+    list->links[i].basePriority = priority;
 }
 
 internal void SV_SwapEntityLinks(

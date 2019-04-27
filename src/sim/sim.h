@@ -89,7 +89,8 @@ extern "C" i32      Sim_ExecuteBulkSpawn(
                         SimScene* sim,
                         SimBulkSpawnEvent* def,
 						i32 fastForwardTicks,
-                        i32* spawnedEntityFlags);
+                        i32* spawnedEntityFlags,
+                        f32* spawnedEntityPriority);
 
 // Entity behaviour
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);

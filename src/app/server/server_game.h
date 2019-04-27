@@ -175,9 +175,9 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.tick = sim->tick;
         event.base.sourceSerial = ent->id.serial;
         i32 flags;
+        f32 priority;
 		Sim_ExecuteBulkSpawn(
-			sim, &event, 0, &flags
-		);
+			sim, &event, 0, &flags, &priority);
 
         ent->relationships.liveChildren += 
             ent->relationships.childSpawnCount;
@@ -189,7 +189,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         if (flags & SIM_ENT_FLAG_POSITION_SYNC)
         {
             SVU_AddBulkEntityLinksForAllUsers(
-                &g_users, event.base.firstSerial, event.patternDef.numItems);
+                &g_users, event.base.firstSerial, event.patternDef.numItems, priority);
         }
         #endif
         #if 0
@@ -379,7 +379,8 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     event.base.tick = g_ticks;
     event.base.seedIndex = COM_STDRandU8();
     i32 flags;
-    Sim_ExecuteBulkSpawn(sim, &event, fastForwardTicks, &flags);
+    f32 priority;
+    Sim_ExecuteBulkSpawn(sim, &event, fastForwardTicks, &flags, &priority);
 
     // Replicate
     S2C_BulkSpawn prj = {};
@@ -394,7 +395,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
         SVU_AddBulkEntityLinksForAllUsers(
             &g_users,
             event.base.firstSerial,
-            event.patternDef.numItems);
+            event.patternDef.numItems, priority);
     }
 
 

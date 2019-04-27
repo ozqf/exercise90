@@ -106,6 +106,7 @@ internal void Sim_SetEntityBase(
     ent->relationships.childFactoryType = def->childFactoryType;
     ent->relationships.parentId.serial = def->parentSerial;
     ent->priority = 1;
+    ent->basePriority = 1;
     Transform_SetScaleSafe(&ent->body.t, def->scale);
 }
 
@@ -142,7 +143,8 @@ internal i32 Sim_InitWorldVolume(
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
-    i32 count = 128;
+    //i32 count = 128;
+    i32 count = 64;
     //i32 count = 1;
     //i32 count = 20;
     Sim_SetEntityBase(ent, def);
@@ -258,6 +260,7 @@ internal i32 Sim_InitSeeker(
         | SIM_ENT_FLAG_POSITION_SYNC
         | SIM_ENT_FLAG_MOVE_AVOID;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
+    ent->basePriority = 8;
     return COM_ERROR_NONE;
 }
 

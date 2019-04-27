@@ -68,22 +68,22 @@ internal void SVU_EnqueueCommandForAllUsers(
 }
 
 internal void SVU_AddEntityLinkForAllUsers(
-    UserList* users, i32 entSerial, i32 priority)
+    UserList* users, i32 entSerial, f32 priority)
 {
     for (i32 i = 0; i < users->max; ++i)
     {
         User* user = &users->items[i];
         if (user->state == USER_STATE_FREE) { continue; }
-        SV_AddPriorityLink(&user->entSync, entSerial, 1);
+        SV_AddPriorityLink(&user->entSync, entSerial, priority);
     }
 }
 
-internal void SVU_AddBulkEntityLinksForAllUsers(
-    UserList* users, i32 firstSerial, i32 numEntities)
+internal void SVU_AddBulkEntityLinksForAllUsers( 
+    UserList* users, i32 firstSerial, i32 numEntities, f32 priority)
 {
     for (i32 i = 0; i < numEntities; ++i)
     {
-        SVU_AddEntityLinkForAllUsers(users, firstSerial++, 1);
+        SVU_AddEntityLinkForAllUsers(users, firstSerial++, priority);
     }
 }
 

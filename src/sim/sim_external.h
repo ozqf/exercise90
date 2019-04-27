@@ -212,7 +212,8 @@ i32 Sim_ExecuteBulkSpawn(
     SimScene* sim,
     SimBulkSpawnEvent* event,
 	i32 fastForwardTicks,
-    i32* spawnedEntityFlags)
+    i32* spawnedEntityFlags,
+    f32* spawnedEntityPriority)
 {
     COM_ASSERT(event->factoryType, "Bulk spawn factory type is 0")
     i32 isLocal = (event->base.firstSerial < 0);
@@ -249,6 +250,7 @@ i32 Sim_ExecuteBulkSpawn(
         // The caller needs to know whether or not to track these
         // entities for priority queue sync.
         *spawnedEntityFlags = ent->flags;
+        *spawnedEntityPriority = ent->basePriority;
     }
 
     return COM_ERROR_NONE;
