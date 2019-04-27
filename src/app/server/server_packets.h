@@ -43,20 +43,21 @@ internal i32 SVP_WriteUnreliableSection(
     {
         if (packet->Space() < sizeof(S2C_EntitySync))
         { break; }
+        stats->numUnreliableMessages += 1;
+
         SVEntityLink* link = &links[i];
-        
         SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
         S2C_EntitySync cmd = {};
         Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
         packet->ptrWrite += COM_COPY(
             &cmd, packet->ptrWrite, cmd.header.size);
+
+        // Reset importance, add to transmission record
         link->importance = 0;
-
-        stats->numUnreliableMessages += 1;
-
+        link->lastPacketSent = rec->sequence;
         rec->syncIds[rec->numSyncMessages] = ent->id.serial;
-        rec->numReliableMessages += 1;
-        if (rec->numReliableMessages == MAX_PACKET_SYNC_MESSAGES)
+        rec->numSyncMessages += 1;
+        if (rec->numSyncMessages == MAX_PACKET_SYNC_MESSAGES)
         { break; }
     }
     #endif
@@ -284,8 +285,16 @@ internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
     i32 numPacketAcks = Ack_CheckIncomingAcks(
         &user->acks, p.ackSequence, p.ackBits, packetAcks, time);
 	
-	Stream_ProcessPacketAcks(
-        &user->reliableStream, packetAcks, numPacketAcks);
+    for (i32 i = 0; i < numPacketAcks; ++i)
+    {
+        i32 sequence = packetAcks[i];
+        TransmissionRecord* rec = 
+            Stream_ClearReceivedOutput(&user->reliableStream, sequence);
+        SV_UpdateSyncAcks(&user->entSync, sequence, rec->syncIds, rec->numSyncMessages);
+
+    }
+	// Stream_ProcessPacketAcks(
+    //     &user->reliableStream, packetAcks, numPacketAcks);
 	
 	// -- reliable section --
 	

@@ -21,6 +21,7 @@ struct SVEntityLink
     f32 basePriority;
     f32 priority;
     f32 importance;
+    i32 lastPacketSent;
     i32 lastPacketAck;
 
     // used for calculating priority
@@ -43,6 +44,8 @@ internal void SV_UpdateSyncAcks(
     SVEntityLinkArray* list, i32 packetSequence,
     i32* syncIds, i32 numSyncIds)
 {
+    //printf("Update sync acks (%d links, %d ids)\n",
+    //    list->numLinks, numSyncIds);
     for (i32 i = 0; i < list->numLinks; ++i)
     {
         SVEntityLink* link = &list->links[i];
@@ -52,6 +55,11 @@ internal void SV_UpdateSyncAcks(
                 && link->lastPacketAck < packetSequence)
             {
                 link->lastPacketAck = packetSequence;
+                if (link->lastPacketSent == link->lastPacketAck)
+                {
+                    printf("Link %d ack'd from packet %d\n",
+                        link->id, link->lastPacketAck);
+                }
             }
         }
     }

@@ -156,7 +156,12 @@ internal i32 CL_ReadPacket(
 	i32 numPacketAcks = Ack_CheckIncomingAcks(
 		&g_acks, p.ackSequence, p.ackBits, packetAcks, time
 	);
-	Stream_ProcessPacketAcks(reliableStream, packetAcks, numPacketAcks);
+    for (i32 i = 0; i < numPacketAcks; ++i)
+    {
+        Stream_ClearReceivedOutput(
+            reliableStream, packetAcks[i]);
+    }
+	//Stream_ProcessPacketAcks(reliableStream, packetAcks, numPacketAcks);
     
     // -- reliable section --
     // TODO: Put this byte buffer on the descriptor and initialise it there

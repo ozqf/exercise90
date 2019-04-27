@@ -103,7 +103,7 @@ internal void Stream_DeleteCommandBySequence(ByteBuffer* b, i32 sequence)
 	}
 }
 
-internal void Stream_ClearReceivedOutput(
+internal TransmissionRecord* Stream_ClearReceivedOutput(
 	NetStream* stream, u32 packetSequence)
 {
     TransmissionRecord* rec = Stream_FindTransmissionRecord(
@@ -111,7 +111,7 @@ internal void Stream_ClearReceivedOutput(
     ByteBuffer* b = &stream->outputBuffer;
     if (!rec)
     {
-        return;
+        return NULL;
     }
     i32 numMessages = rec->numReliableMessages;
     for (i32 i = 0; i < numMessages; ++i)
@@ -122,8 +122,10 @@ internal void Stream_ClearReceivedOutput(
         if (cmd == NULL) { continue; }
         Stream_DeleteCommand(b, cmd);
     }
+    return rec;
 }
 
+#if 0
 internal void Stream_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 numPacketAcks)
 {
 	for (i32 i = 0; i < numPacketAcks; ++i)
@@ -131,6 +133,7 @@ internal void Stream_ProcessPacketAcks(NetStream* stream, u32* packetAcks, i32 n
 		Stream_ClearReceivedOutput(stream, packetAcks[i]);
 	}
 }
+#endif
 
 // returns bytes written
 internal i32 Stream_EnqueueUnreliableInput(
