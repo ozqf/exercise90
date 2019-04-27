@@ -21,6 +21,7 @@ struct SVEntityLink
     f32 basePriority;
     f32 priority;
     f32 importance;
+    i32 lastPacketAck;
 
     // used for calculating priority
     f32 distance;
@@ -36,6 +37,24 @@ struct SVEntityLinkArray
 internal i32 SV_CalcEntityLinkArrayBytes(i32 numEntities)
 {
     return sizeof(SVEntityLink) * numEntities;
+}
+
+internal void SV_UpdateSyncAcks(
+    SVEntityLinkArray* list, i32 packetSequence,
+    i32* syncIds, i32 numSyncIds)
+{
+    for (i32 i = 0; i < list->numLinks; ++i)
+    {
+        SVEntityLink* link = &list->links[i];
+        for (i32 j = 0; j < numSyncIds; ++j)
+        {
+            if (link->id == syncIds[j]
+                && link->lastPacketAck < packetSequence)
+            {
+                link->lastPacketAck = packetSequence;
+            }
+        }
+    }
 }
 
 internal i32 SV_GetPriorityLinkIndexById(

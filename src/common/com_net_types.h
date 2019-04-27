@@ -9,11 +9,14 @@ struct ZNetAddress
 };
 
 #define MAX_PACKET_TRANSMISSION_MESSAGES 64
+#define MAX_PACKET_SYNC_MESSAGES 64
 struct TransmissionRecord
 {
 	u32 sequence;
 	u32 numReliableMessages;
 	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
+	u32 numSyncMessages;
+	i32 syncIds[MAX_PACKET_SYNC_MESSAGES];
 };
 
 struct StreamStats

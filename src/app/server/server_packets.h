@@ -3,7 +3,11 @@
 #include "server.cpp"
 
 internal i32 SVP_WriteUnreliableSection(
-    SimScene* sim, User* user, ByteBuffer* packet, PacketStats* stats)
+    SimScene* sim,
+    User* user,
+    ByteBuffer* packet,
+    TransmissionRecord* rec,
+    PacketStats* stats)
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
@@ -49,6 +53,11 @@ internal i32 SVP_WriteUnreliableSection(
         link->importance = 0;
 
         stats->numUnreliableMessages += 1;
+
+        rec->syncIds[rec->numSyncMessages] = ent->id.serial;
+        rec->numReliableMessages += 1;
+        if (rec->numReliableMessages == MAX_PACKET_SYNC_MESSAGES)
+        { break; }
     }
     #endif
     #if 0
@@ -164,7 +173,7 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     // -- write mid-packet deserialise check and unreliable sync data -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SVP_WriteUnreliableSection(
-        sim, user, &packet, &stats);
+        sim, user, &packet, rec, &stats);
     //i32 unreliableWritten = 0;
     if (unreliableWritten > 0)
     {
@@ -180,7 +189,6 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     App_SendTo(0, &user->address, buf, total);
     return stats;
 }
-
 
 internal void SVP_WriteTestPacket()
 {

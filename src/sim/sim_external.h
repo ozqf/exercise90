@@ -106,6 +106,33 @@ SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject)
     return NULL;
 }
 
+/*
+NOTE: Was going to use to look for entity sets that are all dead
+even though a player has an enqueued spawn message for them (packet loss etc)
+However, probably wouldn't work. You can only guarentee that the player
+HAS executed a command, not that they definitely haven't. It could be queued up
+just not ack'd. yet. So they WOULD spawn stuff and this scan would be invalid
+Search for number of entities in a range that are assigned
+*/
+#if 0
+extern "C"
+i32 Sim_ScanForSerialRange(SimScene* sim, i32 firstSerial, i32 numSerials)
+{
+    if (numSerials == 0) { return 0; }
+    i32 count = 0;
+    i32 lastSerial = firstSerial + (numSerials - 1);
+    for (i32 i = 0; i < sim->maxEnts; ++i)
+    {
+        SimEntity* ent = &sim->ents[i];
+        if (ent->status == SIM_ENT_STATUS_FREE) { continue; }
+        if (ent->id.serial >= firstSerial && ent->id.serial <= lastSerial)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+#endif
 extern "C"
 SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial)
 {

@@ -100,15 +100,19 @@ void SV_WriteDebugString(ZStringHeader* str)
                 i32 kbpsTotal = (stats->lastSecond.totalBytes * 8) / 1024;
                 i32 reliableKbps = (stats->lastSecond.reliableBytes * 8) / 1024;
                 i32 unreliableKbps = (stats->lastSecond.unreliableBytes * 8) / 1024;
+                i32 numLinks = user->entSync.numLinks;
+                i32 numEnqueued = Stream_CountCommands(&user->reliableStream.outputBuffer);
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d Bytes\nPer packet averages\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\nLinks %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     user->syncRateHertz,
                     kbpsTotal,
                     reliableKbps,
                     unreliableKbps,
+                    numEnqueued,
                     user->reliableStream.outputBuffer.Written(),
+                    numLinks,
                     stats->lastSecond.numReliableMessages / stats->numPackets,
                     stats->lastSecond.numUnreliableMessages / stats->numPackets,
                     stats->lastSecond.totalBytes / stats->numPackets
@@ -249,7 +253,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 1;
+    const i32 stage = 0;
 	switch (stage)
     {
         case 1:
@@ -259,10 +263,13 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
         break;
-        default:
+        case 2:
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
         SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
+        break;
+        default:
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
         break;
     }
     // Place a test spawner
@@ -443,6 +450,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
+        printf(".");
         // Add up command stats here
         for (i32 j = 0; j < 256; ++j)
         {
