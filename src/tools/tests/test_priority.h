@@ -9,7 +9,7 @@ internal void ListPriority(PriorityLinkSet* list)
 		list->numLinks, list->maxLinks);
     for (i32 i = 0; i < list->numLinks; ++i)
     {
-        printf("%d Link id %d priority %d importance: %d\n",
+        printf("%d Link id %d priority %.3f importance: %.3f\n",
 			i, 
 			list->links[i].id,
 			list->links[i].priority,
@@ -41,30 +41,30 @@ internal void Test_Priority()
 	
 	list.maxLinks = 8;
 	
-	SV_AddPriorityLink(&list, 1, 2);
-	SV_AddPriorityLink(&list, 2, 1);
-	SV_AddPriorityLink(&list, 3, 4);
-	SV_AddPriorityLink(&list, 4, 3);
-	SV_AddPriorityLink(&list, 5, 2);
-	SV_AddPriorityLink(&list, 6, 4);
-	SV_AddPriorityLink(&list, 7, 5);
-	SV_AddPriorityLink(&list, 7, 5);
+	Priority_AddLink(&list, 1, 2);
+	Priority_AddLink(&list, 2, 1);
+	Priority_AddLink(&list, 3, 4);
+	Priority_AddLink(&list, 4, 3);
+	Priority_AddLink(&list, 5, 2);
+	Priority_AddLink(&list, 6, 4);
+	Priority_AddLink(&list, 7, 5);
+	Priority_AddLink(&list, 7, 5);
 	printf("Empty list:\n");
 	ListPriority(&list);
 	for (i32 i = 0; i < 10; ++i)
 	{
-		SV_TickPriorityQueue(list.links, list.numLinks);
+		Priority_TickQueue(&list);
 	}
-	SV_RemovePriorityLinkByIndex(
+	Priority_FlagLinkAsDead(
 		&list,
-		SV_GetPriorityLinkIndexById(&list, 4)
+		Priority_GetLinkIndexById(&list, 4)
 	);
-	SV_RemovePriorityLinkByIndex(
+	Priority_FlagLinkAsDead(
 		&list,
-		SV_GetPriorityLinkIndexById(&list, 2)
+		Priority_GetLinkIndexById(&list, 2)
 	);
 	ResetTopPriorityItems(&list, 3);
-	SV_TickPriorityQueue(list.links, list.numLinks);
+	Priority_TickQueue(&list);
 	printf("Ticked list:\n");
 	ListPriority(&list);
 	/*
