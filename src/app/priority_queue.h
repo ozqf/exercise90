@@ -38,7 +38,8 @@ struct PriorityLinkSet
 	i32 maxLinks;
 
     // For debugging
-    i32 highestMeasuredPriority;
+    f32 highestMeasuredPriority;
+    f32 currentHighest;
 };
 
 internal i32 Priority_CalcEntityLinkArrayBytes(i32 numEntities)
@@ -225,6 +226,7 @@ Run every tick
 internal void Priority_TickQueue(
     PriorityLinkSet* list)
 {
+    list->currentHighest = 0;
     for (i32 i = list->numLinks - 1; i >= 0; --i)
     {
         PriorityLink* link = &list->links[i];
@@ -242,7 +244,14 @@ internal void Priority_TickQueue(
             }
             // No? Extra importance bump Be gone with you already...
             link->importance += link->priority;
-            
+        }
+        if (link->importance > list->currentHighest)
+        {
+            list->currentHighest = link->importance;
+        }
+        if (link->importance > list->highestMeasuredPriority)
+        {
+            list->highestMeasuredPriority = link->importance;
         }
     }
 	Priority_BubbleSort(list->links, list->numLinks);

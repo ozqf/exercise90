@@ -135,9 +135,11 @@ void SV_WriteDebugString(ZStringHeader* str)
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "- Cmds/Sync Links -\nLinks %d\nDead Links %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "- Cmds/Sync Links -\nLinks %d\nDead Links %d\nLifetime max %.3f\nCurrent max %.3f\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     numLinks,
                     numDeadLinks,
+                    user->entSync.highestMeasuredPriority,
+                    user->entSync.currentHighest,
                     stats.numReliableMessages / stats.numPackets,
                     stats.numUnreliableMessages / stats.numPackets,
                     stats.totalBytes / stats.numPackets
