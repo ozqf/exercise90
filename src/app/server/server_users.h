@@ -74,7 +74,7 @@ internal void SVU_AddEntityLinkForAllUsers(
     {
         User* user = &users->items[i];
         if (user->state == USER_STATE_FREE) { continue; }
-        SV_AddPriorityLink(&user->entSync, entSerial, priority);
+        Priority_AddLink(&user->entSync, entSerial, priority);
     }
 }
 
@@ -95,7 +95,7 @@ internal void SVU_RemoveEntityForAllUsers(
         User* u = &g_users.items[i];
         if (u->state == USER_STATE_FREE) { continue; }
         //SV_RemovePriorityLinkBySerial(&u->entSync, entSerial);
-        SV_FlagLinkAsDead(&u->entSync, entSerial);
+        Priority_FlagLinkAsDead(&u->entSync, entSerial);
     }
 }
 
@@ -119,7 +119,7 @@ internal void SVU_StartUserSync(User* user)
         // Add an entity link if required
         if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
         {
-            SV_AddPriorityLink(&user->entSync, ent->id.serial, 1);
+            Priority_AddLink(&user->entSync, ent->id.serial, 1);
         }
 
         // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
@@ -153,7 +153,7 @@ internal User* SVU_CreateUser(UserIds ids, ZNetAddress* addr)
     user->entSync = {};
     user->entSync.links = (SVEntityLink*)COM_Malloc(
         &g_mallocs,
-        SV_CalcEntityLinkArrayBytes(APP_MAX_ENTITIES),
+        Priority_CalcEntityLinkArrayBytes(APP_MAX_ENTITIES),
         "EntLinks");
     user->entSync.maxLinks = APP_MAX_ENTITIES;
     user->entSync.numLinks = 0;

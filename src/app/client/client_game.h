@@ -97,7 +97,15 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             ent->body.error.x = currentPos.x - cmd->update.pos.x;
             ent->body.error.y = currentPos.y - cmd->update.pos.y;
             ent->body.error.z = currentPos.z - cmd->update.pos.z;
-            ent->body.errorRate = 0.95f;
+            if (Vec3_Magnitude(&ent->body.error) > 2)
+            {
+                ent->body.errorRate = 0.8f;    
+            }
+            else
+            {
+                ent->body.errorRate = 0.95f;
+            }
+            
             ent->body.previousPos = ent->body.t.pos;
             ent->body.t.pos = cmd->update.pos;
             ent->priority = cmd->update.priority;

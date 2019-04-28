@@ -334,7 +334,7 @@ internal i32 Sim_InitProjTest(
     SimProjectileType t;
     t.speed = 45.0f;
     t.patternDef.numItems = 4;
-    t.lifeTime = 0.5f;
+    t.lifeTime = 1.5f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
     t.scale = { 1, 1, 1 };
 

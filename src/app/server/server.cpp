@@ -36,7 +36,7 @@ internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
 
-internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_10HZ;
+internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
 internal i32 g_debugFlags = SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
@@ -101,11 +101,14 @@ void SV_WriteDebugString(ZStringHeader* str)
                 i32 reliableKbps = (stats->lastSecond.reliableBytes * 8) / 1024;
                 i32 unreliableKbps = (stats->lastSecond.unreliableBytes * 8) / 1024;
                 i32 numLinks = user->entSync.numLinks;
-                i32 numEnqueued = Stream_CountCommands(&user->reliableStream.outputBuffer);
+                i32 numDeadLinks = Priority_TallyDeadLinks(
+                    user->entSync.links, user->entSync.numLinks);
+                i32 numEnqueued = Stream_CountCommands(
+                    &user->reliableStream.outputBuffer);
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\nLinks %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\nLinks %d\nDead Links %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     user->syncRateHertz,
                     kbpsTotal,
                     reliableKbps,
@@ -113,6 +116,7 @@ void SV_WriteDebugString(ZStringHeader* str)
                     numEnqueued,
                     user->reliableStream.outputBuffer.Written(),
                     numLinks,
+                    numDeadLinks,
                     stats->lastSecond.numReliableMessages / stats->numPackets,
                     stats->lastSecond.numUnreliableMessages / stats->numPackets,
                     stats->lastSecond.totalBytes / stats->numPackets
@@ -444,7 +448,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             break;
         }
 
-		SV_TickPriorityQueue(&user->entSync);
+		Priority_TickQueue(&user->entSync);
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;

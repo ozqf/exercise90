@@ -303,7 +303,8 @@ internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
         i32 sequence = packetAcks[i];
         TransmissionRecord* rec = 
             Stream_ClearReceivedOutput(&user->reliableStream, sequence);
-        SV_UpdateSyncAcks(&user->entSync, sequence, rec->syncIds, rec->numSyncMessages);
+        Priority_UpdateSyncAcks(
+            &user->entSync, sequence, rec->syncIds, rec->numSyncMessages);
 
     }
 	// Stream_ProcessPacketAcks(
