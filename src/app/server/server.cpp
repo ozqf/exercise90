@@ -371,6 +371,8 @@ void SV_Init()
     SV_LoadTestScene();
 
     SV_ListAllocs();
+    printf("SV sizeof(Command): %d\n", sizeof(Command)); 
+    printf("SV sizeof(S2C_EntitySync): %d\n", sizeof(S2C_EntitySync));
 }
 
 void SV_Shutdown()

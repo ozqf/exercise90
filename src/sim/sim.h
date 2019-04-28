@@ -3,7 +3,7 @@
 #include "../common/common.h"
 
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 3
+#define SIM_NET_MAX_PRIORITY 6
 
 #define SIM_DEFAULT_SPAWN_DELAY 1.5
 

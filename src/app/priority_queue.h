@@ -17,7 +17,7 @@ than others, increase its priority value so it accumulates importance faster
 #define ENT_LINK_STATUS_ACTIVE 0
 #define ENT_LINK_STATUS_DEAD 1
 
-struct SVEntityLink
+struct PriorityLink
 {
     i32 id;             // Serial number of related entity
     u8 status;
@@ -31,19 +31,22 @@ struct SVEntityLink
     f32 distance;
 };
 
-struct SVEntityLinkArray
+struct PriorityLinkSet
 {
-	SVEntityLink* links;
+	PriorityLink* links;
 	i32 numLinks;
 	i32 maxLinks;
+
+    // For debugging
+    i32 highestMeasuredPriority;
 };
 
 internal i32 Priority_CalcEntityLinkArrayBytes(i32 numEntities)
 {
-    return sizeof(SVEntityLink) * numEntities;
+    return sizeof(PriorityLink) * numEntities;
 }
 
-internal i32 Priority_TallyDeadLinks(SVEntityLink* links, i32 numLinks)
+internal i32 Priority_TallyDeadLinks(PriorityLink* links, i32 numLinks)
 {
     i32 total = 0;
     for (i32 i = 0; i < numLinks; ++i)
@@ -55,14 +58,14 @@ internal i32 Priority_TallyDeadLinks(SVEntityLink* links, i32 numLinks)
 }
 
 internal void Priority_UpdateSyncAcks(
-    SVEntityLinkArray* list, i32 packetSequence,
+    PriorityLinkSet* list, i32 packetSequence,
     i32* syncIds, i32 numSyncIds)
 {
     //printf("Update sync acks (%d links, %d ids)\n",
     //    list->numLinks, numSyncIds);
     for (i32 i = list->numLinks - 1; i >= 0; --i)
     {
-        SVEntityLink* link = &list->links[i];
+        PriorityLink* link = &list->links[i];
         for (i32 j = 0; j < numSyncIds; ++j)
         {
             if (link->id == syncIds[j]
@@ -82,7 +85,7 @@ internal void Priority_UpdateSyncAcks(
 }
 
 internal i32 Priority_GetLinkIndexById(
-    SVEntityLinkArray* list, i32 id)
+    PriorityLinkSet* list, i32 id)
 {
 	for (i32 i = 0; i < list->numLinks; ++i)
 	{
@@ -94,8 +97,8 @@ internal i32 Priority_GetLinkIndexById(
 	return -1;
 }
 
-internal SVEntityLink* Priority_AddLink(
-    SVEntityLinkArray* list, i32 id, f32 priority)
+internal PriorityLink* Priority_AddLink(
+    PriorityLinkSet* list, i32 id, f32 priority)
 {
 	// Avoid duplicates
     i32 i = Priority_GetLinkIndexById(list, id);
@@ -120,10 +123,10 @@ internal SVEntityLink* Priority_AddLink(
 }
 
 internal void Priority_SwapEntityLinks(
-    SVEntityLink* a,
-    SVEntityLink* b)
+    PriorityLink* a,
+    PriorityLink* b)
 {
-    SVEntityLink temp;
+    PriorityLink temp;
     temp = *a;
     *a = *b;
     *b = temp;
@@ -131,7 +134,7 @@ internal void Priority_SwapEntityLinks(
 }
 
 internal void Priority_RemovePriorityLinkByIndex(
-    SVEntityLinkArray* list, i32 index)
+    PriorityLinkSet* list, i32 index)
 {
 	if (index == -1) { return; }
     //printf("SV deleting priority link %d\n", index);
@@ -141,10 +144,10 @@ internal void Priority_RemovePriorityLinkByIndex(
 	list->numLinks -= 1;
 }
 
-internal void Priority_FlagLinkAsDead(SVEntityLinkArray* list, i32 id)
+internal void Priority_FlagLinkAsDead(PriorityLinkSet* list, i32 id)
 {
     // Find link
-    SVEntityLink* link = NULL;
+    PriorityLink* link = NULL;
     for (i32 i = 0; i < list->numLinks; ++i)
     {
         if (list->links[i].id == id)
@@ -173,7 +176,7 @@ internal void Priority_FlagLinkAsDead(SVEntityLinkArray* list, i32 id)
 }
 #if 0
 internal void Priority_RemoveLinkBySerial(
-    SVEntityLinkArray* list, i32 id)
+    PriorityLinkSet* list, i32 id)
 {
     for (i32 i = 0; i < list->numLinks; ++i)
     {
@@ -184,7 +187,7 @@ internal void Priority_RemoveLinkBySerial(
     }
 }
 #endif
-internal i32 Priority_CompareLink(SVEntityLink* a, SVEntityLink* b)
+internal i32 Priority_CompareLink(PriorityLink* a, PriorityLink* b)
 {
     if (a->importance < b->importance) { return -1; }
     if (a->importance > b->importance) { return 1; }
@@ -195,7 +198,7 @@ internal i32 Priority_CompareLink(SVEntityLink* a, SVEntityLink* b)
  * The ultimate sorting algorithm
  */
 internal void Priority_BubbleSort(
-    SVEntityLink* links, i32 numLinks)
+    PriorityLink* links, i32 numLinks)
 {
     i32 swapped;
     do
@@ -203,8 +206,8 @@ internal void Priority_BubbleSort(
         swapped = 0;
         for (i32 i = 0; i < numLinks - 1; ++i)
         {
-            SVEntityLink* a = &links[i];
-            SVEntityLink* b = &links[i + 1];
+            PriorityLink* a = &links[i];
+            PriorityLink* b = &links[i + 1];
             if (Priority_CompareLink(a, b) < 0)
             {
                 Priority_SwapEntityLinks(a, b);
@@ -220,11 +223,11 @@ Run every tick
 > Sort Priority Queue
 */
 internal void Priority_TickQueue(
-    SVEntityLinkArray* list)
+    PriorityLinkSet* list)
 {
     for (i32 i = list->numLinks - 1; i >= 0; --i)
     {
-        SVEntityLink* link = &list->links[i];
+        PriorityLink* link = &list->links[i];
         link->importance += link->priority;
         if (link->status == ENT_LINK_STATUS_DEAD &&
             link->baselineSequence != 0 &&

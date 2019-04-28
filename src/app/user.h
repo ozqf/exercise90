@@ -42,7 +42,7 @@ struct User
     NetStream reliableStream;
     NetStream unreliableStream;
     // Priority queue stuff
-    SVEntityLinkArray entSync;
+    PriorityLinkSet entSync;
 
     // Clients are considered in sync mode until their acknowledged
     // reliable message queue Id is >= to this.

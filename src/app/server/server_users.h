@@ -151,7 +151,7 @@ internal User* SVU_CreateUser(UserIds ids, ZNetAddress* addr)
     SVU_AllocateUserStream(&user->unreliableStream, KiloBytes(64));
 
     user->entSync = {};
-    user->entSync.links = (SVEntityLink*)COM_Malloc(
+    user->entSync.links = (PriorityLink*)COM_Malloc(
         &g_mallocs,
         Priority_CalcEntityLinkArrayBytes(APP_MAX_ENTITIES),
         "EntLinks");

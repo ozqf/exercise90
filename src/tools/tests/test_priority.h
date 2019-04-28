@@ -3,7 +3,7 @@
 #include "../../common/common.h"
 #include "../../app/priority_queue.h"
 
-internal void ListPriority(SVEntityLinkArray* list)
+internal void ListPriority(PriorityLinkSet* list)
 {
     printf("Priority list (%d/%d items)\n",
 		list->numLinks, list->maxLinks);
@@ -17,7 +17,7 @@ internal void ListPriority(SVEntityLinkArray* list)
     }
 }
 
-internal void ResetTopPriorityItems(SVEntityLinkArray* list, i32 numToClear)
+internal void ResetTopPriorityItems(PriorityLinkSet* list, i32 numToClear)
 {
 	if (numToClear > list->numLinks)
 	{
@@ -33,10 +33,10 @@ internal void Test_Priority()
 {
     printf("Test Priority\n");
 	
-	SVEntityLinkArray list = {};
+	PriorityLinkSet list = {};
 	i32 maxLinks = 8;
-	i32 bytes = sizeof(SVEntityLink) * maxLinks;
-	list.links = (SVEntityLink*)malloc(bytes);
+	i32 bytes = sizeof(PriorityLink) * maxLinks;
+	list.links = (PriorityLink*)malloc(bytes);
 	COM_ZeroMemory((u8*)list.links, bytes);
 	
 	list.maxLinks = 8;
@@ -69,7 +69,7 @@ internal void Test_Priority()
 	ListPriority(&list);
 	/*
     const i32 numLinks = 4;
-    SVEntityLink links[numLinks];
+    PriorityLink links[numLinks];
     links[0] = {};
     links[0].importance = 8;
     links[1] = {};

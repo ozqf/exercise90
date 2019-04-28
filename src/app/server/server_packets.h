@@ -35,7 +35,7 @@ internal i32 SVP_WriteUnreliableSection(
     stats->numUnreliableMessages += 1;
     // ENTITY SYNC
     #if 1
-    SVEntityLink* links = user->entSync.links;
+    PriorityLink* links = user->entSync.links;
     i32 numLinks = user->entSync.numLinks;
     // most of the time there will be too many entities
     // for one packet and this for loop will never complete
@@ -45,9 +45,11 @@ internal i32 SVP_WriteUnreliableSection(
         { break; }
         stats->numUnreliableMessages += 1;
 
-        SVEntityLink* link = &links[i];
+        PriorityLink* link = &links[i];
         i32 serial = link->id;
         SimEntity* ent = Sim_GetEntityBySerial(sim, serial);
+
+        // Prepare sync data
         S2C_EntitySync cmd = {};
         if (ent)
         {
@@ -58,10 +60,12 @@ internal i32 SVP_WriteUnreliableSection(
             // No entity? must be dead!
             Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, 0, link->id);
         }
+
+        // Write sync to packet
         packet->ptrWrite += COM_COPY(
             &cmd, packet->ptrWrite, cmd.header.size);
         
-        // Is this a new baseline?
+        // Is this a new baseline for unreliable ack?
         if (link->baselineSequence == 0)
         {
             link->baselineSequence = rec->sequence;
@@ -75,36 +79,8 @@ internal i32 SVP_WriteUnreliableSection(
         { break; }
     }
     #endif
-    #if 0
-    //APP_LOG(128, "SV Write ent sync for: ");
-	//i32 syncMessagesWritten = 0;
-	for (i32 i = 0; i < g_sim.maxEnts; ++i)
-	{
-		SimEntity* ent = &g_sim.ents[i];
-		if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
-        if (ent->isLocal) { continue; }
-		
-		if (packet->Space() < sizeof(S2C_EntitySync))
-		{
-			break;
-		}
-        //APP_LOG(32, "%d, ", ent->id.serial);
-        if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
-        {
-            S2C_EntitySync cmd = {};
-            Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-            packet->ptrWrite += COM_COPY(
-                &cmd, packet->ptrWrite, cmd.header.size);
-            //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
-		    syncMessagesWritten++;
-        }
-	}
-    #endif
-    //APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);
     stats->unreliableBytes = written;
-    //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
-    //    syncMessagesWritten, written, capacity);
     return written;
 }
 
@@ -150,14 +126,9 @@ internal i32 SVP_WriteReliableSection(
     return (capacity - space);
 }
 
-// Returns packet statistics
 internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 {
-	//printf("SV Write packet for user %d\n", user->ids.privateId);
-	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
-	
 	// enqueue
-	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 	PacketStats stats = {};
 	const i32 packetSize = SV_PACKET_MAX_BYTES;
 	// unreliable may use whatever space is remaining, but
@@ -183,24 +154,20 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     
     i32 reliableWritten = SVP_WriteReliableSection(
         user, &packet, reliableAllocation, rec, &stats);
-	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
 
     // -- write mid-packet deserialise check and unreliable sync data -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SVP_WriteUnreliableSection(
         sim, user, &packet, rec, &stats);
-    //if (unreliableWritten > 0)
-    //{
-    //    APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);
-    //}
     
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
+    App_SendTo(0, &user->address, buf, total);
+
     stats.totalBytes = total;
     stats.reliableBytes = reliableWritten;
     stats.unreliableBytes = unreliableWritten;
-    App_SendTo(0, &user->address, buf, total);
     return stats;
 }
 
