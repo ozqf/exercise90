@@ -229,14 +229,20 @@ internal void Priority_TickQueue(
     {
         PriorityLink* link = &list->links[i];
         link->importance += link->priority;
-        if (link->status == ENT_LINK_STATUS_DEAD &&
-            link->baselineSequence != 0 &&
-            link->baselineSequence < link->lastPacketAck)
+        if (link->status == ENT_LINK_STATUS_DEAD)
         {
-            //printf("SV Link baseline %d exceeded %d\n",
-            //    link->baselineSequence, link->lastPacketAck);
-            //printf("SV link removal acked for %d\n", link->id);
-            Priority_RemovePriorityLinkByIndex(list, i);
+            // Check if confirmed for removal
+            if (link->baselineSequence != 0 &&
+                link->baselineSequence < link->lastPacketAck)
+            {
+                //printf("SV Link baseline %d exceeded %d\n",
+                //    link->baselineSequence, link->lastPacketAck);
+                //printf("SV link removal acked for %d\n", link->id);
+                Priority_RemovePriorityLinkByIndex(list, i);
+            }
+            // No? Extra importance bump Be gone with you already...
+            link->importance += link->priority;
+            
         }
     }
 	Priority_BubbleSort(list->links, list->numLinks);

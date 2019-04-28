@@ -101,17 +101,19 @@ void SV_WriteDebugString(ZStringHeader* str)
                 i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
                 i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
                 i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
+                f32 lossEstimate = Ack_EstimateLoss(&user->acks);
                 i32 numEnqueued = Stream_CountCommands(
                     &user->reliableStream.outputBuffer);
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\n",
+                    "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nLoss %.1f%%\nEnqueued: %d (%d Bytes)\n",
                     user->syncRateHertz,
                     kbpsTotal,
                     (f32)stats.totalBytes / 1024.0f,
                     reliableKbps,
                     unreliableKbps,
+                    lossEstimate,
                     numEnqueued,
                     user->reliableStream.outputBuffer.Written()
 		        );

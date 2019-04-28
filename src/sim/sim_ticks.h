@@ -23,9 +23,9 @@ i32 Sim_TickSpawner(
         
         f32 time = (f32)progress / (f32)totalWait;
         //printf("Spawner time %f\n", time);
-        ent->body.t.scale.x = COM_LerpF32(0.01f, 1.0f, time);
+        ent->body.t.scale.x = COM_LerpF32(0.01f, 0.5f, time);
         ent->body.t.scale.y = COM_LerpF32(50.0f, 1.0f, time);
-        ent->body.t.scale.z = COM_LerpF32(0.01f, 1.0f, time);
+        ent->body.t.scale.z = COM_LerpF32(0.01f, 0.5f, time);
     }
     return COM_ERROR_NONE;
 }
