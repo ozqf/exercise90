@@ -207,6 +207,9 @@ struct SimScene
     i32 cmdSequence;
     i32 tick;
 
+    // for client. server has remote sequence anyway
+    i32 highestAssignedSequence;
+
     Vec3 boundaryMin;
     Vec3 boundaryMax;
 };

@@ -41,10 +41,6 @@ internal void SVG_HandleEntityDeath(
 {
 	APP_LOG(128, "SV Remove ent %d\n", victim->id.serial);
     
-    //S2C_RemoveEntity cmd = {};
-    //Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
-    //SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
-
     SimEntity* parent = Sim_GetEntityBySerial(
         sim, victim->relationships.parentId.serial);
     if (parent != NULL)
@@ -55,7 +51,16 @@ internal void SVG_HandleEntityDeath(
     // deterministic deaths will occur naturally on the client without server info
     if (!deathIsDeterministic)
     {
-        SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+        if (victim->flags & SIM_ENT_FLAG_POSITION_SYNC)
+        {
+            SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+        }
+        else
+        {
+            S2C_RemoveEntity cmd = {};
+            Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
+            SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+        }
     }
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately

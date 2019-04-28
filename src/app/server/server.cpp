@@ -35,6 +35,7 @@ internal i32 g_isRunning = 0;
 internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
+internal i32 g_unreliableProjectileDeaths = 1;
 
 internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 

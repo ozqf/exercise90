@@ -68,12 +68,33 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
     if (!ent)
     {
-        // This isn't a bug, and could happen naturally due to
-        // out-of-order updates
-        //APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
         // Must return executed or this dead command will stay
         // in the buffer!
+        // ... actually
+        // This isn't a bug, and could happen naturally due to
+        // out-of-order updates vs in order reliable updates
+        // If it is a 'death' sync, we need to hang onto it
+        // so that it can be refired when the entity has been spawned.
+        // Because entity spawns are always in order and reserved,
+        // use the highest spawned Id and compare
+        if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+        {
+            if (cmd->networkId > g_sim.highestAssignedSequence)
+            {
+                printf("CL Death of %d postponed (highest %d)!\n",
+                    cmd->networkId, g_sim.highestAssignedSequence);
+                return 0;
+            }
+            //printf("CL Death repeat of %d, dicarding\n", cmd->networkId);
+        }
+        return 1;
+        #if 0
+        //APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+        COM_ASSERT(cmd->type != S2C_ENTITY_SYNC_TYPE_DEATH,
+            "CL death sync but no entity!\n");
+        
         executed = 1;
+        #endif
     }
     else
     {
@@ -115,10 +136,10 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         }
         else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
-            //if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
-            //{
-            //    printf("CL Sync prj death of %d\n", cmd->networkId);
-            //}
+            if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
+            {
+                printf("CL Sync prj death of %d\n", cmd->networkId);
+            }
             CLG_HandleEntityDeath(&g_sim, cmd->networkId);
             Sim_RemoveEntity(sim, cmd->networkId);
         }

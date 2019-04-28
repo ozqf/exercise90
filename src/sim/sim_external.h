@@ -162,7 +162,10 @@ extern "C"
 i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 {
     if (isLocal) { return scene->localEntitySequence--; }
-    else { return scene->remoteEntitySequence++; }
+    else
+    {
+        return scene->remoteEntitySequence++;
+    }
 }
 
 extern "C"

@@ -66,6 +66,11 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+    // For clients, keep track of the latest entity spawned.
+    if (newSerial > scene->highestAssignedSequence)
+    {
+        scene->highestAssignedSequence = newSerial;
+    }
 	APP_LOG(64,
         "SIM assigned replicated ent serial %d (slot %d/%d)\n",
         ent->id.serial, ent->id.slot.iteration, ent->id.slot.index);
