@@ -102,6 +102,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     {
         if (cmd->networkId == g_avatarSerial)
         {
+            // TODO: Don't bother sending client avatar syncs
             // Do NOT sync the client's avatar here.
             // There's a special command for that!
             return 1;
@@ -399,24 +400,7 @@ CLG_DEFINE_ENT_UPDATE(Spawn)
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
     if (!g_tickEnemies) { return; }
-    /*
-    Vec3* pos = &ent->body.t.pos;
-    ent->previousPos.x = pos->x;
-    ent->previousPos.y = pos->y;
-    ent->previousPos.z = pos->z;
-    Vec3 move =
-    {
-        ent->velocity.x * deltaTime,
-        ent->velocity.y * deltaTime,
-        ent->velocity.z * deltaTime
-    };
     
-    ent->body.t.pos.x += move.x;
-    ent->body.t.pos.y += move.y;
-    ent->body.t.pos.z += move.z;
-    
-    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
-    */
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
@@ -493,7 +477,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
         //{ CLG_UpdateSpawn(sim, ent, deltaTime); } break;
-        { Sim_TickSpawner(sim, ent, deltaTime); } break;
+        { Sim_TickSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:

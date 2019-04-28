@@ -97,7 +97,7 @@ extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);
 extern "C" i32      Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max);
 extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
 
-extern "C" i32      Sim_TickSpawner(
+extern "C" i32      Sim_TickSpawn(
     SimScene* sim, SimEntity* ent, f32 deltaTime);
 
 // Searching/Querying

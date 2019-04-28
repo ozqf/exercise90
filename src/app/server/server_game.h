@@ -515,7 +515,7 @@ internal void SVG_TickEntity(
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
         //{ SVG_UpdateSpawn(sim, ent, deltaTime); } break;
-        { Sim_TickSpawner(sim, ent, deltaTime); } break;
+        { Sim_TickSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;
