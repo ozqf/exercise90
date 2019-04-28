@@ -83,7 +83,6 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             // There's a special command for that!
             return 1;
         }
-        APP_PRINT(64, "CL Sync type %d for ent %d\n", cmd->type, cmd->networkId);
         if (cmd->type == S2C_ENTITY_SYNC_TYPE_UPDATE)
         {
             Vec3 currentPos =
@@ -108,7 +107,11 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         }
         else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
-            printf("CL Sync death of %d\n", cmd->networkId);
+            //if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
+            //{
+            //    printf("CL Sync prj death of %d\n", cmd->networkId);
+            //}
+            CLG_HandleEntityDeath(&g_sim, cmd->networkId);
             Sim_RemoveEntity(sim, cmd->networkId);
         }
         else

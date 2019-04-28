@@ -61,9 +61,14 @@ internal i32 SVP_WriteUnreliableSection(
         packet->ptrWrite += COM_COPY(
             &cmd, packet->ptrWrite, cmd.header.size);
         
+        // Is this a new baseline?
+        if (link->baselineSequence == 0)
+        {
+            link->baselineSequence = rec->sequence;
+        }
+
         // Reset importance, add to transmission record
         link->importance = 0;
-        link->lastPacketSent = rec->sequence;
         rec->syncIds[rec->numSyncMessages] = serial;
         rec->numSyncMessages += 1;
         if (rec->numSyncMessages == MAX_PACKET_SYNC_MESSAGES)
@@ -184,11 +189,10 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = SVP_WriteUnreliableSection(
         sim, user, &packet, rec, &stats);
-    //i32 unreliableWritten = 0;
-    if (unreliableWritten > 0)
-    {
-        APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);
-    }
+    //if (unreliableWritten > 0)
+    //{
+    //    APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);
+    //}
     
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);

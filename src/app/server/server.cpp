@@ -253,7 +253,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 0;
+    const i32 stage = 1;
 	switch (stage)
     {
         case 1:

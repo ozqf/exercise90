@@ -33,6 +33,7 @@ internal TransmissionRecord* Stream_AssignTransmissionRecord(
     TransmissionRecord* rec = &records[sequence % MAX_TRANSMISSION_RECORDS];
     rec->sequence = sequence;
     rec->numReliableMessages = 0;
+    rec->numSyncMessages = 0;
     return rec;
 }
 

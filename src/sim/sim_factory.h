@@ -122,7 +122,7 @@ internal i32 Sim_InitActor(
     ent->attackTime = 0.05f;
     ent->body.speed = 6.0f;
     ent->display.colour = { 0, 1, 0, 1 };
-    ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
+    //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
 }
 
@@ -144,8 +144,8 @@ internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     //i32 count = 128;
-    //i32 count = 64;
-    i32 count = 1;
+    i32 count = 64;
+    //i32 count = 1;
     //i32 count = 20;
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
@@ -288,7 +288,7 @@ internal i32 Sim_InitProjBase(
     SimProjectileType t;
     t.speed = 10.0f;
     t.patternDef.numItems = 1;
-    t.lifeTime = 2.0f;
+    t.lifeTime = 1.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
     t.scale = { 1, 1, 1 };
 
@@ -334,7 +334,7 @@ internal i32 Sim_InitProjTest(
     SimProjectileType t;
     t.speed = 45.0f;
     t.patternDef.numItems = 4;
-    t.lifeTime = 6.0f;
+    t.lifeTime = 0.5f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
     t.scale = { 1, 1, 1 };
 

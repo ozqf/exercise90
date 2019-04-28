@@ -24,7 +24,7 @@ struct SVEntityLink
     f32 basePriority;
     f32 priority;
     f32 importance;
-    i32 lastPacketSent;
+    i32 baselineSequence;
     i32 lastPacketAck;
 
     // used for calculating priority
@@ -58,11 +58,13 @@ internal void SV_UpdateSyncAcks(
                 && link->lastPacketAck < packetSequence)
             {
                 link->lastPacketAck = packetSequence;
-                if (link->lastPacketSent <= link->lastPacketAck)
-                {
-                    printf("Link %d ack'd from packet %d\n",
-                        link->id, link->lastPacketAck);
-                }
+                //printf("SV Link %d baseline %d passed\n");
+
+                //if (link->lastPacketSent <= link->lastPacketAck)
+                //{
+                //    printf("Link %d ack'd from packet %d\n",
+                //        link->id, link->lastPacketAck);
+                //}
             }
         }
     }
@@ -81,17 +83,18 @@ internal i32 SV_GetPriorityLinkIndexById(
 	return -1;
 }
 
-internal void SV_AddPriorityLink(
+internal SVEntityLink* SV_AddPriorityLink(
     SVEntityLinkArray* list, i32 id, f32 priority)
 {
 	// Avoid duplicates
-	if (SV_GetPriorityLinkIndexById(list, id) != -1)
+    i32 i = SV_GetPriorityLinkIndexById(list, id);
+	if (i != -1)
 	{
-		printf("SV priority: id %d already linked!\n", id);
-		return;
+        return &list->links[i];
 	}
 	
-	i32 i = list->numLinks;
+    // Add a new one
+	i = list->numLinks;
 	COM_ASSERT(i < list->maxLinks, "No free entity links")
 	if (priority < 1)
 	{
@@ -102,6 +105,7 @@ internal void SV_AddPriorityLink(
 	list->links[i].id = id;
 	list->links[i].priority = priority;
     list->links[i].basePriority = priority;
+    return &list->links[i];
 }
 
 internal void SV_SwapEntityLinks(
@@ -119,7 +123,7 @@ internal void SV_RemovePriorityLinkByIndex(
     SVEntityLinkArray* list, i32 index)
 {
 	if (index == -1) { return; }
-    printf("SV deleting priority link %d\n", index);
+    //printf("SV deleting priority link %d\n", index);
 	i32 last = list->numLinks - 1;
 	list->links[index] = {};
 	SV_SwapEntityLinks(&list->links[index], &list->links[last]);
@@ -128,17 +132,33 @@ internal void SV_RemovePriorityLinkByIndex(
 
 internal void SV_FlagLinkAsDead(SVEntityLinkArray* list, i32 id)
 {
+    // Find link
+    SVEntityLink* link = NULL;
     for (i32 i = 0; i < list->numLinks; ++i)
     {
         if (list->links[i].id == id)
         {
-            // Reset last ack to flag this sync as 'dirty'
-            // and in need of acking
-            list->links[i].lastPacketAck = 0;
-            list->links[i].status = ENT_LINK_STATUS_DEAD;
-            printf("Entity Link %d flagged as dead\n", id);
+            link = &list->links[i];
+            break;
         }
     }
+    if (link == NULL)
+    {
+        /*
+        Entity is not currently tracked. Add a link so
+        the death message can be transferred
+        (this is even if the entity is not normally
+        position synchronised)
+        */
+       //printf("SV Ent %d not tracked, adding link\n", id);
+       link = SV_AddPriorityLink(list, id, 999);
+    }
+    // Mark for removal
+    link->status = ENT_LINK_STATUS_DEAD;
+    // Reset baseline for confirmation of
+    // status change
+    link->baselineSequence = 0;
+    //printf("Entity Link %d flagged as dead\n", id);
 }
 
 internal void SV_RemovePriorityLinkBySerial(
@@ -196,9 +216,12 @@ internal void SV_TickPriorityQueue(
         SVEntityLink* link = &list->links[i];
         link->importance += link->priority;
         if (link->status == ENT_LINK_STATUS_DEAD &&
-            link->lastPacketAck >= link->lastPacketSent)
+            link->baselineSequence != 0 &&
+            link->baselineSequence < link->lastPacketAck)
         {
-            printf("SV link removal acked for %d\n", link->id);
+            //printf("SV Link baseline %d exceeded %d\n",
+            //    link->baselineSequence, link->lastPacketAck);
+            //printf("SV link removal acked for %d\n", link->id);
             SV_RemovePriorityLinkByIndex(list, i);
         }
     }

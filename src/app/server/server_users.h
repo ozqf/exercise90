@@ -87,7 +87,7 @@ internal void SVU_AddBulkEntityLinksForAllUsers(
     }
 }
 
-internal void SVU_RemoveEntityLinkForAllUsers(
+internal void SVU_RemoveEntityForAllUsers(
     UserList* users, i32 entSerial)
 {
     for (i32 i = 0; i < g_users.max; ++i)

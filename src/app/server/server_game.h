@@ -37,7 +37,7 @@ internal SimEntity* SVG_FindAndValidateTarget(
 }
 
 internal void SVG_HandleEntityDeath(
-    SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style)
+    SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style, i32 deathIsDeterministic)
 {
 	APP_LOG(128, "SV Remove ent %d\n", victim->id.serial);
     
@@ -51,7 +51,12 @@ internal void SVG_HandleEntityDeath(
     {
         parent->relationships.liveChildren--;
     }
-    SVU_RemoveEntityLinkForAllUsers(&g_users, victim->id.serial);
+
+    // deterministic deaths will occur naturally on the client without server info
+    if (!deathIsDeterministic)
+    {
+        SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+    }
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
 	Sim_RemoveEntity(sim, victim->id.serial);
@@ -258,20 +263,29 @@ internal i32 SVG_StepProjectile(
     i32 overlaps = Sim_FindByAABB(
         sim, min, max, ent->id.serial, ents, 16);
     
+    i32 killed = 0;
     for (i32 i = 0; i < overlaps; ++i)
     {
         // TODO: For now just hit first valid entity in list
         SimEntity* victim = ents[i];
         if (Sim_IsEntTargetable(victim) == NO) { continue; }
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
-        SVG_HandleEntityDeath(sim, victim, ent, 0);
-        ent->timing.nextThink = sim->tick;
+        SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
+        //ent->timing.nextThink = sim->tick;
+        killed = 1;
         break;
     }
+
+    if (killed)
+    {
+        SVG_HandleEntityDeath(sim, ent, NULL, 0, 0);
+        return 0;
+    }
     
+    // Timeout
 	if (sim->tick >= ent->timing.nextThink)
 	{
-        SVG_HandleEntityDeath(sim, ent, NULL, 0);
+        SVG_HandleEntityDeath(sim, ent, NULL, 0, 1);
         return 0;
 	}
     return 1;
