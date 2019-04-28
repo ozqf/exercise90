@@ -81,8 +81,10 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         {
             if (cmd->networkId > g_sim.highestAssignedSequence)
             {
-                printf("CL Death of %d postponed (highest %d)!\n",
-                    cmd->networkId, g_sim.highestAssignedSequence);
+                //printf("CL GHOST WARNING\n");
+                //return 1;
+                //printf("CL Death of %d postponed (highest %d)!\n",
+                //    cmd->networkId, g_sim.highestAssignedSequence);
                 return 0;
             }
             //printf("CL Death repeat of %d, dicarding\n", cmd->networkId);

@@ -277,7 +277,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 1;
+    const i32 stage = 3;
 	switch (stage)
     {
         case 1:
@@ -290,6 +290,13 @@ internal void SV_LoadTestScene()
         case 2:
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
         SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
+        break;
+        case 3:
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
         break;
         default:
