@@ -58,7 +58,7 @@ internal void SV_UpdateSyncAcks(
                 && link->lastPacketAck < packetSequence)
             {
                 link->lastPacketAck = packetSequence;
-                if (link->lastPacketSent == link->lastPacketAck)
+                if (link->lastPacketSent <= link->lastPacketAck)
                 {
                     printf("Link %d ack'd from packet %d\n",
                         link->id, link->lastPacketAck);
@@ -119,6 +119,7 @@ internal void SV_RemovePriorityLinkByIndex(
     SVEntityLinkArray* list, i32 index)
 {
 	if (index == -1) { return; }
+    printf("SV deleting priority link %d\n", index);
 	i32 last = list->numLinks - 1;
 	list->links[index] = {};
 	SV_SwapEntityLinks(&list->links[index], &list->links[last]);
@@ -131,7 +132,11 @@ internal void SV_FlagLinkAsDead(SVEntityLinkArray* list, i32 id)
     {
         if (list->links[i].id == id)
         {
+            // Reset last ack to flag this sync as 'dirty'
+            // and in need of acking
+            list->links[i].lastPacketAck = 0;
             list->links[i].status = ENT_LINK_STATUS_DEAD;
+            printf("Entity Link %d flagged as dead\n", id);
         }
     }
 }
@@ -193,6 +198,7 @@ internal void SV_TickPriorityQueue(
         if (link->status == ENT_LINK_STATUS_DEAD &&
             link->lastPacketAck >= link->lastPacketSent)
         {
+            printf("SV link removal acked for %d\n", link->id);
             SV_RemovePriorityLinkByIndex(list, i);
         }
     }

@@ -144,8 +144,8 @@ internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     //i32 count = 128;
-    i32 count = 64;
-    //i32 count = 1;
+    //i32 count = 64;
+    i32 count = 1;
     //i32 count = 20;
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;

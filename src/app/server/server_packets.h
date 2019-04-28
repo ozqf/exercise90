@@ -52,17 +52,15 @@ internal i32 SVP_WriteUnreliableSection(
         if (ent)
         {
             Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, 0, ent);
-            packet->ptrWrite += COM_COPY(
-                &cmd, packet->ptrWrite, cmd.header.size);
         }
         else
         {
             // No entity? must be dead!
             Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, 0, link->id);
         }
+        packet->ptrWrite += COM_COPY(
+            &cmd, packet->ptrWrite, cmd.header.size);
         
-        
-
         // Reset importance, add to transmission record
         link->importance = 0;
         link->lastPacketSent = rec->sequence;

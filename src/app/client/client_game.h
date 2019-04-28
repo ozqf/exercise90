@@ -68,6 +68,8 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
     if (!ent)
     {
+        // This isn't a bug, and could happen naturally due to
+        // out-of-order updates
         //APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
         // Must return executed or this dead command will stay
         // in the buffer!
@@ -81,9 +83,9 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             // There's a special command for that!
             return 1;
         }
+        APP_PRINT(64, "CL Sync type %d for ent %d\n", cmd->type, cmd->networkId);
         if (cmd->type == S2C_ENTITY_SYNC_TYPE_UPDATE)
         {
-            //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
             Vec3 currentPos =
             {
                 ent->body.t.pos.x + ent->body.error.x,
@@ -106,6 +108,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         }
         else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
+            printf("CL Sync death of %d\n", cmd->networkId);
             Sim_RemoveEntity(sim, cmd->networkId);
         }
         else

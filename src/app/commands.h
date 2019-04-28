@@ -221,6 +221,7 @@ internal void Cmd_WriteEntitySyncAsDeath(
     cmd->header.size = sizeof(S2C_EntitySync);
     cmd->type = S2C_ENTITY_SYNC_TYPE_DEATH;
     cmd->networkId = entitySerial;
+    printf("SV Write death sync (%d) for %d\n", cmd->type, entitySerial);
 }
 
 ///////////////////////////////////////////////////////////////////////////
