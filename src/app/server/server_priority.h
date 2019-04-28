@@ -17,7 +17,12 @@ internal void SVP_CalculatePriorities(
     for (i32 i = numLinks - 1; i >= 0; --i)
     {
         SVEntityLink* link = &links[i];
-        if (link->status != ENT_LINK_STATUS_ACTIVE) { continue; }
+        if (link->status != ENT_LINK_STATUS_ACTIVE)
+        {
+            // Force to maximum for death updates
+            link->distance = 0;
+            continue;
+        }
 
         SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
         COM_ASSERT(ent, "Linked entity is null")

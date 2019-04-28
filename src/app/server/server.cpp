@@ -94,37 +94,64 @@ void SV_WriteDebugString(ZStringHeader* str)
         if (g_debugFlags & SV_DEBUG_USER_BANDWIDTH)
         {
             #if 1
-            StreamStats* stats = User_SumPacketStats(user);
-            if (stats->numPackets > 0)
+            StreamStats stats;
+            User_SumPacketStats(user, &stats);
+            if (stats.numPackets > 0)
             {
-                i32 kbpsTotal = (stats->lastSecond.totalBytes * 8) / 1024;
-                i32 reliableKbps = (stats->lastSecond.reliableBytes * 8) / 1024;
-                i32 unreliableKbps = (stats->lastSecond.unreliableBytes * 8) / 1024;
-                i32 numLinks = user->entSync.numLinks;
-                i32 numDeadLinks = Priority_TallyDeadLinks(
-                    user->entSync.links, user->entSync.numLinks);
+                i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
+                i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
+                i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
                 i32 numEnqueued = Stream_CountCommands(
                     &user->reliableStream.outputBuffer);
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\nLinks %d\nDead Links %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\n",
                     user->syncRateHertz,
                     kbpsTotal,
+                    (f32)stats.totalBytes / 1024.0f,
                     reliableKbps,
                     unreliableKbps,
                     numEnqueued,
-                    user->reliableStream.outputBuffer.Written(),
+                    user->reliableStream.outputBuffer.Written()
+		        );
+                #if 1
+                // Sequencing/jitter
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "- Latency -\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
+                    acks->outputSequence,
+                    acks->remoteSequence,
+                    user->ping,
+		        	user->jitter
+                );
+                #endif
+                i32 numLinks = user->entSync.numLinks;
+                i32 numDeadLinks = Priority_TallyDeadLinks(
+                    user->entSync.links, user->entSync.numLinks);
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "- Cmds/Sync Links -\nLinks %d\nDead Links %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     numLinks,
                     numDeadLinks,
-                    stats->lastSecond.numReliableMessages / stats->numPackets,
-                    stats->lastSecond.numUnreliableMessages / stats->numPackets,
-                    stats->lastSecond.totalBytes / stats->numPackets
+                    stats.numReliableMessages / stats.numPackets,
+                    stats.numUnreliableMessages / stats.numPackets,
+                    stats.totalBytes / stats.numPackets
+		        );
+                
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "--Last second totals --\nReliable Cmds %d\nUnreliable Cmds %d\n",
+                    stats.numReliableMessages,
+                    stats.numUnreliableMessages
 		        );
             }
             for (i32 i = 0; i < 256; ++i)
             {
-                i32 count = stats->commandCounts[i];
+                i32 count = stats.commandCounts[i];
                 if (count == 0) { continue; }
                 written += sprintf_s(
                     chars + written,
@@ -132,18 +159,6 @@ void SV_WriteDebugString(ZStringHeader* str)
                     "\tType %d: %d\n",
                     i, count);
             }
-            #endif
-            #if 0
-            // Sequencing/jitter
-            written += sprintf_s(
-                chars + written,
-                str->maxLength - written,
-                "Output seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
-                acks->outputSequence,
-                acks->remoteSequence,
-                user->ping,
-		    	user->jitter
-            );
             #endif
             #if 0
 		    // currently overflows debug text buffer:
@@ -452,7 +467,17 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
         user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
-        printf(".");
+
+        // add to totals
+        user->streamStats.numPackets += 1;
+        user->streamStats.totalBytes += stats.totalBytes;
+        user->streamStats.reliableBytes += stats.reliableBytes;
+        user->streamStats.unreliableBytes += stats.unreliableBytes;
+        user->streamStats.numReliableMessages += stats.numReliableMessages;
+        user->streamStats.numReliableSkipped += stats.numReliableSkipped;
+        user->streamStats.numUnreliableMessages += stats.numUnreliableMessages;
+
+        //printf(".");
         // Add up command stats here
         for (i32 j = 0; j < 256; ++j)
         {

@@ -197,7 +197,7 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
-    stats.packetSize = total;
+    stats.totalBytes = total;
     stats.reliableBytes = reliableWritten;
     stats.unreliableBytes = unreliableWritten;
     App_SendTo(0, &user->address, buf, total);

@@ -112,7 +112,7 @@ struct FakeSocket
         #endif
         if (this->info.RollDropPacket())
         {
-            APP_PRINT(16, "GULP\n");
+            //APP_PRINT(16, "GULP\n");
             return;
         }
         i32 i = this->GetFreeHandleIndex();
