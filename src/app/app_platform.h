@@ -390,6 +390,13 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         }
         return 1;
     }
+    if (numTokens == 4 && !COM_CompareStrings(tokens[0], "LAG"))
+    {
+        i32 minMS = COM_AsciIsDecimalInt32(tokens[1]);
+        i32 maxMS = COM_AsciIsDecimalInt32(tokens[2]);
+        f32 loss = (f32)COM_AsciIsDecimalInt32(tokens[3]) / 100.0f;
+        g_loopbackSocket.SetLagStats(minMS, maxMS, loss);
+    }
     if (g_isRunningServer && SV_ParseCommandString(str, tokens, numTokens)) { return 1; }
     if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }
     return 0;

@@ -50,20 +50,22 @@ struct FakeSocket
     f32 nextDelayTime;
     f32 nextDropTime;
 
-    void Init(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
+    void SetLagStats(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
     {
-        delayRecalcTime = 0;
-
         if (minLagMS > maxLagMS) { minLagMS = maxLagMS; }
-
         COM_ClampF32(&normalisedPacketLossChance, 0, 0.9f);
-        COM_ZeroMemory((u8*)this, sizeof(FakeSocket));
-
         // Half the given round trip time to get the delay for
         // an individual packet
         info.minMS = minLagMS / 2;
         info.maxMS = maxLagMS / 2;
         info.lossNormal = normalisedPacketLossChance;
+    }
+
+    void Init(i32 minLagMS, i32 maxLagMS, f32 normalisedPacketLossChance)
+    {
+        delayRecalcTime = 0;
+        COM_ZeroMemory((u8*)this, sizeof(FakeSocket));
+        SetLagStats(minLagMS, maxLagMS, normalisedPacketLossChance);
     }
 
     i32 GetFreeHandleIndex()

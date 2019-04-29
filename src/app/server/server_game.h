@@ -501,6 +501,7 @@ internal void SVG_TickEntity(
         { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SEEKER:
         { SVG_UpdateSeeker(sim, ent, deltaTime); } break;
+        //{  } break;
 		case SIM_TICK_TYPE_WANDERER:
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_BOUNCER:

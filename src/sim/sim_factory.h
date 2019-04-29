@@ -263,7 +263,8 @@ internal i32 Sim_InitSeeker(
     ent->flags =
           SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC
-        | SIM_ENT_FLAG_MOVE_AVOID;
+        | SIM_ENT_FLAG_MOVE_AVOID
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     ent->basePriority = 8;
     return COM_ERROR_NONE;
