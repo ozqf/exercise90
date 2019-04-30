@@ -178,7 +178,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = ent->relationships.childSpawnCount;
         event.patternDef.patternId = SIM_PATTERN_RADIAL;
-        event.patternDef.radius = 6.0f;
+        event.patternDef.radius = 10.0f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
@@ -218,28 +218,8 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 //////////////////////////////////////////////////////
 SVG_DEFINE_ENT_UPDATE(Spawn)
 {
-    if (ent->timing.nextThink >= sim->tick)
-    {
-        ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
-        ent->tickType = ent->coreTickType;
-    }
-    else
-    {
-        ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
-        f32 time = (f32)ent->timing.lastThink / (f32)ent->timing.nextThink;
-    }
-    
-    // if (ent->thinkTick <= 0)
-    // {
-    //     ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
-    //     ent->tickType = ent->coreTickType;
-    // }
-    // else
-    // {
-    //     ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
-    //     ent->thinkTick -= deltaTime;
-    // }
-    
+    SimEntity* target = Sim_FindTargetForEnt(sim, ent);
+    Sim_TickSpawn(sim, ent, deltaTime);
 }
 
 internal i32 SVG_StepProjectile(
@@ -515,8 +495,8 @@ internal void SVG_TickEntity(
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
-        //{ SVG_UpdateSpawn(sim, ent, deltaTime); } break;
-        { Sim_TickSpawn(sim, ent, deltaTime); } break;
+        { SVG_UpdateSpawn(sim, ent, deltaTime); } break;
+        //{ Sim_TickSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;

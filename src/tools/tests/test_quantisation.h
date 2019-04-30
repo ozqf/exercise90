@@ -58,28 +58,23 @@ f32 Test_DequantiseI16ToF32_B(u16 input, const i16 halfRange)
 // Quantise the given float into an integer between
 // -halfRange to +(halfRange - 1), within the given bits.
 // spare bits are used for decimal precision
-u32 Test_QuantiseF2I(f32 input, const i32 halfRange, u8 numBits)
+internal u32 Test_QuantiseF2I(f32 input, const i32 halfRange, const u8 numBits)
 {
-	// clamp
-	if (input > (halfRange - 1)) { input = (f32)(halfRange - 1); }
-	if (input < -halfRange) { input = (f32)-halfRange; }
+    // Remove sign
+    input += halfRange;
+    i32 positiveMaximum = (halfRange * 2) - 1;
+    // clamp
+    if (input > positiveMaximum) { input = (f32)positiveMaximum; }
+    if (input < 0) { input = 0; }
 	// Calc precision
-	f32 fullRange = (f32)(halfRange * 2);
-	i32 majorBits = (i32)log2f(fullRange);
+	i32 majorBits = (i32)log2f((f32)halfRange * 2);
 	i32 minorBits = numBits - majorBits;
 	f32 scale = powf(2, (f32)minorBits);
-    printf("%d major, %d minor. Scale %f\n", majorBits, minorBits, scale);
-	// quantise
-    printf("  Apply half range (%f), scale (%f)\n",
-        (input + halfRange), (input + halfRange)  * scale);
-	f32 output = input;
-	output += halfRange;
-	output *= scale;
-	return (u32)output;
+    return (u32)(input * scale);
 }
 
 // Reverse the Quantisation
-f32 Test_DequantiseI2F(i32 input, const i32 halfRange, u8 numBits)
+internal f32 Test_DequantiseI2F(i32 input, const i32 halfRange, const u8 numBits)
 {
 	// Calc precision
 	f32 fullRange = (f32)(halfRange * 2);
@@ -88,7 +83,7 @@ f32 Test_DequantiseI2F(i32 input, const i32 halfRange, u8 numBits)
 	f32 scale = powf(2, (f32)minorBits);
 	// unpack
 	f32 output = (f32)input;
-	output /=scale;
+	output /= scale;
 	output -= halfRange;
 	return output;
 }
@@ -98,6 +93,8 @@ void Test_QuantiseValue(f32 original, i32 halfRange, u8 numBits)
     i32 mask = COM_CreateBitmask(numBits);
 	printf("-----\n> %f in %d bits (%d bit mask)\n", original, numBits, numBits);
     u32 encoded = Test_QuantiseF2I(original, halfRange, numBits);
+    COM_PrintBits(encoded, 1);
+    COM_PrintBits(mask, 1);
     encoded = encoded & mask;
     f32 result = Test_DequantiseI2F(encoded, halfRange, numBits);
 	
@@ -114,7 +111,9 @@ void Tests_Quantisation()
     Test_QuantiseValue(30.14959403f, 32, 20);
     Test_QuantiseValue(30.14959403f, 32, 17);
     Test_QuantiseValue(30.14959403f, 32, 9);
-    Test_QuantiseValue(0.14959403f, 1, 10);
+    Test_QuantiseValue(0.14959403f, 2, 10);
+    Test_QuantiseValue(1.0f, 2, 10);
+    Test_QuantiseValue(-1.0f, 2, 10);
     Test_QuantiseValue(30.14959403f, 128, 16);
 
     //Test_QuantiseValue(24.0f, 16);
