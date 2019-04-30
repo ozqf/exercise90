@@ -84,6 +84,25 @@ internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd, i32 remainingSpa
     u8* cmdPtr = (u8*)cmd;
     COM_ASSERT(cmdPtr >= start, "Cmd position < buffer start")
     COM_ASSERT(cmdPtr < bufEnd, "Cmd position > buffer end")
+    
+    i32 bytesToDelete = cmd->size - remainingSpace;
+	u8* copyBlockDest = cmdPtr + remainingSpace;
+    u8* copyBlockStart = (u8*)cmd + cmd->size;
+    i32 bytesToCopy = bufEnd - copyBlockStart;
+    // printf("Deleting %d bytes. Copying %d bytes\n", bytesToDelete, bytesToCopy);
+	COM_CopyMemory(copyBlockStart, copyBlockDest, bytesToCopy);
+	b->ptrWrite -= bytesToDelete;
+}
+
+internal void Stream_DeleteCommand_Original(ByteBuffer* b, Command* cmd, i32 remainingSpace)
+{
+    ErrorCode err = Cmd_Validate(cmd); 
+    COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
+    u8* start = b->ptrStart;
+    u8* bufEnd = start + b->Written();
+    u8* cmdPtr = (u8*)cmd;
+    COM_ASSERT(cmdPtr >= start, "Cmd position < buffer start")
+    COM_ASSERT(cmdPtr < bufEnd, "Cmd position > buffer end")
 
     i32 bytesToDelete = cmd->size;
 	u8* copyBlockDest = (u8*)cmd;

@@ -211,7 +211,7 @@ internal void SVU_ClearStaleOutput(SimScene* sim, ByteBuffer* output)
         // Replace with a skip command.
         // printf("SVP User has outdated spawn event! (Id %d to %d)\n",
         //     firstSerial, numSerials);
-        #if 0
+        #if 1
         S2C_RemoveEntityGroup grp = {};
         Cmd_InitRemoveEntityGroup(&grp, cmd->tick, firstSerial, (u8)numSerials);
         // Remember to copy the reliable sequence number and tick!
@@ -219,8 +219,9 @@ internal void SVU_ClearStaleOutput(SimScene* sim, ByteBuffer* output)
 
         i32 spaceRequired = sizeof(S2C_RemoveEntityGroup);
         Stream_DeleteCommand(output, cmd, spaceRequired);
-        COM_COPY_STRUCT(&grp, cmd, spaceRequired);
+        COM_COPY(&grp, cmd, spaceRequired);
 		read = (u8*)cmd + spaceRequired;
+        end = output->ptrStart + output->Written();
         #endif
     }
 }
