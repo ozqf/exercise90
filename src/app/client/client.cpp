@@ -350,7 +350,7 @@ internal i32 CL_ExecReliableCommand(
 
 	switch (h->type)
 	{
-        case CMD_TYPE_S2C_SPAWN_PROJECTILE:
+        case CMD_TYPE_S2C_BULK_SPAWN:
         {
             S2C_BulkSpawn* prj = (S2C_BulkSpawn*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
@@ -386,6 +386,18 @@ internal i32 CL_ExecReliableCommand(
             CLG_HandleEntityDeath(&g_sim, cmd->entityId);
             Sim_RemoveEntity(sim, cmd->entityId);
             //APP_PRINT(64, "CL Remove Ent %d\n", cmd->entityId);
+        } break;
+        case CMD_TYPE_S2C_REMOVE_ENTITY_GROUP:
+        {
+            S2C_RemoveEntityGroup* cmd = (S2C_RemoveEntityGroup*)h;
+            for (i32 i = 0; i < cmd->numIds; ++i)
+            {
+                i32 serial = cmd->firstId + i;
+                CLG_HandleEntityDeath(sim, serial);
+                Sim_RemoveEntity(sim, serial);
+            }
+            printf("CL deleting outdated spawns (Id %d to %d)\n",
+                cmd->firstId, cmd->numIds);
         } break;
         case CMD_TYPE_S2C_SYNC:
         {
@@ -452,7 +464,7 @@ internal void CL_RunReliableCommands(
 		COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
 		if (CL_ExecReliableCommand(sim, h, deltaTime, diff))
         {
-            Stream_DeleteCommand(b, h);
+            Stream_DeleteCommand(b, h, 0);
         }
 	}
 }
@@ -517,7 +529,7 @@ internal void CL_RunUnreliableCommands(
         
         if (executed)
         {
-            Stream_DeleteCommand(b, h);
+            Stream_DeleteCommand(b, h, 0);
         }
         else
         {

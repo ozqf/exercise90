@@ -262,15 +262,26 @@ internal void SV_AddWanderer()
 
 internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
 {
-    SimEntSpawnData def = {};
-    def = {};
-    def.isLocal = 1;
-    def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    def.pos = pos;
-    def.childFactoryType = factoryType;
-    def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
-    def.scale = { 1, 1, 1 };
-    Sim_RestoreEntity(&g_sim, &def);
+    //SimEntSpawnData def = {};
+    //def = {};
+    //def.isLocal = 1;
+    //def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
+    //def.pos = pos;
+    //def.childFactoryType = factoryType;
+    //def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_SPAWNER, pos);
+    data.childFactoryType = factoryType;
+    Sim_RestoreEntity(&g_sim, &data);
+}
+
+internal void SV_AddBot(SimScene* sim, Vec3 pos)
+{
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_BOT, pos);
+    SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
+    S2C_RestoreEntity cmd = {};
+    Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
 }
 
 internal void SV_LoadTestScene()
@@ -303,6 +314,9 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
         break;
     }
+
+    SV_AddBot(sim, { -10, 0, 0 });
+
     // Place a test spawner
     // -10 Z == further away
     //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
@@ -313,7 +327,7 @@ internal void SV_LoadTestScene()
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
 
-    
+
 
     i32 numWanderers = 0;
     for (i32 i = 0; i < numWanderers; ++i)
@@ -442,6 +456,10 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 	{
 		User* user = &g_users.items[i];
 		if (user->state == USER_STATE_FREE) { continue; }
+
+        // Clean out reliable queue if possible
+        SVU_ClearStaleOutput(sim, &user->reliableStream.outputBuffer);
+
         // Update priorities
         SimEntity* avatar = Sim_GetEntityBySerial(sim, user->entSerial);
         if (avatar != NULL)

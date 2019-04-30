@@ -26,35 +26,6 @@ i32 CalcQuantizationBits(i32 highLimit, i32 lowLimit)
     return bits;
 }
 
-const i32 majorRange = 32;
-const i32 precisionBits = 9;
-
-u16 Test_QuantiseF32ToI16_B(f32 input, const i16 halfRange)
-{
-    const i32 totalBits = 16;
-    i32 majorBits = (i32)log2f((f32)halfRange * 2);
-    i32 minorBits = totalBits - majorBits;
-    //printf("Bits: %d major %d minor\n", majorBits, minorBits);
-    input += halfRange;
-    f32 scale = powf(2, (f32)minorBits);
-    input *= scale;
-    printf("  scaled up result: %f\n", input);
-    return (u16)input;
-}
-
-f32 Test_DequantiseI16ToF32_B(u16 input, const i16 halfRange)
-{
-    const i16 totalBits = 16;
-    i32 majorBits = (i32)log2f((f32)halfRange * 2);
-    i32 minorBits = totalBits - majorBits;
-    printf("Bits: %d major %d minor\n", majorBits, minorBits);
-    f32 output = input;
-    f32 scale = powf(2, (f32)minorBits);
-    output /= scale;
-    output -= halfRange;
-    return output;
-}
-
 // Quantise the given float into an integer between
 // -halfRange to +(halfRange - 1), within the given bits.
 // spare bits are used for decimal precision
@@ -115,11 +86,6 @@ void Tests_Quantisation()
     Test_QuantiseValue(1.0f, 2, 10);
     Test_QuantiseValue(-1.0f, 2, 10);
     Test_QuantiseValue(30.14959403f, 128, 16);
-
-    //Test_QuantiseValue(24.0f, 16);
-    //Test_QuantiseValue(32.0f, 16);
-    //Test_QuantiseValue(29.35f, 16);
-    //Test_QuantiseValue(-15.794f, 16);
 
     /*
     Current sync command sends:

@@ -75,7 +75,7 @@ internal Command* Stream_FindMessageBySequence(u8* ptr, i32 numBytes, i32 sequen
  * After:
  * blockStart* (rest of buffer ---- )bufferEnd*
  */
-internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd)
+internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd, i32 remainingSpace)
 {
     ErrorCode err = Cmd_Validate(cmd); 
     COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
@@ -100,7 +100,7 @@ internal void Stream_DeleteCommandBySequence(ByteBuffer* b, i32 sequence)
         b->ptrStart, b->Written(), sequence);
 	if (cmd)
 	{
-		Stream_DeleteCommand(b, cmd);
+		Stream_DeleteCommand(b, cmd, 0);
 	}
 }
 
@@ -121,7 +121,7 @@ internal TransmissionRecord* Stream_ClearReceivedOutput(
         Command* cmd = Stream_FindMessageBySequence(
 			b->ptrStart, b->Written(), seq);
         if (cmd == NULL) { continue; }
-        Stream_DeleteCommand(b, cmd);
+        Stream_DeleteCommand(b, cmd, 0);
     }
     return rec;
 }

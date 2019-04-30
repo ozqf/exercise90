@@ -131,6 +131,19 @@ internal i32 Sim_InitActor(
     return COM_ERROR_NONE;
 }
 
+internal i32 Sim_InitBot(
+    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
+{
+    Sim_SetEntityBase(ent, def);
+    ent->tickType = SIM_TICK_TYPE_BOT;
+    ent->coreTickType = SIM_TICK_TYPE_BOT;
+    ent->attackTime = 0.05f;
+    ent->body.speed = 6.5f;
+    ent->display.colour = { 0.3f, 0, 0.3f, 1 };
+    //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
+    return COM_ERROR_NONE;
+}
+
 internal i32 Sim_InitWorldVolume(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
@@ -395,6 +408,8 @@ internal SimEntity* Sim_SpawnEntity(
             err = Sim_InitExplosion(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_BOT:
+            err =  Sim_InitBot(sim, ent, def); break;
         case SIM_FACTORY_TYPE_SEEKER:
             err =  Sim_InitSeeker(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:

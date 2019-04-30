@@ -9,13 +9,14 @@
 #define CMD_TYPE_S2C_HANDSHAKE 254
 #define CMD_TYPE_S2C_SET_SCENE 253
 #define CMD_TYPE_S2C_RESTORE_ENTITY 252
-#define CMD_TYPE_S2C_SPAWN_PROJECTILE 251
+#define CMD_TYPE_S2C_BULK_SPAWN 251
 #define CMD_TYPE_S2C_SYNC 250
 #define CMD_TYPE_C2S_INPUT 249
 #define CMD_TYPE_S2C_SYNC_ENTITY 248
 #define CMD_TYPE_PING 247
 #define CMD_TYPE_S2C_INPUT_RESPONSE 246
 #define CMD_TYPE_S2C_REMOVE_ENTITY 245
+#define CMD_TYPE_S2C_REMOVE_ENTITY_GROUP 244
 
 struct CmdPing
 {
@@ -142,13 +143,20 @@ struct S2C_RestoreEntity
     f32 yaw;
 };
 
+// TODO: Any entity specific spawning stuff here
 internal void Cmd_InitRestoreEntity(
-    S2C_RestoreEntity* cmd, i32 tick, i32 sequence)
+    S2C_RestoreEntity* cmd, i32 tick, SimEntity* ent)
 {
     *cmd = {};
-    Cmd_Prepare(&cmd->header, tick, sequence);
+    Cmd_Prepare(&cmd->header, tick, 0);
     cmd->header.size = sizeof(S2C_RestoreEntity);
     cmd->header.type = CMD_TYPE_S2C_RESTORE_ENTITY;
+    cmd->factoryType = (u8)ent->factoryType;
+    cmd->networkId = ent->id.serial;
+    cmd->pos = ent->body.t.pos;
+    cmd->vel = ent->body.velocity;
+    cmd->pitch = ent->body.pitch;
+    cmd->yaw = ent->body.yaw;
 }
 
 struct S2C_RemoveEntity
@@ -165,6 +173,25 @@ internal void Cmd_InitRemoveEntity(
     cmd->header.size = sizeof(S2C_RemoveEntity);
     cmd->header.type = CMD_TYPE_S2C_REMOVE_ENTITY;
     cmd->entityId = entId;
+}
+
+struct S2C_RemoveEntityGroup
+{
+    Command header;
+    i32 firstId;
+    u8 numIds;
+};
+
+internal void Cmd_InitRemoveEntityGroup(
+    S2C_RemoveEntityGroup* cmd, i32 tick, i32 firstId, u8 numIds)
+{
+    *cmd = {};
+    Cmd_Prepare(&cmd->header, tick, 0);
+    cmd->header.size = sizeof(S2C_RemoveEntityGroup);
+    cmd->header.type = CMD_TYPE_S2C_REMOVE_ENTITY_GROUP;
+    cmd->firstId = firstId;
+    cmd->numIds = numIds;
+
 }
 
 #define S2C_ENTITY_SYNC_TYPE_UPDATE 0
@@ -241,7 +268,7 @@ internal void Cmd_InitBulkSpawn(
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick, sequence);
     cmd->header.size = sizeof(S2C_BulkSpawn);
-    cmd->header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    cmd->header.type = CMD_TYPE_S2C_BULK_SPAWN;
     cmd->def = *event;
 }
 #endif

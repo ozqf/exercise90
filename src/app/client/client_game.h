@@ -139,10 +139,10 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         }
         else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
-            if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
-            {
-                printf("CL Sync prj death of %d\n", cmd->networkId);
-            }
+            //if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
+            //{
+            //    printf("CL Sync prj death of %d\n", cmd->networkId);
+            //}
             CLG_HandleEntityDeath(&g_sim, cmd->networkId);
             Sim_RemoveEntity(sim, cmd->networkId);
         }
@@ -482,6 +482,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:
         { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_BOT: { } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         default: { COM_ASSERT(0, "Client - unknown entity tick type") } break;

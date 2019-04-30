@@ -114,7 +114,7 @@ HAS executed a command, not that they definitely haven't. It could be queued up
 just not ack'd. yet. So they WOULD spawn stuff and this scan would be invalid
 Search for number of entities in a range that are assigned
 */
-#if 0
+#if 1
 extern "C"
 i32 Sim_ScanForSerialRange(SimScene* sim, i32 firstSerial, i32 numSerials)
 {

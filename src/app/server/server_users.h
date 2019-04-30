@@ -122,18 +122,8 @@ internal void SVU_StartUserSync(User* user)
             Priority_AddLink(&user->entSync, ent->id.serial, 1);
         }
 
-        // TODO: Passing in sequence 0 as it is set by the stream when enqueued anyway
-        // is manually setting it ever required?
-        Cmd_InitRestoreEntity(&cmd, g_ticks, 0);
+        Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
         
-        // TODO: Any entity specific spawning stuff here
-        cmd.factoryType = (u8)ent->factoryType;
-        cmd.networkId = ent->id.serial;
-        cmd.pos = ent->body.t.pos;
-        cmd.vel = ent->body.velocity;
-        cmd.pitch = ent->body.pitch;
-        cmd.yaw = ent->body.yaw;
-
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);
         APP_LOG(64, "  Write Entity %d\n", ent->id.serial);
@@ -192,4 +182,45 @@ UserIds SVU_CreateLocalUser()
 	SVU_SpawnUserAvatar(u);
     SVU_StartUserSync(u);
     return id;
+}
+
+internal void SVU_ClearStaleOutput(SimScene* sim, ByteBuffer* output)
+{
+    u8* read = output->ptrStart;
+    u8* end = read + output->Written();
+    while(read < end)
+    {
+        Command* cmd = (Command*)read;
+		ErrorCode err = Cmd_Validate(cmd);
+		COM_ASSERT(err == COM_ERROR_NONE, "Bad command")
+        read += cmd->size;
+        if (cmd->type != CMD_TYPE_S2C_BULK_SPAWN) { continue; }
+
+        S2C_BulkSpawn* spawn = (S2C_BulkSpawn*)cmd;
+        i32 firstSerial = spawn->def.base.firstSerial;
+        i32 numSerials = spawn->def.patternDef.numItems;
+        i32 numAlive = Sim_ScanForSerialRange(&g_sim,
+            firstSerial,
+            numSerials);
+        if (numAlive > 0)
+        {
+            // This event is still relevant because entities from it
+            // still exist
+            continue;
+        }
+        // Replace with a skip command.
+        // printf("SVP User has outdated spawn event! (Id %d to %d)\n",
+        //     firstSerial, numSerials);
+        #if 0
+        S2C_RemoveEntityGroup grp = {};
+        Cmd_InitRemoveEntityGroup(&grp, cmd->tick, firstSerial, (u8)numSerials);
+        // Remember to copy the reliable sequence number and tick!
+        grp.header.sequence = cmd->sequence;
+
+        i32 spaceRequired = sizeof(S2C_RemoveEntityGroup);
+        Stream_DeleteCommand(output, cmd, spaceRequired);
+        COM_COPY_STRUCT(&grp, cmd, spaceRequired);
+		read = (u8*)cmd + spaceRequired;
+        #endif
+    }
 }

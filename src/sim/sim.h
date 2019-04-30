@@ -30,6 +30,7 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_RUBBLE 11
 #define SIM_FACTORY_TYPE_DART 12
 #define SIM_FACTORY_TYPE_EXPLOSION 13
+#define SIM_FACTORY_TYPE_BOT 14
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0
@@ -44,6 +45,7 @@ typedef u8 simFactoryType;
 #define SIM_TICK_TYPE_DART 10
 #define SIM_TICK_TYPE_EXPLOSION 11
 #define SIM_TICK_TYPE_SPAWN 12
+#define SIM_TICK_TYPE_BOT 13
 
 // Spawn pattern types.
 #define SIM_PATTERN_NONE 0
@@ -78,6 +80,7 @@ extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 // Entity list functions
 extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
 extern "C" SimEntity* Sim_GetEntityByIndex(SimScene* sim, SimEntIndex index);
+extern "C" i32      Sim_ScanForSerialRange(SimScene* sim, i32 firstSerial, i32 numSerials);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);

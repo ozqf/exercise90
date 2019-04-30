@@ -3,6 +3,37 @@
 #include "server.cpp"
 #include <math.h>
 
+
+internal void Sim_PrepareSpawnData(
+    SimScene* sim, SimEntSpawnData* data,
+    i32 bIsLocal, u8 factoryType,
+    Vec3 pos)
+{
+    *data = {};
+    data->isLocal = bIsLocal;
+    data->serial = Sim_ReserveEntitySerial(&g_sim, bIsLocal);
+    data->pos = pos;
+    data->factoryType = factoryType;
+}
+
+internal void SVG_ReplicateSpawn(
+    SimScene* sim, SimBulkSpawnEvent* event,
+    i32 bSyncPosition, f32 priority)
+{
+    // Replicate!
+    S2C_BulkSpawn cmd = {};
+    Cmd_InitBulkSpawn(&cmd, event, g_ticks, 0);
+	SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+    if (bSyncPosition)
+    {
+        SVU_AddBulkEntityLinksForAllUsers(
+            &g_users,
+            event->base.firstSerial,
+            event->patternDef.numItems,
+            priority);
+    }
+}
+
 // Returns target if found
 internal SimEntity* SVG_FindAndValidateTarget(
     SimScene* sim, SimEntity* ent)
@@ -51,6 +82,11 @@ internal void SVG_HandleEntityDeath(
     // deterministic deaths will occur naturally on the client without server info
     if (!deathIsDeterministic)
     {
+        SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+
+        // Alter replication of event depending on relationship
+        // to a user
+        #if 0
         if (victim->flags & SIM_ENT_FLAG_POSITION_SYNC)
         {
             SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
@@ -61,6 +97,7 @@ internal void SVG_HandleEntityDeath(
             Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
             SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
         }
+        #endif
     }
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
@@ -170,7 +207,6 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         ent->timing.nextThink += App_CalcTickInterval(2);
         // think
         // Spawn projectiles
-        #if 1
         SimBulkSpawnEvent event = {};
         event.factoryType = ent->relationships.childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(
@@ -191,8 +227,11 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 
         ent->relationships.liveChildren += 
             ent->relationships.childSpawnCount;
-
+        
         // Replicate!
+        SVG_ReplicateSpawn(
+            sim, &event, flags & SIM_ENT_FLAG_POSITION_SYNC, priority);
+        #if 0
         S2C_BulkSpawn prj = {};
         Cmd_InitBulkSpawn(&prj, &event, g_ticks, 0);
 		SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
@@ -201,14 +240,6 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
             SVU_AddBulkEntityLinksForAllUsers(
                 &g_users, event.base.firstSerial, event.patternDef.numItems, priority);
         }
-        #endif
-        #if 0
-        SimEnemySpawnEvent event {};
-        event.enemyType = SIM_FACTORY_TYPE_WANDERER;
-        event.base.firstSerial = Sim_ReserveEntitySerials(
-            sim, 0, 8);
-        event.base.pos = ent->body.t.pos;
-        event.base.forward = ent->body.t.pos;
         #endif
     }
 }
@@ -385,7 +416,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     S2C_BulkSpawn prj = {};
     Cmd_Prepare(&prj.header, eventTick, 0);
     prj.def = event;
-    prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    prj.header.type = CMD_TYPE_S2C_BULK_SPAWN;
     prj.header.size = sizeof(prj);
     SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
 
@@ -472,6 +503,14 @@ SVG_DEFINE_ENT_UPDATE(Actor)
     }
 }
 
+SVG_DEFINE_ENT_UPDATE(Bot)
+{
+    u32 buttons = 0;
+    buttons |= ACTOR_INPUT_SHOOT_RIGHT;
+    ent->input.buttons = buttons;
+    SVG_UpdateActor(sim, ent, deltaTime);
+}
+
 internal void SVG_TickEntity(
     SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
@@ -490,6 +529,8 @@ internal void SVG_TickEntity(
         { SVG_UpdateDart(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_BOT:
+        { SVG_UpdateBot(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWNER:
         { SVG_UpdateSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:

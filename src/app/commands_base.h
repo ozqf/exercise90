@@ -46,6 +46,9 @@ internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
     b->ptrWrite += COM_COPY(cmd, b->ptrWrite, cmd->size);
 }
 
+
+// TODO: Passing in sequence 0 often here as it is set by the
+// stream when enqueued anyway. Is manually setting it ever required?
 internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
 {
     cmd->sentinel = CMD_SENTINEL;
