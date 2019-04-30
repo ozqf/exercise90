@@ -184,7 +184,7 @@ UserIds SVU_CreateLocalUser()
     return id;
 }
 
-internal void SVU_ClearStaleOutput(SimScene* sim, ByteBuffer* output)
+internal void SVU_ClearStaleOutput(User* user, SimScene* sim, ByteBuffer* output)
 {
     u8* read = output->ptrStart;
     u8* end = read + output->Written();
@@ -222,6 +222,9 @@ internal void SVU_ClearStaleOutput(SimScene* sim, ByteBuffer* output)
         COM_COPY(&grp, cmd, spaceRequired);
 		read = (u8*)cmd + spaceRequired;
         end = output->ptrStart + output->Written();
+        
+        // No need for any links either
+        Priority_DeleteLinkRange(&user->entSync, firstSerial, numSerials);
         #endif
     }
 }

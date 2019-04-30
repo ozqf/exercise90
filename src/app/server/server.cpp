@@ -459,7 +459,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 		if (user->state == USER_STATE_FREE) { continue; }
 
         // Clean out reliable queue if possible
-        SVU_ClearStaleOutput(sim, &user->reliableStream.outputBuffer);
+        SVU_ClearStaleOutput(user, sim, &user->reliableStream.outputBuffer);
 
         // Update priorities
         SimEntity* avatar = Sim_GetEntityBySerial(sim, user->entSerial);

@@ -145,6 +145,20 @@ internal void Priority_RemovePriorityLinkByIndex(
 	list->numLinks -= 1;
 }
 
+internal void Priority_DeleteLinkRange(
+    PriorityLinkSet* list, i32 firstId, i32 numIds)
+{
+    i32 lastId = firstId + (numIds - 1);
+    for (i32 i = list->numLinks - 1; i >= 0; --i)
+    {
+        PriorityLink* link = &list->links[i];
+        if (link->id >= firstId && link->id <= lastId)
+        {
+            Priority_RemovePriorityLinkByIndex(list, i);
+        }
+    }
+}
+
 internal void Priority_FlagLinkAsDead(PriorityLinkSet* list, i32 id)
 {
     // Find link
