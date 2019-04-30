@@ -55,52 +55,73 @@ f32 Test_DequantiseI16ToF32_B(u16 input, const i16 halfRange)
     return output;
 }
 
-i16 Test_QuantiseF32ToI16(f32 input)
+// Quantise the given float into an integer between
+// -halfRange to +(halfRange - 1), within the given bits.
+// spare bits are used for decimal precision
+u32 Test_QuantiseF2I(f32 input, const i32 halfRange, u8 numBits)
 {
-    i32 precision = (i32)powf(2, (f32)precisionBits);
-    i16 integer = (i16)((majorRange * 2) - 1) * (i16)precision;
-
-    printf("Input %f, Precision Bits %d (scale %d) integer max: %d Bits required: %d\n",
-        input, precisionBits, precision, integer, CalcNumBits(integer));
-    
-    input += majorRange;
-    input *= precision;
-    printf(" Result: %f\n", input);
-    return (i16)input;
+	// clamp
+	if (input > (halfRange - 1)) { input = (f32)(halfRange - 1); }
+	if (input < -halfRange) { input = (f32)-halfRange; }
+	// Calc precision
+	f32 fullRange = (f32)(halfRange * 2);
+	i32 majorBits = (i32)log2f(fullRange);
+	i32 minorBits = numBits - majorBits;
+	f32 scale = powf(2, (f32)minorBits);
+    printf("%d major, %d minor. Scale %f\n", majorBits, minorBits, scale);
+	// quantise
+    printf("  Apply half range (%f), scale (%f)\n",
+        (input + halfRange), (input + halfRange)  * scale);
+	f32 output = input;
+	output += halfRange;
+	output *= scale;
+	return (u32)output;
 }
 
-f32 Test_DequantiseI16ToF32(i16 input)
+// Reverse the Quantisation
+f32 Test_DequantiseI2F(i32 input, const i32 halfRange, u8 numBits)
 {
-    f32 output = input;
-    f32 precision = powf(2, (f32)precisionBits);
-    output /= precision;
-    output -= majorRange;
-    return output;
+	// Calc precision
+	f32 fullRange = (f32)(halfRange * 2);
+	i32 majorBits = (i32)log2f(fullRange);
+	i32 minorBits = numBits - majorBits;
+	f32 scale = powf(2, (f32)minorBits);
+	// unpack
+	f32 output = (f32)input;
+	output /=scale;
+	output -= halfRange;
+	return output;
 }
 
-void Test_QuantiseValue(f32 original)
+void Test_QuantiseValue(f32 original, i32 halfRange, u8 numBits)
 {
-    // i16 encoded = Test_QuantiseF32ToI16(original);
-    // f32 result = Test_DequantiseI16ToF32(encoded);
-    printf("-----\n> %f\n", original);
-    i16 encoded = Test_QuantiseF32ToI16_B(original, 32);
-    f32 result = Test_DequantiseI16ToF32_B(encoded, 32);
-    printf("%f -> %d -> %f\n", original, encoded, result);
+    i32 mask = COM_CreateBitmask(numBits);
+	printf("-----\n> %f in %d bits (%d bit mask)\n", original, numBits, numBits);
+    u32 encoded = Test_QuantiseF2I(original, halfRange, numBits);
+    encoded = encoded & mask;
+    f32 result = Test_DequantiseI2F(encoded, halfRange, numBits);
+	
+    printf("%f -> %d -> %f\n", original,  encoded, result);
     f32 diff = original - result;
     if (diff < 0.0f) { diff *= -1; }
-    if (diff < 0.01f)
-    {
-        printf("Okay!\n");
-    }
-    else
-    {
-        printf("Bad\n");
-    }
-    
+    printf("\tLoss: %f\n", diff);
 }
 
 void Tests_Quantisation()
 {
+    printf("\n-- Quantise Tests --\n");
+    Test_QuantiseValue(30.14959403f, 32, 16);
+    Test_QuantiseValue(30.14959403f, 32, 20);
+    Test_QuantiseValue(30.14959403f, 32, 17);
+    Test_QuantiseValue(30.14959403f, 32, 9);
+    Test_QuantiseValue(0.14959403f, 1, 10);
+    Test_QuantiseValue(30.14959403f, 128, 16);
+
+    //Test_QuantiseValue(24.0f, 16);
+    //Test_QuantiseValue(32.0f, 16);
+    //Test_QuantiseValue(29.35f, 16);
+    //Test_QuantiseValue(-15.794f, 16);
+
     /*
     Current sync command sends:
     i32 networkId;
@@ -134,18 +155,4 @@ void Tests_Quantisation()
     printf("\nVelocity quantization...\n");
     CalcQuantizationBits(128, 128);
     #endif
-    printf("\n-- Quantise Tests --\n");
-    Test_QuantiseValue(24.0f);
-    Test_QuantiseValue(26.0f);
-    Test_QuantiseValue(29.35f);
-    Test_QuantiseValue(31.1f);
-    Test_QuantiseValue(-15.794f);
-    //printf("And breaking it:\n");
-    //Test_QuantiseValue(32.0f);
-    //Test_QuantiseValue(-32.0f);
-    //Test_QuantiseValue(-33.0f);
-
-    //f32 testValue = 27.9251f;
-    //i32 numBits = (i32)ceilf(log2f(testValue));
-    //printf("Num bits for %f: %d\n", testValue, numBits);
 }
