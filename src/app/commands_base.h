@@ -27,6 +27,12 @@ struct Command
     // Controls execution time and order
     i32 tick;
     i32 sequence;
+
+    // Server re-transmission control
+    // ticks to next transmission
+    i8 sendTicks;
+    // times sent
+    i8 timesSent;
 };
 
 internal inline i32 Cmd_Validate(Command* cmd)
@@ -56,6 +62,8 @@ internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
     cmd->sequence = sequence;
     cmd->type = CMD_TYPE_NULL;
     cmd->size = CMD_INVALID_SIZE;
+    cmd->sendTicks = 0;
+    cmd->timesSent = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////

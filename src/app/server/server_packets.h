@@ -105,6 +105,19 @@ internal i32 SVP_WriteReliableSection(
         i32 size = cmd->size;
         read += size;
         if (cmd->size > space) { numCommandsNotWritten++; continue; }
+        if (cmd->sendTicks > 0) { cmd->sendTicks--; continue; }
+        
+        cmd->timesSent++;
+        // k this thing just ain't getting through
+        if (cmd->timesSent > 3)
+        {
+            cmd->sendTicks = 0;
+        }
+        else
+        {
+            cmd->sendTicks = 3;
+        }
+        
         
         packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
         space -= size;
