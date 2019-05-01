@@ -204,7 +204,8 @@ internal i32 Sim_InitWanderer(
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 1, 0, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
@@ -220,7 +221,8 @@ internal i32 Sim_InitRubble(
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.7f, 0.7f, 1, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
@@ -229,7 +231,7 @@ internal i32 Sim_InitBouncer(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
+    ent->body.speed = 6.0f;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -245,7 +247,7 @@ internal i32 Sim_InitDart(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 5;
+    ent->body.speed = 5.5f;
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_DART;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -253,7 +255,8 @@ internal i32 Sim_InitDart(
     //ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->display.colour = { 1, 0.7f, 0.3f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     //printf("Spawn dart on tick %d birth %d last %d next %d\n",
     //    scene->tick,

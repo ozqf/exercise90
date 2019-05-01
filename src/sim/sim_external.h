@@ -336,9 +336,9 @@ void Sim_Init(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
-    f32 halfX = 40;
-    f32 halfY = 30;
-    f32 halfZ = 30;
+    f32 halfX = 35;
+    f32 halfY = 25;
+    f32 halfZ = 25;
 
     SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
