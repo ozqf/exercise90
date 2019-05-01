@@ -317,6 +317,7 @@ internal void SV_LoadTestScene()
 
     SV_AddBot(sim, { 15, 0, 15 });
     SV_AddBot(sim, { 15, 0, -15 });
+    SV_AddBot(sim, { 15, 0, 0 });
 
     // Place a test spawner
     // -10 Z == further away

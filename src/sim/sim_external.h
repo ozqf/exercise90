@@ -63,6 +63,26 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
 }
 
+extern "C"
+void Sim_BoundaryStop(SimEntity* ent, Vec3* min, Vec3* max)
+{
+    Vec3* p = &ent->body.t.pos;
+    if (p->x < min->x)
+    { p->x = min->x; }
+    if (p->x > max->x)
+    { p->x = max->x; }
+
+    if (p->y < min->y)
+    { p->y = min->y; }
+    if (p->y > max->y)
+    { p->y = max->y; }
+
+    if (p->z < min->z)
+    { p->z = min->z; }
+    if (p->z > max->z)
+    { p->z = max->z; }
+}
+
 ////////////////////////////////////////////////////////////
 // Targetting and validation
 ////////////////////////////////////////////////////////////
@@ -316,9 +336,9 @@ void Sim_Init(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
-    f32 halfX = 30;
-    f32 halfY = 20;
-    f32 halfZ = 20;
+    f32 halfX = 40;
+    f32 halfY = 30;
+    f32 halfZ = 30;
 
     SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);

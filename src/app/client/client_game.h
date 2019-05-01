@@ -185,7 +185,7 @@ internal void CLG_StepActor(
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;
-
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
 internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)

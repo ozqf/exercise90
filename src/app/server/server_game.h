@@ -470,6 +470,7 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 
     if (ent->attackTick <= 0)
     {

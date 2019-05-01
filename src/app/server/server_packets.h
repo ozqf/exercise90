@@ -115,7 +115,7 @@ internal i32 SVP_WriteReliableSection(
         }
         else
         {
-            cmd->sendTicks = 3;
+            cmd->sendTicks = 5;
         }
         
         
