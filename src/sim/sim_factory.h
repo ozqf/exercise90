@@ -115,6 +115,14 @@ internal void Sim_SetEntityBase(
     Transform_SetScaleSafe(&ent->body.t, def->scale);
 }
 
+internal void Sim_SetEntityStats(
+    SimEntity* ent, f32 speed, i16 health, f32 attackTime)
+{
+    ent->body.speed = speed;
+    ent->life.health = health;
+    ent->attackTime = attackTime;
+}
+
 ////////////////////////////////////////////////////////////////////
 // Entity initialisation
 ////////////////////////////////////////////////////////////////////
@@ -124,8 +132,7 @@ internal i32 Sim_InitActor(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->coreTickType = SIM_TICK_TYPE_ACTOR;
-    ent->attackTime = 0.05f;
-    ent->body.speed = 6.5f;
+    Sim_SetEntityStats(ent, 6.5f, 1, 0.05f);
     ent->display.colour = { 0, 1, 0, 1 };
     //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -137,8 +144,7 @@ internal i32 Sim_InitBot(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_BOT;
     ent->coreTickType = SIM_TICK_TYPE_BOT;
-    ent->attackTime = 0.05f;
-    ent->body.speed = 6.5f;
+    Sim_SetEntityStats(ent, 6.5f, 1, 0.05f);
     ent->display.colour = { 0.3f, 0, 0.3f, 1 };
     //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
@@ -197,7 +203,7 @@ internal i32 Sim_InitWanderer(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 1;
+    Sim_SetEntityStats(ent, 1, 1, 1);
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_WANDERER;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -214,7 +220,7 @@ internal i32 Sim_InitRubble(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
+    Sim_SetEntityStats(ent, 4, 1, 1);
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_NONE;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -231,14 +237,15 @@ internal i32 Sim_InitBouncer(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 6.0f;
+    Sim_SetEntityStats(ent, 6.0f, 1, 1);
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
     ent->timing.lastThink = ent->timing.birthTick;
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
     ent->display.colour = { 0.5f, 0.5f, 0.7f, 1 };
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
 }
@@ -247,7 +254,7 @@ internal i32 Sim_InitDart(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 5.5f;
+    Sim_SetEntityStats(ent, 5.5f, 1, 1);
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_DART;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -270,7 +277,7 @@ internal i32 Sim_InitSeeker(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
     Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
+    Sim_SetEntityStats(ent, 4, 1, 1);
     ent->tickType = SIM_TICK_TYPE_SPAWN;
     ent->coreTickType = SIM_TICK_TYPE_SEEKER;
     ent->timing.lastThink = ent->timing.birthTick;
@@ -283,6 +290,38 @@ internal i32 Sim_InitSeeker(
         | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     ent->basePriority = 8;
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitGrunt(
+    SimScene* sim, SimEntity* ent, SimEntSpawnData* data)
+{
+    Sim_SetEntityBase(ent, data);
+    Sim_SetEntityStats(ent, 3, 1, 1);
+    ent->body.t.scale = { 1.5f, 1, 1.5f };
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitBrute(
+    SimScene* sim, SimEntity* ent, SimEntSpawnData* data)
+{
+    Sim_SetEntityBase(ent, data);
+    Sim_SetEntityStats(ent, 3, 1, 1);
+    ent->body.t.scale = { 3.0f, 2.0f, 3.0f };
+    ent->flags =
+          SIM_ENT_FLAG_SHOOTABLE
+        | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_MOVE_AVOID
+        | SIM_ENT_FLAG_OUT_OF_PLAY;
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitCharger(
+    SimScene* sim, SimEntity* ent, SimEntSpawnData* data)
+{
+    Sim_SetEntityBase(ent, data);
+    Sim_SetEntityStats(ent, 3, 1, 1);
+    ent->body.t.scale = { 2.0f, 2.0f, 2.0f };
     return COM_ERROR_NONE;
 }
 

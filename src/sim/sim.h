@@ -31,6 +31,9 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_DART 12
 #define SIM_FACTORY_TYPE_EXPLOSION 13
 #define SIM_FACTORY_TYPE_BOT 14
+#define SIM_FACTORY_TYPE_GRUNT 15
+#define SIM_FACTORY_TYPE_BRUTE 16
+#define SIM_FACTORY_TYPE_CHARGER 17
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0

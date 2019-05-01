@@ -111,6 +111,11 @@ struct SimEntity
         f32 yaw;
         Vec3 halfSize;
     } body;
+
+    struct
+    {
+        i16 health;
+    } life;
     
 	SimActorInput input;
 
