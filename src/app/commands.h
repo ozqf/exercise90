@@ -10,7 +10,7 @@
 #define CMD_TYPE_S2C_SET_SCENE 253
 #define CMD_TYPE_S2C_RESTORE_ENTITY 252
 #define CMD_TYPE_S2C_BULK_SPAWN 251
-#define CMD_TYPE_S2C_SYNC 250
+#define CMD_TYPE_S2C_SESSION_SYNC 250
 #define CMD_TYPE_C2S_INPUT 249
 #define CMD_TYPE_S2C_SYNC_ENTITY 248
 #define CMD_TYPE_PING 247
@@ -52,7 +52,7 @@ internal void Cmd_InitSync(
 {
     *cmd = {};
     Cmd_Prepare(&cmd->header, tick);
-    cmd->header.type = CMD_TYPE_S2C_SYNC;
+    cmd->header.type = CMD_TYPE_S2C_SESSION_SYNC;
     cmd->header.size = sizeof(S2C_Sync);
     cmd->simTick = simTick;
     cmd->jitterTickCount = jitterTickCount;

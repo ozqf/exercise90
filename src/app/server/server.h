@@ -1,11 +1,7 @@
 #pragma once
 
 #include "../../common/com_defines.h"
-#include "../app.h"
 #include "../user.h"
-#include "../commands.h"
-#include "../stream.h"
-#include "../packet.h"
 
 void    SV_Init();
 void    SV_Shutdown();

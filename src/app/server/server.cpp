@@ -3,10 +3,15 @@
 
 #include <stdlib.h>
 #include "../../common/common.h"
-#include "server.h"
+#include "../app.h"
+#include "../commands.h"
+#include "../commands_io.h"
+#include "../stream.h"
+#include "../packet.h"
 #include "../packet.h"
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
+#include "server.h"
 #include "server_priority.h"
 
 struct SVEntityFrame

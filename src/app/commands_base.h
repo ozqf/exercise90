@@ -21,11 +21,11 @@ typedef unsigned short CmdSeq;
 // pointer casting
 struct Command
 {
-    // for alignment checking
-    i32 sentinel;
     // Type and Size must be set by the implementing command
     u8 type;
     i32 size;
+    // for alignment checking
+    i32 sentinel;
 
     // Controls execution time and order
     i32 tick;

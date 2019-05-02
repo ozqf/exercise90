@@ -321,7 +321,7 @@ internal i32 CL_IsCommandTickSensitive(i32 cmdType)
 {
 	switch (cmdType)
 	{
-		case CMD_TYPE_S2C_SYNC: { return false; }
+		case CMD_TYPE_S2C_SESSION_SYNC: { return false; }
 	}
 	return true;
 }
@@ -399,7 +399,7 @@ internal i32 CL_ExecReliableCommand(
             printf("CL deleting outdated spawns (Id %d to %d)\n",
                 cmd->firstId, cmd->numIds);
         } break;
-        case CMD_TYPE_S2C_SYNC:
+        case CMD_TYPE_S2C_SESSION_SYNC:
         {
             S2C_Sync* sync = (S2C_Sync*)h;
 			CL_SetServerTick(sync->simTick);
