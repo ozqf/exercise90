@@ -53,12 +53,12 @@ internal i32 SVP_WriteUnreliableSection(
         S2C_EntitySync cmd = {};
         if (ent)
         {
-            Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, 0, ent);
+            Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, ent);
         }
         else
         {
             // No entity? must be dead!
-            Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, 0, link->id);
+            Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, link->id);
         }
 
         // Write sync to packet
@@ -122,7 +122,6 @@ internal i32 SVP_WriteReliableSection(
             // TODO: Vary resend wait based on packet loss?
             cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
         }
-        
         
         packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
         space -= size;

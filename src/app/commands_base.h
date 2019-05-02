@@ -13,6 +13,8 @@ Header only - base for command structs.
 #define CMD_SENTINEL 0xDEADBEEF
 #define CMD_INVALID_SIZE 0
 
+typedef unsigned short CmdSeq;
+
 // BASE FOR ALL COMMANDS
 // All commands MUST have a Command struct as their first member, for
 // pointer casting
@@ -26,7 +28,7 @@ struct Command
 
     // Controls execution time and order
     i32 tick;
-    i32 sequence;
+    CmdSeq sequence;
 
     // Server re-transmission control
     // ticks to next transmission
@@ -52,14 +54,10 @@ internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
     b->ptrWrite += COM_COPY(cmd, b->ptrWrite, cmd->size);
 }
 
-
-// TODO: Passing in sequence 0 often here as it is set by the
-// stream when enqueued anyway. Is manually setting it ever required?
-internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
+internal void Cmd_Prepare(Command* cmd, i32 tick)
 {
     cmd->sentinel = CMD_SENTINEL;
     cmd->tick = tick;
-    cmd->sequence = sequence;
     cmd->type = CMD_TYPE_NULL;
     cmd->size = CMD_INVALID_SIZE;
     cmd->sendTicks = 0;

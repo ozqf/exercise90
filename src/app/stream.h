@@ -7,6 +7,67 @@
 #include "../common/common.h"
 #include "commands_base.h"
 
+#define MAX_PACKET_TRANSMISSION_MESSAGES 64
+#define MAX_PACKET_SYNC_MESSAGES 64
+struct TransmissionRecord
+{
+	u32 sequence;
+	u32 numReliableMessages;
+	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
+	u32 numSyncMessages;
+	i32 syncIds[MAX_PACKET_SYNC_MESSAGES];
+};
+
+struct PacketStats
+{
+	i32 totalBytes;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+	i32 commandCounts[256];
+};
+
+struct StreamStats
+{
+	i32 numPackets;
+	i32 totalBytes;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+	i32 commandCounts[256];
+};
+
+#define MAX_TRANSMISSION_RECORDS 33
+struct NetStream
+{
+	// Has allocated buffers
+	i32 initialised;
+    // latest reliable command from remote executed here
+    CmdSeq          inputSequence;
+    ByteBuffer      inputBuffer;
+
+    // id of next reliable message sent to remote
+    CmdSeq          outputSequence;
+    ByteBuffer      outputBuffer;
+    // the most recented remotely acknowledged message Id
+    u32             ackSequence;
+	
+	AckStream		ackStream;
+
+    TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
+};
+
+internal void COM_InitStream(NetStream* stream, ByteBuffer input, ByteBuffer output)
+{
+    stream->inputBuffer = input;
+    stream->outputBuffer = output;
+    stream->inputSequence = 0;
+}
+
 internal i32 Stream_CountCommands(ByteBuffer* b)
 {
     u8* read = b->ptrStart;
@@ -219,7 +280,9 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
         APP_LOG(64, "STREAM cmd for enqueue is invalid. Code %d\n", error);
         return;
     }
+    // Only place where sequence should be set
     cmd->sequence = stream->outputSequence++;
+
     ByteBuffer* b = &stream->outputBuffer;
     COM_ASSERT(b->Space() >= cmd->size, "Not space for output Cmd");
     // TODO: Replace direct copy with customised encoding functions when protocol is ready for it

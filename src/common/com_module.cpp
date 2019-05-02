@@ -20,7 +20,6 @@
 #include "com_text_command_buffer.cpp"
 #include "com_random.cpp"
 #include "com_bitpack.cpp"
-#include "com_net_types.cpp"
 
 #include "com_collision.cpp"
 #include "com_heap/com_heap.cpp"

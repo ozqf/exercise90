@@ -22,7 +22,7 @@ internal void SVG_ReplicateSpawn(
 {
     // Replicate!
     S2C_BulkSpawn cmd = {};
-    Cmd_InitBulkSpawn(&cmd, event, g_ticks, 0);
+    Cmd_InitBulkSpawn(&cmd, event, g_ticks);
 	SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
     if (bSyncPosition)
     {
@@ -414,7 +414,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
 
     // Replicate
     S2C_BulkSpawn prj = {};
-    Cmd_Prepare(&prj.header, eventTick, 0);
+    Cmd_Prepare(&prj.header, eventTick);
     prj.def = event;
     prj.header.type = CMD_TYPE_S2C_BULK_SPAWN;
     prj.header.size = sizeof(prj);
