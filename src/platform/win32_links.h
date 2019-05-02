@@ -30,8 +30,6 @@ void Win32_InitPlatformInterface()
     platInterface.RenderScene = Platform_R_DrawScene;
     platInterface.SubmitRenderCommands = Platform_R_SubmitCommands;
 
-    platInterface.SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
-
     platInterface.LoadSound = Platform_LoadSound;
 
     platInterface.OpenFileForWriting = Platform_OpenFileForWriting;

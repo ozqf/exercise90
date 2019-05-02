@@ -49,6 +49,7 @@ typedef u8 simFactoryType;
 #define SIM_TICK_TYPE_EXPLOSION 11
 #define SIM_TICK_TYPE_SPAWN 12
 #define SIM_TICK_TYPE_BOT 13
+#define SIM_TICK_TYPE_GRUNT 14
 
 // Spawn pattern types.
 #define SIM_PATTERN_NONE 0

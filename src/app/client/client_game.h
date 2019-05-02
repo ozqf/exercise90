@@ -2,6 +2,8 @@
 
 #include "client.h"
 
+#include <math.h>
+
 internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntSpawnData def = {};
@@ -59,6 +61,11 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 			return;
 		}
 	}
+    f32 yaw = atan2f(-ent->body.velocity.z, ent->body.velocity.x);
+    yaw -= 90.0f * DEG2RAD;
+    f32 pitch = 0;//90.0f * DEG2RAD;
+    M3x3_SetToIdentity(ent->body.t.rotation.cells);
+    Transform_SetRotation(&ent->body.t, pitch, yaw, 0);
 }
 
 // Return 1 if the command was successfully executed.
@@ -482,6 +489,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:
         { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_GRUNT: { } break;
         case SIM_TICK_TYPE_BOT: { } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;

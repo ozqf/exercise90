@@ -49,7 +49,9 @@ struct SimEntId
 
 struct SimEntDisplay
 {
-    Colour colour;
+    i32 meshIndex;
+    Colour colourA;
+    Colour colourB;
 };
 
 struct SimEntity

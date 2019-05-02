@@ -107,15 +107,20 @@ internal i32 SVP_WriteReliableSection(
         if (cmd->size > space) { numCommandsNotWritten++; continue; }
         if (cmd->sendTicks > 0) { cmd->sendTicks--; continue; }
         
+        // Flow control to avoid filling packets with the same
+        // commands redundantly
         cmd->timesSent++;
         // k this thing just ain't getting through
-        if (cmd->timesSent > 3)
+        if (cmd->timesSent > SV_CMD_SLOW_RESEND_ATTEMPTS)
         {
+            // Spam the bloody thing out
             cmd->sendTicks = 0;
         }
         else
         {
-            cmd->sendTicks = 5;
+            // Resend just incase
+            // TODO: Vary resend wait based on packet loss?
+            cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
         }
         
         
@@ -184,7 +189,7 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     return stats;
 }
 
-internal void SVP_WriteTestPacket()
+/*internal void SVP_WriteTestPacket()
 {
     // Make a packet, no messages just a header
     u8 buf[1400];
@@ -199,7 +204,7 @@ internal void SVP_WriteTestPacket()
     addr.port = APP_CLIENT_LOOPBACK_PORT;
 
     App_SendTo(0, &addr, buf, written);
-}
+}*/
 
 internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
 {

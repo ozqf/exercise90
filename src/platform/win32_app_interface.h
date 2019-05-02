@@ -75,11 +75,6 @@ void Platform_BindTexture(void* rgbaPixels, u32 width, u32 height, u32 textureIn
     }
 }
 
-void Platform_SetDebugInputTextureIndex(i32 i)
-{
-    Win32_SetDebugInputTextureIndex(i);
-}
-
 // Copy the base name into the given buffer
 i32 Platform_GetBaseDirectoryName(char* buffer, i32 bufferSize)
 {

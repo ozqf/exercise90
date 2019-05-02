@@ -344,7 +344,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.factoryType = SIM_FACTORY_TYPE_WORLD;
-    def.pos.y = -0.5f;
+    def.pos.y = -1;
     def.scale.x = halfX * 2;
     def.scale.y = 1;
     def.scale.z = halfZ * 2;

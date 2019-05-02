@@ -548,7 +548,7 @@ int CALLBACK WinMain(
             g_time = {};
 
             // Make sure assets are ready before scene!
-            SharedAssets_Init();
+            COM_InitEmbeddedAssets();
             
 #if 1
             if (!Win32_LinkToApplication(&g_appLink, PLATFORM_DEFAULT_GAME_NAME))

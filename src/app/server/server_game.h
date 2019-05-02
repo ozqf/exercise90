@@ -507,7 +507,7 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 SVG_DEFINE_ENT_UPDATE(Bot)
 {
     u32 buttons = 0;
-    buttons |= ACTOR_INPUT_SHOOT_LEFT;
+    //buttons |= ACTOR_INPUT_SHOOT_LEFT;
     //buttons |= ACTOR_INPUT_SHOOT_UP;
     ent->input.buttons = buttons;
     SVG_UpdateActor(sim, ent, deltaTime);

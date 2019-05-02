@@ -23,6 +23,9 @@ struct SVEntityFrame
 #define SV_PACKET_MAX_BYTES 1400
 #define SV_PACKET_RELIABLE_MAX_BYTES 700
 
+#define SV_CMD_SLOW_RESEND_ATTEMPTS 3
+#define SV_CMD_RESEND_WAIT_TICKS 3
+
 //internal void SVU_EnqueueCommandForAllUsers(
 //    UserList* users, Command* cmd);
 
@@ -278,7 +281,17 @@ internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
 internal void SV_AddBot(SimScene* sim, Vec3 pos)
 {
     SimEntSpawnData data = {};
-    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_BOT, pos);
+    Sim_PrepareSpawnData(sim, &data, 0, SIM_FACTORY_TYPE_BOT, pos);
+    SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
+    S2C_RestoreEntity cmd = {};
+    Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
+    SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+}
+
+internal void SV_AddGrunt(SimScene* sim, Vec3 pos)
+{
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_GRUNT, pos);
     SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
     S2C_RestoreEntity cmd = {};
     Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
@@ -291,6 +304,9 @@ internal void SV_LoadTestScene()
     const i32 stage = 2;
 	switch (stage)
     {
+        case -1:
+        // No spawners
+        break;
         case 1:
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
@@ -317,7 +333,7 @@ internal void SV_LoadTestScene()
         break;
     }
 
-    //SV_AddBot(sim, { 15, 0, 15 });
+    SV_AddBot(sim, { 15, 0, 15 });
     //SV_AddBot(sim, { 15, 0, -15 });
     //SV_AddBot(sim, { 15, 0, 0 });
 

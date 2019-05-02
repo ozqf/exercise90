@@ -15,7 +15,6 @@ void CL_PopulateRenderScene(
     RendObj obj = {};
     MeshData* cube = COM_GetCubeMesh();
 	
-	
     // Hit test
     #if 0
 	i32 mouseScrX = Input_GetActionValue(
@@ -119,9 +118,9 @@ void CL_PopulateRenderScene(
                 //printf("Percent %f\n", percent);
                 Colour c = 
 				{
-                    COM_LerpF32(ent->display.colour.r, 0, percent),
-                    COM_LerpF32(ent->display.colour.g, 0, percent),
-                    COM_LerpF32(ent->display.colour.b, 0, percent),
+                    COM_LerpF32(ent->display.colourA.r, 0, percent),
+                    COM_LerpF32(ent->display.colourA.g, 0, percent),
+                    COM_LerpF32(ent->display.colourA.b, 0, percent),
                     1
 				};
                 /*Colour c = 
@@ -139,13 +138,19 @@ void CL_PopulateRenderScene(
                     1
 				};*/
 				RendObj_SetAsMesh(
-					&obj, *cube, c, texIndex);
+					&obj,
+                    *COM_GetEmbeddedMesh(ent->display.meshIndex),
+                    ent->display.colourA,
+                    texIndex);
                 
             } break;
 			case SIM_FACTORY_TYPE_WORLD:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, { 0.2f, 0.2f, 0.2f, 1 }, texIndex);
+					&obj,
+                    *COM_GetEmbeddedMesh(ent->display.meshIndex),
+                    ent->display.colourA,
+                    texIndex);
 			} break;
 
             case SIM_FACTORY_TYPE_PROJ_PLAYER:
@@ -155,7 +160,10 @@ void CL_PopulateRenderScene(
                 //printf("PRJ SCALE %.3f, %.3f, %.3f\n",
                 //    ent->t.scale.x, ent->t.scale.y, ent->t.scale.z);
 				RendObj_SetAsMesh(
-					&obj, *cube, { 1, 1, 0, 1 }, texIndex);
+					&obj,
+                    *COM_GetEmbeddedMesh(ent->display.meshIndex),
+                    ent->display.colourA,
+                    texIndex);
 			} break;
 			
 			case SIM_FACTORY_TYPE_ACTOR:
@@ -184,7 +192,10 @@ void CL_PopulateRenderScene(
 			default:
 			{
 				RendObj_SetAsMesh(
-					&obj, *cube, ent->display.colour, texIndex);
+					&obj,
+                    *COM_GetEmbeddedMesh(ent->display.meshIndex),
+                    ent->display.colourA,
+                    texIndex);
 			} break;
 		}
         

@@ -100,13 +100,6 @@ u8 g_debugInputActive = 0;
 RenderListItem g_rendDebugItems[WIN32_NUM_DEBUG_ITEMS];
 RenderScene g_debugScene;
 
-void Win32_SetDebugInputTextureIndex(i32 index)
-{
-    //RendObj_AsciCharArray* c = &g_rendDebugItems[1].obj.data.charArray;
-    //c->textureIndex = index;
-    //PLAT_LOG(64, "PLATFORM Set Console texture index %d\n", index);
-}
-
 char g_lastDebugChar = 0;
 
 void Win32_ResetDebugInput()

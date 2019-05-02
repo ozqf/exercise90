@@ -60,9 +60,7 @@ struct AppPlatform
     // Rendering
     void (*RenderScene)             (RenderScene* scene);
     void (*SubmitRenderCommands)    (RenderCommand* commands, i32 numCommands);
-    // Set the texture the debug text on the platform should use
-    void (*SetDebugInputTextureIndex)  (i32 index);
-
+    
     void (*LoadSound)               (u8* data, i32 numBytes);
 
     // Network

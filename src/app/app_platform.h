@@ -109,8 +109,7 @@ internal i32  App_Init()
     APP_PRINT(64, "App load texture list\n");
     Tex_LoadTextureList(textures);
 
-    g_platform.SetDebugInputTextureIndex(
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
+    COM_InitEmbeddedAssets();
 
     // proc gen textures here
     //i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
