@@ -14,6 +14,7 @@ Header only - base for command structs.
 #define CMD_INVALID_SIZE 0
 
 typedef unsigned short CmdSeq;
+#define CMD_SEQ_MAX 0xFFFF;
 
 // BASE FOR ALL COMMANDS
 // All commands MUST have a Command struct as their first member, for

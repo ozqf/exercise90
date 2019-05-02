@@ -41,6 +41,13 @@ struct StreamStats
 	i32 commandCounts[256];
 };
 
+struct ReliableCmdQueueStats
+{
+    i32 count;
+    CmdSeq highestSeq;
+    CmdSeq lowestSeq;
+};
+
 #define MAX_TRANSMISSION_RECORDS 33
 struct NetStream
 {
@@ -68,23 +75,26 @@ internal void COM_InitStream(NetStream* stream, ByteBuffer input, ByteBuffer out
     stream->inputSequence = 0;
 }
 
-internal i32 Stream_CountCommands(ByteBuffer* b)
+internal ReliableCmdQueueStats Stream_CountCommands(ByteBuffer* b)
 {
+    ReliableCmdQueueStats result = {};
+    result.lowestSeq = CMD_SEQ_MAX;
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
-    i32 count = 0;
     while (read < end)
     {
         Command* cmd = (Command*)read;
         i32 err = Cmd_Validate(cmd);
         if (err)
         {
-            return -1;
+            return result;
         }
+        if (cmd->sequence < result.lowestSeq) { result.lowestSeq = cmd->sequence; }
+        if (cmd->sequence > result.highestSeq) { result.highestSeq = cmd->sequence; }
         read += cmd->size;
-        count++;
+        result.count++;
     }
-    return count;
+    return result;
 }
 
 internal TransmissionRecord* Stream_AssignTransmissionRecord(

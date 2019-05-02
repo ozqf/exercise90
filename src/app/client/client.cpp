@@ -83,9 +83,9 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
 
     written += sprintf_s(chars + written, str->maxLength,
 			"=== Commands ===\n%d reliablebytes %d\n%d unreliable bytes %d\n",
-            Stream_CountCommands(&g_reliableStream.inputBuffer),
+            Stream_CountCommands(&g_reliableStream.inputBuffer).count,
             g_reliableStream.inputBuffer.Written(),
-            Stream_CountCommands(&g_unreliableStream.inputBuffer),
+            Stream_CountCommands(&g_unreliableStream.inputBuffer).count,
             g_unreliableStream.inputBuffer.Written()
             );
 
