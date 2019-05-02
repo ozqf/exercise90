@@ -140,7 +140,7 @@ void CL_PopulateRenderScene(
 				RendObj_SetAsMesh(
 					&obj,
                     *COM_GetEmbeddedMesh(ent->display.meshIndex),
-                    ent->display.colourA,
+                    c,
                     texIndex);
                 
             } break;
@@ -199,6 +199,7 @@ void CL_PopulateRenderScene(
 			} break;
 		}
         
+        // Set transform
         if (copyPosition)
         {
             t = ent->body.t;
@@ -222,6 +223,10 @@ void CL_PopulateRenderScene(
                 ent->body.error.x *= rate;
                 ent->body.error.y *= rate;
                 ent->body.error.z *= rate;
+            }
+            if (ent->flags & SIM_ENT_FLAG_USE_OVERRIDE_SCALE)
+            {
+                t.scale = ent->display.scale;
             }
         }
         

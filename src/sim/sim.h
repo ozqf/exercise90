@@ -65,6 +65,7 @@ typedef u8 simFactoryType;
 #define SIM_ENT_FLAG_POSITION_SYNC (1 << 2)
 #define SIM_ENT_FLAG_MOVE_AVOID (1 << 3)
 #define SIM_ENT_FLAG_TARGET_SEEKING (1 << 4)
+#define SIM_ENT_FLAG_USE_OVERRIDE_SCALE (1 << 5)
 
 #define SIM_DEATH_GFX_NONE 0
 #define SIM_DEATH_GFX_EXPLOSION 1

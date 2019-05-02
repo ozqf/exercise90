@@ -50,6 +50,7 @@ struct SimEntId
 struct SimEntDisplay
 {
     i32 meshIndex;
+    Vec3 scale;
     Colour colourA;
     Colour colourB;
 };

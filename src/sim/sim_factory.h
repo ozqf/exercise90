@@ -266,7 +266,7 @@ internal i32 Sim_InitProjTest(
     t.patternDef.numItems = 4;
     t.lifeTime = 1.5f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
-    t.scale = { 0.35f, 0.35f, 1.0f };
+    t.scale = { 1, 1, 1 };
     Sim_SetEntityDisplay(ent,
         { 1, 1, 0, 1 },
         { 1, 1, 0, 1 },
