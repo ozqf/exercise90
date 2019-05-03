@@ -11,14 +11,6 @@ internal i32 SVP_WriteUnreliableSection(
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
-    // Send ping
-	//CmdPing ping = {};
-	// TODO: Stream enqueue will set the sequence for us
-	// so remove sending 0 here.
-    //Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
-    //packet->ptrWrite += COM_COPY(
-    //    &ping, packet->ptrWrite, ping.header.size);
-
     // send input confirmation
     SimEntity* avatar = Sim_GetEntityBySerial(&g_sim, user->entSerial);
     Vec3 pos = {};
@@ -30,8 +22,7 @@ internal i32 SVP_WriteUnreliableSection(
         user->userInputSequence,
         pos
         );
-    packet->ptrWrite += COM_COPY(
-        &response, packet->ptrWrite, response.header.size);
+    packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &response.header, 0);
     stats->numUnreliableMessages += 1;
     // ENTITY SYNC
     #if 1
@@ -62,8 +53,7 @@ internal i32 SVP_WriteUnreliableSection(
         }
 
         // Write sync to packet
-        packet->ptrWrite += COM_COPY(
-            &cmd, packet->ptrWrite, cmd.header.size);
+        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &cmd.header, 0);
         
         // Is this a new baseline for unreliable ack?
         if (link->baselineSequence == 0)
@@ -123,7 +113,7 @@ internal i32 SVP_WriteReliableSection(
             cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
         }
         
-        packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
+        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, 0);
         space -= size;
         stats->numReliableMessages += 1;
 		
@@ -207,11 +197,13 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 
 internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
 {
+    u8 readBuffer[CMD_MAX_SIZE];
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
     while (read < end)
     {
-        Command* header = (Command*)read;
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        Command* header = (Command*)readBuffer;
         i32 err = Cmd_Validate(header);
         if (err)
         {

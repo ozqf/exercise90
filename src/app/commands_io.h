@@ -3,7 +3,7 @@
 #include "commands.h"
 
 // Returns bytes written
-internal i32 Cmd_WriteToPacket(u8* bytes, Command* h, CmdSeq baseSequence)
+internal i32 Cmd_Serialise(u8* bytes, Command* h, CmdSeq baseSequence)
 {
     switch (h->type)
     {
@@ -16,7 +16,7 @@ internal i32 Cmd_WriteToPacket(u8* bytes, Command* h, CmdSeq baseSequence)
 }
 
 // returns bytes read
-internal i32 Cmd_ReadFromPacket(
+internal i32 Cmd_Deserialise(
     u8* source, u8* buffer, i32 capacity, CmdSeq baseSequence)
 {
     // If dumb copying the bytes, don't step forward yet
@@ -36,7 +36,7 @@ internal i32 Cmd_ReadFromPacket(
         return COM_COPY_STRUCT(source, buffer, S2C_RestoreEntity);
         break;
         case CMD_TYPE_S2C_BULK_SPAWN:
-        return COM_COPY_STRUCT(source, buffer, S2C_Sync);
+        return COM_COPY_STRUCT(source, buffer, S2C_BulkSpawn);
         break;
         case CMD_TYPE_S2C_SESSION_SYNC:
         return COM_COPY_STRUCT(source, buffer, S2C_Sync);

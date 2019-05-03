@@ -5,6 +5,8 @@
 
 #include "commands_base.h"
 
+#define CMD_MAX_SIZE 512
+
 #define CMD_TYPE_IMPULSE 255
 #define CMD_TYPE_S2C_HANDSHAKE 254
 #define CMD_TYPE_S2C_SET_SCENE 253

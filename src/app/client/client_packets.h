@@ -36,13 +36,11 @@ internal i32 CL_WriteUnreliableSection(
 	// so remove sending 0 here.
 	Cmd_Prepare(&ping.header, g_ticks);
 	ping.sendTime = g_elapsed;
-    packet->ptrWrite += COM_COPY(
-        &ping, packet->ptrWrite, ping.header.size);
+    packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &ping.header, 0);
 	
 	// TODO: Encode userInput
     APP_LOG(64, "CL Write input\n");
-	packet->ptrWrite += COM_COPY(
-		userInput, packet->ptrWrite, userInput->header.size);
+    packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &userInput->header, 0);
 	
     return (packet->ptrWrite - start);
 }
@@ -88,16 +86,19 @@ internal i32 CL_ReadPacketUnreliableInput(
     //CL_LogCommandBuffer(buf, "Unreliable packet section");
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
+    u8 readBuffer[CMD_MAX_SIZE];
     APP_LOG(128, "CL Reading %d unreliable bytes\n", (end -read));
+    i32 cmdsRead = 0;
     while (read < end)
     {
-        Command* h = (Command*)read;
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        Command* h = (Command*)readBuffer;
         i32 err = Cmd_Validate(h);
         if (err != COM_ERROR_NONE)
         {
             return err;
         }
-        read += h->size;
+        cmdsRead++;
         i32 wrote = Stream_EnqueueUnreliableInput(stream, h);
         if (wrote)
         {
@@ -113,13 +114,16 @@ internal i32 CL_ReadPacketReliableInput(
 {
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
+    u8 readBuffer[CMD_MAX_SIZE];
+    i32 cmdsRead = 0;
     while (read < end)
     {
-        Command* h = (Command*)read;
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        Command* h = (Command*)readBuffer;
         ErrorCode err = Cmd_Validate(h);
         COM_ASSERT(err == COM_ERROR_NONE, "Invalid cmd")
         
-        read += h->size;
+        cmdsRead++;
         Stream_EnqueueReliableInput(stream, h);
     }
     return COM_ERROR_NONE;
