@@ -77,28 +77,32 @@ internal i32 SVP_WriteUnreliableSection(
 internal i32 SVP_WriteReliableSection(
     User* user,
     ByteBuffer* packet,
-    i32 capacity,
     TransmissionRecord* rec,
     PacketStats* stats)
 {
-    i32 space = capacity;
+    // Commands are serialised to this buffer to measure them before
+    // writing to the packet.
+    u8 staging[CMD_MAX_SIZE];
     ByteBuffer* cmds = &user->reliableStream.outputBuffer;
     u8* read = cmds->ptrStart;
     u8* end = cmds->ptrWrite;
-    i32 numCommandsNotWritten = 0;
     i32 bBaseSequenceSet = 0;
     CmdSeq baseSequence = 0;
+    //i32 numCommandsNotWritten = 0;
     while(read < end)
     {
         Command* cmd = (Command*)read;
         COM_ASSERT(
 			Cmd_Validate(cmd) == COM_ERROR_NONE,
 			"Invalid reliable command")
-        i32 size = cmd->size;
-        read += size;
-        if (cmd->size > space) { numCommandsNotWritten++; continue; }
+        read += cmd->size;
+        //i32 size = cmd->size;
+        //read += size;
+        //if (cmd->size > space) { numCommandsNotWritten++; continue; }
         if (cmd->sendTicks > 0) { cmd->sendTicks--; continue; }
         
+        i32 cmdBytesWritten = 0;
+        CmdSeq seqOffset = 0;
         // if first, use this command's sequence as the base others
         // will offset themselves from
         if (bBaseSequenceSet == NO)
@@ -107,9 +111,28 @@ internal i32 SVP_WriteReliableSection(
             baseSequence = cmd->sequence;
             packet->ptrWrite += Cmd_WriteSequence(
                 packet->ptrWrite, baseSequence);
-            size += sizeof(CmdSeq);
+            //size += sizeof(CmdSeq);
+            // We assume the buffer can always fit at least ONE reliable
+            // command and so don't check the size of the first
+            cmdBytesWritten = Cmd_Serialise(staging, cmd, 0);
         }
-
+        else
+        {
+            // If this command's sequence is out of the one byte range
+            // of an offset it cannot be written to this packet!
+            i32 seqDiff = cmd->sequence - baseSequence;
+            if (Cmd_IsSequenceDiffOkay(seqDiff) == NO)
+            {
+                printf("SV Seq diff %d out of range!\n", seqDiff);
+                continue;
+            }
+            seqOffset = (CmdSeq)seqDiff;
+            cmdBytesWritten = Cmd_Serialise(staging, cmd, seqOffset);
+            // Will it fit?
+            if (cmdBytesWritten > packet->Space())
+            continue;
+        }
+        
         // Flow control to avoid filling packets with the same
         // commands redundantly
         cmd->timesSent++;
@@ -126,8 +149,9 @@ internal i32 SVP_WriteReliableSection(
             cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
         }
         
-        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, baseSequence);
-        space -= size;
+        //packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, seqOffset);
+        // Everything is okay, copy from staging to packet
+        packet->ptrWrite += COM_COPY(staging, packet->ptrWrite, cmdBytesWritten);
         stats->numReliableMessages += 1;
 		
 		// Record message
@@ -137,13 +161,13 @@ internal i32 SVP_WriteReliableSection(
             rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES,
             "Too many messages in packet to record")
     }
-    if (numCommandsNotWritten > 0)
+    /*if (numCommandsNotWritten > 0)
     {
         APP_LOG(128, "SV no space for %d commands to user %d (%d bytes in output)\n",
             numCommandsNotWritten, user->ids.privateId, cmds->Written());
-    }
-    stats->numReliableSkipped = numCommandsNotWritten;
-    return (capacity - space);
+    }*/
+    //stats->numReliableSkipped = numCommandsNotWritten;
+    return packet->Written();
 }
 
 internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
@@ -172,11 +196,18 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
     
+    // Create sub-section for reliableBuffer
+    ByteBuffer reliableBuf = Buf_FromBytes(
+        packet.ptrWrite, reliableAllocation);
+    // Write reliable stream
     i32 reliableWritten = SVP_WriteReliableSection(
-        user, &packet, reliableAllocation, rec, &stats);
+        user, &reliableBuf, rec, &stats);
+    // step packet buffer forward
+    packet.ptrWrite += reliableWritten;
 
-    // -- write mid-packet deserialise check and unreliable sync data -- 
+    // -- write mid-packet deserialise check -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
+    // fill remaining space with unreliable sync data
     i32 unreliableWritten = SVP_WriteUnreliableSection(
         sim, user, &packet, rec, &stats);
     

@@ -1,9 +1,19 @@
 #pragma once
 
 #include "commands.h"
+/*
+Packets encode their sequence number as a one byte +127 to -128 diff
+from a base sequence written at the start of the reliable section
+
+*/
+internal i32 Cmd_IsSequenceDiffOkay(i32 diff)
+{
+    if (diff > 127 || diff < -128) { return NO; }
+    return YES;
+}
 
 // Returns bytes written
-internal i32 Cmd_Serialise(u8* bytes, Command* h, CmdSeq baseSequence)
+internal i32 Cmd_Serialise(u8* bytes, Command* h, CmdSeq sequenceOffset)
 {
     switch (h->type)
     {
