@@ -84,7 +84,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
         // so that it can be refired when the entity has been spawned.
         // Because entity spawns are always in order and reserved,
         // use the highest spawned Id and compare
-        if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+        if (cmd->subType == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
             if (cmd->networkId > g_sim.highestAssignedSequence)
             {
@@ -114,7 +114,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             // There's a special command for that!
             return 1;
         }
-        if (cmd->type == S2C_ENTITY_SYNC_TYPE_UPDATE)
+        if (cmd->subType == S2C_ENTITY_SYNC_TYPE_UPDATE)
         {
             Vec3 currentPos =
             {
@@ -144,7 +144,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             ent->relationships.targetId.serial = cmd->update.targetId;
             ent->clientOnly.lastSync = sim->tick;
         }
-        else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+        else if (cmd->subType == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
             //if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
             //{

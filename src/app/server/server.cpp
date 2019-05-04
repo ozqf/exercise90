@@ -307,7 +307,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 4;
+    const i32 stage = 1;
 
     f32 inner = 8;
     f32 outer = 12;
@@ -350,6 +350,9 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { -inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE);
         SV_AddSpawner(sim, { -outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddBot(sim, { 15, 0, 15 });
+        SV_AddBot(sim, { 15, 0, -15 });
+        SV_AddBot(sim, { 15, 0, 0 });
         break;
         default:
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);

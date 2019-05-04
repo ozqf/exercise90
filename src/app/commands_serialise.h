@@ -5,7 +5,7 @@
 // Returns bytes written
 internal i32 Cmd_Serialise(u8* write, Command* h, CmdSeq sequenceOffset)
 {
-    const u8* source = write;
+    const u8* bufStart = write;
     switch (h->type)
     {
         #if 1
@@ -15,16 +15,19 @@ internal i32 Cmd_Serialise(u8* write, Command* h, CmdSeq sequenceOffset)
             // Command type
             *write = h->type; write++;
             // Sub-type
-            *write = cmd->type; write++;
-            if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+            *write = cmd->subType; write++;
+            if (cmd->subType == S2C_ENTITY_SYNC_TYPE_DEATH)
             {
                 write += COM_WriteI32(cmd->networkId, write);
+                return (write - bufStart);
             }
             else
             {
-                return COM_COPY_STRUCT(h, source, CmdImpulse);
+                // Network Id, pos, vel, targetId
+                write += COM_WriteI32(cmd->networkId, write);
+                
+                return COM_COPY_STRUCT(h, bufStart, S2C_EntitySync);
             }
-            return (write - source);
         } break;
         #endif
         case CMD_TYPE_IMPULSE:

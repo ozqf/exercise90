@@ -199,7 +199,7 @@ struct S2C_EntitySync
 {
 	Command header;
 	i32 networkId;
-    u8 type;
+    u8 subType;
     union
     {
         struct
@@ -227,7 +227,7 @@ internal void Cmd_WriteEntitySyncAsUpdate(
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
     cmd->header.size = sizeof(S2C_EntitySync);
     cmd->networkId = ent->id.serial;
-    cmd->type = S2C_ENTITY_SYNC_TYPE_UPDATE;
+    cmd->subType = S2C_ENTITY_SYNC_TYPE_UPDATE;
 	cmd->update.pos = ent->body.t.pos;
 	cmd->update.vel = ent->body.velocity;
     cmd->update.priority = ent->priority;
@@ -242,7 +242,7 @@ internal void Cmd_WriteEntitySyncAsDeath(
     Cmd_Prepare(&cmd->header, tick);
     cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
     cmd->header.size = sizeof(S2C_EntitySync);
-    cmd->type = S2C_ENTITY_SYNC_TYPE_DEATH;
+    cmd->subType = S2C_ENTITY_SYNC_TYPE_DEATH;
     cmd->networkId = entitySerial;
 }
 

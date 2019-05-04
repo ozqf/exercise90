@@ -63,11 +63,11 @@ void Test_QuantiseValue(f32 original, i32 halfRange, u8 numBits)
 {
     i32 mask = COM_CreateBitmask(numBits);
 	printf("-----\n> %f in %d bits (%d bit mask)\n", original, numBits, numBits);
-    u32 encoded = Test_QuantiseF2I(original, halfRange, numBits);
+    u32 encoded = COM_QuantiseF2I_Slow(original, halfRange, numBits);
     COM_PrintBits(encoded, 1);
     COM_PrintBits(mask, 1);
     encoded = encoded & mask;
-    f32 result = Test_DequantiseI2F(encoded, halfRange, numBits);
+    f32 result = COM_DequantiseI2F_Slow(encoded, halfRange, numBits);
 	
     printf("%f -> %d -> %f\n", original,  encoded, result);
     f32 diff = original - result;

@@ -48,17 +48,19 @@ internal i32 Cmd_Deserialise(
                 i32 serial = COM_ReadI32(&read);
                 Cmd_WriteEntitySyncAsDeath(cmd, baseTick, serial);
                 i32 written = (read - source);
-                printf("CMD Wrote %d bytes for death\n", written);
+                //xprintf("CMD read %d bytes for death\n", written);
                 return written;
             }
             else if (subType == S2C_ENTITY_SYNC_TYPE_UPDATE)
             {
-                COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+                i32 written = COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+                return written;
             }
             else
             {
-                COM_ASSERT(0, "Unknown entity sync type");
-                return 0;
+                return COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+                //COM_ASSERT(0, "Unknown entity sync type");
+                //return 0;
             }
         } break;
         case CMD_TYPE_PING:
