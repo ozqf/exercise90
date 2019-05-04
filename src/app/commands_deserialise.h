@@ -4,7 +4,11 @@
 
 // returns bytes read
 internal i32 Cmd_Deserialise(
-    u8* read, u8* buffer, i32 capacity, CmdSeq baseSequence,
+    QuantiseSet* quantise,
+    u8* read,
+    u8* buffer,
+    i32 capacity,
+    CmdSeq baseSequence,
     i32 baseTick)
 {
     const u8* source = read;

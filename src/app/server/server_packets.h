@@ -26,7 +26,8 @@ internal i32 SVP_WriteUnreliableSection(
         user->userInputSequence,
         pos
         );
-    packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &response.header, 0);
+    packet->ptrWrite += Cmd_Serialise(
+        &sim->quantise, packet->ptrWrite, &response.header, 0);
     stats->numUnreliableMessages += 1;
     // ENTITY SYNC
     #if 1
@@ -57,7 +58,8 @@ internal i32 SVP_WriteUnreliableSection(
         }
 
         // Write sync to packet
-        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, &cmd.header, 0);
+        packet->ptrWrite += Cmd_Serialise(
+            &sim->quantise, packet->ptrWrite, &cmd.header, 0);
         
         // Is this a new baseline for unreliable ack?
         if (link->baselineSequence == 0)
@@ -82,6 +84,7 @@ internal i32 SVP_WriteReliableSection(
     User* user,
     ByteBuffer* packet,
     TransmissionRecord* rec,
+    QuantiseSet* quantise,
     PacketStats* stats)
 {
     // Commands are serialised to this buffer to measure them before
@@ -118,7 +121,8 @@ internal i32 SVP_WriteReliableSection(
             //size += sizeof(CmdSeq);
             // We assume the buffer can always fit at least ONE reliable
             // command and so don't check the size of the first
-            cmdBytesWritten = Cmd_Serialise(staging, cmd, 0);
+            cmdBytesWritten = Cmd_Serialise(
+                quantise, staging, cmd, 0);
         }
         else
         {
@@ -131,7 +135,8 @@ internal i32 SVP_WriteReliableSection(
                 continue;
             }
             seqOffset = (CmdSeq)seqDiff;
-            cmdBytesWritten = Cmd_Serialise(staging, cmd, seqOffset);
+            cmdBytesWritten = Cmd_Serialise(
+                quantise, staging, cmd, seqOffset);
             // Will it fit?
             if (cmdBytesWritten > packet->Space())
             continue;
@@ -205,7 +210,7 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
         packet.ptrWrite, reliableAllocation);
     // Write reliable stream
     i32 reliableWritten = SVP_WriteReliableSection(
-        user, &reliableBuf, rec, &stats);
+        user, &reliableBuf, rec, &sim->quantise, &stats);
     // step packet buffer forward
     packet.ptrWrite += reliableWritten;
 
@@ -243,7 +248,8 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
     App_SendTo(0, &addr, buf, written);
 }*/
 
-internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
+internal void SVP_ReadUnreliableSection(
+    User* user, ByteBuffer* b, QuantiseSet* quantise)
 {
     u8 readBuffer[CMD_MAX_SIZE];
     u8* read = b->ptrStart;
@@ -251,7 +257,8 @@ internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
     i32 baseTick = COM_ReadI32(&read);
     while (read < end)
     {
-        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
+        read += Cmd_Deserialise(
+            quantise, read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
         Command* header = (Command*)readBuffer;
         i32 err = Cmd_Validate(header);
         if (err)
@@ -285,7 +292,8 @@ internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
     }
 }
 
-internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
+internal void SVP_ReadPacket(
+    SysPacketEvent* ev, QuantiseSet* quantise, f32 time)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
@@ -344,5 +352,5 @@ internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
     b.ptrWrite = b.ptrStart + p.numUnreliableBytes;
     b.ptrEnd = b.ptrWrite;
     
-    SVP_ReadUnreliableSection(user, &b);
+    SVP_ReadUnreliableSection(user, &b, quantise);
 }

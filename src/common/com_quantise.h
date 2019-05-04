@@ -13,6 +13,13 @@ struct QuantiseDef
     f32 minorScale;
 };
 
+struct QuantiseSet
+{
+    QuantiseDef pos;
+    QuantiseDef vel;
+    QuantiseDef rot;
+};
+
 internal u32 COM_QuantiseF2I(f32 input, QuantiseDef* def)
 {
     // Remove sign

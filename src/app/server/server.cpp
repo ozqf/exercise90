@@ -475,7 +475,7 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 				{
 					continue;
 				}
-                SVP_ReadPacket(packet, g_elapsed);
+                SVP_ReadPacket(packet, &g_sim.quantise, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:

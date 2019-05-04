@@ -361,9 +361,9 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
 
     // Configure quantisation tables based on arena size
     // TODO: largest axis must be passed in here, auto detect this instead!
-    COM_QuantiseInit(&sim->posQuantise, largestHalfAxis, 16);
-    COM_QuantiseInit(&sim->velQuantise, SIM_MAX_AXIS_SPEED, 16);
-    COM_QuantiseInit(&sim->rotQuantise, SIM_MAX_AXIS_SPEED, 16);
+    COM_QuantiseInit(&sim->quantise.pos, largestHalfAxis, 16);
+    COM_QuantiseInit(&sim->quantise.vel, SIM_MAX_AXIS_SPEED, 16);
+    COM_QuantiseInit(&sim->quantise.rot, SIM_MAX_AXIS_SPEED, 16);
 
 	return COM_ERROR_NONE;
 }

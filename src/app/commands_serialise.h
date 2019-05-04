@@ -3,7 +3,11 @@
 #include "commands.h"
 
 // Returns bytes written
-internal i32 Cmd_Serialise(u8* write, Command* h, CmdSeq sequenceOffset)
+internal i32 Cmd_Serialise(
+    QuantiseSet* quantise,
+    u8* write,
+    Command* h,
+    CmdSeq sequenceOffset)
 {
     const u8* bufStart = write;
     switch (h->type)

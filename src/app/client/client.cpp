@@ -293,7 +293,12 @@ internal void CL_ReadSystemEvents(
             {
 				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
-                CL_ReadPacket(packet, &g_reliableStream, &g_unreliableStream, g_elapsed);
+                CL_ReadPacket(
+                    packet,
+                    &g_reliableStream,
+                    &g_unreliableStream,
+                    &g_sim.quantise,
+                    g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -585,5 +590,5 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	g_ticks++;
 	g_serverTick++;
     g_elapsed += deltaTime;
-    CL_WritePacket(g_elapsed, &cmd);
+    CL_WritePacket(&g_sim.quantise, g_elapsed, &cmd);
 }
