@@ -27,10 +27,25 @@ internal i32 Cmd_Serialise(
             }
             else
             {
-                // Network Id, pos, vel, targetId
+                // Network Id, targetId, pos, vel
                 write += COM_WriteI32(cmd->networkId, write);
+                write += COM_WriteI32(cmd->update.targetId, write);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.pos.x, &quantise->pos), write);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.pos.y, &quantise->pos), write);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.pos.z, &quantise->pos), write);
                 
-                return COM_COPY_STRUCT(h, bufStart, S2C_EntitySync);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
+                write += COM_WriteU16(
+                    (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
+                return (write - bufStart);
+                
+                //return COM_COPY_STRUCT(h, bufStart, S2C_EntitySync);
             }
         } break;
         #endif

@@ -51,14 +51,36 @@ internal i32 Cmd_Deserialise(
             {
                 i32 serial = COM_ReadI32(&read);
                 Cmd_WriteEntitySyncAsDeath(cmd, baseTick, serial);
-                i32 written = (read - source);
+                i32 totalRead = (read - source);
                 //xprintf("CMD read %d bytes for death\n", written);
-                return written;
+                return totalRead;
             }
             else if (subType == S2C_ENTITY_SYNC_TYPE_UPDATE)
             {
-                i32 written = COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
-                return written;
+                //i32 totalRead = COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+                //return totalRead;
+
+                i32 serial = COM_ReadI32(&read);
+                i32 targetSerial = COM_ReadI32(&read);
+                Vec3 pos = {};
+                pos.x = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->pos);
+                pos.y = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->pos);
+                pos.z = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->pos);
+                Vec3 vel = {};
+                vel.x = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->vel);
+                vel.y = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->vel);
+                vel.z = COM_DequantiseI2F(
+                    COM_ReadU16(&read), &quantise->vel);
+                
+                Cmd_EntSyncSetUpdate(cmd,
+                    baseTick, serial, targetSerial, pos, vel);
+
+                return (read - source);
             }
             else
             {

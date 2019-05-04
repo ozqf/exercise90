@@ -218,6 +218,21 @@ struct S2C_EntitySync
     };
 };
 
+inline void Cmd_EntSyncSetUpdate(
+    S2C_EntitySync* cmd,
+    i32 tick, i32 serial, i32 targetSerial, Vec3 pos, Vec3 vel
+)
+{
+    Cmd_Prepare(&cmd->header, tick);
+    cmd->header.type = CMD_TYPE_S2C_SYNC_ENTITY;
+    cmd->header.size = sizeof(S2C_EntitySync);
+    cmd->networkId = serial;
+    cmd->subType = S2C_ENTITY_SYNC_TYPE_UPDATE;
+	cmd->update.pos = pos;
+	cmd->update.vel = vel;
+    cmd->update.targetId = targetSerial;
+}
+
 internal void Cmd_WriteEntitySyncAsUpdate(
     S2C_EntitySync* cmd,
     i32 tick,
