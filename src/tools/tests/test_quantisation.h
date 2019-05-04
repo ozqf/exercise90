@@ -78,15 +78,23 @@ void Test_QuantiseValue(f32 original, i32 halfRange, u8 numBits)
 void Tests_Quantisation()
 {
     printf("\n-- Quantise Tests --\n");
-    Test_QuantiseValue(30.14959403f, 32, 16);
+    /*Test_QuantiseValue(30.14959403f, 32, 16);
     Test_QuantiseValue(30.14959403f, 32, 20);
     Test_QuantiseValue(30.14959403f, 32, 17);
     Test_QuantiseValue(30.14959403f, 32, 9);
     Test_QuantiseValue(0.14959403f, 2, 10);
     Test_QuantiseValue(1.0f, 2, 10);
     Test_QuantiseValue(-1.0f, 2, 10);
-    Test_QuantiseValue(30.14959403f, 128, 16);
+    Test_QuantiseValue(30.14959403f, 128, 16);*/
+    Test_QuantiseValue(18.0f, 45, 16);
+    Test_QuantiseValue(19.0f, 45, 16);
+    Test_QuantiseValue(44.0f, 45, 16);
+    Test_QuantiseValue(19.0f, 64, 16);
 
+    /*f32 posX = 19.0f;
+    u16 encoded = (u16)COM_QuantiseF2I_Slow(posX, 45, 16);
+    f32 result = COM_DequantiseI2F_Slow((u32)encoded, 45, 16);
+    printf("%f -> %d -> %f\n", posX, encoded, result);*/
     /*
     Current sync command sends:
     i32 networkId;

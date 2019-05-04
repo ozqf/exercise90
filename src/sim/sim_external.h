@@ -339,7 +339,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     f32 halfX = 35;
     f32 halfY = 25;
     f32 halfZ = 25;
-    const i32 largestHalfAxis = 35;
+    const i32 largestHalfAxis = 35 + 10;
 
     SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);

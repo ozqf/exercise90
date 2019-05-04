@@ -42,10 +42,12 @@ internal f32 COM_DequantiseI2F(u32 input, QuantiseDef* def)
 internal void COM_QuantiseInit(
     QuantiseDef* def, const i32 halfRange, const u8 numBits)
 {
+    f32 fullRange = (f32)halfRange * 2;
     def->halfMajorScale = halfRange;
     def->positiveMaximum = (def->halfMajorScale * 2) - 1;
-    def->majorBits = (i32)log2f((f32)def->halfMajorScale * 2);
+    def->majorBits = (i32)log2f(fullRange) + 1;
     def->minorBits = numBits - def->majorBits;
+    //printf("Major bits %d minor bits %d\n", def->majorBits, def->minorBits);
     def->minorScale = powf(2, (f32)def->minorBits);
 }
 
