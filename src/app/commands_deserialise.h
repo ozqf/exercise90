@@ -4,11 +4,13 @@
 
 // returns bytes read
 internal i32 Cmd_Deserialise(
-    u8* source, u8* buffer, i32 capacity, CmdSeq baseSequence,
+    u8* read, u8* buffer, i32 capacity, CmdSeq baseSequence,
     i32 baseTick)
 {
+    const u8* source = read;
     // If dumb copying the bytes, don't step forward yet
     u8 type = *source;
+    //u8* read = source;
     switch (type)
     {
         case CMD_TYPE_IMPULSE:
@@ -33,8 +35,32 @@ internal i32 Cmd_Deserialise(
         return COM_COPY_STRUCT(source, buffer, C2S_Input);
         break;
         case CMD_TYPE_S2C_SYNC_ENTITY:
-        return COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
-        break;
+        {
+            // Prepare result
+            S2C_EntitySync* cmd = (S2C_EntitySync*)buffer;
+            *cmd = {};
+            // Step over type
+            read++;
+            // read sub-type
+            u8 subType = *read; read++;
+            if (subType == S2C_ENTITY_SYNC_TYPE_DEATH)
+            {
+                i32 serial = COM_ReadI32(&read);
+                Cmd_WriteEntitySyncAsDeath(cmd, baseTick, serial);
+                i32 written = (read - source);
+                printf("CMD Wrote %d bytes for death\n", written);
+                return written;
+            }
+            else if (subType == S2C_ENTITY_SYNC_TYPE_UPDATE)
+            {
+                COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+            }
+            else
+            {
+                COM_ASSERT(0, "Unknown entity sync type");
+                return 0;
+            }
+        } break;
         case CMD_TYPE_PING:
         return COM_COPY_STRUCT(source, buffer, CmdPing);
         break;
