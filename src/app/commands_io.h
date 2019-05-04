@@ -17,6 +17,9 @@ internal i32 Cmd_Serialise(u8* bytes, Command* h, CmdSeq sequenceOffset)
 {
     switch (h->type)
     {
+        //case CMD_TYPE_S2C_SYNC_ENTITY:
+        //h->tick
+        //break;
         case CMD_TYPE_IMPULSE:
         return COM_COPY_STRUCT(h, bytes, CmdImpulse);
         // Just dumb copy the bytes

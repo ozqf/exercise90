@@ -22,7 +22,7 @@ internal void SVG_ReplicateSpawn(
 {
     // Replicate!
     S2C_BulkSpawn cmd = {};
-    Cmd_InitBulkSpawn(&cmd, event, g_ticks);
+    Cmd_InitBulkSpawn(&cmd, event, sim->tick);
 	SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
     if (bSyncPosition)
     {
@@ -373,7 +373,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
  
         // 2: By diffing from client's last stated frame
         // Works well but is this exploitable...? Trust client's tick value
-        diff = g_ticks - u->latestServerTick;
+        diff = sim->tick - u->latestServerTick;
         #if 1
         fastForwardTicks = diff;
         #endif
@@ -387,11 +387,11 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     }
 
     // Declare when the event took place:
-    i32 eventTick = g_ticks - fastForwardTicks;
+    i32 eventTick = sim->tick - fastForwardTicks;
     if (verbose)
     {
         printf("SV CurTick %d eventTick %d fastforward %d\n",
-            g_ticks, eventTick, fastForwardTicks);
+            sim->tick, eventTick, fastForwardTicks);
     }
 
     i32 numProjectiles = 3;
@@ -406,7 +406,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     event.patternDef.arc = 0.25f;
     event.base.pos = ent->body.t.pos;
     event.base.forward = *dir;
-    event.base.tick = g_ticks;
+    event.base.tick = sim->tick;
     event.base.seedIndex = COM_STDRandU8();
     i32 flags;
     f32 priority;

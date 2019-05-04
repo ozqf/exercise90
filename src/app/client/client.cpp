@@ -401,7 +401,7 @@ internal i32 CL_ExecReliableCommand(
         case CMD_TYPE_S2C_SESSION_SYNC:
         {
             S2C_Sync* sync = (S2C_Sync*)h;
-			CL_SetServerTick(sync->simTick);
+			CL_SetServerTick(sync->header.tick);
 			g_avatarSerial = sync->avatarEntityId;
             APP_PRINT(64, "CL Set avatar %d\n", g_avatarSerial);
             // Lets not do what the server tells us!

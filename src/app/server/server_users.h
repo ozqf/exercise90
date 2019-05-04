@@ -106,7 +106,7 @@ internal void SVU_StartUserSync(User* user)
     NetStream* stream = &user->reliableStream;
 
     S2C_Sync sync;
-    Cmd_InitSync(&sync, g_ticks, g_ticks, 8, user->entSerial);
+    Cmd_InitSync(&sync, g_sim.tick, 8, user->entSerial);
     Stream_EnqueueOutput(stream, &sync.header);
     // start user command queue
     for (i32 j = 0; j < g_sim.maxEnts; ++j)
@@ -122,7 +122,7 @@ internal void SVU_StartUserSync(User* user)
             Priority_AddLink(&user->entSync, ent->id.serial, 1);
         }
 
-        Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
+        Cmd_InitRestoreEntity(&cmd, g_sim.tick, ent);
         
         ByteBuffer* b = &user->reliableStream.outputBuffer;
         Stream_EnqueueOutput(&user->reliableStream, (Command*)&cmd);

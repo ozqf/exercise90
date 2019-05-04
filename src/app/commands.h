@@ -39,7 +39,6 @@ internal void Cmd_InitPing(
 struct S2C_Sync
 {
     Command header;
-    i32 simTick;
     // ticks client should delay themselves by to avoid jitter
     i32 jitterTickCount;
     i32 avatarEntityId;
@@ -47,16 +46,14 @@ struct S2C_Sync
 
 internal void Cmd_InitSync(
     S2C_Sync* cmd,
-    i32 tick,
     i32 simTick,
     i32 jitterTickCount,
     i32 avatarEntityId)
 {
     *cmd = {};
-    Cmd_Prepare(&cmd->header, tick);
+    Cmd_Prepare(&cmd->header, simTick);
     cmd->header.type = CMD_TYPE_S2C_SESSION_SYNC;
     cmd->header.size = sizeof(S2C_Sync);
-    cmd->simTick = simTick;
     cmd->jitterTickCount = jitterTickCount;
     cmd->avatarEntityId = avatarEntityId;
 }
@@ -247,6 +244,17 @@ internal void Cmd_WriteEntitySyncAsDeath(
     cmd->header.size = sizeof(S2C_EntitySync);
     cmd->type = S2C_ENTITY_SYNC_TYPE_DEATH;
     cmd->networkId = entitySerial;
+}
+
+// Return bytes written
+internal i32 Cmd_EntSyncDeserialise(u8* source, u8* dest, i32 baseTick)
+{
+    S2C_EntitySync* cmd = (S2C_EntitySync*)dest;
+    u8 type = *source; source++;
+    i8 seqOffset = *source; source++;
+    
+    
+    return sizeof(S2C_EntitySync);
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -40,7 +40,6 @@ internal UserList g_users;
 internal SimScene g_sim;
 
 internal i32 g_isRunning = 0;
-internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
 internal i32 g_unreliableProjectileDeaths = 1;
@@ -79,7 +78,7 @@ void SV_WriteDebugString(ZStringHeader* str)
     {
         written += sprintf_s(chars, str->maxLength,
             "SERVER:\nTick: %d\nElapsed: %.3f\nMax Rate %d\nNext remote ent: %d\n",
-            g_ticks, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
+            g_sim.tick, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
         );
     }
     
@@ -290,7 +289,7 @@ internal void SV_AddBot(SimScene* sim, Vec3 pos)
     Sim_PrepareSpawnData(sim, &data, 0, SIM_FACTORY_TYPE_BOT, pos);
     SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
     S2C_RestoreEntity cmd = {};
-    Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
+    Cmd_InitRestoreEntity(&cmd, sim->tick, ent);
     SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
 }
 
@@ -300,7 +299,7 @@ internal void SV_AddGrunt(SimScene* sim, Vec3 pos)
     Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_GRUNT, pos);
     SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
     S2C_RestoreEntity cmd = {};
-    Cmd_InitRestoreEntity(&cmd, g_ticks, ent);
+    Cmd_InitRestoreEntity(&cmd, sim->tick, ent);
 }
 
 internal void SV_LoadTestScene()
@@ -405,10 +404,6 @@ void SV_Init()
 
     SV_PrintMsgSizes();
 
-    // force time and ticks forward for debugging
-    g_ticks = 1000;
-    g_elapsed = g_ticks * (1.0f / 60.0f);
-
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
     g_users = {};
@@ -499,7 +494,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             SVP_CalculatePriorities(
                 sim, avatar, user->entSync.links, user->entSync.numLinks);
         }
-        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = {};
+        user->packetStats[sim->tick % USER_NUM_PACKET_STATS] = {};
         // force sending rate
         i32 rate;
         if (user->syncRateHertz < g_maxSyncRate)
@@ -514,13 +509,13 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         switch (rate)
         {
             case APP_CLIENT_SYNC_RATE_30HZ:
-            if (g_ticks % 2 != 0) { continue; }
+            if (sim->tick % 2 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_20HZ:
-            if (g_ticks % 3 != 0) { continue; }
+            if (sim->tick % 3 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_10HZ:
-            if (g_ticks % 6 != 0) { continue; }
+            if (sim->tick % 6 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_60HZ:
             default:
@@ -530,7 +525,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 		Priority_TickQueue(&user->entSync);
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
-        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
+        user->packetStats[sim->tick % USER_NUM_PACKET_STATS] = stats;
 
         // add to totals
         user->streamStats.numPackets += 1;
@@ -564,12 +559,11 @@ internal void SV_CalcPings(f32 deltaTime)
 
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_ticks, g_elapsed);
+    APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_sim.tick, g_elapsed);
     SV_ReadSystemEvents(sysEvents, deltaTime);
     SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
 	g_elapsed += deltaTime;
-    g_ticks++;
     SV_SendUserPackets(&g_sim, deltaTime);
 }
 

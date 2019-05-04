@@ -18,7 +18,7 @@ internal i32 SVP_WriteUnreliableSection(
     S2C_InputResponse response = {};
     Cmd_InitInputResponse(
         &response,
-        g_ticks,
+        sim->tick,
         user->userInputSequence,
         pos
         );
@@ -44,12 +44,12 @@ internal i32 SVP_WriteUnreliableSection(
         S2C_EntitySync cmd = {};
         if (ent)
         {
-            Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, ent);
+            Cmd_WriteEntitySyncAsUpdate(&cmd, sim->tick, ent);
         }
         else
         {
             // No entity? must be dead!
-            Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, link->id);
+            Cmd_WriteEntitySyncAsDeath(&cmd, sim->tick, link->id);
         }
 
         // Write sync to packet
