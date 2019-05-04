@@ -66,7 +66,8 @@ internal SimActorInput g_actorInput = {};
 
 #include "client_render.h"
 #include "client_game.h"
-#include "../commands_io.h"
+#include "../commands_serialise.h"
+#include "../commands_deserialise.h"
 #include "client_packets.h"
 
 i32 CL_IsRunning() { return g_isRunning; }

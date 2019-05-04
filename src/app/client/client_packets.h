@@ -30,6 +30,8 @@ internal i32 CL_WriteUnreliableSection(
     ByteBuffer* packet, C2S_Input* userInput)
 {
     u8* start = packet->ptrWrite;
+    // Write header
+    packet->ptrWrite += COM_WriteI32(g_ticks, packet->ptrWrite);
     // Send ping
 	CmdPing ping = {};
 	// TODO: Stream enqueue will set the sequence for us
@@ -88,10 +90,11 @@ internal i32 CL_ReadPacketUnreliableInput(
     u8* end = buf->ptrWrite;
     u8 readBuffer[CMD_MAX_SIZE];
     APP_LOG(128, "CL Reading %d unreliable bytes\n", (end -read));
+    i32 baseTick = COM_ReadI32(&read);
     i32 cmdsRead = 0;
     while (read < end)
     {
-        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
         Command* h = (Command*)readBuffer;
         i32 err = Cmd_Validate(h);
         if (err != COM_ERROR_NONE)
@@ -120,7 +123,8 @@ internal i32 CL_ReadPacketReliableInput(
     CmdSeq baseSequence = Cmd_ReadSequence(&read);
     while (read < end)
     {
-        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, baseSequence);
+        read += Cmd_Deserialise(
+            read, readBuffer, CMD_MAX_SIZE, baseSequence, 0);
         Command* h = (Command*)readBuffer;
         ErrorCode err = Cmd_Validate(h);
         COM_ASSERT(err == COM_ERROR_NONE, "Invalid cmd")

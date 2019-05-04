@@ -11,6 +11,10 @@ internal i32 SVP_WriteUnreliableSection(
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
+    // write the unreliable section header
+    // - sim tick for these commands
+    packet->ptrWrite += COM_WriteI32(sim->tick, packet->ptrWrite);
+
     // send input confirmation
     SimEntity* avatar = Sim_GetEntityBySerial(&g_sim, user->entSerial);
     Vec3 pos = {};
@@ -244,9 +248,10 @@ internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
     u8 readBuffer[CMD_MAX_SIZE];
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
+    i32 baseTick = COM_ReadI32(&read);
     while (read < end)
     {
-        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
         Command* header = (Command*)readBuffer;
         i32 err = Cmd_Validate(header);
         if (err)
