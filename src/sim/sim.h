@@ -2,6 +2,10 @@
 
 #include "../common/common.h"
 
+// TODO: This is set for quantisating individual axes,
+// but will need to be applied as vector magnitude to work properly
+#define SIM_MAX_AXIS_SPEED 127
+
 #define SIM_NET_MIN_PRIORITY 1
 #define SIM_NET_MAX_PRIORITY 6
 

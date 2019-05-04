@@ -339,6 +339,7 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
     f32 halfX = 35;
     f32 halfY = 25;
     f32 halfZ = 25;
+    const i32 largestHalfAxis = 35;
 
     SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
@@ -357,6 +358,12 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
 
     sim->boundaryMin = { -halfX, -halfY, -halfZ };
     sim->boundaryMax = { halfX, halfY, halfZ };
+
+    // Configure quantisation tables based on arena size
+    // TODO: largest axis must be passed in here, auto detect this instead!
+    COM_QuantiseInit(&sim->posQuantise, largestHalfAxis, 16);
+    COM_QuantiseInit(&sim->velQuantise, SIM_MAX_AXIS_SPEED, 16);
+    COM_QuantiseInit(&sim->rotQuantise, SIM_MAX_AXIS_SPEED, 16);
 
 	return COM_ERROR_NONE;
 }

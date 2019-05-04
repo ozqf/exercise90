@@ -220,4 +220,8 @@ struct SimScene
 
     Vec3 boundaryMin;
     Vec3 boundaryMax;
+
+    QuantiseDef posQuantise;
+    QuantiseDef velQuantise;
+    QuantiseDef rotQuantise;
 };
