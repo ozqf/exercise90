@@ -42,7 +42,6 @@ internal i32 Sim_InitRubble(
         COM_MESH_CUBE_INDEX,
         SIM_DEATH_GFX_EXPLOSION);
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC
         | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     return COM_ERROR_NONE;
