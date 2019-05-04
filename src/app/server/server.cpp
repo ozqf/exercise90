@@ -307,7 +307,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 2;
+    const i32 stage = -1;
 	switch (stage)
     {
         case -1:
@@ -326,6 +326,9 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART);
         SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddBot(sim, { 15, 0, 15 });
+        SV_AddBot(sim, { 15, 0, -15 });
+        SV_AddBot(sim, { 15, 0, 0 });
         break;
         case 3:
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
@@ -338,10 +341,6 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
         break;
     }
-
-    SV_AddBot(sim, { 15, 0, 15 });
-    //SV_AddBot(sim, { 15, 0, -15 });
-    //SV_AddBot(sim, { 15, 0, 0 });
 
     // Place a test spawner
     // -10 Z == further away

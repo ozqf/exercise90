@@ -116,9 +116,11 @@ internal i32 CL_ReadPacketReliableInput(
     u8* end = buf->ptrWrite;
     u8 readBuffer[CMD_MAX_SIZE];
     i32 cmdsRead = 0;
+    // Read sequence that cmds will offset from
+    CmdSeq baseSequence = Cmd_ReadSequence(&read);
     while (read < end)
     {
-        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, 0);
+        read += Cmd_Deserialise(read, readBuffer, CMD_MAX_SIZE, baseSequence);
         Command* h = (Command*)readBuffer;
         ErrorCode err = Cmd_Validate(h);
         COM_ASSERT(err == COM_ERROR_NONE, "Invalid cmd")
@@ -147,6 +149,7 @@ internal i32 CL_ReadPacket(
 	if (err != COM_ERROR_NONE)
 	{
 		printf("  Error %d deserialising packet\n", err);
+        COM_ASSERT(0, "Packet Deserialise failed");
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
     /*printf("  Seq %d Tick %d Time %.3f\n",

@@ -397,8 +397,6 @@ internal i32 CL_ExecReliableCommand(
                 CLG_HandleEntityDeath(sim, serial);
                 Sim_RemoveEntity(sim, serial);
             }
-            printf("CL deleting outdated spawns (Id %d to %d)\n",
-                cmd->firstId, cmd->numIds);
         } break;
         case CMD_TYPE_S2C_SESSION_SYNC:
         {

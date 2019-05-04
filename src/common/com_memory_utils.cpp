@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com_defines.h"
+#include "common.h"
 
 com_internal u32 SafeTruncateUInt64(u64 value)
 {

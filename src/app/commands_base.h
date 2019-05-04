@@ -14,7 +14,7 @@ Header only - base for command structs.
 #define CMD_INVALID_SIZE 0
 
 typedef unsigned short CmdSeq;
-#define CMD_SEQ_MAX 0xFFFF;
+#define CMD_SEQ_MAX 0xFFFF
 
 // BASE FOR ALL COMMANDS
 // All commands MUST have a Command struct as their first member, for
@@ -37,6 +37,16 @@ struct Command
     // times sent
     i8 timesSent;
 };
+
+internal inline i32 Cmd_WriteSequence(u8* buffer, CmdSeq seq)
+{
+    return COM_WriteU16(seq, buffer);
+}
+
+internal inline CmdSeq Cmd_ReadSequence(u8** buffer)
+{
+    return COM_ReadU16(buffer);
+}
 
 internal inline i32 Cmd_Validate(Command* cmd)
 {

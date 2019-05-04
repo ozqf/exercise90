@@ -110,76 +110,7 @@ internal void Packet_FinishWrite(
 	h->numReliableBytes = (u16)numReliableBytes;
 	h->numUnreliableBytes = (u16)numUnreliableBytes;
 }
-#if 0
-// Return bytes written
-internal i32 Packet_WriteFromStream(
-	ByteBuffer* packet, ByteBuffer* stream, i32 maxBytes)
-{
-	u8* read = stream->ptrStart;
-	u8* end = stream->ptrWrite;
-	i32 written = 0;
-	while (read < end)
-	{
-		Command* cmd = (Command*)read;
-		Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
-		read += cmd->size;
-		if (cmd->size < maxBytes)
-		{
-			maxBytes -= cmd->size;
-			written += cmd->size;
-			packet->ptrWrite += COM_COPY(
-				cmd, packet->ptrWrite, cmd->size);
-		}
-	}
-	return written;
-}
-#endif
-#if 0
-internal i32 Packet_WriteFromStream(
-	NetStream* stream, NetStream* unreliableStream,
-	u8* buf, i32 capacity, f32 ellapsed,
-	i32 tickNumber, i32 lastReceivedTick)
-{
-	PacketHeader h = {};
-	h.transmissionTickNumber = tickNumber;
-	h.transmissionTime = ellapsed;
-	h.lastReceivedTickNumber = lastReceivedTick;
-	
-	u8* payloadStart = buf + Packet_GetHeaderSize();
-	u8* payloadEnd = buf + capacity;
-	u8* cursor = payloadStart;
-	
-	// iterate reliable output buffer, loading as many commands as possible
-	u8* streamRead = stream->outputBuffer.ptrStart;
-	u8* streamEnd = stream->outputBuffer.ptrWrite;
-	printf("Packet reading %d bytes of input\n", (streamEnd - streamRead));
-	while (streamRead < streamEnd)
-	{
-		Command* cmd = (Command*)streamRead;
-		Assert(Cmd_Validate(cmd) == COM_ERROR_NONE)
-		streamRead += cmd->size;
-		//i32 space = (streamEnd - streamRead);
-		if (cmd->size <= (payloadEnd - payloadStart))
-		{
-			printf("Packet copying command seq %d (%d bytes)\n",
-				cmd->sequence, cmd->size);
-			cursor += COM_COPY(cmd, cursor, cmd->size);
-		}
-	}
-	h.numReliableBytes = (u16)(cursor - payloadStart);
-	i32 reliableWritten = h.numReliableBytes;
-	cursor += COM_WriteI32(COM_SENTINEL_B, cursor);
 
-	h.numUnreliableBytes = 0;
-
-	*(PacketHeader*)buf = h;
-	
-	printf("Packet Wrote %d reliable bytes\n", reliableWritten);
-	i32 totalWritten = (cursor - buf);
-	printf("Packet Wrote %d total bytes\n", totalWritten);
-	return totalWritten;
-}
-#endif
 internal i32 Packet_InitDescriptor(PacketDescriptor* packet, u8* buf, i32 numBytes)
 {
 	//printf("=== Build packet descriptor (%d bytes)===\n", numBytes);

@@ -86,6 +86,8 @@ internal i32 SVP_WriteReliableSection(
     u8* read = cmds->ptrStart;
     u8* end = cmds->ptrWrite;
     i32 numCommandsNotWritten = 0;
+    i32 bBaseSequenceSet = 0;
+    CmdSeq baseSequence = 0;
     while(read < end)
     {
         Command* cmd = (Command*)read;
@@ -97,6 +99,17 @@ internal i32 SVP_WriteReliableSection(
         if (cmd->size > space) { numCommandsNotWritten++; continue; }
         if (cmd->sendTicks > 0) { cmd->sendTicks--; continue; }
         
+        // if first, use this command's sequence as the base others
+        // will offset themselves from
+        if (bBaseSequenceSet == NO)
+        {
+            bBaseSequenceSet = YES;
+            baseSequence = cmd->sequence;
+            packet->ptrWrite += Cmd_WriteSequence(
+                packet->ptrWrite, baseSequence);
+            size += sizeof(CmdSeq);
+        }
+
         // Flow control to avoid filling packets with the same
         // commands redundantly
         cmd->timesSent++;
@@ -113,7 +126,7 @@ internal i32 SVP_WriteReliableSection(
             cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
         }
         
-        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, 0);
+        packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, baseSequence);
         space -= size;
         stats->numReliableMessages += 1;
 		
