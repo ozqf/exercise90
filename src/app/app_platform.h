@@ -57,9 +57,9 @@ internal f32 App_CalcInterpolationTime(f32 accumulator, f32 interval)
     return (accumulator / interval);
 }
 
-internal void App_Fatal(char* msg, char* heading)
+internal void App_Fatal(const char* msg, const char* heading)
 {
-	g_platform.Error(msg, heading);
+	g_platform.Error((char*)msg, (char*)heading);
 }
 
 /***************************************
