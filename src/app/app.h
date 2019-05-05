@@ -13,6 +13,7 @@ void App_SetMouseMode(ZMouseMode mode);
 void App_Error(char* msg, char* heading);
 f32 App_GetSimFrameInterval();
 i32 App_CalcTickInterval(f32 seconds);
+i64 App_SampleClock();
 ScreenInfo App_GetScreenInfo();
 
 /////////////////////////////////////////////////////////////////

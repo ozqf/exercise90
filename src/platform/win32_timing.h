@@ -16,6 +16,17 @@ f32 Win32_InitFloatTime()
     return 0;
 }
 
+// from MSDN:
+// Retrieves the current value of the performance counter,
+// which is a high resolution (<1us) time stamp
+// that can be used for time-interval measurements.
+i64 Win32_QueryPerformanceCounter()
+{
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return counter.QuadPart;
+}
+
 f32 Win32_FloatTime()
 {
     LARGE_INTEGER counter;

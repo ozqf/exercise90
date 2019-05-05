@@ -43,6 +43,11 @@ i32 App_CalcTickInterval(f32 seconds)
     return (i32)(result + 0.5f);
 }
 
+i64 App_SampleClock()
+{
+    return g_platform.SampleClock();
+}
+
 /***************************************
 * Private
 ***************************************/

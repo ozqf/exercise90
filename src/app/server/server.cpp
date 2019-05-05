@@ -579,7 +579,10 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
 	g_elapsed += deltaTime;
+    i64 start = App_SampleClock();
     SV_SendUserPackets(&g_sim, deltaTime);
+    i64 end = App_SampleClock();
+    printf("SV Packets time %lld\n", end - start);
 }
 
 void SV_PopulateRenderScene(

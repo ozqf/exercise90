@@ -20,7 +20,7 @@ struct QuantiseSet
     QuantiseDef rot;
 };
 
-internal u32 COM_QuantiseF2I(f32 input, QuantiseDef* def)
+inline u32 COM_QuantiseF2I(f32 input, QuantiseDef* def)
 {
     // Remove sign
     input += def->halfMajorScale;
@@ -31,7 +31,7 @@ internal u32 COM_QuantiseF2I(f32 input, QuantiseDef* def)
     return (u32)(input * def->minorScale);
 }
 
-internal f32 COM_DequantiseI2F(u32 input, QuantiseDef* def)
+inline f32 COM_DequantiseI2F(u32 input, QuantiseDef* def)
 {
     f32 output = (f32)input;
     output /= def->minorScale;
@@ -39,19 +39,19 @@ internal f32 COM_DequantiseI2F(u32 input, QuantiseDef* def)
     return output;
 }
 
-internal f32 COM_QuantiseF(f32 input, QuantiseDef* def)
+inline f32 COM_QuantiseF(f32 input, QuantiseDef* def)
 {
     return COM_DequantiseI2F(COM_QuantiseF2I(input, def), def);
 }
 
-internal void COM_QuantiseVec3(Vec3* v, QuantiseDef* def)
+inline void COM_QuantiseVec3(Vec3* v, QuantiseDef* def)
 {
     v->x = COM_QuantiseF(v->x, def);
     v->y = COM_QuantiseF(v->y, def);
     v->z = COM_QuantiseF(v->z, def);
 }
 
-internal void COM_QuantiseInit(
+inline void COM_QuantiseInit(
     QuantiseDef* def, const i32 halfRange, const u8 numBits)
 {
     f32 fullRange = (f32)halfRange * 2;
@@ -66,7 +66,7 @@ internal void COM_QuantiseInit(
 // Quantise the given float into an integer between
 // -halfRange to +(halfRange - 1), within the given bits.
 // spare bits are used for decimal precision
-internal u32 COM_QuantiseF2I_Slow(
+inline u32 COM_QuantiseF2I_Slow(
     f32 input, const i32 halfRange, const u8 numBits)
 {
     QuantiseDef def = {};
@@ -75,7 +75,7 @@ internal u32 COM_QuantiseF2I_Slow(
 }
 
 // Reverse the Quantisation
-internal f32 COM_DequantiseI2F_Slow(
+inline f32 COM_DequantiseI2F_Slow(
     i32 input, const i32 halfRange, const u8 numBits)
 {
     QuantiseDef def = {};

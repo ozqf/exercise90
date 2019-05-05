@@ -54,6 +54,9 @@ struct AppPlatform
     // Input
     void (*SetMouseMode)            (enum ZMouseMode mode);
 
+    // Timing
+    i64 (*SampleClock)             ();
+
     // Commands
     void (*WriteTextCommand)        (char* ptr);
 
