@@ -12,9 +12,9 @@ internal i32 Cmd_Serialise(
     const u8* bufStart = write;
     switch (h->type)
     {
-        #if 1
         case CMD_TYPE_S2C_SYNC_ENTITY:
         {
+            #ifdef SIM_QUANTISE_SYNC
             S2C_EntitySync* cmd = (S2C_EntitySync*)h;
             // Command type
             *write = h->type; write++;
@@ -41,18 +41,19 @@ internal i32 Cmd_Serialise(
                 write += COM_WriteU16(
                     (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
                 write += COM_WriteU16(
-                    (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
+                    (u16)COM_QuantiseF2I(cmd->update.vel.y, &quantise->vel), write);
                 write += COM_WriteU16(
-                    (u16)COM_QuantiseF2I(cmd->update.vel.x, &quantise->vel), write);
+                    (u16)COM_QuantiseF2I(cmd->update.vel.z, &quantise->vel), write);
                 return (write - bufStart);
-                
-                //return COM_COPY_STRUCT(h, bufStart, S2C_EntitySync);
             }
+            #else
+            return COM_COPY_STRUCT(h, bufStart, S2C_EntitySync);
+            #endif
         } break;
         case CMD_TYPE_S2C_BULK_SPAWN:
         {
-            return COM_COPY_STRUCT(h, write, S2C_BulkSpawn);
-            #if 0
+            #ifdef SIM_QUANTISE_SPAWNS
+            
             /*
             1 u8 type
             1 u8 sequenceOffset
@@ -69,32 +70,44 @@ internal i32 Cmd_Serialise(
             1 u8 seedIndex
             */
             S2C_BulkSpawn* cmd = (S2C_BulkSpawn*)h;
+            // cmdType, seqOffset, tick, firstSerial, source serial
             *write = CMD_TYPE_S2C_BULK_SPAWN; write++;
             *write = (u8)sequenceOffset; write++;
             write += COM_WriteI32(cmd->header.tick, write);
             write += COM_WriteI32(cmd->def.base.firstSerial, write);
             write += COM_WriteI32(cmd->def.base.sourceSerial, write);
-            // normal
-            i32 normal = COM_PackVec3NormalToI32(cmd->def.base.pos.parts);
+
+            // forward/pos/radius/arc
+            Vec3* forward = &cmd->def.base.forward;
+            i32 normal = COM_PackVec3NormalToI32(forward->parts);
+            //printf("Serialised forward %f, %f, %f to %d\n",
+            //    forward->x, forward->y, forward->z, normal);
             write += COM_WriteI32(normal, write);
-            // pos
             write += COM_WriteU16((u16)COM_QuantiseF2I(
                 cmd->def.base.pos.x, &quantise->pos), write);
             write += COM_WriteU16((u16)COM_QuantiseF2I(
                 cmd->def.base.pos.y, &quantise->pos), write);
             write += COM_WriteU16((u16)COM_QuantiseF2I(
                 cmd->def.base.pos.z, &quantise->pos), write);
-            // radius
+            
             write += COM_WriteU16((u16)COM_QuantiseF2I(
                 cmd->def.patternDef.radius, &quantise->pos), write);
+            write += COM_WriteU16((u16)COM_QuantiseF2I(
+                cmd->def.patternDef.arc, &quantise->rot), write);
             
+            // patternId, factoryType, numItems, seedIndex
             *write = (u8)cmd->def.patternDef.patternId; write++;
+            *write = (u8)cmd->def.factoryType; write++;
             *write = (u8)cmd->def.patternDef.numItems; write++;
             *write = cmd->def.base.seedIndex; write++;
+            write += COM_WriteU16((u16)0xBEEF, write);
+            //printf("Serialised %d of bulk spawn data\n", write - bufStart);
            return (write - bufStart);
+           #else
+           return COM_COPY_STRUCT(h, write, S2C_BulkSpawn);
            #endif
         } break;
-        #endif
+
         case CMD_TYPE_IMPULSE:
         return COM_COPY_STRUCT(h, write, CmdImpulse);
         // Just dumb copy the bytes

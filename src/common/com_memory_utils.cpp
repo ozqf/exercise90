@@ -1,3 +1,4 @@
+#if 1
 #pragma once
 
 #include "common.h"
@@ -273,3 +274,4 @@ com_internal i32 COM_SimpleHash(u8* ptr, i32 numBytes)
     }
     return hash;
 }
+#endif

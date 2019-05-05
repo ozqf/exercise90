@@ -230,8 +230,8 @@ void Tests_Run(i32 argc, char* argv[])
     //TestRenderMatrices();
     //Test_Priority();
     //Tests_SpreadPattern();
-    Test_Introspection();
-    //Tests_Quantisation();
+    //Test_Introspection();
+    Tests_Quantisation();
 }
 
 #endif

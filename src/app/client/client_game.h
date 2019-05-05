@@ -134,7 +134,7 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             }
             else
             {
-                ent->body.errorRate = 0.95f;
+                ent->body.errorRate = 0.98f;
             }
             
             ent->body.previousPos = ent->body.t.pos;

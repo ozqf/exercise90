@@ -216,7 +216,10 @@ internal void Sim_SetBulkSpawn(
     ev->base.forward = forward;
     ev->base.tick = tick;
     ev->base.seedIndex = seedIndex;
-
+    #ifdef SIM_QUANTISE_SYNC
+    ev->base.forward = COM_UnpackVec3Normal(
+        COM_PackVec3NormalToI32(forward.parts));
+    #endif
     ev->factoryType = factoryType;
     ev->patternDef.patternId = patternId;
     ev->patternDef.numItems = numItems;

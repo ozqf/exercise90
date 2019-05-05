@@ -39,6 +39,18 @@ internal f32 COM_DequantiseI2F(u32 input, QuantiseDef* def)
     return output;
 }
 
+internal f32 COM_QuantiseF(f32 input, QuantiseDef* def)
+{
+    return COM_DequantiseI2F(COM_QuantiseF2I(input, def), def);
+}
+
+internal void COM_QuantiseVec3(Vec3* v, QuantiseDef* def)
+{
+    v->x = COM_QuantiseF(v->x, def);
+    v->y = COM_QuantiseF(v->y, def);
+    v->z = COM_QuantiseF(v->z, def);
+}
+
 internal void COM_QuantiseInit(
     QuantiseDef* def, const i32 halfRange, const u8 numBits)
 {

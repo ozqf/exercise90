@@ -313,7 +313,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 1;
+    const i32 stage = 3;
 
     f32 inner = 8;
     f32 outer = 12;
@@ -361,7 +361,7 @@ internal void SV_LoadTestScene()
         SV_AddBot(sim, { 15, 0, 0 });
         break;
         default:
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
         break;
     }
 

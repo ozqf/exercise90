@@ -6,6 +6,9 @@
 // but will need to be applied as vector magnitude to work properly
 #define SIM_MAX_AXIS_SPEED 127
 
+#define SIM_QUANTISE_SYNC
+#define SIM_QUANTISE_SPAWNS
+
 #define SIM_NET_MIN_PRIORITY 1
 #define SIM_NET_MAX_PRIORITY 6
 

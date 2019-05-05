@@ -292,7 +292,7 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
     }
     // Only place where sequence should be set
     cmd->sequence = stream->outputSequence++;
-
+    
     ByteBuffer* b = &stream->outputBuffer;
     COM_ASSERT(b->Space() >= cmd->size, "Not space for output Cmd");
     // TODO: Replace direct copy with customised encoding functions when protocol is ready for it

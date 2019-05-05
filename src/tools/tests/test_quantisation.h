@@ -62,7 +62,8 @@ internal f32 Test_DequantiseI2F(i32 input, const i32 halfRange, const u8 numBits
 void Test_QuantiseValue(f32 original, i32 halfRange, u8 numBits)
 {
     i32 mask = COM_CreateBitmask(numBits);
-	printf("-----\n> %f in %d bits (%d bit mask)\n", original, numBits, numBits);
+	printf("-----\n> %f in %d bits (%d bit mask)\n",
+        original, numBits, numBits);
     u32 encoded = COM_QuantiseF2I_Slow(original, halfRange, numBits);
     COM_PrintBits(encoded, 1);
     COM_PrintBits(mask, 1);
