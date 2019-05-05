@@ -1,4 +1,4 @@
-#if 1
+#if 0
 #pragma once
 
 #include "common.h"
@@ -26,6 +26,9 @@ com_internal u32 COM_WriteByte(u8 value, u8* target)
     return sizeof(u8);
 }
 
+/**
+ * Returns number of bytes written
+ */
 com_internal void COM_WriteByte(u8 value, u8** target)
 {
 	COM_ASSERT(target != NULL, "Target is null");
