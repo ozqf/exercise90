@@ -2,6 +2,11 @@
 
 ## Current
 
+### Linux Server
+* Reimplement winsock and connections
+    * Client/Server connection 
+* 
+
 ### Application layer rebuild
 
 Goal:

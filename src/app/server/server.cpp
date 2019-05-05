@@ -313,7 +313,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 3;
+    const i32 stage = 1;
 
     f32 inner = 8;
     f32 outer = 12;
@@ -582,7 +582,7 @@ void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
     i64 start = App_SampleClock();
     SV_SendUserPackets(&g_sim, deltaTime);
     i64 end = App_SampleClock();
-    printf("SV Packets time %lld\n", end - start);
+    //printf("SV Packets time %lld\n", end - start);
 }
 
 void SV_PopulateRenderScene(

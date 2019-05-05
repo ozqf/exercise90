@@ -551,6 +551,7 @@ SVG_DEFINE_ENT_UPDATE(Bot)
 internal void SVG_TickEntity(
     SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
+    #if 0
     #ifdef SIM_QUANTISE_SYNC
     // Quantise physical properties
     if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
@@ -559,6 +560,7 @@ internal void SVG_TickEntity(
         COM_QuantiseVec3(&ent->body.t.pos, &sim->quantise.pos);
         COM_QuantiseVec3(&ent->body.velocity, &sim->quantise.vel);
     }
+    #endif
     #endif
     switch (ent->tickType)
     {
