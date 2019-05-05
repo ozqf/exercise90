@@ -27,3 +27,6 @@
 *.i
 *.sln
 *.vcxproj*
+
+# Compiles
+*.out

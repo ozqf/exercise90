@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "../../common/common.h"
+#include "linux_socket.h"
 
 int main()
 {
@@ -10,5 +11,6 @@ int main()
 	long t = time.tv_nsec;
 	printf("%d!\n", t);
 	printf("Oh, by the way I built with common.h imported successfully\n");
+	Net_Init();
 }
 
