@@ -208,6 +208,7 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // think
         // Spawn projectiles
         SimBulkSpawnEvent event = {};
+        /*
         event.factoryType = ent->relationships.childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(
             sim, 0, ent->relationships.childSpawnCount);
@@ -220,6 +221,23 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         // frame the event occurred on is recorded
         event.base.tick = sim->tick;
         event.base.sourceSerial = ent->id.serial;
+        */
+       
+        Sim_SetBulkSpawn(
+            &event,
+            Sim_ReserveEntitySerials(sim, 0, ent->relationships.childSpawnCount),
+            ent->id.serial,
+            ent->body.t.pos,
+            { 0, 0, 1 },
+            sim->tick,
+            ent->relationships.childFactoryType,
+            SIM_PATTERN_RADIAL,
+            (u8)ent->relationships.childSpawnCount,
+            COM_STDRandU8(),
+            10.0f,
+            0
+        );
+
         i32 flags;
         f32 priority;
 		Sim_ExecuteBulkSpawn(
@@ -397,17 +415,34 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     i32 numProjectiles = 3;
     
     SimBulkSpawnEvent event = {};
-    event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
+    /*
     event.base.firstSerial = Sim_ReserveEntitySerials(
         sim, 0, numProjectiles);
-    event.patternDef.patternId = SIM_PATTERN_SPREAD;
-    event.patternDef.numItems = numProjectiles;
-    event.patternDef.radius = 0;
-    event.patternDef.arc = 0.25f;
     event.base.pos = ent->body.t.pos;
     event.base.forward = *dir;
     event.base.tick = sim->tick;
     event.base.seedIndex = COM_STDRandU8();
+
+    event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
+    event.patternDef.patternId = SIM_PATTERN_SPREAD;
+    event.patternDef.numItems = numProjectiles;
+    event.patternDef.radius = 0;
+    event.patternDef.arc = 0.25f;
+    */
+    Sim_SetBulkSpawn(
+        &event, Sim_ReserveEntitySerials(sim, 0, numProjectiles),
+        ent->id.serial,
+        ent->body.t.pos,
+        *dir,
+        sim->tick,
+        SIM_FACTORY_TYPE_PROJ_PLAYER,
+        SIM_PATTERN_SPREAD,
+        (u8)numProjectiles,
+        COM_STDRandU8(),
+        0,
+        0.25f
+    );
+
     i32 flags;
     f32 priority;
     Sim_ExecuteBulkSpawn(sim, &event, fastForwardTicks, &flags, &priority);

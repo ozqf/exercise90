@@ -30,8 +30,35 @@ internal i32 Cmd_Deserialise(
         return COM_COPY_STRUCT(source, buffer, S2C_RestoreEntity);
         break;
         case CMD_TYPE_S2C_BULK_SPAWN:
-        return COM_COPY_STRUCT(source, buffer, S2C_BulkSpawn);
-        break;
+        {
+            return COM_COPY_STRUCT(source, buffer, S2C_BulkSpawn);
+            #if 0
+            u8 cmdType = *read; read++;
+            u8 seqOffset = *read; read++;
+            i32 tick = COM_ReadI32(&read);
+            i32 firstSerial = COM_ReadI32(&read);
+            i32 sourceSerial = COM_ReadI32(&read);
+
+            Vec3 forward = COM_UnpackVec3Normal(COM_ReadI32(&read));
+            Vec3 pos = {};
+            pos.x = COM_DequantiseI2F(
+                COM_ReadU16(&read), &quantise->pos);
+            pos.y = COM_DequantiseI2F(
+                COM_ReadU16(&read), &quantise->pos);
+            pos.z = COM_DequantiseI2F(
+                COM_ReadU16(&read), &quantise->pos);
+            f32 radius = COM_DequantiseI2F(
+                COM_ReadU16(&read), &quantise->pos);
+            u8 patternId = *read; read++;
+            u8 numItems = *read; read++;
+            u8 seedIndex = *read; read++;
+
+            S2C_BulkSpawn* cmd = (S2C_BulkSpawn*)buffer;
+            *cmd = {};
+            
+            return (read - source);
+            #endif
+        } break;
         case CMD_TYPE_S2C_SESSION_SYNC:
         return COM_COPY_STRUCT(source, buffer, S2C_Sync);
         break;
@@ -84,9 +111,9 @@ internal i32 Cmd_Deserialise(
             }
             else
             {
-                return COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
-                //COM_ASSERT(0, "Unknown entity sync type");
-                //return 0;
+                //return COM_COPY_STRUCT(source, buffer, S2C_EntitySync);
+                COM_ASSERT(0, "Unknown entity sync type");
+                return 0;
             }
         } break;
         case CMD_TYPE_PING:

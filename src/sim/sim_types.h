@@ -195,6 +195,35 @@ struct SimBulkSpawnEvent
     u8 factoryType;
 };
 
+internal void Sim_SetBulkSpawn(
+    SimBulkSpawnEvent* ev,
+    i32 firstSerial,
+    i32 sourceSerial,
+    Vec3 pos,
+    Vec3 forward,
+    i32 tick,
+    u8 factoryType,
+    u8 patternId,
+    u8 numItems,
+    u8 seedIndex,
+    f32 radius,
+    f32 arc)
+{
+    ev->factoryType = factoryType;
+    ev->base.firstSerial = firstSerial;
+    ev->base.sourceSerial = sourceSerial;
+    ev->base.pos = pos;
+    ev->base.forward = forward;
+    ev->base.tick = tick;
+    ev->base.seedIndex = seedIndex;
+
+    ev->factoryType = factoryType;
+    ev->patternDef.patternId = patternId;
+    ev->patternDef.numItems = numItems;
+    ev->patternDef.radius = radius;
+    ev->patternDef.arc = arc;
+}
+
 #if 0
 // For block allocated entity storage
 struct SimEntBlock

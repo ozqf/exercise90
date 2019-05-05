@@ -65,10 +65,16 @@ i32 SV_IsRunning() { return g_isRunning; }
 
 internal void SV_PrintMsgSizes()
 {
-    APP_LOG(64, "SV sizeof ping: %d\n",
+    APP_PRINT(64, "SV sizeof ping: %d\n",
         sizeof(CmdPing))
-    APP_LOG(64, "SV sizeof S2C_EntitySync: %d\n",
+    APP_PRINT(64, "SV sizeof Command: %d\n",
+        sizeof(Command))
+    APP_PRINT(64, "SV sizeof S2C_EntitySync: %d\n",
         sizeof(S2C_EntitySync))
+    APP_PRINT(64, "SV sizeof S2C_BulkSpawn: %d\n",
+        sizeof(S2C_BulkSpawn))
+    APP_PRINT(64, "SV sizeof S2C_RestoreEntity: %d\n",
+        sizeof(S2C_RestoreEntity))
 }
 
 void SV_WriteDebugString(ZStringHeader* str)
@@ -435,8 +441,6 @@ void SV_Init()
     SV_LoadTestScene();
 
     SV_ListAllocs();
-    printf("SV sizeof(Command): %d\n", sizeof(Command)); 
-    printf("SV sizeof(S2C_EntitySync): %d\n", sizeof(S2C_EntitySync));
 }
 
 void SV_Shutdown()

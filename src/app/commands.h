@@ -126,7 +126,7 @@ internal void Cmd_InitClientInput(
 ///////////////////////////////////////////////////////////////////////////
 /**
  * Restore the extact client state of a specific Entity.
- * Try to use bulk spawn commands instead possible
+ * Try to use bulk spawn commands instead if possible
  */
 struct S2C_RestoreEntity
 {
