@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "../common.h"
 
 #define RENDOBJ_FLAG_DEBUG (1 << 0)
 //#define RENDOBJ_FLAG_DEBUG (1 << 0)

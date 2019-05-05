@@ -4,7 +4,6 @@ Very basic meshes/textures embedded in source
 > Cube
 
 */
-#pragma once
 
 #include "common.h"
 

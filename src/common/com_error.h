@@ -31,6 +31,6 @@ void COM_Fatal(char* msg);
 #define COM_ASSERT(expression, msg) if(!(expression)) \
 { \
     char assertBuf[512]; \
-    sprintf_s(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
+    snprintf(assertBuf, 512, "%s, %d: %s\n", __FILE__, __LINE__, msg); \
 	COM_Fatal(assertBuf); \
 }

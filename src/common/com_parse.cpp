@@ -19,12 +19,12 @@ i32 COM_ReadTokens(char* source, char* destination, char** tokens)
         {
             if (c == ' ')
             {
-                *(destination + writePos) = NULL;
+                *(destination + writePos) = '\0';
 				readingToken = 0;
             }
-            else if (c == NULL)
+            else if (c == '\0')
             {
-                *(destination + writePos) = NULL;
+                *(destination + writePos) = '\0';
 				readingToken = 0;
                 reading = false;
             }
@@ -41,9 +41,9 @@ i32 COM_ReadTokens(char* source, char* destination, char** tokens)
             {
                 readPos++;
             }
-            else if (c == NULL)
+            else if (c == '\0')
             {
-                *(destination + writePos) = NULL;
+                *(destination + writePos) = '\0';
                 reading = false;
             }
             else

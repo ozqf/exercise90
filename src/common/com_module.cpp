@@ -1,4 +1,3 @@
-#pragma once
 // common module compilation unit
 
 // Implementation of structs/code found in:

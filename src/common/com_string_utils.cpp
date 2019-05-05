@@ -14,7 +14,7 @@ com_internal i32 COM_CompareStrings(const char *a, const char *b)
     while (*a == *b)
     {
         // End of string
-        if (*a == NULL)
+        if (*a == '\0')
         {
             return 0;
         }
@@ -49,7 +49,7 @@ com_internal void COM_CopyStringA(const char *source, char *target)
     while (true)
     {
         *target = *source;
-        if (*source == NULL)
+        if (*source == '\0')
         {
             return;
         }

@@ -15,7 +15,7 @@ u8 COM_FloatToByte(f32 f)
 }
 
 #define BEGIN_PIXEL_FUNCTION(functionName) \
-void TexDraw_##functionName##(Texture2DHeader* tex) \
+void TexDraw_##functionName(Texture2DHeader* tex) \
 { \
     for (i32 pixelY = 0; pixelY < tex->height; ++pixelY) \
     { \

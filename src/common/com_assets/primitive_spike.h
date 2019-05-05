@@ -1,6 +1,5 @@
-#pragma once
 
-#include "common.h"
+#include "../common.h"
 
 #define SPIKE_SIZE 1.0f
 

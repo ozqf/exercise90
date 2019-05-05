@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# lm to link with math.h
+gcc linux.cpp ../../common/com_module.cpp -lm
