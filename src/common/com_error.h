@@ -22,7 +22,7 @@ typedef int ErrorCode;
 #define COM_ERROR_NULL_ARGUMENT 12
 #define COM_ERROR_NOT_IMPLEMENTED 13
 
-typedef void (*COM_FatalErrorFunction)(char* message, char* heading);
+typedef void (*COM_FatalErrorFunction)(const char* message, const char* heading);
 
 void COM_SetFatalError(COM_FatalErrorFunction func);
 

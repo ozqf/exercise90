@@ -558,14 +558,14 @@ com_internal void Heap_Defrag2(Heap *heap)
     // Heap_Fragment fragments[1];
     // i32 numFragments = Heap_ScanForFragments(heap, fragments, 1);
 }
-
+/*
 com_internal i32 Heap_AllocString(Heap* heap, BlockRef* ref, i32 maxStringCapacity)
 {
     // length of string + 1 for null terminator
     u32 totalSize = maxStringCapacity + 1;
     return Heap_Allocate(heap, ref, totalSize, "ZString", 1);
 }
-
+*/
 void Heap_NeverCall()
 {
     ILLEGAL_CODE_PATH
