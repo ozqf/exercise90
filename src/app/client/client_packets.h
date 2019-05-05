@@ -27,27 +27,30 @@ internal void CL_LogCommandBuffer(ByteBuffer* b, char* label)
 }
 
 internal i32 CL_WriteUnreliableSection(
-    ByteBuffer* packet, C2S_Input* userInput)
+    QuantiseSet* quantise, ByteBuffer* packet, C2S_Input* userInput)
 {
     u8* start = packet->ptrWrite;
+    // Write header
+    packet->ptrWrite += COM_WriteI32(g_ticks, packet->ptrWrite);
     // Send ping
 	CmdPing ping = {};
 	// TODO: Stream enqueue will set the sequence for us
 	// so remove sending 0 here.
-	Cmd_Prepare(&ping.header, g_ticks, 0);
+	Cmd_Prepare(&ping.header, g_ticks);
 	ping.sendTime = g_elapsed;
-    packet->ptrWrite += COM_COPY(
-        &ping, packet->ptrWrite, ping.header.size);
+    packet->ptrWrite += Cmd_Serialise(
+        quantise, packet->ptrWrite, &ping.header, 0);
 	
 	// TODO: Encode userInput
     APP_LOG(64, "CL Write input\n");
-	packet->ptrWrite += COM_COPY(
-		userInput, packet->ptrWrite, userInput->header.size);
+    packet->ptrWrite += Cmd_Serialise(
+        quantise, packet->ptrWrite, &userInput->header, 0);
 	
     return (packet->ptrWrite - start);
 }
 
-internal void CL_WritePacket(f32 time, C2S_Input* userInput)
+internal void CL_WritePacket(
+    QuantiseSet* quantise, f32 time, C2S_Input* userInput)
 {
     #if 1
 	//printf("CL Write packet for user %d\n", g_ids.privateId);
@@ -69,7 +72,7 @@ internal void CL_WritePacket(f32 time, C2S_Input* userInput)
 	//	g_reliableStream.transmissions, packetSequence);
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
     i32 unreliableWritten = CL_WriteUnreliableSection(
-        &packet, userInput);
+        quantise, &packet, userInput);
     Packet_FinishWrite(&packet, 0, unreliableWritten);
     i32 total = packet.Written();
 	
@@ -83,21 +86,26 @@ internal void CL_WritePacket(f32 time, C2S_Input* userInput)
 }
 
 internal i32 CL_ReadPacketUnreliableInput(
-    ByteBuffer* buf, NetStream* stream)
+    ByteBuffer* buf, NetStream* stream, QuantiseSet* quantise)
 {
     //CL_LogCommandBuffer(buf, "Unreliable packet section");
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
+    u8 readBuffer[CMD_MAX_SIZE];
     APP_LOG(128, "CL Reading %d unreliable bytes\n", (end -read));
+    i32 baseTick = COM_ReadI32(&read);
+    i32 cmdsRead = 0;
     while (read < end)
     {
-        Command* h = (Command*)read;
+        read += Cmd_Deserialise(
+            quantise, read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
+        Command* h = (Command*)readBuffer;
         i32 err = Cmd_Validate(h);
         if (err != COM_ERROR_NONE)
         {
             return err;
         }
-        read += h->size;
+        cmdsRead++;
         i32 wrote = Stream_EnqueueUnreliableInput(stream, h);
         if (wrote)
         {
@@ -109,17 +117,23 @@ internal i32 CL_ReadPacketUnreliableInput(
 }
 
 internal i32 CL_ReadPacketReliableInput(
-    ByteBuffer* buf, NetStream* stream)
+    ByteBuffer* buf, NetStream* stream, QuantiseSet* quantise)
 {
     u8* read = buf->ptrStart;
     u8* end = buf->ptrWrite;
+    u8 readBuffer[CMD_MAX_SIZE];
+    i32 cmdsRead = 0;
+    // Read sequence that cmds will offset from
+    CmdSeq baseSequence = Cmd_ReadSequence(&read);
     while (read < end)
     {
-        Command* h = (Command*)read;
+        read += Cmd_Deserialise(
+            quantise, read, readBuffer, CMD_MAX_SIZE, baseSequence, 0);
+        Command* h = (Command*)readBuffer;
         ErrorCode err = Cmd_Validate(h);
         COM_ASSERT(err == COM_ERROR_NONE, "Invalid cmd")
         
-        read += h->size;
+        cmdsRead++;
         Stream_EnqueueReliableInput(stream, h);
     }
     return COM_ERROR_NONE;
@@ -129,6 +143,7 @@ internal i32 CL_ReadPacket(
     SysPacketEvent* ev,
     NetStream* reliableStream,
     NetStream* unreliableStream,
+    QuantiseSet* quantise,
     f32 time)
 {
     // -- Descriptor --
@@ -143,6 +158,7 @@ internal i32 CL_ReadPacket(
 	if (err != COM_ERROR_NONE)
 	{
 		printf("  Error %d deserialising packet\n", err);
+        COM_ASSERT(0, "Packet Deserialise failed");
 		return COM_ERROR_DESERIALISE_FAILED;
 	}
     /*printf("  Seq %d Tick %d Time %.3f\n",
@@ -172,7 +188,7 @@ internal i32 CL_ReadPacket(
     reliableSection.ptrWrite = reliableSection.ptrStart + p.numReliableBytes;
     reliableSection.ptrEnd = reliableSection.ptrWrite;
     reliableSection.capacity = p.numReliableBytes;
-    CL_ReadPacketReliableInput(&reliableSection, reliableStream);
+    CL_ReadPacketReliableInput(&reliableSection, reliableStream, quantise);
     //Cmd_PrintBuffer(reliableSection.ptrStart, reliableSection.Written());
 	
 	// -- unreliable section --
@@ -182,7 +198,8 @@ internal i32 CL_ReadPacket(
         unreliableSection.ptrStart +
         p.numUnreliableBytes;
     unreliableSection.ptrEnd = unreliableSection.ptrWrite;
-    err = CL_ReadPacketUnreliableInput(&unreliableSection, unreliableStream);
+    err = CL_ReadPacketUnreliableInput(
+        &unreliableSection, unreliableStream, quantise);
     if (err)
     {
         APP_PRINT(64, "CL err %d reading unreliable", err) 

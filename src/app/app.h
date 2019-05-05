@@ -13,12 +13,13 @@ void App_SetMouseMode(ZMouseMode mode);
 void App_Error(char* msg, char* heading);
 f32 App_GetSimFrameInterval();
 i32 App_CalcTickInterval(f32 seconds);
+i64 App_SampleClock();
 ScreenInfo App_GetScreenInfo();
 
 /////////////////////////////////////////////////////////////////
 // MACROS
 /////////////////////////////////////////////////////////////////
-#define APP_MAX_ENTITIES 2048
+#define APP_MAX_ENTITIES 4096
 
 #define APP_CLIENT_SYNC_RATE_60HZ 60
 #define APP_CLIENT_SYNC_RATE_30HZ 30

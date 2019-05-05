@@ -11,13 +11,9 @@ internal i32 SVP_WriteUnreliableSection(
 {
     i32 capacity = packet->Space();
     u8* start = packet->ptrWrite;
-    // Send ping
-	//CmdPing ping = {};
-	// TODO: Stream enqueue will set the sequence for us
-	// so remove sending 0 here.
-    //Cmd_InitPing(&ping, g_ticks, 0, g_elapsed);
-    //packet->ptrWrite += COM_COPY(
-    //    &ping, packet->ptrWrite, ping.header.size);
+    // write the unreliable section header
+    // - sim tick for these commands
+    packet->ptrWrite += COM_WriteI32(sim->tick, packet->ptrWrite);
 
     // send input confirmation
     SimEntity* avatar = Sim_GetEntityBySerial(&g_sim, user->entSerial);
@@ -26,16 +22,16 @@ internal i32 SVP_WriteUnreliableSection(
     S2C_InputResponse response = {};
     Cmd_InitInputResponse(
         &response,
-        g_ticks,
+        sim->tick,
         user->userInputSequence,
         pos
         );
-    packet->ptrWrite += COM_COPY(
-        &response, packet->ptrWrite, response.header.size);
+    packet->ptrWrite += Cmd_Serialise(
+        &sim->quantise, packet->ptrWrite, &response.header, 0);
     stats->numUnreliableMessages += 1;
     // ENTITY SYNC
     #if 1
-    SVEntityLink* links = user->entSync.links;
+    PriorityLink* links = user->entSync.links;
     i32 numLinks = user->entSync.numLinks;
     // most of the time there will be too many entities
     // for one packet and this for loop will never complete
@@ -45,90 +41,126 @@ internal i32 SVP_WriteUnreliableSection(
         { break; }
         stats->numUnreliableMessages += 1;
 
-        SVEntityLink* link = &links[i];
+        PriorityLink* link = &links[i];
         i32 serial = link->id;
         SimEntity* ent = Sim_GetEntityBySerial(sim, serial);
+
+        // Prepare sync data
         S2C_EntitySync cmd = {};
         if (ent)
         {
-            Cmd_WriteEntitySyncAsUpdate(&cmd, g_ticks, 0, ent);
-            packet->ptrWrite += COM_COPY(
-                &cmd, packet->ptrWrite, cmd.header.size);
+            Cmd_WriteEntitySyncAsUpdate(&cmd, sim->tick, ent);
         }
         else
         {
             // No entity? must be dead!
-            Cmd_WriteEntitySyncAsDeath(&cmd, g_ticks, 0, link->id);
+            Cmd_WriteEntitySyncAsDeath(&cmd, sim->tick, link->id);
         }
+
+        // Write sync to packet
+        packet->ptrWrite += Cmd_Serialise(
+            &sim->quantise, packet->ptrWrite, &cmd.header, 0);
         
-        
+        // Is this a new baseline for unreliable ack?
+        if (link->baselineSequence == 0)
+        {
+            link->baselineSequence = rec->sequence;
+        }
 
         // Reset importance, add to transmission record
         link->importance = 0;
-        link->lastPacketSent = rec->sequence;
         rec->syncIds[rec->numSyncMessages] = serial;
         rec->numSyncMessages += 1;
         if (rec->numSyncMessages == MAX_PACKET_SYNC_MESSAGES)
         { break; }
     }
     #endif
-    #if 0
-    //APP_LOG(128, "SV Write ent sync for: ");
-	//i32 syncMessagesWritten = 0;
-	for (i32 i = 0; i < g_sim.maxEnts; ++i)
-	{
-		SimEntity* ent = &g_sim.ents[i];
-		if (ent->status != SIM_ENT_STATUS_IN_USE) { continue; }
-        if (ent->isLocal) { continue; }
-		
-		if (packet->Space() < sizeof(S2C_EntitySync))
-		{
-			break;
-		}
-        //APP_LOG(32, "%d, ", ent->id.serial);
-        if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
-        {
-            S2C_EntitySync cmd = {};
-            Cmd_WriteEntitySync(&cmd, g_ticks, 0, ent);
-            packet->ptrWrite += COM_COPY(
-                &cmd, packet->ptrWrite, cmd.header.size);
-            //APP_LOG(128, "SV Wrote ent %d sync\n", ent->id.serial);
-		    syncMessagesWritten++;
-        }
-	}
-    #endif
-    //APP_LOG(8, "\n");
     i32 written = (packet->ptrWrite - start);
     stats->unreliableBytes = written;
-    //APP_LOG(128, "SV Wrote %d sync messages (%d bytes of %d capacity)\n",
-    //    syncMessagesWritten, written, capacity);
     return written;
 }
 
 internal i32 SVP_WriteReliableSection(
     User* user,
     ByteBuffer* packet,
-    i32 capacity,
     TransmissionRecord* rec,
+    QuantiseSet* quantise,
     PacketStats* stats)
 {
-    i32 space = capacity;
+    // Commands are serialised to this buffer to measure them before
+    // writing to the packet.
+    u8 staging[CMD_MAX_SIZE];
     ByteBuffer* cmds = &user->reliableStream.outputBuffer;
     u8* read = cmds->ptrStart;
     u8* end = cmds->ptrWrite;
-    i32 numCommandsNotWritten = 0;
+    i32 bBaseSequenceSet = 0;
+    CmdSeq baseSequence = 0;
+    //i32 numCommandsNotWritten = 0;
     while(read < end)
     {
         Command* cmd = (Command*)read;
         COM_ASSERT(
 			Cmd_Validate(cmd) == COM_ERROR_NONE,
 			"Invalid reliable command")
-        i32 size = cmd->size;
-        read += size;
-        if (cmd->size > space) { numCommandsNotWritten++; continue; }
+        read += cmd->size;
+        //i32 size = cmd->size;
+        //read += size;
+        //if (cmd->size > space) { numCommandsNotWritten++; continue; }
+        if (cmd->sendTicks > 0) { cmd->sendTicks--; continue; }
         
-        packet->ptrWrite += COM_COPY(cmd, packet->ptrWrite, size);
-        space -= size;
+        i32 cmdBytesWritten = 0;
+        CmdSeq seqOffset = 0;
+        // if first, use this command's sequence as the base others
+        // will offset themselves from
+        if (bBaseSequenceSet == NO)
+        {
+            bBaseSequenceSet = YES;
+            baseSequence = cmd->sequence;
+            packet->ptrWrite += Cmd_WriteSequence(
+                packet->ptrWrite, baseSequence);
+            //size += sizeof(CmdSeq);
+            // We assume the buffer can always fit at least ONE reliable
+            // command and so don't check the size of the first
+            cmdBytesWritten = Cmd_Serialise(
+                quantise, staging, cmd, 0);
+        }
+        else
+        {
+            // If this command's sequence is out of the one byte range
+            // of an offset it cannot be written to this packet!
+            i32 seqDiff = cmd->sequence - baseSequence;
+            if (Cmd_IsSequenceDiffOkay(seqDiff) == NO)
+            {
+                printf("SV Seq diff %d out of range!\n", seqDiff);
+                continue;
+            }
+            seqOffset = (CmdSeq)seqDiff;
+            cmdBytesWritten = Cmd_Serialise(
+                quantise, staging, cmd, seqOffset);
+            // Will it fit?
+            if (cmdBytesWritten > packet->Space())
+            continue;
+        }
+        
+        // Flow control to avoid filling packets with the same
+        // commands redundantly
+        cmd->timesSent++;
+        // k this thing just ain't getting through
+        if (cmd->timesSent > SV_CMD_SLOW_RESEND_ATTEMPTS)
+        {
+            // Spam the bloody thing out
+            cmd->sendTicks = 0;
+        }
+        else
+        {
+            // Resend just incase
+            // TODO: Vary resend wait based on packet loss?
+            cmd->sendTicks = SV_CMD_RESEND_WAIT_TICKS;
+        }
+        
+        //packet->ptrWrite += Cmd_Serialise(packet->ptrWrite, cmd, seqOffset);
+        // Everything is okay, copy from staging to packet
+        packet->ptrWrite += COM_COPY(staging, packet->ptrWrite, cmdBytesWritten);
         stats->numReliableMessages += 1;
 		
 		// Record message
@@ -138,23 +170,18 @@ internal i32 SVP_WriteReliableSection(
             rec->numReliableMessages < MAX_PACKET_TRANSMISSION_MESSAGES,
             "Too many messages in packet to record")
     }
-    if (numCommandsNotWritten > 0)
+    /*if (numCommandsNotWritten > 0)
     {
         APP_LOG(128, "SV no space for %d commands to user %d (%d bytes in output)\n",
             numCommandsNotWritten, user->ids.privateId, cmds->Written());
-    }
-    stats->numReliableSkipped = numCommandsNotWritten;
-    return (capacity - space);
+    }*/
+    //stats->numReliableSkipped = numCommandsNotWritten;
+    return packet->Written();
 }
 
-// Returns packet statistics
 internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 {
-	//printf("SV Write packet for user %d\n", user->ids.privateId);
-	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);
-	
 	// enqueue
-	//ByteBuffer* buf = App_GetLocalClientPacketForWrite();
 	PacketStats stats = {};
 	const i32 packetSize = SV_PACKET_MAX_BYTES;
 	// unreliable may use whatever space is remaining, but
@@ -178,31 +205,33 @@ internal PacketStats SVP_WriteUserPacket(SimScene* sim, User* user, f32 time)
 	TransmissionRecord* rec = Stream_AssignTransmissionRecord(
 		user->reliableStream.transmissions, packetSequence);
     
+    // Create sub-section for reliableBuffer
+    ByteBuffer reliableBuf = Buf_FromBytes(
+        packet.ptrWrite, reliableAllocation);
+    // Write reliable stream
     i32 reliableWritten = SVP_WriteReliableSection(
-        user, &packet, reliableAllocation, rec, &stats);
-	//printf("  Reliable wrote %d bytes of %d allowed\n", reliableWritten, reliableAllocation);
+        user, &reliableBuf, rec, &sim->quantise, &stats);
+    // step packet buffer forward
+    packet.ptrWrite += reliableWritten;
 
-    // -- write mid-packet deserialise check and unreliable sync data -- 
+    // -- write mid-packet deserialise check -- 
     packet.ptrWrite += COM_WriteI32(COM_SENTINEL_B, packet.ptrWrite);
+    // fill remaining space with unreliable sync data
     i32 unreliableWritten = SVP_WriteUnreliableSection(
         sim, user, &packet, rec, &stats);
-    //i32 unreliableWritten = 0;
-    if (unreliableWritten > 0)
-    {
-        APP_LOG(128, "SV Wrote %d unreliable bytes\n", unreliableWritten);
-    }
     
 	// -- Finish --
     Packet_FinishWrite(&packet, reliableWritten, unreliableWritten);
     i32 total = packet.Written();
-    stats.packetSize = total;
+    App_SendTo(0, &user->address, buf, total);
+
+    stats.totalBytes = total;
     stats.reliableBytes = reliableWritten;
     stats.unreliableBytes = unreliableWritten;
-    App_SendTo(0, &user->address, buf, total);
     return stats;
 }
 
-internal void SVP_WriteTestPacket()
+/*internal void SVP_WriteTestPacket()
 {
     // Make a packet, no messages just a header
     u8 buf[1400];
@@ -217,15 +246,20 @@ internal void SVP_WriteTestPacket()
     addr.port = APP_CLIENT_LOOPBACK_PORT;
 
     App_SendTo(0, &addr, buf, written);
-}
+}*/
 
-internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
+internal void SVP_ReadUnreliableSection(
+    User* user, ByteBuffer* b, QuantiseSet* quantise)
 {
+    u8 readBuffer[CMD_MAX_SIZE];
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
+    i32 baseTick = COM_ReadI32(&read);
     while (read < end)
     {
-        Command* header = (Command*)read;
+        read += Cmd_Deserialise(
+            quantise, read, readBuffer, CMD_MAX_SIZE, 0, baseTick);
+        Command* header = (Command*)readBuffer;
         i32 err = Cmd_Validate(header);
         if (err)
         {
@@ -258,7 +292,8 @@ internal void SVP_ReadUnreliableSection(User* user, ByteBuffer* b)
     }
 }
 
-internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
+internal void SVP_ReadPacket(
+    SysPacketEvent* ev, QuantiseSet* quantise, f32 time)
 {
 	i32 headerSize = sizeof(SysPacketEvent);
     i32 dataSize = ev->header.size - headerSize;
@@ -301,7 +336,8 @@ internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
         i32 sequence = packetAcks[i];
         TransmissionRecord* rec = 
             Stream_ClearReceivedOutput(&user->reliableStream, sequence);
-        SV_UpdateSyncAcks(&user->entSync, sequence, rec->syncIds, rec->numSyncMessages);
+        Priority_UpdateSyncAcks(
+            &user->entSync, sequence, rec->syncIds, rec->numSyncMessages);
 
     }
 	// Stream_ProcessPacketAcks(
@@ -316,5 +352,5 @@ internal void SVP_ReadPacket(SysPacketEvent* ev, f32 time)
     b.ptrWrite = b.ptrStart + p.numUnreliableBytes;
     b.ptrEnd = b.ptrWrite;
     
-    SVP_ReadUnreliableSection(user, &b);
+    SVP_ReadUnreliableSection(user, &b, quantise);
 }

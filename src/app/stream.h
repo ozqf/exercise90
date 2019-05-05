@@ -7,23 +7,94 @@
 #include "../common/common.h"
 #include "commands_base.h"
 
-internal i32 Stream_CountCommands(ByteBuffer* b)
+#define MAX_PACKET_TRANSMISSION_MESSAGES 64
+#define MAX_PACKET_SYNC_MESSAGES 64
+struct TransmissionRecord
 {
+	u32 sequence;
+	u32 numReliableMessages;
+	u32 reliableMessageIds[MAX_PACKET_TRANSMISSION_MESSAGES];
+	u32 numSyncMessages;
+	i32 syncIds[MAX_PACKET_SYNC_MESSAGES];
+};
+
+struct PacketStats
+{
+	i32 totalBytes;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+	i32 commandCounts[256];
+};
+
+struct StreamStats
+{
+	i32 numPackets;
+	i32 totalBytes;
+    i32 reliableBytes;
+    i32 unreliableBytes;
+	i32 numReliableMessages;
+	i32 numReliableSkipped;
+	i32 numUnreliableMessages;
+	i32 commandCounts[256];
+};
+
+struct ReliableCmdQueueStats
+{
+    i32 count;
+    CmdSeq highestSeq;
+    CmdSeq lowestSeq;
+};
+
+#define MAX_TRANSMISSION_RECORDS 33
+struct NetStream
+{
+	// Has allocated buffers
+	i32 initialised;
+    // latest reliable command from remote executed here
+    CmdSeq          inputSequence;
+    ByteBuffer      inputBuffer;
+
+    // id of next reliable message sent to remote
+    CmdSeq          outputSequence;
+    ByteBuffer      outputBuffer;
+    // the most recented remotely acknowledged message Id
+    u32             ackSequence;
+	
+	AckStream		ackStream;
+
+    TransmissionRecord transmissions[MAX_TRANSMISSION_RECORDS];
+};
+
+internal void COM_InitStream(NetStream* stream, ByteBuffer input, ByteBuffer output)
+{
+    stream->inputBuffer = input;
+    stream->outputBuffer = output;
+    stream->inputSequence = 0;
+}
+
+internal ReliableCmdQueueStats Stream_CountCommands(ByteBuffer* b)
+{
+    ReliableCmdQueueStats result = {};
+    result.lowestSeq = CMD_SEQ_MAX;
     u8* read = b->ptrStart;
     u8* end = b->ptrWrite;
-    i32 count = 0;
     while (read < end)
     {
         Command* cmd = (Command*)read;
         i32 err = Cmd_Validate(cmd);
         if (err)
         {
-            return -1;
+            return result;
         }
+        if (cmd->sequence < result.lowestSeq) { result.lowestSeq = cmd->sequence; }
+        if (cmd->sequence > result.highestSeq) { result.highestSeq = cmd->sequence; }
         read += cmd->size;
-        count++;
+        result.count++;
     }
-    return count;
+    return result;
 }
 
 internal TransmissionRecord* Stream_AssignTransmissionRecord(
@@ -33,6 +104,7 @@ internal TransmissionRecord* Stream_AssignTransmissionRecord(
     TransmissionRecord* rec = &records[sequence % MAX_TRANSMISSION_RECORDS];
     rec->sequence = sequence;
     rec->numReliableMessages = 0;
+    rec->numSyncMessages = 0;
     return rec;
 }
 
@@ -74,7 +146,26 @@ internal Command* Stream_FindMessageBySequence(u8* ptr, i32 numBytes, i32 sequen
  * After:
  * blockStart* (rest of buffer ---- )bufferEnd*
  */
-internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd)
+internal void Stream_DeleteCommand(ByteBuffer* b, Command* cmd, i32 remainingSpace)
+{
+    ErrorCode err = Cmd_Validate(cmd); 
+    COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
+    u8* start = b->ptrStart;
+    u8* bufEnd = start + b->Written();
+    u8* cmdPtr = (u8*)cmd;
+    COM_ASSERT(cmdPtr >= start, "Cmd position < buffer start")
+    COM_ASSERT(cmdPtr < bufEnd, "Cmd position > buffer end")
+    
+    i32 bytesToDelete = cmd->size - remainingSpace;
+	u8* copyBlockDest = cmdPtr + remainingSpace;
+    u8* copyBlockStart = (u8*)cmd + cmd->size;
+    i32 bytesToCopy = bufEnd - copyBlockStart;
+    // printf("Deleting %d bytes. Copying %d bytes\n", bytesToDelete, bytesToCopy);
+	COM_CopyMemory(copyBlockStart, copyBlockDest, bytesToCopy);
+	b->ptrWrite -= bytesToDelete;
+}
+
+internal void Stream_DeleteCommand_Original(ByteBuffer* b, Command* cmd, i32 remainingSpace)
 {
     ErrorCode err = Cmd_Validate(cmd); 
     COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
@@ -99,7 +190,7 @@ internal void Stream_DeleteCommandBySequence(ByteBuffer* b, i32 sequence)
         b->ptrStart, b->Written(), sequence);
 	if (cmd)
 	{
-		Stream_DeleteCommand(b, cmd);
+		Stream_DeleteCommand(b, cmd, 0);
 	}
 }
 
@@ -120,7 +211,7 @@ internal TransmissionRecord* Stream_ClearReceivedOutput(
         Command* cmd = Stream_FindMessageBySequence(
 			b->ptrStart, b->Written(), seq);
         if (cmd == NULL) { continue; }
-        Stream_DeleteCommand(b, cmd);
+        Stream_DeleteCommand(b, cmd, 0);
     }
     return rec;
 }
@@ -199,7 +290,9 @@ internal void Stream_EnqueueOutput(NetStream* stream, Command* cmd)
         APP_LOG(64, "STREAM cmd for enqueue is invalid. Code %d\n", error);
         return;
     }
+    // Only place where sequence should be set
     cmd->sequence = stream->outputSequence++;
+    
     ByteBuffer* b = &stream->outputBuffer;
     COM_ASSERT(b->Space() >= cmd->size, "Not space for output Cmd");
     // TODO: Replace direct copy with customised encoding functions when protocol is ready for it

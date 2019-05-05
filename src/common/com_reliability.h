@@ -10,7 +10,7 @@ Records of transmission or reception are stored in rolling arrays
 */
 #include "common.h"
 
-#define ACK_CAPACITY 128
+#define ACK_CAPACITY 256
 // +1 due to ack number (1) + ackbits (32)
 #define ACK_RESULTS_CAPACITY 33
 
@@ -42,10 +42,15 @@ struct AckStream
 static void Ack_RecordPacketTransmission(
 	AckStream* astream, u32 outputSequence, f32 time)
 {
-	u32 index = outputSequence % ACK_CAPACITY;
-	astream->awaitingAck[index].sequence = outputSequence;
-	astream->awaitingAck[index].acked = 0;
-	astream->awaitingAck[index].sentTime = time;
+	AckRecord* rec = &astream->awaitingAck[outputSequence % ACK_CAPACITY];
+	// Check whether we are replacing a previous record
+	if (rec->sentTime > 0)
+	{
+		// Check if received for loss stats...?
+	}
+	rec->sequence = outputSequence;
+	rec->acked = 0;
+	rec->sentTime = time;
 }
 
 static void Ack_RecordPacketReceived(AckStream* astream, u32 packetSequence)
@@ -57,6 +62,25 @@ static void Ack_RecordPacketReceived(AckStream* astream, u32 packetSequence)
 	}
 	u32 index = packetSequence % ACK_CAPACITY;
 	astream->received[index] = packetSequence;
+}
+
+static f32 Ack_EstimateLoss(AckStream* astream)
+{
+	i32 total = 0;
+	i32 acked = 0;
+	for (i32 i = 0; i < ACK_CAPACITY; ++i)
+	{
+		AckRecord* rec = &astream->awaitingAck[i];
+		if (rec->sentTime != 0)
+		{
+			total++;
+			if (rec->acked)
+			{
+				acked++;
+			}
+		}
+	}
+	return 100.0f - (((f32)acked / (f32)total) * 100.0f);
 }
 
 static f32 Ack_CalculateAverageDelay(AckStream* astream)

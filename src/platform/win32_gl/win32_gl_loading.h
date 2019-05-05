@@ -66,7 +66,7 @@ internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 	{
 		printf("REND Got proc Swap Interval\n");
 		// 1 == vsync on, 0 off
-		ex->SwapInterval(1);
+		ex->SwapInterval(0);
 	}
 	else
 	{

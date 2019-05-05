@@ -14,6 +14,7 @@ Data structures and code shared between all modules
 #include "com_command_types.h"
 #include "com_render/com_render_types.h"
 #include "com_bitpack.h"
+#include "com_quantise.h"
 #include "com_random.h"
 #include "com_maths.h"
 #include "com_transform.h"

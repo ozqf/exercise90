@@ -26,11 +26,11 @@ void Win32_InitPlatformInterface()
     platInterface.BindTexture = Platform_BindTexture;
     
     platInterface.SetMouseMode = Win32_SetMouseMode;
+    
+    platInterface.SampleClock = Win32_QueryPerformanceCounter;
 
     platInterface.RenderScene = Platform_R_DrawScene;
     platInterface.SubmitRenderCommands = Platform_R_SubmitCommands;
-
-    platInterface.SetDebugInputTextureIndex = Platform_SetDebugInputTextureIndex;
 
     platInterface.LoadSound = Platform_LoadSound;
 

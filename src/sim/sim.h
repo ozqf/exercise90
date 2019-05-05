@@ -2,8 +2,15 @@
 
 #include "../common/common.h"
 
+// TODO: This is set for quantisating individual axes,
+// but will need to be applied as vector magnitude to work properly
+#define SIM_MAX_AXIS_SPEED 127
+
+#define SIM_QUANTISE_SYNC
+#define SIM_QUANTISE_SPAWNS
+
 #define SIM_NET_MIN_PRIORITY 1
-#define SIM_NET_MAX_PRIORITY 4
+#define SIM_NET_MAX_PRIORITY 6
 
 #define SIM_DEFAULT_SPAWN_DELAY 1.5
 
@@ -30,6 +37,10 @@ typedef u8 simFactoryType;
 #define SIM_FACTORY_TYPE_RUBBLE 11
 #define SIM_FACTORY_TYPE_DART 12
 #define SIM_FACTORY_TYPE_EXPLOSION 13
+#define SIM_FACTORY_TYPE_BOT 14
+#define SIM_FACTORY_TYPE_GRUNT 15
+#define SIM_FACTORY_TYPE_BRUTE 16
+#define SIM_FACTORY_TYPE_CHARGER 17
 
 // Update functions
 #define SIM_TICK_TYPE_NONE 0
@@ -44,6 +55,8 @@ typedef u8 simFactoryType;
 #define SIM_TICK_TYPE_DART 10
 #define SIM_TICK_TYPE_EXPLOSION 11
 #define SIM_TICK_TYPE_SPAWN 12
+#define SIM_TICK_TYPE_BOT 13
+#define SIM_TICK_TYPE_GRUNT 14
 
 // Spawn pattern types.
 #define SIM_PATTERN_NONE 0
@@ -59,6 +72,7 @@ typedef u8 simFactoryType;
 #define SIM_ENT_FLAG_POSITION_SYNC (1 << 2)
 #define SIM_ENT_FLAG_MOVE_AVOID (1 << 3)
 #define SIM_ENT_FLAG_TARGET_SEEKING (1 << 4)
+#define SIM_ENT_FLAG_USE_OVERRIDE_SCALE (1 << 5)
 
 #define SIM_DEATH_GFX_NONE 0
 #define SIM_DEATH_GFX_EXPLOSION 1
@@ -78,6 +92,7 @@ extern "C" i32		Sim_GetFrameNumber(SimScene* sim);
 // Entity list functions
 extern "C" SimEntity* Sim_GetEntityBySerial(SimScene* sim, i32 serial);
 extern "C" SimEntity* Sim_GetEntityByIndex(SimScene* sim, SimEntIndex index);
+extern "C" i32      Sim_ScanForSerialRange(SimScene* sim, i32 firstSerial, i32 numSerials);
 extern "C" i32      Sim_ReserveEntitySerial(SimScene* sim, i32 isLocal);
 extern "C" i32      Sim_ReserveEntitySerials(
                         SimScene* scene, i32 isLocal, i32 count);
@@ -96,8 +111,9 @@ extern "C" i32      Sim_ExecuteBulkSpawn(
 extern "C" void     Sim_SimpleMove(SimEntity* ent, f32 deltaTime);
 extern "C" i32      Sim_InBounds(SimEntity* ent, Vec3* min, Vec3* max);
 extern "C" void     Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max);
+extern "C" void     Sim_BoundaryStop(SimEntity* ent, Vec3* min, Vec3* max);
 
-extern "C" i32      Sim_TickSpawner(
+extern "C" i32      Sim_TickSpawn(
     SimScene* sim, SimEntity* ent, f32 deltaTime);
 
 // Searching/Querying

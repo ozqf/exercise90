@@ -2,6 +2,8 @@
 
 #include "client.h"
 
+#include <math.h>
+
 internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntSpawnData def = {};
@@ -59,6 +61,11 @@ CLG_DEFINE_ENT_UPDATE(Projectile)
 			return;
 		}
 	}
+    f32 yaw = atan2f(-ent->body.velocity.z, ent->body.velocity.x);
+    yaw -= 90.0f * DEG2RAD;
+    f32 pitch = 0;//90.0f * DEG2RAD;
+    M3x3_SetToIdentity(ent->body.t.rotation.cells);
+    Transform_SetRotation(&ent->body.t, pitch, yaw, 0);
 }
 
 // Return 1 if the command was successfully executed.
@@ -68,22 +75,47 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
     SimEntity* ent = Sim_GetEntityBySerial(&g_sim, cmd->networkId);
     if (!ent)
     {
-        //APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
         // Must return executed or this dead command will stay
         // in the buffer!
+        // ... actually
+        // This isn't a bug, and could happen naturally due to
+        // out-of-order updates vs in order reliable updates
+        // If it is a 'death' sync, we need to hang onto it
+        // so that it can be refired when the entity has been spawned.
+        // Because entity spawns are always in order and reserved,
+        // use the highest spawned Id and compare
+        if (cmd->subType == S2C_ENTITY_SYNC_TYPE_DEATH)
+        {
+            if (cmd->networkId > g_sim.highestAssignedSequence)
+            {
+                //printf("CL GHOST WARNING\n");
+                //return 1;
+                //printf("CL Death of %d postponed (highest %d)!\n",
+                //    cmd->networkId, g_sim.highestAssignedSequence);
+                return 0;
+            }
+            //printf("CL Death repeat of %d, dicarding\n", cmd->networkId);
+        }
+        return 1;
+        #if 0
+        //APP_PRINT(128, "CL No ent %d for sync\n", cmd->networkId);
+        COM_ASSERT(cmd->type != S2C_ENTITY_SYNC_TYPE_DEATH,
+            "CL death sync but no entity!\n");
+        
         executed = 1;
+        #endif
     }
     else
     {
         if (cmd->networkId == g_avatarSerial)
         {
+            // TODO: Don't bother sending client avatar syncs
             // Do NOT sync the client's avatar here.
             // There's a special command for that!
             return 1;
         }
-        if (cmd->type == S2C_ENTITY_SYNC_TYPE_UPDATE)
+        if (cmd->subType == S2C_ENTITY_SYNC_TYPE_UPDATE)
         {
-            //APP_LOG(64, "CL Sync ent %d\n", cmd->networkId);
             Vec3 currentPos =
             {
                 ent->body.t.pos.x + ent->body.error.x,
@@ -96,7 +128,15 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             ent->body.error.x = currentPos.x - cmd->update.pos.x;
             ent->body.error.y = currentPos.y - cmd->update.pos.y;
             ent->body.error.z = currentPos.z - cmd->update.pos.z;
-            ent->body.errorRate = 0.95f;
+            if (Vec3_Magnitude(&ent->body.error) > 2)
+            {
+                ent->body.errorRate = 0.8f;    
+            }
+            else
+            {
+                ent->body.errorRate = 0.98f;
+            }
+            
             ent->body.previousPos = ent->body.t.pos;
             ent->body.t.pos = cmd->update.pos;
             ent->priority = cmd->update.priority;
@@ -104,8 +144,13 @@ internal i32 CLG_SyncEntity(SimScene* sim, S2C_EntitySync* cmd)
             ent->relationships.targetId.serial = cmd->update.targetId;
             ent->clientOnly.lastSync = sim->tick;
         }
-        else if (cmd->type == S2C_ENTITY_SYNC_TYPE_DEATH)
+        else if (cmd->subType == S2C_ENTITY_SYNC_TYPE_DEATH)
         {
+            //if (ent->tickType == SIM_TICK_TYPE_PROJECTILE)
+            //{
+            //    printf("CL Sync prj death of %d\n", cmd->networkId);
+            //}
+            CLG_HandleEntityDeath(&g_sim, cmd->networkId);
             Sim_RemoveEntity(sim, cmd->networkId);
         }
         else
@@ -147,7 +192,7 @@ internal void CLG_StepActor(
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;
-
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
 internal void CLG_SyncAvatar(SimScene* sim, S2C_InputResponse* cmd)
@@ -362,24 +407,7 @@ CLG_DEFINE_ENT_UPDATE(Spawn)
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
     if (!g_tickEnemies) { return; }
-    /*
-    Vec3* pos = &ent->body.t.pos;
-    ent->previousPos.x = pos->x;
-    ent->previousPos.y = pos->y;
-    ent->previousPos.z = pos->z;
-    Vec3 move =
-    {
-        ent->velocity.x * deltaTime,
-        ent->velocity.y * deltaTime,
-        ent->velocity.z * deltaTime
-    };
     
-    ent->body.t.pos.x += move.x;
-    ent->body.t.pos.y += move.y;
-    ent->body.t.pos.z += move.z;
-    
-    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
-    */
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
@@ -456,11 +484,13 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
         { CLG_UpdateActor(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
         //{ CLG_UpdateSpawn(sim, ent, deltaTime); } break;
-        { Sim_TickSpawner(sim, ent, deltaTime); } break;
+        { Sim_TickSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { CLG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_EXPLOSION:
         { CLG_UpdateExplosion(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_GRUNT: { } break;
+        case SIM_TICK_TYPE_BOT: { } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         default: { COM_ASSERT(0, "Client - unknown entity tick type") } break;

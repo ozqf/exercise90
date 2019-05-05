@@ -63,6 +63,26 @@ void Sim_BoundaryBounce(SimEntity* ent, Vec3* min, Vec3* max)
     { p->z = max->z; ent->body.velocity.z = -ent->body.velocity.z; }
 }
 
+extern "C"
+void Sim_BoundaryStop(SimEntity* ent, Vec3* min, Vec3* max)
+{
+    Vec3* p = &ent->body.t.pos;
+    if (p->x < min->x)
+    { p->x = min->x; }
+    if (p->x > max->x)
+    { p->x = max->x; }
+
+    if (p->y < min->y)
+    { p->y = min->y; }
+    if (p->y > max->y)
+    { p->y = max->y; }
+
+    if (p->z < min->z)
+    { p->z = min->z; }
+    if (p->z > max->z)
+    { p->z = max->z; }
+}
+
 ////////////////////////////////////////////////////////////
 // Targetting and validation
 ////////////////////////////////////////////////////////////
@@ -114,7 +134,7 @@ HAS executed a command, not that they definitely haven't. It could be queued up
 just not ack'd. yet. So they WOULD spawn stuff and this scan would be invalid
 Search for number of entities in a range that are assigned
 */
-#if 0
+#if 1
 extern "C"
 i32 Sim_ScanForSerialRange(SimScene* sim, i32 firstSerial, i32 numSerials)
 {
@@ -162,7 +182,10 @@ extern "C"
 i32 Sim_ReserveEntitySerial(SimScene* scene, i32 isLocal)
 {
     if (isLocal) { return scene->localEntitySequence--; }
-    else { return scene->remoteEntitySequence++; }
+    else
+    {
+        return scene->remoteEntitySequence++;
+    }
 }
 
 extern "C"
@@ -313,15 +336,16 @@ void Sim_Init(
 extern "C"
 i32 Sim_LoadScene(SimScene* sim, i32 index)
 {
-    f32 halfX = 30;
-    f32 halfY = 20;
-    f32 halfZ = 20;
+    f32 halfX = 35;
+    f32 halfY = 25;
+    f32 halfZ = 25;
+    const i32 largestHalfAxis = 35 + 10;
 
     SimEntSpawnData def = {};
     def.serial = Sim_ReserveEntitySerial(sim, 1);
     def.isLocal = 1;
 	def.factoryType = SIM_FACTORY_TYPE_WORLD;
-    def.pos.y = -0.5f;
+    def.pos.y = -1;
     def.scale.x = halfX * 2;
     def.scale.y = 1;
     def.scale.z = halfZ * 2;
@@ -334,6 +358,13 @@ i32 Sim_LoadScene(SimScene* sim, i32 index)
 
     sim->boundaryMin = { -halfX, -halfY, -halfZ };
     sim->boundaryMax = { halfX, halfY, halfZ };
+
+    // Configure quantisation tables based on arena size
+    // TODO: largest axis must be passed in here, auto detect this instead!
+    COM_QuantiseInit(&sim->quantise.pos, largestHalfAxis, 16);
+    COM_QuantiseInit(&sim->quantise.vel, SIM_MAX_AXIS_SPEED, 16);
+    // TODO: Configure this more precisely for radians
+    COM_QuantiseInit(&sim->quantise.rot, 7, 16);
 
 	return COM_ERROR_NONE;
 }

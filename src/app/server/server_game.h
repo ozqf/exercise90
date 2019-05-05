@@ -3,6 +3,37 @@
 #include "server.cpp"
 #include <math.h>
 
+
+internal void Sim_PrepareSpawnData(
+    SimScene* sim, SimEntSpawnData* data,
+    i32 bIsLocal, u8 factoryType,
+    Vec3 pos)
+{
+    *data = {};
+    data->isLocal = bIsLocal;
+    data->serial = Sim_ReserveEntitySerial(&g_sim, bIsLocal);
+    data->pos = pos;
+    data->factoryType = factoryType;
+}
+
+internal void SVG_ReplicateSpawn(
+    SimScene* sim, SimBulkSpawnEvent* event,
+    i32 bSyncPosition, f32 priority)
+{
+    // Replicate!
+    S2C_BulkSpawn cmd = {};
+    Cmd_InitBulkSpawn(&cmd, event, sim->tick);
+	SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+    if (bSyncPosition)
+    {
+        SVU_AddBulkEntityLinksForAllUsers(
+            &g_users,
+            event->base.firstSerial,
+            event->patternDef.numItems,
+            priority);
+    }
+}
+
 // Returns target if found
 internal SimEntity* SVG_FindAndValidateTarget(
     SimScene* sim, SimEntity* ent)
@@ -37,21 +68,37 @@ internal SimEntity* SVG_FindAndValidateTarget(
 }
 
 internal void SVG_HandleEntityDeath(
-    SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style)
+    SimScene* sim, SimEntity* victim, SimEntity* attacker, i32 style, i32 deathIsDeterministic)
 {
 	APP_LOG(128, "SV Remove ent %d\n", victim->id.serial);
     
-    //S2C_RemoveEntity cmd = {};
-    //Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
-    //SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
-
     SimEntity* parent = Sim_GetEntityBySerial(
         sim, victim->relationships.parentId.serial);
     if (parent != NULL)
     {
         parent->relationships.liveChildren--;
     }
-    SVU_RemoveEntityLinkForAllUsers(&g_users, victim->id.serial);
+
+    // deterministic deaths will occur naturally on the client without server info
+    if (!deathIsDeterministic)
+    {
+        SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+
+        // Alter replication of event depending on relationship
+        // to a user
+        #if 0
+        if (victim->flags & SIM_ENT_FLAG_POSITION_SYNC)
+        {
+            SVU_RemoveEntityForAllUsers(&g_users, victim->id.serial);
+        }
+        else
+        {
+            S2C_RemoveEntity cmd = {};
+            Cmd_InitRemoveEntity(&cmd, g_ticks, 0, victim->id.serial);
+            SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+        }
+        #endif
+    }
 	// Remove Ent AFTER command as sim may
 	// clear entity details immediately
 	Sim_RemoveEntity(sim, victim->id.serial);
@@ -160,20 +207,37 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
         ent->timing.nextThink += App_CalcTickInterval(2);
         // think
         // Spawn projectiles
-        #if 1
         SimBulkSpawnEvent event = {};
+        /*
         event.factoryType = ent->relationships.childFactoryType;
         event.base.firstSerial = Sim_ReserveEntitySerials(
             sim, 0, ent->relationships.childSpawnCount);
         event.base.pos = ent->body.t.pos;
         event.patternDef.numItems = ent->relationships.childSpawnCount;
         event.patternDef.patternId = SIM_PATTERN_RADIAL;
-        event.patternDef.radius = 6.0f;
+        event.patternDef.radius = 10.0f;
         event.base.seedIndex = COM_STDRandU8();
         event.base.forward = { 0, 0, 1 };
         // frame the event occurred on is recorded
         event.base.tick = sim->tick;
         event.base.sourceSerial = ent->id.serial;
+        */
+       
+        Sim_SetBulkSpawn(
+            &event,
+            Sim_ReserveEntitySerials(sim, 0, ent->relationships.childSpawnCount),
+            ent->id.serial,
+            ent->body.t.pos,
+            { 0, 0, 1 },
+            sim->tick,
+            ent->relationships.childFactoryType,
+            SIM_PATTERN_RADIAL,
+            (u8)ent->relationships.childSpawnCount,
+            COM_STDRandU8(),
+            10.0f,
+            0
+        );
+
         i32 flags;
         f32 priority;
 		Sim_ExecuteBulkSpawn(
@@ -181,8 +245,11 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 
         ent->relationships.liveChildren += 
             ent->relationships.childSpawnCount;
-
+        
         // Replicate!
+        SVG_ReplicateSpawn(
+            sim, &event, flags & SIM_ENT_FLAG_POSITION_SYNC, priority);
+        #if 0
         S2C_BulkSpawn prj = {};
         Cmd_InitBulkSpawn(&prj, &event, g_ticks, 0);
 		SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
@@ -192,14 +259,6 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
                 &g_users, event.base.firstSerial, event.patternDef.numItems, priority);
         }
         #endif
-        #if 0
-        SimEnemySpawnEvent event {};
-        event.enemyType = SIM_FACTORY_TYPE_WANDERER;
-        event.base.firstSerial = Sim_ReserveEntitySerials(
-            sim, 0, 8);
-        event.base.pos = ent->body.t.pos;
-        event.base.forward = ent->body.t.pos;
-        #endif
     }
 }
 
@@ -208,28 +267,8 @@ SVG_DEFINE_ENT_UPDATE(Spawner)
 //////////////////////////////////////////////////////
 SVG_DEFINE_ENT_UPDATE(Spawn)
 {
-    if (ent->timing.nextThink >= sim->tick)
-    {
-        ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
-        ent->tickType = ent->coreTickType;
-    }
-    else
-    {
-        ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
-        f32 time = (f32)ent->timing.lastThink / (f32)ent->timing.nextThink;
-    }
-    
-    // if (ent->thinkTick <= 0)
-    // {
-    //     ent->flags &= ~SIM_ENT_FLAG_OUT_OF_PLAY;
-    //     ent->tickType = ent->coreTickType;
-    // }
-    // else
-    // {
-    //     ent->flags |= SIM_ENT_FLAG_OUT_OF_PLAY;
-    //     ent->thinkTick -= deltaTime;
-    // }
-    
+    SimEntity* target = Sim_FindTargetForEnt(sim, ent);
+    Sim_TickSpawn(sim, ent, deltaTime);
 }
 
 internal i32 SVG_StepProjectile(
@@ -258,20 +297,29 @@ internal i32 SVG_StepProjectile(
     i32 overlaps = Sim_FindByAABB(
         sim, min, max, ent->id.serial, ents, 16);
     
+    i32 killed = 0;
     for (i32 i = 0; i < overlaps; ++i)
     {
         // TODO: For now just hit first valid entity in list
         SimEntity* victim = ents[i];
         if (Sim_IsEntTargetable(victim) == NO) { continue; }
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
-        SVG_HandleEntityDeath(sim, victim, ent, 0);
-        ent->timing.nextThink = sim->tick;
+        SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
+        //ent->timing.nextThink = sim->tick;
+        killed = 1;
         break;
     }
+
+    if (killed)
+    {
+        SVG_HandleEntityDeath(sim, ent, NULL, 0, 0);
+        return 0;
+    }
     
+    // Timeout
 	if (sim->tick >= ent->timing.nextThink)
 	{
-        SVG_HandleEntityDeath(sim, ent, NULL, 0);
+        SVG_HandleEntityDeath(sim, ent, NULL, 0, 1);
         return 0;
 	}
     return 1;
@@ -343,7 +391,7 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
  
         // 2: By diffing from client's last stated frame
         // Works well but is this exploitable...? Trust client's tick value
-        diff = g_ticks - u->latestServerTick;
+        diff = sim->tick - u->latestServerTick;
         #if 1
         fastForwardTicks = diff;
         #endif
@@ -357,36 +405,53 @@ internal void SVG_FireActorAttack(SimScene* sim, SimEntity* ent, Vec3* dir)
     }
 
     // Declare when the event took place:
-    i32 eventTick = g_ticks - fastForwardTicks;
+    i32 eventTick = sim->tick - fastForwardTicks;
     if (verbose)
     {
         printf("SV CurTick %d eventTick %d fastforward %d\n",
-            g_ticks, eventTick, fastForwardTicks);
+            sim->tick, eventTick, fastForwardTicks);
     }
 
     i32 numProjectiles = 3;
     
     SimBulkSpawnEvent event = {};
-    event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
+    /*
     event.base.firstSerial = Sim_ReserveEntitySerials(
         sim, 0, numProjectiles);
+    event.base.pos = ent->body.t.pos;
+    event.base.forward = *dir;
+    event.base.tick = sim->tick;
+    event.base.seedIndex = COM_STDRandU8();
+
+    event.factoryType = SIM_FACTORY_TYPE_PROJ_PLAYER;
     event.patternDef.patternId = SIM_PATTERN_SPREAD;
     event.patternDef.numItems = numProjectiles;
     event.patternDef.radius = 0;
     event.patternDef.arc = 0.25f;
-    event.base.pos = ent->body.t.pos;
-    event.base.forward = *dir;
-    event.base.tick = g_ticks;
-    event.base.seedIndex = COM_STDRandU8();
+    */
+    Sim_SetBulkSpawn(
+        &event, Sim_ReserveEntitySerials(sim, 0, numProjectiles),
+        ent->id.serial,
+        ent->body.t.pos,
+        *dir,
+        sim->tick,
+        SIM_FACTORY_TYPE_PROJ_PLAYER,
+        SIM_PATTERN_SPREAD,
+        (u8)numProjectiles,
+        COM_STDRandU8(),
+        0,
+        0.25f
+    );
+
     i32 flags;
     f32 priority;
     Sim_ExecuteBulkSpawn(sim, &event, fastForwardTicks, &flags, &priority);
 
     // Replicate
     S2C_BulkSpawn prj = {};
-    Cmd_Prepare(&prj.header, eventTick, 0);
+    Cmd_Prepare(&prj.header, eventTick);
     prj.def = event;
-    prj.header.type = CMD_TYPE_S2C_SPAWN_PROJECTILE;
+    prj.header.type = CMD_TYPE_S2C_BULK_SPAWN;
     prj.header.size = sizeof(prj);
     SVU_EnqueueCommandForAllUsers(&g_users, &prj.header);
 
@@ -440,6 +505,7 @@ SVG_DEFINE_ENT_UPDATE(Actor)
 	ent->body.t.pos.x += move.x;
 	ent->body.t.pos.y += move.y;
 	ent->body.t.pos.z += move.z;
+    Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 
     if (ent->attackTick <= 0)
     {
@@ -473,15 +539,36 @@ SVG_DEFINE_ENT_UPDATE(Actor)
     }
 }
 
+SVG_DEFINE_ENT_UPDATE(Bot)
+{
+    u32 buttons = 0;
+    buttons |= ACTOR_INPUT_SHOOT_LEFT;
+    //buttons |= ACTOR_INPUT_SHOOT_UP;
+    ent->input.buttons = buttons;
+    SVG_UpdateActor(sim, ent, deltaTime);
+}
+
 internal void SVG_TickEntity(
     SimScene* sim, SimEntity* ent, f32 deltaTime)
 {
+    #if 0
+    #ifdef SIM_QUANTISE_SYNC
+    // Quantise physical properties
+    if (ent->flags & SIM_ENT_FLAG_POSITION_SYNC)
+    {
+        // quantise position, velocity and rotation
+        COM_QuantiseVec3(&ent->body.t.pos, &sim->quantise.pos);
+        COM_QuantiseVec3(&ent->body.velocity, &sim->quantise.vel);
+    }
+    #endif
+    #endif
     switch (ent->tickType)
     {
 		case SIM_TICK_TYPE_PROJECTILE:
         { SVG_UpdateProjectile(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SEEKER:
         { SVG_UpdateSeeker(sim, ent, deltaTime); } break;
+        //{  } break;
 		case SIM_TICK_TYPE_WANDERER:
         { SVG_UpdateWanderer(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_BOUNCER:
@@ -490,13 +577,15 @@ internal void SVG_TickEntity(
         { SVG_UpdateDart(sim, ent, deltaTime); } break;
 		case SIM_TICK_TYPE_ACTOR:
         { SVG_UpdateActor(sim, ent, deltaTime); } break;
+        case SIM_TICK_TYPE_BOT:
+        { SVG_UpdateBot(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWNER:
         { SVG_UpdateSpawner(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_LINE_TRACE:
         { SVG_UpdateLineTrace(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_SPAWN:
-        //{ SVG_UpdateSpawn(sim, ent, deltaTime); } break;
-        { Sim_TickSpawner(sim, ent, deltaTime); } break;
+        { SVG_UpdateSpawn(sim, ent, deltaTime); } break;
+        //{ Sim_TickSpawn(sim, ent, deltaTime); } break;
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;

@@ -66,6 +66,11 @@ internal SimEntity* Sim_GetFreeReplicatedEntity(
     ent->status = SIM_ENT_STATUS_IN_USE;
     ent->id.slot.index = (u16)slotIndex;
 	ent->id.serial = newSerial;
+    // For clients, keep track of the latest entity spawned.
+    if (newSerial > scene->highestAssignedSequence)
+    {
+        scene->highestAssignedSequence = newSerial;
+    }
 	APP_LOG(64,
         "SIM assigned replicated ent serial %d (slot %d/%d)\n",
         ent->id.serial, ent->id.slot.iteration, ent->id.slot.index);
@@ -93,24 +98,6 @@ internal SimEntity* Sim_GetFreeLocalEntity(
 }
 
 ////////////////////////////////////////////////////////////////////
-// Shared Entity initialisation
-////////////////////////////////////////////////////////////////////
-internal void Sim_SetEntityBase(
-    SimEntity* ent, SimEntSpawnData* def)
-{
-    ent->timing.birthTick = def->birthTick;
-    ent->body.t.pos = def->pos;
-    ent->body.previousPos = def->pos;
-    ent->destination = def->destination;
-    ent->body.velocity = def->velocity;
-    ent->relationships.childFactoryType = def->childFactoryType;
-    ent->relationships.parentId.serial = def->parentSerial;
-    ent->priority = 1;
-    ent->basePriority = 1;
-    Transform_SetScaleSafe(&ent->body.t, def->scale);
-}
-
-////////////////////////////////////////////////////////////////////
 // Entity initialisation
 ////////////////////////////////////////////////////////////////////
 internal i32 Sim_InitActor(
@@ -119,10 +106,29 @@ internal i32 Sim_InitActor(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_ACTOR;
     ent->coreTickType = SIM_TICK_TYPE_ACTOR;
-    ent->attackTime = 0.05f;
-    ent->body.speed = 6.0f;
-    ent->display.colour = { 0, 1, 0, 1 };
-    ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
+    Sim_SetEntityStats(ent, 6.5f, 1, 0.05f);
+    Sim_SetEntityDisplay(ent,
+        { 0, 1, 0, 1 },
+        { 0, 1, 0, 1 },
+        COM_MESH_CUBE_INDEX,
+        SIM_DEATH_GFX_EXPLOSION);
+    //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
+    return COM_ERROR_NONE;
+}
+
+internal i32 Sim_InitBot(
+    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
+{
+    Sim_SetEntityBase(ent, def);
+    ent->tickType = SIM_TICK_TYPE_BOT;
+    ent->coreTickType = SIM_TICK_TYPE_BOT;
+    Sim_SetEntityStats(ent, 6.5f, 1, 0.05f);
+    Sim_SetEntityDisplay(ent,
+        { 0, 0.6f, 0, 1 },
+        { 0, 0.6f, 0, 1 },
+        COM_MESH_CUBE_INDEX,
+        SIM_DEATH_GFX_EXPLOSION);
+    //ent->flags = SIM_ENT_FLAG_POSITION_SYNC;
     return COM_ERROR_NONE;
 }
 
@@ -136,17 +142,22 @@ internal i32 Sim_InitWorldVolume(
     ent->coreTickType = SIM_TICK_TYPE_WORLD;
     // world volumes can't move (yet!)
     ent->body.velocity = {};
-    ent->display.colour = { 0.2f, 0.2f, 0.2f, 1 };
+    Sim_SetEntityDisplay(ent,
+        { 0.2f, 0.2f, 0.2f, 1 },
+        { 0.2f, 0.2f, 0.2f, 1 },
+        COM_MESH_CUBE_INDEX,
+        SIM_DEATH_GFX_NONE);
     return COM_ERROR_NONE;
 }
 
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
-    //i32 count = 128;
-    i32 count = 64;
     //i32 count = 1;
     //i32 count = 20;
+    i32 count = 64;
+    //i32 count = 128;
+    
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
@@ -173,98 +184,6 @@ internal i32 Sim_InitLineTrace(
 }
 
 ///////////////////////////////////////////////////////
-// Enemies
-///////////////////////////////////////////////////////
-internal i32 Sim_InitWanderer(
-    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
-{
-    Sim_SetEntityBase(ent, def);
-    ent->body.speed = 1;
-    ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->coreTickType = SIM_TICK_TYPE_WANDERER;
-    ent->timing.lastThink = ent->timing.birthTick;
-    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 1, 0, 1, 1 };
-    ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
-    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
-    return COM_ERROR_NONE;
-}
-
-internal i32 Sim_InitRubble(
-    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
-{
-    Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->coreTickType = SIM_TICK_TYPE_NONE;
-    ent->timing.lastThink = ent->timing.birthTick;
-    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 0.7f, 0.7f, 1, 1 };
-    ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
-    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
-    return COM_ERROR_NONE;
-}
-
-internal i32 Sim_InitBouncer(
-    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
-{
-    Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->coreTickType = SIM_TICK_TYPE_BOUNCER;
-    ent->timing.lastThink = ent->timing.birthTick;
-    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 0.5f, 0.5f, 0.7f, 1 };
-    ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
-    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
-    return COM_ERROR_NONE;
-}
-
-internal i32 Sim_InitDart(
-    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
-{
-    Sim_SetEntityBase(ent, def);
-    ent->body.speed = 5;
-    ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->coreTickType = SIM_TICK_TYPE_DART;
-    ent->timing.lastThink = ent->timing.birthTick;
-    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    //ent->display.colour = { 1, 0.7f, 0.3f, 1 };
-    ent->display.colour = { 1, 0.7f, 0.3f, 1 };
-    ent->flags = SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC;
-    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
-    //printf("Spawn dart on tick %d birth %d last %d next %d\n",
-    //    scene->tick,
-    //    ent->birthTick,
-    //    ent->timing.lastThink,
-    //    ent->timing.nextThink);
-    return COM_ERROR_NONE;
-}
-
-internal i32 Sim_InitSeeker(
-    SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
-{
-    Sim_SetEntityBase(ent, def);
-    ent->body.speed = 4;
-    ent->tickType = SIM_TICK_TYPE_SPAWN;
-    ent->coreTickType = SIM_TICK_TYPE_SEEKER;
-    ent->timing.lastThink = ent->timing.birthTick;
-    ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(1.5f);
-    ent->display.colour = { 0, 0.7f, 0.7f, 1 };
-    ent->flags =
-          SIM_ENT_FLAG_SHOOTABLE
-        | SIM_ENT_FLAG_POSITION_SYNC
-        | SIM_ENT_FLAG_MOVE_AVOID;
-    ent->deathType = SIM_DEATH_GFX_EXPLOSION;
-    ent->basePriority = 8;
-    return COM_ERROR_NONE;
-}
-
-///////////////////////////////////////////////////////
 // GFX
 ///////////////////////////////////////////////////////
 internal i32 Sim_InitExplosion(
@@ -273,7 +192,11 @@ internal i32 Sim_InitExplosion(
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_EXPLOSION;
     ent->coreTickType = SIM_TICK_TYPE_EXPLOSION;
-    ent->display.colour = { 1, 1, 0, 1 };
+    Sim_SetEntityDisplay(ent,
+        { 1, 1, 0, 1 },
+        { 1, 1, 0, 1 },
+        COM_MESH_CUBE_INDEX,
+        SIM_DEATH_GFX_NONE);
     ent->timing.nextThink = ent->timing.birthTick + App_CalcTickInterval(0.5f);
     ent->body.t.scale = { 2, 1, 2 };
     return COM_ERROR_NONE;
@@ -288,10 +211,14 @@ internal i32 Sim_InitProjBase(
     SimProjectileType t;
     t.speed = 10.0f;
     t.patternDef.numItems = 1;
-    t.lifeTime = 2.0f;
+    t.lifeTime = 1.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
-    t.scale = { 1, 1, 1 };
-
+    t.scale = { 0.5f, 0.5f, 0.5f };
+    Sim_SetEntityDisplay(ent,
+        { 1, 1, 0, 1 },
+        { 1, 1, 0, 1 },
+        COM_MESH_SPIKE_INDEX,
+        SIM_DEATH_GFX_EXPLOSION);
     // must set birth tick here
     ent->timing.birthTick = def->birthTick;
 
@@ -314,7 +241,11 @@ internal i32 Sim_InitProjPrediction(
     t.lifeTime = 2.0f;
     t.patternDef.patternId = SIM_PATTERN_NONE;
     t.scale = { 0.5f, 0.5f, 0.5f };
-
+    Sim_SetEntityDisplay(ent,
+        { 1, 1, 0, 1 },
+        { 1, 1, 0, 1 },
+        COM_MESH_SPIKE_INDEX,
+        SIM_DEATH_GFX_EXPLOSION);
     // must set birth tick here
     ent->timing.birthTick = def->birthTick;
 
@@ -334,10 +265,14 @@ internal i32 Sim_InitProjTest(
     SimProjectileType t;
     t.speed = 45.0f;
     t.patternDef.numItems = 4;
-    t.lifeTime = 6.0f;
+    t.lifeTime = 1.5f;
     t.patternDef.patternId = SIM_PATTERN_RADIAL;
     t.scale = { 1, 1, 1 };
-
+    Sim_SetEntityDisplay(ent,
+        { 1, 1, 0, 1 },
+        { 1, 1, 0, 1 },
+        COM_MESH_SPIKE_INDEX,
+        SIM_DEATH_GFX_EXPLOSION);
     // must set birth tick here
     ent->timing.birthTick = def->birthTick;
 
@@ -389,6 +324,8 @@ internal SimEntity* Sim_SpawnEntity(
             err = Sim_InitExplosion(sim, ent, def); break;
         case SIM_FACTORY_TYPE_ACTOR:
             err =  Sim_InitActor(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_BOT:
+            err =  Sim_InitBot(sim, ent, def); break;
         case SIM_FACTORY_TYPE_SEEKER:
             err =  Sim_InitSeeker(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WANDERER:
@@ -399,6 +336,8 @@ internal SimEntity* Sim_SpawnEntity(
             err = Sim_InitDart(sim, ent, def); break;
         case SIM_FACTORY_TYPE_RUBBLE:
             err = Sim_InitRubble(sim, ent, def); break;
+        case SIM_FACTORY_TYPE_GRUNT:
+            err = Sim_InitGrunt(sim, ent, def); break;
         case SIM_FACTORY_TYPE_WORLD:
             err =  Sim_InitWorldVolume(sim, ent, def); break;
         case SIM_FACTORY_TYPE_SPAWNER:
@@ -414,7 +353,6 @@ internal SimEntity* Sim_SpawnEntity(
 
         default:
         {
-            printf("SIM Unknown entity type %d\n", def->factoryType);
             COM_ASSERT(0, "Sim Unknown entity type");
             return NULL;
         } break;

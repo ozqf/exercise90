@@ -66,6 +66,8 @@ internal SimActorInput g_actorInput = {};
 
 #include "client_render.h"
 #include "client_game.h"
+#include "../commands_serialise.h"
+#include "../commands_deserialise.h"
 #include "client_packets.h"
 
 i32 CL_IsRunning() { return g_isRunning; }
@@ -83,9 +85,9 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
 
     written += sprintf_s(chars + written, str->maxLength,
 			"=== Commands ===\n%d reliablebytes %d\n%d unreliable bytes %d\n",
-            Stream_CountCommands(&g_reliableStream.inputBuffer),
+            Stream_CountCommands(&g_reliableStream.inputBuffer).count,
             g_reliableStream.inputBuffer.Written(),
-            Stream_CountCommands(&g_unreliableStream.inputBuffer),
+            Stream_CountCommands(&g_unreliableStream.inputBuffer).count,
             g_unreliableStream.inputBuffer.Written()
             );
 
@@ -291,7 +293,12 @@ internal void CL_ReadSystemEvents(
             {
 				//COM_PrintBytes((u8*)ev, ev->size, 16);
                 SysPacketEvent* packet = (SysPacketEvent*)ev;
-                CL_ReadPacket(packet, &g_reliableStream, &g_unreliableStream, g_elapsed);
+                CL_ReadPacket(
+                    packet,
+                    &g_reliableStream,
+                    &g_unreliableStream,
+                    &g_sim.quantise,
+                    g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -321,7 +328,7 @@ internal i32 CL_IsCommandTickSensitive(i32 cmdType)
 {
 	switch (cmdType)
 	{
-		case CMD_TYPE_S2C_SYNC: { return false; }
+		case CMD_TYPE_S2C_SESSION_SYNC: { return false; }
 	}
 	return true;
 }
@@ -350,7 +357,7 @@ internal i32 CL_ExecReliableCommand(
 
 	switch (h->type)
 	{
-        case CMD_TYPE_S2C_SPAWN_PROJECTILE:
+        case CMD_TYPE_S2C_BULK_SPAWN:
         {
             S2C_BulkSpawn* prj = (S2C_BulkSpawn*)h;
             APP_LOG(256, "CL Spawn Prj %d on SV tick %d (local sv tick diff %d. Cmd tick %d)\n",
@@ -387,10 +394,20 @@ internal i32 CL_ExecReliableCommand(
             Sim_RemoveEntity(sim, cmd->entityId);
             //APP_PRINT(64, "CL Remove Ent %d\n", cmd->entityId);
         } break;
-        case CMD_TYPE_S2C_SYNC:
+        case CMD_TYPE_S2C_REMOVE_ENTITY_GROUP:
+        {
+            S2C_RemoveEntityGroup* cmd = (S2C_RemoveEntityGroup*)h;
+            for (i32 i = 0; i < cmd->numIds; ++i)
+            {
+                i32 serial = cmd->firstId + i;
+                CLG_HandleEntityDeath(sim, serial);
+                Sim_RemoveEntity(sim, serial);
+            }
+        } break;
+        case CMD_TYPE_S2C_SESSION_SYNC:
         {
             S2C_Sync* sync = (S2C_Sync*)h;
-			CL_SetServerTick(sync->simTick);
+			CL_SetServerTick(sync->header.tick);
 			g_avatarSerial = sync->avatarEntityId;
             APP_PRINT(64, "CL Set avatar %d\n", g_avatarSerial);
             // Lets not do what the server tells us!
@@ -452,7 +469,7 @@ internal void CL_RunReliableCommands(
 		COM_ASSERT(err == COM_ERROR_NONE, "Invalid command")
 		if (CL_ExecReliableCommand(sim, h, deltaTime, diff))
         {
-            Stream_DeleteCommand(b, h);
+            Stream_DeleteCommand(b, h, 0);
         }
 	}
 }
@@ -517,7 +534,7 @@ internal void CL_RunUnreliableCommands(
         
         if (executed)
         {
-            Stream_DeleteCommand(b, h);
+            Stream_DeleteCommand(b, h, 0);
         }
         else
         {
@@ -573,5 +590,5 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 	g_ticks++;
 	g_serverTick++;
     g_elapsed += deltaTime;
-    CL_WritePacket(g_elapsed, &cmd);
+    CL_WritePacket(&g_sim.quantise, g_elapsed, &cmd);
 }

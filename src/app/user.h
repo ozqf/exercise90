@@ -42,7 +42,7 @@ struct User
     NetStream reliableStream;
     NetStream unreliableStream;
     // Priority queue stuff
-    SVEntityLinkArray entSync;
+    PriorityLinkSet entSync;
 
     // Clients are considered in sync mode until their acknowledged
     // reliable message queue Id is >= to this.
@@ -65,34 +65,27 @@ struct UserList
     i32 localUserId = 0;
 };
 
-internal StreamStats* User_SumPacketStats(User* u)
+internal void User_SumPacketStats(User* u, StreamStats* result)
 {
     StreamStats* stream = &u->streamStats;
-    stream->lastSecond = {};
+    #if 1
+    *result = {};
     i32 numValid = 0;
     for (i32 i = 0; i < USER_NUM_PACKET_STATS; ++i)
     {
         PacketStats* stats = &u->packetStats[i];
-        if (stats->packetSize == 0){continue;}
+        if (stats->totalBytes == 0) { continue; }
         numValid++;
-        stream->numPackets++;
+        result->numPackets++;
         // Totals
-        stream->totalBytes += stats->packetSize;
-        stream->reliableBytes += stats->reliableBytes;
-        stream->unreliableBytes += stats->unreliableBytes;
-        stream->numReliableMessages += stats->numReliableMessages;
-        stream->numReliableSkipped += stats->numReliableSkipped;
-        stream->numUnreliableMessages += stats->numUnreliableMessages;
-
-        // last second
-        stream->lastSecond.totalBytes += stats->packetSize;
-        stream->lastSecond.reliableBytes += stats->reliableBytes;
-        stream->lastSecond.unreliableBytes += stats->unreliableBytes;
-        stream->lastSecond.numReliableMessages += stats->numReliableMessages;
-        stream->lastSecond.numReliableSkipped += stats->numReliableSkipped;
-        stream->lastSecond.numUnreliableMessages += stats->numUnreliableMessages;
+        result->totalBytes += stats->totalBytes;
+        result->reliableBytes += stats->reliableBytes;
+        result->unreliableBytes += stats->unreliableBytes;
+        result->numReliableMessages += stats->numReliableMessages;
+        result->numReliableSkipped += stats->numReliableSkipped;
+        result->numUnreliableMessages += stats->numUnreliableMessages;
     }
-    return stream;
+    #endif
 }
 
 internal User* User_GetFree(UserList* users)

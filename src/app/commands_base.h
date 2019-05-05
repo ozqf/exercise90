@@ -13,21 +13,40 @@ Header only - base for command structs.
 #define CMD_SENTINEL 0xDEADBEEF
 #define CMD_INVALID_SIZE 0
 
+typedef unsigned short CmdSeq;
+#define CMD_SEQ_MAX 0xFFFF
+
 // BASE FOR ALL COMMANDS
 // All commands MUST have a Command struct as their first member, for
 // pointer casting
 struct Command
 {
-    // for alignment checking
-    i32 sentinel;
     // Type and Size must be set by the implementing command
     u8 type;
     i32 size;
+    // for alignment checking
+    i32 sentinel;
 
     // Controls execution time and order
     i32 tick;
-    i32 sequence;
+    CmdSeq sequence;
+
+    // Server re-transmission control
+    // ticks to next transmission
+    i8 sendTicks;
+    // times sent
+    i8 timesSent;
 };
+
+internal inline i32 Cmd_WriteSequence(u8* buffer, CmdSeq seq)
+{
+    return COM_WriteU16(seq, buffer);
+}
+
+internal inline CmdSeq Cmd_ReadSequence(u8** buffer)
+{
+    return COM_ReadU16(buffer);
+}
 
 internal inline i32 Cmd_Validate(Command* cmd)
 {
@@ -37,22 +56,33 @@ internal inline i32 Cmd_Validate(Command* cmd)
     if (cmd->size <= 0) { return COM_ERROR_BAD_SIZE; }
     return COM_ERROR_NONE;
 }
+/*
+Packets encode their sequence number as a one byte +127 to -128 diff
+from a base sequence written at the start of the reliable section
 
-internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
+*/
+internal i32 Cmd_IsSequenceDiffOkay(i32 diff)
+{
+    if (diff > 127 || diff < -128) { return NO; }
+    return YES;
+}
+
+/*internal inline void Cmd_WriteToByteBuffer(ByteBuffer* b, Command* cmd)
 {
     ErrorCode err = Cmd_Validate(cmd);
     COM_ASSERT(!err, "Command failed validation")
     COM_ASSERT(b->Space() >= cmd->size, "No space for command")
     b->ptrWrite += COM_COPY(cmd, b->ptrWrite, cmd->size);
-}
+}*/
 
-internal void Cmd_Prepare(Command* cmd, i32 tick, i32 sequence)
+internal void Cmd_Prepare(Command* cmd, i32 tick)
 {
     cmd->sentinel = CMD_SENTINEL;
     cmd->tick = tick;
-    cmd->sequence = sequence;
     cmd->type = CMD_TYPE_NULL;
     cmd->size = CMD_INVALID_SIZE;
+    cmd->sendTicks = 0;
+    cmd->timesSent = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////

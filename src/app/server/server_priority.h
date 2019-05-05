@@ -8,7 +8,7 @@
 #include "../priority_queue.h"
 
 internal void SVP_CalculatePriorities(
-    SimScene* sim, SimEntity* subject, SVEntityLink* links, i32 numLinks)
+    SimScene* sim, SimEntity* subject, PriorityLink* links, i32 numLinks)
 {
     Vec3 pos = subject->body.t.pos;
     f32 closest = ZINFINITY(), furthest = 0;
@@ -16,8 +16,13 @@ internal void SVP_CalculatePriorities(
     // Do in reverse so links can be removed
     for (i32 i = numLinks - 1; i >= 0; --i)
     {
-        SVEntityLink* link = &links[i];
-        if (link->status != ENT_LINK_STATUS_ACTIVE) { continue; }
+        PriorityLink* link = &links[i];
+        if (link->status != ENT_LINK_STATUS_ACTIVE)
+        {
+            // Force to maximum for death updates
+            link->distance = 0;
+            continue;
+        }
 
         SimEntity* ent = Sim_GetEntityBySerial(sim, link->id);
         COM_ASSERT(ent, "Linked entity is null")
@@ -31,7 +36,7 @@ internal void SVP_CalculatePriorities(
     // Find each link's place in the group
     for (i32 i = numLinks - 1; i >= 0; --i)
     {
-        SVEntityLink* link = &links[i];
+        PriorityLink* link = &links[i];
         
         // Calculate range based priority by comparing to distance
         // of other entities.

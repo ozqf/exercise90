@@ -43,6 +43,11 @@ i32 App_CalcTickInterval(f32 seconds)
     return (i32)(result + 0.5f);
 }
 
+i64 App_SampleClock()
+{
+    return g_platform.SampleClock();
+}
+
 /***************************************
 * Private
 ***************************************/
@@ -109,8 +114,7 @@ internal i32  App_Init()
     APP_PRINT(64, "App load texture list\n");
     Tex_LoadTextureList(textures);
 
-    g_platform.SetDebugInputTextureIndex(
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH));
+    COM_InitEmbeddedAssets();
 
     // proc gen textures here
     //i32 texIndex = Tex_GetTextureIndexByName(sourceTextureName);
@@ -151,9 +155,9 @@ internal i32  App_Init()
     // Render Scenes - orient camera
     RScene_Init(&g_worldScene, g_worldSceneItems, MAX_WORLD_SCENE_ITEMS,
 		90, RENDER_PROJECTION_MODE_3D, 8);
-    g_worldScene.cameraTransform.pos.z = 16;
-    g_worldScene.cameraTransform.pos.y += 24;
-    Transform_SetRotation(&g_worldScene.cameraTransform, -(67.5f    * DEG2RAD), 0, 0);
+    g_worldScene.cameraTransform.pos.z = 10;
+    g_worldScene.cameraTransform.pos.y += 34;
+    Transform_SetRotation(&g_worldScene.cameraTransform, -(80.0f    * DEG2RAD), 0, 0);
 
     // server and client areas currently acquiring their own memory
     App_StartSession(APP_SESSION_TYPE_SINGLE_PLAYER);
@@ -389,6 +393,13 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
             g_debugDrawServerScene = !g_debugDrawServerScene;
         }
         return 1;
+    }
+    if (numTokens == 4 && !COM_CompareStrings(tokens[0], "LAG"))
+    {
+        i32 minMS = COM_AsciToInt32(tokens[1]);
+        i32 maxMS = COM_AsciToInt32(tokens[2]);
+        f32 loss = (f32)COM_AsciToInt32(tokens[3]) / 100.0f;
+        g_loopbackSocket.SetLagStats(minMS, maxMS, loss);
     }
     if (g_isRunningServer && SV_ParseCommandString(str, tokens, numTokens)) { return 1; }
     if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }

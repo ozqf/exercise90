@@ -3,10 +3,16 @@
 
 #include <stdlib.h>
 #include "../../common/common.h"
-#include "server.h"
+#include "../app.h"
+#include "../commands.h"
+#include "../commands_serialise.h"
+#include "../commands_deserialise.h"
+#include "../stream.h"
+#include "../packet.h"
 #include "../packet.h"
 #include "../../interface/sys_events.h"
 #include "../../sim/sim.h"
+#include "server.h"
 #include "server_priority.h"
 
 struct SVEntityFrame
@@ -23,6 +29,9 @@ struct SVEntityFrame
 #define SV_PACKET_MAX_BYTES 1400
 #define SV_PACKET_RELIABLE_MAX_BYTES 700
 
+#define SV_CMD_SLOW_RESEND_ATTEMPTS 3
+#define SV_CMD_RESEND_WAIT_TICKS 3
+
 //internal void SVU_EnqueueCommandForAllUsers(
 //    UserList* users, Command* cmd);
 
@@ -32,11 +41,11 @@ internal UserList g_users;
 internal SimScene g_sim;
 
 internal i32 g_isRunning = 0;
-internal i32 g_ticks = 0;
 internal f32 g_elapsed = 0;
 internal i32 g_lagCompensateProjectiles = 1;
+internal i32 g_unreliableProjectileDeaths = 1;
 
-internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_10HZ;
+internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
 internal i32 g_debugFlags = SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
@@ -56,10 +65,16 @@ i32 SV_IsRunning() { return g_isRunning; }
 
 internal void SV_PrintMsgSizes()
 {
-    APP_LOG(64, "SV sizeof ping: %d\n",
+    APP_PRINT(64, "SV sizeof ping: %d\n",
         sizeof(CmdPing))
-    APP_LOG(64, "SV sizeof S2C_EntitySync: %d\n",
+    APP_PRINT(64, "SV sizeof Command: %d\n",
+        sizeof(Command))
+    APP_PRINT(64, "SV sizeof S2C_EntitySync: %d\n",
         sizeof(S2C_EntitySync))
+    APP_PRINT(64, "SV sizeof S2C_BulkSpawn: %d\n",
+        sizeof(S2C_BulkSpawn))
+    APP_PRINT(64, "SV sizeof S2C_RestoreEntity: %d\n",
+        sizeof(S2C_RestoreEntity))
 }
 
 void SV_WriteDebugString(ZStringHeader* str)
@@ -70,7 +85,7 @@ void SV_WriteDebugString(ZStringHeader* str)
     {
         written += sprintf_s(chars, str->maxLength,
             "SERVER:\nTick: %d\nElapsed: %.3f\nMax Rate %d\nNext remote ent: %d\n",
-            g_ticks, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
+            g_sim.tick, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
         );
     }
     
@@ -94,33 +109,69 @@ void SV_WriteDebugString(ZStringHeader* str)
         if (g_debugFlags & SV_DEBUG_USER_BANDWIDTH)
         {
             #if 1
-            StreamStats* stats = User_SumPacketStats(user);
-            if (stats->numPackets > 0)
+            StreamStats stats;
+            User_SumPacketStats(user, &stats);
+            if (stats.numPackets > 0)
             {
-                i32 kbpsTotal = (stats->lastSecond.totalBytes * 8) / 1024;
-                i32 reliableKbps = (stats->lastSecond.reliableBytes * 8) / 1024;
-                i32 unreliableKbps = (stats->lastSecond.unreliableBytes * 8) / 1024;
-                i32 numLinks = user->entSync.numLinks;
-                i32 numEnqueued = Stream_CountCommands(&user->reliableStream.outputBuffer);
+                i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
+                i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
+                i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
+                f32 lossEstimate = Ack_EstimateLoss(&user->acks);
+                ReliableCmdQueueStats queueStats = Stream_CountCommands(
+                    &user->reliableStream.outputBuffer);
                 written += sprintf_s(
                     chars + written,
                     str->maxLength - written,
-                    "Rate: %d\nTotal: %dkbps\nReliable: %d kbps\nUnreliable: %d kbps\nEnqueued: %d (%d Bytes)\nLinks %d\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
+                    "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nLoss %.1f%%\nEnqueued: %d (%d Bytes)\nSequence rage %d\n",
                     user->syncRateHertz,
                     kbpsTotal,
+                    (f32)stats.totalBytes / 1024.0f,
                     reliableKbps,
                     unreliableKbps,
-                    numEnqueued,
+                    lossEstimate,
+                    queueStats.count,
                     user->reliableStream.outputBuffer.Written(),
+                    queueStats.highestSeq - queueStats.lowestSeq
+		        );
+                #if 1
+                // Sequencing/jitter
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "- Latency -\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
+                    acks->outputSequence,
+                    acks->remoteSequence,
+                    user->ping,
+		        	user->jitter
+                );
+                #endif
+                i32 numLinks = user->entSync.numLinks;
+                i32 numDeadLinks = Priority_TallyDeadLinks(
+                    user->entSync.links, user->entSync.numLinks);
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "- Cmds/Sync Links -\nLinks %d\nDead Links %d\nLifetime max %.3f\nCurrent max %.3f\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     numLinks,
-                    stats->lastSecond.numReliableMessages / stats->numPackets,
-                    stats->lastSecond.numUnreliableMessages / stats->numPackets,
-                    stats->lastSecond.totalBytes / stats->numPackets
+                    numDeadLinks,
+                    user->entSync.highestMeasuredPriority,
+                    user->entSync.currentHighest,
+                    stats.numReliableMessages / stats.numPackets,
+                    stats.numUnreliableMessages / stats.numPackets,
+                    stats.totalBytes / stats.numPackets
+		        );
+                
+                written += sprintf_s(
+                    chars + written,
+                    str->maxLength - written,
+                    "--Last second totals --\nReliable Cmds %d\nUnreliable Cmds %d\n",
+                    stats.numReliableMessages,
+                    stats.numUnreliableMessages
 		        );
             }
             for (i32 i = 0; i < 256; ++i)
             {
-                i32 count = stats->commandCounts[i];
+                i32 count = stats.commandCounts[i];
                 if (count == 0) { continue; }
                 written += sprintf_s(
                     chars + written,
@@ -128,18 +179,6 @@ void SV_WriteDebugString(ZStringHeader* str)
                     "\tType %d: %d\n",
                     i, count);
             }
-            #endif
-            #if 0
-            // Sequencing/jitter
-            written += sprintf_s(
-                chars + written,
-                str->maxLength - written,
-                "Output seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
-                acks->outputSequence,
-                acks->remoteSequence,
-                user->ping,
-		    	user->jitter
-            );
             #endif
             #if 0
 		    // currently overflows debug text buffer:
@@ -238,24 +277,51 @@ internal void SV_AddWanderer()
 
 internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
 {
-    SimEntSpawnData def = {};
-    def = {};
-    def.isLocal = 1;
-    def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    def.pos = pos;
-    def.childFactoryType = factoryType;
-    def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
-    def.scale = { 1, 1, 1 };
-    Sim_RestoreEntity(&g_sim, &def);
+    //SimEntSpawnData def = {};
+    //def = {};
+    //def.isLocal = 1;
+    //def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
+    //def.pos = pos;
+    //def.childFactoryType = factoryType;
+    //def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_SPAWNER, pos);
+    data.childFactoryType = factoryType;
+    Sim_RestoreEntity(&g_sim, &data);
+}
+
+internal void SV_AddBot(SimScene* sim, Vec3 pos)
+{
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 0, SIM_FACTORY_TYPE_BOT, pos);
+    SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
+    S2C_RestoreEntity cmd = {};
+    Cmd_InitRestoreEntity(&cmd, sim->tick, ent);
+    SVU_EnqueueCommandForAllUsers(&g_users, &cmd.header);
+}
+
+internal void SV_AddGrunt(SimScene* sim, Vec3 pos)
+{
+    SimEntSpawnData data = {};
+    Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_GRUNT, pos);
+    SimEntity* ent = Sim_RestoreEntity(&g_sim, &data);
+    S2C_RestoreEntity cmd = {};
+    Cmd_InitRestoreEntity(&cmd, sim->tick, ent);
 }
 
 internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 0;
+    const i32 stage = 1;
+
+    f32 inner = 8;
+    f32 outer = 12;
 	switch (stage)
     {
+        case -1:
+        // No spawners
+        break;
         case 1:
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
@@ -265,13 +331,40 @@ internal void SV_LoadTestScene()
         break;
         case 2:
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddBot(sim, { 15, 0, 15 });
+        SV_AddBot(sim, { 15, 0, -15 });
+        SV_AddBot(sim, { 15, 0, 0 });
+        break;
+        case 3:
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
         break;
+        case 4:
+        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { -inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { -outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { -inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { -outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddBot(sim, { 15, 0, 15 });
+        SV_AddBot(sim, { 15, 0, -15 });
+        SV_AddBot(sim, { 15, 0, 0 });
+        break;
         default:
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
         break;
     }
+
     // Place a test spawner
     // -10 Z == further away
     //SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
@@ -282,7 +375,7 @@ internal void SV_LoadTestScene()
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
     //SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
 
-    
+
 
     i32 numWanderers = 0;
     for (i32 i = 0; i < numWanderers; ++i)
@@ -327,10 +420,6 @@ void SV_Init()
     APP_PRINT(64, "SV Init scene\n");
 
     SV_PrintMsgSizes();
-
-    // force time and ticks forward for debugging
-    g_ticks = 1000;
-    g_elapsed = g_ticks * (1.0f / 60.0f);
 
     g_mallocs = COM_InitMallocList(g_mallocItems, SV_MAX_MALLOCS);
 
@@ -390,7 +479,7 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 				{
 					continue;
 				}
-                SVP_ReadPacket(packet, g_elapsed);
+                SVP_ReadPacket(packet, &g_sim.quantise, g_elapsed);
             } break;
 
             case SYS_EVENT_INPUT:
@@ -409,6 +498,10 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 	{
 		User* user = &g_users.items[i];
 		if (user->state == USER_STATE_FREE) { continue; }
+
+        // Clean out reliable queue if possible
+        SVU_ClearStaleOutput(user, sim, &user->reliableStream.outputBuffer);
+
         // Update priorities
         SimEntity* avatar = Sim_GetEntityBySerial(sim, user->entSerial);
         if (avatar != NULL)
@@ -416,7 +509,7 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
             SVP_CalculatePriorities(
                 sim, avatar, user->entSync.links, user->entSync.numLinks);
         }
-        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = {};
+        user->packetStats[sim->tick % USER_NUM_PACKET_STATS] = {};
         // force sending rate
         i32 rate;
         if (user->syncRateHertz < g_maxSyncRate)
@@ -431,24 +524,34 @@ internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
         switch (rate)
         {
             case APP_CLIENT_SYNC_RATE_30HZ:
-            if (g_ticks % 2 != 0) { continue; }
+            if (sim->tick % 2 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_20HZ:
-            if (g_ticks % 3 != 0) { continue; }
+            if (sim->tick % 3 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_10HZ:
-            if (g_ticks % 6 != 0) { continue; }
+            if (sim->tick % 6 != 0) { continue; }
             break;
             case APP_CLIENT_SYNC_RATE_60HZ:
             default:
             break;
         }
 
-		SV_TickPriorityQueue(&user->entSync);
+		Priority_TickQueue(&user->entSync);
         
         PacketStats stats = SVP_WriteUserPacket(sim, user, g_elapsed);
-        user->packetStats[g_ticks % USER_NUM_PACKET_STATS] = stats;
-        printf(".");
+        user->packetStats[sim->tick % USER_NUM_PACKET_STATS] = stats;
+
+        // add to totals
+        user->streamStats.numPackets += 1;
+        user->streamStats.totalBytes += stats.totalBytes;
+        user->streamStats.reliableBytes += stats.reliableBytes;
+        user->streamStats.unreliableBytes += stats.unreliableBytes;
+        user->streamStats.numReliableMessages += stats.numReliableMessages;
+        user->streamStats.numReliableSkipped += stats.numReliableSkipped;
+        user->streamStats.numUnreliableMessages += stats.numUnreliableMessages;
+
+        //printf(".");
         // Add up command stats here
         for (i32 j = 0; j < 256; ++j)
         {
@@ -471,13 +574,15 @@ internal void SV_CalcPings(f32 deltaTime)
 
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_ticks, g_elapsed);
+    APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_sim.tick, g_elapsed);
     SV_ReadSystemEvents(sysEvents, deltaTime);
     SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
 	g_elapsed += deltaTime;
-    g_ticks++;
+    i64 start = App_SampleClock();
     SV_SendUserPackets(&g_sim, deltaTime);
+    i64 end = App_SampleClock();
+    //printf("SV Packets time %lld\n", end - start);
 }
 
 void SV_PopulateRenderScene(

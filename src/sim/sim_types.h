@@ -49,7 +49,10 @@ struct SimEntId
 
 struct SimEntDisplay
 {
-    Colour colour;
+    i32 meshIndex;
+    Vec3 scale;
+    Colour colourA;
+    Colour colourB;
 };
 
 struct SimEntity
@@ -111,6 +114,11 @@ struct SimEntity
         f32 yaw;
         Vec3 halfSize;
     } body;
+
+    struct
+    {
+        i16 health;
+    } life;
     
 	SimActorInput input;
 
@@ -187,6 +195,38 @@ struct SimBulkSpawnEvent
     u8 factoryType;
 };
 
+internal void Sim_SetBulkSpawn(
+    SimBulkSpawnEvent* ev,
+    i32 firstSerial,
+    i32 sourceSerial,
+    Vec3 pos,
+    Vec3 forward,
+    i32 tick,
+    u8 factoryType,
+    u8 patternId,
+    u8 numItems,
+    u8 seedIndex,
+    f32 radius,
+    f32 arc)
+{
+    ev->factoryType = factoryType;
+    ev->base.firstSerial = firstSerial;
+    ev->base.sourceSerial = sourceSerial;
+    ev->base.pos = pos;
+    ev->base.forward = forward;
+    ev->base.tick = tick;
+    ev->base.seedIndex = seedIndex;
+    #ifdef SIM_QUANTISE_SYNC
+    ev->base.forward = COM_UnpackVec3Normal(
+        COM_PackVec3NormalToI32(forward.parts));
+    #endif
+    ev->factoryType = factoryType;
+    ev->patternDef.patternId = patternId;
+    ev->patternDef.numItems = numItems;
+    ev->patternDef.radius = radius;
+    ev->patternDef.arc = arc;
+}
+
 #if 0
 // For block allocated entity storage
 struct SimEntBlock
@@ -207,6 +247,11 @@ struct SimScene
     i32 cmdSequence;
     i32 tick;
 
+    // for client. server has remote sequence anyway
+    i32 highestAssignedSequence;
+
     Vec3 boundaryMin;
     Vec3 boundaryMax;
+
+    QuantiseSet quantise;
 };

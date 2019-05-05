@@ -12,6 +12,8 @@ internal void Sim_InitProjectile(
     ent->status = SIM_ENT_STATUS_IN_USE;
 	ent->tickType = SIM_TICK_TYPE_PROJECTILE;
 	ent->coreTickType = SIM_TICK_TYPE_PROJECTILE;
+    ent->flags |= SIM_ENT_FLAG_USE_OVERRIDE_SCALE;
+    ent->display.scale = { 0.35f, 0.35f, 1.0f };
 	Transform_SetToIdentity(&ent->body.t);
     if (!COM_IsZeroed((u8*)&type->scale, sizeof(Vec3)))
     {
