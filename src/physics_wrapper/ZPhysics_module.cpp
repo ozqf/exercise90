@@ -2,17 +2,17 @@
 #define ZPHYSICS_MODULE_CPP
 
 #include <stdio.h>
-#include "../../common/com_defines.h"
+#include "../common/com_defines.h"
 // header, contains data structures and function definitions
 #include "ZPhysics_interface.h"
 /**
  * !NO BULLET PHYSICS LIBRARY ABOVE THIS POINT!
  * 
  */
-#include "../../../lib/bullet/btBulletCollisionCommon.h"
-#include "../../../lib/bullet/btBulletDynamicsCommon.h"
+#include "../../lib/bullet/btBulletCollisionCommon.h"
+#include "../../lib/bullet/btBulletDynamicsCommon.h"
 
-#include "../../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
 //#include "btGhostObject.h"
 
 // For debug output ONLY

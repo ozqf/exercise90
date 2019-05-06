@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/com_defines.h"
+#include "../common/common.h"
 
 //////////////////////////////////////////////////////////////////
 // Collision Shapes

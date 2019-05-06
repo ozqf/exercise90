@@ -60,7 +60,7 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
         p->b.externalId = handleB->externalId;
         p->b.shapeTag = handleB->def.tag;
 
-        // never report
+        // report begin/end touch?
         if ((handleA->def.flags & ZCOLLIDER_FLAG_INTERESTING) &&
             (handleB->def.flags & ZCOLLIDER_FLAG_INTERESTING))
         {
@@ -150,7 +150,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             else
             {
                 pairIndex = Phys_AddOverlapPair(w, indexA, indexB, currentFrame);
-                Assert(pairIndex != -1);
+                COM_ASSERT(pairIndex != -1, "No capacity for overlap pair");
             }
         }
     }

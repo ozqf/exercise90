@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../../common/com_defines.h"
-
 #include "ZPhysics_interface.h"
 
 void Phys_Error(char* message)
@@ -32,10 +30,10 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 
 i32 PhysCmd_CreateShape(ZShapeDef* def, u32 externalId)
 {
-    Assert(def != NULL);
+    COM_ASSERT(def != NULL, "No shape def provided");
     PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
     
-    Assert(h != NULL);
+    COM_ASSERT(h != NULL, "No free body handle");
     def->handleId = h->id;
 	h->externalId = externalId;
     g_input.ptrWrite += COM_WriteByte(Create, g_input.ptrWrite);
@@ -211,7 +209,7 @@ void PhysExt_Init(
         || ptrEventBuffer == NULL
         )
     {
-        Assert(false);
+        COM_ASSERT(0, "Physics wrapper innit failed");
     }
 
 	printf("PHYS INIT\n");

@@ -9,7 +9,7 @@
  * Phys_Bullet
  * 
  */
-#include "../../common/common.h"
+#include "../common/common.h"
 
 #include "ZPhysics_external_types.h"
 

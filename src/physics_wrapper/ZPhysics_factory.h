@@ -10,7 +10,7 @@
 PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZCollisionBoxData* box)
 {
     PhysBodyHandle* handle = Phys_GetHandleById(&world->bodies, def->handleId);
-    Assert(handle != NULL);
+    COM_ASSERT(handle != NULL, "No handle found");
     
     handle->shape = new btBoxShape(btVector3(box->halfSize[0], box->halfSize[1], box->halfSize[2]));
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(def->pos[0], def->pos[1], def->pos[2])));
@@ -87,7 +87,7 @@ PhysBodyHandle* Phys_CreateBulletBox(ZBulletWorld* world, ZShapeDef* def, ZColli
 PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
 {
     PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
+    COM_ASSERT(handle != NULL, "No handle found");
     /*
     u8 inUse;
     i32 id;
@@ -165,7 +165,7 @@ PhysBodyHandle* Phys_CreateBulletSphere(ZBulletWorld* world, ZSphereDef def)
 PhysBodyHandle* Phys_CreateBulletInfinitePlane(ZBulletWorld* world, ZShapeDef def)
 {
     PhysBodyHandle* handle = PHYS_GetFreeBodyHandle(&world->bodies);
-    Assert(handle != NULL);
+    COM_ASSERT(handle != NULL, "No free body handles");
 
     handle->shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     handle->motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, def.pos[1], 0)));

@@ -23,8 +23,8 @@ internal PhysBodyHandle *Phys_GetFreeBodyHandle(PhysBodyList *list)
 
 internal PhysBodyHandle *Phys_GetHandleById(PhysBodyList *list, i32 queryId)
 {
-    Assert(queryId >= 0);
-    Assert(queryId < list->capacity);
+    COM_ASSERT(queryId >= 0, "Query Id < 0");
+    COM_ASSERT(queryId < list->capacity, "Query Id out of bounds");
     // Handles that have not been 'issued' have no business being found!
 	if (list->items[queryId].inUse == FALSE) { return NULL; }
     //Assert(list->items[queryId].inUse);
@@ -283,7 +283,7 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 			inactiveSkipped++;
             continue;
         }
-        Assert(h->motionState != NULL);
+        COM_ASSERT(h->motionState != NULL, "Motion state is null");
         i32 requiredSize = sizeof(PhysDataItemHeader) + sizeof(PhysEV_TransformUpdate);
         if (writePosition +  requiredSize > endPosition)
         {

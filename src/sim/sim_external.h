@@ -331,6 +331,7 @@ void Sim_Init(
     sim->ents = entityMemory;
     sim->maxEnts = maxEntities;
 	Sim_Reset(sim);
+    //PhysExt_Init(NULL, 0, NULL, 0, NULL);
 }
 
 extern "C"
