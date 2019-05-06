@@ -68,9 +68,11 @@ struct PhysInfinitePlane
     
 };
 
+#define HANDLE2WORLD ZBulletWorld* world = (ZBulletWorld*)handle;
+
 struct ZBulletWorld
 {
-    ZPhysicsHandle header;
+    WorldHandle header;
     // Identifies the world
     i32 index;
     char* label;

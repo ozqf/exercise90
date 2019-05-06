@@ -170,7 +170,7 @@ internal void Phys_LockCommandBuffer(ByteBuffer *buffer)
 internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 {
     //Phys_TickCallback(g_world.dynamicsWorld, 0.016f);
-    ByteBuffer *buffer = &g_input;
+    ByteBuffer *buffer = &world->input;
     u8 *ptrRead = buffer->ptrStart;
 	i32 executed = 0;
     while (*ptrRead != NULL && ptrRead < buffer->ptrEnd)
@@ -214,7 +214,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
             {
 				++executed;
                 i32 shapeId = COM_ReadI32(&ptrRead);
-                PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
+                PhysBodyHandle* h = Phys_GetHandleById(&world->bodies, shapeId);
                 if (h == NULL)
                 {
                     printf("PHYS: Not shape %d to remove!\n", shapeId);
@@ -223,7 +223,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
                 else
                 {
                     //printf("PHYS Removed shape %d\n", shapeId);
-                    Phys_FreeHandle(&g_world, h);
+                    Phys_FreeHandle(world, h);
                 }
             } break;
 
@@ -262,8 +262,8 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
     ++world->debug.stepCount;
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
-    u8 *writePosition = g_output.ptrWrite;
-	u8 *endPosition = g_output.ptrStart + g_output.capacity;
+    u8 *writePosition = world->output.ptrWrite;
+	u8 *endPosition = world->output.ptrStart + world->output.capacity;
     i32 len = world->bodies.capacity;
 	i32 updatesWritten = 0;
 	i32 unusedSkipped = 0;
@@ -351,8 +351,8 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 
     // Mark end of buffer
     *writePosition = 0;
-    g_output.ptrEnd = writePosition;
-    g_output.ptrWrite = writePosition;
+    world->output.ptrEnd = writePosition;
+    world->output.ptrWrite = writePosition;
 
     /*char buf[128];
         sprintf_s(buf, 128, "Sphere pos: %.2f, %.2f, %.2f\n", pos.getX(), pos.getY(), pos.getZ());

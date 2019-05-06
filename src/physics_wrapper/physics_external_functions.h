@@ -28,17 +28,18 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
 }
 #endif
 
-i32 PhysCmd_CreateShape(ZShapeDef* def, u32 externalId)
+i32 PhysCmd_CreateShape(WorldHandle* handle, ZShapeDef* def, u32 externalId)
 {
+    HANDLE2WORLD
     COM_ASSERT(def != NULL, "No shape def provided");
-    PhysBodyHandle* h = Phys_GetFreeBodyHandle(&g_world.bodies);
+    PhysBodyHandle* h = Phys_GetFreeBodyHandle(&world->bodies);
     
     COM_ASSERT(h != NULL, "No free body handle");
     def->handleId = h->id;
 	h->externalId = externalId;
-    g_input.ptrWrite += COM_WriteByte(Create, g_input.ptrWrite);
-    g_input.ptrWrite += COM_COPY_STRUCT(def, g_input.ptrWrite, ZShapeDef);
-    if (g_world.verbose)
+    world->input.ptrWrite += COM_WriteByte(Create, world->input.ptrWrite);
+    world->input.ptrWrite += COM_COPY_STRUCT(def, world->input.ptrWrite, ZShapeDef);
+    if (world->verbose)
     {
         printf("PHYS Assigning shape Id %d for external %d\n", def->handleId, h->externalId);
     }
@@ -75,41 +76,45 @@ i32 PhysCmd_CreateBox(
     return PhysCmd_CreateShape(&def, ownerId);
 }
 #endif
-void PhysCmd_RemoveShape(i32 shapeId)
+void PhysCmd_RemoveShape(WorldHandle* handle, i32 shapeId)
 {
-    PhysBodyHandle* h = Phys_GetHandleById(&g_world.bodies, shapeId);
-    g_input.ptrWrite += COM_WriteByte(Remove, g_input.ptrWrite);
-    g_input.ptrWrite += COM_WriteI32(shapeId, g_input.ptrWrite);
+    HANDLE2WORLD
+    PhysBodyHandle* h = Phys_GetHandleById(&world->bodies, shapeId);
+    world->input.ptrWrite += COM_WriteByte(Remove, world->input.ptrWrite);
+    world->input.ptrWrite += COM_WriteI32(shapeId, world->input.ptrWrite);
 }
 
-void PhysCmd_SetState(PhysCmd_State* state)
+void PhysCmd_SetState(WorldHandle* handle, PhysCmd_State* state)
 {
-    g_input.ptrWrite += COM_WriteByte(SetState, g_input.ptrWrite);
-    g_input.ptrWrite += COM_COPY_STRUCT(state, g_input.ptrWrite, PhysCmd_State);
+    HANDLE2WORLD
+    world->input.ptrWrite += COM_WriteByte(SetState, world->input.ptrWrite);
+    world->input.ptrWrite += COM_COPY_STRUCT(state, world->input.ptrWrite, PhysCmd_State);
 }
 
-void PhysCmd_TeleportShape(i32 shapeId, f32 posX, f32 posY, f32 posZ)
+void PhysCmd_TeleportShape(WorldHandle* handle, i32 shapeId, f32 posX, f32 posY, f32 posZ)
 {
+    HANDLE2WORLD
     PhysCmd_Teleport cmd = {};
     cmd.shapeId = shapeId;
     cmd.pos[0] = posX;
     cmd.pos[1] = posY;
     cmd.pos[2] = posZ;
 	
-    g_input.ptrWrite += COM_WriteByte(Teleport, g_input.ptrWrite);
-    g_input.ptrWrite += COM_COPY_STRUCT(&cmd, g_input.ptrWrite, PhysCmd_Teleport);
+    world->input.ptrWrite += COM_WriteByte(Teleport, world->input.ptrWrite);
+    world->input.ptrWrite += COM_COPY_STRUCT(&cmd, world->input.ptrWrite, PhysCmd_Teleport);
 }
 
-void PhysCmd_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
+void PhysCmd_ChangeVelocity(WorldHandle* handle, i32 shapeId, f32 velX, f32 velY, f32 velZ)
 {
+    HANDLE2WORLD
 	PhysCmd_VelocityChange cmd = {};
 	cmd.shapeId = shapeId;
 	cmd.vel[0] = velX;
 	cmd.vel[1] = velY;
 	cmd.vel[2] = velZ;
 
-	g_input.ptrWrite += COM_WriteByte(SetVelocity, g_input.ptrWrite);
-	g_input.ptrWrite += COM_COPY_STRUCT(&cmd, g_input.ptrWrite, PhysCmd_VelocityChange);
+	world->input.ptrWrite += COM_WriteByte(SetVelocity, world->input.ptrWrite);
+	world->input.ptrWrite += COM_COPY_STRUCT(&cmd, world->input.ptrWrite, PhysCmd_VelocityChange);
 }
 
 /////////////////////////////////////////////////////////////
@@ -117,9 +122,10 @@ void PhysCmd_ChangeVelocity(i32 shapeId, f32 velX, f32 velY, f32 velZ)
 /////////////////////////////////////////////////////////////
 
 // return number of hits or number of hits written if max is lower
-i32 PhysExt_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
+i32 PhysExt_QueryRay(WorldHandle* handle, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
 {
-    return Phys_QuickRaycast(&g_world, cmd, hits, maxHits);
+    HANDLE2WORLD
+    return Phys_QuickRaycast(world, cmd, hits, maxHits);
 }
 
 // Return bytes written
@@ -128,9 +134,10 @@ i32 PhysExt_QueryRay(PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
 //     return Phys_ExecRaycast(&g_world, cmd, resultsBuffer, bufferCapacity);
 // }
 
-i32 PhysExt_RayTest(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
+i32 PhysExt_RayTest(WorldHandle* handle, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
 {
-    return PhysCmd_RayTest(&g_world, x0, y0, z0, x1, y1, y2);
+    HANDLE2WORLD
+    return PhysCmd_RayTest(world, x0, y0, z0, x1, y1, y2);
 }
 
 void PhysExt_GetDebugString(char** str, i32* length)
@@ -191,171 +198,125 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 // Lifetime
 /////////////////////////////////////////////////////////////
 
-extern "C"
-i32 PhysExt_GetMemoryRequirement(i32 numBodies)
-{
-    i32 sizeOfStruct = sizeof(ZBulletWorld);
-    i32 input = MegaBytes(2);
-    i32 output = MegaBytes(2);
-    i32 bodies = sizeof(PhysBodyHandle) * PHYS_MAX_BODIES;
-    i32 overlaps = sizeof(PhysOverlapPair) * PHYS_MAX_OVERLAPS;
-    return sizeOfStruct + input + output;
-}
-
-extern "C"
-ZPhysicsHandle* PhysExt_CreateWorld(
-    ByteBuffer inputBuffer,
-    ByteBuffer outputBuffer,
-    PhysErrorHandler errorHandler)
-{
-    malloc(MegaBytes(4));
-    return NULL;
-}
-
 // If the provided command buffer is NULL or the size is zero, fail
 // TODO: Could give the option to call function pointers for input/output
 // instead of using buffers.
-void PhysExt_Init(
-    void* ptrCommandBuffer,
-    u32 commandBufferSize,
-    void* ptrEventBuffer,
-    u32 eventBufferSize,
-    PhysErrorHandler errorHandler
+extern "C"
+WorldHandle* PhysExt_Init(PhysErrorHandler errorHandler
     )
 {
-    if (
-        commandBufferSize == 0
-        || ptrCommandBuffer == NULL
-        || eventBufferSize == 0
-        || ptrEventBuffer == NULL
-        )
-    {
-        COM_ASSERT(0, "Physics wrapper innit failed");
-    }
-
-	printf("PHYS INIT\n");
+    printf("PHYS INIT\n");
 
     g_errorHandler = errorHandler;
-
-    COM_ZeroMemory((u8*)ptrCommandBuffer, commandBufferSize);
-    COM_ZeroMemory((u8*)ptrEventBuffer, eventBufferSize);
-
-    g_input = {};
-    g_input.ptrStart = (u8*)ptrCommandBuffer;
-    g_input.ptrEnd = g_input.ptrStart;
-    g_input.ptrWrite = g_input.ptrStart;
-    g_input.capacity = commandBufferSize;
-
-    g_output = {};
-    g_output.ptrStart = (u8*)ptrEventBuffer;
-    g_output.ptrEnd = g_output.ptrStart;
-    g_output.ptrWrite = g_output.ptrStart;
-    g_output.capacity = eventBufferSize;
     
-
     //g_physTest = {};
-    g_world = {};
-	//g_world.verbose = 1;
-    g_world.bodies.items = g_bodies;
-    g_world.bodies.capacity = PHYS_MAX_BODIES;
-    g_world.overlapPairs = g_overlapPairs;
-    g_world.numOverlaps = PHYS_MAX_OVERLAPS;
-
-    g_world.broadphase = new btDbvtBroadphase();
-
-    g_world.collisionConfiguration = new btDefaultCollisionConfiguration();
-    g_world.dispatcher = new btCollisionDispatcher(g_world.collisionConfiguration);
-
-    g_world.solver = new btSequentialImpulseConstraintSolver();
-
-    g_world.dynamicsWorld = new btDiscreteDynamicsWorld(
-        g_world.dispatcher,
-        g_world.broadphase,
-        g_world.solver,
-        g_world.collisionConfiguration);
-
-    g_world.dynamicsWorld->setGravity(btVector3(0, -20, 0));
-
-	g_world.dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
-    g_world.dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);
+    ZBulletWorld* world = (ZBulletWorld*)malloc(sizeof(ZBulletWorld));
+    world = {};
     
+    i32 bufferSize = MegaBytes(1);
+    world->input = Buf_FromMalloc(malloc(bufferSize), bufferSize);
+    world->output = Buf_FromMalloc(malloc(bufferSize), bufferSize);
+
+	//world.verbose = 1;
+    world->bodies.items = (PhysBodyHandle*)malloc(
+        sizeof(PhysBodyHandle) * PHYS_MAX_BODIES
+    );
+    world->bodies.capacity = PHYS_MAX_BODIES;
+    world->overlapPairs = (PhysOverlapPair*)malloc(
+        sizeof(PhysOverlapPair) * PHYS_MAX_OVERLAPS
+    );
+    world->numOverlaps = PHYS_MAX_OVERLAPS;
+
+    world->broadphase = new btDbvtBroadphase();
+
+    world->collisionConfiguration = new btDefaultCollisionConfiguration();
+    world->dispatcher = new btCollisionDispatcher(world->collisionConfiguration);
+
+    world->solver = new btSequentialImpulseConstraintSolver();
+
+    world->dynamicsWorld = new btDiscreteDynamicsWorld(
+        world->dispatcher,
+        world->broadphase,
+        world->solver,
+        world->collisionConfiguration);
+    
+    // User data is our new handle so that callbacks from bullet
+    // can relocate it
+    world->dynamicsWorld->setWorldUserInfo((void*)world);
+
+    world->dynamicsWorld->setGravity(btVector3(0, -20, 0));
+
+	world->dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
+    world->dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);
+    
+    return &world->header;
     //Phys_CreateTestScene(&g_world);
 }
 
-void PhysExt_ClearWorld()
+void PhysExt_ClearWorld(WorldHandle* handle)
 {
-    if (g_world.verbose)
+    HANDLE2WORLD
+    if (world->verbose)
     {
         printf("PHYS Clear world\n");
     }
-	Phys_ClearOverlapPairs(&g_world);
-	Buf_Clear(&g_input);
-	Buf_Clear(&g_output);
-    for (int i = 0; i < g_world.bodies.capacity; ++i)
+	Phys_ClearOverlapPairs(world);
+	Buf_Clear(&world->input);
+	Buf_Clear(&world->output);
+    for (int i = 0; i < world->bodies.capacity; ++i)
     {
-        Phys_FreeHandle(&g_world, &g_world.bodies.items[i]);
+        Phys_FreeHandle(world, &world->bodies.items[i]);
     }
 }
 
-void PhysExt_Shutdown()
+void PhysExt_Shutdown(WorldHandle* handle)
 {
-    PhysExt_ClearWorld();
+    HANDLE2WORLD
+    PhysExt_ClearWorld(handle);
     // Get order right or it will cause an access violation
-	delete g_world.dynamicsWorld;
-	delete g_world.solver;
-	delete g_world.dispatcher;
-	delete g_world.collisionConfiguration;
-    delete g_world.broadphase;
+	delete world->dynamicsWorld;
+	delete world->solver;
+	delete world->dispatcher;
+	delete world->collisionConfiguration;
+    delete world->broadphase;
 }
 
-ByteBuffer PhysExt_Step(f32 deltaTime)
+ByteBuffer PhysExt_Step(WorldHandle* handle, f32 deltaTime)
 {
-    //MemoryBlock eventBuffer = {};
-
+    HANDLE2WORLD
     
-    
-    
-    
-    
-    
-    //eventBuffer.ptrMemory = g_output.ptrStart;
-    //eventBuffer.size = g_output.capacity;
-
-    // TODO: Lot of ickyness here
-    // Internal functions should not reference global buffers, but receive buffers via
-    // params, so that locations of 'current' buffers can be changed in this function
-    Phys_LockCommandBuffer(&g_input);
-    u32 reading = g_input.ptrWrite - g_input.ptrStart;
-    if (reading > g_world.debug.inputPeakBytes)
+    Phys_LockCommandBuffer(&world->input);
+    u32 reading = world->input.ptrWrite - world->input.ptrStart;
+    if (reading > world->debug.inputPeakBytes)
     {
-        g_world.debug.inputPeakBytes = reading;
+        world->debug.inputPeakBytes = reading;
     }
-	if (g_world.verbose)
+	if (world->verbose)
 	{
 		printf("PHYS Reading %d bytes\n", reading);
 	}
 
     // Reset output
-    g_output.ptrWrite = g_output.ptrStart;
-    g_output.ptrEnd = g_output.ptrStart;
+    world->output.ptrWrite = world->output.ptrStart;
+    world->output.ptrEnd = world->output.ptrStart;
 
     // So commands both read and write... Is this going to work?
-    Phys_ReadCommands(&g_world, &g_output);
+    Phys_ReadCommands(world, &world->output);
 
-    Phys_StepWorld(&g_world, deltaTime);
-    u32 written = g_output.ptrWrite - g_output.ptrStart;
-    if (written > g_world.debug.outputPeakBytes)
+    Phys_StepWorld(world, deltaTime);
+    u32 written = world->output.ptrWrite - world->output.ptrStart;
+    if (written > world->debug.outputPeakBytes)
     {
-        g_world.debug.outputPeakBytes = written;
+        world->debug.outputPeakBytes = written;
     }
-	if (g_world.verbose)
+	if (world->verbose)
 	{
 		printf("PHYS Wrote %d bytes\n", written);
 	}
 
     // TODO: Should only write the debug string if is asked for!
-    Phys_WriteDebugOutput(&g_world);
-    ByteBuffer buf = g_output;
+    Phys_WriteDebugOutput(world);
+    ByteBuffer buf = world->output;
     return buf;
 }
 

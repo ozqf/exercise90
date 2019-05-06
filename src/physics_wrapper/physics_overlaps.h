@@ -84,7 +84,8 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
 ////////////////////////////////////////////////////////////////////////////////////////////
 internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
 {
-    ++g_world.debug.preSolves;
+    ZBulletWorld* world = (ZBulletWorld*)dynWorld->getWorldUserInfo();
+    world->debug.preSolves++;
 }
 
 internal void Phys_WriteCollisionEvent(PhysEv_Collision* ev, PhysOverlapPair* pair)
@@ -106,11 +107,11 @@ internal void Phys_WriteCollisionEvent(PhysEv_Collision* ev, PhysOverlapPair* pa
 */
 internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
 {
-    ZBulletWorld *w = &g_world;
+    ZBulletWorld* w = (ZBulletWorld*)dynWorld->getWorldUserInfo();
     u32 currentFrame = ++w->debug.postSolves;
 
     int numManifolds = dynWorld->getDispatcher()->getNumManifolds();
-    g_world.debug.numManifolds = numManifolds;
+    w->debug.numManifolds = numManifolds;
     for (int i = 0; i < numManifolds; i++)
     {
         // All this spiel is iterating bullet's collisions 
@@ -156,7 +157,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     }
 
     // Output start/end events
-    ByteBuffer* buf = &g_output;
+    ByteBuffer* buf = &w->output;
     PhysDataItemHeader h = {};
     PhysEv_Collision ev = {};
     

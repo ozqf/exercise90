@@ -27,8 +27,9 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_INTERESTING (1 << 5)
 #define ZCOLLIDER_FLAG_VERY_INTERESTING (1 << 6)
 
-
-struct ZPhysicsHandle
+// This struct is the header of an internal data structure
+// for passing back to a caller
+struct WorldHandle
 {
 	i32 id;
 };
