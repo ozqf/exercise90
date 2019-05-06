@@ -320,6 +320,11 @@ void Sim_Reset(SimScene* sim)
 	sim->localEntitySequence = -1;
 }
 
+internal void Sim_PhysicsError(char* msg)
+{
+    COM_ASSERT(0, msg)
+}
+
 extern "C"
 void Sim_Init(
             SimScene* sim,
@@ -331,6 +336,7 @@ void Sim_Init(
     sim->ents = entityMemory;
     sim->maxEnts = maxEntities;
 	Sim_Reset(sim);
+    PhysExt_Create(Sim_PhysicsError);
     //PhysExt_Init(NULL, 0, NULL, 0, NULL);
 }
 

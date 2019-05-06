@@ -2,6 +2,7 @@
 
 #include "physics_module.cpp"
 
+extern "C"
 void Phys_Error(char* message)
 {
     printf("PHYS Error: %s\n", message);
@@ -27,7 +28,7 @@ i32 Phys_EnqueueRaycast(PhysCmd_Raycast* ev)
     return id;
 }
 #endif
-
+extern "C"
 i32 PhysCmd_CreateShape(WorldHandle* handle, ZShapeDef* def, u32 externalId)
 {
     HANDLE2WORLD
@@ -76,6 +77,7 @@ i32 PhysCmd_CreateBox(
     return PhysCmd_CreateShape(&def, ownerId);
 }
 #endif
+extern "C"
 void PhysCmd_RemoveShape(WorldHandle* handle, i32 shapeId)
 {
     HANDLE2WORLD
@@ -84,6 +86,7 @@ void PhysCmd_RemoveShape(WorldHandle* handle, i32 shapeId)
     world->input.ptrWrite += COM_WriteI32(shapeId, world->input.ptrWrite);
 }
 
+extern "C"
 void PhysCmd_SetState(WorldHandle* handle, PhysCmd_State* state)
 {
     HANDLE2WORLD
@@ -91,6 +94,7 @@ void PhysCmd_SetState(WorldHandle* handle, PhysCmd_State* state)
     world->input.ptrWrite += COM_COPY_STRUCT(state, world->input.ptrWrite, PhysCmd_State);
 }
 
+extern "C"
 void PhysCmd_TeleportShape(WorldHandle* handle, i32 shapeId, f32 posX, f32 posY, f32 posZ)
 {
     HANDLE2WORLD
@@ -104,6 +108,7 @@ void PhysCmd_TeleportShape(WorldHandle* handle, i32 shapeId, f32 posX, f32 posY,
     world->input.ptrWrite += COM_COPY_STRUCT(&cmd, world->input.ptrWrite, PhysCmd_Teleport);
 }
 
+extern "C"
 void PhysCmd_ChangeVelocity(WorldHandle* handle, i32 shapeId, f32 velX, f32 velY, f32 velZ)
 {
     HANDLE2WORLD
@@ -122,6 +127,7 @@ void PhysCmd_ChangeVelocity(WorldHandle* handle, i32 shapeId, f32 velX, f32 velY
 /////////////////////////////////////////////////////////////
 
 // return number of hits or number of hits written if max is lower
+extern "C"
 i32 PhysExt_QueryRay(WorldHandle* handle, PhysCmd_Raycast* cmd, PhysRayHit* hits, i32 maxHits)
 {
     HANDLE2WORLD
@@ -133,29 +139,33 @@ i32 PhysExt_QueryRay(WorldHandle* handle, PhysCmd_Raycast* cmd, PhysRayHit* hits
 // {
 //     return Phys_ExecRaycast(&g_world, cmd, resultsBuffer, bufferCapacity);
 // }
-
+extern "C"
 i32 PhysExt_RayTest(WorldHandle* handle, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 y2)
 {
     HANDLE2WORLD
     return PhysCmd_RayTest(world, x0, y0, z0, x1, y1, y2);
 }
 
+extern "C"
 void PhysExt_GetDebugString(char** str, i32* length)
 {
     *str = g_debugString;
     *length = g_debugStringSize;
 }
 
+extern "C"
 i32 PhysExt_QueryHitscan()
 {
     return 0;
 }
 
+extern "C"
 i32 PhysExt_QueryVolume()
 {
     return 0;
 }
 
+extern "C"
 Vec3 PhysExt_DebugGetPosition()
 {
     return g_testPos;
@@ -202,7 +212,7 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 // TODO: Could give the option to call function pointers for input/output
 // instead of using buffers.
 extern "C"
-WorldHandle* PhysExt_Init(PhysErrorHandler errorHandler
+WorldHandle* PhysExt_Create(PhysErrorHandler errorHandler
     )
 {
     printf("PHYS INIT\n");
@@ -211,11 +221,16 @@ WorldHandle* PhysExt_Init(PhysErrorHandler errorHandler
     
     //g_physTest = {};
     ZBulletWorld* world = (ZBulletWorld*)malloc(sizeof(ZBulletWorld));
-    world = {};
+	COM_ASSERT(world != NULL, "Failed to malloc physics world")
+    *world = {};
     
     i32 bufferSize = MegaBytes(1);
-    world->input = Buf_FromMalloc(malloc(bufferSize), bufferSize);
-    world->output = Buf_FromMalloc(malloc(bufferSize), bufferSize);
+	void* ptr = malloc(bufferSize);
+	COM_ASSERT(ptr != NULL, "Malloc failed")
+    world->input = Buf_FromMalloc(ptr, bufferSize);
+	ptr = malloc(bufferSize);
+	COM_ASSERT(ptr != NULL, "Malloc failed")
+    world->output = Buf_FromMalloc(ptr, bufferSize);
 
 	//world.verbose = 1;
     world->bodies.items = (PhysBodyHandle*)malloc(
@@ -253,6 +268,7 @@ WorldHandle* PhysExt_Init(PhysErrorHandler errorHandler
     //Phys_CreateTestScene(&g_world);
 }
 
+extern "C"
 void PhysExt_ClearWorld(WorldHandle* handle)
 {
     HANDLE2WORLD
@@ -269,6 +285,7 @@ void PhysExt_ClearWorld(WorldHandle* handle)
     }
 }
 
+extern "C"
 void PhysExt_Shutdown(WorldHandle* handle)
 {
     HANDLE2WORLD
@@ -281,6 +298,7 @@ void PhysExt_Shutdown(WorldHandle* handle)
     delete world->broadphase;
 }
 
+extern "C"
 ByteBuffer PhysExt_Step(WorldHandle* handle, f32 deltaTime)
 {
     HANDLE2WORLD
