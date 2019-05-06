@@ -70,14 +70,25 @@ struct PhysInfinitePlane
 
 struct ZBulletWorld
 {
+    // Identifies the world
+    i32 index;
+    char* label;
+    // Wrapper components
+    ByteBuffer input;
+    ByteBuffer output;
+    PhysErrorHandler errorHandler;
+
     PhysBodyList bodies;
+    i32 maxBodies;
     PhysDebugInfo debug;
 
     PhysOverlapPair* overlapPairs;
+    i32 maxOverlaps;
     i32 numOverlaps;
     i32 nextQueryId;
     i32 verbose;
 
+    // bullet physics components
     btBroadphaseInterface* broadphase;
     btDefaultCollisionConfiguration* collisionConfiguration;
     btCollisionDispatcher* dispatcher;

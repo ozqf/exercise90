@@ -6,36 +6,43 @@
 /***************************************
 * Public (app.h)
 ***************************************/
+extern "C"
 void App_Log(char* msg)
 {
     g_platform.Log(msg);
 }
 
+extern "C"
 void App_Print(char* msg)
 {
     g_platform.Print(msg);
 }
 
+extern "C"
 void App_SetMouseMode(ZMouseMode mode)
 {
 	g_platform.SetMouseMode(mode);
 }
 
+extern "C"
 void App_Error(char* msg, char* heading)
 {
     g_platform.Error(msg, heading);
 }
 
+extern "C"
 ScreenInfo App_GetScreenInfo()
 {
 	return g_screenInfo;
 }
 
+extern "C"
 f32 App_GetSimFrameInterval()
 {
     return (1.0f / g_simFrameRate);
 }
 
+extern "C"
 i32 App_CalcTickInterval(f32 seconds)
 {
     f32 result = seconds / App_GetSimFrameInterval();
@@ -43,9 +50,22 @@ i32 App_CalcTickInterval(f32 seconds)
     return (i32)(result + 0.5f);
 }
 
+extern "C"
 i64 App_SampleClock()
 {
     return g_platform.SampleClock();
+}
+
+extern "C"
+void App_SetPerformanceTime(i32 index, i32 tick, f32 time)
+{
+    g_performanceStats[index].frames[tick % APP_MAX_PERFORMANCE_FRAMES] = time;
+}
+
+extern "C"
+f32 App_GetPerformanceTime(i32 index)
+{
+    return g_performanceStats[index].Sum();
 }
 
 /***************************************

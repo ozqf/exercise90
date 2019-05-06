@@ -2,6 +2,8 @@
 
 #include "ZPhysics_internal_types.h"
 
+internal ZBulletWorld g_worlds[2];
+
 internal PhysErrorHandler g_errorHandler = NULL;
 internal ZBulletWorld g_world;
 internal ByteBuffer g_input;

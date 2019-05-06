@@ -595,6 +595,7 @@ internal void SVG_TickEntity(
 
 internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 {
+    AppTimer timer(APP_STAT_SV_SIM, g_sim.tick);
     for (i32 i = 0; i < g_sim.maxEnts; ++i)
     {
         SimEntity* ent = &g_sim.ents[i];

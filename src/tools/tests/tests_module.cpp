@@ -5,6 +5,7 @@
 #include "test_priority.h"
 #include "test_introspection.h"
 #include "test_quantisation.h"
+#include "test_syntax.h"
 
 #define TEST_ASSERT(expression, msg) \
 if (!(expression)) { printf("Failed: %s\n", msg##); } \
@@ -231,7 +232,8 @@ void Tests_Run(i32 argc, char* argv[])
     //Test_Priority();
     //Tests_SpreadPattern();
     //Test_Introspection();
-    Tests_Quantisation();
+    //Tests_Quantisation();
+    Test_Syntax();
 }
 
 #endif

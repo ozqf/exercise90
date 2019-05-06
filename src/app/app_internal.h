@@ -19,6 +19,8 @@ internal ScreenInfo g_screenInfo;
 internal i32 g_simFrameRate = 60;
 internal f32 g_simFrameAcculator = 0;
 
+internal AppPerformanceStat g_performanceStats[8];
+
 // 
 internal i32 g_fakeLagMinMS = 200;
 internal i32 g_fakeLagMaxMS = 300;

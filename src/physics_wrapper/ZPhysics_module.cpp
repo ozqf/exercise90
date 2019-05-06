@@ -31,11 +31,11 @@
 #define PHYS_DEFAULT_RESTITUTION 0.0
 
 // Handling public interface
-#include "ZPhysics_external_functions.cpp"
+#include "ZPhysics_external_functions.h"
 
 #include "ZPhysics_query.h"
 #include "ZPhysics_factory.h"
-#include "ZPhysics_overlaps.cpp"
+#include "ZPhysics_overlaps.h"
 #include "ZPhysics_main.h"
 
 #endif

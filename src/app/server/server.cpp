@@ -23,6 +23,7 @@ struct SVEntityFrame
 
 #define SV_DEBUG_TIMING (1 << 0)
 #define SV_DEBUG_USER_BANDWIDTH (1 << 1)
+#define SV_DEBUG_PERFORMANCE (1 << 2)
 
 #define SV_MAX_MALLOCS 1024
 
@@ -47,7 +48,9 @@ internal i32 g_unreliableProjectileDeaths = 1;
 
 internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
-internal i32 g_debugFlags = SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
+internal i32 g_debugFlags = 
+    SV_DEBUG_PERFORMANCE;
+    //SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
 /*
 Record entity states for lag compensation rewind
@@ -62,149 +65,7 @@ i32 SV_IsRunning() { return g_isRunning; }
 #include "server_users.h"
 #include "server_game.h"
 #include "server_packets.h"
-
-internal void SV_PrintMsgSizes()
-{
-    APP_PRINT(64, "SV sizeof ping: %d\n",
-        sizeof(CmdPing))
-    APP_PRINT(64, "SV sizeof Command: %d\n",
-        sizeof(Command))
-    APP_PRINT(64, "SV sizeof S2C_EntitySync: %d\n",
-        sizeof(S2C_EntitySync))
-    APP_PRINT(64, "SV sizeof S2C_BulkSpawn: %d\n",
-        sizeof(S2C_BulkSpawn))
-    APP_PRINT(64, "SV sizeof S2C_RestoreEntity: %d\n",
-        sizeof(S2C_RestoreEntity))
-}
-
-void SV_WriteDebugString(ZStringHeader* str)
-{
-    char* chars = str->chars;
-    i32 written = 0;
-    if (g_debugFlags & SV_DEBUG_TIMING)
-    {
-        written += sprintf_s(chars, str->maxLength,
-            "SERVER:\nTick: %d\nElapsed: %.3f\nMax Rate %d\nNext remote ent: %d\n",
-            g_sim.tick, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
-        );
-    }
-    
-    
-    // TODO: Just showing local user for now
-    ZNetAddress addr = {};
-    addr.port = APP_CLIENT_LOOPBACK_PORT;
-    User* user = User_FindByAddress(&g_users, &addr);
-    if (user)
-    {
-        AckStream* acks = &user->acks;
-        
-        // title
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
-            "-- Local Client %d --\n",
-            user->ids.privateId
-		);
-        // Bandwidth
-        if (g_debugFlags & SV_DEBUG_USER_BANDWIDTH)
-        {
-            #if 1
-            StreamStats stats;
-            User_SumPacketStats(user, &stats);
-            if (stats.numPackets > 0)
-            {
-                i32 kbpsTotal = (stats.totalBytes * 8) / 1024;
-                i32 reliableKbps = (stats.reliableBytes * 8) / 1024;
-                i32 unreliableKbps = (stats.unreliableBytes * 8) / 1024;
-                f32 lossEstimate = Ack_EstimateLoss(&user->acks);
-                ReliableCmdQueueStats queueStats = Stream_CountCommands(
-                    &user->reliableStream.outputBuffer);
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
-                    "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nLoss %.1f%%\nEnqueued: %d (%d Bytes)\nSequence rage %d\n",
-                    user->syncRateHertz,
-                    kbpsTotal,
-                    (f32)stats.totalBytes / 1024.0f,
-                    reliableKbps,
-                    unreliableKbps,
-                    lossEstimate,
-                    queueStats.count,
-                    user->reliableStream.outputBuffer.Written(),
-                    queueStats.highestSeq - queueStats.lowestSeq
-		        );
-                #if 1
-                // Sequencing/jitter
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
-                    "- Latency -\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
-                    acks->outputSequence,
-                    acks->remoteSequence,
-                    user->ping,
-		        	user->jitter
-                );
-                #endif
-                i32 numLinks = user->entSync.numLinks;
-                i32 numDeadLinks = Priority_TallyDeadLinks(
-                    user->entSync.links, user->entSync.numLinks);
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
-                    "- Cmds/Sync Links -\nLinks %d\nDead Links %d\nLifetime max %.3f\nCurrent max %.3f\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
-                    numLinks,
-                    numDeadLinks,
-                    user->entSync.highestMeasuredPriority,
-                    user->entSync.currentHighest,
-                    stats.numReliableMessages / stats.numPackets,
-                    stats.numUnreliableMessages / stats.numPackets,
-                    stats.totalBytes / stats.numPackets
-		        );
-                
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
-                    "--Last second totals --\nReliable Cmds %d\nUnreliable Cmds %d\n",
-                    stats.numReliableMessages,
-                    stats.numUnreliableMessages
-		        );
-            }
-            for (i32 i = 0; i < 256; ++i)
-            {
-                i32 count = stats.commandCounts[i];
-                if (count == 0) { continue; }
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
-                    "\tType %d: %d\n",
-                    i, count);
-            }
-            #endif
-            #if 0
-		    // currently overflows debug text buffer:
-            for (i32 j = 0; j < ACK_CAPACITY; ++j)
-            {
-                AckRecord* rec = &acks->awaitingAck[j];
-                if (rec->acked)
-                {
-                    f32 time = rec->receivedTime - rec->sentTime;
-                    written += sprintf_s(chars + written, str->maxLength - written,
-                        "%.3f Sent: %.3f Rec: %.3f\n", time, rec->sentTime, rec->receivedTime
-                    );
-                }
-            }
-		    #endif
-        }
-        
-    }
-    else
-    {
-        written += sprintf_s(
-            chars + written, str->maxLength - written,
-            "No local client found\n");
-    }
-    str->length = written;
-}
+#include "server_debug.h"
 
 u8 SV_ParseCommandString(char* str, char** tokens, i32 numTokens)
 {
@@ -456,6 +317,8 @@ void SV_Shutdown()
 
 internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 {
+    AppTimer timer(APP_STAT_SV_INPUT, g_sim.tick);
+
 	u8* read = sysEvents->ptrStart;
 	u8* end = sysEvents->ptrWrite;
 	while (read < end)
@@ -494,6 +357,7 @@ internal void SV_ReadSystemEvents(ByteBuffer* sysEvents, f32 deltaTime)
 
 internal void SV_SendUserPackets(SimScene* sim, f32 deltaTime)
 {
+    AppTimer timer(APP_STAT_SV_OUTPUT, g_sim.tick);
     for (i32 i = 0; i < g_users.max; ++i)
 	{
 		User* user = &g_users.items[i];
@@ -574,27 +438,14 @@ internal void SV_CalcPings(f32 deltaTime)
 
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
-    i64 start, end;
     APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_sim.tick, g_elapsed);
-    start = App_SampleClock();
     SV_ReadSystemEvents(sysEvents, deltaTime);
-    end = App_SampleClock();
-    f32 eventsTime = (f32)(end - start) / 1000;
     
-    start = App_SampleClock();
     SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
-    end = App_SampleClock();
-    f32 simTickTime = (f32)(end - start) / 1000;
     
 	g_elapsed += deltaTime;
-    start = App_SampleClock();
     SV_SendUserPackets(&g_sim, deltaTime);
-    end = App_SampleClock();
-    f32 sendPacketsTime = (f32)(end - start) / 1000;
-    //printf("SV Send Packets time %.4fms\n", (f32)(end - start) / 1000);
-    printf("SV Times Ev %.4f, SimTick %.4f, Packets %.f\n",
-        eventsTime, simTickTime, sendPacketsTime);
 }
 
 void SV_PopulateRenderScene(

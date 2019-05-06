@@ -14,7 +14,7 @@
 
 //#include "tests/test_command_stream.h"
 
-internal void Test_FatalError(char* message, char* heading)
+internal void Test_FatalError(const char* message, const char* heading)
 {
     printf("!--- %s ---!\n%s", heading, message);
 }

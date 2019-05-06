@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ZPhysics_interface.h"
+#include "ZPhysics_module.cpp"
 
 void Phys_Error(char* message)
 {
