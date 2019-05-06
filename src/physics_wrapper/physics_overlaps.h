@@ -35,7 +35,7 @@ internal i32 Phys_FindOverlapPair(ZBulletWorld *world, i32 a, i32 b)
 
 internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
 {
-    for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
+    for (int i = 0; i < PHYS_MAX_OVERLAPS; ++i)
     {
         PhysOverlapPair* p = &world->overlapPairs[i];
         if (p->isActive) { continue; }
@@ -160,7 +160,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     PhysDataItemHeader h = {};
     PhysEv_Collision ev = {};
     
-    for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
+    for (int i = 0; i < PHYS_MAX_OVERLAPS; ++i)
     {
         PhysOverlapPair* pair = &w->overlapPairs[i];
         if (!pair->isActive) { continue; }

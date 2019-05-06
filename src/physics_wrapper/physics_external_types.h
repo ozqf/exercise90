@@ -27,6 +27,12 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_INTERESTING (1 << 5)
 #define ZCOLLIDER_FLAG_VERY_INTERESTING (1 << 6)
 
+
+struct ZPhysicsHandle
+{
+	i32 id;
+};
+
 #if 1
 
 struct ZCollisionBoxData

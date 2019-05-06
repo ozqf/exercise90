@@ -2,7 +2,9 @@
 
 #include "physics_internal_types.h"
 
-internal ZBulletWorld g_worlds[2];
+// #define PHYS_MAX_WORLDS 8
+// internal ZBulletWorld g_worlds[PHYS_MAX_WORLDS];
+// internal i32 g_nextWorldIndex = 0;
 
 internal PhysErrorHandler g_errorHandler = NULL;
 internal ZBulletWorld g_world;
@@ -12,11 +14,11 @@ internal ByteBuffer g_output;
 
 internal Vec3 g_testPos;
 
-#define MAX_PHYS_BODIES 2048
-#define MAX_PHYS_OVERLAPS 2048
+#define PHYS_MAX_BODIES 2048
+#define PHYS_MAX_OVERLAPS 2048
 
-internal PhysBodyHandle g_bodies[MAX_PHYS_BODIES];
-internal PhysOverlapPair g_overlapPairs[MAX_PHYS_OVERLAPS];
+internal PhysBodyHandle g_bodies[PHYS_MAX_BODIES];
+internal PhysOverlapPair g_overlapPairs[PHYS_MAX_OVERLAPS];
 
 internal const i32 g_debugStringSize = 1024;
 internal char g_debugString[g_debugStringSize];

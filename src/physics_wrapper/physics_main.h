@@ -442,7 +442,7 @@ Peak output bytes: %d\n\
 	  // length of format + 4 digits per shape id
 	  i32 lineLengthEstimate = 9 + 4 + 4;
 
-      for (int i = 0; i < MAX_PHYS_OVERLAPS; ++i)
+      for (int i = 0; i < PHYS_MAX_OVERLAPS; ++i)
       {
 		  if (remaining < lineLengthEstimate)
 		  {

@@ -70,6 +70,7 @@ struct PhysInfinitePlane
 
 struct ZBulletWorld
 {
+    ZPhysicsHandle header;
     // Identifies the world
     i32 index;
     char* label;

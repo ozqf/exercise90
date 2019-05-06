@@ -191,6 +191,27 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 // Lifetime
 /////////////////////////////////////////////////////////////
 
+extern "C"
+i32 PhysExt_GetMemoryRequirement(i32 numBodies)
+{
+    i32 sizeOfStruct = sizeof(ZBulletWorld);
+    i32 input = MegaBytes(2);
+    i32 output = MegaBytes(2);
+    i32 bodies = sizeof(PhysBodyHandle) * PHYS_MAX_BODIES;
+    i32 overlaps = sizeof(PhysOverlapPair) * PHYS_MAX_OVERLAPS;
+    return sizeOfStruct + input + output;
+}
+
+extern "C"
+ZPhysicsHandle* PhysExt_CreateWorld(
+    ByteBuffer inputBuffer,
+    ByteBuffer outputBuffer,
+    PhysErrorHandler errorHandler)
+{
+    malloc(MegaBytes(4));
+    return NULL;
+}
+
 // If the provided command buffer is NULL or the size is zero, fail
 // TODO: Could give the option to call function pointers for input/output
 // instead of using buffers.
@@ -236,9 +257,9 @@ void PhysExt_Init(
     g_world = {};
 	//g_world.verbose = 1;
     g_world.bodies.items = g_bodies;
-    g_world.bodies.capacity = MAX_PHYS_BODIES;
+    g_world.bodies.capacity = PHYS_MAX_BODIES;
     g_world.overlapPairs = g_overlapPairs;
-    g_world.numOverlaps = MAX_PHYS_OVERLAPS;
+    g_world.numOverlaps = PHYS_MAX_OVERLAPS;
 
     g_world.broadphase = new btDbvtBroadphase();
 
