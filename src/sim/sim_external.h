@@ -89,7 +89,7 @@ void Sim_BoundaryStop(SimEntity* ent, Vec3* min, Vec3* max)
 
 // If no then this ent must be ignored by all other entities
 extern "C"
-i32 Sim_IsEntInPlay(SimEntity* ent)
+inline i32 Sim_IsEntInPlay(SimEntity* ent)
 {
     if (ent == NULL) { return NO; }
     if (ent->id.serial == SIM_ENT_NULL_SERIAL) { return NO; }

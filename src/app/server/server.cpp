@@ -574,15 +574,27 @@ internal void SV_CalcPings(f32 deltaTime)
 
 void SV_Tick(ByteBuffer* sysEvents, f32 deltaTime)
 {
+    i64 start, end;
     APP_LOG(64, "*** SV TICK %d (T %.3f) ***\n", g_sim.tick, g_elapsed);
+    start = App_SampleClock();
     SV_ReadSystemEvents(sysEvents, deltaTime);
+    end = App_SampleClock();
+    f32 eventsTime = (f32)(end - start) / 1000;
+    
+    start = App_SampleClock();
     SV_CalcPings(deltaTime);
     SVG_TickSim(&g_sim, deltaTime);
+    end = App_SampleClock();
+    f32 simTickTime = (f32)(end - start) / 1000;
+    
 	g_elapsed += deltaTime;
-    i64 start = App_SampleClock();
+    start = App_SampleClock();
     SV_SendUserPackets(&g_sim, deltaTime);
-    i64 end = App_SampleClock();
-    //printf("SV Packets time %lld\n", end - start);
+    end = App_SampleClock();
+    f32 sendPacketsTime = (f32)(end - start) / 1000;
+    //printf("SV Send Packets time %.4fms\n", (f32)(end - start) / 1000);
+    printf("SV Times Ev %.4f, SimTick %.4f, Packets %.f\n",
+        eventsTime, simTickTime, sendPacketsTime);
 }
 
 void SV_PopulateRenderScene(

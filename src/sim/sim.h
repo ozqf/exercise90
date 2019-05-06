@@ -122,7 +122,7 @@ extern "C" SimEntity* Sim_FindTargetForEnt(SimScene* sim, SimEntity* subject);
 extern "C" i32        Sim_IsEntTargetable(SimEntity* ent);
 
 extern "C"
-i32 Sim_FindByAABB(
+inline i32 Sim_FindByAABB(
     SimScene* sim,
     Vec3 boundsMin,
     Vec3 boundsMax,
@@ -131,6 +131,6 @@ i32 Sim_FindByAABB(
     i32 maxResults);
 
 extern "C"
-Vec3 Sim_BuildAvoidVector(
+inline Vec3 Sim_BuildAvoidVector(
     SimScene* sim,
     SimEntity* mover);

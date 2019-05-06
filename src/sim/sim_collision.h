@@ -6,7 +6,7 @@
  * Returns number of overlapping entities
  */
 extern "C"
-i32 Sim_FindByAABB(
+inline i32 Sim_FindByAABB(
     SimScene* sim,
     Vec3 boundsMin,
     Vec3 boundsMax,
@@ -119,6 +119,11 @@ Vec3 Sim_BuildAvoidVector(
     SimScene* sim,
     SimEntity* mover)
 {
+    #if 0
+    return { };
+    #endif
+    // TODO: Optimise
+    #if 1
     Vec3 halfSize =
     {
         mover->body.t.scale.x / 2,
@@ -158,4 +163,5 @@ Vec3 Sim_BuildAvoidVector(
         result.z += diff.z;
     }
     return result;
+    #endif
 }
