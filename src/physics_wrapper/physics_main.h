@@ -285,7 +285,7 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
             continue;
         }
         COM_ASSERT(h->motionState != NULL, "Motion state is null");
-        i32 requiredSize = sizeof(PhysDataItemHeader) + sizeof(PhysEV_TransformUpdate);
+        i32 requiredSize = sizeof(PhysEV_TransformUpdate);
         if (writePosition +  requiredSize > endPosition)
         {
             Phys_Error("Output Buffer overrun\n");
@@ -295,7 +295,8 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 		updatesWritten++;
 
         
-        PhysDataItemHeader dataHeader = {};
+        PhysEv_Header dataHeader = {};
+        PhysEv_
         dataHeader.type = TransformUpdate;
         // TODO: If updates vary in size in the future (and they are big,
         // what with containing an entire matrix and all) this will have to be set

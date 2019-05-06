@@ -89,8 +89,10 @@ internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep
     world->debug.preSolves++;
 }
 
-internal void Phys_WriteCollisionEvent(PhysEv_Collision* ev, PhysOverlapPair* pair)
+internal void Phys_WriteCollisionEvent(
+    PhysEv_Collision* ev, PhysOverlapPair* pair)
 {
+    ev->header.type = pair->
 	ev->a.externalId = pair->a.externalId;
 	ev->a.shapeTag = pair->a.shapeTag;
 	ev->b.externalId = pair->b.externalId;
@@ -159,7 +161,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
 
     // Output start/end events
     ByteBuffer* buf = &w->output;
-    PhysDataItemHeader h = {};
+    PhysEv_Header h = {};
     PhysEv_Collision ev = {};
     
     for (int i = 0; i < PHYS_MAX_OVERLAPS; ++i)

@@ -54,6 +54,7 @@ enum ZCommandType
 	Raycast = 6
 };
 
+internal void PhysEv_SetHeader(PhysEv_Header* header, PhysEventType type, i32 size);
 internal PhysBodyHandle* Phys_GetFreeBodyHandle(PhysBodyList* list);
 internal PhysBodyHandle* Phys_GetHandleById(PhysBodyList* list, i32 queryId);
 internal void Phys_FreeHandle(ZBulletWorld* world, PhysBodyHandle* handle);

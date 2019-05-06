@@ -198,6 +198,37 @@ enum PhysEventType
 	OverlapEnded = 5,
 	OverlapInProgress = 6
 };
+
+struct PhysEv_Header
+{
+	PhysEventType type;
+	i32 size;
+	i32 sentinel;
+};
+
+#define PHYS_HEADER_SENTINEL 0xC0FFEE
+
+// MUST be called when setting up any event
+extern "C"
+inline void PhysEv_SetHeader(
+    PhysEv_Header* header, PhysEventType type, i32 size)
+{
+    header->type = type;
+    header->size = size;
+    header->sentinel = PHYS_HEADER_SENTINEL;
+}
+
+extern "C"
+inline ErrorCode Phys_ValidateEvent(PhysEv_Header* header)
+{
+	if (header == NULL) { return COM_ERROR_BAD_ARGUMENT; }
+	if (header->sentinel != PHYS_HEADER_SENTINEL)
+	{ return COM_ERROR_DESERIALISE_FAILED; }
+	if (header->type == 0) { return COM_ERROR_UNKNOWN_COMMAND; }
+	if (header->size <= 0) { return COM_ERROR_BAD_SIZE; }
+	return COM_ERROR_NONE;
+}
+
 #define PHYS_UPDATE_NULL 0
 #define PHYS_EVENT_TRANSFORM 1
 #define PHYS_EVENT_RAYCAST 2
@@ -206,7 +237,7 @@ enum PhysEventType
 
 struct PhysEV_TransformUpdate
 {
-	//i32 type;
+	PhysEv_Header header;
 	u32 ownerId;
 	f32 matrix[16];
 	f32 rot[3];
@@ -225,6 +256,7 @@ struct PhysRayHit
 
 struct PhysEv_RaycastResult
 {
+	PhysEv_Header header;
 	i32 queryId;
 	f32 start[3];
 	f32 end[3];
@@ -233,7 +265,7 @@ struct PhysEv_RaycastResult
 
 struct PhysEv_RaycastDebug
 {
-	//i32 type;
+	PhysEv_Header header;
 	f32 a[3];
 	f32 b[3];
 	f32 colour[3];
@@ -241,12 +273,14 @@ struct PhysEv_RaycastDebug
 
 struct PhysEv_CollisionItem
 {
+	PhysEv_Header header;
 	u32 externalId;
 	i32 shapeTag;
 };
 
 struct PhysEv_Collision
 {
+	PhysEv_Header header;
 	PhysEv_CollisionItem a;
 	PhysEv_CollisionItem b;
 };
@@ -254,11 +288,6 @@ struct PhysEv_Collision
 //////////////////////////////////////////////////////////////////
 // Header for all items in event or command buffers
 //////////////////////////////////////////////////////////////////
-struct PhysDataItemHeader
-{
-	PhysEventType type;
-    i32 size;
-};
 
 struct PhysCmd_State
 {

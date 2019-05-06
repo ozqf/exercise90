@@ -603,6 +603,42 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 
         SVG_TickEntity(sim, ent, deltaTime);
     }
-    PhysExt_Step(sim->world, deltaTime);
+    ByteBuffer output = PhysExt_Step(sim->world, deltaTime);
+    u8* read = output.ptrStart;
+    u8* end = output.ptrEnd;
+    while (read < end)
+    {
+        PhysEv_Header* h = (PhysEv_Header*)read;
+        ErrorCode err = Phys_ValidateEvent(h);
+        COM_ASSERT(err == COM_ERROR_NONE, "Error reading phys event")
+        read += h->size;
+        switch (h->type)
+        {
+            case TransformUpdate:
+            {
+
+            } break;
+            case RaycastDebug:
+            {
+
+            } break;
+            case OverlapStarted:
+            {
+
+            } break;
+            case OverlapInProgress:
+            {
+
+            } break;
+            case OverlapEnded:
+            {
+
+            } break;
+            default:
+            {
+                COM_ASSERT(0, "Unknown physics event type")
+            } break;
+        }
+    }
     sim->tick++;
 }
