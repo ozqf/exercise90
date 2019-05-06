@@ -260,6 +260,7 @@ internal void Phys_ReadCommands(ZBulletWorld *world, ByteBuffer* output)
 internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 {
     ++world->debug.stepCount;
+	COM_ASSERT(world->dynamicsWorld->getWorldUserInfo() != NULL, "Null user info!")
     world->dynamicsWorld->stepSimulation(deltaTime, 10, deltaTime);
 
     u8 *writePosition = world->output.ptrWrite;

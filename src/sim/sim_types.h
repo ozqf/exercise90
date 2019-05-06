@@ -65,6 +65,8 @@ struct SimEntity
     i32 tickType;
     i32 coreTickType;
 
+    ZShapeDef shape;
+
     struct 
     {
         // TODO: For the client only the serial of targetid is safe.
@@ -240,6 +242,8 @@ struct SimScene
 {
     SimEntity* ents;
     i32 maxEnts;
+
+    WorldHandle* world;
 
     // sequential, unrelated to blocks
     i32 remoteEntitySequence;

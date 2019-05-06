@@ -81,12 +81,8 @@ struct ZShapeDef
 	ZShapeData_U data;
 
 	void SetAsBox(
-		f32 x,
-		f32 y,
-		f32 z,
-		f32 halfSizeX,
-    	f32 halfSizeY,
-    	f32 halfSizeZ,
+		Vec3 position,
+		Vec3 halfSize,
     	u32 newFlags,
     	u16 newGroup,
     	u16 newMask,
@@ -99,12 +95,12 @@ struct ZShapeDef
     	group = newGroup;
     	mask = newMask;
 		tag = newTag;
-    	pos[0] = x;
-    	pos[1] = y;
-    	pos[2] = z;
-    	data.box.halfSize[0] = halfSizeX;
-    	data.box.halfSize[1] = halfSizeY;
-    	data.box.halfSize[2] = halfSizeZ;
+    	pos[0] = position.x;
+    	pos[1] = position.y;
+    	pos[2] = position.z;
+    	data.box.halfSize[0] = halfSize.x;
+    	data.box.halfSize[1] = halfSize.y;
+    	data.box.halfSize[2] = halfSize.z;
 	}
 
 	void SetScale(f32 halfSizeX, f32 halfSizeY, f32 halfSizeZ)

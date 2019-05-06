@@ -97,7 +97,8 @@ struct ZBulletWorld
     btCollisionDispatcher* dispatcher;
     btSequentialImpulseConstraintSolver* solver;
 
-    btDiscreteDynamicsWorld* dynamicsWorld;
+    //btDiscreteDynamicsWorld* dynamicsWorld;
+    btDynamicsWorld* dynamicsWorld;
 };
 #if 0
 struct PhysicsTestState

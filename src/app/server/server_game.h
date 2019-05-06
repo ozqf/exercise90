@@ -603,5 +603,6 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 
         SVG_TickEntity(sim, ent, deltaTime);
     }
+    PhysExt_Step(sim->world, deltaTime);
     sim->tick++;
 }

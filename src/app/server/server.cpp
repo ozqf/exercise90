@@ -184,21 +184,14 @@ internal void SV_LoadTestScene()
         // No spawners
         break;
         case 1:
+        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
+        break;
+        case 2:
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
-        break;
-        case 2:
-        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
-        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
-        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART);
-        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART);
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddBot(sim, { 15, 0, 15 });
-        SV_AddBot(sim, { 15, 0, -15 });
-        SV_AddBot(sim, { 15, 0, 0 });
         break;
         case 3:
         SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
@@ -208,6 +201,16 @@ internal void SV_LoadTestScene()
         SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
         break;
         case 4:
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddBot(sim, { 15, 0, 15 });
+        SV_AddBot(sim, { 15, 0, -15 });
+        SV_AddBot(sim, { 15, 0, 0 });
+        break;
+        case 5:
         SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
         SV_AddSpawner(sim, { outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE);
         SV_AddSpawner(sim, { -inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
@@ -297,7 +300,7 @@ void SV_Init()
     i32 maxEnts = APP_MAX_ENTITIES;
     size = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)COM_Malloc(&g_mallocs, size, "Sim Ents");
-    Sim_Init(&g_sim, mem, maxEnts);
+    Sim_Init("Server", &g_sim, mem, maxEnts);
 	Sim_Reset(&g_sim);
     SV_LoadTestScene();
 

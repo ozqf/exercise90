@@ -147,15 +147,19 @@ internal i32 Sim_InitWorldVolume(
         { 0.2f, 0.2f, 0.2f, 1 },
         COM_MESH_CUBE_INDEX,
         SIM_DEATH_GFX_NONE);
+    
+    ent->shape.SetAsBox(def->pos, def->scale, ZCOLLIDER_FLAG_STATIC, 0, 0, 0);
+    PhysCmd_CreateShape(scene->world, &ent->shape, ent->id.serial);
+
     return COM_ERROR_NONE;
 }
 
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
-    //i32 count = 1;
+    i32 count = 1;
     //i32 count = 20;
-    i32 count = 64;
+    //i32 count = 64;
     //i32 count = 128;
     
     Sim_SetEntityBase(ent, def);

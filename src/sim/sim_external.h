@@ -327,6 +327,7 @@ internal void Sim_PhysicsError(char* msg)
 
 extern "C"
 void Sim_Init(
+            char* label,
             SimScene* sim,
             SimEntity* entityMemory,
             i32 maxEntities)
@@ -336,7 +337,7 @@ void Sim_Init(
     sim->ents = entityMemory;
     sim->maxEnts = maxEntities;
 	Sim_Reset(sim);
-    PhysExt_Create(Sim_PhysicsError);
+    sim->world = PhysExt_Create(label, Sim_PhysicsError);
     //PhysExt_Init(NULL, 0, NULL, 0, NULL);
 }
 

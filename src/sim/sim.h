@@ -83,6 +83,7 @@ typedef u8 simFactoryType;
 
 // Scene management
 extern "C" void     Sim_Init(
+                        char* label,
                         SimScene* sim,
                         SimEntity* entityMemory,
                         i32 maxEntities);

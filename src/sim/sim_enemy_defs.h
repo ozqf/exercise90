@@ -44,6 +44,8 @@ internal i32 Sim_InitRubble(
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
+    ent->shape.SetAsBox(def->pos, { 0.5f, 0.5f, 0.5f}, 0, 0, 0, 0);
+    PhysCmd_CreateShape(scene->world, &ent->shape, ent->id.serial);
     return COM_ERROR_NONE;
 }
 

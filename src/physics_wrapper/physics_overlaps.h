@@ -85,6 +85,7 @@ internal i32 Phys_AddOverlapPair(ZBulletWorld *world, i32 a, i32 b, u32 frame)
 internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep)
 {
     ZBulletWorld* world = (ZBulletWorld*)dynWorld->getWorldUserInfo();
+	COM_ASSERT(world != NULL, "World is null")
     world->debug.preSolves++;
 }
 

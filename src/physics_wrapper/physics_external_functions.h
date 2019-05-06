@@ -212,8 +212,7 @@ void Phys_CreateTestScene(ZBulletWorld* world)
 // TODO: Could give the option to call function pointers for input/output
 // instead of using buffers.
 extern "C"
-WorldHandle* PhysExt_Create(PhysErrorHandler errorHandler
-    )
+WorldHandle* PhysExt_Create(char* label, PhysErrorHandler errorHandler)
 {
     printf("PHYS INIT\n");
 
@@ -223,6 +222,7 @@ WorldHandle* PhysExt_Create(PhysErrorHandler errorHandler
     ZBulletWorld* world = (ZBulletWorld*)malloc(sizeof(ZBulletWorld));
 	COM_ASSERT(world != NULL, "Failed to malloc physics world")
     *world = {};
+    world->label = label;
     
     i32 bufferSize = MegaBytes(1);
 	void* ptr = malloc(bufferSize);
@@ -233,14 +233,17 @@ WorldHandle* PhysExt_Create(PhysErrorHandler errorHandler
     world->output = Buf_FromMalloc(ptr, bufferSize);
 
 	//world.verbose = 1;
-    world->bodies.items = (PhysBodyHandle*)malloc(
-        sizeof(PhysBodyHandle) * PHYS_MAX_BODIES
-    );
+    i32 bodiesMemorySize = sizeof(PhysBodyHandle) * PHYS_MAX_BODIES;
+    u8* bodiesPtr = (u8*)malloc(bodiesMemorySize);
+    COM_ZeroMemory(bodiesPtr, bodiesMemorySize);
+    world->bodies.items = (PhysBodyHandle*)bodiesPtr;
     world->bodies.capacity = PHYS_MAX_BODIES;
+
     world->overlapPairs = (PhysOverlapPair*)malloc(
         sizeof(PhysOverlapPair) * PHYS_MAX_OVERLAPS
     );
-    world->numOverlaps = PHYS_MAX_OVERLAPS;
+    world->numOverlaps = 0;
+    world->maxOverlaps = PHYS_MAX_OVERLAPS;
 
     world->broadphase = new btDbvtBroadphase();
 
@@ -258,11 +261,19 @@ WorldHandle* PhysExt_Create(PhysErrorHandler errorHandler
     // User data is our new handle so that callbacks from bullet
     // can relocate it
     world->dynamicsWorld->setWorldUserInfo((void*)world);
+	void* worldInfoPtr = world->dynamicsWorld->getWorldUserInfo();
+	COM_ASSERT(worldInfoPtr != NULL, "Got no world user info back!")
 
     world->dynamicsWorld->setGravity(btVector3(0, -20, 0));
 
-	world->dynamicsWorld->setInternalTickCallback(Phys_PreSolveCallback, 0, true);
-    world->dynamicsWorld->setInternalTickCallback(Phys_PostSolveCallback, 0, false);
+	world->dynamicsWorld->setInternalTickCallback(
+        Phys_PreSolveCallback,
+        worldInfoPtr,
+        true);
+    world->dynamicsWorld->setInternalTickCallback(
+        Phys_PostSolveCallback,
+        worldInfoPtr,
+        false);
     
     return &world->header;
     //Phys_CreateTestScene(&g_world);

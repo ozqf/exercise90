@@ -44,7 +44,7 @@ internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
 
 internal i32 g_interpolateRenderScene = 0;
-internal i32 g_tickEnemies = 1;
+internal i32 g_tickEnemies = 0;
 
 // Menus
 internal i32 g_mainMenuOn;
@@ -210,7 +210,7 @@ void CL_Init(ZNetAddress serverAddress)
     i32 maxEnts = APP_MAX_ENTITIES;
     i32 numEntityBytes = Sim_CalcEntityArrayBytes(maxEnts);
     SimEntity* mem = (SimEntity*)CL_Malloc(numEntityBytes);
-    Sim_Init(&g_sim, mem, maxEnts);
+    Sim_Init("Client", &g_sim, mem, maxEnts);
 	Sim_Reset(&g_sim);
     CL_LoadTestScene();
 
