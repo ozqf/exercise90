@@ -52,6 +52,7 @@ internal i32 CL_WriteUnreliableSection(
 internal void CL_WritePacket(
     QuantiseSet* quantise, f32 time, C2S_Input* userInput)
 {
+    AppTimer timer(APP_STAT_CL_OUTPUT, g_sim.tick);
     #if 1
 	//printf("CL Write packet for user %d\n", g_ids.privateId);
 	//Stream_EnqueueOutput(&user->reliableStream, &ping.header);

@@ -499,6 +499,7 @@ internal void CLG_TickEntity(SimScene* sim, SimEntity* ent, f32 deltaTime)
 
 internal void CLG_TickGame(SimScene* sim, f32 deltaTime)
 {
+    AppTimer timer(APP_STAT_CL_SIM, sim->tick);
     for (i32 i = 0; i < g_sim.maxEnts; ++i)
     {
         SimEntity* ent = &g_sim.ents[i];

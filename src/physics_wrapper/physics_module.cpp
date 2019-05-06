@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "../common/com_defines.h"
 // header, contains data structures and function definitions
-#include "ZPhysics_interface.h"
+#include "physics_interface.h"
 /**
  * !NO BULLET PHYSICS LIBRARY ABOVE THIS POINT!
  * 
@@ -19,11 +19,11 @@
 #include <windows.h>
 
 // Internal data structures used to interact with Bullet Physics
-//#include "ZPhysics_internal_types.h"
-#include "ZPhysics_internal_interface.h"
+//#include "physics_internal_types.h"
+#include "physics_internal_interface.h"
 
 // Global variables used by the rest of the internal system
-#include "ZPhysics_globals.h"
+#include "physics_globals.h"
 
 // Implement public interface
 
@@ -31,11 +31,11 @@
 #define PHYS_DEFAULT_RESTITUTION 0.0
 
 // Handling public interface
-#include "ZPhysics_external_functions.h"
+#include "physics_external_functions.h"
 
-#include "ZPhysics_query.h"
-#include "ZPhysics_factory.h"
-#include "ZPhysics_overlaps.h"
-#include "ZPhysics_main.h"
+#include "physics_query.h"
+#include "physics_factory.h"
+#include "physics_overlaps.h"
+#include "physics_main.h"
 
 #endif

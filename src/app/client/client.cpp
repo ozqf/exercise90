@@ -274,6 +274,7 @@ internal void CL_ReadReliableCommands(NetStream* stream)
 internal void CL_ReadSystemEvents(
 	ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 {
+    AppTimer timer(APP_STAT_CL_INPUT, g_sim.tick);
     //printf("CL Reading platform events (%d bytes)\n", sysEvents->Written());
     u8* read = sysEvents->ptrStart;
     u8* end = sysEvents->ptrWrite;
@@ -551,10 +552,8 @@ internal void CL_CalcPings(f32 deltaTime)
 
 void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 {
-    i64 start, end;
     APP_LOG(64, "*** CL TICK %d (Server Sync Tick %d. T %.3f) ***\n",
         g_ticks, g_serverTick, g_elapsed);
-    start = App_SampleClock();
     CL_ReadSystemEvents(sysEvents, deltaTime, platformFrame);
 
     CL_CalcPings(deltaTime);
@@ -565,9 +564,6 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
 
     // Update input
     CL_UpdateActorInput(&g_inputActions, &g_actorInput);
-    end = App_SampleClock();
-    f32 commandsTick = (f32)(end - start) / 1000;
-
 	// Create and store input to server
 	C2S_Input cmd;
 	SimEntity* plyr = Sim_GetEntityBySerial(&g_sim, g_avatarSerial);
@@ -589,15 +585,10 @@ void CL_Tick(ByteBuffer* sysEvents, f32 deltaTime, u32 platformFrame)
         g_serverTick,
         deltaTime);
 	CL_StoreSentInputCommand(g_sentCommands, &cmd);
-	start = App_SampleClock();
 	// Run
     CLG_TickGame(&g_sim, deltaTime);
-	end = App_SampleClock();
-    f32 tickTime = (f32)(end - start) / 1000;
 	g_ticks++;
 	g_serverTick++;
     g_elapsed += deltaTime;
     CL_WritePacket(&g_sim.quantise, g_elapsed, &cmd);
-    printf("CL Command time %.4f, tick time %.4f\n",
-        commandsTick, tickTime);
 }

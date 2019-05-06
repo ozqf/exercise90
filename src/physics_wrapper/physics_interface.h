@@ -11,7 +11,7 @@
  */
 #include "../common/common.h"
 
-#include "ZPhysics_external_types.h"
+#include "physics_external_types.h"
 
 //////////////////////////////////////////////////////////////////
 // Queued commands

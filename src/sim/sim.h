@@ -2,7 +2,7 @@
 
 #include "../common/common.h"
 
-#include "../physics_wrapper/ZPhysics_interface.h"
+#include "../physics_wrapper/physics_interface.h"
 
 // TODO: This is set for quantisating individual axes,
 // but will need to be applied as vector magnitude to work properly

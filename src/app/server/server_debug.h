@@ -31,11 +31,22 @@ void SV_WriteDebugString(ZStringHeader* str)
     
     if (g_debugFlags & SV_DEBUG_PERFORMANCE)
     {
-        written += sprintf_s(chars, str->maxLength,
+        written += sprintf_s(
+            chars + written,
+            str->maxLength - written,
             "SV Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\n",
             App_GetPerformanceTime(APP_STAT_SV_INPUT),
             App_GetPerformanceTime(APP_STAT_SV_SIM),
             App_GetPerformanceTime(APP_STAT_SV_OUTPUT)
+        );
+        // TODO: Move this stuff out to app layer
+        written += sprintf_s(
+            chars + written,
+            str->maxLength - written,
+            "CL Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\n",
+            App_GetPerformanceTime(APP_STAT_CL_INPUT),
+            App_GetPerformanceTime(APP_STAT_CL_SIM),
+            App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
         );
     }
     

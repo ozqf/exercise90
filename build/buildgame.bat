@@ -23,7 +23,7 @@ set in1=../src/common/com_module.cpp
 set in2=../src/app/app_module.cpp ../src/app/app_textures.cpp
 set in3=../src/sim/sim_module.cpp ../src/network/znet_module.cpp
 set in4=../src/app/server/server.cpp ../src/app/client/client.cpp
-set in5=../src/physics_wrapper/ZPhysics_module.cpp
+set in5=../src/physics_wrapper/physics_module.cpp
 
 @rem -- Stub App input --
 @rem set in2=../src/app_stub/app_stub.cpp ../src/app/app_textures.cpp

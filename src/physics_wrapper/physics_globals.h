@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ZPhysics_internal_types.h"
+#include "physics_internal_types.h"
 
 internal ZBulletWorld g_worlds[2];
 
