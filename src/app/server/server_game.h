@@ -298,14 +298,40 @@ internal i32 SVG_StepProjectile(
         sim, min, max, ent->id.serial, ents, 16);
     
     i32 killed = 0;
+    Vec3 dir = ent->body.velocity;
+    Vec3_NormaliseOrForward(&dir);
     for (i32 i = 0; i < overlaps; ++i)
     {
         // TODO: For now just hit first valid entity in list
         SimEntity* victim = ents[i];
         if (Sim_IsEntTargetable(victim) == NO) { continue; }
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
-        SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
-        //ent->timing.nextThink = sim->tick;
+
+        // TODO: Change this not rely on factory type but entity settings
+        switch (victim->factoryType)
+        {
+            // Testing: Bounce Rubble around!
+            case SIM_FACTORY_TYPE_RUBBLE:
+            {
+                Vec3 vel = victim->body.velocity;
+                vel.x += dir.x * 3;
+                vel.y += dir.y * 3;
+                vel.z += dir.z * 3;
+                PhysCmd_ChangeVelocity(
+                    sim->world, victim->shape.handleId, vel.x, vel.y, vel.z);
+            } break;
+
+            case SIM_FACTORY_TYPE_WORLD:
+            {
+                continue;
+            } break;
+            default:
+            {
+                // Murder Death Kill
+                SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
+            } break;
+        }
+        
         killed = 1;
         break;
     }
@@ -616,7 +642,33 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
         {
             case TransformUpdate:
             {
-
+                PhysEV_TransformUpdate* t = (PhysEV_TransformUpdate*)h;
+                SimEntity* ent = Sim_GetEntityBySerial(&g_sim, t->ownerId);
+                if (ent != NULL)
+                {
+                    Vec3 pos =
+                    {
+                        t->matrix[M4x4_W0],
+                        t->matrix[M4x4_W1],
+                        t->matrix[M4x4_W2]
+                    };
+                    ent->body.velocity.x = t->vel[0];
+                    ent->body.velocity.y = t->vel[1];
+                    ent->body.velocity.z = t->vel[2];
+                    ent->body.t.pos = pos;
+                    /*if (ent->id.serial > 0)
+                    {
+                        printf("SVG Phys update shape %d (ent type %d) to %.3f, %.3f, %.3f\n",
+                            t->ownerId, ent->factoryType, pos.x, pos.y, pos.z);
+                    }*/
+                    
+                }
+                else
+                {
+                    printf("SVG Phys no ent for shape %d\n", t->ownerId);
+                }
+                
+                
             } break;
             case RaycastDebug:
             {
@@ -624,7 +676,8 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
             } break;
             case OverlapStarted:
             {
-
+                PhysEv_Collision* col = (PhysEv_Collision*)h;
+                printf("SVG Phys collision! %d vs %d\n", col->a.externalId, col->b.externalId);
             } break;
             case OverlapInProgress:
             {

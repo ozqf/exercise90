@@ -4,6 +4,8 @@
 
 #include "../physics_wrapper/physics_interface.h"
 
+#define SIM_LAYER_WORLD (1 << 0)
+
 // TODO: This is set for quantisating individual axes,
 // but will need to be applied as vector magnitude to work properly
 #define SIM_MAX_AXIS_SPEED 127

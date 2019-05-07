@@ -148,7 +148,7 @@ internal i32 Sim_InitWorldVolume(
         COM_MESH_CUBE_INDEX,
         SIM_DEATH_GFX_NONE);
     
-    ent->shape.SetAsBox(def->pos, def->scale, ZCOLLIDER_FLAG_STATIC, 0, 0, 0);
+    ent->shape.SetAsBox(def->pos, def->scale, ZCOLLIDER_FLAG_STATIC, SIM_LAYER_WORLD, SIM_LAYER_WORLD, 0);
     PhysCmd_CreateShape(scene->world, &ent->shape, ent->id.serial);
 
     return COM_ERROR_NONE;
@@ -375,6 +375,11 @@ internal i32 Sim_RecycleEntity(
         SimEntIndex slot = ent->id.slot;
         APP_LOG(64, "SIM Removing ent %d (slot %d/%d)\n",
             entitySerialNumber, slot.iteration, slot.index);
+        if (ent->shape.handleId > 0)
+        {
+            PhysCmd_RemoveShape(sim->world, ent->shape.handleId);
+            ent->shape = {};
+        }
         u16 iteration = ent->id.slot.iteration + 1;
         *ent = {};
         ent->id.slot.iteration = iteration;

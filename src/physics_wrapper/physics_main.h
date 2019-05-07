@@ -59,25 +59,34 @@ internal void Phys_FreeHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 /**
  * deactivate all objects on this handle and mark it for reuse
  */
+/*
 internal void Phys_RecycleHandle(ZBulletWorld *world, PhysBodyHandle *handle)
 {
     handle->inUse = FALSE;
 }
-
+*/
+// TODO: Remove me I live in constant agony
 // Hack because I want these functions to be internal
 // but I also want to avoid the compile time warning in this specific case
 void Phys_NeverCall()
 {
     ILLEGAL_CODE_PATH
-    Phys_CreateBulletBox(NULL, NULL, NULL);
-    PhysExec_CreateShape(NULL, NULL);
-    Phys_RecycleHandle(NULL, NULL);
-    Phys_ReadCommands(NULL, NULL);
+    //Phys_CreateBulletBox(NULL, NULL, NULL);
+    //PhysExec_CreateShape(NULL, NULL);
+    //Phys_RecycleHandle(NULL, NULL);
+    //Phys_ReadCommands(NULL, NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // COMMANDS
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+// Add/remove from the simulation without deleting the shape
+void PhysExec_SetBodyActiveState(btRigidBody *body, i32 bIsActive)
+{
+    body->setActivationState(bIsActive);
+}
+
 void PhysExec_SetBodyPosition(btRigidBody *body, f32 x, f32 y, f32 z)
 {
     btTransform t;
@@ -271,20 +280,20 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 	i32 inactiveSkipped = 0;
     for (int i = 0; i < len; ++i)
     {
-        PhysBodyHandle *h = &world->bodies.items[i];
+        PhysBodyHandle *handle = &world->bodies.items[i];
         // Check that a rigidbody is present and that the handle is in use.
         // Otherwise it might be a rigidbody await recylcing
-        if (h->inUse == FALSE || h->rigidBody == NULL)
+        if (handle->inUse == FALSE || handle->rigidBody == NULL)
         {
 			unusedSkipped++;
             continue;
         }
-        if (!h->rigidBody->getActivationState())
+        if (!handle->rigidBody->getActivationState())
         {
 			inactiveSkipped++;
             continue;
         }
-        COM_ASSERT(h->motionState != NULL, "Motion state is null");
+        COM_ASSERT(handle->motionState != NULL, "Motion state is null");
         i32 requiredSize = sizeof(PhysEV_TransformUpdate);
         if (writePosition +  requiredSize > endPosition)
         {
@@ -295,60 +304,54 @@ internal void Phys_StepWorld(ZBulletWorld *world, f32 deltaTime)
 		updatesWritten++;
 
         
-        PhysEv_Header dataHeader = {};
-        PhysEv_
-        dataHeader.type = TransformUpdate;
+        PhysEV_TransformUpdate updateEv = {};
         // TODO: If updates vary in size in the future (and they are big,
         // what with containing an entire matrix and all) this will have to be set
         // AFTER the update is written to the buffer
-        dataHeader.size = sizeof(PhysEV_TransformUpdate);
-        writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
-
-        PhysEV_TransformUpdate ev = {};
-        ev.ownerId = h->externalId;
-        ev.tag = h->def.tag;
+        PhysEv_SetHeader(&updateEv.header, TransformUpdate, sizeof(PhysEV_TransformUpdate));
+        
+        
+        updateEv.ownerId = handle->externalId;
+        updateEv.tag = handle->def.tag;
         
         btTransform t;
-        h->rigidBody->getMotionState()->getWorldTransform(t);
+        handle->rigidBody->getMotionState()->getWorldTransform(t);
 
         btScalar openglM[16];
         t.getOpenGLMatrix(openglM);
         for (i32 j = 0; j < 16; ++j)
         {
-            ev.matrix[j] = openglM[j];
+            updateEv.matrix[j] = openglM[j];
         }
 
-        btVector3 vel = h->rigidBody->getLinearVelocity();
-        ev.vel[0] = vel.getX();
-        ev.vel[1] = vel.getY();
-        ev.vel[2] = vel.getZ();
+        btVector3 vel = handle->rigidBody->getLinearVelocity();
+        updateEv.vel[0] = vel.getX();
+        updateEv.vel[1] = vel.getY();
+        updateEv.vel[2] = vel.getZ();
 
         if ((
-            h->def.flags & ZCOLLIDER_FLAG_NO_ROTATION) ||
-            h->def.flags & ZCOLLIDER_FLAG_GROUNDCHECK)
+            handle->def.flags & ZCOLLIDER_FLAG_NO_ROTATION) ||
+            handle->def.flags & ZCOLLIDER_FLAG_GROUNDCHECK)
         {
             PhysEv_RaycastDebug rayEv = {};
             // TODO: Assuming handle is for a box and halfsize is valid!
             u8 val = PhysCmd_GroundTest(
                 world, openglM[M4x4_W0], openglM[M4x4_W1], openglM[M4x4_W2],
-                h->def.data.box.halfSize[1],
+                handle->def.data.box.halfSize[1],
                 &rayEv);
             if (val)
             {
-                ev.flags |= PHYS_EV_FLAG_GROUNDED;
+                updateEv.flags |= PHYS_EV_FLAG_GROUNDED;
             }
-            writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
-
+            
             // Write ground check debug
-            dataHeader.type = RaycastDebug;
-            dataHeader.size = sizeof(PhysEv_RaycastDebug);
-            writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
-            writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RaycastDebug);
+            //dataHeader.type = RaycastDebug;
+            //dataHeader.size = sizeof(PhysEv_RaycastDebug);
+            //writePosition += COM_COPY_STRUCT(&dataHeader, writePosition, PhysDataItemHeader);
+            //writePosition += COM_COPY_STRUCT(&rayEv, writePosition, PhysEv_RaycastDebug);
         }
-        else
-        {
-            writePosition += COM_COPY_STRUCT(&ev, writePosition, PhysEV_TransformUpdate);
-        }
+        // Write update to buffer
+        writePosition += COM_COPY(&updateEv, writePosition, updateEv.header.size);
     }
 
     // Mark end of buffer

@@ -89,10 +89,10 @@ internal void Phys_PreSolveCallback(btDynamicsWorld *dynWorld, btScalar timeStep
     world->debug.preSolves++;
 }
 
-internal void Phys_WriteCollisionEvent(
-    PhysEv_Collision* ev, PhysOverlapPair* pair)
+internal void Phys_InitCollisionEvent(
+    PhysEv_Collision* ev, PhysOverlapPair* pair, PhysEventType type)
 {
-    ev->header.type = pair->
+    PhysEv_SetHeader(&ev->header, type, sizeof(PhysEv_Collision));
 	ev->a.externalId = pair->a.externalId;
 	ev->a.shapeTag = pair->a.shapeTag;
 	ev->b.externalId = pair->b.externalId;
@@ -168,13 +168,11 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
     {
         PhysOverlapPair* pair = &w->overlapPairs[i];
         if (!pair->isActive) { continue; }
+        // Even if not reporting, must check to set inactive.
         if (pair->reportLevel == 0)
 		{
-			// Even if not reporting, must check to set inactive.
 			if (pair->latestFrame != currentFrame)
-			{
-				pair->isActive = 0;
-			}
+			{ pair->isActive = 0; }
 			continue;
 		}
         if (pair->startFrame == currentFrame)
@@ -182,21 +180,19 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             // collision began
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapStarted;
-			Phys_WriteCollisionEvent(&ev, pair);
-            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+			Phys_InitCollisionEvent(&ev, pair, OverlapStarted);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
-            printf("** Collision %d vs %d start\n", pair->a.externalId, pair->b.externalId);
+            //printf("** Collision %d vs %d start\n", pair->a.externalId, pair->b.externalId);
         }
         else if (pair->latestFrame != currentFrame)
         {
             // collision ended
             h.size = sizeof(PhysEv_Collision);
             h.type = OverlapEnded;
-			Phys_WriteCollisionEvent(&ev, pair);
-            buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+			Phys_InitCollisionEvent(&ev, pair, OverlapEnded);
             buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             pair->isActive = 0;
-            printf("** Collision %d vs %d end\n", pair->a.externalId, pair->b.externalId);
+            //printf("** Collision %d vs %d end\n", pair->a.externalId, pair->b.externalId);
         }
         else
         {
@@ -204,8 +200,7 @@ internal void Phys_PostSolveCallback(btDynamicsWorld *dynWorld, btScalar timeSte
             {
                 h.size = sizeof(PhysEv_Collision);
                 h.type = OverlapInProgress;
-			    Phys_WriteCollisionEvent(&ev, pair);
-                buf->ptrWrite += COM_COPY_STRUCT(&h, buf->ptrWrite, PhysDataItemHeader);
+			    Phys_InitCollisionEvent(&ev, pair, OverlapInProgress);
                 buf->ptrWrite += COM_COPY_STRUCT(&ev, buf->ptrWrite, PhysEv_Collision);
             }
         }

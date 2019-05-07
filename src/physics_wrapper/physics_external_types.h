@@ -2,6 +2,8 @@
 
 #include "../common/common.h"
 
+typedef void (*PhysErrorHandler)(char* message);
+
 //////////////////////////////////////////////////////////////////
 // Collision Shapes
 //////////////////////////////////////////////////////////////////
@@ -24,7 +26,9 @@ enum ZShapeType
 #define ZCOLLIDER_FLAG_NO_ROTATION (1 << 2)
 #define ZCOLLIDER_FLAG_GROUNDCHECK (1 << 3)
 #define ZCOLLIDER_FLAG_NO_COLLISION_RESPONSE (1 << 4)
+// Report overlap begin/end events
 #define ZCOLLIDER_FLAG_INTERESTING (1 << 5)
+// Report overlaps every frame
 #define ZCOLLIDER_FLAG_VERY_INTERESTING (1 << 6)
 
 // This struct is the header of an internal data structure
@@ -182,6 +186,14 @@ struct PhysCmd_Raycast
 	u16 mask;
 };
 
+struct PhysCmd_State
+{
+	i32 shapeId;
+	f32 pos[3];
+	f32 rot[3];
+	f32 vel[3];
+};
+
 #endif
 
 //////////////////////////////////////////////////////////////////
@@ -198,6 +210,10 @@ enum PhysEventType
 	OverlapEnded = 5,
 	OverlapInProgress = 6
 };
+
+//////////////////////////////////////////////////////////////////
+// Header for all items in event or command buffers
+//////////////////////////////////////////////////////////////////
 
 struct PhysEv_Header
 {
@@ -284,17 +300,3 @@ struct PhysEv_Collision
 	PhysEv_CollisionItem a;
 	PhysEv_CollisionItem b;
 };
-
-//////////////////////////////////////////////////////////////////
-// Header for all items in event or command buffers
-//////////////////////////////////////////////////////////////////
-
-struct PhysCmd_State
-{
-	i32 shapeId;
-	f32 pos[3];
-	f32 rot[3];
-	f32 vel[3];
-};
-
-typedef void (*PhysErrorHandler)(char* message);
