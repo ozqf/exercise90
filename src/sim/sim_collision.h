@@ -12,12 +12,21 @@ inline i32 Sim_FindByAABB(
     Vec3 boundsMax,
     i32 ignoreSerial,
     SimEntity** results,
-    i32 maxResults
+    i32 maxResults,
+	i32 replicatedOnly
     )
 {
+	//AppTimer timer(APP_STAT_AABB_SEARCH, g_apptick++);
+	i64 start = App_SampleClock();
     i32 resultIndex = 0;
     i32 count = 0;
-    for (i32 i = 0; i < sim->maxEnts; ++i)
+	
+	// Cut down search range - should not try to avoid local entities
+	// as the client cannot recreate this.
+	i32 len = replicatedOnly == NO ? sim->maxEnts : len = (sim->maxEnts / 2);
+	
+	// TODO: This is super inefficient. Need a proper spatial partition
+    for (i32 i = 0; i < len; ++i)
     {
         SimEntity* ent = &sim->ents[i];
         if (ent->status != SIM_ENT_STATUS_IN_USE
@@ -34,6 +43,8 @@ inline i32 Sim_FindByAABB(
             ent->body.t.scale.y,
             ent->body.t.scale.z
         };
+		
+		#if 1
         Vec3 min;
         min.x = boundsMin.x - halfSize.x;
         min.y = boundsMin.y - halfSize.y;
@@ -46,6 +57,11 @@ inline i32 Sim_FindByAABB(
         if (p->x < min.x || p->x > max.x) { continue; }
         if (p->y < min.y || p->y > max.y) { continue; }
         if (p->z < min.z || p->z > max.z) { continue; }
+		
+		if (p->x < min.x || p->x > max.x) { continue; }
+        if (p->y < min.y || p->y > max.y) { continue; }
+        if (p->z < min.z || p->z > max.z) { continue; }
+		#endif
         count++;
         if (results)
         {
@@ -56,6 +72,8 @@ inline i32 Sim_FindByAABB(
             }
         }
     }
+	i64 end = App_SampleClock();
+	sim->timeInAABBSearch += (end - start);
     return count;
 }
 
@@ -142,7 +160,8 @@ Vec3 Sim_BuildAvoidVector(
 
     const i32 maxResults = 32;
     SimEntity* results[maxResults];
-    i32 numOverlaps = Sim_FindByAABB(sim, min, max, mover->id.serial, results, maxResults);
+    i32 numOverlaps = Sim_FindByAABB(
+		sim, min, max, mover->id.serial, results, maxResults, YES);
     if (numOverlaps == 0) { return { }; }
     Vec3 result = {};
     Vec3 origin = mover->body.t.pos;

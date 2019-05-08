@@ -295,7 +295,7 @@ internal i32 SVG_StepProjectile(
 
     SimEntity* ents[16];
     i32 overlaps = Sim_FindByAABB(
-        sim, min, max, ent->id.serial, ents, 16);
+        sim, min, max, ent->id.serial, ents, 16, YES);
     
     i32 killed = 0;
     Vec3 dir = ent->body.velocity;
@@ -308,7 +308,7 @@ internal i32 SVG_StepProjectile(
 		COM_ASSERT(victim->id.serial, "SV overlap victim serial is 0")
 
         // TODO: Change this not rely on factory type but entity settings
-        switch (victim->factoryType)
+        /*switch (victim->factoryType)
         {
             // Testing: Bounce Rubble around!
             case SIM_FACTORY_TYPE_RUBBLE:
@@ -331,6 +331,8 @@ internal i32 SVG_StepProjectile(
                 SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
             } break;
         }
+        */
+        SVG_HandleEntityDeath(sim, victim, ent, 0, 0);
         
         killed = 1;
         break;
@@ -622,6 +624,7 @@ internal void SVG_TickEntity(
 internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 {
     AppTimer timer(APP_STAT_SV_SIM, g_sim.tick);
+	sim->timeInAABBSearch = 0;
     for (i32 i = 0; i < g_sim.maxEnts; ++i)
     {
         SimEntity* ent = &g_sim.ents[i];
@@ -629,6 +632,7 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
 
         SVG_TickEntity(sim, ent, deltaTime);
     }
+    #ifdef SIM_USE_PHYSICS_ENGINE
     ByteBuffer output = PhysExt_Step(sim->world, deltaTime);
     u8* read = output.ptrStart;
     u8* end = output.ptrEnd;
@@ -693,5 +697,6 @@ internal void SVG_TickSim(SimScene* sim, f32 deltaTime)
             } break;
         }
     }
+    #endif
     sim->tick++;
 }

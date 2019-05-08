@@ -147,19 +147,19 @@ internal i32 Sim_InitWorldVolume(
         { 0.2f, 0.2f, 0.2f, 1 },
         COM_MESH_CUBE_INDEX,
         SIM_DEATH_GFX_NONE);
-    
+    #ifdef SIM_USE_PHYSICS_ENGINE
     ent->shape.SetAsBox(def->pos, def->scale, ZCOLLIDER_FLAG_STATIC, SIM_LAYER_WORLD, SIM_LAYER_WORLD, 0);
     PhysCmd_CreateShape(scene->world, &ent->shape, ent->id.serial);
-
+    #endif
     return COM_ERROR_NONE;
 }
 
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
-    i32 count = 1;
+    //i32 count = 1;
     //i32 count = 20;
-    //i32 count = 64;
+    i32 count = 64;
     //i32 count = 128;
     
     Sim_SetEntityBase(ent, def);
@@ -375,11 +375,13 @@ internal i32 Sim_RecycleEntity(
         SimEntIndex slot = ent->id.slot;
         APP_LOG(64, "SIM Removing ent %d (slot %d/%d)\n",
             entitySerialNumber, slot.iteration, slot.index);
+        #ifdef SIM_USE_PHYSICS_ENGINE
         if (ent->shape.handleId > 0)
         {
             PhysCmd_RemoveShape(sim->world, ent->shape.handleId);
             ent->shape = {};
         }
+        #endif
         u16 iteration = ent->id.slot.iteration + 1;
         *ent = {};
         ent->id.slot.iteration = iteration;

@@ -298,8 +298,10 @@ internal void App_Input(PlatformTime* time, ByteBuffer commands)
     }
 }
 
+i32 g_apptick = 0;
 internal void App_SimFrame(f32 interval)
 {
+    AppTimer timer(APP_STAT_FRAME_TOTAL, g_apptick++);
     #if APP_DEBUG_LOG_FRAME_TIMING
         APP_LOG(64, "App Sim tick %.8f\n", interval);
     #endif

@@ -14,3 +14,8 @@
 #include "sim_factory.h"
 #include "sim_external.h"
 #include "sim_ticks.h"
+
+// TODO: Uncouple me!
+// This should be so that the sim module can access 
+// the platform performance counter
+#include "../app/app.h"

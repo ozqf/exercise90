@@ -34,10 +34,12 @@ void SV_WriteDebugString(ZStringHeader* str)
         written += sprintf_s(
             chars + written,
             str->maxLength - written,
-            "SV Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\n",
+            "App time %.3fms\nSV Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\nSpatial Search %.3f\n",
+            App_GetPerformanceTime(APP_STAT_FRAME_TOTAL),
             App_GetPerformanceTime(APP_STAT_SV_INPUT),
             App_GetPerformanceTime(APP_STAT_SV_SIM),
-            App_GetPerformanceTime(APP_STAT_SV_OUTPUT)
+            App_GetPerformanceTime(APP_STAT_SV_OUTPUT),
+			(f32)g_sim.timeInAABBSearch / 1000.0f
         );
         // TODO: Move this stuff out to app layer
         written += sprintf_s(

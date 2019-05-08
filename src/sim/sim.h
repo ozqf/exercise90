@@ -4,6 +4,8 @@
 
 #include "../physics_wrapper/physics_interface.h"
 
+//#define SIM_USE_PHYSICS_ENGINE
+
 #define SIM_LAYER_WORLD (1 << 0)
 
 // TODO: This is set for quantisating individual axes,
@@ -133,7 +135,8 @@ inline i32 Sim_FindByAABB(
     Vec3 boundsMax,
     i32 ignoreSerial,
     SimEntity** results,
-    i32 maxResults);
+    i32 maxResults,
+	i32 replicatedOnly);
 
 extern "C"
 inline Vec3 Sim_BuildAvoidVector(

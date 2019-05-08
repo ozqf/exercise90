@@ -100,7 +100,7 @@ inline i32 Sim_IsEntInPlay(SimEntity* ent)
 
 // If no then this ent cannot be attacked
 extern "C"
-i32 Sim_IsEntTargetable(SimEntity* ent)
+inline i32 Sim_IsEntTargetable(SimEntity* ent)
 {
     if (!(ent->flags & SIM_ENT_FLAG_SHOOTABLE)) { return NO; }
     return Sim_IsEntInPlay(ent);
@@ -337,7 +337,9 @@ void Sim_Init(
     sim->ents = entityMemory;
     sim->maxEnts = maxEntities;
 	Sim_Reset(sim);
+    #ifdef SIM_USE_PHYSICS_ENGINE
     sim->world = PhysExt_Create(label, Sim_PhysicsError);
+    #endif
     //PhysExt_Init(NULL, 0, NULL, 0, NULL);
 }
 
