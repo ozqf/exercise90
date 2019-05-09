@@ -133,20 +133,24 @@ i32 Sim_FindByRaycast(
 }
 
 extern "C"
-Vec3 Sim_BuildAvoidVector(
+SimAvoidInfo Sim_BuildAvoidVector(
     SimScene* sim,
     SimEntity* mover)
 {
+    SimAvoidInfo info = {};
     #if 0
-    return { };
+    return info;
     #endif
     // TODO: Optimise
     #if 1
     Vec3 halfSize =
     {
-        mover->body.t.scale.x / 2,
-        mover->body.t.scale.y / 2,
-        mover->body.t.scale.z / 2
+        // Actually, don't divide by 2. Inflat volume
+        // to include more objects, keeping things
+        // further apart
+        mover->body.t.scale.x,// / 2,
+        mover->body.t.scale.y,// / 2,
+        mover->body.t.scale.z// / 2
     };
     Vec3 p = mover->body.t.pos;
     Vec3 min;
@@ -163,7 +167,6 @@ Vec3 Sim_BuildAvoidVector(
     i32 numOverlaps = Sim_FindByAABB(
 		sim, min, max, mover->id.serial, results, maxResults, YES);
     if (numOverlaps == 0) { return { }; }
-    Vec3 result = {};
     Vec3 origin = mover->body.t.pos;
     for (i32 i = 0; i < numOverlaps; ++i)
     {
@@ -177,10 +180,11 @@ Vec3 Sim_BuildAvoidVector(
             origin.z - other.z
         };
         Vec3_Normalise(&diff);
-        result.x += diff.x;
-        result.y += diff.y;
-        result.z += diff.z;
+        info.dir.x += diff.x;
+        info.dir.y += diff.y;
+        info.dir.z += diff.z;
+        info.numNeighbours++;
     }
-    return result;
+    return info;
     #endif
 }

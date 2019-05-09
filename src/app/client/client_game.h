@@ -428,10 +428,10 @@ CLG_DEFINE_ENT_UPDATE(Seeker)
                 target->body.t.pos.z - ent->body.t.pos.z,
             };
             Vec3_Normalise(&toTarget);
-            Vec3 avoid = Sim_BuildAvoidVector(sim, ent);
-            toTarget.x += avoid.x;
-            toTarget.y += avoid.y;
-            toTarget.z += avoid.z;
+            SimAvoidInfo avoid = Sim_BuildAvoidVector(sim, ent);
+            toTarget.x += avoid.dir.x * avoid.numNeighbours;
+            toTarget.y += avoid.dir.y * avoid.numNeighbours;
+            toTarget.z += avoid.dir.z * avoid.numNeighbours;
             Vec3_Normalise(&toTarget);
             ent->body.velocity =
             {

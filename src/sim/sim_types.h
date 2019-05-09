@@ -22,6 +22,12 @@ struct SimActorInput
     Vec3 degrees;
 };
 
+struct SimAvoidInfo
+{
+    Vec3 dir;
+    i32 numNeighbours;
+};
+
 #pragma pack(push, 1)
 union SimEntIndex
 {

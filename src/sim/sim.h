@@ -139,6 +139,6 @@ inline i32 Sim_FindByAABB(
 	i32 replicatedOnly);
 
 extern "C"
-inline Vec3 Sim_BuildAvoidVector(
+inline SimAvoidInfo Sim_BuildAvoidVector(
     SimScene* sim,
     SimEntity* mover);
