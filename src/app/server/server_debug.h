@@ -29,7 +29,7 @@ void SV_WriteDebugString(CharBuffer* str)
         );
     }
     
-    if (g_debugFlags & SV_DEBUG_PERFORMANCE)
+    /*if (g_debugFlags & SV_DEBUG_PERFORMANCE)
     {
         str->cursor += sprintf_s(
             str->cursor,
@@ -50,7 +50,7 @@ void SV_WriteDebugString(CharBuffer* str)
             App_GetPerformanceTime(APP_STAT_CL_SIM),
             App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
         );
-    }
+    }*/
     
     // TODO: Just showing local user for now
     ZNetAddress addr = {};

@@ -228,10 +228,12 @@ struct CharBuffer
 
     CharBuffer StartSubSection()
     {
+        COM_ASSERT(Space() > 0, "No space for substring")
         CharBuffer sub;
         sub.chars = cursor;
         sub.cursor = cursor;
-        sub.maxLength = Space();
+        // -1 so EndSubSection can add null terminator
+        sub.maxLength = Space() - 1;
         return sub;
     }
 
@@ -240,8 +242,13 @@ struct CharBuffer
     // it again
     void EndSubSection(CharBuffer* sub)
     {
+        COM_ASSERT(Space() > 0, "No space for substring terminator")
+        *sub->cursor = '\0';
+        sub->cursor++;
+        // move to end of sub-section
         cursor = sub->cursor;
-        sub->maxLength = (cursor - chars);
+        // cap subsection off
+        sub->maxLength = (sub->cursor - sub->chars);
     }
 
     i32 Written()

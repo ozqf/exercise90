@@ -94,38 +94,43 @@ internal void App_WriteSpeeds(CharBuffer* str)
 
 internal void App_WriteDebugStrings()
 {
-    g_debugScene.numObjects = 0;
+	g_debugScene.numObjects = 0;
     g_debugStr.Reset();
     // Transform position on screen
     Transform t = {};
     t.pos.y = 1;
     t.pos.x = -1;
+    CharBuffer speedsSub;
+    CharBuffer serverSub;
+    RenderListItem* r = NULL;
     if (g_debugPrintFlags & APP_FLAG_PRINT_SPEEDS)
     {
-        CharBuffer sub = g_debugStr.StartSubSection();
-        App_WriteSpeeds(&sub);
-        g_debugStr.EndSubSection(&sub);
-        RenderListItem* r = RScene_AssignNextItem(&g_debugScene);
+        speedsSub = g_debugStr.StartSubSection();
+        App_WriteSpeeds(&speedsSub);
+        g_debugStr.EndSubSection(&speedsSub);
+        r = RScene_AssignNextItem(&g_debugScene);
         r->transform = t;
-        App_SetStringRenderObj(&r->obj, &sub);
+        App_SetStringRenderObj(&r->obj, &speedsSub);
         t.pos.x++;
     }
+
     if (g_debugPrintFlags & APP_FLAG_PRINT_SERVER)
     {
-        CharBuffer sub = g_debugStr.StartSubSection();
-        SV_WriteDebugString(&sub);
-        g_debugStr.EndSubSection(&sub);
-        RenderListItem* r = RScene_AssignNextItem(&g_debugScene);
+        serverSub = g_debugStr.StartSubSection();
+        SV_WriteDebugString(&serverSub);
+        g_debugStr.EndSubSection(&serverSub);
+        r = RScene_AssignNextItem(&g_debugScene);
         r->transform = t;
-        App_SetStringRenderObj(&r->obj, &sub);
+        App_SetStringRenderObj(&r->obj, &serverSub);
         t.pos.x++;
     }
+
     if (g_debugPrintFlags & APP_FLAG_PRINT_CLIENT)
     {
         CharBuffer sub = g_debugStr.StartSubSection();
         CL_WriteDebugString(&sub);
         g_debugStr.EndSubSection(&sub);
-        RenderListItem* r = RScene_AssignNextItem(&g_debugScene);
+        r = RScene_AssignNextItem(&g_debugScene);
         r->transform = t;
         App_SetStringRenderObj(&r->obj, &sub);
         t.pos.x++;

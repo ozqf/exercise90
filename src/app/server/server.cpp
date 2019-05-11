@@ -48,11 +48,10 @@ internal i32 g_unreliableProjectileDeaths = 1;
 
 internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
-internal i32 g_debugFlags = 
-    SV_DEBUG_USER_BANDWIDTH;
-    //SV_DEBUG_PERFORMANCE;
-    //SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
-
+internal i32 g_debugFlags = 0
+    | SV_DEBUG_TIMING 
+    //| SV_DEBUG_USER_BANDWIDTH
+;
 /*
 Record entity states for lag compensation rewind
 Local entities are not compensated.

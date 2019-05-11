@@ -417,7 +417,7 @@ int CALLBACK WinMain(
     #endif
 
     // Spawn debugging windows cmd
-    #if 0
+    #if 1
     FILE *stream;
     AllocConsole();
     freopen_s(&stream, "conin$", "r", stdin);

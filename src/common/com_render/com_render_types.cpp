@@ -199,6 +199,7 @@ com_internal void RendObj_SetAsAsciChar(RendObj* obj, u8 asciCharacter)
     c->asciChar = asciCharacter;
 }
 
+// TODO: Sent numChars but renderer still uses null termination!
 com_internal void RendObj_SetAsAsciCharArray(
     RendObj* obj,
     char* asciCharArray,
