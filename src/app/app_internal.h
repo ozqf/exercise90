@@ -22,8 +22,8 @@ internal f32 g_simFrameAcculator = 0;
 internal AppPerformanceStat g_performanceStats[8];
 
 // 
-internal i32 g_fakeLagMinMS = 200;
-internal i32 g_fakeLagMaxMS = 300;
+internal i32 g_fakeLagMinMS = 150;
+internal i32 g_fakeLagMaxMS = 200;
 // 0 to 1 values.
 internal f32 g_fakeLoss = 0.1f;
 
@@ -49,14 +49,19 @@ internal RenderListItem g_worldSceneItems[MAX_WORLD_SCENE_ITEMS];
 
 internal ZNetAddress g_localServerAddress;
 
-#define DEBUG_STRING_LENGTH 2048
-internal ZStringHeader g_clientDebugStr;
-internal char g_clientDebugStrBuffer[DEBUG_STRING_LENGTH];
-internal RendObj g_clientDebugStrRenderer;
+#define DEBUG_STRING_LENGTH 8192
+#define DEBUG_NUM_STRINGS 8
+internal char g_debugStrBuffer[DEBUG_STRING_LENGTH];
+internal CharBuffer g_debugStr;
+internal RendObj g_debugRendObjs[DEBUG_NUM_STRINGS];
 
-internal ZStringHeader g_serverDebugStr;
-internal char g_serverDebugStrBuffer[DEBUG_STRING_LENGTH];
-internal RendObj g_serverDebugStrRenderer;
+//internal CharBuffer g_clientDebugStr;
+//internal char g_clientDebugStrBuffer[DEBUG_STRING_LENGTH];
+//internal RendObj g_clientDebugStrRenderer;
+
+//internal CharBuffer g_serverDebugStr;
+//internal char g_serverDebugStrBuffer[DEBUG_STRING_LENGTH];
+//internal RendObj g_serverDebugStrRenderer;
 
 #define MAX_DEBUG_SCENE_ITEMS 64
 internal RenderScene g_debugScene;
@@ -65,8 +70,18 @@ internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 internal i32 g_debugDrawServerScene = 0;
 internal i32 g_debugDrawServerTests = 0;
 internal i32 g_debugDrawClientPredictions = 1;
-internal i32 g_debugTextServer = 1;
-internal i32 g_debugTextClient = 0;
+//internal i32 g_debugTextServer = 0;
+//internal i32 g_debugTextClient = 1;
+
+#define APP_FLAG_PRINT_SPEEDS (1 << 0)
+#define APP_FLAG_PRINT_SERVER (1 << 1)
+#define APP_FLAG_PRINT_CLIENT (1 << 2)
+
+internal i32 g_debugPrintFlags = 0
+    | APP_FLAG_PRINT_SPEEDS
+    | APP_FLAG_PRINT_SERVER;
+    //| APP_FLAG_PRINT_CLIENT;
+    //APP_FLAG_PRINT_SPEEDS | APP_FLAG_PRINT_SERVER;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
 

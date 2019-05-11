@@ -29,7 +29,7 @@ void    CL_GetRenderCommands(
 			i32 texIndex,
 			f32 interpolateTime);
 void    CL_SetLocalUser(UserIds ids);
-void    CL_WriteDebugString(ZStringHeader* str);
+void    CL_WriteDebugString(CharBuffer* str);
 u8      CL_ParseCommandString(
 			char* str,
 			char** tokens,

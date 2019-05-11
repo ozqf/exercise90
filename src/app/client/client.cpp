@@ -72,18 +72,22 @@ internal SimActorInput g_actorInput = {};
 
 i32 CL_IsRunning() { return g_isRunning; }
 
-internal void CL_WriteNetworkDebug(ZStringHeader* str)
+internal void CL_WriteNetworkDebug(CharBuffer* str)
 {
-	char* chars = str->chars;
-	i32 written = 0;
-    written += sprintf_s(chars, str->maxLength,
+	//char* chars = str->chars;
+	//i32 written = 0;
+    str->cursor += sprintf_s(
+        str->cursor,
+        str->Space(),
         "CLIENT:\nServer Tick: %d\nTick: %d\nElapsed: %.3f\nOutput Seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter %.3f\n",
         g_serverTick, g_ticks, g_elapsed, g_acks.outputSequence,
 		g_acks.remoteSequence, g_ping, g_jitter
     );
 
 
-    written += sprintf_s(chars + written, str->maxLength,
+    str->cursor += sprintf_s(
+            str->cursor,
+            str->Space(),
 			"=== Commands ===\n%d reliablebytes %d\n%d unreliable bytes %d\n",
             Stream_CountCommands(&g_reliableStream.inputBuffer).count,
             g_reliableStream.inputBuffer.Written(),
@@ -114,10 +118,10 @@ internal void CL_WriteNetworkDebug(ZStringHeader* str)
 		}
 	}
 	#endif
-	str->length = written;
+	//str->length = written;
 }
 
-internal void CL_WriteTransformDebug(ZStringHeader* str)
+internal void CL_WriteTransformDebug(CharBuffer* str)
 {
 	char* chars = str->chars;
 	i32 written = 0;
@@ -131,12 +135,12 @@ internal void CL_WriteTransformDebug(ZStringHeader* str)
     );
 }
 
-internal void CL_WriteCameraDebug(ZStringHeader* str)
+internal void CL_WriteCameraDebug(CharBuffer* str)
 {
 	
 }
 
-void CL_WriteDebugString(ZStringHeader* str)
+void CL_WriteDebugString(CharBuffer* str)
 {
 	CL_WriteNetworkDebug(str);
 	//CL_WriteTransformDebug(str);

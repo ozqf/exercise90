@@ -13,7 +13,7 @@ struct MeshData;
 SIMPLE TYPES
 *****************************************************/
 struct MemoryBlock;
-struct ZStringHeader;
+struct CharBuffer;
 struct GameTime;
 struct AngleVectors;
 
@@ -208,11 +208,50 @@ struct ByteBlock
     u8* end;
 };
 
-struct ZStringHeader
+struct CharBuffer
 {
     char* chars;
-    i32 length;
+    char* cursor;
     i32 maxLength;
+
+    void Reset()
+    {
+        cursor = chars;
+    }
+    
+    void Set(char* charArray, i32 numChars)
+    {
+        chars = charArray;
+        cursor = charArray;
+        maxLength = numChars;
+    }
+
+    CharBuffer StartSubSection()
+    {
+        CharBuffer sub;
+        sub.chars = cursor;
+        sub.cursor = cursor;
+        sub.maxLength = Space();
+        return sub;
+    }
+
+    // Set sub string's length to what has been written
+    // so that we don't think we can come back and write into
+    // it again
+    void EndSubSection(CharBuffer* sub)
+    {
+        cursor = sub->cursor;
+        sub->maxLength = (cursor - chars);
+    }
+
+    i32 Written()
+    {
+        return this->cursor - this->chars;
+    }
+    i32 Space()
+    {
+        return maxLength - (cursor - chars);
+    }
 };
 
 struct PlatformTime

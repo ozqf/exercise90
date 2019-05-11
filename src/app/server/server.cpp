@@ -49,7 +49,8 @@ internal i32 g_unreliableProjectileDeaths = 1;
 internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
 internal i32 g_debugFlags = 
-    SV_DEBUG_PERFORMANCE;
+    SV_DEBUG_USER_BANDWIDTH;
+    //SV_DEBUG_PERFORMANCE;
     //SV_DEBUG_TIMING | SV_DEBUG_USER_BANDWIDTH;
 
 /*
@@ -174,7 +175,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 3;
+    const i32 stage = -1;
 
     f32 inner = 8;
     f32 outer = 12;

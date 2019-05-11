@@ -15,5 +15,5 @@ void    SV_PopulateRenderScene(
             f32 interpolateTime,
             i32 drawScene,
             i32 drawTests);
-void    SV_WriteDebugString(ZStringHeader* str);
+void    SV_WriteDebugString(CharBuffer* str);
 u8      SV_ParseCommandString(char* str, char** tokens, i32 numTokens);

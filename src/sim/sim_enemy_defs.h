@@ -89,6 +89,7 @@ internal i32 Sim_InitDart(
         SIM_DEATH_GFX_EXPLOSION);
     ent->flags = SIM_ENT_FLAG_SHOOTABLE
         | SIM_ENT_FLAG_POSITION_SYNC
+        | SIM_ENT_FLAG_MOVE_AVOID
         | SIM_ENT_FLAG_OUT_OF_PLAY;
     ent->deathType = SIM_DEATH_GFX_EXPLOSION;
     //printf("Spawn dart on tick %d birth %d last %d next %d\n",

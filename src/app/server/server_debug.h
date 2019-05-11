@@ -17,13 +17,13 @@ internal void SV_PrintMsgSizes()
         sizeof(S2C_RestoreEntity))
 }
 
-void SV_WriteDebugString(ZStringHeader* str)
+void SV_WriteDebugString(CharBuffer* str)
 {
-    char* chars = str->chars;
-    i32 written = 0;
+    //char* chars = str->chars;
+    //i32 written = 0;
     if (g_debugFlags & SV_DEBUG_TIMING)
     {
-        written += sprintf_s(chars, str->maxLength,
+        str->cursor += sprintf_s(str->cursor, str->Space(),
             "SERVER:\nTick: %d\nElapsed: %.3f\nMax Rate %d\nNext remote ent: %d\n",
             g_sim.tick, g_elapsed, g_maxSyncRate, g_sim.remoteEntitySequence
         );
@@ -31,10 +31,10 @@ void SV_WriteDebugString(ZStringHeader* str)
     
     if (g_debugFlags & SV_DEBUG_PERFORMANCE)
     {
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
-            "App time %.3fms\nSV Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\nSpatial Search %.3f\n",
+        str->cursor += sprintf_s(
+            str->cursor,
+            str->Space(),
+            "App time %.3fms\nSV Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n\tSpatial Search %.3f\n",
             App_GetPerformanceTime(APP_STAT_FRAME_TOTAL),
             App_GetPerformanceTime(APP_STAT_SV_INPUT),
             App_GetPerformanceTime(APP_STAT_SV_SIM),
@@ -42,10 +42,10 @@ void SV_WriteDebugString(ZStringHeader* str)
 			(f32)g_sim.timeInAABBSearch / 1000.0f
         );
         // TODO: Move this stuff out to app layer
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
-            "CL Speeds: Input %.3fms, Sim %.3fms, Output %.3fms\n",
+        str->cursor += sprintf_s(
+            str->cursor,
+            str->Space(),
+            "CL Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n",
             App_GetPerformanceTime(APP_STAT_CL_INPUT),
             App_GetPerformanceTime(APP_STAT_CL_SIM),
             App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
@@ -61,9 +61,9 @@ void SV_WriteDebugString(ZStringHeader* str)
         AckStream* acks = &user->acks;
         
         // title
-        written += sprintf_s(
-            chars + written,
-            str->maxLength - written,
+        str->cursor += sprintf_s(
+            str->cursor,
+            str->Space(),
             "-- Local Client %d --\n",
             user->ids.privateId
 		);
@@ -81,9 +81,9 @@ void SV_WriteDebugString(ZStringHeader* str)
                 f32 lossEstimate = Ack_EstimateLoss(&user->acks);
                 ReliableCmdQueueStats queueStats = Stream_CountCommands(
                     &user->reliableStream.outputBuffer);
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
+                str->cursor += sprintf_s(
+                    str->cursor,
+                    str->Space(),
                     "-Bandwidth -\nRate: %d\nPer Second: %dkbps (%.3f KB)\nReliable: %d kbps\nUnreliable: %d kbps\nLoss %.1f%%\nEnqueued: %d (%d Bytes)\nSequence rage %d\n",
                     user->syncRateHertz,
                     kbpsTotal,
@@ -97,9 +97,9 @@ void SV_WriteDebugString(ZStringHeader* str)
 		        );
                 #if 1
                 // Sequencing/jitter
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
+                str->cursor += sprintf_s(
+                    str->cursor,
+                    str->Space(),
                     "- Latency -\nOutput seq: %d\nAck Seq: %d\nDelay: %.3f\nJitter: %.3f\n",
                     acks->outputSequence,
                     acks->remoteSequence,
@@ -110,9 +110,9 @@ void SV_WriteDebugString(ZStringHeader* str)
                 i32 numLinks = user->entSync.numLinks;
                 i32 numDeadLinks = Priority_TallyDeadLinks(
                     user->entSync.links, user->entSync.numLinks);
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
+                str->cursor += sprintf_s(
+                    str->cursor,
+                    str->Space(),
                     "- Cmds/Sync Links -\nLinks %d\nDead Links %d\nLifetime max %.3f\nCurrent max %.3f\n--Per packet averages--\nReliable Cmds %d\nUnreliable Cmds %d\nPacket Size %d\n",
                     numLinks,
                     numDeadLinks,
@@ -123,9 +123,9 @@ void SV_WriteDebugString(ZStringHeader* str)
                     stats.totalBytes / stats.numPackets
 		        );
                 
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
+                str->cursor += sprintf_s(
+                    str->cursor,
+                    str->Space(),
                     "--Last second totals --\nReliable Cmds %d\nUnreliable Cmds %d\n",
                     stats.numReliableMessages,
                     stats.numUnreliableMessages
@@ -135,9 +135,9 @@ void SV_WriteDebugString(ZStringHeader* str)
             {
                 i32 count = stats.commandCounts[i];
                 if (count == 0) { continue; }
-                written += sprintf_s(
-                    chars + written,
-                    str->maxLength - written,
+                str->cursor += sprintf_s(
+                    str->cursor,
+                    str->Space(),
                     "\tType %d: %d\n",
                     i, count);
             }
@@ -161,11 +161,12 @@ void SV_WriteDebugString(ZStringHeader* str)
     }
     else
     {
-        written += sprintf_s(
-            chars + written, str->maxLength - written,
+        str->cursor += sprintf_s(
+            str->cursor,
+            str->Space(),
             "No local client found\n");
     }
-    str->length = written;
+    //str->length = written;
 }
 
 

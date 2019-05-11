@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////
 // Build a render scene
 ///////////////////////////////////////////////////////////////////
-
+/*
 com_internal void RScene_AddRenderItem(
     RenderScene*    scene,
     RendObj*        rendObj,
@@ -25,7 +25,7 @@ com_internal void RScene_AddRenderItem(
     item->transform.scale.z = scaleZ;
     item->obj = *rendObj;
 }
-
+*/
 com_internal void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj)
 {
     COM_ASSERT(scene->numObjects < scene->maxObjects, "No capacity for render item");
@@ -35,6 +35,16 @@ com_internal void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj
     item->obj = *rendObj;
 }
 
+// Init the next object in the array and return it straight out of the buffer
+// for the user to init
+// No copying like above
+com_internal RenderListItem* RScene_AssignNextItem(RenderScene* scene)
+{
+    COM_ASSERT(scene->numObjects < scene->maxObjects, "No capacity for render item");
+    RenderListItem* item = &scene->sceneItems[scene->numObjects];
+    scene->numObjects++;
+    return item;
+}
 
 com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
                   i32 fov, i32 projectionMode, f32 orthographicHalfHeight)

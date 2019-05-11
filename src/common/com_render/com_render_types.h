@@ -304,7 +304,11 @@ struct ScreenInfo
 // Build a render scene
 ///////////////////////////////////////////////////////////////////
 
+// Add - copy from a render item into the scene's buffer
 com_internal void RScene_AddRenderItem(RenderScene* scene, Transform* t, RendObj* rendObj);
+// Assign straight out of the scene's buffer and return for the caller
+// to initialise
+com_internal RenderListItem* RScene_AssignNextItem(RenderScene* scene);
 com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects,
                   i32 fov, i32 projectionMode, f32 orthographicHalfHeight);
 com_internal void RScene_Init(RenderScene *scene, RenderListItem *objectArray, u32 maxObjects);
