@@ -92,8 +92,6 @@ internal i32 g_debugRenderFlags = 0
 
 internal i32 g_debugPrintFlags = 0
     | APP_PRINT_FLAG_SPEEDS
-    | APP_PRINT_FLAG_SERVER
-    | APP_PRINT_FLAG_CLIENT
 ;
 
 #define APP_MAX_DEBUG_STRING_POSITIONS 6

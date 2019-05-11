@@ -414,19 +414,20 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     if (numTokens == 2 && !COM_CompareStrings(tokens[0], "DRAW"))
     {
         if (!COM_CompareStrings(tokens[1], "SV"))
-        {
-            g_debugRenderFlags ^= APP_REND_FLAG_SERVER_SCENE;
-        }
+        { g_debugRenderFlags ^= APP_REND_FLAG_SERVER_SCENE; }
 
         return 1;
     }
-    if (numTokens == 2 && !COM_CompareStrings(tokens[0], "DRAW"))
+    if (numTokens == 2 && !COM_CompareStrings(tokens[0], "STAT"))
     {
+        if (!COM_CompareStrings(tokens[1], "CLS"))
+        { g_debugPrintFlags = 0; }
+        if (!COM_CompareStrings(tokens[1], "APP"))
+        { g_debugPrintFlags ^= APP_PRINT_FLAG_SPEEDS; }
         if (!COM_CompareStrings(tokens[1], "SV"))
-        {
-            g_debugRenderFlags ^= APP_REND_FLAG_SERVER_SCENE;
-        }
-
+        { g_debugPrintFlags ^= APP_PRINT_FLAG_SERVER; }
+        if (!COM_CompareStrings(tokens[1], "CL"))
+        { g_debugPrintFlags ^= APP_PRINT_FLAG_CLIENT; }
         return 1;
     }
     if (numTokens == 4 && !COM_CompareStrings(tokens[0], "LAG"))

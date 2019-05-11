@@ -27,16 +27,24 @@ internal void App_SetStringRenderObj(RendObj* obj, CharBuffer* str)
 
 internal void App_WriteSpeeds(CharBuffer* str)
 {
+    // app overall
     str->cursor += sprintf_s(
         str->cursor,
         str->Space(),
-        "-APP TIME %.3fms-\nSV Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n",
+        "-APP TIME %.3fms-\nREND %.3fms\n",
         App_GetPerformanceTime(APP_STAT_FRAME_TOTAL),
+        App_GetPerformanceTime(APP_STAT_RENDER_TOTAL)
+    );
+    // sv
+    str->cursor += sprintf_s(
+        str->cursor,
+        str->Space(),
+        "SV Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n",
         App_GetPerformanceTime(APP_STAT_SV_INPUT),
         App_GetPerformanceTime(APP_STAT_SV_SIM),
         App_GetPerformanceTime(APP_STAT_SV_OUTPUT)
     );
-    // TODO: Move this stuff out to app layer
+    // cl
     str->cursor += sprintf_s(
         str->cursor,
         str->Space(),
