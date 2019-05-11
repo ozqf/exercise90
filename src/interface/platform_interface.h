@@ -29,6 +29,9 @@ struct AppPlatform
     u8 (*Malloc)                    (MemoryBlock* mem, u32 bytesToAllocate);
     void (*Free)                    (MemoryBlock *mem);
     
+    // Timing
+    i64 (*SampleClock)             ();
+    
     // Loading assets
     u32 (*MeasureFile)              (char* fileName);
     ErrorCode (*LoadFileIntoMemory) (char* fileName, u8* destination, u32 capacity);
@@ -53,9 +56,6 @@ struct AppPlatform
 
     // Input
     void (*SetMouseMode)            (enum ZMouseMode mode);
-
-    // Timing
-    i64 (*SampleClock)             ();
 
     // Commands
     void (*WriteTextCommand)        (char* ptr);

@@ -57,7 +57,7 @@ internal void App_WriteDebugStrings()
     CharBuffer speedsSub;
     CharBuffer serverSub;
     RenderListItem* r = NULL;
-    if (g_debugPrintFlags & APP_FLAG_PRINT_SPEEDS)
+    if (g_debugPrintFlags & APP_PRINT_FLAG_SPEEDS)
     {
         speedsSub = g_debugStr.StartSubSection();
         App_WriteSpeeds(&speedsSub);
@@ -70,7 +70,7 @@ internal void App_WriteDebugStrings()
         App_SetStringRenderObj(&r->obj, &speedsSub);
     }
 
-    if (g_debugPrintFlags & APP_FLAG_PRINT_SERVER)
+    if (g_debugPrintFlags & APP_PRINT_FLAG_SERVER)
     {
         serverSub = g_debugStr.StartSubSection();
         SV_WriteDebugString(&serverSub);
@@ -83,7 +83,7 @@ internal void App_WriteDebugStrings()
         App_SetStringRenderObj(&r->obj, &serverSub);
     }
 
-    if (g_debugPrintFlags & APP_FLAG_PRINT_CLIENT)
+    if (g_debugPrintFlags & APP_PRINT_FLAG_CLIENT)
     {
         CharBuffer sub = g_debugStr.StartSubSection();
         CL_WriteDebugString(&sub);

@@ -80,6 +80,7 @@ class AppTimer
 #define APP_STAT_AABB_SEARCH 7
 #define APP_STAT_RENDER_TOTAL 8
 #define APP_STAT_CLIENT_SCENE_BUILD 9
+#define APP_STAT_COUNT 10
 
 // --------------------------
 

@@ -362,6 +362,7 @@ internal void App_OffsetRenderObjects(RenderScene* scene, i32 firstItem, f32 x)
 
 internal void App_Render(PlatformTime* time, ScreenInfo info)
 {
+    AppTimer timer(APP_STAT_RENDER_TOTAL, g_renderCalls++);
 	g_screenInfo = info;
     char* texName = "textures\\white_bordered.bmp";
     //char* texName = "textures\\W33_5.bmp";
@@ -392,7 +393,8 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
 
     SV_PopulateRenderScene(
         &g_worldScene, g_worldScene.maxObjects, texIndex, 1,
-        g_debugDrawServerScene, g_debugDrawServerTests);
+        g_debugRenderFlags & APP_REND_FLAG_SERVER_SCENE,
+        g_debugRenderFlags & APP_REND_FLAG_SERVER_TESTS);
     
     CL_PopulateRenderScene(
         &g_worldScene.cameraTransform,
@@ -403,6 +405,7 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     App_WriteDebugStrings();
     
     g_platform.RenderScene(&g_debugScene);
+    i64 end = g_platform.SampleClock();
     #endif
 }
 
@@ -412,8 +415,18 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
     {
         if (!COM_CompareStrings(tokens[1], "SV"))
         {
-            g_debugDrawServerScene = !g_debugDrawServerScene;
+            g_debugRenderFlags ^= APP_REND_FLAG_SERVER_SCENE;
         }
+
+        return 1;
+    }
+    if (numTokens == 2 && !COM_CompareStrings(tokens[0], "DRAW"))
+    {
+        if (!COM_CompareStrings(tokens[1], "SV"))
+        {
+            g_debugRenderFlags ^= APP_REND_FLAG_SERVER_SCENE;
+        }
+
         return 1;
     }
     if (numTokens == 4 && !COM_CompareStrings(tokens[0], "LAG"))
@@ -422,6 +435,7 @@ internal u8 App_ParseCommandString(char* str, char** tokens, i32 numTokens)
         i32 maxMS = COM_AsciToInt32(tokens[2]);
         f32 loss = (f32)COM_AsciToInt32(tokens[3]) / 100.0f;
         g_loopbackSocket.SetLagStats(minMS, maxMS, loss);
+        return 1;
     }
     if (g_isRunningServer && SV_ParseCommandString(str, tokens, numTokens)) { return 1; }
     if (g_isRunningClient && CL_ParseCommandString(str, tokens, numTokens)) { return 1; }

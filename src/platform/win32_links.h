@@ -7,11 +7,13 @@
 
 
 /**********************************************************************
- * Attach to application DLL
+ * Prepare export interfaces for DLLs
  *********************************************************************/
 
 void Win32_InitPlatformInterface()
 {
+    //////////////////////////////////////////////////////////////
+    // App
     platInterface.Error = Win32_Error;
     platInterface.Log = Win32_Log;
     platInterface.Print = Win32_Print;
@@ -20,8 +22,6 @@ void Win32_InitPlatformInterface()
     platInterface.Free = Win32_Free;
     platInterface.MeasureFile = Win32_MeasureFile;
     platInterface.LoadFileIntoHeap = Platform_LoadFileIntoHeap;
-    //platInterface.LoadDebugTextures = Platform_LoadDebugTextures;
-    //platInterface.LoadTexture = Platform_LoadTexture;
     platInterface.LoadTextureB = Win32_LoadTextureB;
     platInterface.BindTexture = Platform_BindTexture;
     
@@ -57,6 +57,7 @@ void Win32_InitPlatformInterface()
     platInterface.Read = Net_Read;
     #endif
 
+    //////////////////////////////////////////////////////////////
     // Renderer
     g_plat2Rend = {};
     g_plat2Rend.Log = Win32_Log;
@@ -64,6 +65,7 @@ void Win32_InitPlatformInterface()
     g_plat2Rend.Error = Win32_Error;
     g_plat2Rend.Malloc = Win32_Alloc;
     g_plat2Rend.Free = Win32_Free;
+    g_plat2Rend.SampleClock = Win32_QueryPerformanceCounter;
 }
 
 void Win32_CloseAppLink()

@@ -2,6 +2,10 @@
 
 #include "common.h"
 
+/**
+ * Reference for bitwise operators because I keep forgetting
+ * them
+ */
 u8 COM_IsFlagDifferent(u32 flagsA, u32 flagsB, u32 flag)
 {
     return ((flagsA & flag) != (flagsB & flag));
@@ -12,6 +16,11 @@ void COM_DisableBits(u32* flags, u32 mask)
     // bitwise AND and bitwise NOT to disable bit
     // expanded: flags = flags & ~mask
     *flags &= ~mask;
+}
+
+void COM_ToggleBit(u32* bits, u32 mask)
+{
+    *bits ^= mask;
 }
 
 // Used to generate the mask constants used above
