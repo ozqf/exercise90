@@ -136,7 +136,8 @@ internal void SV_AddWanderer()
     Sim_RestoreEntity(&g_sim, &def);   
 }
 
-internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
+internal void SV_AddSpawner(
+    SimScene* sim, Vec3 pos, simFactoryType factoryType, u8 spawnCount)
 {
     //SimEntSpawnData def = {};
     //def = {};
@@ -146,8 +147,10 @@ internal void SV_AddSpawner(SimScene* sim, Vec3 pos, simFactoryType factoryType)
     //def.childFactoryType = factoryType;
     //def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
     SimEntSpawnData data = {};
+    data.numChildren = spawnCount;
     Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_SPAWNER, pos);
     data.childFactoryType = factoryType;
+    data.numChildren = spawnCount;
     Sim_RestoreEntity(&g_sim, &data);
 }
 
@@ -174,8 +177,9 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = -1;
+    const i32 stage = 4;
 
+    u8 count = 64;
     f32 inner = 8;
     f32 outer = 12;
 	switch (stage)
@@ -184,48 +188,48 @@ internal void SV_LoadTestScene()
         // No spawners
         break;
         case 1:
-        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE, count);
         break;
         case 2:
-        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER, count);
         break;
         case 3:
-        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER);
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_SEEKER, count);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART, count);
         break;
         case 4:
-        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER);
-        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER);
-        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART);
-        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART);
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER);
+        SV_AddSpawner(sim, { -10, 0, 10 }, SIM_FACTORY_TYPE_BOUNCER, count);
+        SV_AddSpawner(sim, { 10, 0, -10 }, SIM_FACTORY_TYPE_BOUNCER, count);
+        SV_AddSpawner(sim, { 10, 0, 10 }, SIM_FACTORY_TYPE_DART, count);
+        SV_AddSpawner(sim, { -10, 0, -10 }, SIM_FACTORY_TYPE_DART, count);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_SEEKER, count);
         SV_AddBot(sim, { 15, 0, 15 });
         SV_AddBot(sim, { 15, 0, -15 });
         SV_AddBot(sim, { 15, 0, 0 });
         break;
         case 5:
-        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { -inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { -outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { -inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { -outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE);
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE);
+        SV_AddSpawner(sim, { inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { -inner, 0, inner }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { -outer, 0, outer }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { -inner, 0, -inner }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { -outer, 0, -outer }, SIM_FACTORY_TYPE_RUBBLE, count);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_RUBBLE, count);
         SV_AddBot(sim, { 15, 0, 15 });
         SV_AddBot(sim, { 15, 0, -15 });
         SV_AddBot(sim, { 15, 0, 0 });
         break;
         default:
-        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART);
+        SV_AddSpawner(sim, { 0, 0, 0 }, SIM_FACTORY_TYPE_DART, 1);
         break;
     }
 

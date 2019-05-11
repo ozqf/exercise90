@@ -157,17 +157,12 @@ internal i32 Sim_InitWorldVolume(
 internal i32 Sim_InitSpawner(
     SimScene* scene, SimEntity* ent, SimEntSpawnData* def)
 {
-    //i32 count = 1;
-    //i32 count = 20;
-    i32 count = 64;
-    //i32 count = 128;
-    
     Sim_SetEntityBase(ent, def);
     ent->tickType = SIM_TICK_TYPE_SPAWNER;
     ent->coreTickType = SIM_TICK_TYPE_SPAWNER;
-    ent->relationships.childSpawnCount = count;
-    ent->relationships.maxLiveChildren = count;
-    ent->relationships.totalChildren = count;
+    ent->relationships.childSpawnCount = def->numChildren;
+    ent->relationships.maxLiveChildren = def->numChildren;
+    ent->relationships.totalChildren = def->numChildren;
     //printf("Spawned Spawner, Ticktype %d Vel %.3f, %.3f, %.3f\n",
     //    ent->tickType,
     //    ent->body.velocity.x,

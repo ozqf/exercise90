@@ -148,8 +148,10 @@ struct SimEntSpawnData
     i32 birthTick;
     
     i32 isLocal;
+    // Spawner info... could be used for attacks too...?
     simFactoryType factoryType;
     simFactoryType childFactoryType;
+    u8 numChildren;
 
     Vec3 pos;
     Vec3 scale;

@@ -4,6 +4,8 @@
 
 #include <math.h>
 
+#define CLG_NO_ENEMY_TICK_DROPOUT { if ((g_clDebugFlags & CL_DEBUG_FLAG_NO_ENEMY_TICK)) return; }
+
 internal void CLG_SpawnLineSegment(SimScene* sim, Vec3 origin, Vec3 dest)
 {
     SimEntSpawnData def = {};
@@ -406,7 +408,7 @@ CLG_DEFINE_ENT_UPDATE(Spawn)
 //////////////////////////////////////////////////////
 CLG_DEFINE_ENT_UPDATE(Wanderer)
 {
-    if (!g_tickEnemies) { return; }
+    CLG_NO_ENEMY_TICK_DROPOUT
     
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
@@ -414,7 +416,7 @@ CLG_DEFINE_ENT_UPDATE(Wanderer)
 
 CLG_DEFINE_ENT_UPDATE(Seeker)
 {
-    if (!g_tickEnemies) { return; }
+    CLG_NO_ENEMY_TICK_DROPOUT
     i32 targetId = ent->relationships.targetId.serial;
     if (targetId != 0)
     {
@@ -447,14 +449,14 @@ CLG_DEFINE_ENT_UPDATE(Seeker)
 
 CLG_DEFINE_ENT_UPDATE(Bouncer)
 {
-    if (!g_tickEnemies) { return; }
+    CLG_NO_ENEMY_TICK_DROPOUT
     Sim_SimpleMove(ent, deltaTime);
     Sim_BoundaryBounce(ent, &sim->boundaryMin, &sim->boundaryMax);
 }
 
 CLG_DEFINE_ENT_UPDATE(Dart)
 {
-    if (!g_tickEnemies) { return; }
+    CLG_NO_ENEMY_TICK_DROPOUT
     Vec3 previousPos = ent->body.t.pos;
     Sim_SimpleMove(ent, deltaTime);
     if (!Sim_InBounds(ent, &sim->boundaryMin, &sim->boundaryMax))

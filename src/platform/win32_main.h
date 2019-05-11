@@ -462,8 +462,8 @@ int CALLBACK WinMain(
     // Prepare module link paths before trying to
     // link to any of them
 
-    g_appLink.path = PLATFORM_PATH_BASE_GAME;
-    g_appLink.pathForCopy = PLATFORM_PATH_BASE_GAME_COPY;
+    //g_appLink.path = PLATFORM_PATH_BASE_GAME;
+    //g_appLink.pathForCopy = PLATFORM_PATH_BASE_GAME_COPY;
     g_rendererLink.path = PLATFORM_PATH_REND;
     g_rendererLink.pathForCopy = PLATFORM_PATH_REND_COPY;
     g_soundLink.path = PLATFORM_PATH_SND;

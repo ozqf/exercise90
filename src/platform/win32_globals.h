@@ -13,10 +13,13 @@
 #include "win32_snd/win32_snd_interface.h"
 #include "win32_gl/win32_gl_interface.h"
 
+#define MAX_GAME_NAME_LENGTH 16
+// Selects the directory to load the game dll from
+#define PLATFORM_DEFAULT_GAME_NAME "base"
+//#define PLATFORM_DEFAULT_GAME_NAME "stub"
 
-// TODO Remove these they are applied then ignored!
-#define PLATFORM_PATH_BASE_GAME "base/gamex86.dll"
-#define PLATFORM_PATH_BASE_GAME_COPY "base/gamex86copy.dll"
+#define DEFAULT_GAME_DLL_NAME "gamex86.dll"
+#define DEFAULT_GAME_DLL_COPY_NAME "gamex86copy.dll"
 
 #define PLATFORM_PATH_REND "win32gl.dll"
 #define PLATFORM_PATH_REND_COPY "win32glcopy.dll"

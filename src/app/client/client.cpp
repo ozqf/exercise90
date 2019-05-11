@@ -44,7 +44,12 @@ internal Vec3 g_testHitPos = { 0, 2, 0 };
 internal M4x4 g_matrix;
 
 internal i32 g_interpolateRenderScene = 0;
-internal i32 g_tickEnemies = 1;
+//internal i32 g_tickEnemies = 1;
+
+#define CL_DEBUG_FLAG_NO_ENEMY_TICK (1 << 0)
+internal i32 g_clDebugFlags = 0
+    //| CL_DEBUG_FLAG_NO_ENEMY_TICK
+;
 
 // Menus
 internal i32 g_mainMenuOn;
