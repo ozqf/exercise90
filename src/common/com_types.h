@@ -228,7 +228,8 @@ struct CharBuffer
 
     CharBuffer StartSubSection()
     {
-        COM_ASSERT(Space() > 0, "No space for substring")
+        // 1 for data 1 for terminator
+        COM_ASSERT(Space() > 2, "No space for substring")
         CharBuffer sub;
         sub.chars = cursor;
         sub.cursor = cursor;

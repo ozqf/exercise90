@@ -55,14 +55,6 @@ internal char g_debugStrBuffer[DEBUG_STRING_LENGTH];
 internal CharBuffer g_debugStr;
 internal RendObj g_debugRendObjs[DEBUG_NUM_STRINGS];
 
-//internal CharBuffer g_clientDebugStr;
-//internal char g_clientDebugStrBuffer[DEBUG_STRING_LENGTH];
-//internal RendObj g_clientDebugStrRenderer;
-
-//internal CharBuffer g_serverDebugStr;
-//internal char g_serverDebugStrBuffer[DEBUG_STRING_LENGTH];
-//internal RendObj g_serverDebugStrRenderer;
-
 #define MAX_DEBUG_SCENE_ITEMS 64
 internal RenderScene g_debugScene;
 internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
@@ -70,8 +62,6 @@ internal RenderListItem g_debugSceneItems[MAX_DEBUG_SCENE_ITEMS];
 internal i32 g_debugDrawServerScene = 0;
 internal i32 g_debugDrawServerTests = 0;
 internal i32 g_debugDrawClientPredictions = 1;
-//internal i32 g_debugTextServer = 0;
-//internal i32 g_debugTextClient = 1;
 
 #define APP_FLAG_PRINT_SPEEDS (1 << 0)
 #define APP_FLAG_PRINT_SERVER (1 << 1)
@@ -79,11 +69,21 @@ internal i32 g_debugDrawClientPredictions = 1;
 
 internal i32 g_debugPrintFlags = 0
     | APP_FLAG_PRINT_SPEEDS
-    | APP_FLAG_PRINT_SERVER;
-    //| APP_FLAG_PRINT_CLIENT;
-    //APP_FLAG_PRINT_SPEEDS | APP_FLAG_PRINT_SERVER;
+    | APP_FLAG_PRINT_SERVER
+    | APP_FLAG_PRINT_CLIENT
+;
 
 //#define APP_DEBUG_LOG_FRAME_TIMING
+
+#define APP_MAX_DEBUG_STRING_POSITIONS 4
+internal Vec3 g_debugStrPositions[APP_MAX_DEBUG_STRING_POSITIONS] =
+{
+    // Viewport Screen quarters
+    { -1, 1 },
+    { -0.334f, 1 },
+    { 0.334f, 1 },
+    { -1, 0 },
+};
 
 internal i32 App_StartSession(i32 sessionType);
 

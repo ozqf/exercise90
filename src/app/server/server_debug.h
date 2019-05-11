@@ -29,29 +29,6 @@ void SV_WriteDebugString(CharBuffer* str)
         );
     }
     
-    /*if (g_debugFlags & SV_DEBUG_PERFORMANCE)
-    {
-        str->cursor += sprintf_s(
-            str->cursor,
-            str->Space(),
-            "App time %.3fms\nSV Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n\tSpatial Search %.3f\n",
-            App_GetPerformanceTime(APP_STAT_FRAME_TOTAL),
-            App_GetPerformanceTime(APP_STAT_SV_INPUT),
-            App_GetPerformanceTime(APP_STAT_SV_SIM),
-            App_GetPerformanceTime(APP_STAT_SV_OUTPUT),
-			(f32)g_sim.timeInAABBSearch / 1000.0f
-        );
-        // TODO: Move this stuff out to app layer
-        str->cursor += sprintf_s(
-            str->cursor,
-            str->Space(),
-            "CL Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n",
-            App_GetPerformanceTime(APP_STAT_CL_INPUT),
-            App_GetPerformanceTime(APP_STAT_CL_SIM),
-            App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
-        );
-    }*/
-    
     // TODO: Just showing local user for now
     ZNetAddress addr = {};
     addr.port = APP_CLIENT_LOOPBACK_PORT;
@@ -166,7 +143,6 @@ void SV_WriteDebugString(CharBuffer* str)
             str->Space(),
             "No local client found\n");
     }
-    //str->length = written;
 }
 
 

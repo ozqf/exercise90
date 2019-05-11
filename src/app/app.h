@@ -67,6 +67,7 @@ class AppTimer
 /////////////////////////////////////////////////////////////////
 #define APP_MAX_ENTITIES 4096
 
+// Debug timing indices
 #define APP_STAT_SV_INPUT 0
 #define APP_STAT_SV_SIM 1
 #define APP_STAT_SV_OUTPUT 2
@@ -77,6 +78,10 @@ class AppTimer
 
 #define APP_STAT_FRAME_TOTAL 6
 #define APP_STAT_AABB_SEARCH 7
+#define APP_STAT_RENDER_TOTAL 8
+#define APP_STAT_CLIENT_SCENE_BUILD 9
+
+// --------------------------
 
 #define APP_CLIENT_SYNC_RATE_60HZ 60
 #define APP_CLIENT_SYNC_RATE_30HZ 30

@@ -7,64 +7,20 @@ internal void App_DebugInit()
     RScene_Init(
         &g_debugScene, g_debugSceneItems, MAX_DEBUG_SCENE_ITEMS,
         90, RENDER_PROJECTION_MODE_IDENTITY, 8);
+        
     g_debugStr.Set(g_debugStrBuffer, DEBUG_STRING_LENGTH);
-    /*
-    // Server debug string
-    g_serverDebugStr = {};
-    g_serverDebugStr.Set(g_serverDebugStrBuffer, DEBUG_STRING_LENGTH);
-    //g_serverDebugStr.chars = g_serverDebugStrBuffer;
-    //g_serverDebugStr.maxLength = DEBUG_STRING_LENGTH;
-    
-    g_serverDebugStr.cursor += sprintf_s(
-        g_serverDebugStr.cursor,
-        g_serverDebugStr.Space(),
-        "Server Debug Text"
-        );
-    */
-    /*RendObj_SetAsAsciCharArray(
-        &g_serverDebugStrRenderer,
-        g_serverDebugStr.chars,
-        g_serverDebugStr.Written(),
-        0.05f,
-        TEXT_ALIGNMENT_TOP_LEFT,
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH),
-        0, 1, 1
-    );*/
-    /*
-    // Server client string
-    g_clientDebugStr = {};
-    g_clientDebugStr.Set(g_clientDebugStrBuffer, DEBUG_STRING_LENGTH);
-    //g_clientDebugStr.chars = g_clientDebugStrBuffer;
-    //g_clientDebugStr.maxLength = DEBUG_STRING_LENGTH;
-    */
-   /*
-    g_clientDebugStr.cursor += sprintf_s(
-        g_clientDebugStr.cursor,
-        g_clientDebugStr.Space(),
-        "Client Debug Text"
-        );
-
-    RendObj_SetAsAsciCharArray(
-        &g_clientDebugStrRenderer,
-        g_clientDebugStr.chars,
-        g_clientDebugStr.Written(),
-        0.05f,
-        TEXT_ALIGNMENT_TOP_LEFT,
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH),
-        0, 1, 1
-    );
-    */
 }
 
 internal void App_SetStringRenderObj(RendObj* obj, CharBuffer* str)
 {
+    //"textures\\charset_128x128.bmp"
     RendObj_SetAsAsciCharArray(
         obj,
         str->chars,
         str->Written(),
-        0.05f,
+        0.04f,
         TEXT_ALIGNMENT_TOP_LEFT,
-        Tex_GetTextureIndexByName(DEFAULT_CONSOLE_CHARSET_PATH),
+        Tex_GetTextureIndexByName("textures\\charset.bmp"),
         0, 1, 1
     );
 }
@@ -89,7 +45,6 @@ internal void App_WriteSpeeds(CharBuffer* str)
         App_GetPerformanceTime(APP_STAT_CL_SIM),
         App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
     );
-
 }
 
 internal void App_WriteDebugStrings()
@@ -98,8 +53,7 @@ internal void App_WriteDebugStrings()
     g_debugStr.Reset();
     // Transform position on screen
     Transform t = {};
-    t.pos.y = 1;
-    t.pos.x = -1;
+    i32 posIndex = 0;
     CharBuffer speedsSub;
     CharBuffer serverSub;
     RenderListItem* r = NULL;
@@ -109,9 +63,11 @@ internal void App_WriteDebugStrings()
         App_WriteSpeeds(&speedsSub);
         g_debugStr.EndSubSection(&speedsSub);
         r = RScene_AssignNextItem(&g_debugScene);
+        t.pos.x = g_debugStrPositions[posIndex].x;
+        t.pos.y = g_debugStrPositions[posIndex].y;
+        posIndex++;
         r->transform = t;
         App_SetStringRenderObj(&r->obj, &speedsSub);
-        t.pos.x++;
     }
 
     if (g_debugPrintFlags & APP_FLAG_PRINT_SERVER)
@@ -120,9 +76,11 @@ internal void App_WriteDebugStrings()
         SV_WriteDebugString(&serverSub);
         g_debugStr.EndSubSection(&serverSub);
         r = RScene_AssignNextItem(&g_debugScene);
+        t.pos.x = g_debugStrPositions[posIndex].x;
+        t.pos.y = g_debugStrPositions[posIndex].y;
+        posIndex++;
         r->transform = t;
         App_SetStringRenderObj(&r->obj, &serverSub);
-        t.pos.x++;
     }
 
     if (g_debugPrintFlags & APP_FLAG_PRINT_CLIENT)
@@ -131,8 +89,10 @@ internal void App_WriteDebugStrings()
         CL_WriteDebugString(&sub);
         g_debugStr.EndSubSection(&sub);
         r = RScene_AssignNextItem(&g_debugScene);
+        t.pos.x = g_debugStrPositions[posIndex].x;
+        t.pos.y = g_debugStrPositions[posIndex].y;
+        posIndex++;
         r->transform = t;
         App_SetStringRenderObj(&r->obj, &sub);
-        t.pos.x++;
     }
 }
