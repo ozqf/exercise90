@@ -8,12 +8,6 @@
 #define BVH_EMPTY_ID 0
 #define BVH_MAX_NODES 8
 
-struct AABB
-{
-    Vec3 min;
-    Vec3 max;
-};
-
 inline AABB Bvh_Combine(AABB* a, AABB* b)
 {
     AABB r = {};

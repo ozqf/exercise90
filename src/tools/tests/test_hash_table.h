@@ -1,5 +1,7 @@
 #pragma once
-
+/*
+Incomplete/abandoned hash table learning exercise
+*/
 #include "../../common/common.h"
 
 // Prime number!
