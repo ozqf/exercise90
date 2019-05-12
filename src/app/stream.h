@@ -8,7 +8,7 @@
 #include "commands_base.h"
 
 #define MAX_PACKET_TRANSMISSION_MESSAGES 64
-#define MAX_PACKET_SYNC_MESSAGES 64
+#define MAX_PACKET_SYNC_MESSAGES 128
 struct TransmissionRecord
 {
 	u32 sequence;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics_module.cpp"
+#include "physics.h"
 
 internal
 inline void PhysEv_InitTransformUpdate(

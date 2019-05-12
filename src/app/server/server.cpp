@@ -49,8 +49,8 @@ internal i32 g_unreliableProjectileDeaths = 1;
 internal i32 g_maxSyncRate = APP_CLIENT_SYNC_RATE_20HZ;
 
 internal i32 g_debugFlags = 0
-    | SV_DEBUG_TIMING 
-    //| SV_DEBUG_USER_BANDWIDTH
+    //| SV_DEBUG_TIMING 
+    | SV_DEBUG_USER_BANDWIDTH
 ;
 /*
 Record entity states for lag compensation rewind
@@ -170,7 +170,7 @@ internal void SV_LoadTestScene()
 {
     SimScene* sim = &g_sim;
     Sim_LoadScene(sim, 0);
-    const i32 stage = 4;
+    const i32 stage = 2;
 
     u8 count = 64;
     f32 inner = 8;
