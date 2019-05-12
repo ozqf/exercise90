@@ -2,17 +2,17 @@
 #define ZPHYSICS_MODULE_CPP
 
 #include <stdio.h>
-#include "../common/com_defines.h"
+#include "../../common/com_defines.h"
 // header, contains data structures and function definitions
-#include "physics_interface.h"
+#include "../physics.h"
 /**
  * !NO BULLET PHYSICS LIBRARY ABOVE THIS POINT!
  * 
  */
-#include "../../lib/bullet/btBulletCollisionCommon.h"
-#include "../../lib/bullet/btBulletDynamicsCommon.h"
+#include "../../../lib/bullet/btBulletCollisionCommon.h"
+#include "../../../lib/bullet/btBulletDynamicsCommon.h"
 
-#include "../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "../../../lib/bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
 //#include "btGhostObject.h"
 
 // For debug output ONLY
@@ -20,10 +20,10 @@
 
 // Internal data structures used to interact with Bullet Physics
 //#include "physics_internal_types.h"
-#include "physics_internal_interface.h"
+#include "bullet_internal_interface.h"
 
 // Global variables used by the rest of the internal system
-#include "physics_globals.h"
+#include "bullet_globals.h"
 
 // Implement public interface
 
@@ -31,11 +31,11 @@
 #define PHYS_DEFAULT_RESTITUTION 0.0
 
 // Handling public interface
-#include "physics_external_functions.h"
+#include "bullet_external.h"
 
-#include "physics_query.h"
-#include "physics_factory.h"
-#include "physics_overlaps.h"
-#include "physics_main.h"
+#include "bullet_query.h"
+#include "bullet_factory.h"
+#include "bullet_overlaps.h"
+#include "bullet_main.h"
 
 #endif

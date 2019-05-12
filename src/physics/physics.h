@@ -12,7 +12,7 @@
  */
 #include "../common/common.h"
 
-#include "physics_external_types.h"
+#include "physics_types.h"
 
 //////////////////////////////////////////////////////////////////
 // Queued commands

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics_internal_types.h"
+#include "bullet_internal_types.h"
 
 // #define PHYS_MAX_WORLDS 8
 // internal ZBulletWorld g_worlds[PHYS_MAX_WORLDS];

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics_interface.h"
+#include "../physics.h"
 
 #include "../../../lib/bullet/btBulletCollisionCommon.h"
 #include "../../../lib/bullet/btBulletDynamicsCommon.h"

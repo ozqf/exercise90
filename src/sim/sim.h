@@ -2,7 +2,7 @@
 
 #include "../common/common.h"
 
-#include "../physics_wrapper/physics_interface.h"
+#include "../physics/physics.h"
 
 //#define SIM_USE_PHYSICS_ENGINE
 
