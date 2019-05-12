@@ -405,7 +405,6 @@ internal void App_Render(PlatformTime* time, ScreenInfo info)
     App_WriteDebugStrings();
     
     g_platform.RenderScene(&g_debugScene);
-    i64 end = g_platform.SampleClock();
     #endif
 }
 

@@ -139,13 +139,6 @@ internal void SV_AddWanderer()
 internal void SV_AddSpawner(
     SimScene* sim, Vec3 pos, simFactoryType factoryType, u8 spawnCount)
 {
-    //SimEntSpawnData def = {};
-    //def = {};
-    //def.isLocal = 1;
-    //def.serial = Sim_ReserveEntitySerial(&g_sim, 1);
-    //def.pos = pos;
-    //def.childFactoryType = factoryType;
-    //def.factoryType = SIM_FACTORY_TYPE_SPAWNER;
     SimEntSpawnData data = {};
     data.numChildren = spawnCount;
     Sim_PrepareSpawnData(sim, &data, 1, SIM_FACTORY_TYPE_SPAWNER, pos);

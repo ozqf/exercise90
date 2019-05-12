@@ -48,10 +48,11 @@ internal void App_WriteSpeeds(CharBuffer* str)
     str->cursor += sprintf_s(
         str->cursor,
         str->Space(),
-        "CL Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n",
+        "CL Speeds:\n\tInput %.3fms\n\tSim %.3fms\n\tOutput %.3fms\n\tRender %.3fms\n",
         App_GetPerformanceTime(APP_STAT_CL_INPUT),
         App_GetPerformanceTime(APP_STAT_CL_SIM),
-        App_GetPerformanceTime(APP_STAT_CL_OUTPUT)
+        App_GetPerformanceTime(APP_STAT_CL_OUTPUT),
+        App_GetPerformanceTime(APP_STAT_CL_RENDER)
     );
 }
 

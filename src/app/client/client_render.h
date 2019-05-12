@@ -10,6 +10,8 @@ void CL_PopulateRenderScene(
 	i32 texIndex,
 	f32 interpolateTime)
 {
+    AppTimer timer(APP_STAT_CL_RENDER, g_sim.tick);
+
     Transform t;
     Transform_SetToIdentity(&t);
     RendObj obj = {};
@@ -253,6 +255,7 @@ void CL_GetRenderCommands(
 	i32 texIndex,
 	f32 interpolateTime)
 {
+    AppTimer timer(APP_STAT_CL_RENDER, g_sim.tick);
     #if 0
     *cmds = g_renderCommands;
     *numCommands = 0;

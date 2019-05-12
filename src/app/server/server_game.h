@@ -619,7 +619,8 @@ internal void SVG_TickEntity(
         case SIM_TICK_TYPE_WORLD: { } break;
         case SIM_TICK_TYPE_NONE: { } break;
         //case SIM_TICK_TYPE_NONE: { } break;
-        default: { COM_ASSERT(0, "Unknown Ent Tick Type"); } break;
+        default:
+        { COM_ASSERT(0, "Unknown Ent Tick Type"); } break;
     }
 }
 

@@ -75,12 +75,13 @@ class AppTimer
 #define APP_STAT_CL_INPUT 3
 #define APP_STAT_CL_SIM 4
 #define APP_STAT_CL_OUTPUT 5
+#define APP_STAT_CL_RENDER 6
 
-#define APP_STAT_FRAME_TOTAL 6
-#define APP_STAT_AABB_SEARCH 7
-#define APP_STAT_RENDER_TOTAL 8
-#define APP_STAT_CLIENT_SCENE_BUILD 9
-#define APP_STAT_COUNT 10
+#define APP_STAT_FRAME_TOTAL 7
+#define APP_STAT_AABB_SEARCH 8
+#define APP_STAT_RENDER_TOTAL 9
+#define APP_STAT_CLIENT_SCENE_BUILD 10
+#define APP_STAT_COUNT 11
 
 // --------------------------
 
