@@ -15,8 +15,8 @@
 
 #define MAX_GAME_NAME_LENGTH 16
 // Selects the directory to load the game dll from
-#define PLATFORM_DEFAULT_GAME_NAME "base"
-//#define PLATFORM_DEFAULT_GAME_NAME "stub"
+//#define PLATFORM_DEFAULT_GAME_NAME "base"
+#define PLATFORM_DEFAULT_GAME_NAME "stub"
 
 #define DEFAULT_GAME_DLL_NAME "gamex86.dll"
 #define DEFAULT_GAME_DLL_COPY_NAME "gamex86copy.dll"

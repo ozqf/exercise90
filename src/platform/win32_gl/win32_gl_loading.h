@@ -2,6 +2,9 @@
 
 #include "win32_gl_module.cpp"
 
+//#define GL_MAJOR_VERSION                  0x821B
+//#define GL_MINOR_VERSION                  0x821C
+
 internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 {
     *ex = {};
@@ -43,7 +46,11 @@ internal void Win32_GetExtensions(HDC windowContext, Extensions* ex)
 		HGLRC modernGLRC = ex->CreateContextAttribs(windowContext, shared, attribs);
 		if (modernGLRC)
 		{
-			printf("\tOpengl Escalated\n");
+			i32 majorV;
+			i32 minorV;
+			glGetIntegerv(GL_MAJOR_VERSION, &majorV);
+			glGetIntegerv(GL_MINOR_VERSION, &minorV);
+			printf("\tOpengl Escalated to %d.%d\n", majorV, minorV);
 			wglMakeCurrent(windowContext, modernGLRC);
 			wglDeleteContext(g_openglRC);
 			g_openglRC = modernGLRC;

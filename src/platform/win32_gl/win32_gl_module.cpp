@@ -20,6 +20,8 @@ https://msdn.microsoft.com/en-us/library/windows/desktop/dd318361(v=vs.85).aspx
 #include "../win32_system_include.h"
 #include <stdio.h>
 #include <gl/gl.h>
+#include "../../../lib/glext.h"
+#include "../../../lib/wglext.h"
 
 #include "../../common/common.h"
 #include "win32_gl_interface.h"
