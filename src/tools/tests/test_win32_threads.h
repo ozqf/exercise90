@@ -9,6 +9,7 @@
 
 // Macro to define compiler intrinsics
 #define WRITE_BARRIER _WriteBarrier(); _mm_sfence();
+#define READ_BARRIER _ReadBarrier();
 
 struct ThreadInfo
 {
@@ -34,6 +35,13 @@ volatile i32 g_jobsCompleted = 0;
 
 Job* GetJobToDo();
 void FinishJob(i32 jobId);
+void FindJobIndexByAddress(Job* queryJob);
+
+char* g_jobPayloads[] = {
+    "DATA 1", "DATA 2", "DATA 3", "DATA 4", "DATA 5", "DATA 6",
+    "DATA 7", "DATA 8", "DATA 9", "DATA 10", "DATA 11", "DATA 12",
+    "DATA 13", "DATA 14", "DATA 15", "DATA 16", "DATA 17", "DATA 18",
+};
 
 // Thread entry point
 DWORD __stdcall ThreadMain(LPVOID lpThreadParameter)
@@ -44,23 +52,15 @@ DWORD __stdcall ThreadMain(LPVOID lpThreadParameter)
     {
         Job* job = GetJobToDo();
         if (job == NULL) { continue; }
-
+        if (job->data == NULL)
+        {
+            printf("THREAD %d GOT NULL DATA. Finding job...\n", handle.id);
+            FindJobIndexByAddress(job);
+        }
         printf("Thread %d doing job %d %s\n", handle.id, job->id, job->data);
         FinishJob(job->id);
     }
     //return COM_ERROR_NONE;
-}
-
-void AddJob(char* data)
-{
-    Job* job = &g_jobs[g_nextJobToIssue];
-    job->id = g_nextJobToIssue;
-    job->data = data;
-    // do not increment job counter until
-    // job has been prepared
-    WRITE_BARRIER
-    printf("issued job %d\n", g_nextJobToIssue);
-    g_nextJobToIssue++;
 }
 
 Job* GetJobToDo()
@@ -70,19 +70,34 @@ Job* GetJobToDo()
         // this returns the incremented value
         // this function works as a memory fence
         LONG jobId = InterlockedIncrement((LONG volatile *)&g_nextJobToDo);
+        READ_BARRIER
         // Although we just incremented next job, we got the result of the increment,
         // we actually want what it was before we incremented it, so -1:
         jobId -= 1;
+        printf("Releasing job %d\n", jobId);
         return &g_jobs[jobId];
     }
-    Sleep(10);
+    
     return NULL;
 }
 
 void FinishJob(i32 id)
 {
-    InterlockedIncrement((LONG volatile *)&g_jobsCompleted);
-    printf("  Finished job %d! completed: %d\n", id, g_jobsCompleted);
+    i32 num = InterlockedIncrement((LONG volatile *)&g_jobsCompleted);
+    printf("  Finished job %d! completed: %d\n", id, num);
+}
+
+void AddJob(char* data)
+{
+    printf("Issuing job %d\n", g_nextJobToIssue);
+    Job* job = &g_jobs[g_nextJobToIssue];
+    job->id = g_nextJobToIssue;
+    job->data = data;
+    // do not increment job counter until
+    // job has been prepared
+    WRITE_BARRIER
+    printf("  issued job %d\n", g_nextJobToIssue);
+    g_nextJobToIssue++;
 }
 
 void IssueJobs(i32 numJobs)
@@ -90,9 +105,24 @@ void IssueJobs(i32 numJobs)
     printf("-- ISSUING JOBS --\n");
     for (i32 i = 0; i < numJobs; ++i)
     {
-        AddJob("DATA");
+        AddJob(g_jobPayloads[i]);
+        Sleep(10);
     }
     printf("-- JOBS ISSUED --\n");
+}
+
+void FindJobIndexByAddress(Job* queryJob)
+{
+    for (i32 i = 0; i < MAX_JOBS; ++i)
+    {
+        Job* job = &g_jobs[i];
+        if (job == queryJob)
+        {
+            printf("  0x%X is job %d!\n", (u32)queryJob, i);
+            return;
+        }
+    }
+    printf("Failed to find job at addr %d\n", (u32)queryJob);
 }
 
 void WaitForJobs()
@@ -116,8 +146,8 @@ void DoAllJobs()
 void Test_Win32Threads()
 {
     printf("=== Test threads ===\n");
-    i32 numThreads = 4;
-    i32 numJobs = 4;
+    i32 numThreads = 2;
+    i32 numJobs = 8;
     printf("Creating %d threads and %d jobs\n", numThreads, numJobs);
     for (i32 i = 0; i < numThreads; ++i)
     {
