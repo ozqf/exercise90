@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <windows.h>
-// for barrier intrinsics
-#include <intrin.h>
+#include <sysinfoapi.h>
+#include <intrin.h> // for barrier intrinsics
 #include "../../common/common.h"
 
 // Macro to define compiler intrinsics
@@ -58,45 +58,14 @@ DWORD __stdcall ThreadMain(LPVOID lpThreadParameter)
         {
             printf("THREAD %d GOT NULL DATA. Finding job...\n", handle.id);
             FindJobIndexByAddress(job);
+            continue;
         }
         else
         {
             printf("Thread %d doing job %d %s\n", handle.id, job->id, job->data);
         }
-        Sleep(1);
+        //Sleep(1);
         FinishJob(job->id);
-        #endif
-        #if 0
-        // The problem here is that two threads can compare the same values
-        // at the same time. They will both pass the check, increment the job
-        // counter, and one will grab a job that hasn't been issued yet!
-        // The increments are thread safe, but the condition to increment
-        // is NOT!
-        if (g_nextJobToDo < g_nextJobToIssue)
-        {
-            printf(" Todo %d < Issue %d\n", g_nextJobToDo, g_nextJobToIssue);
-            // this returns the incremented value
-            // this function works as a memory fence
-            LONG jobId = InterlockedIncrement((LONG volatile *)&g_nextJobToDo);
-            READ_BARRIER
-            // Although we just incremented next job, we got the result of the increment,
-            // we actually want what it was before we incremented it, so -1:
-            jobId -= 1;
-            printf("  Issuing job %d Next job to do is %d next job to issue is %d\n", jobId, g_nextJobToDo, g_nextJobToIssue);
-            Job* job = &g_jobs[jobId];
-            if (job->data == NULL)
-            {
-                printf("THREAD %d GOT NULL DATA. Finding job...\n", handle.id);
-                FindJobIndexByAddress(job);
-            }
-            else
-            {
-                printf("Thread %d doing job %d %s\n", handle.id, job->id, job->data);
-                FinishJob(job->id);
-            }
-            
-        }
-        //printf(".");
         #endif
     }
     //return COM_ERROR_NONE;
@@ -114,6 +83,11 @@ Job* GetJobToDo(i32 threadId)
         //printf("THREAD %d checking for job: Todo %d < Issue %d\n",
         //    threadId, g_nextJobToDo, g_nextJobToIssue);
         Job* job = &g_jobs[g_nextJobToDo];
+        // The problem here is that two threads can compare the same values
+        // at the same time. They will both pass the check, increment the job
+        // counter, and one will grab a job that hasn't been issued yet!
+        // The increments are thread safe, but the condition to increment
+        // is NOT!
         i32 result = (i32)InterlockedCompareExchange(
             (volatile long*)&job->threadId, (long)threadId, -1);
         if (result != -1)
@@ -127,30 +101,6 @@ Job* GetJobToDo(i32 threadId)
         return job;
     }
     return NULL;
-    #if 0
-    // The problem here is that two threads can compare the same values
-    // at the same time. They will both pass the check, increment the job
-    // counter, and one will grab a job that hasn't been issued yet!
-    // The increments are thread safe, but the condition to increment
-    // is NOT!
-    if (g_nextJobToDo < g_nextJobToIssue)
-    {
-        printf("THREAD %d got work - Todo %d < Issue %d\n",
-            threadId, g_nextJobToDo, g_nextJobToIssue);
-        // this returns the incremented value
-        // this function works as a memory fence
-        LONG jobId = InterlockedIncrement((LONG volatile *)&g_nextJobToDo);
-        READ_BARRIER
-        // Although we just incremented next job, we got the result of the increment,
-        // we actually want what it was before we incremented it, so -1:
-        jobId -= 1;
-        printf("  Issuing job %d Next job to do is %d next job to issue is %d\n",
-            jobId, g_nextJobToDo, g_nextJobToIssue);
-        return &g_jobs[jobId];
-    }
-    
-    return NULL;
-    #endif
 }
 #endif
 void FinishJob(i32 id)
@@ -203,6 +153,7 @@ void WaitForJobs()
     printf("Waiting for %d jobs\n", g_nextJobToIssue);
     while (g_jobsCompleted < g_nextJobToIssue) { }
     printf("Finished on %d of %d!\n", g_jobsCompleted, g_nextJobToIssue);
+    //Sleep(100);
 }
 
 void DoAllJobs()
@@ -216,11 +167,11 @@ void DoAllJobs()
     }
 }
 
-void Test_Win32Threads()
+void Test_JobQueue()
 {
-    printf("=== Test threads ===\n");
+    printf("=== Test job queue ===\n");
     i32 numThreads = 4;
-    i32 numJobs = 12;
+    i32 numJobs = 4;
     printf("Creating %d threads and %d jobs\n", numThreads, numJobs);
     for (i32 i = 0; i < numThreads; ++i)
     {
@@ -251,6 +202,42 @@ void Test_Win32Threads()
     Sleep(1000);
     printf("Main resume\n");
     #endif
+}
+
+// Thread entry point
+DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
+{
+    ThreadInfo handle = *(ThreadInfo*)lpThreadParameter;
+    for (i32 i = 0; i < 10; ++i)
+    {
+        printf("Thread %d: %d\n", handle.id, i);
+    }
+    
+    return 0;
+}
+
+void Test_Concurrency()
+{
+    printf("=== Test concurrency ===\n");
+
+    ThreadInfo* info = &g_threads[g_nextThread++];
+    info->id = 1;
+    DWORD threadId;
+    HANDLE handle = CreateThread(0, 0, AppThreadMain, info, 0, &threadId);
+    CloseHandle(handle);
+
+    ThreadInfo* self = &g_threads[g_nextThread++];
+    self->id = 2;
+    threadId;
+    AppThreadMain(self);
+
+    Sleep(100);
+}
+
+void Test_Win32Threads()
+{
+    Test_Concurrency();
+    
 }
 
 #endif // TEST_WIN32_THREADS_H
