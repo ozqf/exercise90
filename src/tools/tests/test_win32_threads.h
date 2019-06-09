@@ -211,9 +211,22 @@ DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
     for (i32 i = 0; i < 10; ++i)
     {
         printf("Thread %d: %d\n", handle.id, i);
+        Sleep((i32)(COM_STDRandf32() * 500));
     }
     
     return 0;
+}
+
+void Test_RunMain()
+{
+    i32 ticks = 0;
+    while (ticks++ < 20)
+    {
+        printf("Tick %d\n", ticks);
+        // Check for messages from AppThread here
+        
+        Sleep(100);
+    }
 }
 
 void Test_Concurrency()
@@ -225,12 +238,15 @@ void Test_Concurrency()
     DWORD threadId;
     HANDLE handle = CreateThread(0, 0, AppThreadMain, info, 0, &threadId);
     CloseHandle(handle);
-
+    #if 1
+    Test_RunMain();
+    #endif
+    #if 0
     ThreadInfo* self = &g_threads[g_nextThread++];
     self->id = 2;
     threadId;
     AppThreadMain(self);
-
+    #endif
     Sleep(100);
 }
 
