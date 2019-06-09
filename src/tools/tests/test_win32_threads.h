@@ -63,6 +63,7 @@ DWORD __stdcall ThreadMain(LPVOID lpThreadParameter)
         {
             printf("Thread %d doing job %d %s\n", handle.id, job->id, job->data);
         }
+        Sleep(1);
         FinishJob(job->id);
         #endif
         #if 0
@@ -110,8 +111,8 @@ Job* GetJobToDo(i32 threadId)
     );*/
     if (g_nextJobToDo < g_nextJobToIssue)
     {
-        printf("THREAD %d checking for job: Todo %d < Issue %d\n",
-            threadId, g_nextJobToDo, g_nextJobToIssue);
+        //printf("THREAD %d checking for job: Todo %d < Issue %d\n",
+        //    threadId, g_nextJobToDo, g_nextJobToIssue);
         Job* job = &g_jobs[g_nextJobToDo];
         i32 result = (i32)InterlockedCompareExchange(
             (volatile long*)&job->threadId, (long)threadId, -1);
@@ -121,7 +122,7 @@ Job* GetJobToDo(i32 threadId)
             printf("!!CLASH!! Thread %d cannot acquire job owned by thread %d\n", threadId, job->threadId);
             return NULL;
         }
-        printf("Thread %d got job %d\n", threadId, g_nextJobToDo);
+        //printf("Thread %d got job %d\n", threadId, g_nextJobToDo);
         LONG jobId = InterlockedIncrement((LONG volatile *)&g_nextJobToDo);
         return job;
     }
@@ -168,7 +169,7 @@ void AddJob(char* data)
     // do not increment job counter until
     // job has been prepared
     WRITE_BARRIER
-    printf("  added job %d\n", g_nextJobToIssue);
+    //printf("  added job %d\n", g_nextJobToIssue);
     ++g_nextJobToIssue;
 }
 
@@ -178,7 +179,7 @@ void CreateJobs(i32 numJobs)
     for (i32 i = 0; i < numJobs; ++i)
     {
         AddJob(g_jobPayloads[i]);
-        Sleep(10);
+        //Sleep(10);
     }
     printf("-- JOBS CREATED --\n");
 }
@@ -218,8 +219,8 @@ void DoAllJobs()
 void Test_Win32Threads()
 {
     printf("=== Test threads ===\n");
-    i32 numThreads = 2;
-    i32 numJobs = 3;
+    i32 numThreads = 4;
+    i32 numJobs = 12;
     printf("Creating %d threads and %d jobs\n", numThreads, numJobs);
     for (i32 i = 0; i < numThreads; ++i)
     {
