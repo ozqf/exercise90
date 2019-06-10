@@ -78,16 +78,18 @@ Job* GetJobToDo(i32 threadId)
       LONG          ExChange,
       LONG          Comperand
     );*/
+	// The problem here is that two threads can compare the same values
+    // at the same time. They will both pass the check, increment the job
+    // counter, and one will grab a job that hasn't been issued yet!
+    // The increments are thread safe, but the condition to increment
+    // is NOT!
+	// The InterlockedCompareExchange is used to check that another thread
+	// hasn't sneaked in and grabbed the job at the same time
     if (g_nextJobToDo < g_nextJobToIssue)
     {
         //printf("THREAD %d checking for job: Todo %d < Issue %d\n",
         //    threadId, g_nextJobToDo, g_nextJobToIssue);
         Job* job = &g_jobs[g_nextJobToDo];
-        // The problem here is that two threads can compare the same values
-        // at the same time. They will both pass the check, increment the job
-        // counter, and one will grab a job that hasn't been issued yet!
-        // The increments are thread safe, but the condition to increment
-        // is NOT!
         i32 result = (i32)InterlockedCompareExchange(
             (volatile long*)&job->threadId, (long)threadId, -1);
         if (result != -1)
@@ -204,34 +206,133 @@ void Test_JobQueue()
     #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+// Concurrency test
+////////////////////////////////////////////////////////////////////////////////////
+#define USE_MUTEX
+
+#define EVENT_CODE_NONE -1
+
+//#define MAX_TEST_EVENTS 10
+//i32 g_testEvents[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+#define MAX_EVENTS_QUEUED 256
+i32 g_eventQueue[MAX_EVENTS_QUEUED];
+i32 g_numEvents = 0;
+
+HANDLE g_queueMutex;
+
+void EventQueue_Push(i32 event)
+{
+    #ifdef USE_MUTEX
+    WaitForSingleObject(g_queueMutex, INFINITE);
+    #endif
+
+    if (g_numEvents == MAX_EVENTS_QUEUED)
+    {
+        printf("EVENT QUEUE OVERFLOW");
+    }
+    else
+    {
+        g_eventQueue[g_numEvents] = event;
+        g_numEvents++;
+    }
+    #ifdef USE_MUTEX
+    ReleaseMutex(g_queueMutex);
+    #endif
+}
+
+i32 EventQueue_Pop()
+{
+    #ifdef USE_MUTEX
+    WaitForSingleObject(g_queueMutex, INFINITE);
+    #endif
+    i32 result;
+    if (g_numEvents == 0)
+    {
+        result = EVENT_CODE_NONE;
+    }
+    else
+    {
+        result = g_eventQueue[0];
+        // Shift queue down so that queue is FIFO
+        for (i32 i = 1; i < g_numEvents; ++i)
+        {
+            g_eventQueue[i - 1] = g_eventQueue[i];
+        }
+        g_numEvents--;
+    }
+    #ifdef USE_MUTEX
+    ReleaseMutex(g_queueMutex);
+    #endif
+    return result;
+}
+
 // Thread entry point
 DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
 {
+	printf("Begin application thread\n");
     ThreadInfo handle = *(ThreadInfo*)lpThreadParameter;
-    for (i32 i = 0; i < 10; ++i)
+    i32 ticks = 0;
+    //for (i32 i = 0; i < 10; ++i)
+    for(;;)
     {
-        printf("Thread %d: %d\n", handle.id, i);
-        Sleep((i32)(COM_STDRandf32() * 500));
+        //printf("Thread %d: %d\n", handle.id, i);
+        //Sleep((i32)(COM_STDRandf32() * 500));
+        i32 numEventsRead = 0;
+        char buf[256];
+		char* write = buf;
+        COM_SET_ZERO(buf, 256);
+		
+		ticks++;
+        i32 event;
+        event = EventQueue_Pop();
+		
+        while (event != EVENT_CODE_NONE)
+        {
+            numEventsRead++;
+			printf(".");
+			i32 written = snprintf(write, 256, "%d, ", event);
+			write += written;
+            //printf("%d, ", event);
+            event = EventQueue_Pop();
+        }
+        if (numEventsRead > 0)
+        {
+            printf("App read %d events (%s) on tick %d\n", numEventsRead, buf, ticks);
+        }
     }
-    
-    return 0;
+    //printf("  App thread done\n");
+    //return 0;
 }
 
 void Test_RunMain()
 {
+	printf("Main thread - entering loop\n");
     i32 ticks = 0;
     while (ticks++ < 20)
     {
-        printf("Tick %d\n", ticks);
         // Check for messages from AppThread here
-        
-        Sleep(100);
+        i32 numEvents = (i32)(COM_STDRandf32() * 5);
+        for (i32 i = 0; i < numEvents; ++i)
+        {
+            EventQueue_Push(ticks);
+        }
+        if (numEvents > 0)
+        {
+            printf("Main posted %d events on tick %d\n", numEvents, ticks);
+        }
+        Sleep((i32)(COM_STDRandf32() * 200));
     }
+    printf("  Main done. Events remaining: %d\n", g_numEvents);
+    //Sleep(2000);
 }
 
 void Test_Concurrency()
 {
     printf("=== Test concurrency ===\n");
+
+    g_queueMutex = CreateMutexA(0, 0, "EventQueue");
 
     ThreadInfo* info = &g_threads[g_nextThread++];
     info->id = 1;
@@ -247,7 +348,6 @@ void Test_Concurrency()
     threadId;
     AppThreadMain(self);
     #endif
-    Sleep(100);
 }
 
 void Test_Win32Threads()
