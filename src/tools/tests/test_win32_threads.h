@@ -216,12 +216,20 @@ void Test_JobQueue()
 //#define MAX_TEST_EVENTS 10
 //i32 g_testEvents[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-#define MAX_EVENTS_QUEUED 256
+#define MAX_EVENTS_QUEUED 4096
 i32 g_eventQueue[MAX_EVENTS_QUEUED];
 i32 g_numEvents = 0;
 
-HANDLE g_queueMutex;
+volatile i32 g_globalRunning = YES;
+i32 g_runDurationMS = 2000;
 
+volatile i32 g_runningThreads = 0;
+
+HANDLE g_queueMutex;
+HANDLE g_completionSemaphore;
+
+//////////////////////////////////////////////////////////////////////////////////
+// Mutex locked event queue control
 void EventQueue_Push(i32 event)
 {
     #ifdef USE_MUTEX
@@ -268,6 +276,22 @@ i32 EventQueue_Pop()
     return result;
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+// Atomic thread count control
+void Test_IncrementRunningThreads()
+{
+	i32 num = InterlockedIncrement((LONG volatile *)&g_runningThreads);
+	printf("+ Thread: %d\n", g_runningThreads);
+}
+
+void Test_DecrementRunningThreads()
+{
+	i32 num = InterlockedDecrement((LONG volatile *)&g_runningThreads);
+	printf("- Thread: %d\n", g_runningThreads);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
 // Thread entry point
 DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
 {
@@ -275,7 +299,7 @@ DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
     ThreadInfo handle = *(ThreadInfo*)lpThreadParameter;
     i32 ticks = 0;
     //for (i32 i = 0; i < 10; ++i)
-    for(;;)
+    while(g_globalRunning)
     {
         //printf("Thread %d: %d\n", handle.id, i);
         //Sleep((i32)(COM_STDRandf32() * 500));
@@ -302,15 +326,35 @@ DWORD __stdcall AppThreadMain(LPVOID lpThreadParameter)
             printf("App read %d events (%s) on tick %d\n", numEventsRead, buf, ticks);
         }
     }
-    //printf("  App thread done\n");
-    //return 0;
+    printf("  App thread done\n");
+    ReleaseSemaphore(g_completionSemaphore, 1, NULL);
+	Test_DecrementRunningThreads();
+    return 0;
 }
 
-void Test_RunMain()
+//////////////////////////////////////////////////////////////////////////////////
+// Timing thread
+// wait a given amount of time, then switch a flag and exit
+DWORD __stdcall Test_RunTimer(LPVOID lpThreadParameter)
+{
+    i32 msToSleep = *(i32*)lpThreadParameter;
+    printf("======== Closing app in %dms ========\n", msToSleep);
+    Sleep(msToSleep);
+    g_globalRunning = NO;
+    printf("======== TIME'S UP ========\n");
+    ReleaseSemaphore(g_completionSemaphore, 1, NULL);
+	Test_DecrementRunningThreads();
+    return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Main thread loop
+void Test_ConcurrentMain()
 {
 	printf("Main thread - entering loop\n");
     i32 ticks = 0;
-    while (ticks++ < 20)
+    //while (ticks++ < 20)
+    while(g_globalRunning)
     {
         // Check for messages from AppThread here
         i32 numEvents = (i32)(COM_STDRandf32() * 5);
@@ -322,38 +366,55 @@ void Test_RunMain()
         {
             printf("Main posted %d events on tick %d\n", numEvents, ticks);
         }
+        ticks++;
         Sleep((i32)(COM_STDRandf32() * 200));
     }
     printf("  Main done. Events remaining: %d\n", g_numEvents);
     //Sleep(2000);
 }
-
 void Test_Concurrency()
 {
     printf("=== Test concurrency ===\n");
 
     g_queueMutex = CreateMutexA(0, 0, "EventQueue");
+    g_completionSemaphore = CreateSemaphore(0, 0, 2, "CompletionCount");
 
     ThreadInfo* info = &g_threads[g_nextThread++];
     info->id = 1;
     DWORD threadId;
-    HANDLE handle = CreateThread(0, 0, AppThreadMain, info, 0, &threadId);
+    HANDLE handle;
+	
+	Test_IncrementRunningThreads();
+    handle = CreateThread(0, 0, AppThreadMain, info, 0, &threadId);
     CloseHandle(handle);
-    #if 1
-    Test_RunMain();
-    #endif
+    printf("Start timer thread\n");
+	Test_IncrementRunningThreads();
+    handle = CreateThread(0, 0, Test_RunTimer, &g_runDurationMS, 0, &threadId);
+    CloseHandle(handle);
+    //while (g_globalRunning);
+
     #if 0
-    ThreadInfo* self = &g_threads[g_nextThread++];
-    self->id = 2;
-    threadId;
-    AppThreadMain(self);
+    // threads are set up, enter main loop
+    Test_ConcurrentMain();
+    #endif
+    #if 1
+    // Wait for two threads to exit
+    printf("Waiting for work\n");
+	// Semaphores do not work this way! Any number OVER 0 will count as signalled
+	// so as soon as any thread finishes, this wait will pass.
+    //WaitForSingleObject(g_completionSemaphore, INFINITE);
+	
+	// Just spinlock on the bastards
+	while (g_runningThreads > 0);
+	
+    printf("All threads completed\n");
     #endif
 }
 
 void Test_Win32Threads()
 {
     Test_Concurrency();
-    
+	//Test_JobQueue();
 }
 
 #endif // TEST_WIN32_THREADS_H
