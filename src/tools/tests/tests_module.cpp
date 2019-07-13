@@ -7,6 +7,7 @@
 #include "test_quantisation.h"
 #include "test_syntax.h"
 #include "test_hash_table.h"
+#include "Test_Win32_threads.h"
 
 #define TEST_ASSERT(expression, msg) \
 if (!(expression)) { printf("Failed: %s\n", msg##); } \
@@ -235,7 +236,8 @@ void Tests_Run(i32 argc, char* argv[])
     //Test_Introspection();
     //Tests_Quantisation();
     //Test_Syntax();
-    Test_HashTable();
+    //Test_HashTable();
+    Test_Win32Threads();
 }
 
 #endif
