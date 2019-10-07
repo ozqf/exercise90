@@ -7,6 +7,7 @@
 #include "test_quantisation.h"
 #include "test_syntax.h"
 #include "test_hash_table.h"
+#include "test_blob_list.h"
 #include "Test_Win32_threads.h"
 
 #include "../ze_read_blender_file.h"
@@ -240,8 +241,10 @@ void Tests_Run(i32 argc, char* argv[])
     //Test_Syntax();
     //Test_HashTable();
     //Test_Win32Threads();
+    
+    //ZE_ReadBlenderFileTest();
 
-    ZE_ReadBlenderFileTest();
+    TestBlobList();
 }
 
 #endif
