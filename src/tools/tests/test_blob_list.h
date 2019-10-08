@@ -33,8 +33,8 @@ static void BlobTest_PrintKeys(BlobList* list)
         BlobLookupKey* key = &list->keys[i];
         if (key->id == BL_INVALID_ID)
         {
-            //printf("%d: --\n", i);
-            return;
+            printf("%d: --\n", i);
+            continue;
         }
         printf("%d: Id %d, hash %u, index %d\n",
             i, key->id, key->hash, key->index);
@@ -68,10 +68,12 @@ static void TestBlobList()
         printf("Error %d creating blob list\n", err);
         return;
     }
-    printf("Created blob list, capacity %d\n", capacity);
+    printf("Created blob list, capacity %d lookup table size %d\n",
+		capacity, list->maxKeys);
+	BlobTest_PrintAll(list);
     BlobTest_Add(list, 7, 17);
-    //BlobTest_Add(list, 27, 37);
-    //BlobTest_Add(list, 47, 57);
+    BlobTest_Add(list, 27, 37);
+    BlobTest_Add(list, 47, 57);
     BlobTest_PrintAll(list);
     BlobHeader* header = BL_GetById(list, 2);
     if (header != NULL)

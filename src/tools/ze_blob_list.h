@@ -74,22 +74,27 @@ internal u32 BL_HashUint(u32 a)
     return a;
 }
 
-internal u32 BL_MeasureBytesForLookupTable(u32 numBlobs)
-{
-    return (numBlobs * BL_HASH_TABLE_SCALE) * sizeof(BlobLookupKey);
-}
+// internal u32 BL_MeasureBytesForLookupTable(u32 numBlobs)
+// {
+//     return (numBlobs * BL_HASH_TABLE_SCALE) * sizeof(BlobLookupKey);
+// }
 
-internal u32 BL_MeasureTotalBytes(u32 sizeOfABlob, u32 numBlobs)
-{
-    u32 bytesForKeysTable = BL_MeasureBytesForLookupTable(numBlobs);
-    return sizeof(BlobList) + (sizeOfABlob * numBlobs);
-}
+// internal u32 BL_MeasureTotalBytes(u32 sizeOfABlob, u32 numBlobs)
+// {
+//     u32 bytesForKeysTable = BL_MeasureBytesForLookupTable(numBlobs);
+//     return sizeof(BlobList) + bytesForKeysTable + (sizeOfABlob * numBlobs);
+// }
 
 internal ErrorCode BL_Create(u32 sizeOfABlob, u32 initialNumBlobs, BlobList** result)
 {
     if (result == NULL) { return COM_ERROR_NULL_ARGUMENT; }
-    u32 sizeForLookupTable = BL_MeasureBytesForLookupTable(initialNumBlobs);
-    u32 totalSize = BL_MeasureTotalBytes(sizeOfABlob, initialNumBlobs);
+    //u32 sizeForLookupTable = BL_MeasureBytesForLookupTable(initialNumBlobs);
+    //u32 totalSize = BL_MeasureTotalBytes(sizeOfABlob, initialNumBlobs);
+    u32 lookupTableBytes =
+        (initialNumBlobs * BL_HASH_TABLE_SCALE) * sizeof(BlobLookupKey);
+    u32 blobsBytes = sizeOfABlob * initialNumBlobs;
+    u32 totalSize = sizeof(BlobList) + lookupTableBytes + blobsBytes;
+
     printf("Creating blob list. %d items, %dB each, %dKB\n",
         initialNumBlobs,
         sizeOfABlob,
@@ -103,7 +108,7 @@ internal ErrorCode BL_Create(u32 sizeOfABlob, u32 initialNumBlobs, BlobList** re
     list->keys = (BlobLookupKey*)(mem + sizeof(BlobList));
     list->maxKeys = initialNumBlobs * BL_HASH_TABLE_SCALE;
 
-    list->blobs = mem + sizeof(BlobList) + sizeForLookupTable;
+    list->blobs = mem + sizeof(BlobList) + lookupTableBytes;
     list->blobUserSize = sizeOfABlob;
     list->numBlobs = 0;
     list->maxBlobs = initialNumBlobs;
@@ -134,6 +139,8 @@ internal BlobHeader* BL_GetById(BlobList* list, i32 id)
         if (key->id == id)
         {
             // bingo
+            printf("  Found at keyIndex %d - result at %d\n",
+                keyIndex, key->index);
             return (BlobHeader*)list->blobs[key->index];
         }
         if (key->id == BL_INVALID_ID)
@@ -172,6 +179,7 @@ internal ErrorCode BL_AssignNewBlob(
     // insert to lookup table
     u32 hash = BL_HashUint(newId);
     i32 keyIndex = hash % list->maxKeys;
+	printf("Key index: %d\n", keyIndex);
 
     i32 escape = 0;
     do
