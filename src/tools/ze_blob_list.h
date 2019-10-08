@@ -21,7 +21,7 @@ struct MyStruct
 #define BL_BAD_INDEX -1
 #define BL_INVALID_ID 0
 
-#define BL_HASH_TABLE_SCALE 2
+#define BL_HASH_TABLE_SCALE 1
 
 #define BL_MALLOC(numBytesToAlloc) \
 (u8*)malloc(##numBytesToAlloc##)
@@ -42,6 +42,7 @@ struct BlobLookupKey
     i32 id;
     u32 hash;
     i32 index;
+    i32 collisionsOnInsert;
 };
 
 struct BlobHeader
@@ -182,6 +183,7 @@ internal ErrorCode BL_AssignNewBlob(
 	printf("Key index: %d\n", keyIndex);
 
     i32 escape = 0;
+    u32 numCollisions = 0;
     do
     {
         BlobLookupKey* key = &list->keys[keyIndex];
@@ -192,6 +194,7 @@ internal ErrorCode BL_AssignNewBlob(
             key->id = newId;
             key->hash = hash;
             key->index = newBlobIndex;
+            key->collisionsOnInsert = numCollisions;
             printf("Assigning blob id %d to index %d. Hash %u. Key index %d\n",
                 key->id, key->index, key->hash, keyIndex
             );
@@ -224,6 +227,7 @@ internal ErrorCode BL_AssignNewBlob(
         {
             printf("Trying next key\n");
             // occupied - move to next slot and try again
+            numCollisions++;
             keyIndex++;
             if (keyIndex >= list->maxKeys)
             {
