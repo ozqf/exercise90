@@ -97,10 +97,14 @@ static void TestBlobList()
     }
     //i32 removeId = 7;
     printf("===========================\nRemove test\n");
-    printf("Removing 7, 12, and 4\n");
+    printf("Removing 7, 12, 1, 10, 6, 3\n");
+    // TODO: Deleting six here but ended up with only 5 in the blob list!
     err = BL_RemoveById(list, 7);
     err = BL_RemoveById(list, 12);
-    err = BL_RemoveById(list, 4);
+    err = BL_RemoveById(list, 1);
+    err = BL_RemoveById(list, 10);
+    err = BL_RemoveById(list, 6);
+    err = BL_RemoveById(list, 3);
     BlobTest_PrintAll(list);
     printf("\n");
 }

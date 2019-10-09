@@ -23,21 +23,32 @@ struct MyStruct
 
 #define BL_HASH_TABLE_SCALE 1
 
+#ifndef BL_MALLOC
 #define BL_MALLOC(numBytesToAlloc) \
 (u8*)malloc(##numBytesToAlloc##)
+#endif
 
+#ifndef BL_FREE
 #define BL_FREE(ptrToFree) \
 free(##ptrToFree##)
+#endif
 
+#ifndef BL_SET_ZERO
 #define BL_SET_ZERO(ptrToSet, numBytesToZero) \
 memset(##ptrToSet##, 0, numBytesToZero##)
+#endif
 
+#ifndef BL_GET_CAST
 #define BL_GET_CAST(blobListPtr, blobIndex, typeForCast) \
 (##typeForCast##*)BL_GetByIndex(blobListPtr, blobIndex);
+#endif
 
+#ifndef BL_COPY
 #define BL_COPY(destBlob, sourceBlob, blobSize) \
 memcpy((void*)##destBlob##, (void*)##sourceBlob##, blobSize##);
+#endif
 
+// for alignment checking
 #define BLOB_SENTINEL 0xEFBEADDE
 
 struct BlobLookupKey
@@ -68,7 +79,7 @@ struct BlobList
 
 // Credit: Thomas Wang
 // https://burtleburtle.net/bob/hash/integer.html
-internal u32 BL_HashUint(u32 a)
+static u32 BL_HashUint(u32 a)
 {
 	a = (a ^ 61) ^ (a >> 16);
 	a = a + (a << 3);
@@ -81,7 +92,7 @@ internal u32 BL_HashUint(u32 a)
 //////////////////////////////////////////////////////////////
 // Create/Destruction
 //////////////////////////////////////////////////////////////
-internal ErrorCode BL_Create(u32 sizeOfABlob, u32 initialNumBlobs, BlobList** result)
+static ErrorCode BL_Create(u32 sizeOfABlob, u32 initialNumBlobs, BlobList** result)
 {
     if (result == NULL) { return COM_ERROR_NULL_ARGUMENT; }
     if (sizeOfABlob == 0) { return COM_ERROR_BAD_ARGUMENT; }
@@ -115,7 +126,7 @@ internal ErrorCode BL_Create(u32 sizeOfABlob, u32 initialNumBlobs, BlobList** re
     return COM_ERROR_NONE;
 }
 
-internal ErrorCode BL_Destroy(BlobList* list)
+static ErrorCode BL_Destroy(BlobList* list)
 {
     if (list == NULL) { return COM_ERROR_NULL_ARGUMENT; }
     void* mem = (void*)list;
@@ -125,7 +136,7 @@ internal ErrorCode BL_Destroy(BlobList* list)
 //////////////////////////////////////////////////////////////
 // Locate
 //////////////////////////////////////////////////////////////
-internal BlobHeader* BL_GetByIndex(BlobList* list, i32 index)
+static BlobHeader* BL_GetByIndex(BlobList* list, i32 index)
 {
     if (index < 0) { return NULL; }
     if (index >= list->maxBlobs) { return NULL; }
@@ -133,12 +144,12 @@ internal BlobHeader* BL_GetByIndex(BlobList* list, i32 index)
     return (BlobHeader*)addr;
 }
 
-internal i32 BL_GetKeyIndexById(BlobList* list, i32 id)
+static i32 BL_GetKeyIndexById(BlobList* list, i32 id)
 {
     u32 hash = BL_HashUint(id);
     i32 keyIndex = hash % list->maxKeys;
-    printf("Searching for id %d, hash %u. Starting at %d\n",
-        id, hash, keyIndex);
+    //printf("Searching for id %d, hash %u. Starting at %d\n",
+    //    id, hash, keyIndex);
     i32 escape = 0;
     do
     {
@@ -146,8 +157,8 @@ internal i32 BL_GetKeyIndexById(BlobList* list, i32 id)
         if (key->id == id)
         {
             // bingo
-            printf("  Found at keyIndex %d - result at %d\n",
-                keyIndex, key->index);
+            //printf("  Found at keyIndex %d - result at %d\n",
+            //    keyIndex, key->index);
             return keyIndex;
         }
         else if (key->id == BL_INVALID_ID)
@@ -168,7 +179,7 @@ internal i32 BL_GetKeyIndexById(BlobList* list, i32 id)
     return BL_INVALID_INDEX;
 }
 
-internal BlobHeader* BL_GetById(BlobList* list, i32 id)
+static BlobHeader* BL_GetById(BlobList* list, i32 id)
 {
     i32 keyIndex = BL_GetKeyIndexById(list, id);
     if (keyIndex == BL_INVALID_INDEX) { return NULL; }
@@ -178,7 +189,7 @@ internal BlobHeader* BL_GetById(BlobList* list, i32 id)
 //////////////////////////////////////////////////////////////
 // Insert
 //////////////////////////////////////////////////////////////
-internal ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 index)
+static ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 index)
 {
     i32 keyIndex = hash % list->maxKeys;
     i32 escape = 0;
@@ -194,7 +205,7 @@ internal ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 inde
             key->hash = hash;
             key->index = index;
             key->collisionsOnInsert = numCollisions;
-            printf("Assigning blob id %d to index %d. Hash %u. Key index %d\n",
+            printf("Assigning key id %d to index %d. Hash %u. Key index %d\n",
                 key->id, key->index, key->hash, keyIndex
             );
             
@@ -220,7 +231,7 @@ internal ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 inde
     return COM_ERROR_FUNC_RAN_AWAY;
 }
 
-internal ErrorCode BL_AssignNewBlob(
+static ErrorCode BL_AssignNewBlob(
     BlobList* list, i32 newId, BlobHeader** result)
 {
     if (list == NULL) { return COM_ERROR_NULL_ARGUMENT; }
@@ -255,7 +266,8 @@ internal ErrorCode BL_AssignNewBlob(
 //////////////////////////////////////////////////////////////
 // Removal
 //////////////////////////////////////////////////////////////
-internal ErrorCode BL_RemoveLookupKey(BlobList* list, i32 id)
+#if 0
+static ErrorCode BL_RemoveLookupKey(BlobList* list, i32 id)
 {
     u32 hash = BL_HashUint(id);
     i32 keyIndex = hash % list->maxKeys;
@@ -269,8 +281,8 @@ internal ErrorCode BL_RemoveLookupKey(BlobList* list, i32 id)
         
     } while (++escape < list->maxKeys);
 }
-
-internal ErrorCode BL_RemoveById(BlobList* list, i32 id)
+#endif
+static ErrorCode BL_RemoveById(BlobList* list, i32 id)
 {
     i32 keyIndex = BL_GetKeyIndexById(list, id);
     if (keyIndex == BL_INVALID_INDEX) { return COM_ERROR_NOT_FOUND; }
@@ -305,8 +317,27 @@ internal ErrorCode BL_RemoveById(BlobList* list, i32 id)
     list->numBlobs--;
 
     // Clear keys
+    // > Wipe deleted item key
     BlobLookupKey* key = &list->keys[keyIndex];
     *key = {};
+    // probe forward reinserting until a key with an invalid id is found
+    keyIndex++;
+    if (keyIndex >= list->maxKeys) { keyIndex = 0; }
+    key = &list->keys[keyIndex];
+    while(key->id != BL_INVALID_ID)
+    {
+        i32 correctIndex = key->hash % list->maxKeys;
+        if (correctIndex != keyIndex)
+        {
+            // previous collision
+            BlobLookupKey copy = *key;
+            *key = {};
+            BL_InsertLookupKey(list, copy.id, copy.hash, copy.index);
+        }
+        keyIndex++;
+        if (keyIndex >= list->maxKeys) { keyIndex = 0; }
+        key = &list->keys[keyIndex];
+    }
 
     return COM_ERROR_NOT_IMPLEMENTED;
 }
