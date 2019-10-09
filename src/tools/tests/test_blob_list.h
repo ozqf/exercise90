@@ -46,13 +46,21 @@ static void BlobTest_PrintAll(BlobList* list)
     printf("===== Blob List Contents =====\n");
     BlobTest_PrintKeys(list);
     printf("--- Blobs ---\n");
-    for (i32 i = 0; i < list->numBlobs; ++i)
+    for (i32 i = 0; i < list->maxBlobs; ++i)
     {
-        Blob* blob = (Blob*)BL_GetByIndex(list, i);
-        printf("Index %d, Id %d, hash %u - Foo %d Bar %d\n",
-            i, blob->header.id, blob->header.hash,
-            blob->foo, blob->bar
-        );
+        if (i < list->numBlobs)
+        {
+            Blob* blob = (Blob*)BL_GetByIndex(list, i);
+            printf("Index %d, Id %d, hash %u - Foo %d Bar %d\n",
+                i, blob->header.id, blob->header.hash,
+                blob->foo, blob->bar
+            );
+        }
+        else
+        {
+            printf("Index %d --\n", i);
+        }
+        
     }
 }
 
@@ -71,9 +79,6 @@ static void TestBlobList()
     printf("Created blob list, capacity %d lookup table size %d\n",
 		capacity, list->maxKeys);
 	
-    // BlobTest_Add(list, 7, 17);
-    // BlobTest_Add(list, 27, 37);
-    // BlobTest_Add(list, 47, 57);
     u32 foo = 7;
     u32 bar = 3;
     for (i32 i = 1; i <= capacity; ++i)
@@ -81,12 +86,23 @@ static void TestBlobList()
         BlobTest_Add(list, foo * i, bar * i);
     }
     BlobTest_PrintAll(list);
-    BlobHeader* header = BL_GetById(list, 12);
+    printf("\n");
+    i32 searchForId = 12;
+    BlobHeader* header = BL_GetById(list, searchForId);
     if (header != NULL)
     {
         Blob* blob = (Blob*)header;
-        printf("Found 2: foo %d, bar %d\n", blob->foo, blob->bar);
+        printf("Found %d: foo %d, bar %d\n",
+            searchForId, blob->foo, blob->bar);
     }
+    //i32 removeId = 7;
+    printf("===========================\nRemove test\n");
+    printf("Removing 7, 12, and 4\n");
+    err = BL_RemoveById(list, 7);
+    err = BL_RemoveById(list, 12);
+    err = BL_RemoveById(list, 4);
+    BlobTest_PrintAll(list);
+    printf("\n");
 }
 
 #endif // TEST_BLOB_LIST_H
