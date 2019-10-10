@@ -13,7 +13,7 @@ struct Blob
 static void BlobTest_Add(BlobList* list, i32 foo, i32 bar)
 {
     BlobHeader* header = NULL;
-    printf("Adding blob Id %d\n", list->nextId);
+    //printf("Adding blob Id %d\n", list->nextId);
     ErrorCode err = BL_AssignNewBlob(list, list->nextId++, &header);
     if (err != COM_ERROR_NONE)
     {
@@ -69,7 +69,7 @@ static void TestBlobList()
     ErrorCode err;
     printf("Test blob list\n");
     BlobList* list;
-    i32 capacity = 12;
+    i32 capacity = 6;
     err = BL_Create(sizeof(Blob), capacity, &list);
     if (err != COM_ERROR_NONE)
     {
@@ -97,13 +97,15 @@ static void TestBlobList()
     }
     //i32 removeId = 7;
     printf("===========================\nRemove test\n");
-    printf("Removing 7, 12, 1, 10, 6, 3\n");
     // TODO: Deleting six here but ended up with only 5 in the blob list!
-    err = BL_RemoveById(list, 7);
-    err = BL_RemoveById(list, 12);
+	err = BL_RemoveById(list, 2);
+    err = BL_RemoveById(list, 5);
     err = BL_RemoveById(list, 1);
-    err = BL_RemoveById(list, 10);
-    err = BL_RemoveById(list, 6);
+    for (i32 i = 0; i < 3; ++i)
+    {
+        BlobTest_Add(list, 0, 0);
+    }
+    err = BL_RemoveById(list, 4);
     err = BL_RemoveById(list, 3);
     BlobTest_PrintAll(list);
     printf("\n");

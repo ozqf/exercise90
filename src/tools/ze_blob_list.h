@@ -77,6 +77,10 @@ struct BlobList
     i32 nextId;
 };
 
+// uncomment this for TESTING ONLY
+#define BL_USE_BAD_HASH_FUNCTION
+
+#ifndef BL_USE_BAD_HASH_FUNCTION
 // Credit: Thomas Wang
 // https://burtleburtle.net/bob/hash/integer.html
 static u32 BL_HashUint(u32 a)
@@ -88,6 +92,17 @@ static u32 BL_HashUint(u32 a)
     a = a ^ (a >> 15);
     return a;
 }
+#endif
+
+// DO NOT USE!
+// This is a deliberately broken hash for testing
+// hash collision resolution!
+#ifdef BL_USE_BAD_HASH_FUNCTION
+static u32 BL_HashUint(u32 a)
+{
+	return 1;
+}
+#endif
 
 //////////////////////////////////////////////////////////////
 // Create/Destruction
@@ -205,8 +220,8 @@ static ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 index)
             key->hash = hash;
             key->index = index;
             key->collisionsOnInsert = numCollisions;
-            printf("Assigning key id %d to index %d. Hash %u. Key index %d\n",
-                key->id, key->index, key->hash, keyIndex
+            printf("Assigning key id %d to index %d. Hash %u. Key index %d - collisions %d\n",
+                key->id, key->index, key->hash, keyIndex, key->collisionsOnInsert
             );
             
             return COM_ERROR_NONE;
@@ -217,7 +232,7 @@ static ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 index)
         }
         else
         {
-            printf("Trying next key\n");
+            //printf("Trying next key\n");
             // occupied - move to next slot and try again
             numCollisions++;
             keyIndex++;
