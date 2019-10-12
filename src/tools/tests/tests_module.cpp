@@ -244,7 +244,8 @@ void Tests_Run(i32 argc, char* argv[])
     
     //ZE_ReadBlenderFileTest();
 
-    TestBlobList();
+    //TestBlobList();
+    Test_LookupTable();
 }
 
 #endif

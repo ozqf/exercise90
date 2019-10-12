@@ -2,6 +2,7 @@
 #define TEST_BLOB_LIST_H
 
 #include "../ze_blob_list.h"
+#include "../ze_lookup_table.h"
 
 struct Blob
 {
@@ -9,6 +10,32 @@ struct Blob
     i32 foo;
     i32 bar;
 };
+
+static void BlobTest_ValidateList(BlobList* list)
+{
+    i32 keyIds[256];
+    i32 nextKey = 0;
+    for (i32 i = 0; i < list->maxKeys; ++i)
+    {
+        if (list->keys[i].id == BL_INVALID_ID) { continue; }
+        keyIds[nextKey++] = list->keys[i].id;
+    }
+    i32 blobIds[256];
+    i32 nextBlob = 0;
+    for (i32 i = 0; i < list->numBlobs; ++i)
+    {
+        blobIds[nextBlob++] = BL_GetByIndex(list, i)->id;
+    }
+    if (nextKey != nextBlob)
+    {
+        printf("ERROR Blob Count (%d) vs key count (%d) mismatch!\n", nextBlob, nextKey);
+        return;
+    }
+    for (i32 i = 0; i < nextKey; ++i)
+    {
+        
+    }
+}
 
 static void BlobTest_Add(BlobList* list, i32 foo, i32 bar)
 {
@@ -99,16 +126,43 @@ static void TestBlobList()
     printf("===========================\nRemove test\n");
     // TODO: Deleting six here but ended up with only 5 in the blob list!
 	err = BL_RemoveById(list, 2);
-    err = BL_RemoveById(list, 5);
-    err = BL_RemoveById(list, 1);
-    for (i32 i = 0; i < 3; ++i)
-    {
-        BlobTest_Add(list, 0, 0);
-    }
-    err = BL_RemoveById(list, 4);
-    err = BL_RemoveById(list, 3);
+    //err = BL_RemoveById(list, 5);
+    //err = BL_RemoveById(list, 1);
+    //BlobTest_PrintAll(list);
+    // for (i32 i = 0; i < 3; ++i)
+    // {
+    //     BlobTest_Add(list, 0, 0);
+    // }
+    // BlobTest_PrintAll(list);
+    // err = BL_RemoveById(list, 4);
+    //err = BL_RemoveById(list, 3);
+    
     BlobTest_PrintAll(list);
     printf("\n");
+}
+
+static void Test_PrintLookupKeys(ZELookupTable* table)
+{
+    printf("--- KEYS ---\n");
+    for (i32 i = 0; i < table->m_maxKeys; ++i)
+    {
+        ZELookupKey* key = &table->m_keys[i];
+        if (key->id == ZE_LT_INVALID_ID)
+        {
+            printf("%d: -\n", i);
+            continue;
+        }
+        printf("%d: id %d, data %d, collisions: %d, hash %u\n",
+            i, key->id, key->data, key->collisionsOnInsert, key->idHash
+        );
+    }
+}
+
+static void Test_LookupTable()
+{
+    ZELookupTable* table = ZE_LT_Create(6, 1);
+    table->Insert(1, 999);
+    Test_PrintLookupKeys(table);
 }
 
 #endif // TEST_BLOB_LIST_H
