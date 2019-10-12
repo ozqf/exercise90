@@ -158,11 +158,57 @@ static void Test_PrintLookupKeys(ZELookupTable* table)
     }
 }
 
+static void Test_FindLookupData(ZELookupTable* table, i32 id)
+{
+    i32 data = table->FindData(id);
+    if (data == table->m_invalidDataValue)
+    {
+        printf("No data for id %d found\n", id);
+        return;
+    }
+    printf("Data id %d: %d\n", id, data);
+}
+
+static void Test_RemoveLookupKey(ZELookupTable* table, i32 id)
+{
+    printf("Remove id %d\n", id);
+    i32 err = table->Remove(id);
+    if (err != COM_ERROR_NONE)
+    {
+        printf("Error %d removing id %d\n", err, id);
+    }
+}
+
 static void Test_LookupTable()
 {
-    ZELookupTable* table = ZE_LT_Create(6, 1);
-    table->Insert(1, 999);
+    ZELookupTable* table = ZE_LT_Create(6, 2, 0);
+    i32 testId = 1;
+    while (testId <= 6)
+    {
+        table->Insert(testId, 999);
+        testId++;
+    }
     Test_PrintLookupKeys(table);
+    Test_FindLookupData(table, 2);
+    Test_FindLookupData(table, 3);
+    Test_FindLookupData(table, 1);
+
+    Test_RemoveLookupKey(table, 2);
+    Test_RemoveLookupKey(table, 4);
+
+    table->Insert(testId++, 999);
+    table->Insert(testId++, 999);
+
+    Test_RemoveLookupKey(table, 6);
+    Test_RemoveLookupKey(table, 1);
+    Test_RemoveLookupKey(table, 3);
+    table->Insert(testId++, 999);
+    Test_RemoveLookupKey(table, 5);
+    Test_RemoveLookupKey(table, 9);
+    Test_PrintLookupKeys(table);
+
+    Test_FindLookupData(table, 5);
+    Test_FindLookupData(table, 8);
 }
 
 #endif // TEST_BLOB_LIST_H

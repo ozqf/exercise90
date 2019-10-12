@@ -22,7 +22,7 @@ memset(##ptrToSet##, 0, numBytesToZero##)
 #endif
 
 // uncomment this for TESTING ONLY
-#define ZE_LT_USE_BAD_HASH_FUNCTION
+//#define ZE_LT_USE_BAD_HASH_FUNCTION
 
 #ifndef ZE_LT_USE_BAD_HASH_FUNCTION
 // Credit: Thomas Wang
@@ -60,6 +60,7 @@ struct ZELookupTable
 {
     ZELookupKey* m_keys;
     i32 m_maxKeys;
+    i32 m_invalidDataValue;
 
     void StepKeyIndex(i32* index)
     {
@@ -70,13 +71,50 @@ struct ZELookupTable
         }
     }
 
+    void ClearKey(ZELookupKey* key)
+    {
+        *key = {};
+        key->id = ZE_LT_INVALID_ID;
+    }
+
     void Clear()
     {
         for (i32 i = 0; i < m_maxKeys; ++i)
         {
-            //m_keys[i].id = ZE_LT_INVALID_ID;
-            m_keys[i] = {};
+            ClearKey(&m_keys[i]);
         }
+    }
+
+    i32 FindKeyIndex(i32 id)
+    {
+        u32 hash = ZE_LT_HashUint(id);
+        i32 keyIndex = hash % m_maxKeys;
+        i32 escape = 0;
+        do
+        {
+            ZELookupKey* key = &m_keys[keyIndex];
+            if (key->id == id)
+            {
+                return keyIndex;
+            }
+            else if (key->id == ZE_LT_INVALID_ID)
+            {
+                return ZE_LT_INVALID_INDEX;
+            }
+            else
+            {
+                StepKeyIndex(&keyIndex);
+            }
+            
+        } while (escape++ < m_maxKeys);
+        return ZE_LT_INVALID_INDEX;
+    }
+
+    i32 FindData(i32 id)
+    {
+        i32 keyIndex = FindKeyIndex(id);
+        if (keyIndex == ZE_LT_INVALID_INDEX) { return m_invalidDataValue; }
+        return m_keys[keyIndex].data;
     }
 
     i32 Insert(i32 id, i32 data)
@@ -105,11 +143,47 @@ struct ZELookupTable
             }
             else
             {
+                // probe forward
                 numCollisions++;
                 StepKeyIndex(&keyIndex);
             }
             
         } while (escape++ < m_maxKeys);
+        return COM_ERROR_FUNC_RAN_AWAY;
+    }
+
+    i32 Remove(i32 id)
+    {
+        
+        i32 keyIndex = FindKeyIndex(id);
+        if (keyIndex == ZE_LT_INVALID_INDEX) { return COM_ERROR_NOT_FOUND; }
+        ClearKey(&m_keys[keyIndex]);
+
+        // probe forward reinserting until a key
+        // with an invalid id is found
+        StepKeyIndex(&keyIndex);
+        i32 escape = 0;
+        do
+        {
+            //printf("\tCheck key at %d\n", keyIndex);
+            ZELookupKey* key = &m_keys[keyIndex];
+            if (key->id == ZE_LT_INVALID_ID)
+            {
+                // empty key. Done
+                return COM_ERROR_NONE;
+            }
+            i32 correctIndex = key->idHash % m_maxKeys;
+            if (correctIndex != keyIndex)
+            {
+                // reinsert key
+                //printf("Reinsert id %d\n", key->id);
+                ZELookupKey copy = *key;
+                ClearKey(key);
+                Insert(copy.id, copy.data);
+            }
+            StepKeyIndex(&keyIndex);
+        } while (escape++ < m_maxKeys);
+        
         return COM_ERROR_FUNC_RAN_AWAY;
     }
 };
@@ -121,7 +195,7 @@ static i32 ZE_LT_CalcBytesForTable(i32 numKeys)
     return bytesTotal;
 }
 
-static ZELookupTable* ZE_LT_Create(i32 capacity, i32 scale)
+static ZELookupTable* ZE_LT_Create(i32 capacity, i32 scale, i32 invalidDataValue)
 {
     if (scale < 0) { scale = 2; }
     capacity = capacity * scale;
@@ -130,6 +204,7 @@ static ZELookupTable* ZE_LT_Create(i32 capacity, i32 scale)
     u8* mem = (u8*)ZE_LT_MALLOC(numBytes);
     ZELookupTable* table = (ZELookupTable*)mem;
     table->m_maxKeys = capacity;
+    table->m_invalidDataValue = invalidDataValue;
     table->m_keys = (ZELookupKey*)(mem + sizeof(ZELookupTable));
     table->Clear();
     return table;
