@@ -3,6 +3,8 @@
 
 #include "../common/common.h"
 
+#define ZE_LT_SCALE 2
+
 #define ZE_LT_INVALID_INDEX -1
 #define ZE_LT_INVALID_ID 0
 
@@ -59,6 +61,7 @@ struct ZELookupKey
 struct ZELookupTable
 {
     ZELookupKey* m_keys;
+    i32 m_numKeys;
     i32 m_maxKeys;
     i32 m_invalidDataValue;
 
@@ -133,6 +136,7 @@ struct ZELookupTable
                 key->idHash = idHash;
                 key->data = data;
                 key->collisionsOnInsert = numCollisions;
+                m_numKeys++;
                 return COM_ERROR_NONE;
             }
             else if (key->id == id)
@@ -158,6 +162,7 @@ struct ZELookupTable
         i32 keyIndex = FindKeyIndex(id);
         if (keyIndex == ZE_LT_INVALID_INDEX) { return COM_ERROR_NOT_FOUND; }
         ClearKey(&m_keys[keyIndex]);
+        m_numKeys--;
 
         // probe forward reinserting until a key
         // with an invalid id is found
@@ -179,6 +184,7 @@ struct ZELookupTable
                 //printf("Reinsert id %d\n", key->id);
                 ZELookupKey copy = *key;
                 ClearKey(key);
+                m_numKeys--; // decrement count as insert will increment it again
                 Insert(copy.id, copy.data);
             }
             StepKeyIndex(&keyIndex);
@@ -195,14 +201,22 @@ static i32 ZE_LT_CalcBytesForTable(i32 numKeys)
     return bytesTotal;
 }
 
-static ZELookupTable* ZE_LT_Create(i32 capacity, i32 scale, i32 invalidDataValue)
+/**
+ * Initialise a table
+ * > if mem is NULL, the table will be allocated
+ *   > allocation is |table struct|...keys...|
+ * > use CalcBytes function to measure required space!
+ * > capacity passed in should be double size of the lookup array to reduce collisions
+ */
+static ZELookupTable* ZE_LT_Create(i32 capacity, i32 invalidDataValue, u8* mem)
 {
-    if (scale < 0) { scale = 2; }
-    capacity = capacity * scale;
-
-    i32 numBytes = ZE_LT_CalcBytesForTable(capacity);
-    u8* mem = (u8*)ZE_LT_MALLOC(numBytes);
+    if (mem == NULL)
+    {
+        i32 numBytes = ZE_LT_CalcBytesForTable(capacity);
+        mem = (u8*)ZE_LT_MALLOC(numBytes);
+    }
     ZELookupTable* table = (ZELookupTable*)mem;
+    *table = {};
     table->m_maxKeys = capacity;
     table->m_invalidDataValue = invalidDataValue;
     table->m_keys = (ZELookupKey*)(mem + sizeof(ZELookupTable));

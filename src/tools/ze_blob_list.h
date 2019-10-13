@@ -21,7 +21,7 @@ struct MyStruct
 #define BL_INVALID_INDEX -1
 #define BL_INVALID_ID 0
 
-#define BL_HASH_TABLE_SCALE 2
+#define BL_HASH_TABLE_SCALE 1
 
 #ifndef BL_MALLOC
 #define BL_MALLOC(numBytesToAlloc) \
@@ -220,9 +220,9 @@ static ErrorCode BL_InsertLookupKey(BlobList* list, i32 id, u32 hash, i32 index)
             key->hash = hash;
             key->index = index;
             key->collisionsOnInsert = numCollisions;
-            // printf("Assigning key id %d to index %d. Hash %u. Key index %d - collisions %d\n",
-            //     key->id, key->index, key->hash, keyIndex, key->collisionsOnInsert
-            // );
+            printf("Assigning key id %d to index %d. Hash %u. Key index %d - collisions %d\n",
+                key->id, key->index, key->hash, keyIndex, key->collisionsOnInsert
+            );
             
             return COM_ERROR_NONE;
         }
@@ -300,7 +300,6 @@ static ErrorCode BL_RemoveLookupKey(BlobList* list, i32 id)
 static ErrorCode BL_RemoveById(BlobList* list, i32 id)
 {
     i32 keyIndex = BL_GetKeyIndexById(list, id);
-    COM_ASSERT(list->keys[keyIndex].id == id, "Key/Blob id mismatch\n");
     if (keyIndex == BL_INVALID_INDEX) { return COM_ERROR_NOT_FOUND; }
     i32 itemIndex = list->keys[keyIndex].index;
 
@@ -320,8 +319,8 @@ static ErrorCode BL_RemoveById(BlobList* list, i32 id)
 
     // > set the key's index to the index of the item we are deleting
     list->keys[swapKeyIndex].index = swapItemIndex;
-    printf(">>> Remove %d - Copying blob id %d (index %d) over id %d (index %d) -- %d bytes\n",
-        id, swapBlob->id, swapItemIndex, id, itemIndex, list->blobUserSize);
+    printf(">>> Copying blob id %d (index %d) over id %d (index %d) -- %d bytes\n",
+        swapBlob->id, swapItemIndex, id, itemIndex, list->blobUserSize);
     
     // > copy swap blob over the deleted blob
     u8* itemAddr = (u8*)(list->blobs + (list->blobUserSize * itemIndex));
@@ -348,7 +347,6 @@ static ErrorCode BL_RemoveById(BlobList* list, i32 id)
             // previous collision
             BlobLookupKey copy = *key;
             *key = {};
-            printf("Reinserting key index %d (Id %d)\n", keyIndex, copy.id);
             BL_InsertLookupKey(list, copy.id, copy.hash, copy.index);
         }
         keyIndex++;

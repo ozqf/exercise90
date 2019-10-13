@@ -143,7 +143,7 @@ static void TestBlobList()
 
 static void Test_PrintLookupKeys(ZELookupTable* table)
 {
-    printf("--- KEYS ---\n");
+    printf("--- KEYS (%d)---\n", table->m_numKeys);
     for (i32 i = 0; i < table->m_maxKeys; ++i)
     {
         ZELookupKey* key = &table->m_keys[i];
@@ -171,17 +171,20 @@ static void Test_FindLookupData(ZELookupTable* table, i32 id)
 
 static void Test_RemoveLookupKey(ZELookupTable* table, i32 id)
 {
-    printf("Remove id %d\n", id);
     i32 err = table->Remove(id);
     if (err != COM_ERROR_NONE)
     {
         printf("Error %d removing id %d\n", err, id);
+        return;
     }
+    printf("Removed id %d - num keys %d\n", id, table->m_numKeys);
 }
 
 static void Test_LookupTable()
 {
-    ZELookupTable* table = ZE_LT_Create(6, 2, 0);
+    i32 capacity = 6 * 2;
+    //ZELookupTable* table = ZE_LT_Create(capacity, 0, NULL);
+    ZELookupTable* table = ZE_LT_Create(capacity, 0, (u8*)malloc(ZE_LT_CalcBytesForTable(capacity)));
     i32 testId = 1;
     while (testId <= 6)
     {
