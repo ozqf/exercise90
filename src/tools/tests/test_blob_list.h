@@ -18,14 +18,15 @@ static void Test_PrintBlobArray(ZEBlobArray* arr)
         arr->m_numBlobs, arr->m_maxBlobs, arr->m_blobUserSize);
     for (i32 i = 0; i < arr->m_maxBlobs; ++i)
     {
+        ZEBlobHeader* header = (ZEBlobHeader*)arr->GetHeaderByIndexUnchecked(i);
         Blob* blob = (Blob*)arr->GetByIndexUnchecked(i);
-        if (blob->header.valid == YES)
+        if (header->valid == YES)
         {
-            printf("%d: id %d foo %d bar %d\n", i, blob->header.id, blob->foo, blob->bar);
+            printf("%d: id %d foo %d bar %d\n", i, header->id, blob->foo, blob->bar);
         }
         else if (i < arr->m_numBlobs)
         {
-            printf("%d: id %d awaiting removal\n", i, blob->header.id);
+            printf("%d: id %d awaiting removal\n", i, header->id);
         }
         else
         {
@@ -36,8 +37,8 @@ static void Test_PrintBlobArray(ZEBlobArray* arr)
 
 static void Test_AddToBlobArray(ZEBlobArray* arr, i32 id, i32 foo, i32 bar)
 {
-    ZEBlobHeader* h;
-    ErrorCode err = arr->GetFree(&h, id);
+    u8* h;
+    ErrorCode err = arr->GetFreeSlot(&h, id);
     ((Blob*)h)->foo = foo;
     ((Blob*)h)->bar = bar;
 }
@@ -45,7 +46,7 @@ static void Test_AddToBlobArray(ZEBlobArray* arr, i32 id, i32 foo, i32 bar)
 static void Test_RemoveFromBlobArray(ZEBlobArray* arr, i32 index)
 {
     ErrorCode err = arr->MarkForFree(index);
-    printf("Mark to Remove	 at %d. %d/%d remaining\n", index, arr->m_numBlobs, arr->m_maxBlobs);
+    printf("Mark to Remove at %d. %d/%d remaining\n", index, arr->m_numBlobs, arr->m_maxBlobs);
 }
 
 static void Test_BlobArray()

@@ -45,28 +45,51 @@ struct ZEBlobArray
 {
     u8* m_blobs;
     u8* m_end;
+    i32 m_totalBlobSize;
     i32 m_blobUserSize;
     i32 m_maxBlobs;
     i32 m_numBlobs;
     i32 m_invalidId;
 
-    ZEBlobHeader* GetByIndex(i32 index)
+    ///////////////////////////////////////////////////
+    // Get headers
+    ///////////////////////////////////////////////////
+    ZEBlobHeader* GetHeaderByIndex(i32 index)
     {
         COM_ASSERT((index >= 0 && index < m_numBlobs), "Blob array out of bounds");
-        i32 offset = m_blobUserSize * index;
+        i32 offset = m_totalBlobSize * index;
         ZEBlobHeader* result = (ZEBlobHeader*)(m_blobs + offset);
         COM_ASSERT(result->sentinel == COM_SENTINEL, "Blob GetByIndex sentinel failed")
         return result;
     }
 
-    ZEBlobHeader* GetByIndexUnchecked(i32 index)
+    ZEBlobHeader* GetHeaderByIndexUnchecked(i32 index)
     {
-        i32 offset = m_blobUserSize * index;
+        i32 offset = m_totalBlobSize * index;
         ZEBlobHeader* result = (ZEBlobHeader*)(m_blobs + offset);
         return result;
     }
 
-    ErrorCode GetFree(ZEBlobHeader** result, i32 id)
+    ///////////////////////////////////////////////////
+    // Get users slots
+    ///////////////////////////////////////////////////
+
+    u8* GetByIndexUnchecked(i32 index)
+    {
+        ZEBlobHeader* h = GetHeaderByIndexUnchecked(index);
+        return (u8*)h + sizeof(ZEBlobHeader);
+    }
+
+    u8* GetByIndex(i32 index)
+    {
+        COM_ASSERT((index >= 0 && index < m_numBlobs), "Blob array out of bounds");
+        i32 offset = m_totalBlobSize * index;
+        ZEBlobHeader* h = GetHeaderByIndexUnchecked(index);
+        COM_ASSERT(h->sentinel == COM_SENTINEL, "Blob GetByIndex sentinel failed")
+        return (u8*)h + sizeof(ZEBlobHeader);
+    }
+
+    ErrorCode GetFreeSlot(u8** result, i32 id)
     {
         if (result == NULL) { return COM_ERROR_NULL_ARGUMENT; }
         if (id == m_invalidId) { return COM_ERROR_BAD_ARGUMENT; }
@@ -74,12 +97,12 @@ struct ZEBlobArray
 
         i32 newBlobIndex = m_numBlobs++;
 
-        i32 offset = m_blobUserSize * newBlobIndex;
+        i32 offset = m_totalBlobSize * newBlobIndex;
         ZEBlobHeader* header = (ZEBlobHeader*)(m_blobs + offset);
         header->id = id;
         header->sentinel = COM_SENTINEL;
         header->valid = YES;
-        *result = header;
+        *result = (u8*)header + sizeof(ZEBlobHeader);
         return COM_ERROR_NONE;
     }
 
@@ -93,7 +116,7 @@ struct ZEBlobArray
     ErrorCode MarkForFree(i32 index)
     {
         if (index >= m_numBlobs) { return COM_ERROR_OUT_OF_BOUNDS; }
-        ZEBlobHeader* header = GetByIndex(index);
+        ZEBlobHeader* header = GetHeaderByIndex(index);
         if (header == NULL) { return COM_ERROR_NOT_FOUND; }
         header->valid = NO;
         return COM_ERROR_NONE;
@@ -101,9 +124,9 @@ struct ZEBlobArray
 
     void CopyOver(i32 sourceIndex, i32 destIndex)
     {
-        u8* sourcePtr = m_blobs + (m_blobUserSize * sourceIndex);
-        u8* destPtr = m_blobs + (m_blobUserSize * destIndex);
-        ZE_BA_COPY(destPtr, sourcePtr, m_blobUserSize)
+        u8* sourcePtr = m_blobs + (m_totalBlobSize * sourceIndex);
+        u8* destPtr = m_blobs + (m_totalBlobSize * destIndex);
+        ZE_BA_COPY(destPtr, sourcePtr, m_totalBlobSize)
     }
     
     void Truncate()
@@ -113,13 +136,13 @@ struct ZEBlobArray
         {
             // if blob is not valid, replace it with the last in the array
             // and reduce the blob count
-            ZEBlobHeader* blob = GetByIndex(i);
+            ZEBlobHeader* blob = GetHeaderByIndex(i);
             if (blob->valid == YES) { i++; continue; }
             
             if (m_numBlobs == 1)
             {
                 // no blob to replace this with, just clear list
-                MarkFree(GetByIndexUnchecked(i));
+                MarkFree(GetHeaderByIndexUnchecked(i));
                 m_numBlobs = 0;
                 return;
             }
@@ -127,7 +150,7 @@ struct ZEBlobArray
             {
                 i32 swapIndex = (m_numBlobs - 1);
                 CopyOver(swapIndex, i);
-                MarkFree(GetByIndexUnchecked(swapIndex));
+                MarkFree(GetHeaderByIndexUnchecked(swapIndex));
                 m_numBlobs--;
             }
         }
@@ -135,8 +158,9 @@ struct ZEBlobArray
 };
 
 static ErrorCode ZE_CreateBlobArray(
-    ZEBlobArray** result, i32 capacity, i32 sizePerBlob, i32 invalidId)
+    ZEBlobArray** result, i32 capacity, i32 sizePerObject, i32 invalidId)
 {
+    i32 sizePerBlob = sizeof(ZEBlobHeader) + sizePerObject;
     i32 totalBytes = sizeof(ZEBlobArray) + (sizePerBlob * capacity);
     u8* mem = ZE_BA_MALLOC(totalBytes);
     if (mem == NULL) { return COM_ERROR_ALLOCATION_FAILED; }
@@ -144,13 +168,14 @@ static ErrorCode ZE_CreateBlobArray(
     *arr = {};
     arr->m_blobs = mem + sizeof(ZEBlobArray);
     arr->m_end = mem + totalBytes;
-    arr->m_blobUserSize = sizePerBlob;
+    arr->m_blobUserSize = sizePerObject;
+    arr->m_totalBlobSize = sizePerBlob;
     arr->m_numBlobs = 0;
     arr->m_maxBlobs = capacity;
     arr->m_invalidId = invalidId;
     for (i32 i = 0; i < arr->m_maxBlobs; ++i)
     {
-        ZEBlobHeader* h = arr->GetByIndexUnchecked(i);
+        ZEBlobHeader* h = arr->GetHeaderByIndexUnchecked(i);
         h->id = invalidId;
         h->valid = NO;
         h->sentinel = 0;
