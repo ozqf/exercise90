@@ -12,13 +12,49 @@ struct Blob
     i32 bar;
 };
 
+static void Test_PrintBlobArray(ZEBlobArray* arr)
+{
+    printf("--- Blob array (%d/%d capacity, %d blob size) ---\n",
+        arr->m_numBlobs, arr->m_maxBlobs, arr->m_blobUserSize);
+    for (i32 i = 0; i < arr->m_maxBlobs; ++i)
+    {
+        Blob* blob = (Blob*)arr->GetByIndexUnchecked(i);
+        if (blob->header.valid == YES)
+        {
+            printf("%d: id %d foo %d bar %d\n", i, blob->header.id, blob->foo, blob->bar);
+        }
+        else if (i < arr->m_numBlobs)
+        {
+            printf("%d: id %d awaiting removal\n", i, blob->header.id);
+        }
+        else
+        {
+            printf("%d: --\n", i);
+        }
+    }
+}
+
+static void Test_AddToBlobArray(ZEBlobArray* arr, i32 id, i32 foo, i32 bar)
+{
+    ZEBlobHeader* h;
+    ErrorCode err = arr->GetFree(&h, id);
+    ((Blob*)h)->foo = foo;
+    ((Blob*)h)->bar = bar;
+}
+
+static void Test_RemoveFromBlobArray(ZEBlobArray* arr, i32 index)
+{
+    ErrorCode err = arr->MarkForFree(index);
+    printf("Remove at %d\n", index);
+}
+
 static void Test_BlobArray()
 {
     ErrorCode err;
     printf("Test blob array\n");
     i32 capacity = 6;
     ZEBlobArray* arr = NULL;
-    err = ZE_CreateBlobArray(&arr, capacity, sizeof(Blob));
+    err = ZE_CreateBlobArray(&arr, capacity, sizeof(Blob), 0);
     if (err != COM_ERROR_NONE)
     {
         printf("Error %d creating blob array\n", err);
@@ -27,7 +63,16 @@ static void Test_BlobArray()
     printf("Created Blob array. Capacity %d, total bytes %d\n",
         capacity, arr->m_end - arr->m_blobs);
     
-    //ZEBlobHeader* h
+    //ZEBlobHeader* h;
+    Test_AddToBlobArray(arr, 1, 111, 222);
+    Test_AddToBlobArray(arr, 2, 333, 444);
+    Test_AddToBlobArray(arr, 3, 555, 666);
+    Test_PrintBlobArray(arr);
+    Test_RemoveFromBlobArray(arr, 0);
+    Test_PrintBlobArray(arr);
+    printf("Truncate array\n");
+    arr->Truncate();
+    Test_PrintBlobArray(arr);
 }
 
 static void Test_PrintLookupKeys(ZELookupTable* table)
