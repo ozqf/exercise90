@@ -130,7 +130,6 @@ struct ZEBlobArray
                 MarkFree(GetByIndexUnchecked(swapIndex));
                 m_numBlobs--;
             }
-            //i++;
         }
     }
 };

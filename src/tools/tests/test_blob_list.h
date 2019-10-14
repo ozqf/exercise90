@@ -1,7 +1,7 @@
 #ifndef TEST_BLOB_LIST_H
 #define TEST_BLOB_LIST_H
 
-//#include "../ze_blob_list.h"
+#include "../ze_blob_list.h"
 #include "../ze_lookup_table.h"
 #include "../ze_blob_array.h"
 
@@ -45,7 +45,7 @@ static void Test_AddToBlobArray(ZEBlobArray* arr, i32 id, i32 foo, i32 bar)
 static void Test_RemoveFromBlobArray(ZEBlobArray* arr, i32 index)
 {
     ErrorCode err = arr->MarkForFree(index);
-    printf("Remove at %d\n", index);
+    printf("Mark to Remove	 at %d. %d/%d remaining\n", index, arr->m_numBlobs, arr->m_maxBlobs);
 }
 
 static void Test_BlobArray()
@@ -68,6 +68,11 @@ static void Test_BlobArray()
     Test_AddToBlobArray(arr, 2, 333, 444);
     Test_AddToBlobArray(arr, 3, 555, 666);
     Test_PrintBlobArray(arr);
+
+	Test_AddToBlobArray(arr, 4, 11, 22);
+	Test_AddToBlobArray(arr, 5, 33, 44);
+	Test_AddToBlobArray(arr, 6, 55, 66);
+	Test_PrintBlobArray(arr);
     
     Test_RemoveFromBlobArray(arr, 0);
     Test_PrintBlobArray(arr);
@@ -75,8 +80,11 @@ static void Test_BlobArray()
     arr->Truncate();
     Test_PrintBlobArray(arr);
 
-    Test_RemoveFromBlobArray(arr, 1);
     Test_RemoveFromBlobArray(arr, 0);
+    Test_RemoveFromBlobArray(arr, 1);
+	Test_RemoveFromBlobArray(arr, 2);
+	Test_RemoveFromBlobArray(arr, 3);
+	Test_RemoveFromBlobArray(arr, 4);
     printf("Truncate again\n");
     arr->Truncate();
     Test_PrintBlobArray(arr);
