@@ -115,12 +115,13 @@ struct ZEBlobArray
             // and reduce the blob count
             ZEBlobHeader* blob = GetByIndex(i);
             if (blob->valid == YES) { i++; continue; }
-            if (blob->valid == NO)
             
-            if (i == (m_numBlobs - 1))
+            if (m_numBlobs == 1)
             {
                 // no blob to replace this with, just clear list
-                m_numBlobs--;
+                MarkFree(GetByIndexUnchecked(i));
+                m_numBlobs = 0;
+                return;
             }
             else
             {
@@ -129,7 +130,7 @@ struct ZEBlobArray
                 MarkFree(GetByIndexUnchecked(swapIndex));
                 m_numBlobs--;
             }
-            i++;
+            //i++;
         }
     }
 };

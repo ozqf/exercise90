@@ -68,9 +68,16 @@ static void Test_BlobArray()
     Test_AddToBlobArray(arr, 2, 333, 444);
     Test_AddToBlobArray(arr, 3, 555, 666);
     Test_PrintBlobArray(arr);
+    
     Test_RemoveFromBlobArray(arr, 0);
     Test_PrintBlobArray(arr);
     printf("Truncate array\n");
+    arr->Truncate();
+    Test_PrintBlobArray(arr);
+
+    Test_RemoveFromBlobArray(arr, 1);
+    Test_RemoveFromBlobArray(arr, 0);
+    printf("Truncate again\n");
     arr->Truncate();
     Test_PrintBlobArray(arr);
 }
