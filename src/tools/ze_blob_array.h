@@ -89,9 +89,11 @@ struct ZEBlobArray
         return (u8*)h + sizeof(ZEBlobHeader);
     }
 
-    ErrorCode GetFreeSlot(u8** result, i32 id)
+    /**
+     * If data result or index result are null they are ignored
+     */
+    ErrorCode GetFreeSlot(u8** dataResult, i32* indexResult, i32 id)
     {
-        if (result == NULL) { return COM_ERROR_NULL_ARGUMENT; }
         if (id == m_invalidId) { return COM_ERROR_BAD_ARGUMENT; }
         if (m_numBlobs == m_maxBlobs) { return COM_ERROR_NO_SPACE; }
 
@@ -102,7 +104,14 @@ struct ZEBlobArray
         header->id = id;
         header->sentinel = COM_SENTINEL;
         header->valid = YES;
-        *result = (u8*)header + sizeof(ZEBlobHeader);
+        if (dataResult != NULL)
+        {
+            *dataResult = (u8*)header + sizeof(ZEBlobHeader);
+        }
+        if (indexResult != NULL)
+        {
+            *indexResult = newBlobIndex;
+        }
         return COM_ERROR_NONE;
     }
 

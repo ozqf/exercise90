@@ -1,9 +1,13 @@
 #ifndef TEST_BLOB_LIST_H
 #define TEST_BLOB_LIST_H
 
-#include "../ze_blob_list.h"
 #include "../ze_lookup_table.h"
 #include "../ze_blob_array.h"
+#include "../ze_blob_store.h"
+
+//////////////////////////////////////////////////////
+// Blob Array
+//////////////////////////////////////////////////////
 
 struct Blob
 {
@@ -38,7 +42,7 @@ static void Test_PrintBlobArray(ZEBlobArray* arr)
 static void Test_AddToBlobArray(ZEBlobArray* arr, i32 id, i32 foo, i32 bar)
 {
     u8* h;
-    ErrorCode err = arr->GetFreeSlot(&h, id);
+    ErrorCode err = arr->GetFreeSlot(&h, NULL, id);
     ((Blob*)h)->foo = foo;
     ((Blob*)h)->bar = bar;
 }
@@ -90,6 +94,10 @@ static void Test_BlobArray()
     arr->Truncate();
     Test_PrintBlobArray(arr);
 }
+
+//////////////////////////////////////////////////////
+// Lookup table
+//////////////////////////////////////////////////////
 
 static void Test_PrintLookupKeys(ZELookupTable* table)
 {
@@ -164,11 +172,48 @@ static void Test_LookupTable()
     Test_FindLookupData(table, 8);
 }
 
+//////////////////////////////////////////////////////
+// Blob Store
+//////////////////////////////////////////////////////
+
+static void Test_PrintBlobStore(ZEBlobStore* store)
+{
+    Test_PrintBlobArray(store->array);
+    Test_PrintLookupKeys(store->lookup);
+}
+
+static void Test_InsertBlob(ZEBlobStore* store, i32 id, i32 foo, i32 bar)
+{
+    Blob* blob;
+    blob = (Blob*)store->GetFreeSlot(id);
+    blob->foo = foo;
+    blob->bar = bar;
+}
+
+static void Test_BlobStore()
+{
+    ZEBlobStore store;
+    ZE_InitBlobStore(&store, 6, sizeof(Blob), 0);
+    Test_InsertBlob(&store, 1, 0xDEAD, 0xBEEF);
+    Test_InsertBlob(&store, 2, 0xF00, 0xBA5);
+    Test_InsertBlob(&store, 3, 22, 33);
+    store.MarkForRemoval(2);
+    Test_PrintBlobStore(&store);
+}
+
+//////////////////////////////////////////////////////
+// Run tests
+//////////////////////////////////////////////////////
+
 static void Test_BlobsAndLookupTable()
 {
+    #if 0
     Test_LookupTable();
-    printf("\n");
+    printf("\n\n");
     Test_BlobArray();
+    printf("\n\n");
+    #endif
+    Test_BlobStore();
 }
 
 #endif // TEST_BLOB_LIST_H
