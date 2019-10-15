@@ -63,6 +63,12 @@ struct ZEBlobStore
 		return numDeletes;
 	}
 
+    /**
+     * Scans over store and removes items marked for removal
+     * > Items removed will be copied over from the end of the store
+     * so items will move around!
+     * > Must update the lookup table to keep it in-sync
+     */
     i32 Truncate()
     {
         i32 numDeletes = 0;
@@ -87,7 +93,7 @@ struct ZEBlobStore
             if (blob->status == ZE_BA_STATUS_OCCUPIED)
             {
                 // Record swap index if necessary
-                if (i > swapIndex) { swapIndex = i; }
+                //if (i > swapIndex) { swapIndex = i; }
                 i--;
                 continue;
             }

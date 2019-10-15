@@ -11,7 +11,6 @@
 
 struct Blob
 {
-    //ZEBlobHeader header;
     i32 foo;
     i32 bar;
 };

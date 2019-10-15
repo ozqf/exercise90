@@ -178,7 +178,6 @@ struct ZELookupTable
         i32 escape = 0;
         do
         {
-            //printf("\tCheck key at %d\n", keyIndex);
             ZELookupKey* key = &m_keys[keyIndex];
             if (key->id == ZE_LT_INVALID_ID)
             {
@@ -189,7 +188,6 @@ struct ZELookupTable
             if (correctIndex != keyIndex)
             {
                 // reinsert key
-                //printf("Reinsert id %d\n", key->id);
                 ZELookupKey copy = *key;
                 ClearKey(key);
                 m_numKeys--; // decrement count as insert will increment it again
