@@ -120,6 +120,14 @@ struct ZELookupTable
         return m_keys[keyIndex].data;
     }
 
+    i32 SetData(i32 id, i32 data)
+    {
+        i32 keyIndex = FindKeyIndex(id);
+        if (keyIndex == ZE_LT_INVALID_INDEX) { return COM_ERROR_NOT_FOUND; }
+        m_keys[keyIndex].data = data;
+        return COM_ERROR_NONE;
+    }
+
     i32 Insert(i32 id, i32 data)
     {
         u32 idHash = ZE_LT_HashUint(id);

@@ -11,7 +11,7 @@
 
 struct Blob
 {
-    ZEBlobHeader header;
+    //ZEBlobHeader header;
     i32 foo;
     i32 bar;
 };
@@ -24,7 +24,7 @@ static void Test_PrintBlobArray(ZEBlobArray* arr)
     {
         ZEBlobHeader* header = (ZEBlobHeader*)arr->GetHeaderByIndexUnchecked(i);
         Blob* blob = (Blob*)arr->GetByIndexUnchecked(i);
-        if (header->valid == YES)
+        if (header->status == ZE_BA_STATUS_OCCUPIED)
         {
             printf("%d: id %d foo %d bar %d\n", i, header->id, blob->foo, blob->bar);
         }
@@ -178,8 +178,8 @@ static void Test_LookupTable()
 
 static void Test_PrintBlobStore(ZEBlobStore* store)
 {
-    Test_PrintBlobArray(store->array);
-    Test_PrintLookupKeys(store->lookup);
+    Test_PrintBlobArray(store->m_array);
+    Test_PrintLookupKeys(store->m_lookup);
 }
 
 static void Test_InsertBlob(ZEBlobStore* store, i32 id, i32 foo, i32 bar)
@@ -190,6 +190,17 @@ static void Test_InsertBlob(ZEBlobStore* store, i32 id, i32 foo, i32 bar)
     blob->bar = bar;
 }
 
+static void Test_GetBlobById(ZEBlobStore* store, i32 id)
+{
+    Blob* blob = (Blob*)store->GetById(id);
+    if (blob == NULL)
+    {
+        printf("Could not retrieve blob Id %d\n", id);
+        return;
+    }
+    printf("Found blob %d. Foo %d, bar %d\n", id, blob->foo, blob->bar);
+}
+
 static void Test_BlobStore()
 {
     ZEBlobStore store;
@@ -197,7 +208,21 @@ static void Test_BlobStore()
     Test_InsertBlob(&store, 1, 0xDEAD, 0xBEEF);
     Test_InsertBlob(&store, 2, 0xF00, 0xBA5);
     Test_InsertBlob(&store, 3, 22, 33);
-    store.MarkForRemoval(2);
+    Test_InsertBlob(&store, 4, 23, 245);
+    Test_InsertBlob(&store, 5, 23, 245);
+    Test_InsertBlob(&store, 6, 23, 245);
+
+    store.MarkForRemoval(5);
+	store.MarkForRemoval(2);
+    store.MarkForRemoval(6);
+
+    Test_GetBlobById(&store, 1);
+    Test_GetBlobById(&store, 2);
+    
+    Test_PrintBlobStore(&store);
+
+    printf("Truncate!\n");
+    store.Truncate();
     Test_PrintBlobStore(&store);
 }
 
