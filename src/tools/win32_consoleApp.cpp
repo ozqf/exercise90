@@ -92,6 +92,7 @@ internal i32 Test_Win32_BeginDirectoryScan(char* relativePath)
 internal void Test_FatalError(const char* message, const char* heading)
 {
     printf("!--- %s ---!\n%s", heading, message);
+	ILLEGAL_CODE_PATH
 }
 
 // main function for everywhere except windows

@@ -21,6 +21,10 @@ typedef int ErrorCode;
 #define COM_ERROR_BAD_ARGUMENT 11
 #define COM_ERROR_NULL_ARGUMENT 12
 #define COM_ERROR_NOT_IMPLEMENTED 13
+#define COM_ERROR_ALLOCATION_FAILED 14
+#define COM_ERROR_OPERATION_FAILED 15
+#define COM_ERROR_FUNC_RAN_AWAY 16
+#define COM_ERROR_OUT_OF_BOUNDS 17
 
 typedef void (*COM_FatalErrorFunction)(const char* message, const char* heading);
 

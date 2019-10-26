@@ -7,7 +7,10 @@
 #include "test_quantisation.h"
 #include "test_syntax.h"
 #include "test_hash_table.h"
+#include "test_blob_list.h"
 #include "Test_Win32_threads.h"
+
+#include "../ze_read_blender_file.h"
 
 #define TEST_ASSERT(expression, msg) \
 if (!(expression)) { printf("Failed: %s\n", msg##); } \
@@ -237,7 +240,11 @@ void Tests_Run(i32 argc, char* argv[])
     //Tests_Quantisation();
     //Test_Syntax();
     //Test_HashTable();
-    Test_Win32Threads();
+    //Test_Win32Threads();
+    
+    //ZE_ReadBlenderFileTest();
+
+    Test_BlobsAndLookupTable();
 }
 
 #endif
