@@ -27,7 +27,8 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg)
 {
     ZPGPoint cursor = { cfg->startX, cfg->startY };
     ZPGPoint dir = ZPG_RandomFourWayDir(&cfg->seed);
-    i32 escapeCounter = 999999;
+    const i32 escapeCounter = 999999;
+    i32 iterations = 0;
     i32 tilesPlaced = 0;
     while (tilesPlaced < cfg->tilesToPlace)
     {
@@ -38,19 +39,24 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg)
             tilesPlaced++;
         }
         grid->MoveWithBounce(&cursor, &dir);
+        const f32 turnChance = 0.3f; //0.6f
+        #if 1
         f32 changeDirChance = ZPG_Randf32(cfg->seed++);
-        if (changeDirChance > 0.6f)
+        if (changeDirChance > turnChance)
         {
-            dir = ZPG_RandomFourWayDir(&cfg->seed);
+            dir = ZPG_RandomThreeWayDir(&cfg->seed, dir);
+            //dir = ZPG_RandomFourWayDir(&cfg->seed);
         }
-        escapeCounter--;
-        if (escapeCounter == 0)
+        #endif
+        iterations++;
+        if (iterations >= escapeCounter)
         {
-            printf("ABORT! Walk ran away after %d tiles!\n",
-                tilesPlaced);
+            printf("ABORT! Walk ran away\n");
             break;
         }
     }
+    printf("Drunken walk placed %d tiles in %d iterations\n",
+        tilesPlaced, iterations);
 }
 
 #endif // ZPG_GRID_H

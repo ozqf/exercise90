@@ -19,4 +19,31 @@ static ZPGPoint ZPG_RandomFourWayDir(i32* seed)
     return p;
 }
 
+static ZPGPoint ZPG_RandomThreeWayDir(i32* seed, ZPGPoint curDir)
+{
+    f32 r = ZPG_Randf32(*seed);
+    *seed += 1;
+    ZPGPoint p = curDir;
+    f32 radians = atan2f((f32)p.y, (f32)p.x);
+    f32 degrees = radians * RAD2DEG;
+    if (r < 0.33333333f)
+    {
+        // turn left
+        degrees += 90;
+        radians = degrees * DEG2RAD;
+        p.x = (i32)cosf(radians);
+        p.y = (i32)sinf(radians);
+    }
+    else if (r < 0.6666666f)
+    {
+        // turn right
+        degrees -= 90;
+        radians = degrees * DEG2RAD;
+        p.x = (i32)cosf(radians);
+        p.y = (i32)sinf(radians);
+    }
+    // (else do nothing)
+    return p;
+}
+
 #endif // ZPG_UTILS_H
