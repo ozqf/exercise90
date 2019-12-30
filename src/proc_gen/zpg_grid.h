@@ -16,8 +16,13 @@ extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
     *grid = {};
     // init grid memory
     ptr += sizeof(ZPGGrid);
-    memset(ptr, ' ', memForGrid);
+    //memset(ptr, ' ', memForGrid);
     grid->cells = (ZPGCell*)ptr;
+    for (i32 i = 0; i < totalCells; ++i)
+    {
+        grid->cells[i] = {};
+        grid->cells[i].c = ' ';
+    }
     grid->width = width;
     grid->height = height;
     return grid;

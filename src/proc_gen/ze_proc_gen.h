@@ -24,6 +24,7 @@ struct ZPGCell
 {
     char c;
     i32 val;
+    i32 rings;
 };
 
 struct ZPGGrid
@@ -105,6 +106,72 @@ struct ZPGGrid
             }
         }
     }
+    
+    /*
+    eg:
+    0   1     2
+    ### ##### #######
+    #p# #...# #.....#
+    ### #.p.# #.....#
+        #...# #..p..#
+        ##### #.....#
+              #.....#
+              #######
+    */
+    i32 CountNeighourRingsAt(i32 x, i32 y)
+    {
+        ZPGCell* cell = GetCellAt(x, y);
+        if (cell == NULL)
+        {
+            printf("Cannot Plot ringss at %d/%d - Cell is null\n",
+                x, y);
+            return 0;
+        }
+        i32 result = 0;
+        i32 ringTest = 1;
+        i32 plotX, plotY;
+        i32 bScanning = YES;
+        // Count until a test fails
+        for(;;)
+        {
+            for (i32 iY = -ringTest; iY <= ringTest; ++iY)
+            {
+                for (i32 iX = -ringTest; iX <= ringTest; ++iX)
+                {
+                    plotX = x + iX;
+                    plotY = y + iY;
+                    //printf("  Test %d/%d\n", plotX, plotY);
+                    ZPGCell* queryCell = GetCellAt(plotX, plotY);
+                    if (queryCell == NULL) { bScanning = NO; break; }
+                    if (queryCell == cell) { continue; }
+                    if (queryCell->c != cell->c)
+                    {
+                        //printf("  Char mismatch (%c vs %c)\n",
+                        //    cell->c, queryCell->c);
+                        bScanning = NO;
+                        break;
+                    }
+                }
+                if (bScanning == NO) { break; }
+            }
+            if (bScanning == NO) { break; }
+            else { result++; ringTest++; }
+        }
+        return result;
+    }
+
+    void CountNeighourRings()
+    {
+        printf("Calc rings\n");
+        for (i32 y = 0; y < height; ++y)
+        {
+            for (i32 x = 0; x < width; ++x)
+            {
+                ZPGCell* cell = GetCellAt(x, y);
+                cell->rings = CountNeighourRingsAt(x, y);
+            }
+        }
+    }
 
     void Print()
     {
@@ -115,6 +182,7 @@ struct ZPGGrid
             for (i32 x = 0; x < width; ++x)
             {
                 ZPGCell* cell = GetCellAt(x, y);
+                //printf("%c%d", cell->c, cell->rings);
                 printf("%c", cell->c);
             }
             printf("|\n");
