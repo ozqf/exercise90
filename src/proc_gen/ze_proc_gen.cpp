@@ -16,23 +16,35 @@ extern "C" void ZPG_TestDrunkenWalk(i32 seed)
     // grid->SetCellAt(16, 16, cell);
     ZPGWalkCfg cfg = {};
     cfg.seed = seed;
-    cfg.startX = 16;
-    cfg.startY = 16;
-    cfg.tilesToPlace = 512;//256;
+    cfg.startX = 31;
+    cfg.startY = 15;
+    cfg.tilesToPlace = 40;//256;
 
-    i32 numRivers = 2;
-    i32 numTunnels = 2;
+    i32 numRivers = 4;
+    i32 numTunnels = 4;
+    const i32 numDirections = 4;
+    ZPGPoint directions[] =
+    {
+        { -1, 0 },
+        { 1, 0 },
+        { 0, -1 },
+        { 0, 1 }
+    };
     // Draw "rivers"
     cfg.charToPlace = '.';
     for (i32 i = 0; i < numRivers; ++i)
     {
-        ZPG_GridRandomWalk(grid, &cfg);
+        //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
+        ZPGPoint dir = directions[i % numDirections];
+        ZPG_GridRandomWalk(grid, &cfg, dir);
     }
     // Draw "tunnels"
     cfg.charToPlace = '#';
     for (i32 i = 0; i < numTunnels; ++i)
     {
-        ZPG_GridRandomWalk(grid, &cfg);
+        //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
+        ZPGPoint dir = directions[i % numDirections];
+        ZPG_GridRandomWalk(grid, &cfg, dir);
     }
     printf("Final seed value: %d\n", cfg.seed);
     grid->CountNeighourRings();

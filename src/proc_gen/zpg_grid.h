@@ -28,10 +28,11 @@ extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
     return grid;
 }
 
-extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg)
+extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir)
 {
     ZPGPoint cursor = { cfg->startX, cfg->startY };
-    ZPGPoint dir = ZPG_RandomFourWayDir(&cfg->seed);
+    //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg->seed);
+	printf("Drunken Walk starting angle %.1f\n", (atan2f((f32)dir.y, (f32)dir.x) * RAD2DEG));
     const i32 escapeCounter = 999999;
     i32 iterations = 0;
     i32 tilesPlaced = 0;

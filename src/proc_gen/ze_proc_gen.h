@@ -193,6 +193,6 @@ struct ZPGGrid
 
 extern "C" void ZPG_RunTests();
 extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height);
-extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg);
+extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir);
 
 #endif // ZE_PROC_GEN_H
