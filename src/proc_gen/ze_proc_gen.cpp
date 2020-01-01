@@ -126,14 +126,20 @@ extern "C" void ZPG_TestDrunkenWalk_Scattered(i32 seed)
 
 extern "C" void ZPG_TestCaveGen(i32 seed)
 {
+    // Create canvas
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
     grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
-    ZPG_SeedCaves(grid, ZPGCELL_TYPE_FLOOR, &seed);
+    // Stencil grid - blocks writing of tiles
+    ZPGGrid* stencil = ZPG_CreateGrid(72, 32);
+    stencil->SetCellTypeAll(ZPGCELL_TYPE_NONE);
+    ZPG_DrawOuterBorder(stencil, ZPGCELL_TYPE_FLOOR);
+
+    ZPG_SeedCaves(grid, stencil, ZPGCELL_TYPE_FLOOR, &seed);
     grid->Print();
     i32 numIterations = 3;
     for (i32 i = 0; i < numIterations; ++i)
     {
-        ZPG_IterateCaves(grid, ZPGCELL_TYPE_WALL, ZPGCELL_TYPE_FLOOR);
+        ZPG_IterateCaves(grid, stencil, ZPGCELL_TYPE_WALL, ZPGCELL_TYPE_FLOOR);
     }
     grid->Print();
     free(grid);
@@ -145,16 +151,18 @@ extern "C" void ZPG_TestDrawOffsetLines()
     grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
 
     i32 seed = 0;
-    const i32 numPoints = 10;
+    const i32 numPoints = 8;
     i32 numLines = numPoints - 1;
+    i32 numRivers = 4;
+    i32 numTilesPerRiver = 80;
+    i32 numTilesPerPath = 40;
 
     // Draw rivers
     ZPGWalkCfg cfg = {};
     cfg.seed = seed;
-    cfg.tilesToPlace = 40;
+    cfg.tilesToPlace = numTilesPerRiver;
     cfg.typeToPaint = ZPGCELL_TYPE_WATER;
 
-    i32 numRivers = 6;
     for (i32 i = 0; i < numRivers; ++i)
     {
         ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
@@ -170,6 +178,7 @@ extern "C" void ZPG_TestDrawOffsetLines()
     ZPG_DrawSegmentedLine(grid, points, numPoints);
 
     // Draw side paths
+    cfg.tilesToPlace = numTilesPerPath;
     cfg.typeToPaint = ZPGCELL_TYPE_FLOOR;
     for (i32 i = 1; i < numLines; ++i)
     {
@@ -190,6 +199,7 @@ extern "C" void ZPG_TestDrawLines()
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
     grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
 
+    ZPG_DrawOuterBorder(grid, ZPGCELL_TYPE_FLOOR);
     ZPG_DrawLine(grid, 0, 0, 71, 31, ZPGCELL_TYPE_FLOOR);
 
     grid->Print();
@@ -201,7 +211,7 @@ extern "C" void ZPG_RunTests()
     // Seed rand
     srand((i32)time(NULL));
 
-    const i32 mode = 4;
+    const i32 mode = 3;
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     switch (mode)

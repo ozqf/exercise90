@@ -3,6 +3,17 @@
 
 #include "ze_proc_gen.h"
 
+/**
+ * returns NO if type at given cell is 0, YES otherwise
+ */
+static i32 ZPG_CheckStencilOccupied(ZPGGrid* grid, i32 x, i32 y)
+{
+    if (grid == NULL) { return YES; }
+    ZPGCell* cell = grid->GetCellAt(x, y);
+    if (cell == NULL) { return YES; }
+    return (cell->type != ZPGCELL_TYPE_NONE);
+}
+
 static i32 ZPG_RandomDir(i32* seed)
 {
     f32 r = ZPG_Randf32(*seed);

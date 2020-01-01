@@ -26,6 +26,9 @@ struct ZPGWalkCfg
 #define ZPGCELL_TYPE_WALL 2
 #define ZPGCELL_TYPE_WATER 3
 
+#define ZPG_STENCIL_TYPE_EMPTY 0
+#define ZPG_STENCIL_TYPE_FULL 1
+
 #define ZPGCELL_TAG_NONE 0
 #define ZPGCELL_TAG_RANDOM_WALK_START 1
 #define ZPGCELL_TAG_RANDOM_WALK_END 2
@@ -266,7 +269,7 @@ extern "C" void ZPG_RunTests();
 extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height);
 
 extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir);
-extern "C" void ZPG_SeedCaves(ZPGGrid* grid, i32 paintType, i32* seed);
-extern "C" void ZPG_IterateCaves(ZPGGrid* grid, i32 solidType, i32 emptyType);
+extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 paintType, i32* seed);
+extern "C" void ZPG_IterateCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 solidType, i32 emptyType);
 
 #endif // ZE_PROC_GEN_H

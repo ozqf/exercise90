@@ -3,7 +3,7 @@
 
 #include "ze_proc_gen.h"
 
-extern "C" void ZPG_SeedCaves(ZPGGrid* grid, i32 paintType, i32* seed)
+extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 paintType, i32* seed)
 {
     // 0.45 very little paint chance. 0.55 much higher.
     const f32 seedChance = 0.55f;
@@ -11,6 +11,11 @@ extern "C" void ZPG_SeedCaves(ZPGGrid* grid, i32 paintType, i32* seed)
     {
         for (i32 x = 0; x < grid->width; ++x)
         {
+            // if (stencil != NULL && stencil->GetCellAt(x, y)->type != ZPGCELL_TAG_NONE)
+            // {
+            //     continue;
+            // }
+            if (ZPG_CheckStencilOccupied(stencil, x, y) == YES) { continue; }
             f32 rand = ZPG_Randf32(*seed);
             *seed += 1;
             if (rand < seedChance)
@@ -22,7 +27,7 @@ extern "C" void ZPG_SeedCaves(ZPGGrid* grid, i32 paintType, i32* seed)
     }
 }
 
-extern "C" void ZPG_IterateCaves(ZPGGrid* grid, i32 solidType, i32 emptyType)
+extern "C" void ZPG_IterateCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 solidType, i32 emptyType)
 {
     const i32 removeCellLimit = 4;
     const i32 addCellLimit = 4;
@@ -30,6 +35,7 @@ extern "C" void ZPG_IterateCaves(ZPGGrid* grid, i32 solidType, i32 emptyType)
     {
         for (i32 x = 0; x < grid->width; ++x)
         {
+            if (ZPG_CheckStencilOccupied(stencil, x, y) == YES) { continue; }
             ZPGCell* cell = grid->GetCellAt(x, y);
             i32 neighbours = grid->CountNeighboursAt(x, y);
             if (neighbours < 4)
