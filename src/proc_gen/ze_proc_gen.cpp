@@ -139,6 +139,18 @@ extern "C" void ZPG_TestCaveGen(i32 seed)
     free(grid);
 }
 
+extern "C" void ZPG_TestDrawOffsetLines()
+{
+    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
+
+    i32 seed = 0;
+    ZPG_DrawHorizontalDrunkenPath(grid, &seed);
+
+    grid->Print();
+    free(grid);
+}
+
 extern "C" void ZPG_TestDrawLines()
 {
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
@@ -163,7 +175,8 @@ extern "C" void ZPG_RunTests()
         case 1: ZPG_TestDrunkenWalk_FromCentre(0); break;
         case 2: ZPG_TestDrunkenWalk_Scattered(0); break;
         case 3: ZPG_TestCaveGen(seed); break;
-        case 4: ZPG_TestDrawLines(); break;
+        case 4: ZPG_TestDrawOffsetLines(); break;
+        case 5: ZPG_TestDrawLines(); break;
     }
     
     //ZPG_TestDrunkenWalk(876987);
