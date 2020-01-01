@@ -26,10 +26,18 @@ struct ZPGWalkCfg
 #define ZPGCELL_TYPE_WALL 2
 #define ZPGCELL_TYPE_WATER 3
 
+#define ZPGCELL_TAG_NONE 0
+#define ZPGCELL_TAG_RANDOM_WALK_START 1
+#define ZPGCELL_TAG_RANDOM_WALK_END 2
+
 struct ZPGCell
 {
+    // specific class of this cell
     i32 type;
+    // how many concentric rings of the same cell surround this cell
     i32 rings;
+    // for additional categorisation
+    i32 tag;
 };
 
 struct ZPGGrid
@@ -44,6 +52,13 @@ struct ZPGGrid
         if (x < 0 || x >= width) { return -1; }
         if (y < 0 || y >= height) { return -1; }
         return x + (y * width);
+    }
+
+    ZPGCell* GetCellAt(i32 x, i32 y)
+    {
+        i32 i = PositionToIndex(x, y);
+        if (i == -1) { return NULL; }
+        return &cells[i];
     }
 
     void SetCellAt(i32 x, i32 y, ZPGCell newCell)
@@ -64,11 +79,11 @@ struct ZPGGrid
         SetCellAt(x, y, cell);
     }
 
-    ZPGCell* GetCellAt(i32 x, i32 y)
+    void SetCellTagAt(i32 x, i32 y, i32 tag)
     {
-        i32 i = PositionToIndex(x, y);
-        if (i == -1) { return NULL; }
-        return &cells[i];
+        ZPGCell* cell = GetCellAt(x, y);
+        if (cell == NULL) { return; }
+        cell->tag = tag;
     }
 
     void MoveWithBounce(ZPGPoint* cursor, ZPGPoint* dir)
@@ -192,7 +207,14 @@ struct ZPGGrid
                 {
                     //case ZPGCELL_TYPE_WALL: c = ' '; break;
                     case ZPGCELL_TYPE_WALL: c = '#'; break;
-                    case ZPGCELL_TYPE_FLOOR: c = ' '; break;
+                    case ZPGCELL_TYPE_FLOOR: c = ' ';
+                        switch (cell->tag)
+                        {
+                            case ZPGCELL_TAG_RANDOM_WALK_START: c = '-'; break;
+                            case ZPGCELL_TAG_RANDOM_WALK_END: c = 'x'; break;
+                            default: c = ' '; break;
+                        }
+                    break;
                     case ZPGCELL_TYPE_WATER: c = '.'; break;
                 }
                 printf("%c", c);
