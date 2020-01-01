@@ -31,7 +31,8 @@ extern "C" void ZPG_TestDrunkenWalk(i32 seed)
         { 0, 1 }
     };
     // Draw "rivers"
-    cfg.charToPlace = '.';
+    cfg.typeToPaint = ZPGCELL_TYPE_WATER;
+    //cfg.charToPlace = '.';
     for (i32 i = 0; i < numRivers; ++i)
     {
         //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
@@ -39,7 +40,8 @@ extern "C" void ZPG_TestDrunkenWalk(i32 seed)
         ZPG_GridRandomWalk(grid, &cfg, dir);
     }
     // Draw "tunnels"
-    cfg.charToPlace = '#';
+    cfg.typeToPaint = ZPGCELL_TYPE_FLOOR;
+    //cfg.charToPlace = '#';
     for (i32 i = 0; i < numTunnels; ++i)
     {
         //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);

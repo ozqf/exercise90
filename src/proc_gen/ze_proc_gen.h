@@ -17,13 +17,18 @@ struct ZPGWalkCfg
     i32 startX;
     i32 startY;
     i32 tilesToPlace;
-    char charToPlace;
+    i32 typeToPaint;
+    //char charToPlace;
 };
+
+#define ZPGCELL_TYPE_NONE 0
+#define ZPGCELL_TYPE_FLOOR 1
+#define ZPGCELL_TYPE_WALL 2
+#define ZPGCELL_TYPE_WATER 3
 
 struct ZPGCell
 {
-    char c;
-    i32 val;
+    i32 type;
     i32 rings;
 };
 
@@ -52,11 +57,10 @@ struct ZPGGrid
         *cell = newCell;
     }
 
-    void SetCellAt(i32 x, i32 y, char c, i32 val)
+    void SetCellAt(i32 x, i32 y, i32 type)
     {
         ZPGCell cell {};
-        cell.c = c;
-        cell.val = val;
+        cell.type = type;
         SetCellAt(x, y, cell);
     }
 
@@ -144,7 +148,7 @@ struct ZPGGrid
                     ZPGCell* queryCell = GetCellAt(plotX, plotY);
                     if (queryCell == NULL) { bScanning = NO; break; }
                     if (queryCell == cell) { continue; }
-                    if (queryCell->c != cell->c)
+                    if (queryCell->type != cell->type)
                     {
                         //printf("  Char mismatch (%c vs %c)\n",
                         //    cell->c, queryCell->c);
@@ -183,7 +187,15 @@ struct ZPGGrid
             {
                 ZPGCell* cell = GetCellAt(x, y);
                 //printf("%c%d", cell->c, cell->rings);
-                printf("%c", cell->c);
+                char c = ' ';
+                switch (cell->type)
+                {
+                    //case ZPGCELL_TYPE_WALL: c = ' '; break;
+                    case ZPGCELL_TYPE_WALL: c = '#'; break;
+                    case ZPGCELL_TYPE_FLOOR: c = ' '; break;
+                    case ZPGCELL_TYPE_WATER: c = '.'; break;
+                }
+                printf("%c", c);
             }
             printf("|\n");
         }

@@ -21,7 +21,7 @@ extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
     for (i32 i = 0; i < totalCells; ++i)
     {
         grid->cells[i] = {};
-        grid->cells[i].c = ' ';
+        grid->cells[i].type = ZPGCELL_TYPE_WALL;
     }
     grid->width = width;
     grid->height = height;
@@ -39,9 +39,9 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir)
     while (tilesPlaced < cfg->tilesToPlace)
     {
         ZPGCell* cell = grid->GetCellAt(cursor.x, cursor.y);
-        if (cell != NULL && cell->c != cfg->charToPlace)
+        if (cell != NULL && cell->type != cfg->typeToPaint)
         {
-            grid->SetCellAt(cursor.x, cursor.y, cfg->charToPlace, 0);
+            grid->SetCellAt(cursor.x, cursor.y, cfg->typeToPaint);
             tilesPlaced++;
         }
         grid->MoveWithBounce(&cursor, &dir);
