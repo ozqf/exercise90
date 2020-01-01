@@ -247,7 +247,7 @@ struct ZPGGrid
                     case ZPGCELL_TYPE_FLOOR: c = ' ';
                         switch (cell->tag)
                         {
-                            case ZPGCELL_TAG_RANDOM_WALK_START: c = '-'; break;
+                            case ZPGCELL_TAG_RANDOM_WALK_START: c = 's'; break;
                             case ZPGCELL_TAG_RANDOM_WALK_END: c = 'x'; break;
                             default: c = ' '; break;
                         }

@@ -35,7 +35,7 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir)
     ZPGPoint lastPos = cursor;
     grid->SetCellTagAt(cursor.x, cursor.y, ZPGCELL_TAG_RANDOM_WALK_START);
     //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg->seed);
-	printf("Drunken Walk starting angle %.1f\n", (atan2f((f32)dir.y, (f32)dir.x) * RAD2DEG));
+	//printf("Drunken Walk starting angle %.1f\n", (atan2f((f32)dir.y, (f32)dir.x) * RAD2DEG));
     const i32 escapeCounter = 999999;
     i32 iterations = 0;
     i32 tilesPlaced = 0;
