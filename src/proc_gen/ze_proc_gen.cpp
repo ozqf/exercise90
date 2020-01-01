@@ -6,8 +6,34 @@
 #include "time.h"
 #include "zpg_random_table.h"
 #include "zpg_utils.h"
-#include "zpg_grid.h"
+#include "zpg_drunken_walk.h"
 #include "zpg_cave_gen.h"
+
+extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
+{
+    i32 totalCells = width * height;
+    i32 memForGrid = (sizeof(ZPGCell) * totalCells);
+    i32 memTotal = sizeof(ZPGGrid) + memForGrid;
+    printf("Make grid %d by %d (%d cells, %d bytes)\n",
+        width, height, (width * height), memTotal);
+    u8* ptr = (u8*)malloc(memTotal);
+    // Create grid struct
+    ZPGGrid* grid = (ZPGGrid*)ptr;
+    *grid = {};
+    // init grid memory
+    ptr += sizeof(ZPGGrid);
+    //memset(ptr, ' ', memForGrid);
+    grid->cells = (ZPGCell*)ptr;
+    for (i32 i = 0; i < totalCells; ++i)
+    {
+        grid->cells[i] = {};
+        grid->cells[i].type = ZPGCELL_TYPE_WALL;
+        grid->cells[i].tag = ZPGCELL_TAG_NONE;
+    }
+    grid->width = width;
+    grid->height = height;
+    return grid;
+}
 
 extern "C" void ZPG_TestDrunkenWalk_FromCentre(i32 seed)
 {
