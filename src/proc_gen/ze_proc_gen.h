@@ -10,6 +10,12 @@ struct ZPGPoint
     i32 y;
 };
 
+struct ZPGRect
+{
+    ZPGPoint min;
+    ZPGPoint max;
+};
+
 struct ZPGEntity
 {
     ZPGPoint pos;
@@ -115,46 +121,6 @@ struct ZPGGrid
             return;
         }
         cell->tag = tag;
-    }
-
-    void MoveWithBounce(ZPGPoint *cursor, ZPGPoint *dir)
-    {
-        // Step
-        cursor->x += dir->x;
-        cursor->y += dir->y;
-        // if out of grid, move back and change dir on that axis
-        // Horizontal:
-        if (dir->x != 0)
-        {
-            // left side
-            if (cursor->x < 0)
-            {
-                cursor->x = 0;
-                dir->x = 1;
-            }
-            // right side
-            else if (cursor->x >= width)
-            {
-                cursor->x = width - 1;
-                dir->x = -1;
-            }
-        }
-        // Vertical
-        if (dir->y != 0)
-        {
-            // top
-            if (cursor->y < 0)
-            {
-                cursor->y = 0;
-                dir->y = 1;
-            }
-            // bottom
-            else if (cursor->y >= height)
-            {
-                cursor->y = height - 1;
-                dir->y = -1;
-            }
-        }
     }
 
     i32 CountNeighboursAt(i32 x, i32 y)
@@ -352,7 +318,7 @@ struct ZPGGrid
 extern "C" void ZPG_RunTests();
 extern "C" ZPGGrid *ZPG_CreateGrid(i32 width, i32 height);
 
-extern "C" void ZPG_GridRandomWalk(ZPGGrid *grid, ZPGWalkCfg *cfg, ZPGPoint dir);
+extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCfg* cfg, ZPGPoint dir);
 extern "C" void ZPG_SeedCaves(ZPGGrid *grid, ZPGGrid *stencil, i32 paintType, i32 *seed);
 extern "C" void ZPG_IterateCaves(ZPGGrid *grid, ZPGGrid *stencil, i32 solidType, i32 emptyType);
 

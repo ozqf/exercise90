@@ -100,4 +100,45 @@ extern "C" void ZPG_WriteGridAsAsci(ZPGGrid* grid, char* fileName)
     fclose(f);
 }
 
+static void ZPG_StepGridWithBorder(
+    ZPGPoint *cursor, ZPGPoint *dir, ZPGPoint topLeft, ZPGPoint bottomRight)
+{
+    // Step
+    cursor->x += dir->x;
+    cursor->y += dir->y;
+    // if out of grid, move back and change dir on that axis
+    // Horizontal:
+    if (dir->x != 0)
+    {
+        // left side
+        if (cursor->x < topLeft.x)
+        {
+            cursor->x = topLeft.x;
+            dir->x = 1;
+        }
+        // right side
+        else if (cursor->x >= bottomRight.x)
+        {
+            cursor->x = bottomRight.x - 1;
+            dir->x = -1;
+        }
+    }
+    // Vertical
+    if (dir->y != 0)
+    {
+        // top
+        if (cursor->y < topLeft.y)
+        {
+            cursor->y = topLeft.y;
+            dir->y = 1;
+        }
+        // bottom
+        else if (cursor->y >= bottomRight.y)
+        {
+            cursor->y = bottomRight.y - 1;
+            dir->y = -1;
+        }
+    }
+}
+
 #endif // ZPG_UTILS_H

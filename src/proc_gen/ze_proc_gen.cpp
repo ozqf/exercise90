@@ -37,6 +37,14 @@ extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
     return grid;
 }
 
+static ZPGGrid* ZPG_CreateBorderStencil(i32 width, i32 height)
+{
+    ZPGGrid* stencil = ZPG_CreateGrid(width, height);
+    stencil->SetCellTypeAll(ZPG_CELL_TYPE_NONE);
+    ZPG_DrawOuterBorder(stencil, ZPG_CELL_TYPE_FLOOR);
+    return stencil;
+}
+
 extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
 {
     printf("Generate: Drunken walk - start from centre\n");
@@ -65,7 +73,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     {
         //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         ZPGPoint dir = directions[i % numDirections];
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
     // Draw "tunnels"
     cfg.typeToPaint = ZPG_CELL_TYPE_FLOOR;
@@ -74,7 +82,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     {
         //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         ZPGPoint dir = directions[i % numDirections];
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
     printf("Final seed value: %d\n", cfg.seed);
     grid->CountNeighourRings();
@@ -100,7 +108,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_Scattered(i32 seed)
         ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         cfg.startX = (i32)ZPG_Randf32InRange(cfg.seed++, 0, 63);
         cfg.startY = (i32)ZPG_Randf32InRange(cfg.seed++, 0, 31);
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
     // Paths
     cfg.typeToPaint = ZPG_CELL_TYPE_FLOOR;
@@ -109,7 +117,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_Scattered(i32 seed)
         ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         cfg.startX = (i32)ZPG_Randf32InRange(cfg.seed++, 0, 63);
         cfg.startY = (i32)ZPG_Randf32InRange(cfg.seed++, 0, 31);
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
     return grid;
 }
@@ -120,9 +128,10 @@ extern "C" ZPGGrid* ZPG_TestCaveGen(i32 seed)
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
     grid->SetCellTypeAll(ZPG_CELL_TYPE_WALL);
     // Stencil grid - blocks writing of tiles
-    ZPGGrid* stencil = ZPG_CreateGrid(72, 32);
-    stencil->SetCellTypeAll(ZPG_CELL_TYPE_NONE);
-    ZPG_DrawOuterBorder(stencil, ZPG_CELL_TYPE_FLOOR);
+    ZPGGrid* stencil = ZPG_CreateBorderStencil(72, 32);
+    //ZPGGrid* stencil = ZPG_CreateGrid(72, 32);
+    //stencil->SetCellTypeAll(ZPG_CELL_TYPE_NONE);
+    //ZPG_DrawOuterBorder(stencil, ZPG_CELL_TYPE_FLOOR);
 
     ZPG_SeedCaves(grid, stencil, ZPG_CELL_TYPE_FLOOR, &seed);
     grid->Print();
@@ -136,8 +145,11 @@ extern "C" ZPGGrid* ZPG_TestCaveGen(i32 seed)
 
 extern "C" ZPGGrid* ZPG_TestDrawOffsetLines()
 {
-    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    const i32 width = 72;
+    const i32 height = 32;
+    ZPGGrid* grid = ZPG_CreateGrid(width, height);
     grid->SetCellTypeAll(ZPG_CELL_TYPE_WALL);
+    ZPGGrid* stencil = ZPG_CreateBorderStencil(width, height);
 
     i32 seed = 0;
     const i32 numPoints = 8;
@@ -158,12 +170,13 @@ extern "C" ZPGGrid* ZPG_TestDrawOffsetLines()
         ZPGPoint p = ZPG_RandomGridCell(grid, &cfg.seed);
         cfg.startX = p.x;
         cfg.startY = p.y;
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
 
     // Draw main path
+    i32 bVertical = NO;
     ZPGPoint* points = (ZPGPoint*)malloc(sizeof(ZPGPoint) * numPoints);
-    ZPG_PlotHorizontalDrunkenPath(grid, &seed, points, numPoints);
+    ZPG_PlotSegmentedPath(grid, &seed, points, numPoints, bVertical);
     ZPG_DrawSegmentedLine(grid, points, numPoints);
 
     // Draw side paths
@@ -172,10 +185,17 @@ extern "C" ZPGGrid* ZPG_TestDrawOffsetLines()
     for (i32 i = 1; i < numLines; ++i)
     {
         ZPGPoint dir = {};
-        dir.y = ZPG_RandomDir(&cfg.seed);
+        if (bVertical == YES)
+        {
+            dir.x = ZPG_RandomDir(&cfg.seed);
+        }
+        else
+        {
+            dir.y = ZPG_RandomDir(&cfg.seed);
+        }
         cfg.startX = points[i].x;
         cfg.startY = points[i].y;
-        ZPG_GridRandomWalk(grid, &cfg, dir);
+        ZPG_GridRandomWalk(grid, NULL, &cfg, dir);
     }
     return grid;
 }
