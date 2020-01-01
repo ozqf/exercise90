@@ -145,9 +145,43 @@ extern "C" void ZPG_TestDrawOffsetLines()
     grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
 
     i32 seed = 0;
-    ZPG_DrawHorizontalDrunkenPath(grid, &seed);
+    const i32 numPoints = 10;
+    i32 numLines = numPoints - 1;
+
+    // Draw rivers
+    ZPGWalkCfg cfg = {};
+    cfg.seed = seed;
+    cfg.tilesToPlace = 40;
+    cfg.typeToPaint = ZPGCELL_TYPE_WATER;
+
+    i32 numRivers = 6;
+    for (i32 i = 0; i < numRivers; ++i)
+    {
+        ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
+        ZPGPoint p = ZPG_RandomGridCell(grid, &cfg.seed);
+        cfg.startX = p.x;
+        cfg.startY = p.y;
+        ZPG_GridRandomWalk(grid, &cfg, dir);
+    }
+
+    // Draw main path
+    ZPGPoint* points = (ZPGPoint*)malloc(sizeof(ZPGPoint) * numPoints);
+    ZPG_PlotHorizontalDrunkenPath(grid, &seed, points, numPoints);
+    ZPG_DrawSegmentedLine(grid, points, numPoints);
+
+    // Draw side paths
+    cfg.typeToPaint = ZPGCELL_TYPE_FLOOR;
+    for (i32 i = 1; i < numLines; ++i)
+    {
+        ZPGPoint dir = {};
+        dir.y = ZPG_RandomDir(&cfg.seed);
+        cfg.startX = points[i].x;
+        cfg.startY = points[i].y;
+        ZPG_GridRandomWalk(grid, &cfg, dir);
+    }
 
     grid->Print();
+    free(points);
     free(grid);
 }
 

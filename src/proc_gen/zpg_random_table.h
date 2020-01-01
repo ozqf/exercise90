@@ -522,13 +522,13 @@ com_internal f32 zpg_random_table[ZPG_RANDOM_NUMBER_TABLE_SIZE] = {
 	0.656758f
 };
 
-extern "C" f32 ZPG_Randf32(i32 index)
+static f32 ZPG_Randf32(i32 index)
 {
 	//return zpg_random_table[index % ZPG_RANDOM_NUMBER_TABLE_SIZE];
 	return ZPG_STDRandf32();
 }
 
-extern "C" f32 ZPG_Randf32InRange(i32 index, f32 min, f32 max)
+static f32 ZPG_Randf32InRange(i32 index, f32 min, f32 max)
 {
 	return ZPG_Randf32(index) * (max - min) + min;
 }

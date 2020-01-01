@@ -3,6 +3,24 @@
 
 #include "ze_proc_gen.h"
 
+static i32 ZPG_RandomDir(i32* seed)
+{
+    f32 r = ZPG_Randf32(*seed);
+    *seed += 1;
+    if (r > 0.5f) { return -1; }
+    else { return 1; }
+}
+
+static ZPGPoint ZPG_RandomGridCell(ZPGGrid* grid, i32* seed)
+{
+    ZPGPoint p;
+    p.x = (i32)ZPG_Randf32InRange(*seed, 0, (f32)grid->width - 1);
+    *seed++;
+    p.y = (i32)ZPG_Randf32InRange(*seed, 0, (f32)grid->height - 1);
+    *seed++;
+    return p;
+}
+
 static ZPGPoint ZPG_RandomFourWayDir(i32* seed)
 {
     f32 r = ZPG_Randf32(*seed);

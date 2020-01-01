@@ -3,7 +3,7 @@
 
 #include "../common/common.h"
 
-extern "C" f32 ZPG_Randf32(i32 index);
+//extern "C" f32 ZPG_Randf32(i32 index);
 
 struct ZPGPoint
 {

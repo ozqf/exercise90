@@ -52,7 +52,8 @@ static void ZPG_PrintPointsArray(ZPGPoint* points, i32 numPoints)
     }
 }
 
-extern "C" void ZPG_DrawHorizontalDrunkenPath(ZPGGrid* grid, i32* seed)
+extern "C" void ZPG_PlotHorizontalDrunkenPath(
+    ZPGGrid* grid, i32* seed, ZPGPoint* points, i32 numPoints)
 {
     ZPGPoint start;
     start.x = 0;
@@ -61,9 +62,9 @@ extern "C" void ZPG_DrawHorizontalDrunkenPath(ZPGGrid* grid, i32* seed)
     end.x = grid->width - 1;
     end.y = grid->height / 2;
 
-    const i32 numPoints = 10;
-    const i32 numLines = (numPoints - 1);
-    ZPGPoint points[numPoints];
+    //const i32 numPoints = 10;
+    i32 numLines = (numPoints - 1);
+    //ZPGPoint points[numPoints];
     // set start
     points[0].x = 0;
     points[0].y = grid->height / 2;
@@ -80,8 +81,10 @@ extern "C" void ZPG_DrawHorizontalDrunkenPath(ZPGGrid* grid, i32* seed)
         points[i].y = (i32)ZPG_Randf32InRange(*seed, 0, (f32)(grid->height - 1));
         seed++;
     }
-    ZPG_PrintPointsArray(points, numPoints);
+    //ZPG_PrintPointsArray(points, numPoints);
+    //ZPG_DrawSegmentedLine(grid, points, numPoints);
     // Draw lines between nodes
+    /*
     for (i32 i = 0; i < numLines; ++i)
     {
         ZPGPoint a = points[i];
@@ -89,6 +92,7 @@ extern "C" void ZPG_DrawHorizontalDrunkenPath(ZPGGrid* grid, i32* seed)
         printf("Draw %d/%d to %d/%d\n", a.x, a.y, b.x, b.y);
         ZPG_DrawLine(grid, (f32)a.x, (f32)a.y, (f32)b.x, (f32)b.y, ZPGCELL_TYPE_FLOOR);
     }
+    */
 }
 
 #endif // ZPG_GRID_H
