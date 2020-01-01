@@ -89,6 +89,72 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     return grid;
 }
 
+/**
+ * Define some rects within a grid and random walk within
+ */
+extern "C" ZPGGrid* ZPG_TestDrunkenWalk_WithinSpace(i32 seed)
+{
+    printf("Generate: Drunken walk - Within borders\n");
+    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    i32 quarterWidth = grid->width / 4;
+    i32 quarterHeight = grid->height / 4;
+    const i32 numSquares = 4;
+    ZPGRect squares[numSquares];
+    // top left
+    squares[0].min.x = 0;
+    squares[0].min.y = 0;
+    squares[0].max.x = quarterWidth;
+    squares[0].max.y = quarterHeight;
+    // top right
+    squares[1].min.x = quarterWidth * 2;
+    squares[1].min.y = 0;
+    squares[1].max.x = quarterWidth * 4;
+    squares[1].max.y = quarterHeight;
+    // bottom left
+    squares[2].min.x = 0;
+    squares[2].min.y = quarterHeight * 2;
+    squares[2].max.x = quarterWidth;
+    squares[2].max.y = quarterHeight * 4;
+    // bottom right
+    squares[3].min.x = quarterWidth * 2;
+    squares[3].min.y = quarterHeight * 2;
+    squares[3].max.x = quarterWidth * 4;
+    squares[3].max.y = quarterHeight * 4;
+
+
+    ZPGWalkCfg cfg = {};
+    cfg.seed = seed;
+    cfg.tilesToPlace = 80;//256;
+    cfg.typeToPaint = ZPG_CELL_TYPE_FLOOR;
+    for (i32 i = 0; i < numSquares; ++i)
+    {
+        ZPGRect rect = squares[i];
+        printf("Draw in rect %d/%d to %d/%d\n", rect.min.x, rect.min.y, rect.max.x, rect.max.y);
+        ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
+        ZPGPoint centre = rect.Centre();
+        cfg.startX = centre.x;
+        cfg.startY = centre.y;
+        ZPG_GridRandomWalk(grid, &rect, &cfg, dir);
+    }
+    /*
+    ZPGRect rect;
+    rect.min.x = quarterWidth;
+    rect.min.y = quarterHeight;
+    rect.max.x = quarterWidth * 3;
+    rect.max.y = quarterHeight * 3;
+    ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
+    ZPGPoint centre = rect.Centre();
+    printf("Quarter size: %d/%d\n", quarterWidth, quarterHeight);
+    printf("Draw from %d/%d\n", centre.x, centre.y);
+    cfg.startX = (i32)ZPG_Randf32InRange(cfg.seed++, 0, (f32) centre.x);
+    cfg.startY = (i32)ZPG_Randf32InRange(cfg.seed++, 0, (f32) centre.y);
+    cfg.startX = centre.x;
+    cfg.startY = centre.y;
+    ZPG_GridRandomWalk(grid, &rect, &cfg, dir);
+    */
+   return grid;
+}
+
 extern "C" ZPGGrid* ZPG_TestDrunkenWalk_Scattered(i32 seed)
 {
     printf("Generate: Drunken walk - scattered starting points\n");
@@ -215,7 +281,7 @@ extern "C" void ZPG_RunTests()
     // Seed rand
     srand((i32)time(NULL));
 
-    const i32 mode = 4;
+    const i32 mode = 6;
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     ZPGGrid* grid = NULL;
@@ -226,6 +292,7 @@ extern "C" void ZPG_RunTests()
         case 3: grid = ZPG_TestCaveGen(seed); break;
         case 4: grid = ZPG_TestDrawOffsetLines(); break;
         case 5: grid = ZPG_TestDrawLines(); break;
+        case 6: grid = ZPG_TestDrunkenWalk_WithinSpace(seed); break;
     }
     
     if (grid != NULL)
