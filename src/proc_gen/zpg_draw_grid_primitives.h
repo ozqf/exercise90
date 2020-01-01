@@ -113,4 +113,16 @@ static void ZPG_DrawOuterBorder(ZPGGrid* grid, i32 typeToPaint)
     ZPG_DrawLine(grid, maxX, 0, maxX, maxY, typeToPaint);
 }
 
+static void ZPG_DrawRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, i32 typeToPaint)
+{
+    // top
+    ZPG_DrawLine(grid, min.x, min.y, max.x, min.y, typeToPaint);
+    // bottom
+    ZPG_DrawLine(grid, min.x, max.y, max.x, max.y, typeToPaint);
+    // left
+    ZPG_DrawLine(grid, min.x, min.y, min.x, max.y, typeToPaint);
+    // right
+    ZPG_DrawLine(grid, max.x, min.y, max.x, max.y, typeToPaint);
+}
+
 #endif // ZPG_DRAW_GRID_PRIMITIVES_H

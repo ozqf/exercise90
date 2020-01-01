@@ -96,40 +96,43 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_WithinSpace(i32 seed)
 {
     printf("Generate: Drunken walk - Within borders\n");
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
-    i32 quarterWidth = grid->width / 4;
-    i32 quarterHeight = grid->height / 4;
+    i32 halfWidth = grid->width / 2;
+    i32 halfHeight = grid->height / 2;
     const i32 numSquares = 4;
     ZPGRect squares[numSquares];
+    i32 borderSize = 1;
     // top left
-    squares[0].min.x = 0;
-    squares[0].min.y = 0;
-    squares[0].max.x = quarterWidth;
-    squares[0].max.y = quarterHeight;
+    squares[0].min.x = borderSize;
+    squares[0].min.y = borderSize;
+    squares[0].max.x = halfWidth - (borderSize + 1);
+    squares[0].max.y = halfHeight - (borderSize + 1);
     // top right
-    squares[1].min.x = quarterWidth * 2;
-    squares[1].min.y = 0;
-    squares[1].max.x = quarterWidth * 4;
-    squares[1].max.y = quarterHeight;
+    squares[1].min.x = halfWidth + borderSize;
+    squares[1].min.y = (0) + borderSize;
+    squares[1].max.x = grid->width - (borderSize + 1);
+    squares[1].max.y = halfHeight - (borderSize + 1);
     // bottom left
-    squares[2].min.x = 0;
-    squares[2].min.y = quarterHeight * 2;
-    squares[2].max.x = quarterWidth;
-    squares[2].max.y = quarterHeight * 4;
+    squares[2].min.x = (0) + borderSize;
+    squares[2].min.y = halfHeight + borderSize;
+    squares[2].max.x = halfWidth - (borderSize + 1);
+    squares[2].max.y = grid->height - (borderSize + 1);
     // bottom right
-    squares[3].min.x = quarterWidth * 2;
-    squares[3].min.y = quarterHeight * 2;
-    squares[3].max.x = quarterWidth * 4;
-    squares[3].max.y = quarterHeight * 4;
+    squares[3].min.x = halfWidth + borderSize;
+    squares[3].min.y = halfHeight + borderSize;
+    squares[3].max.x = grid->width - (borderSize + 1);
+    squares[3].max.y = grid->height - (borderSize + 1);
 
 
     ZPGWalkCfg cfg = {};
     cfg.seed = seed;
-    cfg.tilesToPlace = 80;//256;
+    cfg.tilesToPlace = 120;//256;
     cfg.typeToPaint = ZPG_CELL_TYPE_FLOOR;
     for (i32 i = 0; i < numSquares; ++i)
     {
         ZPGRect rect = squares[i];
+        //ZPGRect rect = squares[1];
         printf("Draw in rect %d/%d to %d/%d\n", rect.min.x, rect.min.y, rect.max.x, rect.max.y);
+        ZPG_DrawRect(grid, rect.min, rect.max, ZPG_CELL_TYPE_WATER);
         ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         ZPGPoint centre = rect.Centre();
         cfg.startX = centre.x;
