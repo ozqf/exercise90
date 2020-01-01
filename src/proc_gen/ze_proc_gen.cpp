@@ -6,6 +6,7 @@
 #include "time.h"
 #include "zpg_random_table.h"
 #include "zpg_utils.h"
+#include "zpg_draw_grid_primitives.h"
 #include "zpg_drunken_walk.h"
 #include "zpg_cave_gen.h"
 
@@ -138,12 +139,23 @@ extern "C" void ZPG_TestCaveGen(i32 seed)
     free(grid);
 }
 
+extern "C" void ZPG_TestDrawLines()
+{
+    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
+
+    ZPG_DrawLine(grid, 0, 0, 71, 31, ZPGCELL_TYPE_FLOOR);
+
+    grid->Print();
+    free(grid);
+}
+
 extern "C" void ZPG_RunTests()
 {
     // Seed rand
     srand((i32)time(NULL));
 
-    const i32 mode = 2;
+    const i32 mode = 4;
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     switch (mode)
@@ -151,6 +163,7 @@ extern "C" void ZPG_RunTests()
         case 1: ZPG_TestDrunkenWalk_FromCentre(0); break;
         case 2: ZPG_TestDrunkenWalk_Scattered(0); break;
         case 3: ZPG_TestCaveGen(seed); break;
+        case 4: ZPG_TestDrawLines(); break;
     }
     
     //ZPG_TestDrunkenWalk(876987);

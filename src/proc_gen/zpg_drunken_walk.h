@@ -44,4 +44,14 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGWalkCfg* cfg, ZPGPoint dir)
         tilesPlaced, iterations);
 }
 
+extern "C" void ZPG_DrawHorizontalDrunkenPath(ZPGGrid* grid)
+{
+    ZPGPoint start;
+    start.x = 0;
+    start.y = grid->height / 2;
+    ZPGPoint end;
+    end.x = grid->width - 1;
+    end.y = grid->height / 2;
+}
+
 #endif // ZPG_GRID_H
