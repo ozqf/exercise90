@@ -3,6 +3,27 @@
 
 #include "../common/common.h"
 
+// Wrap rand for now...
+static i32 ZPG_STDRandI32()
+{
+    return rand();
+}
+
+static u8 ZPG_STDRandU8()
+{
+    return rand() % UINT8_MAX;
+}
+
+static f32 ZPG_STDRandf32()
+{
+    return (f32)rand() / (f32)RAND_MAX;
+}
+
+static f32 ZPG_STDRandomInRange(f32 min, f32 max)
+{
+    return ZPG_STDRandf32() * (max - min) + min;
+}
+
 #define ZPG_RANDOM_NUMBER_TABLE_SIZE 512
 
 com_internal f32 zpg_random_table[ZPG_RANDOM_NUMBER_TABLE_SIZE] = {
@@ -522,8 +543,8 @@ com_internal f32 zpg_random_table[ZPG_RANDOM_NUMBER_TABLE_SIZE] = {
 
 extern "C" f32 ZPG_Randf32(i32 index)
 {
-	return zpg_random_table[index % ZPG_RANDOM_NUMBER_TABLE_SIZE];
+	//return zpg_random_table[index % ZPG_RANDOM_NUMBER_TABLE_SIZE];
+	return ZPG_STDRandf32();
 }
-
 
 #endif // ZPG_RANDOM_TABLE_H

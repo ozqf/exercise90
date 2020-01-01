@@ -3,9 +3,11 @@
 
 #include "ze_proc_gen.h"
 #include "string.h"
+#include "time.h"
 #include "zpg_random_table.h"
 #include "zpg_utils.h"
 #include "zpg_grid.h"
+#include "zpg_cave_gen.h"
 
 extern "C" void ZPG_TestDrunkenWalk(i32 seed)
 {
@@ -63,10 +65,33 @@ extern "C" void ZPG_TestDrunkenWalk(i32 seed)
     free(grid);
 }
 
+extern "C" void ZPG_TestCaveGen(i32 seed)
+{
+    srand((i32)time(NULL));
+    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    grid->SetCellTypeAll(ZPGCELL_TYPE_WALL);
+    ZPG_SeedCaves(grid, ZPGCELL_TYPE_FLOOR, &seed);
+    grid->Print();
+    i32 numIterations = 3;
+    for (i32 i = 0; i < numIterations; ++i)
+    {
+        ZPG_IterateCaves(grid, ZPGCELL_TYPE_WALL, ZPGCELL_TYPE_FLOOR);
+    }
+    grid->Print();
+    free(grid);
+}
+
 extern "C" void ZPG_RunTests()
 {
+    const i32 mode = 1;
+    const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
-    ZPG_TestDrunkenWalk(0);
+    switch (mode)
+    {
+        case 1: ZPG_TestCaveGen(seed); break;
+        case 2: ZPG_TestDrunkenWalk(0); break;
+    }
+    
     //ZPG_TestDrunkenWalk(876987);
     //ZPG_TestDrunkenWalk(1993);
 }
