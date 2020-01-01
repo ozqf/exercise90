@@ -9,6 +9,7 @@
 
 #include "../common/common.h"
 #include "tests/tests.h"
+#include "../proc_gen/ze_proc_gen.h"
 
 #include "../Platform/win32_system_include.h"
 
@@ -99,8 +100,8 @@ internal void Test_FatalError(const char* message, const char* heading)
 int main(i32 argc, char* argv[])
 {
     COM_SetFatalError(Test_FatalError);
-    Test_Win32_BeginDirectoryScan("");
     //Tests_Run(argc, argv);
+    ZPG_RunTests();
     //TestCommandStream();
     //TestAcks();
     return 0;
