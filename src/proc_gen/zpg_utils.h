@@ -11,7 +11,7 @@ static i32 ZPG_CheckStencilOccupied(ZPGGrid* grid, i32 x, i32 y)
     if (grid == NULL) { return YES; }
     ZPGCell* cell = grid->GetCellAt(x, y);
     if (cell == NULL) { return YES; }
-    return (cell->type != ZPGCELL_TYPE_NONE);
+    return (cell->type != ZPG_CELL_TYPE_NONE);
 }
 
 static i32 ZPG_RandomDir(i32* seed)
@@ -73,6 +73,31 @@ static ZPGPoint ZPG_RandomThreeWayDir(i32* seed, ZPGPoint curDir)
     }
     // (else do nothing)
     return p;
+}
+
+extern "C" void ZPG_WriteGridAsAsci(ZPGGrid* grid, char* fileName)
+{
+    if (grid == NULL) { return; }
+    if (fileName == NULL) { return; }
+    FILE* f;
+    i32 err = fopen_s(&f, fileName, "w");
+    if (err != 0)
+    {
+        printf("Cound not open file %s for writing\n", fileName);
+        return;
+    }
+    for (i32 y = 0; y < grid->height; ++y)
+    {
+        for (i32 x = 0; x < grid->width; ++x)
+        {
+            ZPGCell* cell = grid->GetCellAt(x, y);
+            char c = grid->CellToChar(cell->type, cell->tag);
+            fprintf(f, "%c", c);
+        }
+        if (y < (grid->height - 1)) { fprintf(f, "\n"); }
+    }
+    printf("Wrote %d chars to %s\n", ftell(f), fileName);
+    fclose(f);
 }
 
 #endif // ZPG_UTILS_H

@@ -3,6 +3,10 @@
 
 #include "ze_proc_gen.h"
 
+/**
+ * Draw line algorithm - specific version that makes sure that pixels
+ * in the line are always connected horizontally - this is really important!
+ */
 static void ZPG_DrawLine(ZPGGrid *grid, i32 aX, i32 aY, i32 bX, i32 bY, i32 typeToPaint)
 {
     f32 x0 = (f32)aX, y0 = (f32)aY, x1 = (f32)bX, y1 = (f32)bY;
@@ -91,7 +95,7 @@ static void ZPG_DrawSegmentedLine(ZPGGrid* grid, ZPGPoint* points, i32 numPoints
     {
         ZPGPoint* a = &points[i];
         ZPGPoint* b = &points[i + 1];
-        ZPG_DrawLine(grid, a->x, a->y, b->x, b->y, ZPGCELL_TYPE_FLOOR);
+        ZPG_DrawLine(grid, a->x, a->y, b->x, b->y, ZPG_CELL_TYPE_FLOOR);
     }
 }
 
