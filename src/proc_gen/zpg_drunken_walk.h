@@ -48,7 +48,7 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCf
     while (tilesPlaced < cfg->tilesToPlace)
     {
         ZPGCell* cell = grid->GetCellAt(cursor.x, cursor.y);
-        if (cell != NULL && cell->type != cfg->typeToPaint)
+        if (cell != NULL && cell->tile.type != cfg->typeToPaint)
         {
             grid->SetCellAt(cursor.x, cursor.y, cfg->typeToPaint);
             lastPos = cursor;

@@ -11,13 +11,13 @@ static void ZPG_ApplyPerlinThreshold(ZPGGrid* grid, u8 threshold)
         for (i32 pixelX = 0; pixelX < grid->width; ++pixelX)
         {
             ZPGCell* cell = grid->GetCellAt(pixelX, pixelY);
-            if (cell->type > threshold)
+            if (cell->tile.type > threshold)
             {
-                cell->type = ZPG_CELL_TYPE_FLOOR;
+                cell->tile.type = ZPG_CELL_TYPE_FLOOR;
             }
             else
             {
-                cell->type = ZPG_CELL_TYPE_WALL;
+                cell->tile.type = ZPG_CELL_TYPE_WALL;
             }
         }
     }
@@ -46,12 +46,12 @@ static void ZPG_DrawPerlinGrid(ZPGGrid* grid)
             #endif
             #if 1 // scatter
             // Scale factor of 1 means little variation. 10 for a lot
-            f32 scaleFactor = 10;//5;
+            f32 scaleFactor = 4;//10;//5;
             f32 noise = Perlin_Get2d((f32)(x * scaleFactor), (f32)(y * scaleFactor), 2, 2);
             result = noise > 0.5f ? 1.0f : 0.0f;
             #endif
             // type is scaled to 0-255
-            grid->GetCellAt(pixelX, pixelY)->type = (i32)(255.f * result);
+            grid->GetCellAt(pixelX, pixelY)->tile.type = (u8)(255.f * result);
         }
     }
     ZPG_ApplyPerlinThreshold(grid, 72);

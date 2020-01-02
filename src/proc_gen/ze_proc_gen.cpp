@@ -30,8 +30,8 @@ extern "C" ZPGGrid* ZPG_CreateGrid(i32 width, i32 height)
     for (i32 i = 0; i < totalCells; ++i)
     {
         grid->cells[i] = {};
-        grid->cells[i].type = ZPG_CELL_TYPE_WALL;
-        grid->cells[i].tag = ZPG_CELL_TAG_NONE;
+        grid->cells[i].tile.type = ZPG_CELL_TYPE_WALL;
+        grid->cells[i].tile.tag = ZPG_CELL_TAG_NONE;
     }
     grid->width = width;
     grid->height = height;

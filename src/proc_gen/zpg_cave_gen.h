@@ -11,7 +11,7 @@
  * Randomly paint tiles for growing caves
  * Any Stencil cell whose value is not 0 will be skipped
  */
-extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 paintType, i32* seed)
+extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, u8 paintType, i32* seed)
 {
     const f32 seedChance = ZPG_CAVE_GEN_DEFAULT_CELL_SEED_CHANCE;
     for (i32 y = 0; y < grid->height; ++y)
@@ -24,7 +24,7 @@ extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 paintType, i3
             if (rand < seedChance)
             {
                 ZPGCell* cell = grid->GetCellAt(x, y);
-                cell->type = paintType;
+                cell->tile.type = paintType;
             }
         }
     }
@@ -34,7 +34,7 @@ extern "C" void ZPG_SeedCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 paintType, i3
  * Add/Remove tiles based on their neighbour count
  * Any Stencil cell whose value is not 0 will be skipped
  */
-extern "C" void ZPG_IterateCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 solidType, i32 emptyType)
+extern "C" void ZPG_IterateCaves(ZPGGrid* grid, ZPGGrid* stencil, u8 solidType, u8 emptyType)
 {
     for (i32 y = 0; y < grid->height; ++y)
     {
@@ -45,13 +45,13 @@ extern "C" void ZPG_IterateCaves(ZPGGrid* grid, ZPGGrid* stencil, i32 solidType,
             i32 neighbours = grid->CountNeighboursAt(x, y);
             if (neighbours < ZPG_CAVE_GEN_CRITICAL_NEIGHBOUR_COUNT)
             {
-                if (cell->type == solidType)
+                if (cell->tile.type == solidType)
                 {
-                    cell->type = emptyType;
+                    cell->tile.type = emptyType;
                 }
-                else if (cell->type == emptyType)
+                else if (cell->tile.type == emptyType)
                 {
-                    cell->type = solidType;
+                    cell->tile.type = solidType;
                 }
             }
         }

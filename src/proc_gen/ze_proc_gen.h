@@ -38,7 +38,7 @@ struct ZPGWalkCfg
     i32 startX;
     i32 startY;
     i32 tilesToPlace;
-    i32 typeToPaint;
+    u8 typeToPaint;
     //char charToPlace;
 };
 
@@ -54,6 +54,7 @@ struct ZPGWalkCfg
 #define ZPG_CELL_TAG_RANDOM_WALK_START 1
 #define ZPG_CELL_TAG_RANDOM_WALK_END 2
 
+#if 0
 struct ZPGCell
 {
     // specific class of this cell
@@ -63,6 +64,31 @@ struct ZPGCell
     // for additional categorisation
     i32 tag;
 };
+#endif
+
+#if 1
+#pragma pack(push, 1)
+union ZPGCell
+{
+    u8 arr[4];
+    struct
+    {
+        u8 r;
+        u8 g;
+        u8 b;
+        u8 a;
+    } colour;
+
+    struct
+    {
+        u8 type;
+        u8 tag;
+        u8 rings;
+    } tile;
+    
+};
+#pragma pack(pop)
+#endif
 
 struct ZPGGrid
 {
@@ -105,30 +131,30 @@ struct ZPGGrid
         *cell = newCell;
     }
 
-    void SetCellAt(i32 x, i32 y, i32 type)
+    void SetCellAt(i32 x, i32 y, u8 type)
     {
-        ZPGCell cell{};
-        cell.type = type;
+        ZPGCell cell = {};
+        cell.tile.type = type;
         SetCellAt(x, y, cell);
     }
 
-    void SetCellTypeAll(i32 type)
+    void SetCellTypeAll(u8 type)
     {
         i32 totalCells = width * height;
         for (i32 i = 0; i < totalCells; ++i)
         {
-            cells[i].type = type;
+            cells[i].tile.type = type;
         }
     }
 
-    void SetCellTagAt(i32 x, i32 y, i32 tag)
+    void SetCellTagAt(i32 x, i32 y, u8 tag)
     {
         ZPGCell *cell = GetCellAt(x, y);
         if (cell == NULL)
         {
             return;
         }
-        cell->tag = tag;
+        cell->tile.tag = tag;
     }
 
     i32 CountNeighboursAt(i32 x, i32 y)
@@ -138,47 +164,47 @@ struct ZPGGrid
         {
             return 0;
         }
-        i32 matchType = cell->type;
+        u8 matchType = cell->tile.type;
         i32 neighbours = 0;
         cell = GetCellAt(x - 1, y - 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
         cell = GetCellAt(x, y - 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
         cell = GetCellAt(x + 1, y - 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
 
         cell = GetCellAt(x - 1, y);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
         cell = GetCellAt(x + 1, y);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
 
         cell = GetCellAt(x - 1, y + 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
         cell = GetCellAt(x, y + 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
         cell = GetCellAt(x + 1, y + 1);
-        if (cell != NULL && cell->type == matchType)
+        if (cell != NULL && cell->tile.type == matchType)
         {
             neighbours++;
         }
@@ -197,7 +223,7 @@ struct ZPGGrid
               #.....#
               #######
     */
-    i32 CountNeighourRingsAt(i32 x, i32 y)
+    u8 CountNeighourRingsAt(i32 x, i32 y)
     {
         ZPGCell *cell = GetCellAt(x, y);
         if (cell == NULL)
@@ -206,8 +232,8 @@ struct ZPGGrid
                    x, y);
             return 0;
         }
-        i32 result = 0;
-        i32 ringTest = 1;
+        u8 result = 0;
+        u8 ringTest = 1;
         i32 plotX, plotY;
         i32 bScanning = YES;
         // Count until a test fails
@@ -230,7 +256,7 @@ struct ZPGGrid
                     {
                         continue;
                     }
-                    if (queryCell->type != cell->type)
+                    if (queryCell->tile.type != cell->tile.type)
                     {
                         //printf("  Char mismatch (%c vs %c)\n",
                         //    cell->c, queryCell->c);
@@ -264,12 +290,12 @@ struct ZPGGrid
             for (i32 x = 0; x < width; ++x)
             {
                 ZPGCell *cell = GetCellAt(x, y);
-                cell->rings = CountNeighourRingsAt(x, y);
+                cell->tile.rings = CountNeighourRingsAt(x, y);
             }
         }
     }
 
-    char CellToChar(i32 type, i32 tag)
+    char CellToChar(u8 type, u8 tag)
     {
         char c = ' ';
         switch (type)
@@ -312,7 +338,7 @@ struct ZPGGrid
             for (i32 x = 0; x < width; ++x)
             {
                 ZPGCell *cell = GetCellAt(x, y);
-                char c = CellToChar(cell->type, cell->tag);
+                char c = CellToChar(cell->tile.type, cell->tile.tag);
                 //printf("%c%d", cell->c, cell->rings);
 
                 printf("%c", c);
@@ -331,7 +357,7 @@ struct ZPGGrid
             for (i32 x = 0; x < width; ++x)
             {
                 ZPGCell *cell = GetCellAt(x, y);
-                printf("%d", cell->type);
+                printf("%d", cell->tile.type);
             }
             printf("|\n");
         }
@@ -343,7 +369,7 @@ extern "C" void ZPG_RunTests();
 extern "C" ZPGGrid *ZPG_CreateGrid(i32 width, i32 height);
 
 extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCfg* cfg, ZPGPoint dir);
-extern "C" void ZPG_SeedCaves(ZPGGrid *grid, ZPGGrid *stencil, i32 paintType, i32 *seed);
-extern "C" void ZPG_IterateCaves(ZPGGrid *grid, ZPGGrid *stencil, i32 solidType, i32 emptyType);
+extern "C" void ZPG_SeedCaves(ZPGGrid *grid, ZPGGrid *stencil, u8 paintType, i32 *seed);
+extern "C" void ZPG_IterateCaves(ZPGGrid *grid, ZPGGrid *stencil, u8 solidType, u8 emptyType);
 
 #endif // ZE_PROC_GEN_H

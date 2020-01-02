@@ -11,7 +11,7 @@ static i32 ZPG_CheckStencilOccupied(ZPGGrid* grid, i32 x, i32 y)
     if (grid == NULL) { return YES; }
     ZPGCell* cell = grid->GetCellAt(x, y);
     if (cell == NULL) { return YES; }
-    return (cell->type != ZPG_CELL_TYPE_NONE);
+    return (cell->tile.type != ZPG_CELL_TYPE_NONE);
 }
 
 static i32 ZPG_RandomDir(i32* seed)
@@ -91,7 +91,7 @@ extern "C" void ZPG_WriteGridAsAsci(ZPGGrid* grid, char* fileName)
         for (i32 x = 0; x < grid->width; ++x)
         {
             ZPGCell* cell = grid->GetCellAt(x, y);
-            char c = grid->CellToChar(cell->type, cell->tag);
+            char c = grid->CellToChar(cell->tile.type, cell->tile.tag);
             fprintf(f, "%c", c);
         }
         if (y < (grid->height - 1)) { fprintf(f, "\n"); }

@@ -7,7 +7,7 @@
  * Draw line algorithm - specific version that makes sure that pixels
  * in the line are always connected horizontally - this is really important!
  */
-static void ZPG_DrawLine(ZPGGrid *grid, i32 aX, i32 aY, i32 bX, i32 bY, i32 typeToPaint)
+static void ZPG_DrawLine(ZPGGrid *grid, i32 aX, i32 aY, i32 bX, i32 bY, u8 typeToPaint)
 {
     f32 x0 = (f32)aX, y0 = (f32)aY, x1 = (f32)bX, y1 = (f32)bY;
     float dx = x1 - x0;
@@ -71,7 +71,7 @@ static void ZPG_DrawLine(ZPGGrid *grid, i32 aX, i32 aY, i32 bX, i32 bY, i32 type
         ZPGCell* cell = grid->GetCellAt(plotX, plotY);
         if (cell != NULL)
         {
-            cell->type = typeToPaint;
+            cell->tile.type = typeToPaint;
         }
 
         if (error > 0)
@@ -99,7 +99,7 @@ static void ZPG_DrawSegmentedLine(ZPGGrid* grid, ZPGPoint* points, i32 numPoints
     }
 }
 
-static void ZPG_DrawOuterBorder(ZPGGrid* grid, i32 typeToPaint)
+static void ZPG_DrawOuterBorder(ZPGGrid* grid, u8 typeToPaint)
 {
     i32 maxX = grid->width - 1;
     i32 maxY = grid->height - 1;
@@ -113,7 +113,7 @@ static void ZPG_DrawOuterBorder(ZPGGrid* grid, i32 typeToPaint)
     ZPG_DrawLine(grid, maxX, 0, maxX, maxY, typeToPaint);
 }
 
-static void ZPG_DrawRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, i32 typeToPaint)
+static void ZPG_DrawRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, u8 typeToPaint)
 {
     // top
     ZPG_DrawLine(grid, min.x, min.y, max.x, min.y, typeToPaint);
