@@ -20,8 +20,10 @@ static u8 ZPG_FloatToByte(f32 f)
  * types should be an array of three u8s.
  * 1 for each threshold
  */
-static void ZPG_ApplyPerlinThreshold(ZPGGrid* grid, ZPGGrid* stencil, u8* types)
+static void ZPG_ApplyPerlinThreshold(
+    ZPGGrid* grid, ZPGGrid* stencil, u8* types, i32 numTypes)
 {
+    f32 step = 1.f / numTypes;
     for (i32 pixelY = 0; pixelY < grid->height; ++pixelY)
     {
         for (i32 pixelX = 0; pixelX < grid->width; ++pixelX)
@@ -29,12 +31,15 @@ static void ZPG_ApplyPerlinThreshold(ZPGGrid* grid, ZPGGrid* stencil, u8* types)
             if (ZPG_CheckStencilOccupied(stencil, pixelX, pixelY)) { continue; }
             ZPGCell* cell = grid->GetCellAt(pixelX, pixelY);
             f32 value = ZPG_ByteToFloat(cell->tile.type);
+            #if 0
             if (value > 0.66f) { cell->tile.type = types[0]; }
             else if (value > 0.33f) { cell->tile.type = types[1]; }
             else { cell->tile.type = types[2]; }
-            // if (value > 0.66f) { cell->tile.type = ZPG_CELL_TYPE_WALL; }
-            // else if (value > 0.33f) { cell->tile.type = ZPG_CELL_TYPE_WATER; }
-            // else { cell->tile.type = ZPG_CELL_TYPE_FLOOR; }
+            #endif
+            #if 1
+            u8 newType = types[(i32)(numTypes * value)];
+            cell->tile.type = newType;
+            #endif
         }
     }
 }
@@ -56,8 +61,8 @@ static void ZPG_DrawPerlinGrid(ZPGGrid* grid, ZPGGrid* stencil, i32* seed)
             //ColourU32* pixel = (ColourU32*)&tex->ptrMemory[pixelIndex];
             f32 result;
             #if 1 // streaks
-            f32 scaleFactor = 6;
-            f32 noiseScaler = 15;//50;
+            f32 scaleFactor = 5;
+            f32 noiseScaler = 50;
             f32 sampleX = (x * scaleFactor) + seedX;
             f32 sampleY = (y * scaleFactor) + seedY;
             f32 noise = Perlin_Get2d(sampleX, sampleY, 2, 2);
@@ -93,10 +98,16 @@ static void ZPG_DrawPerlinGrid(ZPGGrid* grid, ZPGGrid* stencil, i32* seed)
             grid->GetCellAt(pixelX, pixelY)->tile.type = (u8)(255.f * result);
         }
     }
+    #if 0
     //u8 types[] = { ZPG_CELL_TYPE_WALL, ZPG_CELL_TYPE_FLOOR, ZPG_CELL_TYPE_WATER };
     //u8 types[] = { ZPG_CELL_TYPE_WATER, ZPG_CELL_TYPE_FLOOR, ZPG_CELL_TYPE_WALL };
     u8 types[] = { ZPG_CELL_TYPE_WALL, ZPG_CELL_TYPE_WATER, ZPG_CELL_TYPE_FLOOR };
-    ZPG_ApplyPerlinThreshold(grid, stencil, types);
+    ZPG_ApplyPerlinThreshold(grid, stencil, types, 3);
+    #endif
+    #if 1
+    u8 types[] = { ZPG_CELL_TYPE_WALL, ZPG_CELL_TYPE_FLOOR };
+    ZPG_ApplyPerlinThreshold(grid, stencil, types, 2);
+    #endif
 }
 
 #endif // ZPG_PERLIN_DRAW_H
