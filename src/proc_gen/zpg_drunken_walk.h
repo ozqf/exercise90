@@ -63,8 +63,8 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCf
         }
     }
     grid->SetCellTagAt(lastPos.x, lastPos.y, ZPG_CELL_TAG_RANDOM_WALK_END);
-    printf("Drunken walk placed %d tiles in %d iterations\n",
-        tilesPlaced, iterations);
+    //printf("Drunken walk placed %d tiles in %d iterations\n",
+    //    tilesPlaced, iterations);
 }
 
 static void ZPG_PrintPointsArray(ZPGPoint* points, i32 numPoints)

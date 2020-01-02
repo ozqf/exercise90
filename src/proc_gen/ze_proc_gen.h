@@ -102,6 +102,45 @@ struct ZPGGrid
     i32 height;
     ZPGCell *cells;
 
+    struct
+    {
+        i32 numFloorTiles;
+        i32 numObjectiveTags;
+    } stats;
+
+    void CalcStats()
+    {
+        stats.numFloorTiles = 0;
+        stats.numObjectiveTags = 0;
+        for (i32 y = 0; y < height; ++y)
+        {
+            for (i32 x = 0; x < width; ++x)
+            {
+                ZPGCell* cell = GetCellAt(x, y);
+                #if 1
+                if (cell->tile.type != ZPG_CELL_TYPE_FLOOR) { continue; }
+                stats.numFloorTiles++;
+                if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START
+                    || cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
+                {
+                    stats.numObjectiveTags++;
+                }
+                #endif
+                #if 0
+                if (cell->tile.type == ZPG_CELL_TYPE_FLOOR)
+                {
+                    stats.numFloorTiles++;
+                }
+                if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START
+                    || cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
+                {
+                    stats.numObjectiveTags++;
+                }
+                #endif
+            }
+        }
+    }
+
     i32 PositionToIndex(i32 x, i32 y)
     {
         if (x < 0 || x >= width)
@@ -346,7 +385,8 @@ struct ZPGGrid
 
     void PrintChars()
     {
-        printf("------ Grid %d/%d ------\n", width, height);
+        printf("------ Grid %d/%d (%d path tiles, %d objectives)------\n",
+            width, height, stats.numFloorTiles, stats.numObjectiveTags);
         for (i32 y = 0; y < height; ++y)
         {
             printf("|");

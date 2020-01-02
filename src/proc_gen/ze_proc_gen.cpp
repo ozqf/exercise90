@@ -298,7 +298,7 @@ extern "C" void ZPG_RunTests()
     // Seed rand
     srand((i32)time(NULL));
 
-    const i32 mode = 7;
+    const i32 mode = 1;
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     ZPGGrid* grid = NULL;
@@ -313,7 +313,9 @@ extern "C" void ZPG_RunTests()
         case 6: grid = ZPG_TestDrunkenWalk_WithinSpace(seed); break;
         case 7: grid = ZPG_TestPerlin(seed);  break;
     }
-    
+
+    ZPG_PlaceEntities(grid);
+
     if (grid != NULL)
     {
         if (bPrintChars)
@@ -324,7 +326,6 @@ extern "C" void ZPG_RunTests()
         {
             grid->PrintValues();
         }
-        
         ZPG_WriteGridAsAsci(grid, "test_grid.txt");
         free(grid);
     }

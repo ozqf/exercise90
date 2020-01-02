@@ -3,6 +3,11 @@
 
 #include "ze_proc_gen.h"
 
+static f32 ZPG_Distance(ZPGPoint a, ZPGPoint b)
+{
+    return sqrtf(((f32)b.x * (f32)a.x) + ((f32)b.y * (f32)a.y));
+}
+
 /**
  * returns NO if type at given cell is 0, YES otherwise
  */
