@@ -6,7 +6,7 @@ struct ZPGEntityInfo
     ZPGPoint pos;
     i32 i;
     u8 tag;
-    i32 entType;
+    u8 entType;
     f32 avgDist;
 };
 
@@ -29,6 +29,7 @@ static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
     i32 totalDistances = numEnts * numEnts;
     f32* avgDistWorking = (f32*)malloc(sizeof(f32) * totalDistances);
 
+    // calculate distances from ent to ent
     for (i32 i = 0; i < numEnts; ++i)
     {
         for (i32 j = 0; j < numEnts; ++j)
@@ -43,6 +44,8 @@ static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
 
         }
     }
+
+    // calculate averages
     for (i32 i = 0; i < numEnts; ++i)
     {
         f32 avg = 0;
@@ -74,7 +77,6 @@ static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
         ZPGEntityInfo* info = &ents[i];
         printf("Ent %d type %d pos %d/%d avg dist %.3f\n",
             info->i, info->entType, info->pos.x, info->pos.y, info->avgDist);
-        //printf("Average distance for ent %d to others: %.3f\n", ents[i].i, ents[i].avgDist);
     }
 
 
@@ -83,7 +85,10 @@ static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
     return 0;
 }
 
-static void ZPG_PlaceEntities(ZPGGrid* grid)
+/**
+ * returns none zero if something went wrong
+ */
+static i32 ZPG_PlaceEntities(ZPGGrid* grid, i32* seed)
 {
     /*
     Tasks:
@@ -106,15 +111,22 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
     if (grid->stats.numObjectiveTags < 2)
     {
         printf("Abort: At least two entities are required to place entities\n");
-        return;
+        return 1;
     }
 
     /////////////////////////////////////////////
     // allocate working arrays
-    ZPGPoint* floorTiles = (ZPGPoint*)malloc(sizeof(ZPGPoint) * grid->stats.numFloorTiles);
-    i32 floorTilesLen = 0;
-    ZPGEntityInfo* objectives = (ZPGEntityInfo*)malloc(sizeof(ZPGEntityInfo) * grid->stats.numObjectiveTags);
+
+    // empty tiles are all floor tiles with no objective
+    ZPGPoint* emptyTiles = (ZPGPoint*)malloc(sizeof(ZPGPoint) * grid->stats.numFloorTiles);
+    i32 numEmptyTiles = 0;
+    // list of floor tiles with an 'objective'
+    ZPGEntityInfo* objectives = (ZPGEntityInfo*)malloc(
+        sizeof(ZPGEntityInfo) * grid->stats.numObjectiveTags);
     i32 numObjectives = 0;
+    
+    /////////////////////////////////////////////
+    // build working arrays
     for (i32 y = 0; y < grid->height; ++y)
     {
         for (i32 x = 0;  x < grid->width; ++x)
@@ -122,9 +134,6 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
             ZPGCell* cell = grid->GetCellAt(x, y);
             if (cell->tile.type != ZPG_CELL_TYPE_FLOOR) { continue; }
 
-            floorTiles[floorTilesLen].x = x;
-            floorTiles[floorTilesLen].y = y;
-            floorTilesLen++;
             if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START
                 || cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
             {
@@ -133,23 +142,65 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
                 objectives[numObjectives].tag = cell->tile.tag;
                 numObjectives++;
             }
+            else
+            {
+                emptyTiles[numEmptyTiles].x = x;
+                emptyTiles[numEmptyTiles].y = y;
+                numEmptyTiles++;
+            }
         }
     }
     printf("Build entities found %d path tiles and %d objectives\n",
-        floorTilesLen, numObjectives);
+        numEmptyTiles, numObjectives);
 
+    // generate objectives - if successful write entity types into grid
     if (ZPG_PlaceObjectives(grid, objectives, numObjectives) == NO)
     {
         for (i32 i = numObjectives - 1; i >= 0; --i)
         {
-
+            ZPGEntityInfo* info = &objectives[i];
+            ZPGCell* cell = grid->GetCellAt(info->pos.x, info->pos.y);
+            cell->tile.entType = info->entType;
         }
     }
+    // Randomly place enemies on remaining tiles:
+    i32 numEnemies = numEmptyTiles / 4;
+    i32 tilesCursor = numEmptyTiles;
+    while ((numEnemies > 0))
+    {
+        //f32 r = ZPG_Randf32(*seed);
+        //*seed += 1;
+        //i32 randomIndex = (i32)(r % (f32)tilesCursor);
+        i32 randomIndex = rand() % tilesCursor;
 
+        // place enemy
+        ZPGPoint* p = &emptyTiles[randomIndex];
+        grid->GetCellAt(p->x, p->y)->tile.entType = ZPG_ENTITY_TYPE_ENEMY;
+        tilesCursor--;
 
-    // Free working arrays
-    free(floorTiles);
+        // Reduce usable tiles
+        if (randomIndex == (tilesCursor - 1))
+        {
+            // end of array
+            tilesCursor--;
+        }
+        else
+        {
+            /* code */
+            // swap last item with item just used
+            emptyTiles[randomIndex] = emptyTiles[tilesCursor - 1];
+            // reduce
+            tilesCursor--;
+        }
+        
+
+        numEnemies--;
+    }
+
+    // clean up working arrays
+    free(emptyTiles);
     free(objectives);
+    return 0;
 }
 
 #endif // ZPG_ENTITIES_H

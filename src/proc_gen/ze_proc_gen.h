@@ -357,10 +357,10 @@ struct ZPGGrid
         }
     }
 
-    char CellToChar(u8 type, u8 tag)
+    char CellToChar(ZPGCell* cell)
     {
         char c = ' ';
-        switch (type)
+        switch (cell->tile.type)
         {
         //case ZPG_CELL_TYPE_WALL: c = ' '; break;
         case ZPG_CELL_TYPE_WALL:
@@ -368,16 +368,26 @@ struct ZPGGrid
             break;
         case ZPG_CELL_TYPE_FLOOR:
             c = ' ';
-            switch (tag)
+            switch (cell->tile.entType)
             {
-            case ZPG_CELL_TAG_RANDOM_WALK_START:
-                c = 's';
+            case ZPG_ENTITY_TYPE_NONE:
+                c = ' ';
                 break;
-            case ZPG_CELL_TAG_RANDOM_WALK_END:
+            case ZPG_ENTITY_TYPE_ENEMY:
                 c = 'x';
                 break;
+            case ZPG_ENTITY_TYPE_START:
+                c = 's';
+                break;
+            case ZPG_ENTITY_TYPE_END:
+                c = 'e';
+                break;
+            case ZPG_ENTITY_TYPE_OBJECTIVE:
+                c = 'k';
+                break;
             default:
-                c = ' ';
+                // unknown non-zero
+                c = '?';
                 break;
             }
             break;
@@ -401,7 +411,7 @@ struct ZPGGrid
             for (i32 x = 0; x < width; ++x)
             {
                 ZPGCell *cell = GetCellAt(x, y);
-                char c = CellToChar(cell->tile.type, cell->tile.tag);
+                char c = CellToChar(cell);
                 //printf("%c%d", cell->c, cell->rings);
 
                 printf("%c", c);

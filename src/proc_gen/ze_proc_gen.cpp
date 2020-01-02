@@ -299,7 +299,7 @@ extern "C" void ZPG_RunTests()
     srand((i32)time(NULL));
 
     const i32 mode = 1;
-    const i32 seed = 0;
+    i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     ZPGGrid* grid = NULL;
     i32 bPrintChars = YES;
@@ -314,7 +314,7 @@ extern "C" void ZPG_RunTests()
         case 7: grid = ZPG_TestPerlin(seed);  break;
     }
 
-    ZPG_PlaceEntities(grid);
+    ZPG_PlaceEntities(grid, &seed);
 
     if (grid != NULL)
     {

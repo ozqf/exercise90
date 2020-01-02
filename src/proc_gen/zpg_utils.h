@@ -96,7 +96,7 @@ extern "C" void ZPG_WriteGridAsAsci(ZPGGrid* grid, char* fileName)
         for (i32 x = 0; x < grid->width; ++x)
         {
             ZPGCell* cell = grid->GetCellAt(x, y);
-            char c = grid->CellToChar(cell->tile.type, cell->tile.tag);
+            char c = grid->CellToChar(cell);
             fprintf(f, "%c", c);
         }
         if (y < (grid->height - 1)) { fprintf(f, "\n"); }
