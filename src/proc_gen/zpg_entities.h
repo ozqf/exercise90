@@ -6,6 +6,7 @@ struct ZPGEntityInfo
     ZPGPoint pos;
     i32 i;
     u8 tag;
+    i32 entType;
     f32 avgDist;
 };
 
@@ -14,12 +15,16 @@ static i32 ZPG_CompareEntsByDistance(const void* a, const void* b)
     return ((ZPGEntityInfo*)a)->avgDist > ((ZPGEntityInfo*)b)->avgDist ? 1 : -1;
 }
 
-//static void ZPG_SortFloatArray
-
-static void ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
+/**
+ * Return none zero if something went wrong
+ */
+static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
 {
-    // record average distances from tile to tile here
-    f32* avgDistResults = (f32*)malloc(sizeof(f32) * numEnts);
+    if (numEnts < 2)
+    {
+        printf("Must have at least TWO entities to place objectives\n");
+        return 1;
+    }
     // record distances from each tile to every other tile here
     i32 totalDistances = numEnts * numEnts;
     f32* avgDistWorking = (f32*)malloc(sizeof(f32) * totalDistances);
@@ -35,7 +40,6 @@ static void ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
                 dist = ZPG_Distance(ents[i].pos, ents[j].pos);
             }
             avgDistWorking[distIndex] = dist;
-            //printf("Dist objective %d to %d == %.3f\n", i, j, dist);
 
         }
     }
@@ -51,11 +55,32 @@ static void ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
         ents[i].avgDist = avg;
         ents[i].i = i;
     }
+    // sort list lowest to highest average distance
     qsort(ents, numEnts, sizeof(ZPGEntityInfo), ZPG_CompareEntsByDistance);
+    
+    // end of list is start
+    ents[numEnts - 1].entType = ZPG_ENTITY_TYPE_START;
+    ents[numEnts - 2].entType = ZPG_ENTITY_TYPE_END;
+    // mark any remaining items to objectives
+    i32 numRemainingEnts = numEnts - 2;
+    for (i32 i = 0; i < numRemainingEnts; ++i)
+    {
+        ents[i].entType = ZPG_ENTITY_TYPE_OBJECTIVE;
+    }
+
+    // debug
     for (i32 i = 0; i < numEnts; ++i)
     {
-        printf("Average distance for ent %d to others: %.3f\n", ents[i].i, ents[i].avgDist);
+        ZPGEntityInfo* info = &ents[i];
+        printf("Ent %d type %d pos %d/%d avg dist %.3f\n",
+            info->i, info->entType, info->pos.x, info->pos.y, info->avgDist);
+        //printf("Average distance for ent %d to others: %.3f\n", ents[i].i, ents[i].avgDist);
     }
+
+
+    // Cleanup
+    free(avgDistWorking);
+    return 0;
 }
 
 static void ZPG_PlaceEntities(ZPGGrid* grid)
@@ -78,6 +103,11 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
     /////////////////////////////////////////////
     // calculate capacity for working arrays
     grid->CalcStats();
+    if (grid->stats.numObjectiveTags < 2)
+    {
+        printf("Abort: At least two entities are required to place entities\n");
+        return;
+    }
 
     /////////////////////////////////////////////
     // allocate working arrays
@@ -108,7 +138,13 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
     printf("Build entities found %d path tiles and %d objectives\n",
         floorTilesLen, numObjectives);
 
-    ZPG_PlaceObjectives(grid, objectives, numObjectives);
+    if (ZPG_PlaceObjectives(grid, objectives, numObjectives) == NO)
+    {
+        for (i32 i = numObjectives - 1; i >= 0; --i)
+        {
+
+        }
+    }
 
 
     // Free working arrays

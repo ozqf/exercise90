@@ -42,6 +42,13 @@ struct ZPGWalkCfg
     //char charToPlace;
 };
 
+#define ZPG_ENTITY_TYPE_NONE 0
+#define ZPG_ENTITY_TYPE_START 1
+#define ZPG_ENTITY_TYPE_END 2
+#define ZPG_ENTITY_TYPE_OBJECTIVE 3
+#define ZPG_ENTITY_TYPE_ENEMY 4
+#define ZPG_ENTITY_TYPE_ITEM 5
+
 #define ZPG_CELL_TYPE_NONE 0
 #define ZPG_CELL_TYPE_FLOOR 1
 #define ZPG_CELL_TYPE_WALL 2
@@ -88,6 +95,7 @@ union ZPGCell
     {
         u8 type;
         u8 tag;
+        u8 entType;
         u8 rings;
     } tile;
     
