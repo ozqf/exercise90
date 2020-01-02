@@ -54,6 +54,11 @@ struct ZPGWalkCfg
 #define ZPG_CELL_TAG_RANDOM_WALK_START 1
 #define ZPG_CELL_TAG_RANDOM_WALK_END 2
 
+#define ZPG_CELL_CHANNEL_R 0
+#define ZPG_CELL_CHANNEL_G 1
+#define ZPG_CELL_CHANNEL_B 2
+#define ZPG_CELL_CHANNEL_A 3
+
 #if 0
 struct ZPGCell
 {
@@ -144,6 +149,16 @@ struct ZPGGrid
         for (i32 i = 0; i < totalCells; ++i)
         {
             cells[i].tile.type = type;
+        }
+    }
+
+    void SetCellChannelAll(u8 type, i32 channel)
+    {
+        if (channel < 0 || channel >= 4) { return; }
+        i32 totalCells = width * height;
+        for (i32 i = 0; i < totalCells; ++i)
+        {
+            cells[i].arr[channel] = type;
         }
     }
 

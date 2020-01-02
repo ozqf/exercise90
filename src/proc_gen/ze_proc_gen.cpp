@@ -284,7 +284,12 @@ static ZPGGrid* ZPG_TestPerlin(i32 seed)
 {
     ZPGGrid* grid = ZPG_CreateGrid(72, 32);
     grid->SetCellTypeAll(ZPG_CELL_TYPE_WALL);
-    ZPG_DrawPerlinGrid(grid);
+
+    ZPGGrid* stencil = ZPG_CreateGrid(72, 32);
+    stencil->SetCellTypeAll(ZPG_CELL_TYPE_NONE);
+    ZPG_DrawOuterBorder(stencil, ZPG_CELL_TYPE_WALL);
+    
+    ZPG_DrawPerlinGrid(grid, stencil, &seed);
     return grid;
 }
 
