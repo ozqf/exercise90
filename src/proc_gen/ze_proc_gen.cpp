@@ -7,6 +7,7 @@
 #include "zpg_random_table.h"
 #include "zpg_utils.h"
 #include "zpg_draw_grid_primitives.h"
+#include "zpg_perlin_draw.h"
 #include "zpg_entities.h"
 #include "zpg_drunken_walk.h"
 #include "zpg_cave_gen.h"
@@ -279,12 +280,20 @@ extern "C" ZPGGrid* ZPG_TestDrawLines()
     return grid;
 }
 
+static ZPGGrid* ZPG_TestPerlin(i32 seed)
+{
+    ZPGGrid* grid = ZPG_CreateGrid(72, 32);
+    grid->SetCellTypeAll(ZPG_CELL_TYPE_WALL);
+    ZPG_DrawPerlinGrid(grid);
+    return grid;
+}
+
 extern "C" void ZPG_RunTests()
 {
     // Seed rand
     srand((i32)time(NULL));
 
-    const i32 mode = 6;
+    const i32 mode = 7;
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     ZPGGrid* grid = NULL;
@@ -296,6 +305,7 @@ extern "C" void ZPG_RunTests()
         case 4: grid = ZPG_TestDrawOffsetLines(); break;
         case 5: grid = ZPG_TestDrawLines(); break;
         case 6: grid = ZPG_TestDrunkenWalk_WithinSpace(seed); break;
+        case 7: grid = ZPG_TestPerlin(seed); break;
     }
     
     if (grid != NULL)

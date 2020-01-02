@@ -27,7 +27,7 @@ set compilerDefines=/DPARANOID=1
 @rem Ws2_32.lib == winsock2
 set compInput_0=../src/tools/win32_consoleApp.cpp ../src/tools/tests/tests_module.cpp
 @rem set compInput_1=../src/platform/win32_net/win32_net_module.cpp
-set compInput_1=../src/common/com_module.cpp
+set compInput_1=../src/common/com_module.cpp ../src/proc_gen/zpg_perlin.cpp
 set compInput_2=../src/network/znet_module.cpp ../src/proc_gen/ze_proc_gen.cpp
 
 @rem === LINK SETTINGS === (disable if running win32 console application test)
