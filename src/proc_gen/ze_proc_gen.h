@@ -42,6 +42,8 @@ struct ZPGWalkCfg
     //char charToPlace;
 };
 
+#define ZPG_CHAR_CODE_SOLID_BLOCK 219
+
 #define ZPG_ENTITY_TYPE_NONE 0
 #define ZPG_ENTITY_TYPE_START 1
 #define ZPG_ENTITY_TYPE_END 2
@@ -364,7 +366,8 @@ struct ZPGGrid
         {
         //case ZPG_CELL_TYPE_WALL: c = ' '; break;
         case ZPG_CELL_TYPE_WALL:
-            c = '#';
+            //c = '#';
+            c = (u8)ZPG_CHAR_CODE_SOLID_BLOCK;
             break;
         case ZPG_CELL_TYPE_FLOOR:
             c = ' ';
