@@ -127,7 +127,7 @@ static void ZPG_DrawRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, u8 typeToPai
 
 static void ZPG_FillRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, u8 typeToPaint)
 {
-    printf("Fill rect %d/%d to %d/%d with %d\n", min.x, min.y, max.x, max.y, typeToPaint);
+    //printf("Fill rect %d/%d to %d/%d with %d\n", min.x, min.y, max.x, max.y, typeToPaint);
     if (min.x < 0) { min.x = 0; }
     if (max.x >= grid->width) { max.x = grid->width - 1; }
     if (min.y < 0) { min.y = 0; }

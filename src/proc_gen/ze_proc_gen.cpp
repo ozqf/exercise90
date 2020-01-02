@@ -49,8 +49,12 @@ static ZPGGrid* ZPG_CreateBorderStencil(i32 width, i32 height)
 extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
 {
     printf("Generate: Drunken walk - start from centre\n");
-    ZPGGrid* grid = ZPG_CreateGrid(64, 32);
-    ZPGGrid* stencil = ZPG_CreateGrid(64, 32);
+    const i32 width = 64;
+    const i32 height = 32;
+    ZPGGrid* grid = ZPG_CreateGrid(width, height);
+    ZPGGrid* stencil = ZPG_CreateBorderStencil(width, height);
+    ZPG_FillRect(stencil, { 16, 8 }, { 48, 24 }, ZPG_CELL_TYPE_FLOOR );
+    stencil->PrintValues();
     ZPGWalkCfg cfg = {};
     cfg.seed = seed;
     cfg.startX = 31;
@@ -71,7 +75,8 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     };
     // Draw "rivers"
     cfg.typeToPaint = ZPG_CELL_TYPE_WATER;
-    cfg.bigRoomChance = 0.05f;
+    cfg.bigRoomChance = 0.1f;
+    //cfg.bigRoomChance = 0;
     //cfg.charToPlace = '.';
     for (i32 i = 0; i < numRivers; ++i)
     {
@@ -86,10 +91,9 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     {
         //ZPGPoint dir = ZPG_RandomFourWayDir(&cfg.seed);
         ZPGPoint dir = directions[i % numDirections];
-        ZPG_GridRandomWalk(grid, NULL, NULL, &cfg, dir);
+        ZPG_GridRandomWalk(grid, stencil, NULL, &cfg, dir);
     }
-    printf("Final seed value: %d\n", cfg.seed);
-    grid->CountNeighourRings();
+    //printf("Final seed value: %d\n", cfg.seed);
     return grid;
 }
 
@@ -222,7 +226,6 @@ extern "C" ZPGGrid* ZPG_TestDrawOffsetLines()
     const i32 height = 32;
     ZPGGrid* grid = ZPG_CreateGrid(width, height);
     grid->SetCellTypeAll(ZPG_CELL_TYPE_WALL);
-    ZPGGrid* stencil = ZPG_CreateBorderStencil(width, height);
 
     i32 seed = 0;
     const i32 numPoints = 8;
@@ -316,7 +319,8 @@ extern "C" void ZPG_RunTests()
         case 6: grid = ZPG_TestDrunkenWalk_WithinSpace(seed); break;
         case 7: grid = ZPG_TestPerlin(seed);  break;
     }
-
+    
+    grid->CountNeighourRings();
     ZPG_PlaceScatteredEntities(grid, &seed);
 
     if (grid != NULL)

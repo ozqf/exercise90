@@ -24,7 +24,7 @@ static i32 ZPG_PlaceScatteredObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 
 {
     if (numEnts < 2)
     {
-        printf("Must have at least TWO entities to place objectives\n");
+        printf("Abort: Only %d ents! Must have at least TWO for objectives\n", numEnts);
         return 1;
     }
     // record distances from each tile to every other tile here
@@ -112,7 +112,8 @@ static i32 ZPG_PlaceScatteredEntities(ZPGGrid* grid, i32* seed)
     grid->CalcStats();
     if (grid->stats.numObjectiveTags < 2)
     {
-        printf("Abort: At least two entities are required to place entities\n");
+        printf("Abort: Only %d ents! Must have at least TWO for objectives\n",
+            grid->stats.numObjectiveTags);
         return 1;
     }
 

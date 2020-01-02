@@ -132,9 +132,14 @@ struct ZPGGrid
                 #if 1
                 if (cell->tile.type != ZPG_CELL_TYPE_FLOOR) { continue; }
                 stats.numFloorTiles++;
-                if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START
-                    || cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
+                if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START)
                 {
+                    printf("Found start tag at %d/%d\n", x, y);
+                    stats.numObjectiveTags++;
+                }
+                if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
+                {
+                    printf("Found end tag at %d/%d\n", x, y);
                     stats.numObjectiveTags++;
                 }
                 #endif
@@ -176,22 +181,11 @@ struct ZPGGrid
         return &cells[i];
     }
 
-    void SetCellAt(i32 x, i32 y, ZPGCell newCell)
+    void SetCellTypeAt(i32 x, i32 y, u8 type)
     {
-        ZPGCell *cell = GetCellAt(x, y);
-        if (cell == NULL)
-        {
-            printf("No cell at %d, %d\n", x, y);
-            return;
-        }
-        *cell = newCell;
-    }
-
-    void SetCellAt(i32 x, i32 y, u8 type)
-    {
-        ZPGCell cell = {};
-        cell.tile.type = type;
-        SetCellAt(x, y, cell);
+        ZPGCell* cell = GetCellAt(x, y);
+        if (cell == NULL) { return; }
+        cell->tile.type = type;
     }
 
     void SetCellTypeAll(u8 type)
@@ -220,7 +214,14 @@ struct ZPGGrid
         {
             return;
         }
+        if (cell->tile.tag != ZPG_CELL_TAG_NONE)
+        {
+            printf("WARN: Cannot tag %d/%d as %d, already %d!\n",
+                x, y, tag, cell->tile.tag);
+            return;
+        }
         cell->tile.tag = tag;
+        printf("Tagging cell %d/%d as %d\n", x, y, tag);
     }
 
     i32 CountNeighboursAt(i32 x, i32 y)

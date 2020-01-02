@@ -9,13 +9,14 @@ static f32 ZPG_Distance(ZPGPoint a, ZPGPoint b)
 }
 
 /**
- * returns NO if type at given cell is 0, YES otherwise
+ * returns NO if type at given cell is 0 (or no stencil was supplied),
+ * YES otherwise
  */
 static i32 ZPG_CheckStencilOccupied(ZPGGrid* grid, i32 x, i32 y)
 {
-    if (grid == NULL) { return YES; }
+    if (grid == NULL) { return NO; }
     ZPGCell* cell = grid->GetCellAt(x, y);
-    if (cell == NULL) { return YES; }
+    if (cell == NULL) { return NO; }
     return (cell->tile.type != ZPG_CELL_TYPE_NONE);
 }
 

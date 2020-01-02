@@ -3,15 +3,46 @@
 
 #include "ze_proc_gen.h"
 
-static void ZPG_RandomStep(ZPGGrid* grid, ZPGGrid* stencil, ZPGRect rect, ZPGPoint* cursor, ZPGPoint* dir, i32* seed)
+static void ZPG_RandomStep(
+    ZPGGrid* grid, ZPGGrid* stencil, ZPGRect rect, ZPGPoint* cursor, ZPGPoint* dir, i32* seed)
 {
     // if already over a stencil cell, keep moving forward.
+    i32 bOverStencil = ZPG_CheckStencilOccupied(stencil, cursor->x, cursor->y);
+    if (bOverStencil == YES)
+    {
+        cursor->x += dir->x;
+        cursor->y += dir->y;
+        return;
+    }
 
+    // form 2 - select a tile to move to, and pick another if not acceptable
+    #if 0
+
+    for(;;)
+    {
+        i32 searchFails = 0;
+        ZPGPoint candidate;
+        *dir = ZPG_RandomFourWayDir(seed);
+        candidate.x = cursor->x + dir->x;
+        candidate.y = cursor->y + dir->y;
+        i32 bOverStencil = ZPG_CheckStencilOccupied(stencil, candidate->x, candidate->y);
+        if (bOverStencil == NO)
+        {
+            break;
+        }
+        searchFails++;
+        if (searchFails > 99)
+        {
+            printf("Stuck!\n");
+            return;
+        }
+    }
+    #endif
+
+    #if 1
     // form 1 - move around within a rectangular border, with random
     // direction changes.
-    #if 1
     ZPG_StepGridWithBorder(cursor, dir, rect.min, rect.max);
-    #endif
     const f32 turnChance = 0.3f;
     f32 changeDirChance = ZPG_Randf32(*seed);
     *seed += 1;
@@ -20,6 +51,7 @@ static void ZPG_RandomStep(ZPGGrid* grid, ZPGGrid* stencil, ZPGRect rect, ZPGPoi
         *dir = ZPG_RandomThreeWayDir(seed, *dir);
         *seed += 1;
     }
+    #endif
 }
 
 extern "C" void ZPG_GridRandomWalk(
@@ -45,7 +77,7 @@ extern "C" void ZPG_GridRandomWalk(
     }
     
 
-    const i32 escapeCounter = 999999;
+    const i32 escapeCounter = 99999;
     i32 iterations = 0;
     i32 tilesPlaced = 0;
     while (tilesPlaced < cfg->tilesToPlace)
@@ -62,7 +94,7 @@ extern "C" void ZPG_GridRandomWalk(
             }
             else
             {
-                grid->SetCellAt(cursor.x, cursor.y, cfg->typeToPaint);
+                grid->SetCellTypeAt(cursor.x, cursor.y, cfg->typeToPaint);
             }
             lastPos = cursor;
             tilesPlaced++;
