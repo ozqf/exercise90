@@ -16,9 +16,11 @@ static i32 ZPG_CompareEntsByDistance(const void* a, const void* b)
 }
 
 /**
+ * Objectives are the critical parts of the path from start to end.
+ * other 'objective entities are places to place, say, loot or perhaps keys.
  * Return none zero if something went wrong
  */
-static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
+static i32 ZPG_PlaceScatteredObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
 {
     if (numEnts < 2)
     {
@@ -88,7 +90,7 @@ static i32 ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
 /**
  * returns none zero if something went wrong
  */
-static i32 ZPG_PlaceEntities(ZPGGrid* grid, i32* seed)
+static i32 ZPG_PlaceScatteredEntities(ZPGGrid* grid, i32* seed)
 {
     /*
     Tasks:
@@ -154,7 +156,7 @@ static i32 ZPG_PlaceEntities(ZPGGrid* grid, i32* seed)
         numEmptyTiles, numObjectives);
 
     // generate objectives - if successful write entity types into grid
-    if (ZPG_PlaceObjectives(grid, objectives, numObjectives) == NO)
+    if (ZPG_PlaceScatteredObjectives(grid, objectives, numObjectives) == NO)
     {
         for (i32 i = numObjectives - 1; i >= 0; --i)
         {

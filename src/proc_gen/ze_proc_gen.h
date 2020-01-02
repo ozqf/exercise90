@@ -35,6 +35,7 @@ struct ZPGEntity
 struct ZPGWalkCfg
 {
     i32 seed;
+    f32 bigRoomChance;
     i32 startX;
     i32 startY;
     i32 tilesToPlace;
@@ -42,6 +43,7 @@ struct ZPGWalkCfg
     //char charToPlace;
 };
 
+//#define ZPG_CHAR_CODE_SOLID_BLOCK 35
 #define ZPG_CHAR_CODE_SOLID_BLOCK 219
 
 #define ZPG_ENTITY_TYPE_NONE 0

@@ -54,6 +54,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     cfg.seed = seed;
     cfg.startX = 31;
     cfg.startY = 15;
+    cfg.bigRoomChance = 0.01f;
     cfg.tilesToPlace = 40;//256;
 
     i32 numRivers = 4;
@@ -69,6 +70,7 @@ extern "C" ZPGGrid* ZPG_TestDrunkenWalk_FromCentre(i32 seed)
     };
     // Draw "rivers"
     cfg.typeToPaint = ZPG_CELL_TYPE_WATER;
+    cfg.bigRoomChance = 0.05f;
     //cfg.charToPlace = '.';
     for (i32 i = 0; i < numRivers; ++i)
     {
@@ -314,7 +316,7 @@ extern "C" void ZPG_RunTests()
         case 7: grid = ZPG_TestPerlin(seed);  break;
     }
 
-    ZPG_PlaceEntities(grid, &seed);
+    ZPG_PlaceScatteredEntities(grid, &seed);
 
     if (grid != NULL)
     {

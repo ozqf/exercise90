@@ -125,4 +125,20 @@ static void ZPG_DrawRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, u8 typeToPai
     ZPG_DrawLine(grid, max.x, min.y, max.x, max.y, typeToPaint);
 }
 
+static void ZPG_FillRect(ZPGGrid* grid, ZPGPoint min, ZPGPoint max, u8 typeToPaint)
+{
+    printf("Fill rect %d/%d to %d/%d with %d\n", min.x, min.y, max.x, max.y, typeToPaint);
+    if (min.x < 0) { min.x = 0; }
+    if (max.x >= grid->width) { max.x = grid->width - 1; }
+    if (min.y < 0) { min.y = 0; }
+    if (max.y >= grid->height) { max.y = grid->height - 1; }
+    for (i32 y = min.y; y <= max.y; ++y)
+    {
+        for (i32 x = min.x; x <= max.x; ++x)
+        {
+            grid->GetCellAt(x, y)->tile.type = typeToPaint;
+        }
+    }
+}
+
 #endif // ZPG_DRAW_GRID_PRIMITIVES_H

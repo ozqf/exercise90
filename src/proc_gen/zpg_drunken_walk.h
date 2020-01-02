@@ -50,7 +50,17 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCf
         ZPGCell* cell = grid->GetCellAt(cursor.x, cursor.y);
         if (cell != NULL && cell->tile.type != cfg->typeToPaint)
         {
-            grid->SetCellAt(cursor.x, cursor.y, cfg->typeToPaint);
+            f32 r = ZPG_Randf32(cfg->seed++);
+            if (r < cfg->bigRoomChance)
+            {
+                ZPGPoint min = { cursor.x - 1, cursor.y - 1 };
+                ZPGPoint max = { cursor.x + 1, cursor.y + 1 };
+                ZPG_FillRect(grid, min, max, cfg->typeToPaint);
+            }
+            else
+            {
+                grid->SetCellAt(cursor.x, cursor.y, cfg->typeToPaint);
+            }
             lastPos = cursor;
             tilesPlaced++;
         }
