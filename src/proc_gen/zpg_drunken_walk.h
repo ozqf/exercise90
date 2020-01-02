@@ -3,11 +3,13 @@
 
 #include "ze_proc_gen.h"
 
-static void ZPG_RandomStep(ZPGGrid* grid, ZPGRect rect, ZPGPoint* cursor, ZPGPoint* dir, i32* seed)
+static void ZPG_RandomStep(ZPGGrid* grid, ZPGGrid* stencil, ZPGRect rect, ZPGPoint* cursor, ZPGPoint* dir, i32* seed)
 {
-    //  grid->MoveWithBounce(cursor, dir);
+    // if already over a stencil cell, keep moving forward.
+
+    // form 1 - move around within a rectangular border, with random
+    // direction changes.
     #if 1
-    //ZPG_StepGridWithBorder(cursor, dir, { 1, 1 }, { grid->width - 1, grid->height - 1 });
     ZPG_StepGridWithBorder(cursor, dir, rect.min, rect.max);
     #endif
     const f32 turnChance = 0.3f;
@@ -20,7 +22,8 @@ static void ZPG_RandomStep(ZPGGrid* grid, ZPGRect rect, ZPGPoint* cursor, ZPGPoi
     }
 }
 
-extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCfg* cfg, ZPGPoint dir)
+extern "C" void ZPG_GridRandomWalk(
+    ZPGGrid* grid, ZPGGrid* stencil, ZPGRect* borderRect, ZPGWalkCfg* cfg, ZPGPoint dir)
 {
     ZPGPoint cursor = { cfg->startX, cfg->startY };
     ZPGPoint lastPos = cursor;
@@ -64,7 +67,7 @@ extern "C" void ZPG_GridRandomWalk(ZPGGrid* grid, ZPGRect* borderRect, ZPGWalkCf
             lastPos = cursor;
             tilesPlaced++;
         }
-        ZPG_RandomStep(grid, border, &cursor, &dir, &cfg->seed);
+        ZPG_RandomStep(grid, stencil, border, &cursor, &dir, &cfg->seed);
         iterations++;
         if (iterations >= escapeCounter)
         {
