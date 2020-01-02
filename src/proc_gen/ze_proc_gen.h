@@ -303,7 +303,7 @@ struct ZPGGrid
         return c;
     }
 
-    void Print()
+    void PrintChars()
     {
         printf("------ Grid %d/%d ------\n", width, height);
         for (i32 y = 0; y < height; ++y)
@@ -316,6 +316,22 @@ struct ZPGGrid
                 //printf("%c%d", cell->c, cell->rings);
 
                 printf("%c", c);
+            }
+            printf("|\n");
+        }
+        printf("------------------\n");
+    }
+    
+    void PrintValues()
+    {
+        printf("------ Grid %d/%d ------\n", width, height);
+        for (i32 y = 0; y < height; ++y)
+        {
+            printf("|");
+            for (i32 x = 0; x < width; ++x)
+            {
+                ZPGCell *cell = GetCellAt(x, y);
+                printf("%d", cell->type);
             }
             printf("|\n");
         }

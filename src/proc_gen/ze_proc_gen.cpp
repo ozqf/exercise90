@@ -204,7 +204,7 @@ extern "C" ZPGGrid* ZPG_TestCaveGen(i32 seed)
     //ZPG_DrawOuterBorder(stencil, ZPG_CELL_TYPE_FLOOR);
 
     ZPG_SeedCaves(grid, stencil, ZPG_CELL_TYPE_FLOOR, &seed);
-    grid->Print();
+    grid->PrintChars();
     i32 numIterations = 2;
     for (i32 i = 0; i < numIterations; ++i)
     {
@@ -297,6 +297,7 @@ extern "C" void ZPG_RunTests()
     const i32 seed = 0;
     printf("-- ZE PROC GEN TESTS --\n");
     ZPGGrid* grid = NULL;
+    i32 bPrintChars = YES;
     switch (mode)
     {
         case 1: grid = ZPG_TestDrunkenWalk_FromCentre(0); break;
@@ -305,12 +306,20 @@ extern "C" void ZPG_RunTests()
         case 4: grid = ZPG_TestDrawOffsetLines(); break;
         case 5: grid = ZPG_TestDrawLines(); break;
         case 6: grid = ZPG_TestDrunkenWalk_WithinSpace(seed); break;
-        case 7: grid = ZPG_TestPerlin(seed); break;
+        case 7: grid = ZPG_TestPerlin(seed);  break;
     }
     
     if (grid != NULL)
     {
-        grid->Print();
+        if (bPrintChars)
+        {
+            grid->PrintChars();    
+        }
+        else
+        {
+            grid->PrintValues();
+        }
+        
         ZPG_WriteGridAsAsci(grid, "test_grid.txt");
         free(grid);
     }
