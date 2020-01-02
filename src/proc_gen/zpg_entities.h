@@ -4,50 +4,57 @@
 struct ZPGEntityInfo
 {
     ZPGPoint pos;
+    i32 i;
     u8 tag;
     f32 avgDist;
 };
 
-static i32 ZPG_CompareFloats(f32 a, f32 b)
+static i32 ZPG_CompareEntsByDistance(const void* a, const void* b)
 {
-    return a > b ? 1 : -1;
+    return ((ZPGEntityInfo*)a)->avgDist > ((ZPGEntityInfo*)b)->avgDist ? 1 : -1;
 }
 
 //static void ZPG_SortFloatArray
 
-static void ZPG_PlaceObjectives(ZPGGrid* grid, ZPGPoint* tiles, i32 numTiles)
+static void ZPG_PlaceObjectives(ZPGGrid* grid, ZPGEntityInfo* ents, i32 numEnts)
 {
     // record average distances from tile to tile here
-    f32* avgDistResults = (f32*)malloc(sizeof(f32) * numTiles);
+    f32* avgDistResults = (f32*)malloc(sizeof(f32) * numEnts);
     // record distances from each tile to every other tile here
-    i32 totalDistances = numTiles * numTiles;
+    i32 totalDistances = numEnts * numEnts;
     f32* avgDistWorking = (f32*)malloc(sizeof(f32) * totalDistances);
 
-    for (i32 i = 0; i < numTiles; ++i)
+    for (i32 i = 0; i < numEnts; ++i)
     {
-        for (i32 j = 0; j < numTiles; ++j)
+        for (i32 j = 0; j < numEnts; ++j)
         {
-            i32 distIndex = (i * numTiles) + j;
+            i32 distIndex = (i * numEnts) + j;
             f32 dist = 0;
             if (i != j)
             {
-                dist = ZPG_Distance(tiles[i], tiles[j]);
+                dist = ZPG_Distance(ents[i].pos, ents[j].pos);
             }
             avgDistWorking[distIndex] = dist;
             //printf("Dist objective %d to %d == %.3f\n", i, j, dist);
 
         }
     }
-    for (i32 i = 0; i < numTiles; ++i)
+    for (i32 i = 0; i < numEnts; ++i)
     {
         f32 avg = 0;
-        for (i32 j = 0; j < numTiles; ++j)
+        for (i32 j = 0; j < numEnts; ++j)
         {
-            i32 distIndex = (i * numTiles) + j;
+            i32 distIndex = (i * numEnts) + j;
             avg += avgDistWorking[distIndex];
         }
-        avg /= numTiles;
-        printf("Average distance for tile %d to others: %.3f\n", i, avg);
+        avg /= numEnts;
+        ents[i].avgDist = avg;
+        ents[i].i = i;
+    }
+    qsort(ents, numEnts, sizeof(ZPGEntityInfo), ZPG_CompareEntsByDistance);
+    for (i32 i = 0; i < numEnts; ++i)
+    {
+        printf("Average distance for ent %d to others: %.3f\n", ents[i].i, ents[i].avgDist);
     }
 }
 
@@ -76,8 +83,8 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
     // allocate working arrays
     ZPGPoint* floorTiles = (ZPGPoint*)malloc(sizeof(ZPGPoint) * grid->stats.numFloorTiles);
     i32 floorTilesLen = 0;
-    ZPGPoint* objectiveTiles = (ZPGPoint*)malloc(sizeof(ZPGPoint) * grid->stats.numObjectiveTags);
-    i32 objectiveTilesLen = 0;
+    ZPGEntityInfo* objectives = (ZPGEntityInfo*)malloc(sizeof(ZPGEntityInfo) * grid->stats.numObjectiveTags);
+    i32 numObjectives = 0;
     for (i32 y = 0; y < grid->height; ++y)
     {
         for (i32 x = 0;  x < grid->width; ++x)
@@ -91,21 +98,22 @@ static void ZPG_PlaceEntities(ZPGGrid* grid)
             if (cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_START
                 || cell->tile.tag == ZPG_CELL_TAG_RANDOM_WALK_END)
             {
-                objectiveTiles[objectiveTilesLen].x = x;
-                objectiveTiles[objectiveTilesLen].y = y;
-                objectiveTilesLen++;
+                objectives[numObjectives].pos.x = x;
+                objectives[numObjectives].pos.y = y;
+                objectives[numObjectives].tag = cell->tile.tag;
+                numObjectives++;
             }
         }
     }
     printf("Build entities found %d path tiles and %d objectives\n",
-        floorTilesLen, objectiveTilesLen);
+        floorTilesLen, numObjectives);
 
-    ZPG_PlaceObjectives(grid, objectiveTiles, objectiveTilesLen);
+    ZPG_PlaceObjectives(grid, objectives, numObjectives);
 
 
     // Free working arrays
     free(floorTiles);
-    free(objectiveTiles);
+    free(objectives);
 }
 
 #endif // ZPG_ENTITIES_H
